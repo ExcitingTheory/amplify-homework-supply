@@ -1,0 +1,45 @@
+{
+    "dfmid-0-0": {
+        "learn": {
+            "answers": [
+                "thing",
+                "now"
+            ],
+            "accuracy": 1,
+            "percentComplete": 1,
+            "complete": true
+        },
+        "accuracy": 1,
+        "percentComplete": 0.6667,
+        "currentTab": "HARD",
+        "hard": {
+            "answers": [
+                "thing"
+            ],
+            "accuracy": 1,
+            "percentComplete": 0.5,
+            "complete": false
+        },
+        "complete": false,
+        "easy": {
+            "answers": [
+                "thing",
+                "now"
+            ],
+            "accuracy": 1,
+            "percentComplete": 1,
+            "complete": true
+        }
+    },
+    "anmd7-0-0": {
+        "accuracy": 0,
+        "percentComplete": 1,
+        "correctAnswers": [
+            "This text"
+        ],
+        "complete": true,
+        "attemptedAnswers": [
+            "This text"
+        ]
+    }
+}

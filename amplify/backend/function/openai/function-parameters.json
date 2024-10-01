@@ -1,0 +1,50 @@
+{
+  "permissions": {
+    "api": {
+      "japanese4": [
+        "Query",
+        "Mutation"
+      ]
+    },
+    "auth": {
+      "japanese46739ab6b": [
+        "read"
+      ]
+    },
+    "storage": {
+      "files": [
+        "create",
+        "read"
+      ],
+      "File:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "ChatHistory:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "Section:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "Unit:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "Word:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "secretNames": [
+    "OPENAI_API_KEY"
+  ]
+}

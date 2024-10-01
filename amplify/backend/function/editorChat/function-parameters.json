@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "storage": {
+      "files": [
+        "read"
+      ]
+    },
+    "api": {
+      "japanese4": [
+        "Query"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "secretNames": [
+    "OPENAI_API_KEY"
+  ]
+}

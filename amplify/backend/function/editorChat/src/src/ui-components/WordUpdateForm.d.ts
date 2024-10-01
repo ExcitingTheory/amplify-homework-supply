@@ -1,0 +1,53 @@
+/***************************************************************************
+ * The contents of this file were generated with Amplify Studio.           *
+ * Please refrain from making any modifications to this file.              *
+ * Any changes to this file will be overwritten when running amplify pull. *
+ **************************************************************************/
+
+import * as React from "react";
+import { GridProps, TextFieldProps } from "@aws-amplify/ui-react";
+import { EscapeHatchProps } from "@aws-amplify/ui-react/internal";
+import { Word } from "../models";
+export declare type ValidationResponse = {
+    hasError: boolean;
+    errorMessage?: string;
+};
+export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
+export declare type WordUpdateFormInputValues = {
+    phrase?: string;
+    owner?: string;
+    pronunciation?: string;
+    definition?: string;
+    audio?: string[];
+    rubyTags?: string;
+};
+export declare type WordUpdateFormValidationValues = {
+    phrase?: ValidationFunction<string>;
+    owner?: ValidationFunction<string>;
+    pronunciation?: ValidationFunction<string>;
+    definition?: ValidationFunction<string>;
+    audio?: ValidationFunction<string>;
+    rubyTags?: ValidationFunction<string>;
+};
+export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
+export declare type WordUpdateFormOverridesProps = {
+    WordUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
+    phrase?: PrimitiveOverrideProps<TextFieldProps>;
+    owner?: PrimitiveOverrideProps<TextFieldProps>;
+    pronunciation?: PrimitiveOverrideProps<TextFieldProps>;
+    definition?: PrimitiveOverrideProps<TextFieldProps>;
+    audio?: PrimitiveOverrideProps<TextFieldProps>;
+    rubyTags?: PrimitiveOverrideProps<TextFieldProps>;
+} & EscapeHatchProps;
+export declare type WordUpdateFormProps = React.PropsWithChildren<{
+    overrides?: WordUpdateFormOverridesProps | undefined | null;
+} & {
+    id?: string;
+    word?: Word;
+    onSubmit?: (fields: WordUpdateFormInputValues) => WordUpdateFormInputValues;
+    onSuccess?: (fields: WordUpdateFormInputValues) => void;
+    onError?: (fields: WordUpdateFormInputValues, errorMessage: string) => void;
+    onChange?: (fields: WordUpdateFormInputValues) => WordUpdateFormInputValues;
+    onValidate?: WordUpdateFormValidationValues;
+} & React.CSSProperties>;
+export default function WordUpdateForm(props: WordUpdateFormProps): React.ReactElement;

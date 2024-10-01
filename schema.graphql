@@ -1,0 +1,87 @@
+type Section @model @auth(rules: [
+  { allow: private, operations: [read]},
+  { allow: groups, groups: ["Admins", "Instructors"]},
+  { allow: owner, ownerField: "owner", operations: [create, update, delete, read] },
+  { allow: public, operations: [read]}
+  ]) {
+  id: ID!
+  name: String
+  owner: String
+  description: String
+  code: String!
+  assignments: [Assignment] @hasMany(indexName: "bySection", fields: ["id"])
+}
+
+type Assignment @model @auth(rules: [
+  { allow: private, operations: [read]},
+  # { allow: groups, groupsField: "learner", operations: [read]},
+  # { allow: owner, ownerField: "owner", operations: [create, update, delete, read] },
+  { allow: groups, groups: ["Instructors", "Admins"], operations: [create, update, delete, read] },
+  { allow: public, operations: [read]}
+  ]) {
+  id: ID!
+  due: AWSDateTime
+  learner: String
+  # owner: String
+  sectionID: ID @index(name: "bySection")
+  grades: [Grade] @hasMany(indexName: "byAssignment", fields: ["id"])
+  unitID: ID @index(name: "byUnit")
+}
+
+type Grade @model @auth(rules: [
+  # { allow: groups, groupsField: "instructor", operations: [read]}
+  { allow: owner, ownerField: "owner", operations: [create, read]},
+  { allow: groups, groups: ["Admins"], operations: [read]}
+  ]) {
+  id: ID!
+  percentComplete: Float
+  accuracy: Float
+  complete: Boolean
+  owner: String
+  instructor: String
+  unitVersion: Int
+  data: AWSJSON
+  # unitID: ID @index(name: "byUnit")
+  assignmentID: ID @index(name: "byAssignment")
+}
+
+type Unit @model @auth(rules: [
+  { allow: private, operations: [read]},
+  { allow: groups, groups: ["Admins", "Instructors"]},
+  # { allow: groups, groupsField: "learner", operations: [read]}
+  # { allow: owner, ownerField: "owner", operations: [create, update, delete, read] },
+  { allow: public, operations: [read]}])
+  {
+  id: ID!
+  number: Float
+  name: String
+  # learner: String
+  # owner: String
+  description: String
+  data: AWSJSON
+  publish: Boolean
+  # audioFiles: [String]
+  # videoFiles: [String]
+  # imageFiles: [String]
+  # urls: [String]
+  assignments: [Assignment] @hasMany(indexName: "byUnit", fields: ["id"])
+  words: [Word] @manyToMany(relationName: "UnitWord")
+  # grades: [Grade] @hasMany(indexName: "byUnit", fields: ["id"])
+}
+
+type Word @model @auth(rules: [
+  { allow: private, operations: [read]},
+  { allow: groups, groups: ["Instructors", "Admins"]},
+#   { allow: owner, ownerField: "owner", operations: [create, update, delete, read] },
+  { allow: public, operations: [read]}]) {
+  id: ID!
+  phrase: String
+#   owner: String
+  phonetic: String
+  definition: String
+  audio: [String]
+  units: [Unit] @manyToMany(relationName: "UnitWord")
+}
+
+
+# https://docs.amplify.aws/cli/graphql/authorization-rules/#per-user--owner-based-data-access.

@@ -1,0 +1,79 @@
+olinbarrett-fox@Colins-MBP amplify-homework-supply % amplify update auth
+Please note that certain attributes may not be overwritten if you choose to use defaults settings.
+
+You have configured resources that might depend on this Cognito resource.  Updating this Cognito resource could have unintended side effects.
+
+Using service: Cognito, provided by: awscloudformation
+ What do you want to do? Walkthrough all the auth configurations
+ Select the authentication/authorization services that you want to use: User Sign-Up, Sign-In, connected with AWS IAM controls
+ (Enables per-user Storage features for images or other content, Analytics, and more)
+ Allow unauthenticated logins? (Provides scoped down permissions that you can control via AWS IAM) Yes
+ Do you want to enable 3rd party authentication providers in your identity pool? No
+ Do you want to add User Pool Groups? Yes
+? Select any user pool groups you want to delete: 
+? Do you want to add another User Pool Group No
+✔ Sort the user pool groups in order of preference · Learners, Instructors, Admins
+ Do you want to add an admin queries API? Yes
+? Do you want to restrict access to the admin queries API to a specific Group Yes
+? Select the group to restrict access with: Admins
+ Multifactor authentication (MFA) user login options: OFF
+ Email based user registration/forgot password: Enabled (Requires per-user email entry at registration)
+ Specify an email verification subject: Your verification code
+ Specify an email verification message: Your verification code is {####}
+ Do you want to override the default password policy for this User Pool? No
+ Specify the app's refresh token expiration period (in days): 365
+ Do you want to specify the user attributes this app can read and write? Yes
+ Specify read attributes: Email, Name, Email Verified?
+ Specify write attributes: Name
+ Do you want to enable any of the following capabilities? Add User to Group
+ Do you want to use an OAuth flow? No
+? Do you want to configure Lambda Triggers for Cognito? No
+✅ Successfully updated AdminQueries65120535 function locally
+✅ Successfully updated AdminQueries API locally
+Successfully updated the Cognito trigger locally
+✅ Successfully updated auth resource japanese46739ab6b locally
+
+✅ Some next steps:
+"amplify push" will build all your local backend resources and provision it in the cloud
+"amplify publish" will build all your local backend and frontend resources (if you have hosting category added) and provision it in the cloud
+
+✅ Successfully updated resource update locally
+
+✅ Some next steps:
+"amplify push" will build all your local backend resources and provision it in the cloud
+"amplify publish" will build all your local backend and frontend resources (if you have hosting category added) and provision it in the cloud
+
+colinbarrett-fox@Colins-MBP amplify-homework-supply % amplify status
+
+    Current Environment: main
+    
+┌──────────┬───────────────────────────────────┬───────────┬───────────────────┐
+│ Category │ Resource name                     │ Operation │ Provider plugin   │
+├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
+│ Auth     │ japanese46739ab6b                 │ No Change │ awscloudformation │
+├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
+│ Auth     │ userPoolGroups                    │ No Change │ awscloudformation │
+├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
+│ Storage  │ files                             │ No Change │ awscloudformation │
+├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
+│ Api      │ japanese4                         │ No Change │ awscloudformation │
+├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
+│ Api      │ AdminQueries                      │ No Change │ awscloudformation │
+├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
+│ Function │ manageSection                     │ No Change │ awscloudformation │
+├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
+│ Function │ AdminQueries65120535              │ No Change │ awscloudformation │
+├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
+│ Function │ japanese46739ab6bPostConfirmation │ No Change │ awscloudformation │
+└──────────┴───────────────────────────────────┴───────────┴───────────────────┘
+
+GraphQL endpoint: https://7lgt53fzabgm7cfddi24xluuye.appsync-api.us-east-1.amazonaws.com/graphql
+GraphQL API KEY: da2-gj7mgrqwwjcdhicwlwijcmn2li
+
+GraphQL transformer version: 2
+REST API endpoint: https://bmoc1ceshd.execute-api.us-east-1.amazonaws.com/main
+Hosted UI Endpoint: https://japanese498078882-98078882-main.auth.us-east-1.amazoncognito.com/
+Test Your Hosted UI Endpoint: https://japanese498078882-98078882-main.auth.us-east-1.amazoncognito.com/login?response_type=code&client_id=365tfqgt7t48e4rlpuljippdm4&redirect_uri=http://localhost:3000/
+
+
+colinbarrett-fox@Colins-MBP amplify-homework-supply % 

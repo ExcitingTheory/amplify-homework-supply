@@ -1,0 +1,17 @@
+projects:
+  japanese4:
+    schemaPath: amplify/backend/api/japanese4/build/schema.graphql
+    includes:
+      - src/graphql/**/*.ts
+    excludes:
+      - ./amplify/**
+      - src/API.ts
+    extensions:
+      amplify:
+        codeGenTarget: typescript
+        generatedFileName: src/API.ts
+        docsFilePath: src/graphql
+        maxDepth: 3
+extensions:
+  amplify:
+    version: 3

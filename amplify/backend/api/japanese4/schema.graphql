@@ -1,0 +1,242 @@
+type Mutation {
+  createSectionGroup(name: String!, description: String!): String @function(name: "manageSection-${env}")
+  addSelfToSection(code: String!): String @function(name: "manageSection-${env}")
+  chat(messages: String!, model: String): String @function(name: "openai-${env}")
+  generateAudio(phrase: String!, voice: String, model: String): String @function(name: "openai-${env}")
+  generateAudioFile(phrase: String!, voice: String!, model: String!): File @function(name: "openai-${env}")
+  generateImage(phrase: String!, model: String): String @function(name: "openai-${env}")
+  generateImageFile(phrase: String!, model: String): File @function(name: "openai-${env}")
+  predictUnitData(unitID: ID!): String @function(name: "predictUnitData-${env}")
+  predictUnitByData(data: String!): String @function(name: "predictUnitByData-${env}")
+  useAssistantEditor(threadInstructions: String!, assistantId: String!, threadId: String!): String @function(name: "openai-${env}")
+  initAssistantEditor(model: String!, additionalInstructions: String!): String @function(name: "openai-${env}")
+  updateAssistantEditor(assistantId: String!, additionalInstructions: String!, model: String): String @function(name: "openai-${env}")
+  deleteAssistantEditor(assistantId: String!, threadId: String!): String @function(name: "openai-${env}")
+  chatAssistantThread(assistantId: String!, messages: String!): String @function(name: "openai-${env}")
+}
+
+type Query {
+  listSectionStudents(sectionCode: String!): [StudentInfo] @function(name: "manageSection-${env}")
+  verifyDefinition(phrase: String!, expected: String!, definition: String!, model: String): String @function(name: "openai-${env}")
+  verifyWord(word: String!, expected: String!, definition: String!, model: String): String @function(name: "openai-${env}")
+  verifyShortAnswer(expected: String!, answer: String!, prompt: String!, model: String): String @function(name: "openai-${env}")
+  transcribe(audio: String!, model: String): String @function(name: "openai-${env}")
+  verifyAudio(expected: String!, audio: String!, model: String, chatModel:String!): String @function(name: "openai-${env}")
+  verifyAudioUrl(expected: String!, audioUrl: String!, model: String!, chatModel:String!): String @function(name: "openai-${env}")
+  transcribeUrl(audioUrl: String!, model: String): String @function(name: "openai-${env}")
+  processImage(image: String!, model: String): String @function(name: "openai-${env}")
+  processImageUrl(imageUrl: String!, model: String): String @function(name: "openai-${env}")
+  verifyImage(expected: String!, image: String!, model: String): String @function(name: "openai-${env}")
+  verifyImageUrl(expected: String!, imageUrl: String!, model: String): String @function(name: "openai-${env}")
+}
+
+type StudentInfo {
+  id: ID!
+  name: String
+  email: String
+}
+
+enum PublishedStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum FileProtectionLevels {
+  PUBLIC
+  PRIVATE
+  PROTECTED
+}
+
+type Choice {
+  choice: String
+  correct: Boolean
+}
+
+type Assistant @model @auth(
+    rules: [
+      { allow: owner },
+      { allow: groups, groups: ["Admins"], operations: [read] },
+    ]
+  ) {
+  id: ID!
+  model: String
+  assistantId: String
+  threadInstructions: String
+  additionalInstructions: String
+  messages: String
+  moderationFlag: Boolean
+  identityId: String # The identityId of the owner
+  threadId: String
+}
+
+type Question @model @auth(
+    rules: [
+      { allow: owner },
+      { allow: groups, groups: ["Learners"], operations: [read] },
+    ]
+  ) {
+  id: ID!
+  owner: String 
+  identityId: String # The identityId of the user who uploaded the file
+  answer: String
+  choices: [Choice]
+  hint: String
+  prompt: String
+  audio: [String]
+  answerAudio: [String]
+  generated: Boolean
+  model: String
+  promptHex: String
+  byPromptHex: String @index(name: "byPromptHex")
+  thumbnail: String # The path to the thumbnail in S3
+  # many to many relationships
+  units: [Unit] @manyToMany(relationName: "QuestionUnit")
+  words: [Word] @manyToMany(relationName: "QuestionWord")
+  files: [File] @manyToMany(relationName: "QuestionFile")
+}
+
+type File @model @auth(
+    rules: [
+      { allow: owner },
+      { allow: groups, groups: ["Learners"], operations: [read] },
+    ]
+  ) {
+  id: ID!
+  name: String # The name of the file if the user wanted to call it something different than the original file name
+  owner: String 
+  identityId: String # The identityId of the user who uploaded the file
+  description: String
+  prompt: String # The prompt that was used to generate the file
+  model: String # The model that was used to generate the file
+  variant: String # The variant of the model that was used to generate the file, if applicable
+  mimeType: String
+  level: FileProtectionLevels
+  path: String # The path to the file in S3
+  duration: Int
+  size: Int
+  generated: Boolean
+  hex: String
+  byHex: String @index(name: "byHex")
+  thumbnail: String # The path to the thumbnail in S3
+  # many to many relationship with units
+  units: [Unit] @manyToMany(relationName: "UnitFile")
+  words: [Word] @manyToMany(relationName: "WordFile")
+  questions: [Question] @manyToMany(relationName: "QuestionFile")
+}
+
+type ChatHistory @model @auth(rules: [
+  { allow: owner },
+  { allow: groups, groups: ["Admins"], operations: [read] },
+  ]) {
+  id: ID!
+  owner: String 
+  messages: String
+  model: String
+  inputTokens: String
+  outputTokens: String
+}
+
+type Section @model @auth(rules: [
+      { allow: owner },
+      { allow: groups, groupsField: "learner", operations: [read] },
+  ]) {
+  id: ID!
+  name: String
+  owner: String 
+  learner: String
+  description: String
+  status: PublishedStatus
+  code: String @index(name: "sectionByCode", queryField: "sectionByCode")
+  assignments: [Assignment] @hasMany(indexName: "bySection", fields: ["id"])
+  featuredImage: String
+  identityId: String # The identityId of the owner
+  thumbnail: String
+  backgroundColor: String
+}
+
+type Assignment @model @auth(
+    rules: [
+      { allow: owner },
+      { allow: groups, groupsField: "learner", operations: [read] },
+    ]
+  ) {
+  id: ID!
+  dueDate: AWSDateTime
+  learner: String
+  owner: String 
+  status: PublishedStatus
+  sectionID: ID @index(name: "bySection")
+  unitID: ID @index(name: "byUnit")
+}
+
+type Grade @model @auth(rules: [
+  { allow: owner, ownerField: "instructor", operations: [read] },
+  { allow: owner },
+  { allow: groups, groups: ["Admins"], operations: [read] }
+  ]) {
+  id: ID!
+  percentComplete: Float
+  accuracy: Float
+  timerStarted: Boolean
+  complete: Boolean
+  owner: String
+  identityId: String # The identityId of the owner
+  instructor: String @index(name: "byInstructor")
+  unitVersion: Int
+  data: AWSJSON # The data that was used to generate the grade, add file paths here too? Store feedback inline or separate?
+  feedback: AWSJSON # Generated feedback for the grade
+  files: [String] # The files that were submitted for the grade
+  unitID: ID @index(name: "byUnit")
+}
+
+type Unit @model  @auth(
+    rules: [
+      { allow: owner },
+      { allow: groups, groups: ["Learners"], operations: [read] },
+    ]
+  )
+  {
+  id: ID!
+  number: Float
+  name: String
+  owner: String
+  # learners: [String] #TODO When we assign/unassign a group this needs to be reflected here.
+  # author: String @index(name: "byAuthor")
+  description: String
+  data: AWSJSON
+  status: PublishedStatus
+  timeLimitSeconds: Int
+  assignments: [Assignment] @hasMany(indexName: "byUnit", fields: ["id"])
+  grades: [Grade] @hasMany(indexName: "byUnit", fields: ["id"])
+  featuredImage: String
+  identityId: String # The identityId of the owner
+  thumbnail: String
+  files: [File] @manyToMany(relationName: "UnitFile")
+  words: [Word] @manyToMany(relationName: "UnitWord")
+  questions: [Question] @manyToMany(relationName: "QuestionUnit")
+}
+
+type Word @model @auth(
+    rules: [
+      { allow: owner },
+      { allow: groups, groups: ["Learners"], operations: [read] },
+    ]
+  ) {
+  id: ID!
+  phrase: String
+  owner: String 
+  identityId: String # The identity of the user who uploaded the file
+  # uploadedBy: String @index(name: "byUploader")
+  pronunciation: String
+  definition: String
+  audio: [String]
+  definitionAudio: [String]
+  rubyTags: String
+  units: [Unit] @manyToMany(relationName: "UnitWord")
+  files: [File] @manyToMany(relationName: "WordFile")
+  questions: [Question] @manyToMany(relationName: "QuestionWord")
+}
+
+
+# https://docs.amplify.aws/cli/graphql/authorization-rules/#per-user--owner-based-data-access.

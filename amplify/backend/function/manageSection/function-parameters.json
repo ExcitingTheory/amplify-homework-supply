@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "api": {
+      "japanese4": [
+        "Query"
+      ]
+    },
+    "auth": {
+      "japanese46739ab6b": [
+        "create",
+        "read",
+        "update"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}

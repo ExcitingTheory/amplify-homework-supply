@@ -1,0 +1,44 @@
+{
+  "blocks":[
+     {
+        "text":"This is a Draft-js based editor that supports multiple choice question rendering.",
+        "type":"unstyled"
+     },
+     {
+        "text":" ",
+        "type":"atomic",
+        "entityRanges":[
+           {
+              "offset":0,
+              "length":1,
+              "key":"first"
+           }
+        ]
+     }
+  ],
+  "entityMap":{
+     "first":{
+        "type":"TOKEN",
+        "mutability":"IMMUTABLE",
+        "data":{
+           "content":[
+              {
+                 "id":"id-1",
+                 "answer":"This is the text",
+                 "correct":true
+              },
+              {
+                 "id":"id-2",
+                 "answer":"Some text",
+                 "correct":false
+              },
+              {
+                 "id":"id-3",
+                 "answer":"Some text",
+                 "correct":false
+              }
+           ]
+        }
+     }
+  }
+}

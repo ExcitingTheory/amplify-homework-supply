@@ -1,0 +1,86 @@
+type Mutation {
+  createSectionGroup(name: String, description: String): String @function(name: "manageSection-${env}")
+  addSelfToSection(code: String): String @function(name: "manageSection-${env}")
+}
+
+type Section @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  name: String
+  description: String
+  code: String!
+  learners: String
+  instructors: [String]
+  owner: String
+  SectionAssignments: [Assignment] @hasMany(indexName: "bySection", fields: ["id"])
+}
+
+type Assignment @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  learners: String
+  instructors: [String]
+  due: AWSDateTime
+  sectionID: ID @index(name: "bySection")
+  AssignmentGrades: [Grade] @hasMany(indexName: "byAssignment", fields: ["id"])
+  unitID: ID @index(name: "byUnit")
+}
+
+type Grade @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  score: Float
+  scale: Int
+  incorrect: AWSJSON
+  correct: AWSJSON
+  data: AWSJSON
+  instructors: [String]
+  assignmentID: ID @index(name: "byAssignment")
+}
+
+enum QUESTIONS {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
+enum ORDERS {
+  BY_ID
+  RANDOM
+}
+
+type S3 {
+  bucket: String!
+  path: String!
+  key: String!
+}
+
+# type Answer {
+#   text: String
+#   correct: Boolean
+#   audio: [S3]
+#   media: [S3]
+# }
+
+# type Question {
+#   id: Int
+#   text: String!
+#   points: Float
+#   answers: [Answer]
+#   answerOrder: ORDERS
+#   audio: String
+#   media: String
+#   extends: QUESTIONS
+# }
+
+type Unit @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  number: Float
+  name: String
+  description: String
+  # pages: [String]
+  # questions: Question
+  # questionOrder: ORDERS
+  # audio: [S3]
+  # media: [S3]
+  data: AWSJSON
+  UnitAssignments: [Assignment] @hasMany(indexName: "byUnit", fields: ["id"])
+}
+ 

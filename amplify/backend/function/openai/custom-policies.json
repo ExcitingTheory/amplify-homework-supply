@@ -1,0 +1,8 @@
+[
+  {
+    "Action": [
+      "cognito-identity:ListIdentityPools"
+    ],
+    "Resource": ["*"]
+  }
+]
