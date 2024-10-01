@@ -9,7 +9,10 @@ This is a web application built with Next.js, Material UI, and AWS Amplify gen 1
 - [Installation](#installation)
 - [Usage](#usage)
 - [Requirements](#requirements)
-- [Contributing](#contributing)
+    - [OpenAI API Key](#openai-api-key)
+- [License](LICENSE.md)
+- [Contributing](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
 
 ## Features
 
@@ -59,10 +62,14 @@ This application uses the OpenAI API to generate content from text snippets. You
 amplify secret add openaiApiKey
 ```
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+
 ## Contributing
 
-1. Fork the repository: `https://github.com/ExcitingTheory/amplify-homework-supply.git`
-2. Create a new branch: `git checkout -b feature/my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin feature/my-new-feature`
-5. Submit a pull request.
+Please read and follow our [Contributing Guidelines](CONTRIBUTING.md) to ensure a welcoming and inclusive environment.
+
+## Code of Conduct
+
+Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) to ensure a welcoming and inclusive environment.
