@@ -1,4 +1,60 @@
 {
+  "devb": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-amplifyjapanese4-devb-5d39a-authRole",
+      "UnauthRoleArn": "arn:aws:iam::759854655984:role/amplify-amplifyjapanese4-devb-5d39a-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::759854655984:role/amplify-amplifyjapanese4-devb-5d39a-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-amplifyjapanese4-devb-5d39a-deployment",
+      "UnauthRoleName": "amplify-amplifyjapanese4-devb-5d39a-unauthRole",
+      "StackName": "amplify-amplifyjapanese4-devb-5d39a",
+      "StackId": "arn:aws:cloudformation:us-east-1:759854655984:stack/amplify-amplifyjapanese4-devb-5d39a/9729efb0-807d-11ef-9296-126b5364f013",
+      "AmplifyAppId": "d3d7r4sm7d8hys",
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-amplifyjapanese4-devb-5d39a-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
+    },
+    "categories": {
+      "auth": {
+        "japanese46739ab6b": {},
+        "userPoolGroups": {}
+      },
+      "function": {
+        "AdminQueries65120535": {
+          "deploymentBucketName": "amplify-amplifyjapanese4-devb-5d39a-deployment",
+          "s3Key": "amplify-builds/AdminQueries65120535-765a79686b454631486d-build.zip"
+        },
+        "editorChat": {
+          "secretsPathAmplifyAppId": "d3d7r4sm7d8hys",
+          "deploymentBucketName": "amplify-amplifyjapanese4-devb-5d39a-deployment",
+          "s3Key": "amplify-builds/editorChat-716b6e73757173515469-build.zip"
+        },
+        "japanese46739ab6bPostConfirmation": {
+          "GROUP": "Learners",
+          "deploymentBucketName": "amplify-amplifyjapanese4-devb-5d39a-deployment",
+          "s3Key": "amplify-builds/japanese46739ab6bPostConfirmation-496b69676f4b792b5351-build.zip"
+        },
+        "manageSection": {
+          "deploymentBucketName": "amplify-amplifyjapanese4-devb-5d39a-deployment",
+          "s3Key": "amplify-builds/manageSection-4a77626b2f6558415275-build.zip"
+        },
+        "openai": {
+          "secretsPathAmplifyAppId": "d3d7r4sm7d8hys",
+          "deploymentBucketName": "amplify-amplifyjapanese4-devb-5d39a-deployment",
+          "s3Key": "amplify-builds/openai-38706a374f3734713471-build.zip"
+        },
+        "japanese46739ab6b": {},
+        "files": {},
+        "japanese4": {},
+        "userPoolGroups": {}
+      },
+      "storage": {
+        "files": {}
+      },
+      "api": {
+        "AdminQueries": {},
+        "japanese4": {}
+      }
+    }
+  },
   "staging": {
     "awscloudformation": {
       "AuthRoleName": "amplify-amplifyjapanese4-staging-a7706-authRole",
