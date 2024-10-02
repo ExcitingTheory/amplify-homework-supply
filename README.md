@@ -66,6 +66,7 @@ This application uses AWS Amplify to manage the backend services.  Button to dep
 5. `amplify push -y` to deploy the backend and frontend services to your AWS account. This will prompt you to add the openaiApiKey secret.
 
 If something goes wrong with `amplify push -y`, Run `amplify update function` for both openai and editorChat functions, re upload the openai api key by updating the secret, and re-run `amplify push -y`.
+
 ## Installation
 
 1. Clone the repository: `git clone https://github.com/ExcitingTheory/amplify-homework-supply.git`
