@@ -38,10 +38,9 @@ This application uses AWS Amplify to manage the backend services.  Button to dep
 [![amplifybutton](https://oneclick.amplifyapp.com/button.svg)](https://console.aws.amazon.com/amplify/home#/deploy?repo=https://github.com/ExcitingTheory/amplify-homework-supply)
 
 1. Add the Amplify cli `npm install -g @aws-amplify/cli`
-2. Configure the Amplify cli `amplify configure`
-3. Click the button above to deploy the application to your AWS account. Find the Amplify app id and environment name from the AWS console: <https://us-east-1.console.aws.amazon.com/amplify/apps>
-4. Run the Pull command, but replace the amplify app by name and appid to match the current env: `amplify pull --appId <AMPLIFY_APP_ID> --envName <AMPLIFY_ENV_NAME>`.
-5. ***HACK*** Manually add inline policy to the IAM role doing the deployment. This policy should allow amplify to list Cognito IDP resources. This is necessary for the application to assign groups with a custom resource. To do this:
+2. Click the button above to deploy the application to your AWS account. Find the Amplify app id and environment name from the AWS console: <https://us-east-1.console.aws.amazon.com/amplify/apps>
+3. Run the Pull command, but replace the amplify app by name and appid to match the current env: `amplify pull --appId <AMPLIFY_APP_ID> --envName <AMPLIFY_ENV_NAME>`.
+4. ***HACK*** Manually add inline policy to the IAM role doing the deployment. This policy should allow amplify to list Cognito IDP resources. This is necessary for the application to assign groups with a custom resource. To do this:
     - Go to the IAM console: <https://console.aws.amazon.com/iam/home#/roles>
     - Find the role `<AWS_REGION>_<ID>_Full-access`
     - Click the "Add inline policy" button
@@ -64,7 +63,7 @@ This application uses AWS Amplify to manage the backend services.  Button to dep
         }
         ```
 
-6. `amplify push -y` to deploy the backend and frontend services to your AWS account. This will prompt you to add the openaiApiKey secret.
+5. `amplify push -y` to deploy the backend and frontend services to your AWS account. This will prompt you to add the openaiApiKey secret.
 
 If something goes wrong with `amplify push -y`, Run `amplify update function` for both openai and editorChat functions, re upload the openai api key by updating the secret, and re-run `amplify push -y`.
 ## Installation
