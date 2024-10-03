@@ -86,11 +86,7 @@ If something goes wrong with `amplify push -y`, Run `amplify update function` fo
 
 ### OpenAI API Key
 
-This application uses the OpenAI API to generate content from text snippets. You will need to sign up for an API key at [OpenAI](https://platform.openai.com/signup). Once you have your API key, you can add it to the project using the amplify CLI.
-
-```bash
-amplify secret add openaiApiKey
-```
+This application uses the OpenAI API to generate content from text snippets. You will need to sign up for an API key at [OpenAI](https://platform.openai.com/signup). Once you have your API key, you can add it to the 
 
 ## License
 
