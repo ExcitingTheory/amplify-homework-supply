@@ -215,8 +215,6 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
     console.log('ByWordList', wordIDs, feedback, answers);
     console.log('ByWordList.currentPromptMethod', currentPromptMethod);
 
-    
-
     return <ol>
         {currentInputMethod === 'text' && wordIDs.map((wordId, key) => {
             const isCorrect = feedback[key]?.answer;
@@ -466,7 +464,7 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
             return (
                 <li key={key} sx={{ flexGrow: 1 }}>
                     <Typography variant="body1" component="div" sx={{ flexGrow: 1 }}>
-                        {JSON.stringify(feedback[key]?.reason) || ''}
+                        {JSON.stringify(feedback[key]) || ''}
                     </Typography>
                     {currentPromptMethod === 'text' &&                    
                     <Typography variant="body2" component="div" sx={{ flexGrow: 1 }}>
@@ -553,22 +551,40 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
 
         {currentInputMethod === 'audio' && wordIDs.map((wordId, key) => {
             return (<li key={key} sx={{ flexGrow: 1 }}>
-                <Typography variant="body2" component="div" sx={{ flexGrow: 1 }}>
+
+<Typography variant="body2" component="div" sx={{ flexGrow: 1, 
+                    // red if incorrect, green if correct
+                    color: feedback[wordId]?.answer === true ? 'green' : feedback[wordId]?.answer === false ? 'red' : 'black', }}>
+                    {
+                        feedback[wordId]?.answer === true ? 'Correct! ' : feedback[wordId]?.answer === false ? 'Incorrect ' : ''
+                    }
+                    {JSON.stringify(feedback[wordId]?.reason) || ''}
+                </Typography>
+                
+                
+                <Typography variant="body2" component="div" sx={{ flexGrow: 1, 
+                    // red if incorrect, green if correct
+                    color: feedback[wordId]?.answer === true ? 'green' : feedback[wordId]?.answer === false ? 'red' : 'black', }}>
                     {dictionary[wordId]?.definition}
                 </Typography>
+
+
+
+
                 <RecordingStudio2
                     item={dictionary[wordId]}
                     word={dictionary[wordId]?.definition}
                     requestDefinition={true}
-                    feedback={feedback[key]}
-                    qk={key}
+                    feedback={feedback}
+                    qk={wordId}
                     setFeedback={(data) => {
                         setFeedback({
                             ...feedback,
-                            [key]: data,
+                            [wordId]: data,
                         });
                     }}
                 />
+                
             </li>)
         })}
 

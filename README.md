@@ -1,94 +1,116 @@
-# Homework Supply
+# Documentation Index
 
-This is a web application built with Next.js, Material UI, and AWS Amplify gen 1. The application allows users to create interactive assignments, track their progress, and has language learning features. This can process audio and images uploaded during the assignment and provide feedback based on the expected content. The application also allows users to upload images and generate content from text snippets.
+Welcome to the Homework Supply documentation! This directory contains comprehensive guides for developers working on our Japanese language learning platform.
 
-## Table of Contents
-
-- [Features](#features)
-- [Deploy AWS Amplify](#deploy-aws-amplify)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Requirements](#requirements)
-    - [OpenAI API Key](#openai-api-key)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Features
-
-1. Users can track their progress and performance over time.
-2. Leverage LLMs to generate content from text snippets. Currently, this is limited to audio and image files.
-3. LLM feedback allows users to dynamically compare their inputs with the expected content, real-time interactive assignments.
-4. LLMs grade audio and drawings based on the expected content provided ahead of time by the instructor.
-5. Allow users to upload their own audio and image files.
-6. Allow users to create an account and login to the application.
-7. Provide a dashboard that displays the user's progress and performance.
-8. Allow users to browse and search for vocabulary words and phrases.
-9. Provide flashcards and quizzes to help users learn and practice vocabulary.
-10. Provide users with a simple text editor for generating new content.
-11. Create learning groups and manage those learners' progress.
-12. Assign content to groups.
-13. Allow users to save their progress and resume learning at a later time.
-14. Provide a mobile-responsive design that works well on both desktop and mobile devices.
-
-## Deploy AWS Amplify
-
-This application uses AWS Amplify to manage the backend services.  Button to deploy the application to your AWS account.
-
-[![amplifybutton](https://oneclick.amplifyapp.com/button.svg)](https://console.aws.amazon.com/amplify/home#/deploy?repo=https://github.com/ExcitingTheory/amplify-homework-supply)
-
-## Installation
-
-1. Clone the repository: `git clone https://github.com/ExcitingTheory/amplify-homework-supply.git`
-2. Install dependencies: `npm install`
-
-## Usage
-
-1. Start the development server: `npm run dev`
-2. Open your browser and navigate to `http://localhost:3000`
-3. Open Test Runner `npm run cypress:open`
-
-## Requirements
-
-1. Node.js
-2. AWS Account
-3. OpenAI API Key
-
-### OpenAI API Key
-
-This application uses the OpenAI API to generate content from text snippets. You will need to sign up for an API key at [OpenAI](https://platform.openai.com/signup). Once you have your API key, you can add it to the project using the amplify CLI.
-
-```bash
-amplify secret add openaiApiKey
-```
-
-## Documentation
-
-Comprehensive documentation is available in the `/docs` directory:
+## 📚 Documentation Structure
 
 ### 🚀 Getting Started
-- **[Developer Onboarding Guide](docs/ONBOARDING.md)** - Complete setup guide for new developers
-- **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Solutions to common development issues
+- **[Onboarding Guide](./docs/ONBOARDING.md)** - Complete guide from zero to productive developer
+- **[Troubleshooting Guide](./docs/TROUBLESHOOTING.md)** - Solutions to common development issues
 
 ### 🗺️ Project Planning
-- **[Project Roadmap](docs/ROADMAP.md)** - Timeline for private beta launch
-- **[TypeScript Migration Guide](docs/TYPESCRIPT_MIGRATION.md)** - Strategy for JavaScript to TypeScript conversion
+- **[Project Roadmap](./docs/ROADMAP.md)** - Timeline and phases for production launch
+- **[TypeScript Migration](./docs/TYPESCRIPT_MIGRATION.md)** - Strategy for JS to TS conversion
 
 ### 🔧 Technical Reference
-- **[API Documentation](docs/API.md)** - Backend services, data models, and GraphQL API
-- **[Documentation Index](docs/README.md)** - Complete documentation overview
+- **[API Documentation](./docs/API.md)** - Backend services, data models, and GraphQL API
+- **[Architecture Overview](./docs/ARCHITECTURE.md)** - System design and component relationships *(Coming Soon)*
+- **[Testing Guide](./docs/TESTING.md)** - Testing strategies and best practices *(Coming Soon)*
 
-### 📋 Quick Links
-- [Contributing Guidelines](CONTRIBUTING.md) - Code standards and PR process
-- [Code of Conduct](CODE_OF_CONDUCT.md) - Community standards
-- [Security Policy](SECURITY.md) - Security reporting
+### 📋 Process Documentation
+- **[Contributing Guidelines](./CONTRIBUTING.md)** - Code standards and pull request process
+- **[Code of Conduct](./CODE_OF_CONDUCT.md)** - Community standards and behavior expectations
+- **[Security Policy](./SECURITY.md)** - Security reporting and best practices
 
-**New developers**: Start with the [Onboarding Guide](docs/ONBOARDING.md) for complete setup instructions.
+## 🎯 Quick Navigation
 
-## Contributing
+### For New Developers
+            1. Start with [Onboarding Guide](./docs/ONBOARDING.md)
+            2. Review [Project Roadmap](./docs/ROADMAP.md) 
+3. Set up development environment
+4. Pick up first issue from GitHub
 
-Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Developer Onboarding Guide](docs/ONBOARDING.md) before contributing. All contributors must follow our [Code of Conduct](CODE_OF_CONDUCT.md).
+### For Existing Team Members
+- **Planning Sprint**: Review [Roadmap](./docs/ROADMAP.md)
+- **Technical Questions**: Check [API Documentation](./docs/API.md)
+- **Stuck on Bug**: Use [Troubleshooting Guide](./docs/TROUBLESHOOTING.md)
+- **TypeScript Work**: Follow [Migration Guide](./docs/TYPESCRIPT_MIGRATION.md)
 
-## License
+### For Project Managers
+- **Timeline**: [Project Roadmap](./docs/ROADMAP.md)
+- **Team Onboarding**: [Onboarding Guide](./docs/ONBOARDING.md)
+- **Risk Assessment**: Review roadmap risk mitigation section
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+## 📈 Documentation Status
+
+| Document | Status | Last Updated | Next Review |
+|----------|--------|--------------|-------------|
+| [Onboarding Guide](./docs/ONBOARDING.md) | ✅ Complete | Nov 30, 2024 | Dec 15, 2024 |
+| [Project Roadmap](./docs/ROADMAP.md) | ✅ Complete | Nov 30, 2024 | Weekly |
+| [TypeScript Migration](./docs/TYPESCRIPT_MIGRATION.md) | ✅ Complete | Nov 30, 2024 | Dec 7, 2024 |
+| [API Documentation](./docs/API.md) | ✅ Complete | Nov 30, 2024 | Dec 15, 2024 |
+| [Troubleshooting Guide](./docs/TROUBLESHOOTING.md) | ✅ Complete | Nov 30, 2024 | Dec 15, 2024 |
+| Architecture Overview | 📝 Planned | - | Dec 10, 2024 |
+| Testing Guide | 📝 Planned | - | Dec 15, 2024 |
+
+## 🔍 Document Maintenance
+
+### How to Update Documentation
+1. **Edit in place**: Make changes directly to markdown files
+2. **Update index**: Modify this file if adding new documents
+3. **Review process**: Get team review for major changes
+4. **Version control**: All docs are tracked in Git
+
+### Documentation Standards
+- **Markdown format**: All docs use GitHub-flavored markdown
+- **Clear headers**: Use consistent heading structure
+- **Code examples**: Include working code snippets
+- **Links**: Use relative links between documents
+- **Updates**: Include last updated date in each document
+
+## 🆘 Getting Help
+
+### If Documentation is Unclear
+1. **Search existing docs** - Use Cmd/Ctrl+F to search within files
+2. **Check troubleshooting** - Many issues have known solutions
+3. **Ask the team** - Use Slack/Teams for quick clarification
+4. **Improve the docs** - Submit PR with clarifications
+
+### Missing Information
+If you can't find what you need:
+1. **Check GitHub issues** - May be documented in issue discussions
+2. **Review code comments** - Inline documentation in source files
+3. **Ask in team chat** - Someone likely knows the answer
+4. **Document findings** - Add to appropriate guide for others
+
+## 📋 Contribution Guidelines
+
+### Adding New Documentation
+1. **Create in `/docs` directory**
+2. **Use descriptive filename** (e.g., `DEPLOYMENT_GUIDE.md`)
+3. **Follow existing format** - Include table of contents, clear sections
+4. **Update this index** - Add entry to table above
+5. **Get team review** - Especially for technical documentation
+
+### Updating Existing Documentation
+1. **Keep current** - Update dates and version-specific information
+2. **Preserve links** - Don't break existing internal/external links
+3. **Test examples** - Verify code examples still work
+4. **Maintain style** - Follow existing formatting and tone
+
+## 🏷️ Document Tags
+
+Use these tags to quickly identify document types:
+
+- 🚀 **Getting Started** - New developer onboarding
+- 🗺️ **Planning** - Project roadmaps and timelines
+- 🔧 **Technical** - API docs, architecture, code guides
+- 📋 **Process** - Workflows, standards, guidelines
+- 🐛 **Troubleshooting** - Problem solving and debugging
+- 📈 **Reference** - Quick lookup information
+
+---
+
+**Need something not covered here?** Create an issue or ask in team chat!
+
+*Last Updated: November 30, 2024*

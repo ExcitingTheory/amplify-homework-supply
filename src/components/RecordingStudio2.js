@@ -153,12 +153,13 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
 
         const mainData = JSON.parse(response?.data?.verifyAudioUrl) || {}
 
+        console.log('mainData', mainData);
+
         const data = JSON.parse(mainData?.completion?.choices[0]?.message?.content) || {}
 
-          setFeedback({
-              ...feedback,
-              [qk]: data,
-          });
+        console.log('data', data);
+
+          setFeedback(data);
 
       }
 
