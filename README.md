@@ -10,9 +10,9 @@ This is a web application built with Next.js, Material UI, and AWS Amplify gen 1
 - [Usage](#usage)
 - [Requirements](#requirements)
     - [OpenAI API Key](#openai-api-key)
-- [License](LICENSE.md)
-- [Contributing](CONTRIBUTING.md)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Features
 
@@ -23,8 +23,8 @@ This is a web application built with Next.js, Material UI, and AWS Amplify gen 1
 5. Allow users to upload their own audio and image files.
 6. Allow users to create an account and login to the application.
 7. Provide a dashboard that displays the user's progress and performance.
-8. Allow users to browse and search for Japanese vocabulary words and phrases.
-9. Provide flashcards and quizzes to help users learn and practice Japanese vocabulary.
+8. Allow users to browse and search for vocabulary words and phrases.
+9. Provide flashcards and quizzes to help users learn and practice vocabulary.
 10. Provide users with a simple text editor for generating new content.
 11. Create learning groups and manage those learners' progress.
 12. Assign content to groups.
@@ -62,14 +62,33 @@ This application uses the OpenAI API to generate content from text snippets. You
 amplify secret add openaiApiKey
 ```
 
-## License
+## Documentation
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+Comprehensive documentation is available in the `/docs` directory:
+
+### 🚀 Getting Started
+- **[Developer Onboarding Guide](docs/ONBOARDING.md)** - Complete setup guide for new developers
+- **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Solutions to common development issues
+
+### 🗺️ Project Planning
+- **[Project Roadmap](docs/ROADMAP.md)** - Timeline for private beta launch
+- **[TypeScript Migration Guide](docs/TYPESCRIPT_MIGRATION.md)** - Strategy for JavaScript to TypeScript conversion
+
+### 🔧 Technical Reference
+- **[API Documentation](docs/API.md)** - Backend services, data models, and GraphQL API
+- **[Documentation Index](docs/README.md)** - Complete documentation overview
+
+### 📋 Quick Links
+- [Contributing Guidelines](CONTRIBUTING.md) - Code standards and PR process
+- [Code of Conduct](CODE_OF_CONDUCT.md) - Community standards
+- [Security Policy](SECURITY.md) - Security reporting
+
+**New developers**: Start with the [Onboarding Guide](docs/ONBOARDING.md) for complete setup instructions.
 
 ## Contributing
 
-Please read and follow our [Contributing Guidelines](CONTRIBUTING.md) to ensure a welcoming and inclusive environment.
+Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Developer Onboarding Guide](docs/ONBOARDING.md) before contributing. All contributors must follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Code of Conduct
+## License
 
-Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) to ensure a welcoming and inclusive environment.
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
