@@ -34,7 +34,7 @@ This roadmap outlines our path from the current state to a production-ready Japa
 **Target Completion: December 9, 2024**
 
 ### Critical Bug Fixes
-- [ ] **Fix TODO items** identified in codebase
+- [ ] **Fix TODO items** identified in codebase, these should just be verified as done:
   - [ ] Custom 404/error pages (`pages/_app.js`)
   - [ ] Grade table improvements (`pages/grades.js`)
   - [ ] Recording studio enhancements (`RecordingStudio2.js`)
@@ -312,7 +312,55 @@ Given our tight timeline and need for stability, gradual migration is recommende
 | 6 | Components Converted | All React components in TypeScript |
 | 7 | Japan Infrastructure | AWS Japan region ready |
 | 8 | Production Ready | All systems tested and deployed |
-| 9 | Beta Launch | Live users in Japan! 🎉 |
+| 9 | Beta Launch | Live users! 🎉 |
+
+## Phase 5: UX Enhancements & AI Content Creation (Q1 2025)
+**Target Completion: March 31, 2025**
+
+### 🤖 AI-Powered Content Creation
+- [ ] **Intelligent Content Assistant**
+  - [ ] AI chatbot for creating/updating sections, units, words, questions
+  - [ ] Natural language content generation and editing
+  - [ ] Context-aware content suggestions
+  - [ ] Bulk content operations via chat interface
+
+- [ ] **Advanced Audio Generation**
+  - [ ] Multi-speaker conversation generation from transcripts
+  - [ ] Voice cloning and character assignment
+  - [ ] Streaming audio playback (HLS/DASH support)
+  - [ ] Real-time audio synthesis and caching
+
+- [ ] **Smart Content Import**
+  - [ ] OCR-based text extraction from images/PDFs
+  - [ ] Automatic glossary generation from textbook scans
+  - [ ] Intelligent content categorization and tagging
+  - [ ] Batch processing for large document imports
+
+### 📊 Data Portability & Standards
+- [ ] **SCORM Integration**
+  - [ ] Export lessons as SCORM-compliant packages
+  - [ ] Import existing SCORM content
+  - [ ] LMS compatibility and progress tracking
+  - [ ] xAPI (Tin Can API) support for analytics
+
+- [ ] **Content Exchange**
+  - [ ] Standardized export/import formats
+  - [ ] Cross-platform content sharing
+  - [ ] Version control for content packages
+  - [ ] Collaborative content development tools
+
+### 🎨 Enhanced User Experience
+- [ ] **Instructor Dashboard Redesign**
+  - [ ] Streamlined content creation workflow
+  - [ ] Visual content organization and management
+  - [ ] Advanced analytics and reporting
+  - [ ] Customizable interface layouts
+
+- [ ] **Student Learning Experience**
+  - [ ] Personalized learning paths
+  - [ ] Adaptive difficulty adjustment
+  - [ ] Gamification elements and progress rewards
+  - [ ] Social learning features and collaboration
 
 ## 🔄 Continuous Improvements (Post-Launch)
 
@@ -322,9 +370,16 @@ Given our tight timeline and need for stability, gradual migration is recommende
 - Bug fixes and stability improvements
 
 ### Q1 2025 Roadmap
-- Feature enhancements based on beta feedback
-- Scalability improvements for larger user base
+- Phase 5 UX enhancements implementation
+- AI content creation features rollout
 - Advanced analytics and reporting
+- SCORM compliance and data portability
+
+### Q2 2025 Vision
+- Advanced AI tutoring capabilities
+- Multi-language platform support
+- Enterprise features and integrations
+- Mobile app development
 
 ---
 
