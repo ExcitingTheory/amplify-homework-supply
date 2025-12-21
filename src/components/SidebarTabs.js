@@ -77,7 +77,7 @@ export default function SidebarTabs() {
       </Box>
       <CustomTabPanel value={value} index={0}>
       <DictionaryEditor
-        insertWordBlock={insertWordBlock}
+        insertWordBlock={() => {}}
       />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>

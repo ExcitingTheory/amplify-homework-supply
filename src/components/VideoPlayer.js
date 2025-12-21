@@ -9,7 +9,7 @@ export const VideoPlayer = (props) => {
 
   React.useEffect(() => {
 
-    if(!option || !options?.sources) return;
+    if(!options || !options?.sources) return;
 
     // Make sure Video.js player is only initialized once
     if (!playerRef.current) {
