@@ -14,22 +14,22 @@ type Section @model @auth(rules: [
 
 type Assignment @model @auth(rules: [
   { allow: private, operations: [read]},
-  # { allow: groups, groupsField: "learner", operations: [read]},
-  # { allow: owner, ownerField: "owner", operations: [create, update, delete, read] },
+  { allow: groups, groupsField: "learner", operations: [read]},
+  { allow: owner, ownerField: "owner", operations: [create, update, delete, read] },
   { allow: groups, groups: ["Instructors", "Admins"], operations: [create, update, delete, read] },
   { allow: public, operations: [read]}
   ]) {
   id: ID!
   due: AWSDateTime
   learner: String
-  # owner: String
+  owner: String
   sectionID: ID @index(name: "bySection")
   grades: [Grade] @hasMany(indexName: "byAssignment", fields: ["id"])
   unitID: ID @index(name: "byUnit")
 }
 
 type Grade @model @auth(rules: [
-  # { allow: groups, groupsField: "instructor", operations: [read]}
+  { allow: groups, groupsField: "instructor", operations: [read]}
   { allow: owner, ownerField: "owner", operations: [create, read]},
   { allow: groups, groups: ["Admins"], operations: [read]}
   ]) {
@@ -41,42 +41,42 @@ type Grade @model @auth(rules: [
   instructor: String
   unitVersion: Int
   data: AWSJSON
-  # unitID: ID @index(name: "byUnit")
+  unitID: ID @index(name: "byUnit")
   assignmentID: ID @index(name: "byAssignment")
 }
 
 type Unit @model @auth(rules: [
   { allow: private, operations: [read]},
   { allow: groups, groups: ["Admins", "Instructors"]},
-  # { allow: groups, groupsField: "learner", operations: [read]}
-  # { allow: owner, ownerField: "owner", operations: [create, update, delete, read] },
+  { allow: groups, groupsField: "learner", operations: [read]}
+  { allow: owner, ownerField: "owner", operations: [create, update, delete, read] },
   { allow: public, operations: [read]}])
   {
   id: ID!
   number: Float
   name: String
-  # learner: String
-  # owner: String
+  learner: String
+  owner: String
   description: String
   data: AWSJSON
   publish: Boolean
-  # audioFiles: [String]
-  # videoFiles: [String]
-  # imageFiles: [String]
-  # urls: [String]
+  audioFiles: [String]
+  videoFiles: [String]
+  imageFiles: [String]
+  urls: [String]
   assignments: [Assignment] @hasMany(indexName: "byUnit", fields: ["id"])
   words: [Word] @manyToMany(relationName: "UnitWord")
-  # grades: [Grade] @hasMany(indexName: "byUnit", fields: ["id"])
+  grades: [Grade] @hasMany(indexName: "byUnit", fields: ["id"])
 }
 
 type Word @model @auth(rules: [
   { allow: private, operations: [read]},
   { allow: groups, groups: ["Instructors", "Admins"]},
-#   { allow: owner, ownerField: "owner", operations: [create, update, delete, read] },
+  { allow: owner, ownerField: "owner", operations: [create, update, delete, read] },
   { allow: public, operations: [read]}]) {
   id: ID!
   phrase: String
-#   owner: String
+  owner: String
   phonetic: String
   definition: String
   audio: [String]

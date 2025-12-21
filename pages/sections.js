@@ -5,8 +5,7 @@ import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 
 import { createSectionGroup } from '../src/graphql/mutations';
-
-import { fetchAuthSession } from '@aws-amplify/auth';
+import { fetchAuthSession } from 'aws-amplify/auth';
 
 import PeopleIcon from '@mui/icons-material/People';
 

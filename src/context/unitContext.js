@@ -52,8 +52,11 @@ const UnitProvider = ({ children, id }) => {
   const unitVersion = unit?._version || 0
   const unitOwner = unit?.owner || ''
 
-  console.log('UnitProvider.rubricLength', rubricLength)
-  console.log("Searching for in progress assignment for unitId:", id, "unitVersion", unitVersion)
+  // Reduce console.log frequency to prevent performance issues
+  if (process.env.NODE_ENV === 'development') {
+    console.log('UnitProvider.rubricLength', rubricLength)
+    console.log("Searching for in progress assignment for unitId:", id, "unitVersion", unitVersion)
+  }
 
   // 
   // cache username
@@ -166,16 +169,20 @@ const UnitProvider = ({ children, id }) => {
 
 
   const createGrade = async (unitAccuracy, unitIsComplete) => {
+    // Ensure we have authentication before creating grade
+    if (!session.username) {
+      throw new Error("User not authenticated - cannot create grade");
+    }
+
     const _grade = await DataStore.save(
       new Grade({
         unitID: id,
         // use the unit owner as the instructor
         instructor: unitOwner,
-        // owner: username,
+        // Don't manually set owner - DataStore will auto-populate based on auth
         unitVersion: unitVersion,
-        complete: false,
-        unitAccuracy,
-        unitIsComplete
+        complete: unitIsComplete,
+        accuracy: unitAccuracy
       })
     );
 
@@ -216,16 +223,41 @@ const UnitProvider = ({ children, id }) => {
     try {
       if (!grade) {
         console.log("making new grade!!!")
-        await createGrade(unitAccuracy, unitIsComplete)
+        const newGrade = await createGrade(unitAccuracy, unitIsComplete)
+        // Use the newly created grade for the copyOf operation
+        if (newGrade && newGrade.id) {
+          await DataStore.save(
+            Grade.copyOf(newGrade, updated => {
+              updated.data = data
+              updated.accuracy = unitAccuracy
+              updated.complete = unitIsComplete // The entire assignment is completed
+            })
+          );
+        }
+      } else if (grade && grade.id) {
+        // Only proceed if grade is a valid model instance
+        console.log("saving existing grade!!!")
+        await DataStore.save(
+          Grade.copyOf(grade, updated => {
+            updated.data = data
+            updated.accuracy = unitAccuracy
+            updated.complete = unitIsComplete // The entire assignment is completed
+          })
+        );
+      } else {
+        console.error("Invalid grade object:", grade)
+        // Create a new grade if the existing one is invalid
+        const newGrade = await createGrade(unitAccuracy, unitIsComplete)
+        if (newGrade && newGrade.id) {
+          await DataStore.save(
+            Grade.copyOf(newGrade, updated => {
+              updated.data = data
+              updated.accuracy = unitAccuracy
+              updated.complete = unitIsComplete
+            })
+          );
+        }
       }
-      console.log("saving!!!")
-      await DataStore.save(
-        Grade.copyOf(grade, updated => {
-          updated.data = data
-          updated.accuracy = unitAccuracy
-          updated.complete = unitIsComplete // The entire assignment is completed
-        })
-      );
       console.log("Saved!!!") 
       if(unitIsComplete && !unit?.timeLimitSeconds) {
         setShowUnitComplete(true)
@@ -234,86 +266,103 @@ const UnitProvider = ({ children, id }) => {
         console.log("createGrade(0, false)")
         await createGrade(0, false)
       }
-    } catch (errors) {
-      console.error(errors)
-      // throw new Error(errors[0].message)
+    } catch (error) {
+      console.error("Error saving grade:", error)
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        cause: error.cause
+      })
+      
+      // If it's an authentication error, try to refresh auth
+      if (error.message?.includes("auth") || error.message?.includes("Auth")) {
+        console.log("Authentication error detected, attempting to fetch user...")
+        try {
+          await fetchCurrentUsername()
+        } catch (authError) {
+          console.error("Failed to refresh authentication:", authError)
+        }
+      }
+      
+      // Re-throw to let calling code handle it
+      throw error
     }
   }
 
   React.useEffect(() => {
-    if (!id || !unitVersion) {
+    if (!id || !unitVersion || !session.username) {
       return
     }
 
-    async function _getGrade() {
+    const username = session.username;
 
-      let {
-        username
-      } = session
-
-      const subscription = DataStore.observeQuery(
-        Grade,
-        g => g.and(g => [
-          g.owner.eq(username),
-          g.unitID.eq(id),
-          g.unitVersion.eq(unitVersion),
-          g.complete.eq(false)
-        ]), {
-        sort: g => g.createdAt(SortDirection.DESCENDING)
-      }
-      ).subscribe(snapshot => {
-        const { items } = snapshot;
-        // console.log('items', items)
-        setGrade(items[0]);
-        setUsername(username)
-      });
-
-      return () => {
-        subscription.unsubscribe();
-      };
+    const subscription = DataStore.observeQuery(
+      Grade,
+      g => g.and(g => [
+        g.owner.eq(username),
+        g.unitID.eq(id),
+        g.unitVersion.eq(unitVersion),
+        g.complete.eq(false)
+      ]), {
+      sort: g => g.createdAt(SortDirection.DESCENDING)
     }
+    ).subscribe(snapshot => {
+      const { items } = snapshot;
+      // console.log('items', items)
+      const currentGrade = items[0];
+      setGrade(currentGrade);
+      setUsername(username);
+      
+      // Calculate finished questions from the current grade data
+      if (currentGrade?.data) {
+        let _finishedQuestions = 0;
+        Object.entries(currentGrade.data).forEach(([key, value]) => {
+          if (value?.complete === true) {
+            _finishedQuestions++;
+          }
+        });
+        setFinishedQuestions(_finishedQuestions);
+      } else {
+        setFinishedQuestions(0);
+      }
+    });
 
-    _getGrade()
+    return () => {
+      subscription.unsubscribe();
+    };
 
-  }, [id, unitVersion]);
+  }, [id, unitVersion, session.username]);
 
 
   React.useEffect(() => {
-    if (!id || !unitVersion) {
+    if (!id || !unitVersion || !session.username) {
       return
     }
 
-    async function _getGrades() {
+    const username = session.username;
 
-      let {
-        username
-      } = session
-
-
-      const subscription = DataStore.observeQuery(
-        Grade,
-        g => g.and(g => [
-          g.owner.eq(username),
-          g.unitID.eq(id),
-          g.unitVersion.eq(unitVersion),
-          g.complete.eq(true)
-        ]), {
-        sort: g => g.accuracy(SortDirection.DESCENDING).createdAt(SortDirection.DESCENDING),
-      }
-      ).subscribe(snapshot => {
-        const { items } = snapshot;
-        const _items = items.slice(0, 5)
-        setRecentGrades(_items);
-      });
-
-      return () => {
-        subscription.unsubscribe();
-      };
+    const subscription = DataStore.observeQuery(
+      Grade,
+      g => g.and(g => [
+        g.owner.eq(username),
+        g.unitID.eq(id),
+        g.unitVersion.eq(unitVersion),
+        g.complete.eq(true)
+      ]), {
+      sort: g => g.accuracy(SortDirection.DESCENDING).createdAt(SortDirection.DESCENDING),
     }
+    ).subscribe(snapshot => {
+      const { items } = snapshot;
+      const _items = items.slice(0, 5)
+      setRecentGrades(_items);
+    });
 
-    _getGrades()
+    return () => {
+      subscription.unsubscribe();
+    };
 
-  }, [id, unitVersion]);
+  }, [id, unitVersion, session.username]);
 
   React.useEffect(() => {
 
@@ -376,7 +425,6 @@ const UnitProvider = ({ children, id }) => {
         })
 
         _unitsFiles.forEach(async f => {
-          console.log(' _unitsFiles.forEach f', f)
           const _f = f.value
           _files[_f.id] = _f
         })
@@ -389,7 +437,6 @@ const UnitProvider = ({ children, id }) => {
         const _urlsOutput = await Promise.allSettled(urlsWork)
 
         _urlsOutput.forEach((item, key) => {
-          console.log("unitContext.item::: ", item) 
           if (item.status === 'fulfilled') {
             const _url = item.value
             const urlsId = urlsIds[key]
@@ -422,7 +469,13 @@ const UnitProvider = ({ children, id }) => {
             }
           })
 
-          setRubric(_rubric)
+          // Only update rubric if it has actually changed
+          setRubric(prevRubric => {
+            if (JSON.stringify(prevRubric) !== JSON.stringify(_rubric)) {
+              return _rubric;
+            }
+            return prevRubric;
+          });
         }
 
       });

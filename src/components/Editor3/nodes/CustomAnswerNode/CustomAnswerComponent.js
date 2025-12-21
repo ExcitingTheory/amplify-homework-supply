@@ -65,7 +65,7 @@ export default function CustomAnswerComponent({
     const [allowedInputMethods, setAllowedInputMethods] = useState(allowedInput || ['text', 'audio', 'writing']);
     const [currentPromptMethod, setCurrentPromptMethod] = useState(promptMethod[0] || 'text');
 
-    const { grade } = React.useContext(UnitContext);
+    const { grade, saveGrade } = React.useContext(UnitContext);
     const {
         questionBank,
     } = React.useContext(DictionaryContext);
@@ -103,6 +103,20 @@ export default function CustomAnswerComponent({
         console.log('AnswerComponent.currentPromptMethod', promptMethod[0])
 
     }, []);
+
+    // Track completion of this exercise
+    React.useEffect(() => {
+        if (questionIDs && questionIDs.length > 0 && feedback) {
+            // Check if all questions have been answered
+            const allQuestionsAnswered = questionIDs.every(qid => feedback[qid] !== undefined);
+            
+            if (allQuestionsAnswered) {
+                console.log('CustomAnswerComponent: All questions answered, marking complete');
+                // Save grade to mark this exercise as complete
+                saveGrade(1, '', 1);
+            }
+        }
+    }, [feedback, questionIDs, saveGrade]);
 
     return (
         // a list of questions having a prompt and an expected answer in a collection

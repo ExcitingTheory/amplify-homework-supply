@@ -119,7 +119,7 @@ const columns = [
     },
 ];
 
-export default function CustomAnswerEditor({
+export default React.memo(function CustomAnswerEditor({
     className,
     format,
     nodeKey,
@@ -178,29 +178,30 @@ export default function CustomAnswerEditor({
         unit,
     } = React.useContext(UnitContext);
 
-    const rows = []
+    const rows = React.useMemo(() => {
+        const result = [];
+        console.log('questionIDs', questionIDs);
+        console.log('questionBank', questionBank);
 
-    console.log('questionIDs', questionIDs);
-    console.log('questionBank', questionBank);
-
-    if(questionIDs) {
-        questionIDs.forEach((id) => {
-            console.log('id', id);
-            const _q = questionBank[id];
-            console.log('_q', _q);
-            if (_q) {
-                rows.push({
-                    id: _q.id,
-                    prompt: _q.prompt,
-                    answer: _q.answer,
-                    hint: _q.hint,
-                    promptAudio: _q.audio,
-                    answerAudio: _q.answerAudio,
-                });
-            }
-        });
-    
-    }
+        if(questionIDs) {
+            questionIDs.forEach((id) => {
+                console.log('id', id);
+                const _q = questionBank[id];
+                console.log('_q', _q);
+                if (_q) {
+                    result.push({
+                        id: _q.id,
+                        prompt: _q.prompt,
+                        answer: _q.answer,
+                        hint: _q.hint,
+                        promptAudio: _q.audio,
+                        answerAudio: _q.answerAudio,
+                    });
+                }
+            });
+        }
+        return result;
+    }, [questionIDs, questionBank]);
 
     const fetch = () => {
         setQuestions({ ...questions, isLoading: true, });
@@ -501,7 +502,7 @@ export default function CustomAnswerEditor({
 
     };
 
-    const setAllowedInput = (payload) => {
+    const setAllowedInput = React.useCallback((payload) => {
         editor.update(async () => {
             const node = $getNodeByKey(nodeKey);
             if ($isCustomAnswerNode(node)) {
@@ -509,9 +510,9 @@ export default function CustomAnswerEditor({
                 node.setAllowedInput(payload);
             }
         });
-    };
+    }, [editor, nodeKey]);
 
-    const setPromptMethod = (payload) => {
+    const setPromptMethod = React.useCallback((payload) => {
         editor.update(async () => {
             const node = $getNodeByKey(nodeKey);
             if ($isCustomAnswerNode(node)) {
@@ -519,7 +520,7 @@ export default function CustomAnswerEditor({
                 node.setPromptMethod(payload);
             }
         });
-    };
+    }, [editor, nodeKey]);
 
 
 
@@ -942,4 +943,4 @@ export default function CustomAnswerEditor({
 
         </div>
     );
-}
+});

@@ -70,7 +70,7 @@ const formatTime = (countDown) => {
  * @description
  * Display a countdown timer. Input is a timestamp and a number of seconds.
  */
-function TimeLeft() {
+const TimeLeft = React.memo(() => {
     const {
         grade,
         unit,
@@ -134,7 +134,7 @@ function TimeLeft() {
     </>)
 
 
-}
+});
 
 
 
@@ -265,7 +265,7 @@ export default function ToolBarRoPlugin({
                     
                     <TimeLeft />
 
-                    <Chip label={`${finishedQuestions} of ${rubric.length} Questions Completed`} variant="outlined" />
+                    <Chip label={`${finishedQuestions} of ${rubric?.length || 0} Questions Completed`} variant="outlined" />
                     </Stack>
 
                 </Toolbar>

@@ -50,8 +50,16 @@ function TableCellResizer({editor}) {
         // const isGridSelection = DEPRECATED_$isGridSelection(selection);
 
         // if (isSelectingGrid !== isGridSelection) {
-          updateIsSelectingGrid(isGridSelection);
+        //   updateIsSelectingGrid(isGridSelection);
         // }
+        
+        // Temporarily disable grid selection functionality to prevent errors
+        // TODO: Fix this properly when updating to newer Lexical API
+        updateIsSelectingGrid(false);
+        
+        // Temporarily disable grid selection functionality to prevent errors
+        // TODO: Fix this properly when updating to newer Lexical API
+        updateIsSelectingGrid(false);
 
         return false;
       },

@@ -22,6 +22,7 @@ import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
 import Stack from '@mui/material/Stack';
 import { GutterContext } from './gutterContext';
+import UnitContext from '../context/unitContext';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 const reorder = (list, startIndex, endIndex) => {
@@ -153,7 +154,8 @@ export default class QuestionBlock extends React.Component {
       isLocked: false,
       grades: [],
       grade: 0.0,
-      attemptedAnswers: {}
+      attemptedAnswers: {},
+      verifiedAnswers: {}
     };
 
     this.ref = React.createRef();
@@ -202,7 +204,7 @@ export default class QuestionBlock extends React.Component {
       });
     };
 
-    this._gradeAnswer = (e, thisKey, thisAnswer, questionContent) => {
+    this._gradeAnswer = async (e, thisKey, thisAnswer, questionContent) => {
       e.preventDefault();
       e.stopPropagation();
       const { correct: isCorrect } = thisAnswer
@@ -250,6 +252,7 @@ export default class QuestionBlock extends React.Component {
       const attemptedArr = Object.entries(attemptedAnswers)
 
       grade = Math.floor((verifiedArr.length / correctArr.length) * 100)
+      let thisExerciseComplete = false
 
       if (attemptedArr.length === correctArr.length) {
         isLocked = true
@@ -259,6 +262,7 @@ export default class QuestionBlock extends React.Component {
 
       if (verifiedArr.length === correctArr.length) {
         isLocked = true
+        thisExerciseComplete = true
 
         // console.log("Grade this thing")
         // console.log("reset everything")
@@ -269,6 +273,26 @@ export default class QuestionBlock extends React.Component {
         // grade = 0.0
       }
 
+      // Save completion tracking to UnitContext
+      if (this.props.nodeKey && this.context.saveGrade) {
+        try {
+          const { grade: contextGrade, saveGrade } = this.context;
+          let savedGradeCopy = JSON.parse(JSON.stringify(contextGrade?.data || {}));
+
+          savedGradeCopy[this.props.nodeKey] = {
+            accuracy: grade,
+            attemptedAnswers,
+            verifiedAnswers,
+            complete: thisExerciseComplete,
+            percentComplete: Math.floor((attemptedArr.length / correctArr.length) * 100)
+          };
+
+          await saveGrade(savedGradeCopy);
+        } catch (error) {
+          console.error("Failed to save grade progress for QuestionBlock:", error);
+          // Continue with local state update even if save fails
+        }
+      }
 
       this.setState({
         attemptedAnswers: attemptedAnswers,
@@ -361,7 +385,7 @@ export default class QuestionBlock extends React.Component {
   }
 
 
-  static contextType = GutterContext;
+  static contextType = UnitContext;
 
   _getValue() {
     try {
@@ -372,7 +396,21 @@ export default class QuestionBlock extends React.Component {
       // console.log(error)
     }
     return []
+  }
 
+  componentDidMount() {
+    // Restore progress from UnitContext if nodeKey is provided
+    if (this.props.nodeKey && this.context.grade) {
+      const inProgress = this.context.grade?.data?.[this.props.nodeKey] || {};
+      if (inProgress.attemptedAnswers || inProgress.verifiedAnswers) {
+        this.setState({
+          attemptedAnswers: inProgress.attemptedAnswers || {},
+          verifiedAnswers: inProgress.verifiedAnswers || {},
+          grade: inProgress.accuracy || 0,
+          isLocked: inProgress.complete || false
+        });
+      }
+    }
   }
 
   render() {

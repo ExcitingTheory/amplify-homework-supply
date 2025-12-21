@@ -19,6 +19,11 @@ export const Easy = ({
 
   let [assignment, setAssignment] = React.useState([]);
   const [answers, setAnswers] = React.useState([]);
+  
+  const [filterEasy, setFilterEasy] = React.useState([]);
+  const [verifiedAnswers, setVerifiedAnswers] = React.useState([]);
+  const [completedEasy, setCompletedEasy] = React.useState(0);
+  const [startPositionEasy, setStartPositionEasy] = React.useState(0);
  
   const isFirstRender = React.useRef(true);
 
@@ -45,22 +50,18 @@ export const Easy = ({
 
   const inProgress = grade?.data?.[nodeKey] || {};
 
-  let filterEasy = []
-  let verifiedAnswers = []
-  let completedEasy = 0
-
-  let startPositionEasy = 0
-
-  let setTab = 0
-
-  if (inProgress != {}) {
-    setTab = inProgress?.tabIndex || 0
-    // console.log('inProgress?.tabIndex || 0', inProgress?.tabIndex)
-    filterEasy = inProgress?.easy?.verifiedAnswers || []
-    verifiedAnswers = inProgress?.easy?.verifiedAnswers || []
-    completedEasy = (inProgress?.easy?.percentComplete || 0) * 100
-    startPositionEasy = filterEasy.length
-  }
+  // Update progress state when grade data changes
+  useEffect(() => {
+    if (inProgress && Object.keys(inProgress).length > 0) {
+      const verified = inProgress?.easy?.verifiedAnswers || [];
+      const percentComplete = (inProgress?.easy?.percentComplete || 0) * 100;
+      
+      setFilterEasy(verified);
+      setVerifiedAnswers(verified);
+      setCompletedEasy(percentComplete);
+      setStartPositionEasy(verified.length);
+    }
+  }, [inProgress])
 
   let vocabList = []
   let vocabListEasy = []
@@ -125,14 +126,7 @@ export const Easy = ({
     let newTab = tabIndex;
     let allTabsComplete = false;
     let thisExerciseComplete = false;
-    let _verified = [...verifiedAnswers];
-
-    // const newPercent = Math.floor((currentQuestion / easyAssignmentLength) * 100);
-    // setPercentComplete(newPercent);
-
-
-    // Add to attempted answers
-    _verified.push(wordID);
+    let _verified = [...new Set([...verifiedAnswers, wordID])];
 
     let _attemptedAnswers = JSON.parse(JSON.stringify(loadAttemptedAnswers));
 
@@ -191,6 +185,12 @@ export const Easy = ({
     }
 
     savedGradeCopy[nodeKey].tabIndex = newTab;
+
+    // Update local state immediately before saving to prevent reset
+    setFilterEasy(_verified);
+    setVerifiedAnswers(_verified);
+    setStartPositionEasy(_verified.length);
+    setCompletedEasy((newIndex / assignment.length) * 100);
 
     await saveGrade(savedGradeCopy);
 

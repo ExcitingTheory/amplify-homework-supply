@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
@@ -14,6 +14,7 @@ import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import Stack from '@mui/material/Stack';
 // import { GutterContext } from '../context/gutterContext';
 import SortableAnswers from '../../SortableAnswers';
+import UnitContext from '../../../context/unitContext';
 import { $isQuizNode } from '../plugins/QuizPlugin';
 
 import {
@@ -38,6 +39,7 @@ const QuizEditor = ({
     const [verifiedAnswers, setVerifiedAnswers] = useState({});
 
     const [editor] = useLexicalComposerContext();
+    const { grade: contextGrade, saveGrade } = useContext(UnitContext);
 
 
     const setQuestionValue = (data) => {
@@ -54,6 +56,19 @@ const QuizEditor = ({
     useEffect(() => {
         _setQuestionValue(data);
     }, [data]);
+
+    useEffect(() => {
+        // Restore progress from UnitContext if nodeKey is provided
+        if (nodeKey && contextGrade) {
+            const inProgress = contextGrade?.data?.[nodeKey] || {};
+            if (inProgress.attemptedAnswers || inProgress.verifiedAnswers) {
+                setAttemptedAnswers(inProgress.attemptedAnswers || {});
+                setVerifiedAnswers(inProgress.verifiedAnswers || {});
+                setGrade(inProgress.accuracy || 0);
+                setIsLocked(inProgress.complete || false);
+            }
+        }
+    }, [nodeKey, contextGrade]);
 
 
 
@@ -90,7 +105,7 @@ const QuizEditor = ({
         setQuestionValue(tmp);
     };
 
-    const gradeAnswer = (e, thisKey, thisAnswer, questionContent) => {
+    const gradeAnswer = async (e, thisKey, thisAnswer, questionContent) => {
         e.preventDefault();
         e.stopPropagation();
         const { correct: isCorrect } = thisAnswer;
@@ -131,6 +146,7 @@ const QuizEditor = ({
         const attemptedArr = Object.entries(_attemptedAnswers);
 
         _grade = Math.floor((verifiedArr.length / correctArr.length) * 100);
+        let thisExerciseComplete = false;
 
         if (attemptedArr.length === correctArr.length) {
             _isLocked = true;
@@ -138,6 +154,27 @@ const QuizEditor = ({
 
         if (verifiedArr.length === correctArr.length) {
             _isLocked = true;
+            thisExerciseComplete = true;
+        }
+
+        // Save completion tracking to UnitContext
+        if (nodeKey && saveGrade) {
+            try {
+                let savedGradeCopy = JSON.parse(JSON.stringify(contextGrade?.data || {}));
+
+                savedGradeCopy[nodeKey] = {
+                    accuracy: _grade,
+                    attemptedAnswers: _attemptedAnswers,
+                    verifiedAnswers: _verifiedAnswers,
+                    complete: thisExerciseComplete,
+                    percentComplete: Math.floor((attemptedArr.length / correctArr.length) * 100)
+                };
+
+                await saveGrade(savedGradeCopy);
+            } catch (error) {
+                console.error("Failed to save grade progress for QuizEditor:", error);
+                // Continue with local state update even if save fails
+            }
         }
 
         setAttemptedAnswers(_attemptedAnswers);

@@ -92,13 +92,18 @@ const FilesProvider = ({ children }) => {
 
   React.useEffect(() => {
     const unsubscribe = Hub.listen("auth", handleAuth, "useAuth");
-    console.log('useEffect.handleAuth', handleAuth)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('useEffect.handleAuth', typeof handleAuth)
+    }
     return unsubscribe;
   }, [handleAuth]);
 
 
 
-  console.log('FilesProvider.audioFiles', audioFiles)
+  // Only log in development and reduce frequency
+  if (process.env.NODE_ENV === 'development' && Math.random() < 0.1) {
+    console.log('FilesProvider.audioFiles', Object.keys(audioFiles || {}).length, 'files')
+  }
   // console.log('FilesProvider.files', files)
 
   // React.useEffect(() => {
@@ -137,7 +142,9 @@ const FilesProvider = ({ children }) => {
       // Cache.clear()
       // refreshAudioFiles()
         const data = await DataStore.query(File)
-        console.log("files::: ", data)
+        if (process.env.NODE_ENV === 'development') {
+          console.log("files::: ", data?.length || 0, 'items')
+        }
 
         const _playlistFiltered = {}
         const _playlistUrls = {}

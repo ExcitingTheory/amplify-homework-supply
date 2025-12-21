@@ -20,6 +20,11 @@ export const Hard = ({
   const [answers, setAnswers] = React.useState([]);
   const [length, setLength] = React.useState();
   const [vocabulary, setVocabulary] = React.useState([]);
+  
+  const [filterHard, setFilterHard] = React.useState([]);
+  const [completedHard, setCompletedHard] = React.useState(0);
+  const [startPositionHard, setStartPositionHard] = React.useState(0);
+  const [verifiedAnswers, setVerifiedAnswers] = React.useState([]);
 
   const isFirstRender = React.useRef(true);
 
@@ -55,17 +60,18 @@ export const Hard = ({
   const { grade, saveGrade } = React.useContext(UnitContext)
   const inProgress = grade?.data?.[nodeKey] || {}
 
-  let filterHard = []
-  let completedHard = 0
-  let startPositionHard = 0
-  let setTab = 0
-
-  if (inProgress != {}) {
-    setTab = inProgress?.tabIndex || 0
-    filterHard = inProgress?.hard?.verifiedAnswers || []
-    completedHard = (inProgress?.hard?.percentComplete || 0) * 100
-    startPositionHard = filterHard.length
-  }
+  // Update progress state when grade data changes
+  useEffect(() => {
+    if (inProgress && Object.keys(inProgress).length > 0) {
+      const verified = inProgress?.hard?.verifiedAnswers || [];
+      const percentComplete = (inProgress?.hard?.percentComplete || 0) * 100;
+      
+      setFilterHard(verified);
+      setVerifiedAnswers(verified);
+      setCompletedHard(percentComplete);
+      setStartPositionHard(verified.length);
+    }
+  }, [inProgress])
 
   let vocabList = []
   let vocabListHard = []
@@ -104,7 +110,6 @@ export const Hard = ({
   const percentComplete = completedHard
   // const dropAnswerClass = ''
   const attemptsCount = 0
-  const verifiedAnswers = filterHard
 
   const loadAttemptedAnswers = inProgress?.hard?.attemptedAnswers || {};
   // const correctPhrase = correctAnswer?.phrase
@@ -198,6 +203,12 @@ export const Hard = ({
     }
 
     savedGradeCopy[nodeKey].tabIndex = newTab; //Go back to beginning? TODO Follow up with a success page
+
+    // Update local state immediately before saving to prevent reset
+    setFilterHard(_verified);
+    setVerifiedAnswers(_verified);
+    setStartPositionHard(_verified.length);
+    setCompletedHard((newIndex / assignment.length) * 100);
 
     await saveGrade(savedGradeCopy);
 

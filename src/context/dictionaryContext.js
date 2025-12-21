@@ -214,7 +214,10 @@ const DictionaryProvider = ({ children }) => {
     // const [phraseAndPronunciationFilteredWords, setPhraseAndPronunciationFilteredWords] = React.useState({})
 
 
-    console.log("DictionaryProvider.filter", filter)
+    // Only log in development to prevent performance issues
+    if (process.env.NODE_ENV === 'development' && Math.random() < 0.1) {
+        console.log("DictionaryProvider.filter", filter)
+    }
 
     // search words for a new filter value for the wordblock list
 
@@ -229,9 +232,10 @@ const DictionaryProvider = ({ children }) => {
 
     const filterWords = async () => {
 
-        console.log("filterWords")
-        console.log("filterWords.words", words)
-        console.log("filterWords.filter", filter)
+        // Reduce logging frequency for performance
+        if (process.env.NODE_ENV === 'development' && Math.random() < 0.05) {
+            console.log("filterWords", { wordsCount: Object.keys(words || {}).length, filter })
+        }
 
         if (!words) {
             return
@@ -241,7 +245,9 @@ const DictionaryProvider = ({ children }) => {
 
         // if filtered words is empty, then set filtered words to all words
         if (!filter || filter === "" || filter === " ") {
-            console.log("filterWords.filter is empty")
+            if (process.env.NODE_ENV === 'development') {
+                console.log("filterWords.filter is empty")
+            }
             setFilteredWords(words)
             if (setSearching) {
                 setSearching(false)
@@ -331,7 +337,12 @@ const DictionaryProvider = ({ children }) => {
     }
 
     React.useEffect(() => {
-        filterWords()
+        // Debounce filterWords to prevent excessive calls
+        const timeoutId = setTimeout(() => {
+            filterWords()
+        }, 100);
+        
+        return () => clearTimeout(timeoutId);
     }, [filter, words])
 
     React.useEffect(() => {

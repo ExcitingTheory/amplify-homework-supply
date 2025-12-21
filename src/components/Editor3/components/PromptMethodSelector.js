@@ -8,7 +8,7 @@ import { Check } from '@mui/icons-material';
 import VideoSettingsIcon from '@mui/icons-material/VideoSettings';
 import InputIcon from '@mui/icons-material/Input';
 
-export const AllowedInputSelector = ({
+export const AllowedInputSelector = React.memo(({
     ids, defaultAllowedInputs = ['text', 'audio'], allowedInput = [], setAllowedInput,
     // wordIDs,
 }) => {
@@ -18,17 +18,19 @@ export const AllowedInputSelector = ({
 
     console.log('AllowedInputSelector.allowedInput', allowedInput);
     // load defaults from allowedInputs
+    const allowedInputString = JSON.stringify(allowedInput);
     React.useEffect(() => {
-        if (allowedInput) {
+        if (allowedInput && allowedInput.length > 0) {
             setAllowedInputs(allowedInput);
         }
-    }, [JSON.stringify(allowedInput)]);
+    }, [allowedInputString]);
 
     // if the working inputs change, update the allowedInput
+    const allowedInputsString = JSON.stringify(_allowedInputs);
     React.useEffect(() => {
         console.log('useEffect._allowedInputs', _allowedInputs);
         setAllowedInput(_allowedInputs);
-    }, [JSON.stringify(_allowedInputs)]);
+    }, [allowedInputsString, setAllowedInput]);
 
     const handleClick = (event) => {
         console.log('handleClick', event.currentTarget);
@@ -137,8 +139,8 @@ export const AllowedInputSelector = ({
         //     </MenuList>
         // </>
     );
-};
-export const PromptMethodSelector = ({
+});
+export const PromptMethodSelector = React.memo(({
     ids, defaultPromptMethods = ['text', 'audio', 'writing'], promptMethod = [], setPromptMethod,
     // wordIDs,
 }) => {
@@ -151,11 +153,12 @@ export const PromptMethodSelector = ({
 
     console.log('PromptMethodSelector.promptMethod', promptMethod);
     // load defaults from promptMethods
+    const promptMethodString = JSON.stringify(promptMethod);
     React.useEffect(() => {
-        if (promptMethod) {
+        if (promptMethod && promptMethod.length > 0) {
             setPromptMethods(promptMethod);
         }
-    }, [JSON.stringify(promptMethod)]);
+    }, [promptMethodString]);
 
     // if the working methods change, update the promptMethod
     // React.useEffect(() => {
@@ -269,4 +272,4 @@ export const PromptMethodSelector = ({
         //     </MenuList>
         // </>
     );
-};
+});

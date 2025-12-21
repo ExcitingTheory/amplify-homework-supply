@@ -142,7 +142,9 @@ export default function AnswerComponent({
     }, []);
 
     const {
-        dictionary
+        dictionary,
+        grade,
+        saveGrade
     } = React.useContext(UnitContext);
 
     console.log('AnswerComponent   ', wordIDs, dictionary)
@@ -150,6 +152,42 @@ export default function AnswerComponent({
     let thisPrompt = customPrompt ? customPrompt : 'Provide words that best match the following definition(s):'
 
     thisPrompt = requestDefinition ? 'Please define the following word(s):' : thisPrompt
+
+    // Track completion and save grade
+    React.useEffect(() => {
+        if (!wordIDs || !feedback || !saveGrade || !nodeKey) return;
+
+        // Check if all words have been answered correctly
+        const answeredWords = Object.keys(feedback);
+        const correctAnswers = answeredWords.filter(wordId => feedback[wordId]?.answer === true);
+        const incorrectAnswers = answeredWords.filter(wordId => feedback[wordId]?.answer === false);
+        
+        const totalWords = wordIDs.length;
+        const answeredCount = answeredWords.length;
+        const correctCount = correctAnswers.length;
+        
+        // Consider complete if all words have been attempted
+        const isComplete = answeredCount >= totalWords;
+        const accuracy = totalWords > 0 ? Math.floor((correctCount / totalWords) * 100) : 0;
+
+        if (isComplete) {
+            // Update grade data
+            const currentGradeData = grade?.data || {};
+            const updatedGradeData = {
+                ...currentGradeData,
+                [nodeKey]: {
+                    complete: true,
+                    accuracy,
+                    totalWords,
+                    correctCount,
+                    answeredCount,
+                    feedback: feedback
+                }
+            };
+            
+            saveGrade(updatedGradeData);
+        }
+    }, [feedback, wordIDs, saveGrade, nodeKey, grade]);
 
 
     return (

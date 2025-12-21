@@ -22,6 +22,10 @@ export const Learn = ({
   const [length, setLength] = React.useState();
   const [vocabulary, setVocabulary] = React.useState([]);
   let [assignment, setAssignment] = React.useState([]);
+  
+  const [filterLearn, setFilterLearn] = React.useState([]);
+  const [completedLearn, setCompletedLearn] = React.useState(0);
+  const [startPositionLearn, setStartPositionLearn] = React.useState(0);
 
   const isFirstRender = React.useRef(true);
 
@@ -46,21 +50,21 @@ export const Learn = ({
     processVocabulary()
   }, [wordIDs])
 
-  let filterLearn = []
-  let completedLearn = 0
-  let startPositionLearn = 0
-  let setTab = 0
-
   const { wordMapId: dictionary } = React.useContext(DictionaryContext);
   const { grade, saveGrade } = React.useContext(UnitContext);
   const inProgress = grade?.data?.[nodeKey] || {};
 
-  if (inProgress != {}) {
-    setTab = inProgress?.tabIndex || 0
-    filterLearn = inProgress?.learn?.verifiedAnswers || []
-    completedLearn = (inProgress?.learn?.percentComplete || 0) * 100
-    startPositionLearn = filterLearn.length
-  }
+  // Update progress state when grade data changes
+  useEffect(() => {
+    if (inProgress && Object.keys(inProgress).length > 0) {
+      const verified = inProgress?.learn?.verifiedAnswers || [];
+      const percentComplete = (inProgress?.learn?.percentComplete || 0) * 100;
+      
+      setFilterLearn(verified);
+      setCompletedLearn(percentComplete);
+      setStartPositionLearn(verified.length);
+    }
+  }, [inProgress])
 
   let vocabList = []
   let vocabListLearn = []
@@ -89,10 +93,10 @@ export const Learn = ({
   }
 
   const easyAssignment = assignmentLearn;
-  const verifiedAnswers = filterLearn
-  const correctAnswer = assignmentLearn[startPositionLearn]
-  const percentComplete = completedLearn
-  const easyVocab = vocabListLearn
+  const verifiedAnswers = filterLearn;
+  const correctAnswer = assignmentLearn[startPositionLearn];
+  const percentComplete = completedLearn;
+  const easyVocab = vocabListLearn;
 
   const easyAssignmentLength = easyAssignment.length;
   const currentQuestion = startPositionLearn;
@@ -117,11 +121,11 @@ export const Learn = ({
     let newTab = tabIndex;
     let allTabsComplete = false;
     let thisExerciseComplete = false;
-    let _verified = [...new Set([...verifiedAnswers])];
+    
+    // Use the current state values
+    let _verified = [...new Set([...filterLearn, wordID])];
 
     // Add to attempted answers
-    _verified.push(wordID);
-    // console.log('(correctId, wordID)', correctId, wordID)
     let _attemptedAnswers = JSON.parse(JSON.stringify(loadAttemptedAnswers));
 
     if (typeof _attemptedAnswers[correctId] === 'undefined') {
@@ -130,9 +134,7 @@ export const Learn = ({
 
     _attemptedAnswers[correctId].push(wordID);
     const attempts = attemptsCount + 1;
-    // setAttemptedAnswers(_attemptedAnswers)
-    // setAttemptsCount(attempts)
-    // console.log("newIndex, easyAssignmentLength", newIndex, easyAssignmentLength)
+    
     if (_verified.length === easyAssignmentLength) {
       thisExerciseComplete = true;
       // check for top level complete, all assignments are completed
@@ -153,8 +155,6 @@ export const Learn = ({
       };
     }
 
-    // console.log('Learn _verified.length / length,', _verified.length, length)
-    // console.log('Learn newIndex / length', newIndex, length)
     savedGradeCopy[nodeKey]['learn'] = {
       verifiedAnswers: _verified,
       attemptedAnswers: _attemptedAnswers,
@@ -169,6 +169,11 @@ export const Learn = ({
     }
 
     savedGradeCopy[nodeKey].tabIndex = newTab;
+
+    // Update local state immediately before saving to prevent reset
+    setFilterLearn(_verified);
+    setStartPositionLearn(_verified.length);
+    setCompletedLearn((newIndex / assignment.length) * 100);
 
     await saveGrade(savedGradeCopy);
 
