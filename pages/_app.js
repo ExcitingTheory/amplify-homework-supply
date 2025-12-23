@@ -22,16 +22,6 @@ Amplify.configure({
   DataStore: {
     authModeStrategyType: AuthModeStrategyType.MULTI_AUTH,
   },
-  // API: {
-  //   REST: {
-  //     headers: async () => {
-
-  //       const authToken = (await fetchAuthSession()).tokens?.idToken?.toString();
-  //       console.log('_app.authToken:', authToken);
-  //       return { Authorization: authToken };
-  //     }
-  //   }
-  // }
 })
 
 
