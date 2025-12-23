@@ -16,43 +16,33 @@ export const AllowedInputSelector = React.memo(({
     const [_allowedInputs, setAllowedInputs] = React.useState(allowedInput.length > 0 ? allowedInput : defaultAllowedInputs);
     const open = Boolean(anchorEl);
 
-    console.log('AllowedInputSelector.allowedInput', allowedInput);
-    // load defaults from allowedInputs
-    const allowedInputString = JSON.stringify(allowedInput);
+    // Sync external allowedInput prop with internal state
     React.useEffect(() => {
         if (allowedInput && allowedInput.length > 0) {
-            setAllowedInputs(allowedInput);
+            const newAllowedInputString = JSON.stringify(allowedInput);
+            const currentAllowedInputString = JSON.stringify(_allowedInputs);
+            if (newAllowedInputString !== currentAllowedInputString) {
+                setAllowedInputs(allowedInput);
+            }
         }
-    }, [allowedInputString]);
+    }, [allowedInput]);
 
-    // if the working inputs change, update the allowedInput
-    const allowedInputsString = JSON.stringify(_allowedInputs);
-    React.useEffect(() => {
-        console.log('useEffect._allowedInputs', _allowedInputs);
-        setAllowedInput(_allowedInputs);
-    }, [allowedInputsString, setAllowedInput]);
+    // Removed the useEffect that was causing infinite loop
+    // Only update parent when menu closes
 
     const handleClick = (event) => {
-        console.log('handleClick', event.currentTarget);
         setAnchorEl(event.currentTarget);
     };
 
     const handleClose = () => {
-        console.log('handleClose');
         setAnchorEl(null);
-
         setAllowedInput(_allowedInputs);
     };
 
     const handleSelect = (event) => {
-        console.log('handleSelect', event.target);
-
         const value = event.target.getAttribute('value');
-        console.log('value', value);
         const mergeInputs = _allowedInputs.includes(value) ? _allowedInputs.filter((x) => x !== value) : [..._allowedInputs, value];
-        console.log('mergeInputs', mergeInputs);
         setAllowedInputs(mergeInputs);
-        // setAnchorEl(null);
     };
 
     return (
@@ -144,21 +134,20 @@ export const PromptMethodSelector = React.memo(({
     ids, defaultPromptMethods = ['text', 'audio', 'writing'], promptMethod = [], setPromptMethod,
     // wordIDs,
 }) => {
-
-    console.log('PromptMethodSelector.promptMethod', promptMethod);
-
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [_promptMethods, setPromptMethods] = React.useState(promptMethod.length > 0 ? promptMethod : []);
     const open = Boolean(anchorEl);
 
-    console.log('PromptMethodSelector.promptMethod', promptMethod);
-    // load defaults from promptMethods
-    const promptMethodString = JSON.stringify(promptMethod);
+    // Sync external promptMethod prop with internal state
     React.useEffect(() => {
         if (promptMethod && promptMethod.length > 0) {
-            setPromptMethods(promptMethod);
+            const newMethodsStr = JSON.stringify(promptMethod);
+            const currentMethodsStr = JSON.stringify(_promptMethods);
+            if (newMethodsStr !== currentMethodsStr) {
+                setPromptMethods(promptMethod);
+            }
         }
-    }, [promptMethodString]);
+    }, [promptMethod]);
 
     // if the working methods change, update the promptMethod
     // React.useEffect(() => {
@@ -166,26 +155,18 @@ export const PromptMethodSelector = React.memo(({
     //     setPromptMethod(_promptMethods);
     // }, [JSON.stringify(_promptMethods)]);
     const handleClick = (event) => {
-        console.log('handleClick', event.currentTarget);
         setAnchorEl(event.currentTarget);
     };
 
     const handleClose = () => {
-        console.log('handleClose');
         setAnchorEl(null);
-
         setPromptMethod(_promptMethods);
     };
 
     const handleSelect = (event) => {
-        console.log('handleSelect', event);
-
         const value = event.target.getAttribute('value');
-        console.log('value', value);
         const mergeMethods = _promptMethods.includes(value) ? _promptMethods.filter((x) => x !== value) : [..._promptMethods, value];
-
         setPromptMethods(mergeMethods);
-        // setAnchorEl(null);
     };
 
     return (

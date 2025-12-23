@@ -32,8 +32,9 @@ const FilesProvider = ({ children }) => {
   });
 
   const isLoading = React.useRef(false);
-  // once on load fetch the current user attributes
-  const fetchCurrentUserAttributes = async (params) => {
+  
+  // Memoize to prevent recreating on every render
+  const fetchCurrentUserAttributes = React.useCallback(async () => {
       const {
         identityId,
         tokens: { idToken },
@@ -41,14 +42,14 @@ const FilesProvider = ({ children }) => {
       isLoading.current = false;
 
       setSession({ identityId, idToken });
+  }, []);
 
-  }
   React.useEffect(() => {
     if (!isLoading.current) {
       isLoading.current = true;
       fetchCurrentUserAttributes()
     }
-  }, [])
+  }, [fetchCurrentUserAttributes])
 
   // reload the current user attributes when the auth event is triggered
 
@@ -92,206 +93,89 @@ const FilesProvider = ({ children }) => {
 
   React.useEffect(() => {
     const unsubscribe = Hub.listen("auth", handleAuth, "useAuth");
-    if (process.env.NODE_ENV === 'development') {
-      console.log('useEffect.handleAuth', typeof handleAuth)
-    }
     return unsubscribe;
   }, [handleAuth]);
 
 
 
-  // Only log in development and reduce frequency
-  if (process.env.NODE_ENV === 'development' && Math.random() < 0.1) {
-    console.log('FilesProvider.audioFiles', Object.keys(audioFiles || {}).length, 'files')
-  }
-  // console.log('FilesProvider.files', files)
-
-  // React.useEffect(() => {
-  //   const updateFiles = async () => {
-
-  //     const { results } = await list('audio/', {
-  //       cacheControl: 'max-age=300, stale-while-revalidate=86400' // 5 minutes
-  //     });
-  //     console.log('updateFiles.results', results)
-  //     if (results?.length > 0) {
-  //       const fileMap = new Map()
-  //       results.forEach((item) => {
-  //         fileMap[item.key] = item
-  //       })
-
-  //       console.log('updatfileMapeFiles.', fileMap)
-
-  //       setAudioFiles(JSON.parse(JSON.stringify(fileMap)));
-  //     }
-  //   };
-  //   updateFiles();
-  // }, []);
-
-
   React.useEffect(() => {
-    fetchFiles()
-    async function fetchFiles() {
-      // const {
-      //   username: myUserId,
-      // } = await getCurrentUser();
-      // console.log("myUserId::: ", myUserId)
+    let subscription;
 
-      // if (!myUserId) {
-      //   return;
-      // }
-      // Cache.clear()
-      // refreshAudioFiles()
-        const data = await DataStore.query(File)
-        if (process.env.NODE_ENV === 'development') {
-          console.log("files::: ", data?.length || 0, 'items')
+    async function fetchFiles() {
+      try {
+        const { username: myUserId } = await getCurrentUser();
+
+        if (!myUserId) {
+          return;
         }
 
-        const _playlistFiltered = {}
-        const _playlistUrls = {}
-        const urlsWork = []
+        // Use observeQuery instead of separate query + observe for efficiency
+        subscription = DataStore.observeQuery(File, f => f.owner.eq(myUserId)).subscribe(({ items }) => {
+          const _playlistFiltered = {}
 
-        // TODO change how this is done
+          items.forEach((item) => {
+            if (ACCEPTABLE_PLAYLIST_TYPES.includes(item.mimeType)) {
+              _playlistFiltered[item.id] = item
+            }
+          })
 
-        data.map(async (item) => {
-          if (ACCEPTABLE_PLAYLIST_TYPES.includes(item.mimeType)) {
-            
-            _playlistFiltered[item.id] = item
-
-            console.log("item::: ", item)
-            // urlsWork.push(getCachedUrl(item.path, 'protected', item?.owner))
-            // const _url = getCachedUrl(item.path, 'protected', item?.identityId)
-            // console.log("_url::: ", _url)
-            // _playlistUrls[item.id] = item
-            // _playlistUrls[item.id] = await getCachedUrl(item.path, 'protected', item?.identityId)
-                        
-          }
-        })
-
-        console.log("_playlistFiltered::: ", _playlistFiltered)
-        setMyPlaylistFiles(_playlistFiltered);
-        console.log("_playlistUrls::: ", _playlistUrls)
-        setMyPlaylistUrls(_playlistUrls);
-        setMyFiles(data);
-    }
-    const subscription = DataStore.observe(File).subscribe(() => fetchFiles())
-
-    return function cleanup() {
-        subscription.unsubscribe();
-    }
-}, [])
-
-
-  React.useEffect(() => {
-
-    async function fetchFiles() {
-
-      const {
-        username: myUserId,
-      } = await getCurrentUser();
-      console.log("myUserId::: ", myUserId)
-
-      if (!myUserId) {
-        return;
+          setMyPlaylistFiles(prev => {
+            const prevStr = JSON.stringify(prev);
+            const newStr = JSON.stringify(_playlistFiltered);
+            return prevStr === newStr ? prev : _playlistFiltered;
+          });
+          
+          setMyFiles(prev => {
+            const prevStr = JSON.stringify(prev);
+            const newStr = JSON.stringify(items);
+            return prevStr === newStr ? prev : items;
+          });
+        });
+      } catch (error) {
+        console.error('Error fetching files:', error);
       }
-      // Cache.clear()
-      // refreshAudioFiles()
-
-      DataStore.query(File).then((data) => {
-        console.log("files::: ", data)
-        setMyFiles(data);
-      });
-
-      // compare file model owner to the current user for finding the users files
-      const subscription = DataStore.observeQuery(File, f => f.owner.eq(myUserId)).subscribe(async ({ data }) => {
-        console.log("files::: ", data)
-
-        const _playlistFiltered = {}
-        const _playlistUrls = {}
-        const urlsWork = []
-
-        data.map((item) => {
-          if (ACCEPTABLE_PLAYLIST_TYPES.includes(item.mimeType)) {
-            
-            _playlistFiltered[item.id] = item
-
-            console.log("item::: ", item)
-            // urlsWork.push(getCachedUrl(item.path, 'protected', item?.identityId))
-          }
-        })
-
-        console.log("_playlistFiltered::: ", _playlistFiltered)
-        console.log("urlsWork::: ", urlsWork)
-
-        const _urlsOutput = await Promise.allSettled(urlsWork)
-
-        console.log("_urlsOutput::: ", _urlsOutput)
-
-        _urlsOutput.forEach((item) => {
-          console.log("item::: ", item) 
-          if (item.status === 'fulfilled') {
-            _playlistUrls[item.value.id] = item.value
-          }
-        })
-
-        console.log("_playlistFiltered::: ", _playlistFiltered)
-        setMyPlaylistFiles(_playlistFiltered);
-        console.log("_playlistUrls::: ", _playlistUrls)
-        setMyPlaylistUrls(_playlistUrls);
-        setMyFiles(data);
-      });
-      return subscription.unsubscribe()
     }
 
     fetchFiles()
+    
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, []);
-
-
-  // React.useEffect(() => {
-
-  //   async function fetchFiles() {
-  //     const subscription = DataStore.observeQuery(File).subscribe(({ items }) => {
-  //       console.log("files::: ", items)
-  //       setFiles(items);
-  //     });
-  //     return () => {
-  //       subscription.unsubscribe();
-  //     };
-  //   }
-
-  //   fetchFiles()
-  // }, []);
-
 
   const refreshAudioFiles = async () => {
     const results = await list('audio/', {
       cacheControl: 'no-cache'
     })
-    console.log('refreshing.results', results)
-    if (results.length > 0) {
-      const fileMap = new Map()
-      results.forEach((item) => {
+    
+    if (results?.results?.length > 0) {
+      const fileMap = {}
+      results.results.forEach((item) => {
         fileMap[item.key] = item
       })
 
-      console.log('updatfileMapeFiles.', fileMap)
-
-      setAudioFiles(JSON.parse(JSON.stringify(fileMap)));
-
+      setAudioFiles(fileMap);
     }
   }
 
+  const contextValue = React.useMemo(() => ({
+    audioFiles,
+    refreshAudioFiles,
+    files: myFiles,
+    myFiles,
+    myPlaylistFiles,
+    myPlaylistUrls,
+    session
+  }), [
+    audioFiles,
+    myFiles,
+    myPlaylistFiles,
+    myPlaylistUrls,
+    session,
+  ]);
+
   return (
-    <FilesContext.Provider
-      value={{
-        audioFiles,
-        refreshAudioFiles,
-        files: myFiles,
-        myFiles,
-        myPlaylistFiles,
-        myPlaylistUrls,
-        session
-      }}
-    >
+    <FilesContext.Provider value={contextValue}>
       {children}
     </FilesContext.Provider>
   );

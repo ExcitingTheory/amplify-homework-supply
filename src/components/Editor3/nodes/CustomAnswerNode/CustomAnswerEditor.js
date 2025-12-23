@@ -180,14 +180,10 @@ export default React.memo(function CustomAnswerEditor({
 
     const rows = React.useMemo(() => {
         const result = [];
-        console.log('questionIDs', questionIDs);
-        console.log('questionBank', questionBank);
 
         if(questionIDs) {
             questionIDs.forEach((id) => {
-                console.log('id', id);
                 const _q = questionBank[id];
-                console.log('_q', _q);
                 if (_q) {
                     result.push({
                         id: _q.id,

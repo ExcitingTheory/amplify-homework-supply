@@ -14,17 +14,15 @@ import {
 export default function UnitCompletedPlugin() {
 
     const {
-        unit,
+        name,
         showUnitComplete,
         setShowUnitComplete,
         recentGrades,
     } = useContext(UnitContext);
 
 
-    console.log('unitcompleted_PPPPlugin', unit)
+    console.log('unitcompleted_PPPPlugin', name)
 
-    const name = unit?.name || ''
-    const description = unit?.description || ''
 
     return (
         <Modal

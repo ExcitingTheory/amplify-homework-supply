@@ -214,10 +214,7 @@ const DictionaryProvider = ({ children }) => {
     // const [phraseAndPronunciationFilteredWords, setPhraseAndPronunciationFilteredWords] = React.useState({})
 
 
-    // Only log in development to prevent performance issues
-    if (process.env.NODE_ENV === 'development' && Math.random() < 0.1) {
-        console.log("DictionaryProvider.filter", filter)
-    }
+
 
     // search words for a new filter value for the wordblock list
 
@@ -230,7 +227,7 @@ const DictionaryProvider = ({ children }) => {
     // }, [filterPhraseAndPronunciation])
 
 
-    const filterWords = async () => {
+    const filterWords = React.useCallback(async () => {
 
         // Reduce logging frequency for performance
         if (process.env.NODE_ENV === 'development' && Math.random() < 0.05) {
@@ -245,9 +242,6 @@ const DictionaryProvider = ({ children }) => {
 
         // if filtered words is empty, then set filtered words to all words
         if (!filter || filter === "" || filter === " ") {
-            if (process.env.NODE_ENV === 'development') {
-                console.log("filterWords.filter is empty")
-            }
             setFilteredWords(words)
             if (setSearching) {
                 setSearching(false)
@@ -267,57 +261,26 @@ const DictionaryProvider = ({ children }) => {
 
 
         const _processingQueue = Object.keys(words).map(async (value, key) => {
-            console.log("value", value)
-            console.log("key", key)
-
             let found = false
-
-
             const word = words[value]
-
-            console.log("word", word)
 
             if (word.phrase.toLowerCase().includes(filter.toLowerCase())
                 || word.definition.toLowerCase().includes(filter.toLowerCase())
                 || word.pronunciation.includes(filter.toLowerCase())
             ) {
-                console.log("phrase, definition, or pronunciation includes filter")
                 found = true
             }
 
             // calculate jarowinkler distance
-
             const jaroWinklerPhrase = jaroWinklerDistance(filter.toLowerCase(), word.phrase.toLowerCase())
             const jaroWinklerDefinition = jaroWinklerDistance(filter.toLowerCase(), word.definition.toLowerCase())
             const jaroWinklerPronunciation = jaroWinklerDistance(filter.toLowerCase(), word.pronunciation.toLowerCase())
 
-            console.log("jaroWinklerPhrase", jaroWinklerPhrase)
-            console.log("jaroWinklerDefinition", jaroWinklerDefinition)
-            console.log("jaroWinklerPronunciation", jaroWinklerPronunciation)
-            console.log("jaroWinklerThreshold", jaroWinklerThreshold)
-
             const jaroWinkler = Math.max(jaroWinklerPhrase, jaroWinklerDefinition, jaroWinklerPronunciation)
-            console.log("jaroWinkler", jaroWinkler)
 
             if (jaroWinkler > jaroWinklerThreshold) {
-                console.log(`${jaroWinkler} > ${jaroWinklerThreshold}`, jaroWinkler > jaroWinklerThreshold)
                 found = true
             }
-
-
-            // calculate syntactic similarity
-            // const syntacticSimilarityPhrase = await compareSyntacticSimilarity(filter.toLowerCase(), word.phrase.toLowerCase())
-            // const syntacticSimilarityDefinition = await compareSyntacticSimilarity(filter.toLowerCase(), word.definition.toLowerCase())
-            // const syntacticSimilarityPronunciation = await compareSyntacticSimilarity(filter.toLowerCase(), word.pronunciation.toLowerCase())
-
-            // const _syntacticSimilarity = Math.max(syntacticSimilarityPhrase, syntacticSimilarityDefinition, syntacticSimilarityPronunciation)
-
-            // console.log("syntacticSimilarityPhrase", filter, word.phrase, syntacticSimilarityPhrase)
-
-            // if (syntacticSimilarityPhrase > syntacticSimilarityThreshold) {
-            //     console.log(`${syntacticSimilarityPhrase} > ${syntacticSimilarityThreshold}`, syntacticSimilarityPhrase > syntacticSimilarityThreshold)
-            //     found = true
-            // }
 
             if (found) {
                 return word
@@ -327,14 +290,22 @@ const DictionaryProvider = ({ children }) => {
 
 
         if (Object.keys(_filteredWords).length === 0) {
-            setFilteredWords(words)
+            setFilteredWords(prev => {
+                const prevStr = JSON.stringify(prev);
+                const newStr = JSON.stringify(words);
+                return prevStr === newStr ? prev : words;
+            });
         } else {
-            setFilteredWords(_filteredWords)
+            setFilteredWords(prev => {
+                const prevStr = JSON.stringify(prev);
+                const newStr = JSON.stringify(_filteredWords);
+                return prevStr === newStr ? prev : _filteredWords;
+            });
         }
         if (setSearching) {
             setSearching(false)
         }
-    }
+    }, [words, filter, jaroWinklerThreshold])
 
     React.useEffect(() => {
         // Debounce filterWords to prevent excessive calls
@@ -343,21 +314,43 @@ const DictionaryProvider = ({ children }) => {
         }, 100);
         
         return () => clearTimeout(timeoutId);
-    }, [filter, words])
+    }, [filter, filterWords])
 
     React.useEffect(() => {
         const subscription = DataStore.observeQuery(Word).subscribe(({ items }) => {
-            // console.log("Word.items", items)
             const wordMap = {}
+            const _wordMapId = {}
 
             items.forEach((item) => {
                 wordMap[item.phrase] = item
-                wordMapId[item.id] = item
+                _wordMapId[item.id] = item
             })
 
-            setWords(wordMap);
-            setFilteredWords(wordMap);
-            setWordMapId(wordMapId);
+            // Only update if the words have actually changed
+            setWords(prevWords => {
+                const prevStr = JSON.stringify(Object.keys(prevWords).sort());
+                const newStr = JSON.stringify(Object.keys(wordMap).sort());
+                if (prevStr === newStr) {
+                    return prevWords;
+                }
+                return wordMap;
+            });
+            
+            setFilteredWords(prevFiltered => {
+                const prevStr = JSON.stringify(Object.keys(prevFiltered).sort());
+                const newStr = JSON.stringify(Object.keys(wordMap).sort());
+                if (prevStr === newStr) {
+                    return prevFiltered;
+                }
+                return wordMap;
+            });
+            
+            setWordMapId(prev => {
+                const prevStr = JSON.stringify(prev);
+                const newStr = JSON.stringify(_wordMapId);
+                return prevStr === newStr ? prev : _wordMapId;
+            });
+            
             if (setSearching) {
                 setSearching(false)
             }
@@ -369,21 +362,17 @@ const DictionaryProvider = ({ children }) => {
 
     React.useEffect(() => {
         const subscription = DataStore.observeQuery(Question).subscribe(({ items }) => {
-            // console.log("Word.items", items)
             const questionMap = {}
 
             items.forEach((item) => {
                 questionMap[item.id] = item
             })
 
-            setQuestionBank(questionMap);
-
-            // setWords(questionMap);
-            // setFilteredWords(questionMap);
-            // setWordMapId(questionMap);
-            // if (setSearching) {
-            //     setSearching(false)
-            // }
+            setQuestionBank(prev => {
+                const prevStr = JSON.stringify(prev);
+                const newStr = JSON.stringify(questionMap);
+                return prevStr === newStr ? prev : questionMap;
+            });
         });
         return function cleanup() {
             subscription.unsubscribe();
@@ -393,7 +382,6 @@ const DictionaryProvider = ({ children }) => {
     React.useEffect(() => {
         const setTensorflowBackend = async () => {
             if (hasWebGLSupport()) {
-                console.log("setTensorflowBackend")
                 await tf.setBackend('webgl');
             }
 
@@ -401,24 +389,32 @@ const DictionaryProvider = ({ children }) => {
         setTensorflowBackend()
     }, []);
 
+    const contextValue = React.useMemo(() => ({
+        dictionary: words,
+        filteredDictionary: filteredWords,
+        wordMapId,
+        wordMapPhrase,
+        wordRefs,
+        questionBank,
+        filter,
+        setFilter,
+        filterWords,
+        searching,
+        setSearching,
+    }), [
+        words,
+        filteredWords,
+        wordMapId,
+        wordMapPhrase,
+        wordRefs,
+        questionBank,
+        filter,
+        filterWords,
+        searching,
+    ]);
+
     return (
-        <DictionaryContext.Provider
-            value={{
-                dictionary: words,
-                filteredDictionary: filteredWords,
-                // phraseAndPronunciationFilteredDictionary: phraseAndPronunciationFilteredWords,
-                wordMapId,
-                wordMapPhrase,
-                wordRefs,
-                questionBank,
-                filter,
-                setFilter,
-                filterWords,
-                // filterPhraseAndPronunciation,
-                searching,
-                setSearching,
-            }}
-        >
+        <DictionaryContext.Provider value={contextValue}>
             {children}
         </DictionaryContext.Provider>
     );

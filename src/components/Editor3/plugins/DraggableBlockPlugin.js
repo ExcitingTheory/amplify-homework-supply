@@ -439,7 +439,7 @@ function useDraggableBlockMenu(
 
   useEffect(() => {
     function onMouseMove(event) {
-      console.log('onMouseMove')
+
       const target = event.target;
       if (!isHTMLElement(target)) {
         setDraggableBlockElem(null);
@@ -476,7 +476,7 @@ function useDraggableBlockMenu(
 
   useEffect(() => {
     function onDragover(event) {
-      console.log('onDragover')
+
       if (!isDraggingBlockRef.current) {
         return false;
       }

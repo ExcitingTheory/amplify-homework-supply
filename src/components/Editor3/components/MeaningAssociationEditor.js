@@ -201,14 +201,16 @@ export default function MeaningAssociationEditor({
             if ($isMeaningAssociationNode(node)) {
                 node.appendId(id);
                 // Add relationship to word
-                const word = await DataStore.query(Word, id);
-                if (word) {
-                    await DataStore.save(
-                        new UnitWord({
-                            unit,
-                            word,
-                        })
-                    );
+                if (unit) {
+                    const word = await DataStore.query(Word, id);
+                    if (word) {
+                        await DataStore.save(
+                            new UnitWord({
+                                unit,
+                                word,
+                            })
+                        );
+                    }
                 }
             }
         });

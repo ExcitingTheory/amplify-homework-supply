@@ -31,9 +31,14 @@ const UnitProvider = ({ children, id }) => {
   const versionRef = useRef(0);
   const editorStateRef = useRef();
   const editorSelectionRef = useRef();
+  const unitRef = useRef({});
+  const usernameRef = useRef(null);
+  const unitVersionRef = useRef(0);
 
-  const name = unit?.name;
-  const description = unit?.description;
+  // Memoize derived values to prevent recalculation on every render
+  const name = React.useMemo(() => unit?.name, [unit?.name]);
+  const description = React.useMemo(() => unit?.description, [unit?.description]);
+  const timeLimitSeconds = React.useMemo(() => unit?.timeLimitSeconds, [unit?.timeLimitSeconds]);
 
   const router = useRouter();
 
@@ -48,32 +53,28 @@ const UnitProvider = ({ children, id }) => {
 
   // const [featuredImageUrl, setFeaturedImageUrl] = React.useState(null);
 
-  const rubricLength = rubric.length || 0
-  const unitVersion = unit?._version || 0
-  const unitOwner = unit?.owner || ''
-
-  // Reduce console.log frequency to prevent performance issues
-  if (process.env.NODE_ENV === 'development') {
-    console.log('UnitProvider.rubricLength', rubricLength)
-    console.log("Searching for in progress assignment for unitId:", id, "unitVersion", unitVersion)
-  }
+  // Memoize derived values to prevent recalculation on every render
+  const rubricLength = React.useMemo(() => rubric.length || 0, [rubric.length]);
+  const unitVersion = React.useMemo(() => unit?._version || 0, [unit?._version]);
+  const unitOwner = React.useMemo(() => unit?.owner || '', [unit?.owner]);
 
   // 
   // cache username
 
 
-  const fetchCurrentUsername = async () => {
+  const fetchCurrentUsername = React.useCallback(async () => {
       const { sub: username } = await fetchUserAttributes();
       isLoading.current = false
+      usernameRef.current = username;
       setSession({username});
-  }
+  }, [])
 
   React.useEffect(() => {
     if (!isLoading.current) {
       isLoading.current = true
       fetchCurrentUsername()
     }
-  }, [])
+  }, [fetchCurrentUsername])
 
   const handleAuth = React.useCallback(
     ({ payload }) => {
@@ -91,6 +92,7 @@ const UnitProvider = ({ children, id }) => {
         }
         case "signedOut": {
           isLoading.current = false
+          usernameRef.current = null;
           setSession({ username: undefined, error: undefined });
           break;
         }
@@ -115,72 +117,59 @@ const UnitProvider = ({ children, id }) => {
 
   React.useEffect(() => {
     const unsubscribe = Hub.listen("auth", handleAuth, "useAuth");
-    console.log('useEffect.handleAuth', handleAuth)
     return unsubscribe;
   }, [handleAuth]);
 
 
 
 
-  const verifyAccuracy = (data) => {
+  const verifyAccuracy = React.useCallback((data) => {
     let total = 0
     let accuracy = 0
-    // let correct = 0
     if (data) {
       Object.entries(data).forEach(g => {
-        console.log('verifyAccuracy.data', g)
-
-        console.log('g[1]', g[1])
-        console.log('g[1]?.complete', g[1]?.complete)
-
         if (g[1]?.complete === true && g[1]?.accuracy) {
           let _accuracy = parseInt(g[1]?.accuracy)
           if (_accuracy > 1) {
             _accuracy = _accuracy / 100
           }
           total++
-          console.log('verifyAccuracy.complete', g)
           accuracy += _accuracy
-          console.log('verifyAccuracy._accuracy', _accuracy)
         }
         if (g[1]?.learn?.accuracy) {
           total++
-          console.log('verifyAccuracy.learn', g[1]?.learn?.accuracy)
           accuracy += parseInt(g[1]?.learn?.accuracy)
         }
         if (g[1]?.easy?.accuracy) {
           total++
-          console.log('verifyAccuracy.easy', g[1]?.easy?.accuracy)
           accuracy += parseInt(g[1]?.easy?.accuracy)
         }
         if (g[1]?.hard?.accuracy) {
           total++
-          console.log('verifyAccuracy.hard', g[1]?.hard?.accuracy)
           accuracy += parseInt(g[1]?.hard?.accuracy)
         }
       })
     }
-    console.log('verifyAccuracy.total', total)
-    console.log('verifyAccuracy.accuracy', accuracy)
     accuracy = accuracy / total
-    console.log('verifyAccuracy.accuracyOfAssignment', accuracy)
     return accuracy * 100
-  }
+  }, []);
 
 
-  const createGrade = async (unitAccuracy, unitIsComplete) => {
+  const createGrade = React.useCallback(async (unitAccuracy, unitIsComplete) => {
     // Ensure we have authentication before creating grade
-    if (!session.username) {
+    const currentUsername = usernameRef.current;
+    if (!currentUsername) {
       throw new Error("User not authenticated - cannot create grade");
     }
 
+    const currentUnit = unitRef.current;
     const _grade = await DataStore.save(
       new Grade({
         unitID: id,
         // use the unit owner as the instructor
-        instructor: unitOwner,
+        instructor: currentUnit?.owner || '',
         // Don't manually set owner - DataStore will auto-populate based on auth
-        unitVersion: unitVersion,
+        unitVersion: currentUnit?._version || 0,
         complete: unitIsComplete,
         accuracy: unitAccuracy
       })
@@ -188,9 +177,9 @@ const UnitProvider = ({ children, id }) => {
 
     setGrade(_grade)
     return _grade
-  }
+  }, [id]);
 
-  const saveGrade = async (data) => {
+  const saveGrade = React.useCallback(async (data) => {
 
     // let _grade = grade
 
@@ -198,15 +187,11 @@ const UnitProvider = ({ children, id }) => {
     let _finishedQuestions = 0
     if (data) {
       Object.entries(data).forEach(g => {
-        console.log('saveGrade.data', g)
         if (g[1]?.complete === true) {
           _finishedQuestions++
-          // Count as a graded assignment
-          console.log('saveGrade._finishedQuestions', _finishedQuestions)
         }
       })
     }
-    console.log('saveGrade.rubric', rubricLength)
     let unitIsComplete = false
     let unitAccuracy = null
     if (_finishedQuestions === rubricLength) {
@@ -214,15 +199,10 @@ const UnitProvider = ({ children, id }) => {
       unitAccuracy = verifyAccuracy(data)
     }
 
-    console.log("saveGrade.unitIsComplete", unitIsComplete)
-    console.log("saveGrade.data", data)
-    console.log("_finishedQuestions", _finishedQuestions)
-
     setFinishedQuestions(_finishedQuestions)
 
     try {
       if (!grade) {
-        console.log("making new grade!!!")
         const newGrade = await createGrade(unitAccuracy, unitIsComplete)
         // Use the newly created grade for the copyOf operation
         if (newGrade && newGrade.id) {
@@ -236,7 +216,6 @@ const UnitProvider = ({ children, id }) => {
         }
       } else if (grade && grade.id) {
         // Only proceed if grade is a valid model instance
-        console.log("saving existing grade!!!")
         await DataStore.save(
           Grade.copyOf(grade, updated => {
             updated.data = data
@@ -258,12 +237,9 @@ const UnitProvider = ({ children, id }) => {
           );
         }
       }
-      console.log("Saved!!!") 
-      if(unitIsComplete && !unit?.timeLimitSeconds) {
+      if(unitIsComplete && !timeLimitSeconds) {
         setShowUnitComplete(true)
         setFinishedQuestions(0)
-        console.log("unit?.timeLimitInSeconds", unit?.timeLimitInSeconds)
-        console.log("createGrade(0, false)")
         await createGrade(0, false)
       }
     } catch (error) {
@@ -288,7 +264,7 @@ const UnitProvider = ({ children, id }) => {
       // Re-throw to let calling code handle it
       throw error
     }
-  }
+  }, [rubricLength, grade, createGrade, timeLimitSeconds, fetchCurrentUsername]);
 
   React.useEffect(() => {
     if (!id || !unitVersion || !session.username) {
@@ -311,8 +287,24 @@ const UnitProvider = ({ children, id }) => {
       const { items } = snapshot;
       // console.log('items', items)
       const currentGrade = items[0];
-      setGrade(currentGrade);
-      setUsername(username);
+      
+      // Only update if grade has actually changed
+      setGrade(prevGrade => {
+        const prevGradeStr = JSON.stringify(prevGrade);
+        const currentGradeStr = JSON.stringify(currentGrade);
+        if (prevGradeStr === currentGradeStr) {
+          return prevGrade; // Return same reference to prevent rerender
+        }
+        return currentGrade;
+      });
+      
+      // Only update username if it has changed
+      setUsername(prevUsername => {
+        if (prevUsername === username) {
+          return prevUsername;
+        }
+        return username;
+      });
       
       // Calculate finished questions from the current grade data
       if (currentGrade?.data) {
@@ -322,9 +314,14 @@ const UnitProvider = ({ children, id }) => {
             _finishedQuestions++;
           }
         });
-        setFinishedQuestions(_finishedQuestions);
+        setFinishedQuestions(prevCount => {
+          if (prevCount === _finishedQuestions) {
+            return prevCount; // Return same value to prevent rerender
+          }
+          return _finishedQuestions;
+        });
       } else {
-        setFinishedQuestions(0);
+        setFinishedQuestions(prevCount => prevCount === 0 ? prevCount : 0);
       }
     });
 
@@ -354,8 +351,17 @@ const UnitProvider = ({ children, id }) => {
     }
     ).subscribe(snapshot => {
       const { items } = snapshot;
-      const _items = items.slice(0, 5)
-      setRecentGrades(_items);
+      const _items = items.slice(0, 5);
+      
+      // Only update if recent grades have actually changed
+      setRecentGrades(prevGrades => {
+        const prevGradesStr = JSON.stringify(prevGrades);
+        const newGradesStr = JSON.stringify(_items);
+        if (prevGradesStr === newGradesStr) {
+          return prevGrades; // Return same reference to prevent rerender
+        }
+        return _items;
+      });
     });
 
     return () => {
@@ -365,151 +371,164 @@ const UnitProvider = ({ children, id }) => {
   }, [id, unitVersion, session.username]);
 
   React.useEffect(() => {
-
     if (!id) return
 
-    async function fetchUnits() {
+    const subscription = DataStore.observeQuery(Unit,
+      s => s.id.eq(id)
+    ).subscribe(async ({ items }) => {
+      const _newUnit = items[0]
+      
+      if (!_newUnit) {
+        setUnit({});
+        return;
+      }
 
-      const subscription = DataStore.observeQuery(Unit,
-        s => s.id.eq(id)
-      ).subscribe(async ({ items }) => {
-        // Except for first render check if the version has changed before updating the editor
-        const _newUnit = items[0]
+      // Only update if version has changed
+      if (versionRef.current === _newUnit?._version) {
+        return;
+      }
 
-        // if (versionRef.current >= _newUnit?._version) return // don't update the editor if the version is the same
+      const _files = {}
+      const _dictionary = {}
+      const _questionBank = {}
+      const _playlistUrls = {}
+      const urlsWork = []
+      const urlsIds = []
 
+      const _unitWords = await _newUnit.words.toArray()
+      const _unitFiles = await _newUnit.files.toArray()
+      const _unitQuestions = await _newUnit.questions.toArray()
 
-        const _files = {}
-        const _dictionary = {}
-        const _questionBank = {}
-        const _playlistUrls = {}
-        const urlsWork = []
-        const urlsIds = []
+      const _unitWordsWork = _unitWords.map(async w => {
+        // console.log('wordwordwordword', w)
+        return await w.word 
+      })
 
-        setUnit(_newUnit);
-        if(!_newUnit) return 
+      const _unitFilesWork = _unitFiles.map(async f => {
+        // console.log('wordwordwordword', f)
+        return await f.file 
+      })
 
-        const _unitWords = await _newUnit.words.toArray()
-        const _unitFiles = await _newUnit.files.toArray()
-        const _unitQuestions = await _newUnit.questions.toArray()
+      const _unitQuestionsWork = _unitQuestions.map(async q => {
+        // console.log('wordwordwordword', f)
+        return await q.question
+      })
 
-        console.log('_unitWords', _unitWords)
-        console.log('_unitFiles', _unitFiles)
+      const _words = await Promise.allSettled(_unitWordsWork)
+      const _unitsFiles = await Promise.allSettled(_unitFilesWork)
+      const _questions = await Promise.allSettled(_unitQuestionsWork)
 
-        const _unitWordsWork = _unitWords.map(async w => {
-          // console.log('wordwordwordword', w)
-          return await w.word 
-        })
+      _words.forEach(w => {
+        const _w = w.value
+        _dictionary[_w.id] = _w
+      })
 
-        const _unitFilesWork = _unitFiles.map(async f => {
-          // console.log('wordwordwordword', f)
-          return await f.file 
-        })
+      _unitsFiles.forEach(async f => {
+        const _f = f.value
+        _files[_f.id] = _f
+      })
 
-        const _unitQuestionsWork = _unitQuestions.map(async q => {
-          // console.log('wordwordwordword', f)
-          return await q.question
-        })
+      _questions.forEach(q => {
+        const _q = q.value
+        _questionBank[_q.id] = _q
+      })
 
-        const _words = await Promise.allSettled(_unitWordsWork)
-        const _unitsFiles = await Promise.allSettled(_unitFilesWork)
-        const _questions = await Promise.allSettled(_unitQuestionsWork)
+      const _urlsOutput = await Promise.allSettled(urlsWork)
 
-        console.log('_unitsFiles', _unitsFiles)
-        console.log('_words', _words)
-        console.log('_questions', _questions)
+      _urlsOutput.forEach((item, key) => {
+        if (item.status === 'fulfilled') {
+          const _url = item.value
+          const urlsId = urlsIds[key]
+          _playlistUrls[urlsId] = _url
+        }
+      })
 
-        _words.forEach(w => {
-          const _w = w.value
-          _dictionary[_w.id] = _w
-        })
+      const blocks = _newUnit?.data?.root?.children || []
+      const _rubric = []
 
-        _unitsFiles.forEach(async f => {
-          const _f = f.value
-          _files[_f.id] = _f
-        })
-
-        _questions.forEach(q => {
-          const _q = q.value
-          _questionBank[_q.id] = _q
-        })
-
-        const _urlsOutput = await Promise.allSettled(urlsWork)
-
-        _urlsOutput.forEach((item, key) => {
-          if (item.status === 'fulfilled') {
-            const _url = item.value
-            const urlsId = urlsIds[key]
-            _playlistUrls[urlsId] = _url
+      if (blocks.length > 0) {
+        blocks.forEach(block => {
+          if (gradedBlockTypes.includes(block['type'])) {
+            _rubric.push(block['key'])
           }
         })
+      }
 
-        console.log('_dictionary', _dictionary)
-        console.log('_files', _files)
-        console.log('_questionBank', _questionBank)
-        
-        setDictionary(_dictionary);
-        setFiles(_files);
-        setPlaylistUrls(_playlistUrls);
-        setQuestionBank(_questionBank);
-
-        console.log("unit_playlistUrls::: ", _playlistUrls)
-
-
-        editorStateRef.current = _newUnit?.data;
-        versionRef.current = unit?._version
-
-        const blocks = _newUnit?.data?.root?.children || []
-        const _rubric = []
-
-        if (blocks.length > 0) {
-          blocks.forEach(block => {
-            if (gradedBlockTypes.includes(block['type'])) {
-              _rubric.push(block['key'])
-            }
-          })
-
-          // Only update rubric if it has actually changed
-          setRubric(prevRubric => {
-            if (JSON.stringify(prevRubric) !== JSON.stringify(_rubric)) {
-              return _rubric;
-            }
-            return prevRubric;
-          });
+      // Update all state with comparison to prevent unnecessary rerenders
+      setUnit(prevUnit => {
+        const prevUnitStr = JSON.stringify(prevUnit);
+        const newUnitStr = JSON.stringify(_newUnit);
+        if (prevUnitStr === newUnitStr) {
+          return prevUnit;
         }
-
+        unitRef.current = _newUnit;
+        unitVersionRef.current = _newUnit?._version || 0;
+        return _newUnit;
       });
-      return () => {
-        subscription.unsubscribe();
-      };
-    }
+      
+      setDictionary(prevDict => {
+        const prevDictStr = JSON.stringify(prevDict);
+        const newDictStr = JSON.stringify(_dictionary);
+        return prevDictStr === newDictStr ? prevDict : _dictionary;
+      });
+      
+      setFiles(prevFiles => {
+        const prevFilesStr = JSON.stringify(prevFiles);
+        const newFilesStr = JSON.stringify(_files);
+        return prevFilesStr === newFilesStr ? prevFiles : _files;
+      });
+      
+      setPlaylistUrls(prevUrls => {
+        const prevUrlsStr = JSON.stringify(prevUrls);
+        const newUrlsStr = JSON.stringify(_playlistUrls);
+        return prevUrlsStr === newUrlsStr ? prevUrls : _playlistUrls;
+      });
+      
+      setQuestionBank(prevBank => {
+        const prevBankStr = JSON.stringify(prevBank);
+        const newBankStr = JSON.stringify(_questionBank);
+        return prevBankStr === newBankStr ? prevBank : _questionBank;
+      });
+      
+      setRubric(prevRubric => {
+        const prevRubricStr = JSON.stringify(prevRubric);
+        const newRubricStr = JSON.stringify(_rubric);
+        return prevRubricStr === newRubricStr ? prevRubric : _rubric;
+      });
 
-    fetchUnits()
+      editorStateRef.current = _newUnit?.data;
+      versionRef.current = _newUnit?._version
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [id]);
 
-  const saveEditorContent = async (editorContent) => {
+  const saveEditorContent = React.useCallback(async (editorContent) => {
     const {sub} = await fetchUserAttributes();
+    const currentUnit = unitRef.current;
 
     if (!sub) return
-    if (!unit?.id) return
+    if (!currentUnit?.id) return
     if (!id) return
 
     // For now prevent non owners from saving TODO: add a permission check
-    if (unit?.owner !== sub) return false
+    if (currentUnit?.owner !== sub) return false
 
     let _editorContent = editorContent? editorContent : editorStateRef.current
 
     const content = JSON.stringify(_editorContent)
-    const unitData = JSON.stringify(unit?.data)
+    const unitData = JSON.stringify(currentUnit?.data)
     // console.log('saveEditorContent', content)
     // if the content is the same as the content in the database, don't save
     if (content === unitData) return
     // if the version is behind the current version, don't save
-    if (versionRef.current >= unit?._version) return
+    if (versionRef.current >= currentUnit?._version) return
 
     try {
       await DataStore.save(
-        Unit.copyOf(unit, updated => {
+        Unit.copyOf(currentUnit, updated => {
           updated.data = content;
         })
       );
@@ -517,52 +536,55 @@ const UnitProvider = ({ children, id }) => {
     } catch (errors) {
       console.error(errors)
     }
-  }
+  }, [id]);
 
-  const handleDelete = async () => {
+  const handleDelete = React.useCallback(async () => {
     /**
      * This deletes the unit from the database.
      * It is called from the Editor component.
      * It is passed to the Editor component through the unit context.
      */
+    const currentUnit = unitRef.current;
     try {
-      const deleted = await DataStore.delete(unit);
+      const deleted = await DataStore.delete(currentUnit);
       // console.log('deleted', deleted)
       router.push(`/units`)
     } catch (errors) {
       console.error(errors)
     }
-  }
+  }, [router]);
 
-  const saveDescription = async (description) => {
+  const saveDescription = React.useCallback(async (description) => {
+    const currentUnit = unitRef.current;
     try {
       await DataStore.save(
-        Unit.copyOf(unit, updated => {
+        Unit.copyOf(currentUnit, updated => {
           updated.description = description;
         })
       );
     } catch (errors) {
       console.error(errors)
     }
-  }
+  }, []);
 
-  const saveName = async (name) => {
+  const saveName = React.useCallback(async (name) => {
+    const currentUnit = unitRef.current;
     try {
       await DataStore.save(
-        Unit.copyOf(unit, updated => {
+        Unit.copyOf(currentUnit, updated => {
           updated.name = name;
         })
       );
     } catch (errors) {
       console.error(errors)
     }
-  }
+  }, []);
 
-  const handleBeforeUnload = async (event) => {
+  const handleBeforeUnload = React.useCallback(async (event) => {
     // If content is different then save it
-    // if(!unit?.data) return false;
+    const currentUnit = unitRef.current;
     const content = JSON.stringify(editorStateRef.current)
-    const unitData = JSON.stringify(unit?.data)
+    const unitData = JSON.stringify(currentUnit?.data)
 
     console.log('unitData', unitData)
     if (content === unitData) {
@@ -575,13 +597,16 @@ const UnitProvider = ({ children, id }) => {
         event.preventDefault();
         await saveEditorContent()
     }
-};
+}, [saveEditorContent]);
 
-  const handleStatusChange = async (status) => {
+  const handleStatusChange = React.useCallback(async (status) => {
+    const currentUnit = unitRef.current;
+    const currentName = currentUnit?.name;
+    const currentDescription = currentUnit?.description;
 
     if (status === 'PUBLISHED') {
       // check if the unit has a name and description
-      if (!name || !description) {
+      if (!currentName || !currentDescription) {
         alert('Please add a name and description to your unit before publishing.');
         return;
       }
@@ -589,7 +614,7 @@ const UnitProvider = ({ children, id }) => {
 
     try {
       await DataStore.save(
-        Unit.copyOf(unit, updated => {
+        Unit.copyOf(currentUnit, updated => {
           updated.status = status;
         })
       );
@@ -597,40 +622,61 @@ const UnitProvider = ({ children, id }) => {
       console.log('error', error);
     }
 
-  }
+  }, []);
+
+  const contextValue = React.useMemo(() => ({
+    unit,
+    name,
+    rubric,
+    grade,
+    recentGrades,
+    dictionary,
+    files,
+    questionBank,
+    playlistUrls,
+    description,
+    editorStateRef,
+    editorSelectionRef,
+    versionRef,
+    finishedQuestions,
+    showUnitComplete,
+    handleBeforeUnload,
+    setShowUnitComplete,
+    setFinishedQuestions,
+    saveName,
+    saveDescription,
+    handleDelete,
+    handleStatusChange,
+    saveEditorContent,
+    saveGrade,
+    createGrade,
+    session,
+  }), [
+    unit,
+    name,
+    rubric,
+    grade,
+    recentGrades,
+    dictionary,
+    files,
+    questionBank,
+    playlistUrls,
+    description,
+    finishedQuestions,
+    showUnitComplete,
+    session,
+    handleBeforeUnload,
+    saveName,
+    saveDescription,
+    handleDelete,
+    handleStatusChange,
+    saveEditorContent,
+    saveGrade,
+    createGrade,
+  ]);
 
   return (
-    <UnitContext.Provider
-      value={{
-        unit,
-        name,
-        rubric,
-        grade,
-        recentGrades,
-        dictionary,
-        files,
-        questionBank,
-        // featuredImageUrl,
-        playlistUrls,
-        description,
-        editorStateRef,
-        editorSelectionRef,
-        versionRef,
-        finishedQuestions,
-        showUnitComplete,
-        handleBeforeUnload,
-        setShowUnitComplete,
-        setFinishedQuestions,
-        saveName,
-        saveDescription,
-        handleDelete,
-        handleStatusChange,
-        saveEditorContent,
-        saveGrade,
-        createGrade,
-        session,
-      }}
-    >
+    <UnitContext.Provider value={contextValue}>
       {children}
     </UnitContext.Provider>
   );

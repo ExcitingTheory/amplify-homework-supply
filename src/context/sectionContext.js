@@ -13,70 +13,91 @@ const SectionProvider = ({ children, unitId }) => {
 
     React.useEffect(() => {
 
-        async function fetchSections() {
-            // const currentUser = await getCurrentUser()
-            // const { username } = currentUser
+        let subscription;
 
+        async function fetchSections() {
             const {
                 username,
               } = await getCurrentUser();
 
-            console.log('SectionProvider username', username)
-            const subscription = DataStore.observeQuery(Section,
+            subscription = DataStore.observeQuery(Section,
                 s => s.owner.eq(username)
             ).subscribe(({ items }) => {
-                console.log("Section.items", items)
-
-                let sectionMap = {}
+                let _sectionMap = {}
 
                 items.forEach(item => {
-                    sectionMap[item.id] = item
+                    _sectionMap[item.id] = item
                 })
 
-                console.log('sectionMap', sectionMap)
+                // Only update if sections have actually changed
+                setSections(prevSections => {
+                    const prevStr = JSON.stringify(prevSections);
+                    const newStr = JSON.stringify(items);
+                    if (prevStr === newStr) {
+                        return prevSections; // Return same reference to prevent rerender
+                    }
+                    return items;
+                });
 
-                setSections(items);
-
-                setSectionMap(sectionMap)
+                // Only update if sectionMap has actually changed
+                setSectionMap(prevMap => {
+                    const prevStr = JSON.stringify(prevMap);
+                    const newStr = JSON.stringify(_sectionMap);
+                    if (prevStr === newStr) {
+                        return prevMap; // Return same reference to prevent rerender
+                    }
+                    return _sectionMap;
+                });
 
             });
-            return () => {
-                subscription.unsubscribe();
-            };
         }
 
-
         fetchSections()
+
+        return () => {
+            subscription?.unsubscribe();
+        };
     }, []);
 
     React.useEffect(() => {
-
         if(!unitId) return
 
+        let subscription;
+
         async function fetchAssignments() {
-            const subscription = DataStore.observeQuery(Assignment,
+            subscription = DataStore.observeQuery(Assignment,
                 s => s.unitID.eq(unitId)
             ).subscribe(({ items }) => {
-                console.log("assignments.items", items)
-                setAssignments(items);
+                // Only update if assignments have actually changed
+                setAssignments(prevAssignments => {
+                    const prevStr = JSON.stringify(prevAssignments);
+                    const newStr = JSON.stringify(items);
+                    if (prevStr === newStr) {
+                        return prevAssignments; // Return same reference to prevent rerender
+                    }
+                    return items;
+                });
             });
-            return () => {
-                subscription.unsubscribe();
-            };
         }
 
-
         fetchAssignments()
+
+        return () => {
+            subscription?.unsubscribe();
+        };
     }, [unitId]);
+
+    // Memoize context value to prevent unnecessary rerenders
+    const contextValue = React.useMemo(() => ({
+        sections,
+        sectionMap,
+        assignments,
+    }), [sections, sectionMap, assignments]);
 
 
     return (
         <SectionContext.Provider
-            value={{
-                sections,
-                sectionMap,
-                assignments,
-            }}
+            value={contextValue}
         >
             {children}
         </SectionContext.Provider>

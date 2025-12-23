@@ -130,7 +130,7 @@ export function ActionsMenu({
     );
 }
 
-export default function AnswerEditor({
+const AnswerEditor = React.memo(function AnswerEditor({
     className,
     format,
     nodeKey,
@@ -151,7 +151,7 @@ export default function AnswerEditor({
         pronunciation: '',
     });
 
-    console.log('AnswerEditor.allowedInput', allowedInput);
+
 
     const [title, setTitle] = React.useState('Short Answer Exercise');
 
@@ -613,4 +613,6 @@ export default function AnswerEditor({
 
         </div>
     );
-}
+});
+
+export default AnswerEditor;

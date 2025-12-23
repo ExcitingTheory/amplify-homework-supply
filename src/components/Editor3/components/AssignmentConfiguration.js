@@ -70,7 +70,6 @@ export default function AssignmentConfiguration() {
 
 
   React.useEffect(() => {
-    console.log('AssignmentConfiguration.useEffect.unit?.timeLimitSeconds', unit?.timeLimitSeconds)
     setTimer(unit?.timeLimitSeconds || '');
   }, [unit?.timeLimitSeconds]);
 
