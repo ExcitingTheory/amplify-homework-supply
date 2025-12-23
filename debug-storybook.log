@@ -1,0 +1,29 @@
+[02:02:14.091] [INFO] storybook v10.1.10
+[02:02:14.907] [DEBUG] Getting package.json info for /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/package.json...
+[02:02:16.485] [DEBUG] Serving static files from [36mpublic[39m at [36m/[39m
+[02:02:16.495] [INFO] Starting...
+[02:02:16.527] [WARN] unable to find package.json for @mui/icons-material
+[02:02:16.532] [WARN] unable to find package.json for openai
+[02:02:16.555] [WARN] No story files found for the specified pattern: [34msrc/**/*.mdx[39m
+[02:02:16.903] [DEBUG] Starting preview..
+[02:02:16.964] [INFO] Addon-docs: using MDX3
+[02:02:17.007] [INFO] Using implicit CSS loaders
+[02:02:17.499] [INFO] Using SWC as compiler
+[02:02:17.749] [INFO] Using default Webpack5 setup
+[02:02:18.466] [DEBUG] Using tsconfig paths for react-docgen
+[02:03:05.921] [ERROR] Failed to build the preview
+[02:03:05.927] [WARN] Force closed preview build
+[02:03:05.930] [ERROR] [38;2;241;97;97mSB_BUILDER-WEBPACK5_0003 (WebpackCompilationError): There were problems when compiling your code with Webpack.
+Run Storybook with --debug-webpack for more information.[39m
+    at starter (file://./node_modules/@storybook/builder-webpack5/dist/index.js:799:11)
+    at starter.next (<anonymous>)
+    at Module.start (file://./node_modules/@storybook/builder-webpack5/dist/index.js:857:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async storybookDevServer (file://./node_modules/storybook/dist/core-server/index.js:6806:82)
+    at async buildOrThrow (file://./node_modules/storybook/dist/core-server/index.js:5555:12)
+    at async buildDevStandalone (file://./node_modules/storybook/dist/core-server/index.js:7208:66)
+    at async withTelemetry (file://./node_modules/storybook/dist/_node-chunks/chunk-PGCRO4IZ.js:209:12)
+    at async dev (file://./node_modules/storybook/dist/bin/core.js:2734:3)
+    at async _Command.<anonymous> (file://./node_modules/storybook/dist/bin/core.js:2801:92)
+[02:03:05.933] [WARN] Broken build, fix the error above.
+You may need to refresh the browser.

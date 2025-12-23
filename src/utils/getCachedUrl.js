@@ -6,6 +6,13 @@ const getCachedUrl = async (filePath, accessLevel = 'protected', targetIdentityI
     if (!filePath) {
         return null;
     }
+    
+    // If it's already a data URL or HTTP(S) URL, return it directly
+    if (filePath.startsWith('data:') || filePath.startsWith('http://') || filePath.startsWith('https://')) {
+        console.log('getCachedUrl: returning URL directly', filePath.substring(0, 50) + '...');
+        return filePath;
+    }
+    
     // Cache.clear();
     console.log('getCachedUrl', filePath, accessLevel, targetIdentityId);
     const cachePath = 'getCachedUrl_' + accessLevel + targetIdentityId + filePath;

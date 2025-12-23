@@ -1,7 +1,7 @@
 'use strict';
 import React from 'react';
 import Typography from '@mui/material/Typography';
-import { TextareaAutosize } from '@mui/base/TextareaAutosize';
+import TextareaAutosize from '@mui/material/TextareaAutosize';
 import { DataStore } from 'aws-amplify/datastore';
 import { Question } from '../models';
 

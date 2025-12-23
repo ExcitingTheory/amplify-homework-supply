@@ -6,7 +6,7 @@ import { generateClient } from 'aws-amplify/api';
 
 import { useEffect, useState, useRef } from 'react';
 
-import { TextareaAutosize } from '@mui/base/TextareaAutosize';
+import TextareaAutosize from '@mui/material/TextareaAutosize';
 
 import {
     Box,

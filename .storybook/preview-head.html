@@ -1,0 +1,19 @@
+<script>
+  // Mock AWS Amplify for Storybook to prevent credential errors
+  window.AWS_EXPORTS = {
+    Auth: {
+      Cognito: {
+        userPoolId: 'mock-user-pool-id',
+        userPoolClientId: 'mock-client-id',
+        identityPoolId: 'mock-identity-pool-id',
+        region: 'us-east-1'
+      }
+    },
+    Storage: {
+      S3: {
+        bucket: 'mock-bucket',
+        region: 'us-east-1'
+      }
+    }
+  };
+</script>

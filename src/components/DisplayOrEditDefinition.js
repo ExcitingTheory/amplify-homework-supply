@@ -1,7 +1,7 @@
 'use strict';
 import React from 'react';
-import Typography from '@mui/material/Typography';
-import { TextareaAutosize } from '@mui/base/TextareaAutosize';
+import Box from '@mui/material/Box';
+import TextareaAutosize from '@mui/material/TextareaAutosize';
 import { DataStore } from 'aws-amplify/datastore';
 import { Word } from '../models';
 
@@ -32,15 +32,17 @@ export function DisplayOrEditDefinition({ definition, word }) {
   return (
     <>
       {!editing &&
-        <Typography
+        <Box
+          component="span"
           sx={{
             width: '100%',
             whiteSpace: 'pre-wrap',
+            display: 'block',
           }}
           onClick={handleEdit}
         >
           {definition}
-        </Typography>}
+        </Box>}
 
       {editing &&
         <TextareaAutosize

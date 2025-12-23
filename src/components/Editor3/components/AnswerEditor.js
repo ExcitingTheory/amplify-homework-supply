@@ -23,7 +23,7 @@ import {
     MenuList,
 } from '@mui/material';
 
-import { TextareaAutosize } from '@mui/base/TextareaAutosize';
+import TextareaAutosize from '@mui/material/TextareaAutosize';
 import Button from '@mui/material/Button';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';

@@ -649,6 +649,7 @@ function DictionaryListItem({ entry, i, audioFiles, setPresignedUrl, refreshAudi
     {fileOperations.length > 0 &&
       fileOperations.map((op, i) => {
         return <li
+          key={`file-op-${i}-${op.name}`}
           style={{
             margin: '0 1rem',
           }}
@@ -656,7 +657,6 @@ function DictionaryListItem({ entry, i, audioFiles, setPresignedUrl, refreshAudi
             e.preventDefault();
             e.stopPropagation();
           }}
-          key={i}
           className={operationsClassName}
         >
           <ListItemText
@@ -683,6 +683,7 @@ function DictionaryListItem({ entry, i, audioFiles, setPresignedUrl, refreshAudi
           audioUrls.map((u, i) => {
             console.log('audioUrls.u', u);
             return <div
+              key={`audio-${i}-${u}`}
               style={{
                 display: 'flex',
                 flexDirection: 'row',
@@ -696,7 +697,7 @@ function DictionaryListItem({ entry, i, audioFiles, setPresignedUrl, refreshAudi
                   e.preventDefault();
                   e.stopPropagation();
                 }}
-                key={i} primary={`audio-file-${i+1}.mp3`} />
+                primary={`audio-file-${i+1}.mp3`} />
                 {/**
                  * TODO: add a way to save the original file name 
                  */}
@@ -1350,7 +1351,7 @@ export function DictionaryEditor() {
                     }}
                   >
                     {fileOperations.map((op, i) => {
-                      return <ListItem key={i}>
+                      return <ListItem key={`form-file-op-${i}-${op.name}`}>
                         <ListItemText primary={op?.name} secondary={op?.progress} />
                       </ListItem>
                     })
@@ -1400,8 +1401,10 @@ export function DictionaryEditor() {
 
           {dictionary && Object.keys(dictionary).length > 0 &&
             Object.entries(dictionary).map((entry, i) => <DictionaryListItem
+              key={entry[1]?.id || `dict-entry-${i}`}
               audioFiles={audioFiles}
-              entry={entry} i={i}
+              entry={entry}
+              i={i}
               setPresignedUrl={_setPresignedUrl}
               refreshAudioFiles={refreshAudioFiles}
               identityId={identityId}

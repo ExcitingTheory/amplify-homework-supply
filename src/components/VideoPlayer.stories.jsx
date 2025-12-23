@@ -11,7 +11,7 @@ export default {
 
 export const DefaultVideoPlayer = {
   args: {
-    src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    src: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
     width: 640,
     height: 360,
   },
@@ -19,7 +19,7 @@ export const DefaultVideoPlayer = {
 
 export const CustomDimensions = {
   args: {
-    src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+    src: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
     width: 800,
     height: 450,
   },
@@ -27,7 +27,7 @@ export const CustomDimensions = {
 
 export const SmallPlayer = {
   args: {
-    src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    src: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
     width: 320,
     height: 180,
   },

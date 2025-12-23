@@ -10,55 +10,63 @@ export default {
   parameters: {
     layout: 'padded',
   },
-};
+  decorators: [
+    (Story, context) => {
+      // Get dictionary from story args if available
+      const dictionary = context.args?.dictionary || {};
+      
+      const mockDictionaryContext = {
+        filteredDictionary: dictionary,
+        dictionary: dictionary,
+        setFilter: () => {},
+        searching: false,
+        setSearching: () => {},
+        filter: '',
+        filterWords: () => {},
+        wordMapId: {},
+        wordMapPhrase: {},
+        wordRefs: {},
+        questionBank: {},
+      };
 
-// Mock context providers
-const MockProviders = ({ children, dictionary = {} }) => {
-  const mockDictionaryContext = React.useMemo(() => ({
-    filteredDictionary: dictionary,
-    setFilter: () => {},
-    searching: false,
-    setSearching: () => {},
-  }), [dictionary]);
+      const mockUnitContext = {
+        unit: {
+          id: 'unit-123',
+          title: 'Vocabulary Unit',
+        },
+      };
 
-  const mockUnitContext = React.useMemo(() => ({
-    unit: {
-      id: 'unit-123',
-      title: 'Vocabulary Unit',
+      const mockFilesContext = {
+        audioFiles: {},
+        refreshAudioFiles: () => {},
+        session: {
+          identityId: 'mock-identity-id',
+          idToken: 'mock-token',
+        },
+      };
+
+      return (
+        <DictionaryContext.Provider value={mockDictionaryContext}>
+          <UnitContext.Provider value={mockUnitContext}>
+            <FilesContext.Provider value={mockFilesContext}>
+              <Story />
+            </FilesContext.Provider>
+          </UnitContext.Provider>
+        </DictionaryContext.Provider>
+      );
     },
-  }), []);
-
-  const mockFilesContext = React.useMemo(() => ({
-    audioFiles: {},
-    refreshAudioFiles: () => {},
-    session: {
-      identityId: 'mock-identity-id',
-      idToken: 'mock-token',
-    },
-  }), []);
-
-  return (
-    <DictionaryContext.Provider value={mockDictionaryContext}>
-      <UnitContext.Provider value={mockUnitContext}>
-        <FilesContext.Provider value={mockFilesContext}>
-          {children}
-        </FilesContext.Provider>
-      </UnitContext.Provider>
-    </DictionaryContext.Provider>
-  );
+  ],
 };
 
 export const Empty = {
-  render: () => (
-    <MockProviders>
-      <DictionaryEditor />
-    </MockProviders>
-  ),
+  args: {
+    dictionary: {},
+  },
 };
 
 export const WithWords = {
-  render: () => {
-    const mockDictionary = {
+  args: {
+    dictionary: {
       'bonjour': {
         id: '1',
         phrase: 'bonjour',
@@ -80,12 +88,6 @@ export const WithWords = {
         definition: 'goodbye',
         audio: [],
       },
-    };
-
-    return (
-      <MockProviders dictionary={mockDictionary}>
-        <DictionaryEditor />
-      </MockProviders>
-    );
+    },
   },
 };
