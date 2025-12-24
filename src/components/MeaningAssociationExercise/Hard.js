@@ -28,35 +28,18 @@ export const Hard = ({
 
   const isFirstRender = React.useRef(true);
 
-  // function resetAssignment() {
-  //   setAssignment([...vocabulary])
-  //   setAnswers([...vocabulary])
-  //   setLength(vocabulary.length)
-  // }
-
+  const { wordMapId: dictionary } = React.useContext(DictionaryContext)
 
   useEffect(() => {
-    const processVocabulary = async () => {
+    // Use dictionary context instead of DataStore for Storybook compatibility
+    const _vocabulary = wordIDs.map(id => dictionary[id]).filter(Boolean);
+    console.log('Hard._vocabulary', _vocabulary)
+    setVocabulary(_vocabulary)
+    setAssignment([..._vocabulary])
+    setAnswers([..._vocabulary])
+    setLength(_vocabulary.length)
+  }, [wordIDs, dictionary]);
 
-      const _vocabularyTasks = await Promise.allSettled(wordIDs.map(async (id) => {
-        return await DataStore.query(Word, id)
-      }))
-
-      const _vocabulary = _vocabularyTasks.map((task) => {
-        return task.value
-      })
-      // console.log('MeaningAssociationExercise._vocabulary', _vocabulary)
-      setVocabulary(_vocabulary)
-      setAssignment([..._vocabulary])
-      setAnswers([..._vocabulary])
-      setLength(_vocabulary.length)
-
-    }
-    processVocabulary()
-  }, [wordIDs])
-
-
-  const { wordMapId: dictionary } = React.useContext(DictionaryContext)
   const { grade, saveGrade } = React.useContext(UnitContext)
   const inProgress = grade?.data?.[nodeKey] || {}
 
@@ -265,21 +248,23 @@ export const Hard = ({
 
   return (
 
-    <Grid container>
+    <Grid container flexDirection="column">
       <Grid item xs={12}>
         <LinearProgressWithLabel value={percentComplete} />
       </Grid>
-      <Grid item xs={6}>
+      <Grid container flexDirection="row">
+      <Grid xs={6}>
         <AnswerDrop
           correctAnswer={{ ...correctWord, progressAssignment, sendFail, sendPass }} />
       </Grid>
-      <Grid item xs={6} style={{
+      <Grid xs={6} style={{
         marginBottom: '1rem',
         paddingBottom: '1rem',
         height: 'fit-content',
         overflowY: 'auto'
       }}>
         {hardVocabList}
+      </Grid>
       </Grid>
     </Grid>
   );

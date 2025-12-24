@@ -167,14 +167,27 @@ const sampleQuizState = {
         data: [
           {
             id: 'q1',
-            type: 'multiple-choice',
-            question: 'Select the correct translation',
-            wordID: 'word-7',
+            answer: 'Paris',
+            question: 'What is the capital of France?',
+            correct: true,
           },
           {
             id: 'q2',
-            type: 'true-false',
-            question: 'Is this correct?',
+            answer: 'London',
+            question: 'What is the capital of France?',
+            correct: false,
+          },
+          {
+            id: 'q3',
+            answer: 'Berlin',
+            question: 'What is the capital of France?',
+            correct: false,
+          },
+          {
+            id: 'q4',
+            answer: 'Madrid',
+            question: 'What is the capital of France?',
+            correct: false,
           },
         ],
       },

@@ -29,28 +29,17 @@ export const Learn = ({
 
   const isFirstRender = React.useRef(true);
 
+  const { wordMapId: dictionary } = React.useContext(DictionaryContext);
 
   useEffect(() => {
-    const processVocabulary = async () => {
-
-      const _vocabularyTasks = await Promise.allSettled(wordIDs.map(async (id) => {
-        return await DataStore.query(Word, id)
-      }))
-
-      const _vocabulary = _vocabularyTasks.map((task) => {
-        return task.value
-      })
-      console.log('Learn._vocabulary', _vocabulary)
-      setVocabulary(_vocabulary)
-      setAssignment([..._vocabulary])
-      setAnswers([..._vocabulary])
-      setLength(_vocabulary.length)
-
-    }
-    processVocabulary()
-  }, [wordIDs])
-
-  const { wordMapId: dictionary } = React.useContext(DictionaryContext);
+    // Use dictionary context instead of DataStore for Storybook compatibility
+    const _vocabulary = wordIDs.map(id => dictionary[id]).filter(Boolean);
+    console.log('Learn._vocabulary', _vocabulary)
+    setVocabulary(_vocabulary)
+    setAssignment([..._vocabulary])
+    setAnswers([..._vocabulary])
+    setLength(_vocabulary.length)
+  }, [wordIDs, dictionary]);
   const { grade, saveGrade } = React.useContext(UnitContext);
   const inProgress = grade?.data?.[nodeKey] || {};
 
@@ -225,12 +214,12 @@ export const Learn = ({
 
   return (
 
-    <Grid container>
-      <Grid item xs={12}>
+    <Grid container flexDirection="column">
+      <Grid xs={12} flexGrow={1} >
         <LinearProgressWithLabel value={percentComplete} />
       </Grid>
-      <Grid item xs={8}>
-
+      <Grid container flexDirection="row">
+      <Grid xs={8}>
         <List
           style={{
             maxHeight: maxHeight || 'fit-content',
@@ -290,6 +279,7 @@ export const Learn = ({
         overflowX: 'auto'
       }}>
         {easyVocab}
+      </Grid>
       </Grid>
     </Grid>
   );

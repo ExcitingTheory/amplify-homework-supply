@@ -19,7 +19,7 @@ import { Button } from '@mui/material';
 import MeaningAssociationPlugin, { INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND, MeaningAssociationNode } from './MeaningAssociationPlugin';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
 import { MockUnitProvider } from '../../../../.storybook/__mocks__/MockUnitProvider';
-import { DictionaryProvider } from '../../../context/dictionaryContext';
+import DictionaryContext from '../../../context/dictionaryContext';
 import { DndWrapper } from '../../MeaningAssociationExercise/DndWrapper';
 
 export default {
@@ -32,6 +32,62 @@ export default {
 
 const onError = (error) => {
   console.error(error);
+};
+
+// Minimal valid WAV file base64 data (short beep sound, ~1 second)
+const base64Audio1 = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+const base64Audio2 = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+const base64Audio3 = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+
+// Sample dictionary data with audio
+const mockDictionary = {
+  'word-1': {
+    id: 'word-1',
+    phrase: 'hello',
+    pronunciation: 'heh-LOH',
+    definition: 'a greeting or expression of goodwill',
+    audio: [base64Audio1],
+  },
+  'word-2': {
+    id: 'word-2',
+    phrase: 'goodbye',
+    pronunciation: 'good-BYE',
+    definition: 'a parting phrase',
+    audio: [base64Audio2],
+  },
+  'word-3': {
+    id: 'word-3',
+    phrase: 'thank you',
+    pronunciation: 'THANK yoo',
+    definition: 'an expression of gratitude',
+    audio: [base64Audio3],
+  },
+  'word-4': {
+    id: 'word-4',
+    phrase: 'please',
+    pronunciation: 'PLEEZ',
+    definition: 'used to make a polite request',
+    audio: [base64Audio1],
+  },
+};
+
+const mockDictionaryContext = {
+  filteredDictionary: mockDictionary,
+  dictionary: mockDictionary,
+  wordMapId: mockDictionary,
+  wordMapPhrase: {
+    'hello': mockDictionary['word-1'],
+    'goodbye': mockDictionary['word-2'],
+    'thank you': mockDictionary['word-3'],
+    'please': mockDictionary['word-4'],
+  },
+  setFilter: () => {},
+  searching: false,
+  setSearching: () => {},
+  filter: '',
+  filterWords: () => {},
+  wordRefs: {},
+  questionBank: {},
 };
 
 function InsertMeaningAssociationButton() {
@@ -70,7 +126,7 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
 
   return (
     <MockUnitProvider>
-      <DictionaryProvider>
+      <DictionaryContext.Provider value={mockDictionaryContext}>
         <DndWrapper>
           <LexicalComposer initialConfig={initialConfig}>
             <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
@@ -97,7 +153,7 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
             </div>
           </LexicalComposer>
         </DndWrapper>
-      </DictionaryProvider>
+      </DictionaryContext.Provider>
     </MockUnitProvider>
   );
 };
@@ -124,7 +180,7 @@ const ReadOnlyTemplate = ({ editorState }) => {
 
   return (
     <MockUnitProvider>
-      <DictionaryProvider>
+      <DictionaryContext.Provider value={mockDictionaryContext}>
         <DndWrapper>
           <LexicalComposer initialConfig={initialConfig}>
             <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
@@ -146,7 +202,7 @@ const ReadOnlyTemplate = ({ editorState }) => {
             </div>
           </LexicalComposer>
         </DndWrapper>
-      </DictionaryProvider>
+      </DictionaryContext.Provider>
     </MockUnitProvider>
   );
 };

@@ -38,7 +38,36 @@ export const MockUnitProvider = ({ children, mockValue = {} }) => {
     rubric: [],
     grade: { data: {} },
     recentGrades: [],
-    dictionary: {},
+    dictionary: {
+      'word-1': {
+        id: 'word-1',
+        phrase: 'hello',
+        pronunciation: 'heh-LOH',
+        definition: 'a greeting or expression of goodwill',
+        audio: [audioUrl1],
+      },
+      'word-2': {
+        id: 'word-2',
+        phrase: 'goodbye',
+        pronunciation: 'good-BYE',
+        definition: 'a parting phrase',
+        audio: [audioUrl2],
+      },
+      'word-3': {
+        id: 'word-3',
+        phrase: 'thank you',
+        pronunciation: 'THANK yoo',
+        definition: 'an expression of gratitude',
+        audio: [audioUrl3],
+      },
+      'word-4': {
+        id: 'word-4',
+        phrase: 'please',
+        pronunciation: 'PLEEZ',
+        definition: 'used to make a polite request',
+        audio: [audioUrl1],
+      },
+    },
     files: {
       'image-1': {
         id: 'image-1',
