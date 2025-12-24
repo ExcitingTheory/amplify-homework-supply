@@ -1,3 +1,11 @@
+/**
+ * @fileoverview TableCellResizerPlugin - Handles table cell resizing functionality.
+ * @module TableCellResizerPlugin
+ * 
+ * Provides interactive resizing controls for table cells by dragging
+ * column and row boundaries.
+ */
+
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import useLexicalEditable from '@lexical/react/useLexicalEditable';
 import {

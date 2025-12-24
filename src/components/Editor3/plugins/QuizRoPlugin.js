@@ -1,3 +1,10 @@
+/**
+ * @fileoverview QuizRoPlugin - Read-only quiz node for displaying quizzes.
+ * @module QuizRoPlugin
+ * 
+ * Creates read-only quiz nodes for displaying quiz content without editing capabilities.
+ */
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $insertNodeToNearestRoot } from '@lexical/utils';
 import { COMMAND_PRIORITY_EDITOR, createCommand, DecoratorNode } from 'lexical';
@@ -6,6 +13,12 @@ import { useEffect } from 'react';
 
 import QuizEditor from '../components/QuizEditor';
 
+/**
+ * Converts a DOM element to a QuizNode during import.
+ * 
+ * @param {HTMLElement} domNode - DOM node to convert
+ * @returns {Object|null} Conversion result with node, or null
+ */
 function convertQuizElement(
   domNode,
 ) {
@@ -13,6 +26,12 @@ function convertQuizElement(
   const data = domNode.getAttribute('data-lexical-quiz') || [];
 
   if (data) {
+/**
+ * QuizNode - Lexical decorator node for read-only quiz display.
+ * 
+ * @class
+ * @extends {DecoratorNode}
+ */
     const node = $createQuizNode(data);
     return { node };
   }
@@ -119,20 +138,44 @@ export class QuizNode extends DecoratorNode {
   }
 }
 
+/**
+ * Factory function to create a QuizNode.
+ * 
+ * @param {Array} data - Quiz data array
+ * @returns {QuizNode} New quiz node instance
+ */
 export function $createQuizNode(data) {
   return new QuizNode(data);
 }
 
+/**
+ * Type guard for QuizNode.
+ * 
+ * @param {LexicalNode} node - Node to check
+ * @returns {boolean} True if node is a QuizNode
+ */
 export function $isQuizNode(
   node,
 ) {
   return node instanceof QuizNode;
 }
 
+/**
+ * Command to insert a quiz node.
+ * @type {LexicalCommand}
+ */
 export const INSERT_QUIZ_COMMAND = createCommand(
   'INSERT_QUIZ_COMMAND',
 );
 
+/**
+ * QuizPlugin - Registers read-only quiz functionality.
+ * 
+ * Registers the QuizNode with the editor and handles INSERT_QUIZ_COMMAND
+ * to insert quiz nodes into the editor in read-only mode.
+ * 
+ * @returns {null} Plugin returns null
+ */
 export default function QuizPlugin() {
   const [editor] = useLexicalComposerContext();
 

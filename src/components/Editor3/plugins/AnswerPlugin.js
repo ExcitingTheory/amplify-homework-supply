@@ -1,3 +1,13 @@
+/**
+ * @fileoverview AnswerPlugin - Creates interactive answer fields for vocabulary exercises.
+ * 
+ * This plugin provides functionality for creating answer nodes where learners are prompted
+ * to provide translations or definitions of vocabulary words. It supports various input
+ * methods and validation strategies.
+ * 
+ * @module AnswerPlugin
+ */
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $insertNodeToNearestRoot } from '@lexical/utils';
 import { COMMAND_PRIORITY_EDITOR, createCommand, DecoratorNode } from 'lexical';
@@ -8,6 +18,12 @@ import { useEffect } from 'react';
 import AnswerEditor from '../components/AnswerEditor';
 import AnswerComponent from '../components/AnswerComponent';
 
+/**
+ * Converts a DOM element with answer attributes into an AnswerNode.
+ * 
+ * @param {HTMLElement} domNode - DOM element containing answer data attributes
+ * @returns {{node: AnswerNode} | null} Object containing the created node or null if invalid
+ */
 function convertAnswerElement(
   domNode,
 ) {
@@ -24,6 +40,15 @@ function convertAnswerElement(
   return null;
 }
 
+/**
+ * AnswerNode - Lexical DecoratorNode for vocabulary answer exercises.
+ * 
+ * This node creates interactive answer fields where learners provide translations
+ * or definitions. Supports multiple input validation methods and custom prompting.
+ * 
+ * @class AnswerNode
+ * @extends {DecoratorNode}
+ */
 export class AnswerNode extends DecoratorNode {
   __ids;
   __requestDefinition;
@@ -199,20 +224,48 @@ export class AnswerNode extends DecoratorNode {
   }
 }
 
+/**
+ * Factory function to create a new AnswerNode.
+ * 
+ * @param {string[]} wordIDs - Array of Word IDs to quiz on
+ * @param {boolean} requestDefinition - Whether to request definition or phrase
+ * @param {Object} allowedInputs - Configuration for accepted input types
+ * @param {Array} promptMethod - Array defining how to prompt the user
+ * @param {string} format - Node format
+ * @returns {AnswerNode} New AnswerNode instance
+ */
 export function $createAnswerNode(wordIDs, requestDefinition, allowedInputs, promptMethod, format) {
   return new AnswerNode(wordIDs, requestDefinition, allowedInputs, promptMethod, format);
 }
 
+/**
+ * Type guard to check if a node is an AnswerNode.
+ * 
+ * @param {LexicalNode} node - Node to check
+ * @returns {boolean} True if node is an AnswerNode
+ */
 export function $isAnswerNode(
   node,
 ) {
   return node instanceof AnswerNode;
 }
 
+/**
+ * Command to insert an answer block into the editor.
+ * @type {LexicalCommand}
+ */
 export const INSERT_ANSWER_BLOCK_COMMAND = createCommand(
   'INSERT_ANSWER_BLOCK_COMMAND',
 );
 
+/**
+ * AnswerPlugin - Registers the AnswerNode and handles insertion commands.
+ * 
+ * This plugin registers the AnswerNode type with the Lexical editor and sets up
+ * command handlers for inserting answer blocks into the editor.
+ * 
+ * @returns {null} Plugin returns null as it only registers functionality
+ */
 export default function AnswerPlugin() {
   const [editor] = useLexicalComposerContext();
 
@@ -224,7 +277,8 @@ export default function AnswerPlugin() {
     return editor.registerCommand(
       INSERT_ANSWER_BLOCK_COMMAND,
       (payload) => {
-        const answerNode = $createAnswerNode(payload);
+        const { wordIDs = [], requestDefinition = 'translation', allowedInput = ['text'], promptMethod = ['phrase'] } = payload || {};
+        const answerNode = $createAnswerNode(wordIDs, requestDefinition, allowedInput, promptMethod);
         $insertNodeToNearestRoot(answerNode);
 
         return true;

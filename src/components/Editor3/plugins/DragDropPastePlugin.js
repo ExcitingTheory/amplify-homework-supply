@@ -1,3 +1,11 @@
+/**
+ * @fileoverview DragDropPastePlugin - Handles drag-drop and paste for media files.
+ * @module DragDropPastePlugin
+ * 
+ * Manages file uploads via drag-drop and paste operations. Supports images,
+ * audio files, and documents with AWS S3 storage integration.
+ */
+
 import { uploadData } from 'aws-amplify/storage';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import React from 'react';

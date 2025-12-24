@@ -30,6 +30,8 @@ const config = {
       ...config.resolve.alias,
       'aws-amplify/storage': require.resolve('./__mocks__/aws-amplify-storage.js'),
       'aws-amplify/utils': require.resolve('./__mocks__/aws-amplify-utils.js'),
+      'aws-amplify/api': require.resolve('./__mocks__/aws-amplify-api.js'),
+      '@aws-amplify/datastore': require.resolve('./__mocks__/aws-amplify-datastore.js'),
     };
     return config;
   },

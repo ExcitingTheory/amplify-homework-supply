@@ -1,3 +1,12 @@
+/**
+ * @fileoverview CustomAnswerPlugin - Creates custom question-answer exercises.
+ * 
+ * This plugin allows educators to create flexible Q&A exercises with
+ * custom questions, validation rules, and prompting strategies.
+ * 
+ * @module CustomAnswerPlugin
+ */
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $insertNodeToNearestRoot } from '@lexical/utils';
 import { COMMAND_PRIORITY_EDITOR, createCommand, DecoratorNode } from 'lexical';
@@ -7,6 +16,12 @@ import CustomAnswerEditor from '../nodes/CustomAnswerNode/CustomAnswerEditor';
 import CustomAnswerComponent from '../nodes/CustomAnswerNode/CustomAnswerComponent';
 import { join } from 'path';
 
+/**
+ * Converts a DOM element into a CustomAnswerNode.
+ * 
+ * @param {HTMLElement} domNode - DOM element with custom answer data
+ * @returns {{node: CustomAnswerNode} | null} Created node or null
+ */
 function convertCustomAnswerElement(domNode) {
   const ids = domNode.getAttribute('data-lexical-custom-answer').split(',') || [];
   const allowedInput = JSON.parse(domNode.getAttribute('data-lexical-custom-answer-allowed-input')) || {};
@@ -19,6 +34,15 @@ function convertCustomAnswerElement(domNode) {
   return null;
 }
 
+/**
+ * CustomAnswerNode - Lexical DecoratorNode for custom Q&A exercises.
+ * 
+ * Provides flexible question-answer exercises with custom validation,
+ * input methods, and prompting strategies defined by educators.
+ * 
+ * @class CustomAnswerNode
+ * @extends {DecoratorNode}
+ */
 export class CustomAnswerNode extends DecoratorNode {
   __ids;
   __promptMethod;
@@ -185,16 +209,40 @@ s
   }
 }
 
+/**
+ * Factory function to create a CustomAnswerNode.
+ * 
+ * @param {string[]} ids - Array of Question IDs
+ * @param {Object} allowedInput - Input validation configuration
+ * @param {Array} promptMethod - Prompting strategy
+ * @param {string} format - Node format
+ * @returns {CustomAnswerNode} New custom answer node instance
+ */
 export function $createCustomAnswerNode(ids, allowedInput, promptMethod, format) {
   return new CustomAnswerNode(ids, allowedInput, promptMethod, format);
 }
 
+/**
+ * Type guard for CustomAnswerNode.
+ * 
+ * @param {LexicalNode} node - Node to check
+ * @returns {boolean} True if node is a CustomAnswerNode
+ */
 export function $isCustomAnswerNode(node) {
   return node instanceof CustomAnswerNode;
 }
 
+/**
+ * Command to insert a custom answer exercise.
+ * @type {LexicalCommand}
+ */
 export const INSERT_CUSTOM_ANSWER_BLOCK_COMMAND = createCommand('INSERT_CUSTOM_ANSWER_BLOCK_COMMAND');
 
+/**
+ * CustomAnswerPlugin - Registers custom answer functionality.
+ * 
+ * @returns {null} Plugin returns null
+ */
 export default function CustomAnswerPlugin() {
   const [editor] = useLexicalComposerContext();
 

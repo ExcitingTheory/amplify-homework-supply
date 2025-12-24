@@ -6,7 +6,7 @@ import QuizComponent from './QuizComponent';
 import AnswerComponent from './AnswerComponent';
 import ImageComponent from './ImageComponent';
 import MediaPlayerComponent from './MediaPlayerComponent';
-import { MockUnitProvider } from '../mocks/MockUnitProvider';
+import { MockUnitProvider } from '../../../../.storybook/__mocks__/MockUnitProvider';
 import { ImageNode } from './ImageNode';
 import LanguageEditorTheme from './LanguageEditorTheme';
 

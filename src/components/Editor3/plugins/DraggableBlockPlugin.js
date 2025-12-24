@@ -1,3 +1,11 @@
+/**
+ * @fileoverview DraggableBlockPlugin - Block-level drag and drop functionality.
+ * @module DraggableBlockPlugin
+ * 
+ * Enables dragging and dropping blocks/nodes within the editor for reordering.
+ * Provides visual feedback during drag operations.
+ */
+
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {eventFiles} from '@lexical/rich-text';
 import {mergeRegister} from '@lexical/utils';
@@ -201,12 +209,11 @@ export class Rect {
 // import {Point} from '../../utils/point';
 // import {Rect} from '../../utils/rect';
 
-const SPACE = 63;
-const TOP_OFFSET = 152;
+const SPACE = 4;
 const TARGET_LINE_HALF_HEIGHT = 2;
 const DRAGGABLE_BLOCK_MENU_CLASSNAME = 'draggable-block-menu';
 const DRAG_DATA_FORMAT = 'application/x-lexical-drag-block';
-const TEXT_BOX_HORIZONTAL_PADDING = 28;
+const TEXT_BOX_HORIZONTAL_PADDING = 4;
 
 const Downward = 1;
 const Upward = -1;
@@ -358,16 +365,12 @@ function setMenuPosition(
   }
 
   const targetRect = targetElem.getBoundingClientRect();
-  const targetStyle = window.getComputedStyle(targetElem);
-  const floatingElemRect = floatingElem.getBoundingClientRect();
   const anchorElementRect = anchorElem.getBoundingClientRect();
+  const floatingElemRect = floatingElem.getBoundingClientRect();
 
-  const top =
-  TOP_OFFSET + targetRect.top +
-    (parseInt(targetStyle.lineHeight, 10) - floatingElemRect.height) / 2 -
-    anchorElementRect.top;
-
-  const left = SPACE;
+  // Position relative to the block element (like a gutter ref would)
+  const top = targetRect.top - anchorElementRect.top;
+  const left = 0;
 
   floatingElem.style.opacity = '1';
   floatingElem.style.transform = `translate(${left}px, ${top}px)`;
@@ -394,26 +397,24 @@ function setTargetLine(
   mouseY,
   anchorElem,
 ) {
-  const {top: targetBlockElemTop, height: targetBlockElemHeight} =
-    targetBlockElem.getBoundingClientRect();
-  const {top: anchorTop, width: anchorWidth} =
-    anchorElem.getBoundingClientRect();
+  const targetBlockElemRect = targetBlockElem.getBoundingClientRect();
+  const anchorRect = anchorElem.getBoundingClientRect();
+  
+  const {top: targetBlockElemTop, height: targetBlockElemHeight} = targetBlockElemRect;
+  const {top: anchorTop, width: anchorWidth} = anchorRect;
 
-  const {marginTop, marginBottom} = getCollapsedMargins(targetBlockElem);
   let lineTop = targetBlockElemTop;
-  if (mouseY >= targetBlockElemTop) {
-    lineTop += targetBlockElemHeight + marginBottom / 2;
-  } else {
-    lineTop -= marginTop / 2;
+  if (mouseY >= targetBlockElemTop + targetBlockElemHeight / 2) {
+    // Position below the block
+    lineTop = targetBlockElemTop + targetBlockElemHeight;
   }
+  // Otherwise position above the block (at top)
 
   const top = lineTop - anchorTop - TARGET_LINE_HALF_HEIGHT;
-  const left = TEXT_BOX_HORIZONTAL_PADDING - SPACE;
+  const left = 0;
 
   targetLineElem.style.transform = `translate(${left}px, ${top}px)`;
-  targetLineElem.style.width = `${
-    anchorWidth - (TEXT_BOX_HORIZONTAL_PADDING - SPACE) * 2
-  }px`;
+  targetLineElem.style.width = `${anchorWidth}px`;
   targetLineElem.style.opacity = '.4';
 }
 

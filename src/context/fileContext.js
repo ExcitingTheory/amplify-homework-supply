@@ -103,14 +103,34 @@ const FilesProvider = ({ children }) => {
 
     async function fetchFiles() {
       try {
-        const { username: myUserId } = await getCurrentUser();
+        const { username: myUserId, userId, signInDetails } = await getCurrentUser();
+        const { identityId } = await fetchAuthSession();
+
+        console.log('[FileContext] User identity check:', {
+          username: myUserId,
+          userId,
+          identityId,
+          signInDetails
+        });
 
         if (!myUserId) {
           return;
         }
 
-        // Use observeQuery instead of separate query + observe for efficiency
-        subscription = DataStore.observeQuery(File, f => f.owner.eq(myUserId)).subscribe(({ items }) => {
+        // Start DataStore to begin syncing
+        console.log('[FileContext] Starting DataStore...');
+        await DataStore.start();
+        console.log('[FileContext] DataStore started');
+
+        // Query all files regardless of owner - we'll track by identityId for lookup
+        subscription = DataStore.observeQuery(File).subscribe(({ items, isSynced }) => {
+          console.log('[FileContext] observeQuery update:', {
+            totalFiles: items.length,
+            isSynced,
+            owners: [...new Set(items.map(f => f.owner))],
+            identityIds: [...new Set(items.map(f => f.identityId))]
+          });
+
           const _playlistFiltered = {}
 
           items.forEach((item) => {

@@ -1,3 +1,12 @@
+/**
+ * @fileoverview PlaylistPlugin - Embeds audio/video playlists in the editor.
+ * 
+ * This plugin provides playlist functionality with multi-track playback,
+ * navigation controls, and progress tracking for audio/video content.
+ * 
+ * @module PlaylistPlugin
+ */
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $insertNodeToNearestRoot } from '@lexical/utils';
 import { COMMAND_PRIORITY_EDITOR, createCommand, DecoratorNode } from 'lexical';
@@ -8,6 +17,12 @@ import { useEffect } from 'react';
 import PlaylistEditor from '../components/PlaylistEditor';
 const MediaPlayerComponent = lazy(() => import('../components/MediaPlayerComponent'));
 
+/**
+ * Converts a DOM element into a PlaylistNode.
+ * 
+ * @param {HTMLElement} domNode - DOM element with playlist file IDs
+ * @returns {{node: PlaylistNode} | null} Created node or null
+ */
 function convertPlaylistElement(
   domNode,
 ) {
@@ -21,6 +36,15 @@ function convertPlaylistElement(
   return null;
 }
 
+/**
+ * PlaylistNode - Lexical DecoratorNode for media playlists.
+ * 
+ * Embeds audio/video playlists with playback controls, track navigation,
+ * and progress tracking capabilities.
+ * 
+ * @class PlaylistNode
+ * @extends {DecoratorNode}
+ */
 export class PlaylistNode extends DecoratorNode {
   __ids;
 
@@ -176,20 +200,41 @@ export class PlaylistNode extends DecoratorNode {
   }
 }
 
+/**
+ * Factory function to create a PlaylistNode.
+ * 
+ * @param {string[]} fileIDs - Array of File IDs for playlist tracks
+ * @returns {PlaylistNode} New playlist node instance
+ */
 export function $createPlaylistNode(fileIDs) {
   return new PlaylistNode(fileIDs);
 }
 
+/**
+ * Type guard for PlaylistNode.
+ * 
+ * @param {LexicalNode} node - Node to check
+ * @returns {boolean} True if node is a PlaylistNode
+ */
 export function $isPlaylistNode(
   node,
 ) {
   return node instanceof PlaylistNode;
 }
 
+/**
+ * Command to insert a playlist into the editor.
+ * @type {LexicalCommand}
+ */
 export const INSERT_PLAYLIST_COMMAND = createCommand(
   'INSERT_PLAYLIST_COMMAND',
 );
 
+/**
+ * PlaylistPlugin - Registers playlist functionality in the editor.
+ * 
+ * @returns {null} Plugin returns null
+ */
 export default function PlaylistPlugin() {
   const [editor] = useLexicalComposerContext();
 

@@ -88,6 +88,21 @@ export const WithWords = {
         definition: 'goodbye',
         audio: [],
       },
+      // Japanese words
+      'こんにちは': {
+        id: '4',
+        phrase: 'こんにちは',
+        pronunciation: 'konnichiwa',
+        definition: 'hello; good afternoon',
+        audio: [],
+      },
+      'ありがとう': {
+        id: '5',
+        phrase: 'ありがとう',
+        pronunciation: 'arigatou',
+        definition: 'thank you',
+        audio: [],
+      },
     },
   },
 };

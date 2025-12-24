@@ -1,3 +1,11 @@
+/**
+ * @fileoverview CustomListPlugin - Enhanced list functionality.
+ * @module CustomListPlugin
+ * 
+ * Extends Lexical's list plugin with custom list item nodes and
+ * additional list manipulation features.
+ */
+
 import {ListItemNode, ListNode} from '@lexical/list';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {useEffect} from 'react';

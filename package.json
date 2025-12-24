@@ -49,6 +49,7 @@
     "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.28.5",
     "@excalidraw/excalidraw": "^0.17.6",
+    "@mui/x-tree-view": "^8.22.0",
     "@storybook/addon-docs": "^10.1.10",
     "@storybook/addon-links": "^10.1.10",
     "@storybook/nextjs": "^10.1.10",

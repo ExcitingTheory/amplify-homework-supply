@@ -6,6 +6,8 @@ import StopIcon from '@mui/icons-material/Stop';
 import PlayIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import RecordIcon from '@mui/icons-material/KeyboardVoice';
+import StaticWaveform from './Editor3/components/StaticWaveform';
+import { calculateWaveformData } from '../utils/calculateWaveformData';
 // import { SvgConverter } from './Editor2';
 import { Box, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -107,6 +109,9 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
 
         const newFilename = `user-input-audio/${gradeID}-${Date.now()}.mp3`;
 
+        // Calculate waveform data before upload
+        const waveformData = await calculateWaveformData(audioBlob, 600);
+
         // get identityId and idToken
 
         const result = await uploadData({
@@ -129,6 +134,22 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
           }
           }).result;
           console.log('result!!___', result);
+        
+          // Save file to database with waveform data
+          const { File: FileModel } = await import('../models');
+          const { DataStore } = await import('aws-amplify/datastore');
+          
+          const newFile = await DataStore.save(new FileModel({
+            path: newFilename,
+            identityId,
+            name: `Recording-${Date.now()}.mp3`,
+            size: audioBlob.size,
+            mimeType: 'audio/mp3',
+            level: 'PROTECTED',
+            waveformData: JSON.stringify(waveformData),
+          }));
+          
+          console.log('Saved file with waveform data:', newFile);
         
           // sign the audio file url
 
@@ -443,6 +464,16 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
       // height: '5rem',
       backgroundColor: 'white',
     }}/>
+    {audioFile && (
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="caption" color="text.secondary">Static Waveform Preview:</Typography>
+        <StaticWaveform 
+          file={audioFile} 
+          width={600} 
+          height={80}
+        />
+      </Box>
+    )}
     </>
   );
 }

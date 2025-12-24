@@ -3,6 +3,8 @@ import { Easy } from './Easy';
 import { Hard } from './Hard';
 import { Learn } from './Learn';
 import { DndWrapper } from './DndWrapper';
+import DictionaryContext from '../../context/dictionaryContext';
+import UnitContext from '../../context/unitContext';
 
 export default {
   title: 'Exercises/MeaningAssociation',
@@ -10,11 +12,62 @@ export default {
     layout: 'padded',
   },
   decorators: [
-    (Story) => (
-      <DndWrapper>
-        <Story />
-      </DndWrapper>
-    ),
+    (Story) => {
+      // Mock DictionaryContext
+      const mockDictionaryContext = {
+        dictionary: {},
+        filteredDictionary: {},
+        wordMapId: {},
+        wordMapPhrase: {},
+        wordRefs: {},
+        questionBank: {},
+        filter: '',
+        setFilter: () => {},
+        filterWords: () => {},
+        searching: false,
+        setSearching: () => {},
+      };
+
+      // Mock UnitContext
+      const mockUnitContext = {
+        unit: { id: 'test-unit' },
+        name: 'Test Unit',
+        description: 'Test Description',
+        rubric: [],
+        grade: { data: {} },
+        recentGrades: [],
+        dictionary: {},
+        files: {},
+        questionBank: {},
+        playlistUrls: {},
+        editorStateRef: { current: null },
+        editorSelectionRef: { current: null },
+        versionRef: { current: 0 },
+        finishedQuestions: 0,
+        showUnitComplete: false,
+        handleBeforeUnload: () => {},
+        setShowUnitComplete: () => {},
+        setFinishedQuestions: () => {},
+        saveName: async () => {},
+        saveDescription: async () => {},
+        handleDelete: async () => {},
+        handleStatusChange: async () => {},
+        saveEditorContent: async () => {},
+        saveGrade: async () => {},
+        createGrade: async () => {},
+        session: { username: 'test-user' },
+      };
+
+      return (
+        <DictionaryContext.Provider value={mockDictionaryContext}>
+          <UnitContext.Provider value={mockUnitContext}>
+            <DndWrapper>
+              <Story />
+            </DndWrapper>
+          </UnitContext.Provider>
+        </DictionaryContext.Provider>
+      );
+    },
   ],
 };
 
@@ -25,22 +78,17 @@ const sampleWords = [
   { id: '4', phrase: 'Please', definition: 'Polite request' },
 ];
 
-const sampleTargets = {
-  target1: { id: 'target1', phrase: 'Hello', definition: 'A greeting' },
-  target2: { id: 'target2', phrase: 'Goodbye', definition: 'A farewell' },
-};
 
 // Easy Exercise Stories
 export const EasyExercise = {
   render: () => {
-    const [complete, setComplete] = React.useState(false);
+    const [tabIndex, setTabIndex] = React.useState(0);
     return (
       <Easy
-        words={sampleWords}
-        blockKey="easy-1"
-        complete={complete}
-        setComplete={setComplete}
-        onSave={(data) => console.log('Saved:', data)}
+        tabIndex={tabIndex}
+        setTabIndex={setTabIndex}
+        nodeKey="easy-1"
+        wordIDs={['1', '2', '3', '4']}
       />
     );
   },
@@ -48,13 +96,13 @@ export const EasyExercise = {
 
 export const EasyExerciseCompleted = {
   render: () => {
+    const [tabIndex, setTabIndex] = React.useState(0);
     return (
       <Easy
-        words={sampleWords}
-        blockKey="easy-2"
-        complete={true}
-        setComplete={() => {}}
-        onSave={(data) => console.log('Saved:', data)}
+        tabIndex={tabIndex}
+        setTabIndex={setTabIndex}
+        nodeKey="easy-2"
+        wordIDs={['1', '2', '3', '4']}
       />
     );
   },
@@ -63,14 +111,13 @@ export const EasyExerciseCompleted = {
 // Hard Exercise Stories
 export const HardExercise = {
   render: () => {
-    const [complete, setComplete] = React.useState(false);
+    const [tabIndex, setTabIndex] = React.useState(0);
     return (
       <Hard
-        words={sampleWords}
-        blockKey="hard-1"
-        complete={complete}
-        setComplete={setComplete}
-        onSave={(data) => console.log('Saved:', data)}
+        tabIndex={tabIndex}
+        setTabIndex={setTabIndex}
+        nodeKey="hard-1"
+        wordIDs={['1', '2', '3', '4']}
       />
     );
   },
@@ -78,13 +125,13 @@ export const HardExercise = {
 
 export const HardExerciseCompleted = {
   render: () => {
+    const [tabIndex, setTabIndex] = React.useState(0);
     return (
       <Hard
-        words={sampleWords}
-        blockKey="hard-2"
-        complete={true}
-        setComplete={() => {}}
-        onSave={(data) => console.log('Saved:', data)}
+        tabIndex={tabIndex}
+        setTabIndex={setTabIndex}
+        nodeKey="hard-2"
+        wordIDs={['1', '2', '3', '4']}
       />
     );
   },
@@ -93,14 +140,13 @@ export const HardExerciseCompleted = {
 // Learn Exercise Stories
 export const LearnExercise = {
   render: () => {
-    const [complete, setComplete] = React.useState(false);
+    const [tabIndex, setTabIndex] = React.useState(0);
     return (
       <Learn
-        words={sampleWords}
-        blockKey="learn-1"
-        complete={complete}
-        setComplete={setComplete}
-        onSave={(data) => console.log('Saved:', data)}
+        tabIndex={tabIndex}
+        setTabIndex={setTabIndex}
+        nodeKey="learn-1"
+        wordIDs={['1', '2', '3', '4']}
       />
     );
   },
@@ -108,13 +154,13 @@ export const LearnExercise = {
 
 export const LearnExerciseCompleted = {
   render: () => {
+    const [tabIndex, setTabIndex] = React.useState(0);
     return (
       <Learn
-        words={sampleWords}
-        blockKey="learn-2"
-        complete={true}
-        setComplete={() => {}}
-        onSave={(data) => console.log('Saved:', data)}
+        tabIndex={tabIndex}
+        setTabIndex={setTabIndex}
+        nodeKey="learn-2"
+        wordIDs={['1', '2', '3', '4']}
       />
     );
   },

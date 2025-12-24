@@ -1,3 +1,11 @@
+/**
+ * @fileoverview AutoLinkPlugin - Automatic link detection and creation.
+ * @module AutoLinkPlugin
+ * 
+ * Automatically detects URLs and email addresses in text and converts
+ * them to clickable links.
+ */
+
 import {
     AutoLinkPlugin,
     createLinkMatcherWithRegExp,

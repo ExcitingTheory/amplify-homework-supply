@@ -1,3 +1,13 @@
+/**
+ * @fileoverview MeaningAssociationPlugin - Creates vocabulary matching exercises.
+ * 
+ * This plugin provides interactive exercises where learners match words with their
+ * definitions or meanings. Supports Easy, Hard, and Learn modes for different
+ * difficulty levels.
+ * 
+ * @module MeaningAssociationPlugin
+ */
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $insertNodeToNearestRoot } from '@lexical/utils';
 import { COMMAND_PRIORITY_EDITOR, createCommand, DecoratorNode } from 'lexical';
@@ -8,6 +18,12 @@ import { useEffect } from 'react';
 import MeaningAssociationEditor from '../components/MeaningAssociationEditor';
 import MeaningAssociationExercise from '../../MeaningAssociationExercise';
 
+/**
+ * Converts a DOM element into a MeaningAssociationNode.
+ * 
+ * @param {HTMLElement} domNode - DOM element with meaning-association data attribute
+ * @returns {{node: MeaningAssociationNode} | null} Created node or null
+ */
 function convertMeaningAssociationElement(
   domNode,
 ) {
@@ -21,6 +37,16 @@ function convertMeaningAssociationElement(
   return null;
 }
 
+/**
+ * MeaningAssociationNode - Lexical DecoratorNode for word-meaning matching exercises.
+ * 
+ * Creates interactive vocabulary exercises where learners match words with definitions.
+ * Includes three difficulty modes: Easy (direct matching), Hard (with distractors),
+ * and Learn (flashcard study mode).
+ * 
+ * @class MeaningAssociationNode
+ * @extends {DecoratorNode}
+ */
 export class MeaningAssociationNode extends DecoratorNode {
   __ids;
 
@@ -156,20 +182,41 @@ export class MeaningAssociationNode extends DecoratorNode {
   }
 }
 
+/**
+ * Factory function to create a MeaningAssociationNode.
+ * 
+ * @param {string[]} wordIDs - Array of Word IDs to include in exercise
+ * @returns {MeaningAssociationNode} New node instance
+ */
 export function $createMeaningAssociationNode(wordIDs) {
   return new MeaningAssociationNode(wordIDs);
 }
 
+/**
+ * Type guard for MeaningAssociationNode.
+ * 
+ * @param {LexicalNode} node - Node to check
+ * @returns {boolean} True if node is a MeaningAssociationNode
+ */
 export function $isMeaningAssociationNode(
   node,
 ) {
   return node instanceof MeaningAssociationNode;
 }
 
+/**
+ * Command to insert a meaning association exercise.
+ * @type {LexicalCommand}
+ */
 export const INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND = createCommand(
   'INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND',
 );
 
+/**
+ * MeaningAssociationPlugin - Registers and manages meaning association exercises.
+ * 
+ * @returns {null} Plugin returns null
+ */
 export default function MeaningAssociationPlugin() {
   const [editor] = useLexicalComposerContext();
 

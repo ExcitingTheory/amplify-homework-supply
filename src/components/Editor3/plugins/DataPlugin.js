@@ -1,3 +1,11 @@
+/**
+ * @fileoverview DataPlugin - Synchronizes editor state with unit data.
+ * @module DataPlugin
+ * 
+ * Loads and syncs the editor content from unit data stored in the database.
+ * Prevents unnecessary re-renders by tracking data versions.
+ */
+
 import React, { useRef } from "react";
 import { useEffect, useContext } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';

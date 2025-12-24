@@ -47,6 +47,7 @@ export default function MediaPlayerComponent({
     const [gridSelection, setGridSelection] = React.useState([]);
     const [index, setIndex] = useState(0);
     const [sources, setSources] = useState([]);
+    const [rows, setRows] = useState([]);
 
     const playlist = React.useRef([]);
 
@@ -57,122 +58,133 @@ export default function MediaPlayerComponent({
         playlistUrls,
     } = React.useContext(UnitContext);
 
-    const rows = []
-    const _sources = []
-    
-    if (fileIDs) {
-        playlist.current = fileIDs
-        fileIDs.forEach(async (id, key) => {
-            if (!id) return;
+    React.useEffect(() => {
+        const loadFiles = async () => {
+            const newRows = [];
+            const newSources = [];
+            
+            if (fileIDs) {
+                playlist.current = fileIDs;
+                
+                for (let key = 0; key < fileIDs.length; key++) {
+                    const id = fileIDs[key];
+                    if (!id) continue;
 
-            console.log('MediaPlayerComponent.id', id)
-            console.log('MediaPlayerComponent.files[id]', files[id])
+                    console.log('MediaPlayerComponent.id', id);
+                    console.log('MediaPlayerComponent.files[id]', files[id]);
 
-            const file = files[id];
-            const url = file?.path;
-            if (key === 0) {
-                // sign url
-                const src = await getCachedUrl(url, 'protected', unit.identityId);
-                _sources.push({
-                    src,
-                    type: 'audio/mp3',
-                });
+                    const file = files[id];
+                    const url = file?.path;
+                    
+                    if (key === 0) {
+                        // sign url
+                        const src = await getCachedUrl(url, 'protected', unit.identityId);
+                        newSources.push({
+                            src,
+                            type: 'audio/mp3',
+                        });
+                    }
+                    
+                    if (file) {
+                        newRows.push({
+                            id: file.id,
+                            title: file.name,
+                            size: (file.size / 10000).toFixed(2) + ' MB',
+                            url,
+                        });
+                    }
+                }
             }
-            if (file) {
-                rows.push({
-                    id: file.id,
-                    title: file.name,
-                    size: (file.size / 10000).toFixed(2) + ' MB',
-                    url,
-                });
+            
+            if (questionIDs) {
+                playlist.current = questionIDs;
+                
+                for (let key = 0; key < questionIDs.length; key++) {
+                    const questionID = questionIDs[key];
+                    if (!questionID) continue;
+
+                    console.log('MediaPlayerComponent.questionID', questionID);
+                    const question = questionBank[questionID];
+                    console.log('MediaPlayerComponent.question', question);
+
+                    // get the audio url randomly select from list
+                    let url = question?.audio[0];
+                    let title = question?.prompt;
+
+                    const targetIdentityId = question?.targetIdentityId;
+                    
+                    if (key === 0) {
+                        // sign url
+                        const src = await getCachedUrl(url, 'protected', targetIdentityId);
+                        newSources.push({
+                            src,
+                            type: 'audio/mp3',
+                        });
+                    }
+                    
+                    if (question) {
+                        newRows.push({
+                            id: question.id,
+                            title,
+                            url,
+                        });
+                    }
+                }
             }
-        });
-    }
-    if (questionIDs) {
-        playlist.current = questionIDs
-        questionIDs.forEach(async (questionID, key) => {
-            if (!questionID) return;
+            
+            if (words) {
+                for (let key = 0; key < words.length; key++) {
+                    const word = words[key];
+                    if (!word) continue;
 
-            console.log('MediaPlayerComponent.questionID', questionID)
-            const question = questionBank[questionID];
-            console.log('MediaPlayerComponent.question', question)
+                    console.log('MediaPlayerComponent.word', word);
 
-            // get the audio url randomly select from list
-            let url = question?.audio[0];
-            let title = question?.prompt;
+                    // get the audio url randomly select from list
+                    let url = word?.audio[0];
+                    let title = word?.phrase;
+                    // if requestDefinition is true, then get the definition audio
+                    if (requestDefinition) {
+                        url = word?.definitionAudio[0];
+                        title = word?.definition;
+                    }
 
-
-            const targetIdentityId = question?.targetIdentityId;
-            if (key === 0) {
-                // sign url
-                const src = await getCachedUrl(url, 'protected', targetIdentityId);
-                _sources.push({
-                    src,
-                    type: 'audio/mp3',
-                });
-            }
-            if (question) {
-                rows.push({
-                    id: question.id,
-                    title,
-                    // size: (question.size / 10000).toFixed(2) + ' MB',
-                    url,
-                });
-            }
-        });
-    }
-    if (words) {
-        words.forEach(async (word, key) => {
-            if (!word) return;
-
-            console.log('MediaPlayerComponent.word', word)
-
-            // get the audio url randomly select from list
-            let url = word?.audio[0];
-            let title = word?.phrase;
-            // if requestDefinition is true, then get the definition audio
-            if(requestDefinition) {
-                url = word?.definitionAudio[0];
-                title = word?.definition;
+                    const targetIdentityId = word?.targetIdentityId;
+                    
+                    if (key === 0) {
+                        // sign url
+                        const src = await getCachedUrl(url, 'protected', targetIdentityId);
+                        newSources.push({
+                            src,
+                            type: 'audio/mp3',
+                        });
+                    }
+                    
+                    if (word) {
+                        newRows.push({
+                            id: word.id,
+                            title,
+                            size: (word.size / 10000).toFixed(2) + ' MB',
+                            url,
+                        });
+                    }
+                }
             }
 
-
-            const targetIdentityId = word?.targetIdentityId;
-            if (key === 0) {
-                // sign url
-                const src = await getCachedUrl(url, 'protected', targetIdentityId);
-                _sources.push({
-                    src,
-                    type: 'audio/mp3',
-                });
+            console.log('MediaPlayerComponent._sources', newSources);
+            
+            setRows(newRows);
+            if (newSources.length > 0) {
+                setSources(newSources);
             }
-            if (word) {
-                rows.push({
-                    id: word.id,
-                    title,
-                    size: (word.size / 10000).toFixed(2) + ' MB',
-                    url,
-                });
-            }
-        });
-    }
+        };
 
-    console.log('MediaPlayerComponent._sources', _sources)
-
-    
+        loadFiles();
+    }, [fileIDs, questionIDs, words, files, questionBank, unit, requestDefinition]);
 
     const options = {
-        // autoplay: true,
-        // fluid: true, // make configurable
-        // audioPosterMode: true, // make configurable
         controls: true,
-        sources: sources.length > 0 ? sources : _sources,
-        // poster: 'https://picsum.photos/300/200', // make configurable
-        // sources: [{
-        //     src: playlistUrls[nowPlayingId],
-        //     type: 'audio/mp3',
-        // }],
-    }
+        sources: sources,
+    };
 
     console.log('MediaPlayerComponent.options', options)
 
@@ -202,8 +214,6 @@ export default function MediaPlayerComponent({
     // const {options, onReady} = props;
 
     useEffect(() => {
-
-        if(!options.sources) return
         // Make sure Video.js player is only initialized once
         if (!playerRef.current) {
             // The Video.js player needs to be _inside_ the component el for React 18 Strict Mode. 
@@ -213,26 +223,21 @@ export default function MediaPlayerComponent({
             videoRef.current.appendChild(videoElement);
 
             const player = playerRef.current = videojs(videoElement, options, () => {
-                videojs.log('player is ready');
-                
-                //   onReady && onReady(player);
+                console.log('VIDEOJS: player is ready');
             });
-
-            // player.on('play', () => {
-            //     console.log('MediaPlayerComponent.play');
-            // });
-
-            // You could update an existing player in the `else` block here
-            // on prop change, for example:
         } else {
-            // const player = playerRef.current;
+            const player = playerRef.current;
 
-            playerRef.current.autoplay(options.autoplay);
-            console.log('MediaPlayerComponent.options.sources', options.sources)
+            player.autoplay(options.autoplay);
+            console.log('MediaPlayerComponent.options.sources', options.sources);
 
-            playerRef.current.options = options;
+            // Update the player sources
+            if (options.sources && options.sources.length > 0) {
+                player.src(options.sources);
+                player.load();
+            }
         }
-    }, [options, videoRef, playlistUrls]);
+    }, [options, videoRef]);
 
     // Dispose the Video.js player when the functional component unmounts
     useEffect(() => {

@@ -19,6 +19,9 @@ import {
     Modal,
     Card,
 } from "@mui/material";
+import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
+import { TreeItem } from '@mui/x-tree-view/TreeItem';
+import { useSimpleTreeViewApiRef } from '@mui/x-tree-view/hooks';
 import React from "react";
 import { isMimeType } from '@lexical/utils';
 
@@ -33,6 +36,7 @@ import FilesContext from "../../../context/fileContext";
 import { DataStore } from 'aws-amplify/datastore';
 import { uploadData, remove } from 'aws-amplify/storage';
 import { fetchAuthSession } from 'aws-amplify/auth';
+import { calculateWaveformData } from '../../../utils/calculateWaveformData';
 
 import { FileProtectionLevels } from '../../../models';
 import { File as FileModel } from '../../../models';
@@ -751,9 +755,39 @@ export default function FileManager() {
     const [editor] = useLexicalComposerContext();
     const [search, setSearch] = React.useState('');
     const [searching, setSearching] = React.useState(false);
+    const apiRef = useSimpleTreeViewApiRef();
 
     const handleSearch = (e) => {
         setSearch(e.target.value);
+    }
+
+    const handleSearchSubmit = () => {
+        if (!search.trim()) return;
+        
+        const searchLower = search.toLowerCase();
+        const matchingFile = files.find(file => 
+            file.name.toLowerCase().includes(searchLower)
+        );
+        
+        if (matchingFile) {
+            // Expand the appropriate category
+            if (matchingFile.mimeType.includes('image')) {
+                apiRef.current?.setItemExpansion(null, 'images', true);
+            } else if (matchingFile.mimeType.includes('audio')) {
+                apiRef.current?.setItemExpansion(null, 'audio', true);
+            } else {
+                apiRef.current?.setItemExpansion(null, 'other', true);
+            }
+            
+            // Focus and scroll to the item
+            setTimeout(() => {
+                apiRef.current?.focusItem(null, matchingFile.id);
+                apiRef.current?.getItemDOMElement(matchingFile.id)?.scrollIntoView({ 
+                    block: 'nearest',
+                    behavior: 'smooth'
+                });
+            }, 100);
+        }
     }
 
     const [isDragging, setIsDragging] = React.useState(false);
@@ -847,17 +881,34 @@ export default function FileManager() {
                 });
                 console.log('result!!___', result);
 
-                // Create a new entry in the database using the File model
+                // Calculate waveform data for audio files
+                let waveformData = null;
+                if (isMimeType(file, ACCEPTABLE_AUDIO_TYPES)) {
+                    try {
+                        waveformData = await calculateWaveformData(file, 600);
+                        console.log('Calculated waveform data:', waveformData);
+                    } catch (error) {
+                        console.error('Error calculating waveform:', error);
+                    }
+                }
 
+                // Create a new entry in the database using the File model
                 try {
-                    const newFile = await DataStore.save(new FileModel({
+                    const fileData = {
                         path: newFilename,
                         identityId,
                         name: file.name,
                         size: file.size,
                         mimeType: file.type,
                         level: 'PROTECTED',
-                    }));
+                    };
+                    
+                    // Add waveform data if it was calculated
+                    if (waveformData) {
+                        fileData.waveformData = JSON.stringify(waveformData);
+                    }
+                    
+                    const newFile = await DataStore.save(new FileModel(fileData));
 
                     console.log('newFile', newFile);
                 } catch (error) {
@@ -1128,30 +1179,32 @@ export default function FileManager() {
                     <TextField
                         value={search}
                         onInput={handleSearch}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                handleSearchSubmit();
+                            }
+                        }}
                         type='text'
                         style={{
                             width: '100%',
                             margin: '0rem'
                         }}
-                        // id="outlined-basic"
                         label="Search"
-                    // variant="standard"
                     />
 
                     {searching &&
-
                         <Button aria-label="cancel searching dictionary" disabled>
                             <CircularProgress />
                         </Button>
-
                     }
                     {!searching &&
-                        <Button aria-label="search dictionary" disabled>
+                        <Button 
+                            aria-label="search files"
+                            onClick={handleSearchSubmit}
+                        >
                             <SearchIcon />
                         </Button>
                     }
-                    {/* <Button variant='contained'>Filter</Button> */}
-
                 </Box>
 
                 <Box
@@ -1203,94 +1256,158 @@ export default function FileManager() {
             ))}
 
 
-            <List
-                style={{
-                    width: '100%',
-                    height: 'calc(100vh - 17rem)',
-                    overflowY: 'auto',
-                    overflowX: 'hidden',
-
-                }}
-            >
-                {files.map((file) => (
-                    <ListItem
-                        key={file.id}
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            padding: '1rem',
-                            margin: '0rem',
-                            width: '100%',
-
-                        }}
-                    >
-                        <ListItemAvatar
-                            style={{
-                                marginRight: '1rem',
-                            }}
-
-                        >
-                            <ListItemImage
-                                file={file}
-                            />
-
-                        </ListItemAvatar>
-
-                        <ListItemText
-                            sx={{
-                                textWrap: 'wrap',
-                                paddingRight: '5rem'
-                            }}
-                            primary={file.name}
-                            secondary={(file.size / 1000).toFixed(2) + ' KB'}
-                        />
-                        <ListItemSecondaryAction>
-                            {editor &&
-                                <IconButton
-                                    onClick={async () => {
-                                        // Insert the file into the editor
-                                        // if is image insert image
-                                        if (file.mimeType.includes('image')) {
-                                            editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
-                                                altText: file.name,
-                                                path: file.path,
-                                                identityId: file.identityId,
-                                            });
+            <Box sx={{ minHeight: 200, minWidth: 250, overflowY: 'auto', height: 'calc(100vh - 17rem)' }}>
+                <SimpleTreeView apiRef={apiRef}>
+                    {files
+                        .filter(file => file.mimeType.includes('image'))
+                        .length > 0 && (
+                        <TreeItem itemId="images" label={`Images (${files.filter(f => f.mimeType.includes('image')).length})`}>
+                            {files
+                                .filter(file => file.mimeType.includes('image'))
+                                .map((file) => (
+                                    <TreeItem
+                                        itemId={file.id}
+                                        key={file.id}
+                                        label={
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+                                                <ListItemImage file={file} />
+                                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                                    <Typography noWrap>{file.name}</Typography>
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        {(file.size / 1000).toFixed(2)} KB
+                                                    </Typography>
+                                                </Box>
+                                                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                    {editor && (
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
+                                                                    altText: file.name,
+                                                                    path: file.path,
+                                                                    identityId: file.identityId,
+                                                                });
+                                                            }}
+                                                        >
+                                                            <AddIcon />
+                                                        </IconButton>
+                                                    )}
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={async (e) => {
+                                                            e.stopPropagation();
+                                                            const confirmed = window.confirm(`Are you sure you want to delete ${file.path}?`);
+                                                            if (!confirmed) return;
+                                                            await DataStore.delete(file);
+                                                            await remove(file);
+                                                        }}
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Box>
+                                            </Box>
                                         }
-
-                                        // if is audio insert audio
-                                        if (file.mimeType.includes('audio')) {
-                                            await DataStore.save(
-                                                new UnitFile({
-                                                    unit,
-                                                    file,
-                                                })
-                                            );
-                                            editor.dispatchCommand(INSERT_PLAYLIST_COMMAND, [file.id]);
+                                    />
+                                ))}
+                        </TreeItem>
+                    )}
+                    
+                    {files
+                        .filter(file => file.mimeType.includes('audio'))
+                        .length > 0 && (
+                        <TreeItem itemId="audio" label={`Audio (${files.filter(f => f.mimeType.includes('audio')).length})`}>
+                            {files
+                                .filter(file => file.mimeType.includes('audio'))
+                                .map((file) => (
+                                    <TreeItem
+                                        itemId={file.id}
+                                        key={file.id}
+                                        label={
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+                                                <ListItemImage file={file} />
+                                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                                    <Typography noWrap>{file.name}</Typography>
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        {(file.size / 1000).toFixed(2)} KB
+                                                    </Typography>
+                                                </Box>
+                                                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                    {editor && (
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={async (e) => {
+                                                                e.stopPropagation();
+                                                                await DataStore.save(
+                                                                    new UnitFile({
+                                                                        unit,
+                                                                        file,
+                                                                    })
+                                                                );
+                                                                editor.dispatchCommand(INSERT_PLAYLIST_COMMAND, [file.id]);
+                                                            }}
+                                                        >
+                                                            <AddIcon />
+                                                        </IconButton>
+                                                    )}
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={async (e) => {
+                                                            e.stopPropagation();
+                                                            const confirmed = window.confirm(`Are you sure you want to delete ${file.path}?`);
+                                                            if (!confirmed) return;
+                                                            await DataStore.delete(file);
+                                                            await remove(file);
+                                                        }}
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Box>
+                                            </Box>
                                         }
-                                    }}
-                                ><AddIcon /></IconButton>
-                            }
-                            <IconButton
-                                onClick={async () => {
-                                    // confirm delete
-                                    const confirmed = window.confirm(`Are you sure you want to delete ${file.path}?`);
-
-                                    if (!confirmed) return;
-                                    // delete from S3
-                                    await DataStore.delete(file);
-                                    await remove(file);
-
-                                }}
-                            ><DeleteIcon /></IconButton>
-
-                        </ListItemSecondaryAction>
-
-                    </ListItem>
-                ))}
-            </List>
+                                    />
+                                ))}
+                        </TreeItem>
+                    )}
+                    
+                    {files
+                        .filter(file => !file.mimeType.includes('image') && !file.mimeType.includes('audio'))
+                        .length > 0 && (
+                        <TreeItem itemId="other" label={`Other Files (${files.filter(f => !f.mimeType.includes('image') && !f.mimeType.includes('audio')).length})`}>
+                            {files
+                                .filter(file => !file.mimeType.includes('image') && !file.mimeType.includes('audio'))
+                                .map((file) => (
+                                    <TreeItem
+                                        itemId={file.id}
+                                        key={file.id}
+                                        label={
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+                                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                                    <Typography noWrap>{file.name}</Typography>
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        {(file.size / 1000).toFixed(2)} KB
+                                                    </Typography>
+                                                </Box>
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        const confirmed = window.confirm(`Are you sure you want to delete ${file.path}?`);
+                                                        if (!confirmed) return;
+                                                        await DataStore.delete(file);
+                                                        await remove(file);
+                                                    }}
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </Box>
+                                        }
+                                    />
+                                ))}
+                        </TreeItem>
+                    )}
+                </SimpleTreeView>
+            </Box>
         </div>
 
     )

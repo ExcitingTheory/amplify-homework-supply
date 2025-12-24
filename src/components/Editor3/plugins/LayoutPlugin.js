@@ -1,3 +1,11 @@
+/**
+ * @fileoverview LayoutPlugin - Multi-column layout functionality.
+ * @module LayoutPlugin
+ * 
+ * Provides multi-column layout containers with configurable templates.
+ * Allows creating and updating column-based layouts in the editor.
+ */
+
 import {useEffect} from 'react';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {$insertNodeToNearestRoot, mergeRegister} from '@lexical/utils';

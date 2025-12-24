@@ -1,3 +1,10 @@
+/**
+ * @fileoverview AutoEmbedPlugin - Automatic embedding of external content.
+ * @module AutoEmbedPlugin
+ * 
+ * Detects URLs for embeddable content (YouTube videos, etc.) and provides
+ * UI for inserting rich embeds automatically.
+ */
 
 import {
   AutoEmbedOption,

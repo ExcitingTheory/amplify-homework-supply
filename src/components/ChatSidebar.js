@@ -474,25 +474,21 @@ const ChatSidebar = () => {
                         variant="outlined" />
 
                     {isBusy &&
-                        <Button aria-label="chatting" disabled>
+                        <Button aria-label="chatting" onClick={() => {
+                            setIsBusy(false);
+                        }}>
                             <CircularProgress />
                         </Button>
 
                     }
                     {!isBusy &&
-                        <Button aria-label="chat" disabled>
+                        <Button aria-label="chat" onClick={() => {
+                            // sendMessage();
+                            messageAssistant();
+                        }}>
                             <ChatIcon />
                         </Button>
                     }
-
-
-                    {/* <input
-                    type="text"
-                    placeholder="Type a message..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                />
-                <button onClick={sendMessage}>Send</button> */}
                 </Box>
             </div>
         </>

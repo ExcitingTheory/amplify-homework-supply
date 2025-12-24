@@ -1,3 +1,11 @@
+/**
+ * @fileoverview FloatingLinkEditorPlugin - Floating link editor UI.
+ * @module FloatingLinkEditorPlugin
+ * 
+ * Provides a floating toolbar for editing, viewing, and removing hyperlinks.
+ * Appears when a link is selected in the editor.
+ */
+
 import { $isAutoLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $findMatchingParent, mergeRegister } from '@lexical/utils';
@@ -21,6 +29,7 @@ import { createPortal } from 'react-dom';
 import { getSelectedNode } from '../utils/getSelectedNode';
 
 import { sanitizeUrl } from '../utils/url';
+import { INSERT_YOUTUBE_COMMAND } from './YouTubePlugin';
 
 import {
     Button,
@@ -31,9 +40,18 @@ import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LinkIcon from '@mui/icons-material/Link';
+import YouTubeIcon from '@mui/icons-material/YouTube';
+import CloseIcon from '@mui/icons-material/Close';
 
-const VERTICAL_GAP = -150;
-const HORIZONTAL_OFFSET = -400; // TODO: Make this dynamic based on the width of the link editor.
+const VERTICAL_GAP = 10;
+const HORIZONTAL_OFFSET = 0;
+
+// YouTube URL detection
+function getYouTubeVideoID(url) {
+  const match = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/.exec(url);
+  const id = match ? (match?.[2].length === 11 ? match[2] : null) : null;
+  return id;
+}
 
 export function setFloatingElemPositionForLinkEditor(
     targetRect,
@@ -225,6 +243,27 @@ function FloatingLinkEditor({
         }
     };
 
+    const handleConvertToYouTube = () => {
+        const videoID = getYouTubeVideoID(linkUrl);
+        if (videoID) {
+            editor.update(() => {
+                const selection = $getSelection();
+                if ($isRangeSelection(selection)) {
+                    const node = getSelectedNode(selection);
+                    const parent = node.getParent();
+                    const linkNode = $isLinkNode(parent) ? parent : ($isLinkNode(node) ? node : null);
+                    if (linkNode) {
+                        linkNode.remove();
+                    }
+                }
+            });
+            editor.dispatchCommand(INSERT_YOUTUBE_COMMAND, videoID);
+            setIsLink(false);
+        }
+    };
+
+    const isYouTubeUrl = linkUrl && getYouTubeVideoID(linkUrl) !== null;
+
     return (<>
         <style global jsx>{`
         .link-editor {
@@ -234,6 +273,7 @@ function FloatingLinkEditor({
             left: 0;
             z-index: 2010;
             max-width: 400px;
+            min-width: 400px;
             width: fit-content;
             opacity: 0;
             background-color: #fff;
@@ -249,11 +289,19 @@ function FloatingLinkEditor({
         .link-editor a,
         .link-editor input {
             display: inline-block;
-            margin: 1rem 3rem 1rem 1rem;
+            margin: 1rem 0.5rem 1rem 0.5rem;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
         }
 
         .link-editor [role="button"] {
             min-width: 1rem;
+            flex-shrink: 0;
         }
       `}</style>
         <div ref={editorRef} className="link-editor">
@@ -294,12 +342,36 @@ function FloatingLinkEditor({
                 </>
             ) : (
                 <>
+                    <Button
+                        className="link-close"
+                        role="button"
+                        tabIndex={0}
+                        title="Close"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => {
+                            setIsLink(false);
+                        }}
+                    >
+                        <CloseIcon />
+                    </Button>
                     <a
                         href={sanitizeUrl(linkUrl)}
                         target="_blank"
                         rel="noopener noreferrer">
                         {linkUrl}
                     </a>
+                    {isYouTubeUrl && (
+                        <Button
+                            className="link-youtube"
+                            role="button"
+                            tabIndex={0}
+                            title="Convert to YouTube embed"
+                            onMouseDown={(event) => event.preventDefault()}
+                            onClick={handleConvertToYouTube}
+                        >
+                            <YouTubeIcon />
+                        </Button>
+                    )}
                     <Button
                         className="link-edit"
                         role="button"
@@ -345,11 +417,8 @@ function useFloatingLinkEditorToolbar(
             const linkParent = $findMatchingParent(node, $isLinkNode);
             const autoLinkParent = $findMatchingParent(node, $isAutoLinkNode);
 
-            // We don't want this menu to open for auto links.
-            // Because auto link text editing is not working?
-            // TODO: Fix auto link text editing.
-            if (linkParent != null && autoLinkParent == null) {
-                // if (linkParent != null) {
+            // Show for both regular links and auto links
+            if (linkParent != null || autoLinkParent != null) {
                 setIsLink(true);
             } else {
                 setIsLink(false);

@@ -1,3 +1,11 @@
+/**
+ * @fileoverview AutocompletePlugin - Word autocomplete suggestions.
+ * @module AutocompletePlugin
+ * 
+ * Provides autocomplete suggestions as users type, with keyboard and
+ * swipe gesture support for accepting suggestions.
+ */
+
 import * as React from 'react';
 import { useContext } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';

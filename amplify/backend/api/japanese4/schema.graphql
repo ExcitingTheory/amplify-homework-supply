@@ -119,6 +119,7 @@ type File @model @auth(
   hex: String
   byHex: String @index(name: "byHex")
   thumbnail: String # The path to the thumbnail in S3
+  waveformData: AWSJSON # Pre-calculated waveform amplitude data for audio files
   # many to many relationship with units
   units: [Unit] @manyToMany(relationName: "UnitFile")
   words: [Word] @manyToMany(relationName: "WordFile")

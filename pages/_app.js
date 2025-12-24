@@ -12,6 +12,7 @@ import { Amplify } from 'aws-amplify';
 import '../src/components/Editor3/theme.css';
 import '../src/components/Editor3/components/LanguageEditorTheme.css';
 import { AuthModeStrategyType } from 'aws-amplify/datastore';
+import { FilesProvider } from '../src/context/fileContext';
 // import { fetchAuthSession } from 'aws-amplify/auth';
 
 // Client-side cache, shared for the whole session of the user in the browser.
@@ -70,7 +71,9 @@ export default function MyApp(props) {
       <ThemeProvider theme={theme}>
         {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
         <CssBaseline />
-        <Component {...pageProps} />
+        <FilesProvider>
+          <Component {...pageProps} />
+        </FilesProvider>
       </ThemeProvider>
     </CacheProvider>
   );

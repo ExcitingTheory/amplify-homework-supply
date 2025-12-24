@@ -1,3 +1,11 @@
+/**
+ * @fileoverview TablePlugin - Table creation and management functionality.
+ * @module TablePlugin
+ * 
+ * Provides table insertion, cell editing context, and modal UI for
+ * creating tables with configurable rows and columns.
+ */
+
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {INSERT_TABLE_COMMAND} from '@lexical/table';
 import {

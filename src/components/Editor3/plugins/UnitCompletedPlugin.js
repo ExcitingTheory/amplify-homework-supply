@@ -1,3 +1,11 @@
+/**
+ * @fileoverview UnitCompletedPlugin - Displays unit completion modal.
+ * @module UnitCompletedPlugin
+ * 
+ * Shows a congratulatory modal when a unit is completed, displaying
+ * the unit name and top grades/scores.
+ */
+
 import * as React from 'react';
 import { useEffect, useContext } from 'react';
 
@@ -11,6 +19,14 @@ import {
 } from '@mui/material';
 
 
+/**
+ * UnitCompletedPlugin - Displays modal when unit is completed.
+ * 
+ * Shows a modal with unit name and recent grades when the user completes
+ * all exercises in a unit. Controlled by showUnitComplete from UnitContext.
+ * 
+ * @returns {JSX.Element} Unit completion modal component
+ */
 export default function UnitCompletedPlugin() {
 
     const {

@@ -1,3 +1,11 @@
+/**
+ * @fileoverview ColorPicker - Color selection UI component.
+ * @module ColorPicker
+ * 
+ * Provides an HSV color picker with predefined basic colors and
+ * custom color selection for text/background formatting.
+ */
+
 import {useEffect, useMemo, useRef, useState} from 'react';
 import * as React from 'react';
 

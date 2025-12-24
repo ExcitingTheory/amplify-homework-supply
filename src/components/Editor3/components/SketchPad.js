@@ -153,7 +153,7 @@ const SketchPad = ({ excalidrawData,
                 setFeedback(data);
             } catch (error) {
                 console.error(error);
-                setFeedback(data);
+                setFeedback({ error: error.message });
             }       
 
         }}

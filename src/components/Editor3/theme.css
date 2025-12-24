@@ -85,7 +85,7 @@ ul li.editor-listItem.editor-nested-listitem {
     height: 4px;
     position: absolute;
     left: 0;
-    top: 9.5rem;
+    top: 0;
     opacity: 0;
     will-change: transform;
   }

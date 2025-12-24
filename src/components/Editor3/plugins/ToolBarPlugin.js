@@ -1,3 +1,16 @@
+/**
+ * @fileoverview ToolBarPlugin - Rich text editor toolbar with formatting controls.
+ * @module ToolBarPlugin
+ * 
+ * Provides a comprehensive toolbar for the Lexical editor with controls for:
+ * - Text formatting (bold, italic, underline, strikethrough, subscript, superscript)
+ * - Block types (headings, lists, quotes, code)
+ * - Alignment and indentation
+ * - Links and embeds
+ * - Custom educational nodes (quizzes, answers, word blocks, etc.)
+ * - Undo/redo operations
+ */
+
 import {
     $createCodeNode,
     $isCodeNode,

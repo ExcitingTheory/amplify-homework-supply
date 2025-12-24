@@ -1,3 +1,11 @@
+/**
+ * @fileoverview ToolBarRoPlugin - Read-only toolbar for viewing educational content.
+ * @module ToolBarRoPlugin
+ * 
+ * Provides a read-only toolbar that displays unit information and a countdown timer.
+ * Used when displaying content in read-only/student view mode.
+ */
+
 import * as React from 'react';
 import { useEffect, useContext, useState } from 'react';
 import Head from 'next/head'

@@ -1,3 +1,11 @@
+/**
+ * @fileoverview ImagesPlugin - Image upload and embedding functionality.
+ * @module ImagesPlugin
+ * 
+ * Handles image insertion via URL or file upload, drag-and-drop support,
+ * and image node management in the editor.
+ */
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $wrapNodeInElement, mergeRegister } from '@lexical/utils';
 import {

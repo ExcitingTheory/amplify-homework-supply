@@ -1,3 +1,11 @@
+/**
+ * @fileoverview WordBlockPlugin - Displays vocabulary word information in block format.
+ * @module WordBlockPlugin
+ * 
+ * Creates an interactive word block that displays a vocabulary word's phrase,
+ * pronunciation, and definition from the dictionary context.
+ */
+
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {$insertNodeToNearestRoot} from '@lexical/utils';
 import {COMMAND_PRIORITY_EDITOR, createCommand} from 'lexical';
@@ -10,6 +18,16 @@ import { useEffect, useContext } from 'react';
 
 import DictionaryContext from '../../../context/dictionaryContext';
 
+  /**
+   * WordBlockComponent - Displays word information in a block.
+   * 
+   * @param {Object} props - Component props
+   * @param {string} props.className - CSS className for styling
+   * @param {string} props.format - Block alignment format
+   * @param {string} props.nodeKey - Lexical node key
+   * @param {string} props.wordID - Dictionary word identifier
+   * @returns {JSX.Element} Word block component
+   */
   function WordBlockComponent({
     className,
     format,
@@ -42,6 +60,12 @@ import DictionaryContext from '../../../context/dictionaryContext';
   ){
     const wordID = domNode.getAttribute('data-lexical-word-block');
     if (wordID) {
+  /**
+   * WordBlockNode - Lexical decorator block node for displaying vocabulary words.
+   * 
+   * @class
+   * @extends {DecoratorBlockNode}
+   */
       const node = $createWordBlockNode(wordID);
       return {node};
     }
@@ -131,20 +155,44 @@ import DictionaryContext from '../../../context/dictionaryContext';
     }
   }
   
+  /**
+   * Factory function to create a WordBlockNode.
+   * 
+   * @param {string} wordID - Dictionary word identifier
+   * @returns {WordBlockNode} New word block node instance
+   */
   export function $createWordBlockNode(wordID) {
     return new WordBlockNode(wordID);
   }
   
+  /**
+   * Type guard for WordBlockNode.
+   * 
+   * @param {LexicalNode} node - Node to check
+   * @returns {boolean} True if node is a WordBlockNode
+   */
   export function $isWordBlockNode(
     node,
   ) {
     return node instanceof WordBlockNode;
   }
 
+/**
+ * Command to insert a word block into the editor.
+ * @type {LexicalCommand}
+ */
 export const INSERT_WORD_BLOCK_COMMAND = createCommand(
   'INSERT_WORD_BLOCK_COMMAND',
 );
 
+/**
+ * WordBlockPlugin - Registers word block functionality.
+ * 
+ * Registers the WordBlockNode with the editor and handles INSERT_WORD_BLOCK_COMMAND
+ * to insert vocabulary word blocks into the editor.
+ * 
+ * @returns {null} Plugin returns null
+ */
 export default function WordBlockPlugin(){
   const [editor] = useLexicalComposerContext();
 

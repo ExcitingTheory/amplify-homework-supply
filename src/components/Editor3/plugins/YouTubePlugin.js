@@ -1,3 +1,12 @@
+/**
+ * @fileoverview YouTubePlugin - Embeds YouTube videos in the editor.
+ * 
+ * This plugin provides YouTube video embedding with privacy-enhanced mode,
+ * responsive sizing, and alignment controls.
+ * 
+ * @module YouTubePlugin
+ */
+
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {$insertNodeToNearestRoot} from '@lexical/utils';
 import {COMMAND_PRIORITY_EDITOR, createCommand} from 'lexical';
@@ -9,6 +18,16 @@ DecoratorBlockNode,
 } from '@lexical/react/LexicalDecoratorBlockNode';
 import * as React from 'react';
 
+/**
+ * YouTubeComponent - Renders an embedded YouTube video iframe.
+ * 
+ * @param {Object} props - Component props
+ * @param {string} props.className - CSS class name
+ * @param {string} props.format - Block format/alignment
+ * @param {string} props.nodeKey - Lexical node key
+ * @param {string} props.videoID - YouTube video identifier
+ * @returns {JSX.Element} YouTube iframe component
+ */
   function YouTubeComponent({
     className,
     format,
@@ -33,6 +52,12 @@ import * as React from 'react';
     );
   }
   
+  /**
+   * Converts a DOM element into a YouTubeNode.
+   * 
+   * @param {HTMLElement} domNode - DOM element with YouTube video ID
+   * @returns {{node: YouTubeNode} | null} Created node or null
+   */
   function convertYoutubeElement(
     domNode,
   ){
@@ -44,6 +69,15 @@ import * as React from 'react';
     return null;
   }
   
+  /**
+   * YouTubeNode - Lexical DecoratorBlockNode for YouTube video embeds.
+   * 
+   * Embeds YouTube videos with privacy-enhanced mode (youtube-nocookie.com),
+   * responsive sizing, and full-screen support.
+   * 
+   * @class YouTubeNode
+   * @extends {DecoratorBlockNode}
+   */
   export class YouTubeNode extends DecoratorBlockNode {
     __id;
   
@@ -140,20 +174,44 @@ import * as React from 'react';
     }
   }
   
+  /**
+   * Factory function to create a YouTubeNode.
+   * 
+   * @param {string} videoID - YouTube video identifier
+   * @returns {YouTubeNode} New YouTube node instance
+   */
   export function $createYouTubeNode(videoID) {
     return new YouTubeNode(videoID);
   }
   
+  /**
+   * Type guard for YouTubeNode.
+   * 
+   * @param {LexicalNode} node - Node to check
+   * @returns {boolean} True if node is a YouTubeNode
+   */
   export function $isYouTubeNode(
     node,
   ) {
     return node instanceof YouTubeNode;
   }
 
+/**
+ * Command to insert a YouTube video embed.
+ * @type {LexicalCommand}
+ */
 export const INSERT_YOUTUBE_COMMAND = createCommand(
   'INSERT_YOUTUBE_COMMAND',
 );
 
+/**
+ * YouTubePlugin - Registers YouTube embed functionality.
+ * 
+ * Registers the YouTubeNode with the editor and handles INSERT_YOUTUBE_COMMAND
+ * to insert YouTube embeds into the editor.
+ * 
+ * @returns {null} Plugin returns null
+ */
 export default function YouTubePlugin(){
   const [editor] = useLexicalComposerContext();
 
