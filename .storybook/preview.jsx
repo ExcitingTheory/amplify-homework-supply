@@ -3,6 +3,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme } from '@mui/material/styles';
 import '../src/components/Editor3/theme.css';
+import '../src/components/Editor3/components/LanguageEditorTheme.css';
 
 // Import real contexts
 import FilesContext from '../src/context/fileContext';
