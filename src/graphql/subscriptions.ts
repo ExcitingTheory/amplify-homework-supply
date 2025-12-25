@@ -369,6 +369,7 @@ export const onCreateFile = /* GraphQL */ `subscription OnCreateFile(
     hex
     byHex
     thumbnail
+    waveformData
     units {
       items {
         id
@@ -454,6 +455,7 @@ export const onUpdateFile = /* GraphQL */ `subscription OnUpdateFile(
     hex
     byHex
     thumbnail
+    waveformData
     units {
       items {
         id
@@ -539,6 +541,7 @@ export const onDeleteFile = /* GraphQL */ `subscription OnDeleteFile(
     hex
     byHex
     thumbnail
+    waveformData
     units {
       items {
         id
@@ -2253,6 +2256,7 @@ export const onCreateQuestionFile = /* GraphQL */ `subscription OnCreateQuestion
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -2355,6 +2359,7 @@ export const onUpdateQuestionFile = /* GraphQL */ `subscription OnUpdateQuestion
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -2457,6 +2462,7 @@ export const onDeleteQuestionFile = /* GraphQL */ `subscription OnDeleteQuestion
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -2518,6 +2524,7 @@ export const onCreateUnitFile = /* GraphQL */ `subscription OnCreateUnitFile(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -2623,6 +2630,7 @@ export const onUpdateUnitFile = /* GraphQL */ `subscription OnUpdateUnitFile(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -2728,6 +2736,7 @@ export const onDeleteUnitFile = /* GraphQL */ `subscription OnDeleteUnitFile(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -2833,6 +2842,7 @@ export const onCreateWordFile = /* GraphQL */ `subscription OnCreateWordFile(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -2926,6 +2936,7 @@ export const onUpdateWordFile = /* GraphQL */ `subscription OnUpdateWordFile(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -3019,6 +3030,7 @@ export const onDeleteWordFile = /* GraphQL */ `subscription OnDeleteWordFile(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt

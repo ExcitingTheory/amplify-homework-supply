@@ -259,9 +259,19 @@ export const Learn = ({
               definition={definition}
               correctAnswer={{ ..._correctWord, progressAssignment, sendFail, sendPass }} />;
             if (dropAnswerVisibility.includes(_correctWord?.id)) {
-              answerSection = <ListItem key={_correctWord?.id} style={{ margin: '0.25rem 0', padding: '0.5rem', }}>
-                <ListItemText key={id} primary={`${phrase} (${pronunciation})`}
-                  secondary={definition} />
+              answerSection = <ListItem 
+                key={_correctWord?.id} 
+                style={{ 
+                  margin: '0.25rem 0', 
+                  padding: '0.5rem',
+                  backgroundColor: '#e8f5e9',
+                  borderRadius: '4px',
+                  border: '1px solid #4caf50'
+                }}>
+                <ListItemText 
+                  key={id} 
+                  primary={<span style={{ color: '#2e7d32', fontWeight: 500 }}>{phrase} ({pronunciation}) ✓</span>}
+                  secondary={<span style={{ color: '#1b5e20' }}>{definition}</span>} />
               </ListItem>;
 
             }

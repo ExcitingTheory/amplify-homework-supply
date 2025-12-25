@@ -1,54 +1,29 @@
-[15:13:42.396] [INFO] storybook v10.1.10
-[15:13:43.836] [DEBUG] Getting package.json info for /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/package.json...
-[15:13:44.708] [DEBUG] Serving static files from [36mpublic[39m at [36m/[39m
-[15:13:44.721] [INFO] Starting...
-[15:13:44.750] [WARN] unable to find package.json for @mui/icons-material
-[15:13:44.753] [WARN] unable to find package.json for openai
-[15:13:44.768] [WARN] No story files found for the specified pattern: [34msrc/**/*.mdx[39m
-[15:13:45.298] [DEBUG] Starting preview..
-[15:13:45.339] [INFO] Addon-docs: using MDX3
-[15:13:45.372] [INFO] Using implicit CSS loaders
-[15:13:45.705] [INFO] Using SWC as compiler
-[15:13:45.913] [INFO] Using default Webpack5 setup
-[15:13:46.195] [INFO] Storybook collects completely anonymous usage telemetry. We use it to shape Storybook's roadmap and prioritize features. You can learn more, including how to opt out, at https://storybook.js.org/telemetry
-[15:13:46.444] [DEBUG] Using tsconfig paths for react-docgen
-[15:14:24.128] [WARN] export 'UnitWord' (imported as 'UnitWord') was not found in '../../../models' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.129] [WARN] export 'UnitWord' (imported as 'UnitWord') was not found in '../../../models' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.129] [WARN] export 'UnitWord' (imported as 'UnitWord') was not found in '../../../models' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.130] [WARN] export 'fetchAuthSession' (imported as 'fetchAuthSession') was not found in 'aws-amplify/auth' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.131] [WARN] export 'fetchAuthSession' (imported as 'fetchAuthSession') was not found in 'aws-amplify/auth' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.131] [WARN] export 'File' (imported as 'FileModel') was not found in '../../../models' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.132] [WARN] export 'UnitFile' (imported as 'UnitFile') was not found in '../../../models' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.132] [WARN] export 'UnitWord' (imported as 'UnitWord') was not found in '../../../models' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.132] [WARN] export 'UnitWord' (imported as 'UnitWord') was not found in '../../../models' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.132] [WARN] export 'UnitWord' (imported as 'UnitWord') was not found in '../../../models' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.132] [WARN] export 'UnitFile' (imported as 'UnitFile') was not found in '../../../models' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.133] [WARN] export 'File' (imported as 'File') was not found in '../../../models' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.133] [WARN] export 'UnitFile' (imported as 'UnitFile') was not found in '../../../models' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.133] [WARN] export 'UnitFile' (imported as 'UnitFile') was not found in '../../../models' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.133] [WARN] export 'fetchAuthSession' (imported as 'fetchAuthSession') was not found in 'aws-amplify/auth' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.133] [WARN] export 'File' (imported as 'File') was not found in '../../../models' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.133] [WARN] export 'signOut' (imported as 'signOut') was not found in 'aws-amplify/auth' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.134] [WARN] export 'getCurrentUser' (imported as 'getCurrentUser') was not found in 'aws-amplify/auth' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.134] [WARN] export 'fetchAuthSession' (imported as 'fetchAuthSession') was not found in 'aws-amplify/auth' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.134] [WARN] export 'fetchAuthSession' (imported as 'fetchAuthSession') was not found in 'aws-amplify/auth' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.134] [WARN] export 'getCurrentUser' (imported as 'getCurrentUser') was not found in 'aws-amplify/auth' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.134] [WARN] export 'fetchAuthSession' (imported as 'fetchAuthSession') was not found in 'aws-amplify/auth' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.134] [WARN] export 'File' (imported as 'File') was not found in '../models' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.135] [WARN] export 'getCurrentUser' (imported as 'getCurrentUser') was not found in 'aws-amplify/auth' (possible exports: Assignment, Assistant, DataStore, Grade, Question, Section, SortDirection, Unit, Word, fetchUserAttributes, seedMockUnit)
-[15:14:24.136] [ERROR] Failed to build the preview
-[15:14:24.141] [WARN] Force closed preview build
-[15:14:24.142] [ERROR] [38;2;241;97;97mSB_BUILDER-WEBPACK5_0003 (WebpackCompilationError): There were problems when compiling your code with Webpack.
-Run Storybook with --debug-webpack for more information.[39m
-    at starter (file://./node_modules/@storybook/builder-webpack5/dist/index.js:799:11)
+[21:38:04.552] [INFO] storybook v10.1.10
+[21:38:05.128] [DEBUG] Getting package.json info for /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/package.json...
+[21:38:06.569] [DEBUG] Serving static files from [36mpublic[39m at [36m/[39m
+[21:38:06.580] [INFO] Starting...
+[21:38:06.613] [WARN] unable to find package.json for @mui/icons-material
+[21:38:06.617] [WARN] unable to find package.json for openai
+[21:38:06.639] [WARN] No story files found for the specified pattern: [34msrc/**/*.mdx[39m
+[21:38:07.263] [DEBUG] Starting preview..
+[21:38:07.314] [INFO] Addon-docs: using MDX3
+[21:38:07.351] [INFO] Using implicit CSS loaders
+[21:38:07.950] [INFO] Using SWC as compiler
+[21:38:08.174] [INFO] Using default Webpack5 setup
+[21:38:08.603] [ERROR] Failed to build the preview
+[21:38:08.605] [ERROR] [38;2;241;97;97mValidationError: Invalid configuration object. Webpack has been initialized using a configuration object that does not match the API schema.
+ - configuration.resolve has an unknown property 'dedupe'. These properties are valid:
+   object { alias?, aliasFields?, byDependency?, cache?, cachePredicate?, cacheWithContext?, conditionNames?, descriptionFiles?, enforceExtension?, exportsFields?, extensionAlias?, extensions?, fallback?, fileSystem?, fullySpecified?, importsFields?, mainFields?, mainFiles?, modules?, plugins?, preferAbsolute?, preferRelative?, resolver?, restrictions?, roots?, symlinks?, unsafeCache?, useSyncFileSystemCalls? }
+   -> Options object for resolving requests.[39m
+    at validate (./node_modules/schema-utils/dist/validate.js:213:11)
+    at validateSchema (./node_modules/webpack/lib/validateSchema.js:78:2)
+    at create (./node_modules/webpack/lib/webpack.js:150:23)
+    at webpack (./node_modules/webpack/lib/webpack.js:203:31)
+    at f (./node_modules/webpack/lib/index.js:99:21)
+    at starter (file://./node_modules/@storybook/builder-webpack5/dist/index.js:757:18)
     at starter.next (<anonymous>)
     at Module.start (file://./node_modules/@storybook/builder-webpack5/dist/index.js:857:34)
-    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async storybookDevServer (file://./node_modules/storybook/dist/core-server/index.js:6806:82)
     at async buildOrThrow (file://./node_modules/storybook/dist/core-server/index.js:5555:12)
-    at async buildDevStandalone (file://./node_modules/storybook/dist/core-server/index.js:7208:66)
-    at async withTelemetry (file://./node_modules/storybook/dist/_node-chunks/chunk-PGCRO4IZ.js:209:12)
-    at async dev (file://./node_modules/storybook/dist/bin/core.js:2734:3)
-    at async _Command.<anonymous> (file://./node_modules/storybook/dist/bin/core.js:2801:92)
-[15:14:24.143] [WARN] Broken build, fix the error above.
+[21:38:08.607] [WARN] Broken build, fix the error above.
 You may need to refresh the browser.

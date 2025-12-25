@@ -39,10 +39,27 @@ type Grade @model @auth(rules: [
   complete: Boolean
   owner: String
   instructor: String
+  identityId: String
   unitVersion: Int
   data: AWSJSON
+  feedback: AWSJSON
+  files: [String]
   unitID: ID @index(name: "byUnit")
   assignmentID: ID @index(name: "byAssignment")
+}
+
+type Query {
+  getStudentSubmissionUrl(gradeId: ID!, submissionKey: String!): SubmissionUrl
+    @function(name: "getStudentSubmission-${env}")
+    @auth(rules: [
+      { allow: groups, groups: ["Instructors", "Admins"] }
+    ])
+}
+
+type SubmissionUrl {
+  url: String!
+  expiresAt: AWSDateTime!
+  metadata: AWSJSON
 }
 
 type Unit @model @auth(rules: [

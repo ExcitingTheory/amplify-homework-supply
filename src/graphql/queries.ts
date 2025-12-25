@@ -527,6 +527,7 @@ export const getFile = /* GraphQL */ `query GetFile($id: ID!) {
     hex
     byHex
     thumbnail
+    waveformData
     units {
       items {
         id
@@ -611,6 +612,7 @@ export const listFiles = /* GraphQL */ `query ListFiles(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -669,6 +671,7 @@ export const syncFiles = /* GraphQL */ `query SyncFiles(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -729,6 +732,7 @@ export const filesByByHex = /* GraphQL */ `query FilesByByHex(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -2605,6 +2609,7 @@ export const getQuestionFile = /* GraphQL */ `query GetQuestionFile($id: ID!) {
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -2689,6 +2694,7 @@ export const listQuestionFiles = /* GraphQL */ `query ListQuestionFiles(
         hex
         byHex
         thumbnail
+        waveformData
         createdAt
         updatedAt
         _version
@@ -2768,6 +2774,7 @@ export const syncQuestionFiles = /* GraphQL */ `query SyncQuestionFiles(
         hex
         byHex
         thumbnail
+        waveformData
         createdAt
         updatedAt
         _version
@@ -2849,6 +2856,7 @@ export const questionFilesByQuestionId = /* GraphQL */ `query QuestionFilesByQue
         hex
         byHex
         thumbnail
+        waveformData
         createdAt
         updatedAt
         _version
@@ -2930,6 +2938,7 @@ export const questionFilesByFileId = /* GraphQL */ `query QuestionFilesByFileId(
         hex
         byHex
         thumbnail
+        waveformData
         createdAt
         updatedAt
         _version
@@ -2977,6 +2986,7 @@ export const getUnitFile = /* GraphQL */ `query GetUnitFile($id: ID!) {
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -3084,6 +3094,7 @@ export const listUnitFiles = /* GraphQL */ `query ListUnitFiles(
         hex
         byHex
         thumbnail
+        waveformData
         createdAt
         updatedAt
         _version
@@ -3161,6 +3172,7 @@ export const syncUnitFiles = /* GraphQL */ `query SyncUnitFiles(
         hex
         byHex
         thumbnail
+        waveformData
         createdAt
         updatedAt
         _version
@@ -3240,6 +3252,7 @@ export const unitFilesByFileId = /* GraphQL */ `query UnitFilesByFileId(
         hex
         byHex
         thumbnail
+        waveformData
         createdAt
         updatedAt
         _version
@@ -3319,6 +3332,7 @@ export const unitFilesByUnitId = /* GraphQL */ `query UnitFilesByUnitId(
         hex
         byHex
         thumbnail
+        waveformData
         createdAt
         updatedAt
         _version
@@ -3385,6 +3399,7 @@ export const getWordFile = /* GraphQL */ `query GetWordFile($id: ID!) {
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -3480,6 +3495,7 @@ export const listWordFiles = /* GraphQL */ `query ListWordFiles(
         hex
         byHex
         thumbnail
+        waveformData
         createdAt
         updatedAt
         _version
@@ -3555,6 +3571,7 @@ export const syncWordFiles = /* GraphQL */ `query SyncWordFiles(
         hex
         byHex
         thumbnail
+        waveformData
         createdAt
         updatedAt
         _version
@@ -3632,6 +3649,7 @@ export const wordFilesByFileId = /* GraphQL */ `query WordFilesByFileId(
         hex
         byHex
         thumbnail
+        waveformData
         createdAt
         updatedAt
         _version
@@ -3709,6 +3727,7 @@ export const wordFilesByWordId = /* GraphQL */ `query WordFilesByWordId(
         hex
         byHex
         thumbnail
+        waveformData
         createdAt
         updatedAt
         _version

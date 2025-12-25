@@ -465,6 +465,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "waveformData": {
+                    "name": "waveformData",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "units": {
                     "name": "units",
                     "isArray": true,
@@ -2372,5 +2379,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "6c6ddb1531d6c3eb8e71c3b383cfbbf4"
+    "version": "d1138169e5c06a1148eb6677cb1984ac"
 };

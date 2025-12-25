@@ -14,10 +14,10 @@ import { useTheme } from '@mui/material/styles';
 
 import { hexToRgb } from "../utils/hexToRgb";
 
-import { uploadData } from 'aws-amplify/storage';
 import { verifyAudioUrl } from '../graphql/queries';
 import getCachedUrl from '../utils/getCachedUrl';
 import UnitContext from '../context/unitContext';
+import { uploadStudentSubmission } from '../utils/userSubmissionStorage';
 
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
@@ -38,6 +38,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
   const [recording, setRecording] = React.useState(false);
   const [mediaRecorder, setMediaRecorder] = React.useState(null);
   const [audioBlob, setAudioBlob] = React.useState(null);
+  const [waveformData, setWaveformData] = React.useState(null);
   // const [objectUrl, setObjectUrl] = React.useState(null);
   const audioRef = React.useRef(null);
   const [isPlaying, setIsPlaying] = React.useState(false);
@@ -107,54 +108,64 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
           gradeID = grade.id;
         }
 
-        const newFilename = `user-input-audio/${gradeID}-${Date.now()}.mp3`;
-
+        // Use the new user submission storage with private access
+        const nodeKey = qk || 'unknown';
+        
+        console.log('[RecordingStudio2] Uploading student submission...');
+        
         // Calculate waveform data before upload
         const waveformData = await calculateWaveformData(audioBlob, 600);
-
-        // get identityId and idToken
-
-        const result = await uploadData({
-          key: newFilename,
-          data: audioBlob,
-          options:  {
-            contentType: 'audio/mp3',
-            // contentLength: file.size,
-            identityId,
-            accessLevel: 'protected',
-            progressCallback(progress) {
-              console.log(`Uploaded: ${progress.loaded}/${progress.total}`);
-  
-              setFileOperations((prev) => {
-                const newFileOperations = [...prev];
-                newFileOperations[fileInput.index].progress = Math.round(progress.loaded / progress.total * 100) + '%';
-                return newFileOperations;
-              })
-            }
-          }
-          }).result;
-          console.log('result!!___', result);
         
-          // Save file to database with waveform data
-          const { File: FileModel } = await import('../models');
-          const { DataStore } = await import('aws-amplify/datastore');
-          
-          const newFile = await DataStore.save(new FileModel({
-            path: newFilename,
-            identityId,
-            name: `Recording-${Date.now()}.mp3`,
-            size: audioBlob.size,
-            mimeType: 'audio/mp3',
-            level: 'PROTECTED',
+        // Upload to private user-submissions storage
+        const uploadResult = await uploadStudentSubmission({
+          file: audioBlob,
+          gradeId: gradeID,
+          nodeKey: nodeKey,
+          fileType: 'mp3',
+          metadata: {
             waveformData: JSON.stringify(waveformData),
-          }));
-          
-          console.log('Saved file with waveform data:', newFile);
+            phrase: phrase || '',
+            definition: definition || '',
+          }
+        });
         
-          // sign the audio file url
-
-          const url = await getCachedUrl(newFilename, 'protected', identityId);
-        // add url to grade files[] attribute?
+        console.log('[RecordingStudio2] Upload successful:', uploadResult);
+        
+        // Save file metadata to DataStore
+        const { File: FileModel } = await import('../models');
+        const { DataStore } = await import('aws-amplify/datastore');
+        
+        const newFile = await DataStore.save(new FileModel({
+          path: uploadResult.path,
+          identityId,
+          name: uploadResult.filename,
+          size: audioBlob.size,
+          mimeType: 'audio/mp3',
+          level: 'PRIVATE',
+          waveformData: JSON.stringify(waveformData),
+        }));
+        
+        console.log('[RecordingStudio2] Saved file metadata:', newFile);
+        
+        // Update grade with file reference and identityId
+        const { Grade: GradeModel } = await import('../models');
+        if (grade && grade.id) {
+          await DataStore.save(
+            GradeModel.copyOf(grade, updated => {
+              const existingFiles = updated.files || [];
+              updated.files = [...existingFiles, uploadResult.path];
+              // Ensure identityId is set for file access
+              if (!updated.identityId) {
+                updated.identityId = identityId;
+              }
+            })
+          );
+          console.log('[RecordingStudio2] Added file to grade.files[]:', uploadResult.path);
+        }
+        
+        // For verification, students can access their own private files directly
+        // Teachers will use the getStudentSubmissionUrl GraphQL query
+        const url = await getCachedUrl(uploadResult.path, 'private', identityId);
 
         // verify the audio file
 
@@ -314,10 +325,18 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
           audioChunks.push(event.data);
         });
         
-        mediaRecorder.addEventListener("stop", () => {
+        mediaRecorder.addEventListener("stop", async () => {
           const _audioBlob = new Blob(audioChunks);
           setAudioBlob(_audioBlob);
-          // make waveform of the full audio here?
+          
+          // Calculate waveform data for the recorded audio
+          try {
+            const waveform = await calculateWaveformData(_audioBlob, 600);
+            setWaveformData(waveform);
+            console.log('Calculated waveform for recording:', waveform);
+          } catch (error) {
+            console.error('Error calculating waveform:', error);
+          }
         });
 
         const draw = () => {
@@ -469,6 +488,16 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
         <Typography variant="caption" color="text.secondary">Static Waveform Preview:</Typography>
         <StaticWaveform 
           file={audioFile} 
+          width={600} 
+          height={80}
+        />
+      </Box>
+    )}
+    {waveformData && audioBlob && (
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="caption" color="text.secondary">Recorded Audio Waveform:</Typography>
+        <StaticWaveform 
+          waveformData={waveformData} 
           width={600} 
           height={80}
         />

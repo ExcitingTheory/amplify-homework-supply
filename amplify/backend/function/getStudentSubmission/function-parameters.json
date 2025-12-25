@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "api": {
+      "japanese4": [
+        "Query"
+      ]
+    },
+    "storage": {
+      "files": [
+        "read"
+      ],
+      "File:@model(appsync)": [
+        "read"
+      ],
+      "Grade:@model(appsync)": [
+        "read"
+      ],
+      "Unit:@model(appsync)": [
+        "read"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}

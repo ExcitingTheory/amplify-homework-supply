@@ -17,7 +17,6 @@ import UnitContext from '../../../context/unitContext'
 export default function QuestionBlockRo(props) {
   const { nodeKey, data } = props
   const { grade, saveGrade } = React.useContext(UnitContext)
-  let isLocked = false
   console.log('QuestionBlockRo.grade', grade)
   const inProgress = grade?.data?.[nodeKey] || {}
 
@@ -38,19 +37,33 @@ export default function QuestionBlockRo(props) {
       }
     });
 
-  console.log('QuestionBlock.nodeKey', nodeKey)
+  console.log('QuestionBlock.nodeKey', nodeKey, 'type:', typeof nodeKey)
   console.log('QuestionBlock.questionContent', questionContent)
+  console.log('QuestionBlock.grade.data keys:', grade?.data ? Object.keys(grade.data) : 'no data')
+  console.log('QuestionBlock.grade.data[nodeKey]:', grade?.data?.[nodeKey])
   console.log('QuestionBlockRo.inProgress', inProgress)
 
   const accuracy = inProgress?.accuracy || 0
-  const complete = inProgress?.complete || 0
+  const complete = inProgress?.complete || false
   const percentComplete = inProgress?.percentComplete || 0
   const attemptedAnswers = inProgress?.attemptedAnswers || []
   const correctAnswers = inProgress?.correctAnswers || []
+  
+  // Calculate if quiz should be locked
+  const correctArrLen = Object.entries(correct).length || 0
+  const attemptedCount = Object.keys(attemptedAnswers).length
+  const isLocked = complete || attemptedCount >= correctArrLen
 
   const gradeAnswer = async (e, thisKey, thisAnswer) => {
     // e.preventDefault();
     // e.stopPropagation();
+    
+    // Don't allow changes if already locked
+    if (isLocked) {
+      e.preventDefault();
+      return;
+    }
+    
     const { correct: isCorrect } = thisAnswer
     const isChecked = e.target.checked;
 
@@ -59,7 +72,6 @@ export default function QuestionBlockRo(props) {
     console.log('meow: ?thisAnswer', thisAnswer)
 
     const savedGrade = grade?.data
-    const complete = savedGrade?.complete || false
     // let { saveGrade } = this.props;
     let thisExerciseDone = false
 
@@ -82,9 +94,8 @@ export default function QuestionBlockRo(props) {
     console.log('attemptedArr.length === correctArrLen', attemptedArr.length, correctArrLen)
     console.log('verifiedArr.length === correctArrLen', verifiedArr.length, correctArrLen)
 
-    if (attemptedArr.length >= correctArrLen || 
-      verifiedArr.length >= correctArrLen || complete) {
-      isLocked = true
+    // Lock when number of attempts equals number of correct answers
+    if (attemptedArr.length >= correctArrLen) {
       thisExerciseDone = true
     }
 
@@ -110,22 +121,28 @@ export default function QuestionBlockRo(props) {
     let checkboxes
     if (questionContent) {
       checkboxes = questionContent.map((data, key) => {
-        let _attemptedAnswers = attemptedAnswers[key]
-        if (!_attemptedAnswers) {
-          _attemptedAnswers = {}
-        }
-        let checked = false
-        if (_attemptedAnswers[key]) {
-          checked = true
-        }
-        return (<FormControlLabel key={key} control={<Checkbox checked={checked} disabled={isLocked} onClick={async (e) => { gradeAnswer(e, key, data) }} />} label={data.answer} />)
+        // Check if this specific answer has been attempted
+        const checked = attemptedAnswers[key] !== undefined;
+        
+        return (<FormControlLabel 
+          key={key} 
+          control={
+            <Checkbox 
+              checked={checked} 
+              disabled={isLocked} 
+              onChange={async (e) => { gradeAnswer(e, key, data) }} 
+            />
+          } 
+          label={data.answer} 
+        />)
       });
     }
 
     return (
       <div className={className}
-        contentEditable={false} // <== !!!
-        readOnly // <== !!!>
+        // Don't use contentEditable={false} as it blocks child interactions
+        suppressContentEditableWarning={true}
+        style={{ userSelect: 'none' }}
       >
         <Card elevation={2} sx={{ flexGrow: 1, marginBottom: '1rem' }}>
           <Toolbar>

@@ -5,7 +5,7 @@
  **************************************************************************/
 
 import * as React from "react";
-import { GridProps, SelectFieldProps, SwitchFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
+import { GridProps, SelectFieldProps, SwitchFieldProps, TextAreaFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
 import { File } from "../models";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
@@ -39,6 +39,7 @@ export declare type FileUpdateFormInputValues = {
     hex?: string;
     byHex?: string;
     thumbnail?: string;
+    waveformData?: string;
 };
 export declare type FileUpdateFormValidationValues = {
     name?: ValidationFunction<string>;
@@ -57,6 +58,7 @@ export declare type FileUpdateFormValidationValues = {
     hex?: ValidationFunction<string>;
     byHex?: ValidationFunction<string>;
     thumbnail?: ValidationFunction<string>;
+    waveformData?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type FileUpdateFormOverridesProps = {
@@ -77,6 +79,7 @@ export declare type FileUpdateFormOverridesProps = {
     hex?: PrimitiveOverrideProps<TextFieldProps>;
     byHex?: PrimitiveOverrideProps<TextFieldProps>;
     thumbnail?: PrimitiveOverrideProps<TextFieldProps>;
+    waveformData?: PrimitiveOverrideProps<TextAreaFieldProps>;
 } & EscapeHatchProps;
 export declare type FileUpdateFormProps = React.PropsWithChildren<{
     overrides?: FileUpdateFormOverridesProps | undefined | null;

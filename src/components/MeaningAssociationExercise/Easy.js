@@ -39,6 +39,14 @@ export const Easy = ({
   const { grade, saveGrade } = React.useContext(UnitContext);
 
   const inProgress = grade?.data?.[nodeKey] || {};
+  
+  console.log('Easy.nodeKey', nodeKey, 'type:', typeof nodeKey);
+  console.log('Easy.grade:', grade);
+  console.log('Easy.grade.data:', grade?.data);
+  console.log('Easy.grade.data === grade?', grade?.data === grade);
+  console.log('Easy.grade.data keys:', grade?.data ? Object.keys(grade.data) : 'no data');
+  console.log('Easy.grade.data[nodeKey]:', grade?.data?.[nodeKey]);
+  console.log('Easy.inProgress', inProgress);
 
   // Update progress state when grade data changes
   useEffect(() => {
@@ -137,7 +145,8 @@ export const Easy = ({
     // setAttemptedAnswers(_attemptedAnswers);
     // setAttemptsCount(attempts);
 
-    if (newIndex === easyAssignmentLength) {
+    // Check completion against the full assignment length, not filtered length
+    if (newIndex === assignment.length) {
       // // console.log('newIndex === length')
       thisExerciseComplete = true;
 

@@ -5,7 +5,7 @@
  **************************************************************************/
 
 import * as React from "react";
-import { GridProps, SelectFieldProps, SwitchFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
+import { GridProps, SelectFieldProps, SwitchFieldProps, TextAreaFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
 } | null;
@@ -38,6 +38,7 @@ export declare type FileCreateFormInputValues = {
     hex?: string;
     byHex?: string;
     thumbnail?: string;
+    waveformData?: string;
 };
 export declare type FileCreateFormValidationValues = {
     name?: ValidationFunction<string>;
@@ -56,6 +57,7 @@ export declare type FileCreateFormValidationValues = {
     hex?: ValidationFunction<string>;
     byHex?: ValidationFunction<string>;
     thumbnail?: ValidationFunction<string>;
+    waveformData?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type FileCreateFormOverridesProps = {
@@ -76,6 +78,7 @@ export declare type FileCreateFormOverridesProps = {
     hex?: PrimitiveOverrideProps<TextFieldProps>;
     byHex?: PrimitiveOverrideProps<TextFieldProps>;
     thumbnail?: PrimitiveOverrideProps<TextFieldProps>;
+    waveformData?: PrimitiveOverrideProps<TextAreaFieldProps>;
 } & EscapeHatchProps;
 export declare type FileCreateFormProps = React.PropsWithChildren<{
     overrides?: FileCreateFormOverridesProps | undefined | null;

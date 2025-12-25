@@ -21,6 +21,7 @@ export type File = {
   hex?: string | null,
   byHex?: string | null,
   thumbnail?: string | null,
+  waveformData?: string | null,
   units?: ModelUnitFileConnection | null,
   words?: ModelWordFileConnection | null,
   questions?: ModelQuestionFileConnection | null,
@@ -507,6 +508,7 @@ export type CreateFileInput = {
   hex?: string | null,
   byHex?: string | null,
   thumbnail?: string | null,
+  waveformData?: string | null,
   _version?: number | null,
 };
 
@@ -527,6 +529,7 @@ export type ModelFileConditionInput = {
   hex?: ModelStringInput | null,
   byHex?: ModelStringInput | null,
   thumbnail?: ModelStringInput | null,
+  waveformData?: ModelStringInput | null,
   and?: Array< ModelFileConditionInput | null > | null,
   or?: Array< ModelFileConditionInput | null > | null,
   not?: ModelFileConditionInput | null,
@@ -570,6 +573,7 @@ export type UpdateFileInput = {
   hex?: string | null,
   byHex?: string | null,
   thumbnail?: string | null,
+  waveformData?: string | null,
   _version?: number | null,
 };
 
@@ -1216,6 +1220,7 @@ export type ModelFileFilterInput = {
   hex?: ModelStringInput | null,
   byHex?: ModelStringInput | null,
   thumbnail?: ModelStringInput | null,
+  waveformData?: ModelStringInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelFileFilterInput | null > | null,
@@ -1539,6 +1544,7 @@ export type ModelSubscriptionFileFilterInput = {
   hex?: ModelSubscriptionStringInput | null,
   byHex?: ModelSubscriptionStringInput | null,
   thumbnail?: ModelSubscriptionStringInput | null,
+  waveformData?: ModelSubscriptionStringInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionFileFilterInput | null > | null,
@@ -1808,6 +1814,7 @@ export type GenerateAudioFileMutation = {
     hex?: string | null,
     byHex?: string | null,
     thumbnail?: string | null,
+    waveformData?: string | null,
     units?:  {
       __typename: "ModelUnitFileConnection",
       items:  Array< {
@@ -1901,6 +1908,7 @@ export type GenerateImageFileMutation = {
     hex?: string | null,
     byHex?: string | null,
     thumbnail?: string | null,
+    waveformData?: string | null,
     units?:  {
       __typename: "ModelUnitFileConnection",
       items:  Array< {
@@ -2381,6 +2389,7 @@ export type CreateFileMutation = {
     hex?: string | null,
     byHex?: string | null,
     thumbnail?: string | null,
+    waveformData?: string | null,
     units?:  {
       __typename: "ModelUnitFileConnection",
       items:  Array< {
@@ -2465,6 +2474,7 @@ export type UpdateFileMutation = {
     hex?: string | null,
     byHex?: string | null,
     thumbnail?: string | null,
+    waveformData?: string | null,
     units?:  {
       __typename: "ModelUnitFileConnection",
       items:  Array< {
@@ -2549,6 +2559,7 @@ export type DeleteFileMutation = {
     hex?: string | null,
     byHex?: string | null,
     thumbnail?: string | null,
+    waveformData?: string | null,
     units?:  {
       __typename: "ModelUnitFileConnection",
       items:  Array< {
@@ -4236,6 +4247,7 @@ export type CreateQuestionFileMutation = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -4337,6 +4349,7 @@ export type UpdateQuestionFileMutation = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -4438,6 +4451,7 @@ export type DeleteQuestionFileMutation = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -4498,6 +4512,7 @@ export type CreateUnitFileMutation = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -4602,6 +4617,7 @@ export type UpdateUnitFileMutation = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -4706,6 +4722,7 @@ export type DeleteUnitFileMutation = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -4810,6 +4827,7 @@ export type CreateWordFileMutation = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -4902,6 +4920,7 @@ export type UpdateWordFileMutation = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -4994,6 +5013,7 @@ export type DeleteWordFileMutation = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -5834,6 +5854,7 @@ export type GetFileQuery = {
     hex?: string | null,
     byHex?: string | null,
     thumbnail?: string | null,
+    waveformData?: string | null,
     units?:  {
       __typename: "ModelUnitFileConnection",
       items:  Array< {
@@ -5921,6 +5942,7 @@ export type ListFilesQuery = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -5976,6 +5998,7 @@ export type SyncFilesQuery = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -6032,6 +6055,7 @@ export type FilesByByHexQuery = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -7819,6 +7843,7 @@ export type GetQuestionFileQuery = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -7903,6 +7928,7 @@ export type ListQuestionFilesQuery = {
         hex?: string | null,
         byHex?: string | null,
         thumbnail?: string | null,
+        waveformData?: string | null,
         createdAt: string,
         updatedAt: string,
         _version: number,
@@ -7976,6 +8002,7 @@ export type SyncQuestionFilesQuery = {
         hex?: string | null,
         byHex?: string | null,
         thumbnail?: string | null,
+        waveformData?: string | null,
         createdAt: string,
         updatedAt: string,
         _version: number,
@@ -8050,6 +8077,7 @@ export type QuestionFilesByQuestionIdQuery = {
         hex?: string | null,
         byHex?: string | null,
         thumbnail?: string | null,
+        waveformData?: string | null,
         createdAt: string,
         updatedAt: string,
         _version: number,
@@ -8124,6 +8152,7 @@ export type QuestionFilesByFileIdQuery = {
         hex?: string | null,
         byHex?: string | null,
         thumbnail?: string | null,
+        waveformData?: string | null,
         createdAt: string,
         updatedAt: string,
         _version: number,
@@ -8171,6 +8200,7 @@ export type GetUnitFileQuery = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -8278,6 +8308,7 @@ export type ListUnitFilesQuery = {
         hex?: string | null,
         byHex?: string | null,
         thumbnail?: string | null,
+        waveformData?: string | null,
         createdAt: string,
         updatedAt: string,
         _version: number,
@@ -8349,6 +8380,7 @@ export type SyncUnitFilesQuery = {
         hex?: string | null,
         byHex?: string | null,
         thumbnail?: string | null,
+        waveformData?: string | null,
         createdAt: string,
         updatedAt: string,
         _version: number,
@@ -8421,6 +8453,7 @@ export type UnitFilesByFileIdQuery = {
         hex?: string | null,
         byHex?: string | null,
         thumbnail?: string | null,
+        waveformData?: string | null,
         createdAt: string,
         updatedAt: string,
         _version: number,
@@ -8493,6 +8526,7 @@ export type UnitFilesByUnitIdQuery = {
         hex?: string | null,
         byHex?: string | null,
         thumbnail?: string | null,
+        waveformData?: string | null,
         createdAt: string,
         updatedAt: string,
         _version: number,
@@ -8559,6 +8593,7 @@ export type GetWordFileQuery = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -8654,6 +8689,7 @@ export type ListWordFilesQuery = {
         hex?: string | null,
         byHex?: string | null,
         thumbnail?: string | null,
+        waveformData?: string | null,
         createdAt: string,
         updatedAt: string,
         _version: number,
@@ -8723,6 +8759,7 @@ export type SyncWordFilesQuery = {
         hex?: string | null,
         byHex?: string | null,
         thumbnail?: string | null,
+        waveformData?: string | null,
         createdAt: string,
         updatedAt: string,
         _version: number,
@@ -8793,6 +8830,7 @@ export type WordFilesByFileIdQuery = {
         hex?: string | null,
         byHex?: string | null,
         thumbnail?: string | null,
+        waveformData?: string | null,
         createdAt: string,
         updatedAt: string,
         _version: number,
@@ -8863,6 +8901,7 @@ export type WordFilesByWordIdQuery = {
         hex?: string | null,
         byHex?: string | null,
         thumbnail?: string | null,
+        waveformData?: string | null,
         createdAt: string,
         updatedAt: string,
         _version: number,
@@ -9604,6 +9643,7 @@ export type OnCreateFileSubscription = {
     hex?: string | null,
     byHex?: string | null,
     thumbnail?: string | null,
+    waveformData?: string | null,
     units?:  {
       __typename: "ModelUnitFileConnection",
       items:  Array< {
@@ -9688,6 +9728,7 @@ export type OnUpdateFileSubscription = {
     hex?: string | null,
     byHex?: string | null,
     thumbnail?: string | null,
+    waveformData?: string | null,
     units?:  {
       __typename: "ModelUnitFileConnection",
       items:  Array< {
@@ -9772,6 +9813,7 @@ export type OnDeleteFileSubscription = {
     hex?: string | null,
     byHex?: string | null,
     thumbnail?: string | null,
+    waveformData?: string | null,
     units?:  {
       __typename: "ModelUnitFileConnection",
       items:  Array< {
@@ -11462,6 +11504,7 @@ export type OnCreateQuestionFileSubscription = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -11563,6 +11606,7 @@ export type OnUpdateQuestionFileSubscription = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -11664,6 +11708,7 @@ export type OnDeleteQuestionFileSubscription = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -11724,6 +11769,7 @@ export type OnCreateUnitFileSubscription = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -11828,6 +11874,7 @@ export type OnUpdateUnitFileSubscription = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -11932,6 +11979,7 @@ export type OnDeleteUnitFileSubscription = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -12036,6 +12084,7 @@ export type OnCreateWordFileSubscription = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -12128,6 +12177,7 @@ export type OnUpdateWordFileSubscription = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,
@@ -12220,6 +12270,7 @@ export type OnDeleteWordFileSubscription = {
       hex?: string | null,
       byHex?: string | null,
       thumbnail?: string | null,
+      waveformData?: string | null,
       units?:  {
         __typename: "ModelUnitFileConnection",
         nextToken?: string | null,

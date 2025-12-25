@@ -142,6 +142,28 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "getStudentSubmission": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "japanese4"
+        },
+        {
+          "attributes": [
+            "BucketName"
+          ],
+          "category": "storage",
+          "resourceName": "files"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "japanese46739ab6bPostConfirmation": {
       "build": true,
       "dependsOn": [],
@@ -238,6 +260,22 @@
         {
           "category": "function",
           "resourceName": "editorChat"
+        }
+      ]
+    },
+    "AMPLIFY_function_getStudentSubmission_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getStudentSubmission"
+        }
+      ]
+    },
+    "AMPLIFY_function_getStudentSubmission_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getStudentSubmission"
         }
       ]
     },

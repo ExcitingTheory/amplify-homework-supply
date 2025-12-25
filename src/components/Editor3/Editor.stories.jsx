@@ -2,6 +2,15 @@ import React from 'react';
 import Editor, { Workbook } from './index';
 import { seedMockUnit } from '../../../.storybook/__mocks__/aws-amplify-datastore';
 
+// Verify models are loading - this will show in console
+import { Unit, Grade } from '../../models';
+console.log('[Editor.stories] Model verification:');
+console.log('[Editor.stories] Unit constructor:', typeof Unit);
+console.log('[Editor.stories] Unit.name:', Unit?.name);
+console.log('[Editor.stories] Unit.copyOf:', typeof Unit?.copyOf);
+console.log('[Editor.stories] Grade constructor:', typeof Grade);
+console.log('[Editor.stories] Grade.name:', Grade?.name);
+
 // Mock unit ID for stories
 const MOCK_UNIT_ID = 'story-unit-id';
 const KITCHEN_SINK_ID = 'kitchen-sink-id';

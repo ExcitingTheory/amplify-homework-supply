@@ -12,6 +12,7 @@ import {
   Grid,
   SelectField,
   SwitchField,
+  TextAreaField,
   TextField,
 } from "@aws-amplify/ui-react";
 import { File } from "../models";
@@ -45,6 +46,7 @@ export default function FileCreateForm(props) {
     hex: "",
     byHex: "",
     thumbnail: "",
+    waveformData: "",
   };
   const [name, setName] = React.useState(initialValues.name);
   const [owner, setOwner] = React.useState(initialValues.owner);
@@ -64,6 +66,9 @@ export default function FileCreateForm(props) {
   const [hex, setHex] = React.useState(initialValues.hex);
   const [byHex, setByHex] = React.useState(initialValues.byHex);
   const [thumbnail, setThumbnail] = React.useState(initialValues.thumbnail);
+  const [waveformData, setWaveformData] = React.useState(
+    initialValues.waveformData
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setName(initialValues.name);
@@ -82,6 +87,7 @@ export default function FileCreateForm(props) {
     setHex(initialValues.hex);
     setByHex(initialValues.byHex);
     setThumbnail(initialValues.thumbnail);
+    setWaveformData(initialValues.waveformData);
     setErrors({});
   };
   const validations = {
@@ -101,6 +107,7 @@ export default function FileCreateForm(props) {
     hex: [],
     byHex: [],
     thumbnail: [],
+    waveformData: [{ type: "JSON" }],
   };
   const runValidationTasks = async (
     fieldName,
@@ -144,6 +151,7 @@ export default function FileCreateForm(props) {
           hex,
           byHex,
           thumbnail,
+          waveformData,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -214,6 +222,7 @@ export default function FileCreateForm(props) {
               hex,
               byHex,
               thumbnail,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -253,6 +262,7 @@ export default function FileCreateForm(props) {
               hex,
               byHex,
               thumbnail,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.owner ?? value;
@@ -292,6 +302,7 @@ export default function FileCreateForm(props) {
               hex,
               byHex,
               thumbnail,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.identityId ?? value;
@@ -331,6 +342,7 @@ export default function FileCreateForm(props) {
               hex,
               byHex,
               thumbnail,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.description ?? value;
@@ -370,6 +382,7 @@ export default function FileCreateForm(props) {
               hex,
               byHex,
               thumbnail,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.prompt ?? value;
@@ -409,6 +422,7 @@ export default function FileCreateForm(props) {
               hex,
               byHex,
               thumbnail,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.model ?? value;
@@ -448,6 +462,7 @@ export default function FileCreateForm(props) {
               hex,
               byHex,
               thumbnail,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.variant ?? value;
@@ -487,6 +502,7 @@ export default function FileCreateForm(props) {
               hex,
               byHex,
               thumbnail,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.mimeType ?? value;
@@ -526,6 +542,7 @@ export default function FileCreateForm(props) {
               hex,
               byHex,
               thumbnail,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.level ?? value;
@@ -581,6 +598,7 @@ export default function FileCreateForm(props) {
               hex,
               byHex,
               thumbnail,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.path ?? value;
@@ -624,6 +642,7 @@ export default function FileCreateForm(props) {
               hex,
               byHex,
               thumbnail,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.duration ?? value;
@@ -667,6 +686,7 @@ export default function FileCreateForm(props) {
               hex,
               byHex,
               thumbnail,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.size ?? value;
@@ -706,6 +726,7 @@ export default function FileCreateForm(props) {
               hex,
               byHex,
               thumbnail,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.generated ?? value;
@@ -745,6 +766,7 @@ export default function FileCreateForm(props) {
               hex: value,
               byHex,
               thumbnail,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.hex ?? value;
@@ -784,6 +806,7 @@ export default function FileCreateForm(props) {
               hex,
               byHex: value,
               thumbnail,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.byHex ?? value;
@@ -823,6 +846,7 @@ export default function FileCreateForm(props) {
               hex,
               byHex,
               thumbnail: value,
+              waveformData,
             };
             const result = onChange(modelFields);
             value = result?.thumbnail ?? value;
@@ -837,6 +861,45 @@ export default function FileCreateForm(props) {
         hasError={errors.thumbnail?.hasError}
         {...getOverrideProps(overrides, "thumbnail")}
       ></TextField>
+      <TextAreaField
+        label="Waveform data"
+        isRequired={false}
+        isReadOnly={false}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              name,
+              owner,
+              identityId,
+              description,
+              prompt,
+              model,
+              variant,
+              mimeType,
+              level,
+              path,
+              duration,
+              size,
+              generated,
+              hex,
+              byHex,
+              thumbnail,
+              waveformData: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.waveformData ?? value;
+          }
+          if (errors.waveformData?.hasError) {
+            runValidationTasks("waveformData", value);
+          }
+          setWaveformData(value);
+        }}
+        onBlur={() => runValidationTasks("waveformData", waveformData)}
+        errorMessage={errors.waveformData?.errorMessage}
+        hasError={errors.waveformData?.hasError}
+        {...getOverrideProps(overrides, "waveformData")}
+      ></TextAreaField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

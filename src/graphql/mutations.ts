@@ -52,6 +52,7 @@ export const generateAudioFile = /* GraphQL */ `mutation GenerateAudioFile($phra
     hex
     byHex
     thumbnail
+    waveformData
     units {
       items {
         id
@@ -141,6 +142,7 @@ export const generateImageFile = /* GraphQL */ `mutation GenerateImageFile($phra
     hex
     byHex
     thumbnail
+    waveformData
     units {
       items {
         id
@@ -636,6 +638,7 @@ export const createFile = /* GraphQL */ `mutation CreateFile(
     hex
     byHex
     thumbnail
+    waveformData
     units {
       items {
         id
@@ -721,6 +724,7 @@ export const updateFile = /* GraphQL */ `mutation UpdateFile(
     hex
     byHex
     thumbnail
+    waveformData
     units {
       items {
         id
@@ -806,6 +810,7 @@ export const deleteFile = /* GraphQL */ `mutation DeleteFile(
     hex
     byHex
     thumbnail
+    waveformData
     units {
       items {
         id
@@ -2517,6 +2522,7 @@ export const createQuestionFile = /* GraphQL */ `mutation CreateQuestionFile(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -2619,6 +2625,7 @@ export const updateQuestionFile = /* GraphQL */ `mutation UpdateQuestionFile(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -2721,6 +2728,7 @@ export const deleteQuestionFile = /* GraphQL */ `mutation DeleteQuestionFile(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -2782,6 +2790,7 @@ export const createUnitFile = /* GraphQL */ `mutation CreateUnitFile(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -2887,6 +2896,7 @@ export const updateUnitFile = /* GraphQL */ `mutation UpdateUnitFile(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -2992,6 +3002,7 @@ export const deleteUnitFile = /* GraphQL */ `mutation DeleteUnitFile(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -3097,6 +3108,7 @@ export const createWordFile = /* GraphQL */ `mutation CreateWordFile(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -3190,6 +3202,7 @@ export const updateWordFile = /* GraphQL */ `mutation UpdateWordFile(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt
@@ -3283,6 +3296,7 @@ export const deleteWordFile = /* GraphQL */ `mutation DeleteWordFile(
       hex
       byHex
       thumbnail
+      waveformData
       units {
         nextToken
         startedAt

@@ -50,6 +50,7 @@ function LinearProgressWithLabel({ value }) {
 
 export default function CustomAnswerComponent({
     className,
+    nodeKey,
     // questions,
     ids: questionIDs,
     requestDefinition=false,
@@ -71,6 +72,34 @@ export default function CustomAnswerComponent({
     } = React.useContext(DictionaryContext);
 
     const gradeId = grade?.id;
+    const inProgress = grade?.data?.[nodeKey] || {};
+    
+    // Load saved answers from progress data
+    React.useEffect(() => {
+        if (inProgress?.userResponse) {
+            // For single question exercises
+            const firstQuestionId = questionIDs?.[0];
+            if (firstQuestionId) {
+                setAnswers(prev => ({
+                    ...prev,
+                    [firstQuestionId]: inProgress.userResponse
+                }));
+            }
+        }
+        
+        if (inProgress?.complete) {
+            // Mark as complete if already finished with detailed feedback
+            const completeFeedback = {};
+            questionIDs?.forEach(qid => {
+                completeFeedback[qid] = { 
+                    answer: true, 
+                    reason: inProgress.feedback || 'Answer verified and accepted',
+                    userResponse: inProgress.userResponse || answers[qid]
+                };
+            });
+            setFeedback(completeFeedback);
+        }
+    }, [inProgress, questionIDs]);
 
     const handleInputChange = (event, newInputMethod) => {
         // console.log('newInputMethods', newInputMethods)
@@ -110,13 +139,28 @@ export default function CustomAnswerComponent({
             // Check if all questions have been answered
             const allQuestionsAnswered = questionIDs.every(qid => feedback[qid] !== undefined);
             
-            if (allQuestionsAnswered) {
+            if (allQuestionsAnswered && !inProgress?.complete) {
                 console.log('CustomAnswerComponent: All questions answered, marking complete');
-                // Save grade to mark this exercise as complete
-                saveGrade(1, '', 1);
+                // Get the first answer as user response (for single question exercises)
+                const firstQuestionId = questionIDs?.[0];
+                const userResponse = answers[firstQuestionId] || inProgress?.userResponse;
+                const feedbackText = feedback[firstQuestionId]?.reason || 'All questions completed';
+                
+                // Update this exercise's data while preserving all other exercise data
+                const updatedData = {
+                    ...(grade?.data || {}),
+                    [nodeKey]: {
+                        ...inProgress,
+                        complete: true,
+                        userResponse: userResponse,
+                        feedback: feedbackText,
+                        accuracy: 1.0
+                    }
+                };
+                saveGrade(updatedData);
             }
         }
-    }, [feedback, questionIDs, saveGrade]);
+    }, [feedback, questionIDs, saveGrade, nodeKey, grade, inProgress]);
 
     return (
         // a list of questions having a prompt and an expected answer in a collection
@@ -181,6 +225,8 @@ export default function CustomAnswerComponent({
             questionIDs.map((questionID) => {
 
                     const question = questionBank[questionID] || {};
+                    console.log('CustomAnswerComponent.questionID', questionID)
+                    console.log('CustomAnswerComponent.questionBank', questionBank)
                     console.log('CustomAnswerComponent.question', question)
 
                     let borderStyle = '1px solid #ccc'
@@ -193,37 +239,96 @@ export default function CustomAnswerComponent({
                     }
 
 
-                    const { prompt, answer } = question;
+                    const { prompt, answer, phrase, definition, pronunciation } = question;
+                    console.log('CustomAnswerComponent.question', question)
                     console.log('CustomAnswerComponent.prompt', prompt)
+                    console.log('CustomAnswerComponent.feedback[questionID]', feedback[questionID])
+                    
+                    // Determine if this question is completed
+                    const isCompleted = feedback[questionID] && feedback[questionID].answer !== undefined;
+                    console.log('CustomAnswerComponent.isCompleted', isCompleted)
+                    console.log('CustomAnswerComponent.currentPromptMethod', currentPromptMethod)
+                    
+                    // Determine what to display as the prompt
+                    let displayPrompt = prompt;
+                    if (!displayPrompt && currentPromptMethod === 'phrase') {
+                        displayPrompt = phrase;
+                    } else if (!displayPrompt && currentPromptMethod === 'definition') {
+                        displayPrompt = definition;
+                    } else if (!displayPrompt && currentPromptMethod === 'pronunciation') {
+                        displayPrompt = pronunciation;
+                    }
+                    
+                    // If still no prompt but we have feedback, try to extract from there
+                    if (!displayPrompt && isCompleted && feedback[questionID]) {
+                        // Try to extract the original question from the feedback reason
+                        displayPrompt = `Question for ID: ${questionID}`;
+                    }
+                    
+                    console.log('CustomAnswerComponent.displayPrompt', displayPrompt)
+                    
                     return (
                         <li
                             display='flex'
                             key={questionID}>
                             {/**
-                             * Area for feedback from api call
+                             * Display the question prompt when not using audio OR when completed
                              */}
-
-                            <Typography variant="body2"
-                                style={{
-                                    color: feedback[questionID]?.answer === true? 'green' : feedback[questionID]?.answer === false? 'red' : 'black',
-                                }}
-                            component="div" sx={{ flexGrow: 1 }}>
-                                {feedback[questionID]?.reason || ''}
-                            </Typography>
-
-                            { currentPromptMethod === 'text' && 
+                            { (currentPromptMethod !== 'audio' || isCompleted) && displayPrompt && (
                             <Typography variant="body1"
                                 display="flex"
                                 style={{
-                                    // flexBasis: '40%',
-                                    // minWidth: 'fit-content',
                                     textWrap: 'wrap',
                                     wordBreak: 'normal',
+                                    marginBottom: '0.5rem',
                                 }}
-                                color="textSecondary">{prompt}</Typography>
+                                color="textPrimary">
+                                <strong>Question:</strong> {displayPrompt}
+                            </Typography>
+                            )}
+                            
+                            {/**
+                             * If completed but no prompt data, at least show there was a question
+                             */}
+                            { isCompleted && !displayPrompt && (
+                            <Typography variant="body1"
+                                display="flex"
+                                style={{
+                                    textWrap: 'wrap',
+                                    wordBreak: 'normal',
+                                    marginBottom: '0.5rem',
+                                }}
+                                color="text.secondary">
+                                <strong>Completed Question</strong> (prompt data not available)
+                            </Typography>
+                            )}
 
-                            }
-                                
+                            {/**
+                             * Area for feedback from api call
+                             */}
+                            {feedback[questionID] && (
+                                <Box sx={{ 
+                                    mb: 1.5, 
+                                    p: 1.5, 
+                                    border: 1, 
+                                    borderColor: feedback[questionID]?.answer === true ? 'success.main' : 'error.main',
+                                    borderRadius: 1,
+                                    bgcolor: 'grey.50'
+                                }}>
+                                    {feedback[questionID]?.userResponse && (
+                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontStyle: 'italic' }}>
+                                            Your answer: "{feedback[questionID].userResponse}"
+                                        </Typography>
+                                    )}
+                                    <Typography variant="body2"
+                                        color="text.primary"
+                                        component="div" 
+                                        sx={{ flexGrow: 1 }}>
+                                        {feedback[questionID]?.reason || ''}
+                                    </Typography>
+                                </Box>
+                            )}
+
                             { currentPromptMethod === 'audio' &&
                             <Suspense fallback={<div>{`Loading... questionID: ${questionID}`}</div>}>
                             <MediaPlayerComponent

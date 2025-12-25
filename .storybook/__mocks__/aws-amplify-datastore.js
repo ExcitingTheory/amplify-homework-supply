@@ -1,5 +1,9 @@
 /**
  * Mock @aws-amplify/datastore for Storybook
+ * 
+ * This mock provides DataStore functionality for Storybook stories.
+ * The actual model classes are imported from src/models - we only mock
+ * the DataStore class and its methods.
  */
 
 // Mock unit storage
@@ -43,114 +47,28 @@ export const seedMockUnit = (unitData) => {
   }
 };
 
+// Helper to seed mock grade data for stories
+export const seedMockGrade = (gradeData) => {
+  if (gradeData.id) {
+    mockGrades[gradeData.id] = gradeData;
+    console.log('[Mock DataStore] Seeded grade:', gradeData.id, 'for unit:', gradeData.unitID);
+    console.log('[Mock DataStore] Grade has data:', !!gradeData.data);
+    console.log('[Mock DataStore] Total grades in store:', Object.keys(mockGrades).length);
+    
+    // Notify all Grade subscribers about the new data
+    const items = Object.values(mockGrades);
+    activeSubscriptions.Grade.forEach(callback => {
+      console.log('[Mock DataStore] Notifying subscriber with', items.length, 'grades');
+      callback({ items, isSynced: true });
+    });
+  }
+};
+
 // Helper to clear mock data between stories
 export const clearMockUnits = () => {
   Object.keys(mockUnits).forEach(key => delete mockUnits[key]);
   Object.keys(mockGrades).forEach(key => delete mockGrades[key]);
   console.log('[Mock DataStore] Cleared all mock data');
-};
-
-// Mock model class factory
-const createMockModel = (modelName) => {
-  class MockModel {
-    static copyOf(original, mutator) {
-      const copy = { ...original };
-      mutator(copy);
-      return copy;
-    }
-    
-    constructor(init) {
-      Object.assign(this, init);
-    }
-  }
-  
-  // Define name property using Object.defineProperty to avoid read-only error
-  Object.defineProperty(MockModel, 'name', {
-    value: modelName,
-    writable: false,
-    configurable: true
-  });
-  
-  return MockModel;
-};
-
-export const initSchema = (schema) => {
-  console.log('Mock initSchema called');
-  
-  // Create mock models for each model in the schema
-  const models = {};
-  
-  if (schema && schema.models) {
-    Object.keys(schema.models).forEach(modelName => {
-      models[modelName] = createMockModel(modelName);
-    });
-  }
-  
-  // Fallback for common models if schema parsing fails
-  const commonModels = [
-    'Assistant', 'Question', 'File', 'ChatHistory', 'Section', 
-    'Assignment', 'Grade', 'Unit', 'Word', 'QuestionUnit', 
-    'QuestionWord', 'QuestionFile', 'UnitFile', 'WordFile', 
-    'UnitWord', 'StudentInfo', 'Choice'
-  ];
-  
-  commonModels.forEach(modelName => {
-    if (!models[modelName]) {
-      models[modelName] = createMockModel(modelName);
-    }
-  });
-  
-  return models;
-};
-
-// Create mock model constructors with proper names
-class UnitModel {
-  static copyOf(original, mutator) {
-    const copy = { ...original };
-    mutator(copy);
-    return copy;
-  }
-  
-  constructor(init) {
-    Object.assign(this, init);
-  }
-}
-
-class GradeModel {
-  static copyOf(original, mutator) {
-    const copy = { ...original };
-    mutator(copy);
-    return copy;
-  }
-  
-  constructor(init) {
-    Object.assign(this, init);
-  }
-}
-
-// Define the name property properly
-Object.defineProperty(UnitModel, 'name', { value: 'Unit', writable: false, configurable: true });
-Object.defineProperty(GradeModel, 'name', { value: 'Grade', writable: false, configurable: true });
-
-// Export with standard names
-export const Unit = UnitModel;
-export const Grade = GradeModel;
-
-// Export other models as simple objects for now
-export const Word = {};
-export const Question = {};
-export const Section = {};
-export const Assignment = {};
-export const Assistant = {};
-export const File = {};
-export const UnitWord = {};
-export const UnitFile = {};
-export const QuestionFile = {};
-export const QuestionUnit = {};
-export const FileProtectionLevels = {
-  PUBLIC: 'PUBLIC',
-  PRIVATE: 'PRIVATE',
-  PROTECTED: 'PROTECTED',
 };
 
 // Mock SortDirection enum
@@ -159,15 +77,90 @@ export const SortDirection = {
   DESCENDING: 'DESCENDING'
 };
 
-// Mock data storage
+/**
+ * Mock initSchema function that creates model classes matching Amplify DataStore structure
+ * This is called by src/models/index.js: const { Unit, Grade, ... } = initSchema(schema);
+ */
+export const initSchema = (schema) => {
+  console.log('[Mock initSchema] Called with schema');
+  console.log('[Mock initSchema] Schema has models:', schema?.models ? Object.keys(schema.models).join(', ') : 'none');
+  
+  // Helper to create a model class with the proper structure
+  const createModelClass = (modelName) => {
+    class Model {
+      constructor(init) {
+        Object.assign(this, init);
+      }
+      
+      static copyOf(source, mutator) {
+        const draft = { ...source };
+        const result = mutator(draft);
+        return result !== undefined ? result : draft;
+      }
+    }
+    
+    // Set the name property to match the model name
+    Object.defineProperty(Model, 'name', {
+      value: modelName,
+      writable: false,
+      configurable: true
+    });
+    
+    return Model;
+  };
+  
+  // Create model classes for all models in the schema
+  const models = {};
+  
+  if (schema && schema.models) {
+    Object.keys(schema.models).forEach(modelName => {
+      models[modelName] = createModelClass(modelName);
+    });
+    console.log('[Mock initSchema] Created', Object.keys(models).length, 'model classes');
+  } else {
+    console.warn('[Mock initSchema] No schema.models found, creating fallback models');
+    // Fallback: create common models if schema parsing fails
+    const modelNames = ['Unit', 'Grade', 'Word', 'Question', 'File', 'Section', 'Assignment', 'Assistant', 'ChatHistory', 'UnitWord', 'UnitFile', 'QuestionUnit', 'QuestionWord', 'QuestionFile', 'WordFile', 'StudentInfo', 'Choice'];
+    modelNames.forEach(modelName => {
+      models[modelName] = createModelClass(modelName);
+    });
+    console.log('[Mock initSchema] Created', modelNames.length, 'fallback model classes');
+  }
+  
+  return models;
+};
+
+// Mock data storage for other models (Word, etc.)
 const mockData = {
   Word: {
     '1': { id: '1', phrase: 'Hello', pronunciation: 'heh-LOH', definition: 'A greeting' },
     '2': { id: '2', phrase: 'Goodbye', pronunciation: 'good-BYE', definition: 'A farewell' },
     '3': { id: '3', phrase: 'Thank you', pronunciation: 'thank-YOO', definition: 'Expression of gratitude' },
     '4': { id: '4', phrase: 'Please', pronunciation: 'PLEEZ', definition: 'Polite request' },
+    'vocab-word-1': { id: 'vocab-word-1', phrase: 'こんにちは', pronunciation: 'kon-ni-chi-wa', definition: 'Hello (Japanese)' },
+    'vocab-word-2': { id: 'vocab-word-2', phrase: '猫', pronunciation: 'neko', definition: 'Cat (Japanese)' },
+    'vocab-word-3': { id: 'vocab-word-3', phrase: 'ありがとう', pronunciation: 'a-ri-ga-tou', definition: 'Thank you (Japanese)' },
+    'vocab-word-4': { id: 'vocab-word-4', phrase: '犬', pronunciation: 'inu', definition: 'Dog (Japanese)' },
+    'vocab-word-5': { id: 'vocab-word-5', phrase: 'さようなら', pronunciation: 'sa-you-na-ra', definition: 'Goodbye (Japanese)' },
   },
-  Question: {},
+  Question: {
+    'question-1': { 
+      id: 'question-1', 
+      prompt: 'Translate "犬" to English',
+      phrase: '犬',
+      pronunciation: 'inu',
+      definition: 'Dog (Japanese)',
+      answer: 'Dog' 
+    },
+    'question-2': { 
+      id: 'question-2', 
+      prompt: 'What is a "さようなら"?',
+      phrase: 'さようなら',
+      pronunciation: 'sa-you-na-ra',
+      definition: 'Goodbye (Japanese)',
+      answer: 'A farewell greeting meaning goodbye' 
+    },
+  },
   Unit: {},
   Grade: {},
   Section: {},
@@ -177,6 +170,32 @@ const mockData = {
 export class DataStore {
   static async save(model) {
     console.log('Mock DataStore.save called with:', model);
+    console.log('[Mock DataStore] model.data:', model.data);
+    console.log('[Mock DataStore] model.data type:', typeof model.data);
+    console.log('[Mock DataStore] model.data keys:', model.data ? Object.keys(model.data) : 'no data');
+    
+    // Update the mock data based on model type
+    if (model.id && model.unitID) {
+      // This is likely a Grade
+      mockGrades[model.id] = model;
+      console.log('[Mock DataStore] Updated grade:', model.id);
+      console.log('[Mock DataStore] mockGrades[model.id].data:', mockGrades[model.id].data);
+      
+      // Notify all Grade subscribers
+      activeSubscriptions.Grade.forEach(callback => {
+        callback({ items: Object.values(mockGrades), isSynced: true });
+      });
+    } else if (model.id && model.data) {
+      // Could be a Unit
+      mockUnits[model.id] = model;
+      console.log('[Mock DataStore] Updated unit:', model.id);
+      
+      // Notify all Unit subscribers  
+      activeSubscriptions.Unit.forEach(callback => {
+        callback({ items: Object.values(mockUnits), isSynced: true });
+      });
+    }
+    
     return model;
   }
 

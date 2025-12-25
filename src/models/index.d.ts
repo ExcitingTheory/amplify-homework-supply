@@ -166,6 +166,7 @@ type EagerFile = {
   readonly hex?: string | null;
   readonly byHex?: string | null;
   readonly thumbnail?: string | null;
+  readonly waveformData?: string | null;
   readonly units?: (UnitFile | null)[] | null;
   readonly words?: (WordFile | null)[] | null;
   readonly questions?: (QuestionFile | null)[] | null;
@@ -195,6 +196,7 @@ type LazyFile = {
   readonly hex?: string | null;
   readonly byHex?: string | null;
   readonly thumbnail?: string | null;
+  readonly waveformData?: string | null;
   readonly units: AsyncCollection<UnitFile>;
   readonly words: AsyncCollection<WordFile>;
   readonly questions: AsyncCollection<QuestionFile>;

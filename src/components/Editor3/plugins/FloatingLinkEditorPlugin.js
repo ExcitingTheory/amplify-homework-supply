@@ -112,10 +112,14 @@ function FloatingLinkEditor({
         if ($isRangeSelection(selection)) {
             const node = getSelectedNode(selection);
             const parent = node.getParent();
-            if ($isLinkNode(parent)) {
-                setLinkUrl(parent.getURL());
-            } else if ($isLinkNode(node)) {
-                setLinkUrl(node.getURL());
+            
+            // Check for both regular links and auto-links
+            const linkNode = $isLinkNode(parent) || $isAutoLinkNode(parent) 
+                ? parent 
+                : ($isLinkNode(node) || $isAutoLinkNode(node) ? node : null);
+            
+            if (linkNode) {
+                setLinkUrl(linkNode.getURL());
             } else {
                 setLinkUrl('');
             }
@@ -251,7 +255,9 @@ function FloatingLinkEditor({
                 if ($isRangeSelection(selection)) {
                     const node = getSelectedNode(selection);
                     const parent = node.getParent();
-                    const linkNode = $isLinkNode(parent) ? parent : ($isLinkNode(node) ? node : null);
+                    const linkNode = $isLinkNode(parent) || $isAutoLinkNode(parent)
+                        ? parent 
+                        : ($isLinkNode(node) || $isAutoLinkNode(node) ? node : null);
                     if (linkNode) {
                         linkNode.remove();
                     }

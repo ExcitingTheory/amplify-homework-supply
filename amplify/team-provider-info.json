@@ -44,7 +44,11 @@
         "japanese46739ab6b": {},
         "files": {},
         "japanese4": {},
-        "userPoolGroups": {}
+        "userPoolGroups": {},
+        "getStudentSubmission": {
+          "deploymentBucketName": "amplify-amplifyjapanese4-devb-5d39a-deployment",
+          "s3Key": "amplify-builds/getStudentSubmission-324a6a455469426b3158-build.zip"
+        }
       },
       "storage": {
         "files": {}

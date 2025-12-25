@@ -91,6 +91,7 @@ import { ImageNode } from './components/ImageNode';
 import ImagesPlugin from './plugins/ImagesPlugin';
 
 import DataPlugin from './plugins/DataPlugin';
+import StoryProgressPlugin from './plugins/StoryProgressPlugin';
 import ToolBarRoPlugin from './plugins/ToolBarRoPlugin';
 
 import PlaylistPlugin, {
@@ -645,6 +646,7 @@ export function Workbook() {
             <WordBlockPlugin />
             <QuizPlugin />
             <DataPlugin />
+            <StoryProgressPlugin />
             <MeaningAssociationPlugin />
             <PlaylistPlugin />
             <ImagesPlugin />

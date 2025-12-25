@@ -25,9 +25,29 @@ const config = {
     disableTelemetry: true,
   },
 
+  // Configure manager build to use same React instance
+  managerWebpack: async (config) => {
+    const path = require('path');
+    const reactPath = path.resolve(__dirname, '../node_modules/react');
+    const reactDomPath = path.resolve(__dirname, '../node_modules/react-dom');
+    
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'react': reactPath,
+      'react-dom': reactDomPath,
+    };
+    
+    return config;
+  },
+
   webpackFinal: async (config) => {
     const path = require('path');
     const webpack = require('webpack');
+    
+    // Fix React version conflicts
+    // Force all react imports to use the same instance
+    const reactPath = path.resolve(__dirname, '../node_modules/react');
+    const reactDomPath = path.resolve(__dirname, '../node_modules/react-dom');
     
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -39,22 +59,42 @@ const config = {
       '@aws-amplify/datastore': require.resolve('./__mocks__/aws-amplify-datastore.js'),
     };
     
-    // Replace any imports to src/models with the consolidated mock index
+    // Don't let any package use its own React - force them all to use ours as externals
+    config.externals = config.externals || {};
+    
+    // Remove existing React from bundle and force single shared instance
+    const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
+    
     config.plugins.push(
-      new webpack.NormalModuleReplacementPlugin(
-        /src\/models$/,
-        require.resolve('./__mocks__/index.js')
-      ),
-      new webpack.NormalModuleReplacementPlugin(
-        /\/models$/,
-        (resource) => {
-          // Only replace if it's from the src directory, not node_modules
-          if (resource.context.includes('/src/') && !resource.context.includes('node_modules')) {
-            resource.request = require.resolve('./__mocks__/index.js');
-          }
-        }
-      )
+      new ModuleFederationPlugin({
+        name: 'storybook',
+        shared: {
+          react: {
+            singleton: true,
+            requiredVersion: false,
+            eager: true,
+          },
+          'react-dom': {
+            singleton: true,
+            requiredVersion: false,
+            eager: true,
+          },
+          'react/jsx-runtime': {
+            singleton: true,
+            requiredVersion: false,
+            eager: true,
+          },
+          'react/jsx-dev-runtime': {
+            singleton: true,
+            requiredVersion: false,
+            eager: true,
+          },
+        },
+      })
     );
+    
+    // Ensure symlinks are resolved properly
+    config.resolve.symlinks = false;
     
     return config;
   },

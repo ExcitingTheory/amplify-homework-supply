@@ -1,6 +1,6 @@
 import React from 'react';
 import { Workbook } from './index';
-import { seedMockUnit } from '../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit, seedMockGrade } from '../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
   title: 'Workbook/Workbook',
@@ -194,16 +194,208 @@ export const WorkbookWithContent = {
   },
 };
 
+const workbookWithProgressState = {
+  root: {
+    children: [
+      {
+        children: [
+          {
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Vocabulary Practice',
+            type: 'text',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'heading',
+        version: 1,
+        tag: 'h1',
+      },
+      {
+        children: [
+          {
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Complete these exercises to test your vocabulary knowledge.',
+            type: 'text',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'paragraph',
+        version: 1,
+      },
+      {
+        children: [
+          {
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Meaning Association Exercise',
+            type: 'text',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'heading',
+        version: 1,
+        tag: 'h2',
+      },
+      {
+        children: [
+          {
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Match words with their meanings:',
+            type: 'text',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'paragraph',
+        version: 1,
+      },
+      {
+        type: 'meaning-association',
+        version: 1,
+        wordIDs: ['vocab-word-1', 'vocab-word-2', 'vocab-word-3', 'vocab-word-4', 'vocab-word-5'],
+      },
+      {
+        children: [
+          {
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Multiple Choice Questions',
+            type: 'text',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'heading',
+        version: 1,
+        tag: 'h2',
+      },
+      {
+        type: 'quiz',
+        version: 1,
+        data: [
+          {
+            prompt: 'What is the correct translation of \"こんにちは\"?',
+            answer: '0',
+            correct: true,
+          },
+          {
+            prompt: 'Which word means \"cat\"?',
+            answer: '1',
+            correct: true,
+          },
+          {
+            prompt: 'How do you say \"thank you\" in Japanese?',
+            answer: '2',
+            correct: true,
+          },
+          {
+            prompt: 'Select the hiragana for \"dog\":',
+            answer: '0',
+            correct: true,
+          },
+        ],
+      },
+      {
+        children: [
+          {
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Custom Questions',
+            type: 'text',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'heading',
+        version: 1,
+        tag: 'h2',
+      },
+      {
+        type: 'custom-answer',
+        version: 1,
+        key: 'custom-q-1',
+        ids: ['question-1'],
+        allowedInput: {
+          text: true,
+          audio: false,
+          image: false,
+        },
+        promptMethod: ['phrase', 'pronunciation'],
+      },
+      {
+        type: 'custom-answer',
+        version: 1,
+        key: 'custom-q-2',
+        ids: ['question-2'],
+        allowedInput: {
+          text: true,
+          audio: true,
+          image: false,
+        },
+        promptMethod: ['definition'],
+      },
+    ],
+    direction: 'ltr',
+    format: '',
+    indent: 0,
+    type: 'root',
+    version: 1,
+  },
+};
+
 export const WorkbookWithProgress = {
   loaders: [
     async () => {
       seedMockUnit({
         id: 'workbook-with-progress-id',
         name: 'Sample Workbook with Progress',
-        description: 'This workbook shows progress tracking',
-        data: sampleWorkbookState,
+        description: 'This workbook shows progress tracking with partial completion',
+        data: workbookWithProgressState,
         _version: 1,
         owner: 'mock-user-sub',
+      });
+      
+      // Seed empty grade - will be populated by StoryProgressPlugin after editor loads
+      seedMockGrade({
+        id: 'grade-progress-1',
+        unitID: 'workbook-with-progress-id',
+        owner: 'mock-user-sub',
+        percentComplete: 0,
+        accuracy: 0,
+        complete: false,
+        timerStarted: false,
+        data: {},
+        _version: 1,
       });
     },
   ],
