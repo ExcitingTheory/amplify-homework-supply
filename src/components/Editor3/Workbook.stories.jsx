@@ -1,6 +1,6 @@
 import React from 'react';
 import { Workbook } from './index';
-import { MockUnitProvider } from '../../../.storybook/__mocks__/MockUnitProvider';
+import { seedMockUnit } from '../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
   title: 'Workbook/Workbook',
@@ -8,13 +8,6 @@ export default {
   parameters: {
     layout: 'fullscreen',
   },
-  decorators: [
-    (Story) => (
-      <MockUnitProvider>
-        <Story />
-      </MockUnitProvider>
-    ),
-  ],
 };
 
 const sampleWorkbookState = {
@@ -164,63 +157,60 @@ const sampleWorkbookState = {
 };
 
 export const EmptyWorkbook = {
-  args: {},
+  loaders: [
+    async () => {
+      seedMockUnit({
+        id: 'empty-workbook-id',
+        name: 'Empty Workbook',
+        description: 'A blank workbook to start learning',
+        data: null,
+        _version: 1,
+        owner: 'mock-user-sub',
+      });
+    },
+  ],
+  render: () => <Workbook />,
+  parameters: {
+    unitId: 'empty-workbook-id',
+  },
 };
 
 export const WorkbookWithContent = {
-  decorators: [
-    (Story) => (
-      <MockUnitProvider
-        mockValue={{
-          unit: {
-            id: 'mock-workbook-id',
-            name: 'Sample Workbook Lesson',
-            description: 'This is a sample workbook with interactive content',
-            data: sampleWorkbookState,
-            _version: 1,
-            owner: 'mock-owner',
-          },
-          editorStateRef: { current: sampleWorkbookState },
-        }}
-      >
-        <Story />
-      </MockUnitProvider>
-    ),
+  loaders: [
+    async () => {
+      seedMockUnit({
+        id: 'workbook-with-content-id',
+        name: 'Sample Workbook Lesson',
+        description: 'This is a sample workbook with interactive content',
+        data: sampleWorkbookState,
+        _version: 1,
+        owner: 'mock-user-sub',
+      });
+    },
   ],
+  render: () => <Workbook />,
+  parameters: {
+    unitId: 'workbook-with-content-id',
+  },
 };
 
 export const WorkbookWithProgress = {
-  decorators: [
-    (Story) => (
-      <MockUnitProvider
-        mockValue={{
-          unit: {
-            id: 'mock-workbook-id',
-            name: 'Sample Workbook with Progress',
-            description: 'This workbook shows progress tracking',
-            data: sampleWorkbookState,
-            _version: 1,
-            owner: 'mock-owner',
-          },
-          editorStateRef: { current: sampleWorkbookState },
-          finishedQuestions: 3,
-          rubric: ['q1', 'q2', 'q3', 'q4', 'q5'],
-          grade: {
-            id: 'mock-grade-id',
-            accuracy: 85,
-            complete: false,
-            data: {
-              q1: { complete: true, accuracy: 100 },
-              q2: { complete: true, accuracy: 80 },
-              q3: { complete: true, accuracy: 75 },
-            },
-          },
-        }}
-      >
-        <Story />
-      </MockUnitProvider>
-    ),
+  loaders: [
+    async () => {
+      seedMockUnit({
+        id: 'workbook-with-progress-id',
+        name: 'Sample Workbook with Progress',
+        description: 'This workbook shows progress tracking',
+        data: sampleWorkbookState,
+        _version: 1,
+        owner: 'mock-user-sub',
+      });
+    },
   ],
+  render: () => <Workbook />,
+  parameters: {
+    unitId: 'workbook-with-progress-id',
+  },
 };
 
 const kitchenSinkWorkbookState = {
@@ -1678,42 +1668,22 @@ const kitchenSinkWorkbookState = {
 };
 
 export const KitchenSink = {
-  decorators: [
-    (Story) => (
-      <MockUnitProvider
-        mockValue={{
-          unit: {
-            id: 'kitchen-sink-workbook-id',
-            name: 'Kitchen Sink - All Workbook Blocks',
-            description: 'Comprehensive workbook showing all available interactive exercise types',
-            data: kitchenSinkWorkbookState,
-            _version: 1,
-            owner: 'mock-owner',
-          },
-          editorStateRef: { current: kitchenSinkWorkbookState },
-          finishedQuestions: 5,
-          rubric: ['vocab-word-1', 'vocab-word-2', 'vocab-word-3', 'vocab-word-4', 'vocab-word-5', 'quiz-q1', 'quiz-q2', 'quiz-q3'],
-          grade: {
-            id: 'kitchen-sink-grade-id',
-            accuracy: 72,
-            complete: false,
-            data: {
-              'vocab-word-1': { complete: true, accuracy: 100 },
-              'vocab-word-2': { complete: true, accuracy: 85 },
-              'vocab-word-3': { complete: true, accuracy: 70 },
-              'vocab-word-4': { complete: true, accuracy: 90 },
-              'vocab-word-5': { complete: true, accuracy: 65 },
-              'quiz-q1': { complete: false, accuracy: 0 },
-              'quiz-q2': { complete: false, accuracy: 0 },
-              'quiz-q3': { complete: false, accuracy: 0 },
-            },
-          },
-        }}
-      >
-        <Story />
-      </MockUnitProvider>
-    ),
+  loaders: [
+    async () => {
+      seedMockUnit({
+        id: 'kitchen-sink-workbook-id',
+        name: 'Kitchen Sink - All Workbook Blocks',
+        description: 'Comprehensive workbook showing all available interactive exercise types',
+        data: kitchenSinkWorkbookState,
+        _version: 1,
+        owner: 'mock-user-sub',
+      });
+    },
   ],
+  render: () => <Workbook />,
+  parameters: {
+    unitId: 'kitchen-sink-workbook-id',
+  },
 };
 
 const dataPluginWorkbookState = {
@@ -1978,33 +1948,20 @@ const dataPluginWorkbookState = {
 };
 
 export const DataPluginDemo = {
-  decorators: [
-    (Story) => (
-      <MockUnitProvider
-        mockValue={{
-          unit: {
-            id: 'data-plugin-workbook-demo-id',
-            name: 'DataPlugin Workbook Demo',
-            description: 'Shows how DataPlugin loads workbook content and preserves student state',
-            data: dataPluginWorkbookState,
-            _version: 1,
-            owner: 'mock-owner',
-          },
-          editorStateRef: { current: dataPluginWorkbookState },
-          finishedQuestions: 1,
-          rubric: ['sample-word-1'],
-          grade: {
-            id: 'data-plugin-demo-grade',
-            accuracy: 100,
-            complete: false,
-            data: {
-              'sample-word-1': { complete: true, accuracy: 100 },
-            },
-          },
-        }}
-      >
-        <Story />
-      </MockUnitProvider>
-    ),
+  loaders: [
+    async () => {
+      seedMockUnit({
+        id: 'data-plugin-workbook-demo-id',
+        name: 'DataPlugin Workbook Demo',
+        description: 'Shows how DataPlugin loads workbook content and preserves student state',
+        data: dataPluginWorkbookState,
+        _version: 1,
+        owner: 'mock-user-sub',
+      });
+    },
   ],
+  render: () => <Workbook />,
+  parameters: {
+    unitId: 'data-plugin-workbook-demo-id',
+  },
 };

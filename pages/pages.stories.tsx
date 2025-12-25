@@ -1,14 +1,14 @@
 import React from 'react';
 // Import page components
 // Note: These are wrapped with MyAuth so we need to provide mock auth context
-import IndexPage from './index';
-import GradesPage from './grades';
-import ProfilePage from './profile';
-import SectionsPage from './sections';
-import UnitsPage from './units';
-import SectionDetailPage from './section/[id]';
-import UnitDetailPage from './unit/[id]';
-import WorkbookPage from './workbook/[id]';
+import IndexPage from './index.js';
+import GradesPage from './grades.js';
+import ProfilePage from './profile.js';
+import SectionsPage from './sections.js';
+import UnitsPage from './units.js';
+import SectionDetailPage from './section/[id].js';
+import UnitDetailPage from './unit/[id].js';
+import WorkbookPage from './workbook/[id].js';
 
 /**
  * Pages Stories - Storybook stories for all Next.js pages

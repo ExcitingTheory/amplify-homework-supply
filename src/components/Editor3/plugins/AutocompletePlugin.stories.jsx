@@ -18,7 +18,8 @@ import AutocompletePlugin from './AutocompletePlugin';
 import { AutocompleteProvider } from '../context/SharedAutocompleteContext';
 import { AutocompleteNode } from '../components/AutocompleteNode';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
-import { MockUnitProvider } from '../../../../.storybook/__mocks__/MockUnitProvider';
+import { UnitProvider } from '../../../context/unitContext';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
   title: 'Editor3/Plugins/AutocompletePlugin',
@@ -42,8 +43,17 @@ const EditableTemplate = ({ editorState }) => {
     nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, CodeHighlightNode, AutoLinkNode, LinkNode, AutocompleteNode],
   };
 
+  const unitId = 'story-unit-id-' + Math.random();
+  seedMockUnit({
+    id: unitId,
+    name: 'Autocomplete Story Unit',
+    data: { root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 } },
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <AutocompleteProvider>
         <LexicalComposer initialConfig={initialConfig}>
           <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
@@ -72,7 +82,7 @@ const EditableTemplate = ({ editorState }) => {
           </div>
         </LexicalComposer>
       </AutocompleteProvider>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 

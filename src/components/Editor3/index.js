@@ -381,7 +381,7 @@ export default function Editor() {
 
   const onChange = async (editorState) => {
       editorStateRef.current = editorState
-      // debouncedSave() // TODO - fix this
+      debouncedSave()
     };
 
   const debouncedSave = debounce(async () => {

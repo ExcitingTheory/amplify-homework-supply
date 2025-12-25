@@ -91,23 +91,38 @@ export const AnotherVariant = {
 };
 ```
 
-## Mock Providers
+## Context Providers with Mocked DataStore
 
-For components that depend on context providers (like UnitContext), use the mock providers:
+For components that depend on context providers (like UnitContext), use the real providers with mocked DataStore:
 
 ```javascript
-import { MockUnitProvider } from '../components/Editor3/mocks/MockUnitProvider';
+import { UnitProvider } from '../src/context/unitContext';
+import { seedMockUnit } from './__mocks__/aws-amplify-datastore';
 
 export const YourStory = {
-  decorators: [
-    (Story) => (
-      <MockUnitProvider mockValue={{ /* override values */ }}>
-        <Story />
-      </MockUnitProvider>
-    ),
-  ],
+  render: () => {
+    const unitId = 'your-story-unit-id';
+    
+    // Seed the mock DataStore with your test data
+    seedMockUnit({
+      id: unitId,
+      name: 'Your Story Unit',
+      description: 'Test data for your story',
+      data: yourEditorState, // optional Lexical editor state
+      _version: 1,
+      owner: 'mock-user-sub', // must match mocked auth user
+    });
+    
+    return (
+      <UnitProvider id={unitId}>
+        <YourComponent />
+      </UnitProvider>
+    );
+  },
 };
 ```
+
+The webpack configuration aliases AWS Amplify imports to modular mock files in the `__mocks__/` directory, which provide mock implementations of DataStore, Auth, Storage, API, and Utils. This allows stories to test real provider logic while maintaining Storybook isolation.
 
 ## Storybook Addons
 

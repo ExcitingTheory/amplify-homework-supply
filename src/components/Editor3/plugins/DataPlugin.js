@@ -23,6 +23,7 @@ export default function DataPlugin() {
     useEffect(() => {
         // Guard: ensure unit has data with root node
         if (!unit?.data?.root) {
+            console.log('[DataPlugin] No unit data or root found');
             return;
         }
         
@@ -42,14 +43,22 @@ export default function DataPlugin() {
         const data = JSON.stringify(parsedData);
         const unitVersion = unit?._version;
         
+        console.log('[DataPlugin] Checking unit data, version:', unitVersion, 'has data:', !!parsedData.root.children);
+        
         // Skip if data hasn't changed
-        if (data === previousData.current && unitVersion === unitVersionRef.current) return
+        if (data === previousData.current && unitVersion === unitVersionRef.current) {
+            console.log('[DataPlugin] Data unchanged, skipping');
+            return;
+        }
         
         const currentState = editor.getEditorState();
         const currentStateStr = JSON.stringify(currentState);
         
         // Skip if editor already has this state
-        if (data === currentStateStr) return
+        if (data === currentStateStr) {
+            console.log('[DataPlugin] Editor already has this state');
+            return;
+        }
 
         previousData.current = data;
         unitVersionRef.current = unitVersion;
@@ -62,15 +71,18 @@ export default function DataPlugin() {
                 const stateJSON = _editorState.toJSON();
                 const rootChildren = stateJSON?.root?.children;
                 
+                console.log('[DataPlugin] Parsed state, children count:', rootChildren?.length || 0);
+                
                 if (!rootChildren || rootChildren.length === 0) {
-                    console.error('DataPlugin: Parsed editor state is empty');
-                    return;
+                    console.warn('[DataPlugin] Parsed editor state is empty, but continuing anyway');
+                    // Don't return early - allow empty states to be set
                 }
                 
                 if (editorSelectionRef.current) {
                     _editorState.clone(editorSelectionRef.current);
                 }
 
+                console.log('[DataPlugin] Setting editor state');
                 editor.setEditorState(_editorState);
             } catch (error) {
                 console.error('DataPlugin: Error setting editor state', error);

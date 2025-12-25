@@ -18,7 +18,8 @@ import { Button } from '@mui/material';
 
 import MeaningAssociationPlugin, { INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND, MeaningAssociationNode } from './MeaningAssociationPlugin';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
-import { MockUnitProvider } from '../../../../.storybook/__mocks__/MockUnitProvider';
+import { UnitProvider } from '../../../context/unitContext';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 import DictionaryContext from '../../../context/dictionaryContext';
 import { DndWrapper } from '../../MeaningAssociationExercise/DndWrapper';
 
@@ -105,6 +106,8 @@ function InsertMeaningAssociationButton() {
 }
 
 const EditableTemplate = ({ editorState, showInsertButton }) => {
+  const unitId = 'meaning-association-demo-editable';
+  
   const initialConfig = {
     namespace: 'MeaningAssociationPluginDemo',
     theme: LanguageEditorTheme,
@@ -124,8 +127,17 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
     ],
   };
 
+  seedMockUnit({
+    id: unitId,
+    name: 'Meaning Association Plugin Demo',
+    description: 'Demo for Meaning Association Plugin',
+    data: editorState || null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <DictionaryContext.Provider value={mockDictionaryContext}>
         <DndWrapper>
           <LexicalComposer initialConfig={initialConfig}>
@@ -154,11 +166,13 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
           </LexicalComposer>
         </DndWrapper>
       </DictionaryContext.Provider>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 
 const ReadOnlyTemplate = ({ editorState }) => {
+  const unitId = 'meaning-association-demo-readonly';
+  
   const initialConfig = {
     namespace: 'MeaningAssociationPluginDemo',
     theme: LanguageEditorTheme,
@@ -178,8 +192,17 @@ const ReadOnlyTemplate = ({ editorState }) => {
     ],
   };
 
+  seedMockUnit({
+    id: unitId,
+    name: 'Meaning Association Plugin Demo (Read-Only)',
+    description: 'Demo for Meaning Association Plugin',
+    data: editorState || null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <DictionaryContext.Provider value={mockDictionaryContext}>
         <DndWrapper>
           <LexicalComposer initialConfig={initialConfig}>
@@ -203,7 +226,7 @@ const ReadOnlyTemplate = ({ editorState }) => {
           </LexicalComposer>
         </DndWrapper>
       </DictionaryContext.Provider>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 

@@ -19,7 +19,8 @@ import ImagesPlugin from './ImagesPlugin';
 import PlaylistPlugin, { PlaylistNode } from './PlaylistPlugin';
 import { ImageNode } from '../components/ImageNode';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
-import { MockUnitProvider } from '../../../../.storybook/__mocks__/MockUnitProvider';
+import { UnitProvider } from '../../../context/unitContext';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
   title: 'Editor3/Plugins/DragDropPastePlugin',
@@ -34,6 +35,17 @@ const onError = (error) => {
 };
 
 const EditableTemplate = ({ editorState }) => {
+  const unitId = 'dragdroppaste-demo-unit';
+  
+  seedMockUnit({
+    id: unitId,
+    name: 'DragDropPaste Demo',
+    description: 'Demo for DragDropPastePlugin',
+    data: editorState || null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+  
   const initialConfig = {
     namespace: 'DragDropPastePluginDemo',
     theme: LanguageEditorTheme,
@@ -44,7 +56,7 @@ const EditableTemplate = ({ editorState }) => {
   };
 
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <LexicalComposer initialConfig={initialConfig}>
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
           <h2>Drag & Drop / Paste Plugin - Editable Mode</h2>
@@ -85,7 +97,7 @@ const EditableTemplate = ({ editorState }) => {
           </div>
         </div>
       </LexicalComposer>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 

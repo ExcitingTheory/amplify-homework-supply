@@ -1,8 +1,5 @@
 import React from 'react';
 import { RecordingStudio2 } from './RecordingStudio2';
-import UnitContext from '../context/unitContext';
-import FilesContext from '../context/fileContext';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 export default {
   title: 'Components/RecordingStudio2',
@@ -10,34 +7,6 @@ export default {
   parameters: {
     layout: 'centered',
   },
-};
-
-// Mock context providers
-const MockProviders = ({ children }) => {
-  const mockUnitContext = {
-    grade: {},
-    createGrade: () => {},
-    saveGrade: () => {},
-  };
-
-  const mockFilesContext = {
-    audioFiles: {},
-    session: {
-      identityId: 'mock-identity-id',
-    },
-  };
-
-  const theme = createTheme();
-
-  return (
-    <ThemeProvider theme={theme}>
-      <UnitContext.Provider value={mockUnitContext}>
-        <FilesContext.Provider value={mockFilesContext}>
-          {children}
-        </FilesContext.Provider>
-      </UnitContext.Provider>
-    </ThemeProvider>
-  );
 };
 
 const mockWord = {
@@ -55,13 +24,6 @@ const mockQuestion = {
 };
 
 export const ForWord = {
-  decorators: [
-    (Story) => (
-      <MockProviders>
-        <Story />
-      </MockProviders>
-    ),
-  ],
   args: {
     word: mockWord,
     item: mockWord,
@@ -75,13 +37,6 @@ export const ForWord = {
 };
 
 export const ForQuestion = {
-  decorators: [
-    (Story) => (
-      <MockProviders>
-        <Story />
-      </MockProviders>
-    ),
-  ],
   args: {
     word: null,
     item: mockQuestion,
@@ -95,13 +50,6 @@ export const ForQuestion = {
 };
 
 export const WithFeedback = {
-  decorators: [
-    (Story) => (
-      <MockProviders>
-        <Story />
-      </MockProviders>
-    ),
-  ],
   args: {
     word: mockWord,
     item: mockWord,

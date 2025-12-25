@@ -1,6 +1,5 @@
 import React from 'react';
 import QuestionBlock from './QuestionBlock';
-import UnitContext from '../context/unitContext';
 
 export default {
   title: 'Components/QuestionBlock',
@@ -30,23 +29,6 @@ const mockBlockProps = {
   onRemove: (key) => console.log('Remove:', key),
 };
 
-// Mock context provider
-const MockUnitContext = ({ children }) => {
-  const mockContext = {
-    gutterRefs: {},
-    grade: {
-      data: {},
-    },
-    saveGrade: (data) => console.log('Save grade:', data),
-  };
-
-  return (
-    <UnitContext.Provider value={mockContext}>
-      {children}
-    </UnitContext.Provider>
-  );
-};
-
 const multipleChoiceQuestion = [
   { id: 'id-1', answer: 'Paris', correct: true },
   { id: 'id-2', answer: 'London', correct: false },
@@ -60,13 +42,6 @@ const trueFalseQuestion = [
 ];
 
 export const MultipleChoice = {
-  decorators: [
-    (Story) => (
-      <MockUnitContext>
-        <Story />
-      </MockUnitContext>
-    ),
-  ],
   args: {
     block: createMockBlock(multipleChoiceQuestion),
     contentState: createMockContentState(multipleChoiceQuestion),
@@ -76,13 +51,6 @@ export const MultipleChoice = {
 };
 
 export const TrueFalse = {
-  decorators: [
-    (Story) => (
-      <MockUnitContext>
-        <Story />
-      </MockUnitContext>
-    ),
-  ],
   args: {
     block: createMockBlock(trueFalseQuestion),
     contentState: createMockContentState(trueFalseQuestion),
@@ -92,13 +60,6 @@ export const TrueFalse = {
 };
 
 export const ManyAnswers = {
-  decorators: [
-    (Story) => (
-      <MockUnitContext>
-        <Story />
-      </MockUnitContext>
-    ),
-  ],
   args: {
     block: createMockBlock([
       { id: 'id-1', answer: 'Answer 1', correct: false },

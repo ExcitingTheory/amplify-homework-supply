@@ -19,7 +19,8 @@ import { Button } from '@mui/material';
 import ImagesPlugin, { INSERT_IMAGE_COMMAND } from './ImagesPlugin';
 import { ImageNode } from '../components/ImageNode';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
-import { MockUnitProvider } from '../../../../.storybook/__mocks__/MockUnitProvider';
+import { UnitProvider } from '../../../context/unitContext';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
   title: 'Editor3/Plugins/ImagesPlugin',
@@ -60,8 +61,17 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
     nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, CodeHighlightNode, AutoLinkNode, LinkNode, ImageNode],
   };
 
+  const unitId = 'story-unit-id-' + Math.random();
+  seedMockUnit({
+    id: unitId,
+    name: 'Images Story Unit',
+    data: { root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 } },
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <LexicalComposer initialConfig={initialConfig}>
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
           <h2>Images Plugin - Editable Mode</h2>
@@ -86,7 +96,7 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
           </div>
         </div>
       </LexicalComposer>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 
@@ -100,8 +110,17 @@ const ReadOnlyTemplate = ({ editorState }) => {
     nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, CodeHighlightNode, AutoLinkNode, LinkNode, ImageNode],
   };
 
+  const unitId = 'story-unit-id-' + Math.random();
+  seedMockUnit({
+    id: unitId,
+    name: 'Images Story Unit',
+    data: { root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 } },
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <LexicalComposer initialConfig={initialConfig}>
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
           <h2>Images Plugin - Read-Only Mode</h2>
@@ -121,7 +140,7 @@ const ReadOnlyTemplate = ({ editorState }) => {
           </div>
         </div>
       </LexicalComposer>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 

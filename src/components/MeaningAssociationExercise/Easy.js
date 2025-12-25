@@ -247,11 +247,11 @@ export const Easy = ({
         <LinearProgressWithLabel value={percentComplete} />
       </Grid>
       <Grid container flexDirection="row">
-      <Grid xs={6}>
+      <Grid xs={8}>
         <AnswerDrop
           correctAnswer={{ ...correctWord, progressAssignment, sendFail, sendPass }} />
       </Grid>
-      <Grid xs={6} style={{
+      <Grid xs={4} style={{
         marginBottom: '1rem',
         paddingBottom: '1rem',
         height: 'fit-content',

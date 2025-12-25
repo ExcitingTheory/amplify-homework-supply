@@ -1,8 +1,5 @@
 import React from 'react';
 import { DictionaryEditor } from './DictionaryEditor';
-import DictionaryContext from '../context/dictionaryContext';
-import UnitContext from '../context/unitContext';
-import FilesContext from '../context/fileContext';
 
 export default {
   title: 'Components/DictionaryEditor',
@@ -10,52 +7,6 @@ export default {
   parameters: {
     layout: 'padded',
   },
-  decorators: [
-    (Story, context) => {
-      // Get dictionary from story args if available
-      const dictionary = context.args?.dictionary || {};
-      
-      const mockDictionaryContext = {
-        filteredDictionary: dictionary,
-        dictionary: dictionary,
-        setFilter: () => {},
-        searching: false,
-        setSearching: () => {},
-        filter: '',
-        filterWords: () => {},
-        wordMapId: {},
-        wordMapPhrase: {},
-        wordRefs: {},
-        questionBank: {},
-      };
-
-      const mockUnitContext = {
-        unit: {
-          id: 'unit-123',
-          title: 'Vocabulary Unit',
-        },
-      };
-
-      const mockFilesContext = {
-        audioFiles: {},
-        refreshAudioFiles: () => {},
-        session: {
-          identityId: 'mock-identity-id',
-          idToken: 'mock-token',
-        },
-      };
-
-      return (
-        <DictionaryContext.Provider value={mockDictionaryContext}>
-          <UnitContext.Provider value={mockUnitContext}>
-            <FilesContext.Provider value={mockFilesContext}>
-              <Story />
-            </FilesContext.Provider>
-          </UnitContext.Provider>
-        </DictionaryContext.Provider>
-      );
-    },
-  ],
 };
 
 export const Empty = {

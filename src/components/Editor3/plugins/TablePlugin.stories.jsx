@@ -20,7 +20,8 @@ import TableCellResizerPlugin from './TableCellResizerPlugin';
 import { TableNode as NewTableNode } from '../components/TableNode';
 import TableCellNodes from '../components/TableCellNodes';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
-import { MockUnitProvider } from '../../../../.storybook/__mocks__/MockUnitProvider';
+import { UnitProvider } from '../../../context/unitContext';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
   title: 'Editor3/Plugins/TablePlugin',
@@ -49,6 +50,17 @@ function InsertTableButton() {
 }
 
 const EditableTemplate = ({ editorState, showInsertButton }) => {
+  const unitId = 'table-demo-editable';
+  
+  seedMockUnit({
+    id: unitId,
+    name: 'Table Plugin Demo',
+    description: 'Demo for TablePlugin',
+    data: editorState || null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+  
   const cellEditorConfig = {
     namespace: 'TableCellEditor',
     nodes: [...TableCellNodes],
@@ -66,7 +78,7 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
   };
 
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <TableContext>
         <LexicalComposer initialConfig={initialConfig}>
           <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
@@ -94,11 +106,22 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
           </div>
         </LexicalComposer>
       </TableContext>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 
 const ReadOnlyTemplate = ({ editorState }) => {
+  const unitId = 'table-demo-readonly';
+  
+  seedMockUnit({
+    id: unitId,
+    name: 'Table Plugin ReadOnly Demo',
+    description: 'ReadOnly demo for TablePlugin',
+    data: editorState || null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+  
   const cellEditorConfig = {
     namespace: 'TableCellEditor',
     nodes: [...TableCellNodes],
@@ -117,7 +140,7 @@ const ReadOnlyTemplate = ({ editorState }) => {
   };
 
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <TableContext>
         <LexicalComposer initialConfig={initialConfig}>
           <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
@@ -139,7 +162,7 @@ const ReadOnlyTemplate = ({ editorState }) => {
           </div>
         </LexicalComposer>
       </TableContext>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 

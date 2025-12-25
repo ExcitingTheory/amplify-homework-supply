@@ -18,7 +18,8 @@ import { Button } from '@mui/material';
 
 import AnswerPlugin, { INSERT_ANSWER_BLOCK_COMMAND, AnswerNode } from './AnswerPlugin';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
-import { MockUnitProvider } from '../../../../.storybook/__mocks__/MockUnitProvider';
+import { UnitProvider } from '../../../context/unitContext';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 import { DictionaryProvider } from '../../../context/dictionaryContext';
 
 export default {
@@ -62,8 +63,17 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
     nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, CodeHighlightNode, AutoLinkNode, LinkNode, AnswerNode],
   };
 
+  const unitId = 'story-unit-id-' + Math.random();
+  seedMockUnit({
+    id: unitId,
+    name: 'Answer Story Unit',
+    data: { root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 } },
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <DictionaryProvider>
         <LexicalComposer initialConfig={initialConfig}>
           <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
@@ -90,7 +100,7 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
           </div>
         </LexicalComposer>
       </DictionaryProvider>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 
@@ -104,8 +114,17 @@ const ReadOnlyTemplate = ({ editorState }) => {
     nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, CodeHighlightNode, AutoLinkNode, LinkNode, AnswerNode],
   };
 
+  const unitId = 'story-unit-id-' + Math.random();
+  seedMockUnit({
+    id: unitId,
+    name: 'Answer Story Unit',
+    data: { root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 } },
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <DictionaryProvider>
         <LexicalComposer initialConfig={initialConfig}>
           <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
@@ -127,7 +146,7 @@ const ReadOnlyTemplate = ({ editorState }) => {
           </div>
         </LexicalComposer>
       </DictionaryProvider>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 

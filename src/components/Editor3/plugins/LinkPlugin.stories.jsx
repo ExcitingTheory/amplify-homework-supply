@@ -18,7 +18,8 @@ import LexicalClickableLinkPlugin from '@lexical/react/LexicalClickableLinkPlugi
 import LinkPlugin from './LinkPlugin';
 import AutoLinkPlugin from './AutoLinkPlugin';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
-import { MockUnitProvider } from '../../../../.storybook/__mocks__/MockUnitProvider';
+import { UnitProvider } from '../../../context/unitContext';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
   title: 'Editor3/Plugins/LinkPlugin',
@@ -33,6 +34,17 @@ const onError = (error) => {
 };
 
 const EditableTemplate = ({ editorState }) => {
+  const unitId = 'link-demo-unit-editable';
+  
+  seedMockUnit({
+    id: unitId,
+    name: 'Link Plugin Demo',
+    description: 'Demo for LinkPlugin',
+    data: editorState || null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+  
   const initialConfig = {
     namespace: 'LinkPluginDemo',
     theme: LanguageEditorTheme,
@@ -43,7 +55,7 @@ const EditableTemplate = ({ editorState }) => {
   };
 
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <LexicalComposer initialConfig={initialConfig}>
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
           <h2>Link Plugin - Editable Mode</h2>
@@ -71,11 +83,22 @@ const EditableTemplate = ({ editorState }) => {
           </div>
         </div>
       </LexicalComposer>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 
 const ReadOnlyTemplate = ({ editorState }) => {
+  const unitId = 'link-demo-unit-readonly';
+  
+  seedMockUnit({
+    id: unitId,
+    name: 'Link Plugin Demo ReadOnly',
+    description: 'Demo for LinkPlugin readonly',
+    data: editorState || null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+  
   const initialConfig = {
     namespace: 'LinkPluginDemo',
     theme: LanguageEditorTheme,
@@ -86,7 +109,7 @@ const ReadOnlyTemplate = ({ editorState }) => {
   };
 
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <LexicalComposer initialConfig={initialConfig}>
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
           <h2>Link Plugin - Read-Only Mode</h2>
@@ -110,7 +133,7 @@ const ReadOnlyTemplate = ({ editorState }) => {
           </div>
         </div>
       </LexicalComposer>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 

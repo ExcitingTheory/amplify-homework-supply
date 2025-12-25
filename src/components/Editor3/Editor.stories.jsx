@@ -1,6 +1,10 @@
 import React from 'react';
 import Editor, { Workbook } from './index';
-import { MockUnitProvider } from '../../../.storybook/__mocks__/MockUnitProvider';
+import { seedMockUnit } from '../../../.storybook/__mocks__/aws-amplify-datastore';
+
+// Mock unit ID for stories
+const MOCK_UNIT_ID = 'story-unit-id';
+const KITCHEN_SINK_ID = 'kitchen-sink-id';
 
 export default {
   title: 'Editor/Editor',
@@ -8,13 +12,6 @@ export default {
   parameters: {
     layout: 'fullscreen',
   },
-  decorators: [
-    (Story) => (
-      <MockUnitProvider>
-        <Story />
-      </MockUnitProvider>
-    ),
-  ],
 };
 
 const sampleEditorState = {
@@ -67,29 +64,41 @@ const sampleEditorState = {
 };
 
 export const EmptyEditor = {
-  args: {},
+  loaders: [
+    async () => {
+      seedMockUnit({
+        id: 'empty-editor-id',
+        name: 'Empty Editor',
+        description: 'A blank editor to start creating content',
+        data: null,
+        _version: 1,
+        owner: 'mock-user-sub',
+      });
+    },
+  ],
+  render: () => <Editor />,
+  parameters: {
+    unitId: 'empty-editor-id',
+  },
 };
 
 export const EditorWithContent = {
-  decorators: [
-    (Story) => (
-      <MockUnitProvider
-        mockValue={{
-          unit: {
-            id: 'mock-unit-id',
-            name: 'Sample Unit with Content',
-            description: 'This unit has some sample content',
-            data: sampleEditorState,
-            _version: 1,
-            owner: 'mock-owner',
-          },
-          editorStateRef: { current: sampleEditorState },
-        }}
-      >
-        <Story />
-      </MockUnitProvider>
-    ),
+  loaders: [
+    async () => {
+      seedMockUnit({
+        id: 'editor-with-content-id',
+        name: 'Sample Unit with Content',
+        description: 'This unit has some sample content',
+        data: sampleEditorState,
+        _version: 1,
+        owner: 'mock-user-sub',
+      });
+    },
   ],
+  render: () => <Editor />,
+  parameters: {
+    unitId: 'editor-with-content-id',
+  },
 };
 
 const kitchenSinkEditorState = {
@@ -1307,25 +1316,23 @@ const kitchenSinkEditorState = {
 };
 
 export const KitchenSink = {
-  decorators: [
-    (Story) => (
-      <MockUnitProvider
-        mockValue={{
-          unit: {
-            id: 'kitchen-sink-id',
-            name: 'Kitchen Sink - All Editor Blocks',
-            description: 'Comprehensive example showing all available editor block types',
-            data: kitchenSinkEditorState,
-            _version: 1,
-            owner: 'mock-owner',
-          },
-          editorStateRef: { current: kitchenSinkEditorState },
-        }}
-      >
-        <Story />
-      </MockUnitProvider>
-    ),
+  loaders: [
+    async () => {
+      // Seed the mock DataStore with kitchen sink data
+      seedMockUnit({
+        id: KITCHEN_SINK_ID,
+        name: 'Kitchen Sink - All Editor Blocks',
+        description: 'Comprehensive example showing all available editor block types',
+        data: kitchenSinkEditorState,
+        _version: 1,
+        owner: 'mock-user-sub',
+      });
+    },
   ],
+  render: () => <Editor />,
+  parameters: {
+    unitId: KITCHEN_SINK_ID,
+  },
 };
 
 const dataPluginDemoState = {
@@ -1540,23 +1547,20 @@ const dataPluginDemoState = {
 };
 
 export const DataPluginDemo = {
-  decorators: [
-    (Story) => (
-      <MockUnitProvider
-        mockValue={{
-          unit: {
-            id: 'data-plugin-demo-id',
-            name: 'DataPlugin Synchronization Demo',
-            description: 'Demonstrates how DataPlugin loads editor state from unit.data',
-            data: dataPluginDemoState,
-            _version: 1,
-            owner: 'mock-owner',
-          },
-          editorStateRef: { current: dataPluginDemoState },
-        }}
-      >
-        <Story />
-      </MockUnitProvider>
-    ),
+  loaders: [
+    async () => {
+      seedMockUnit({
+        id: 'data-plugin-demo-id',
+        name: 'DataPlugin Synchronization Demo',
+        description: 'Demonstrates how DataPlugin loads editor state from unit.data',
+        data: dataPluginDemoState,
+        _version: 1,
+        owner: 'mock-user-sub',
+      });
+    },
   ],
+  render: () => <Editor />,
+  parameters: {
+    unitId: 'data-plugin-demo-id',
+  },
 };

@@ -17,7 +17,8 @@ import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import DraggableBlockPlugin from './DraggableBlockPlugin';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
-import { MockUnitProvider } from '../../../../.storybook/__mocks__/MockUnitProvider';
+import { UnitProvider } from '../../../context/unitContext';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 import { GutterProvider } from '../../../context/gutterContext';
 import '../theme.css';
 
@@ -34,7 +35,17 @@ const onError = (error) => {
 };
 
 const EditableTemplate = ({ editorState }) => {
+  const unitId = 'draggable-block-demo';
   const [floatingAnchorElem, setFloatingAnchorElem] = useState(null);
+  
+  seedMockUnit({
+    id: unitId,
+    name: 'DraggableBlock Demo',
+    description: 'Demo for DraggableBlockPlugin',
+    data: editorState || null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
 
   const initialConfig = {
     namespace: 'DraggableBlockPluginDemo',
@@ -52,7 +63,7 @@ const EditableTemplate = ({ editorState }) => {
   };
 
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <GutterProvider>
         <LexicalComposer
             initialConfig={initialConfig}
@@ -93,7 +104,7 @@ const EditableTemplate = ({ editorState }) => {
 
         </LexicalComposer>
       </GutterProvider>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 

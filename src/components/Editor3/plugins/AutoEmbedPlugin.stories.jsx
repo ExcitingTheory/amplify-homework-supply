@@ -18,7 +18,8 @@ import AutoEmbedPlugin from './AutoEmbedPlugin';
 import YouTubePlugin, { YouTubeNode } from './YouTubePlugin';
 import AutoLinkPlugin from './AutoLinkPlugin';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
-import { MockUnitProvider } from '../../../../.storybook/__mocks__/MockUnitProvider';
+import { UnitProvider } from '../../../context/unitContext';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
   title: 'Editor3/Plugins/AutoEmbedPlugin',
@@ -33,6 +34,18 @@ const onError = (error) => {
 };
 
 const EditableTemplate = ({ editorState }) => {
+  const unitId = 'autoembed-demo-unit';
+  
+  // Seed mock unit data
+  seedMockUnit({
+    id: unitId,
+    name: 'AutoEmbed Demo Unit',
+    description: 'Demo for AutoEmbedPlugin',
+    data: editorState || null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+  
   const initialConfig = {
     namespace: 'AutoEmbedPluginDemo',
     theme: LanguageEditorTheme,
@@ -43,7 +56,7 @@ const EditableTemplate = ({ editorState }) => {
   };
 
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <LexicalComposer initialConfig={initialConfig}>
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
           <h2>Auto Embed Plugin - Editable Mode</h2>
@@ -73,7 +86,7 @@ const EditableTemplate = ({ editorState }) => {
           </div>
         </div>
       </LexicalComposer>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 

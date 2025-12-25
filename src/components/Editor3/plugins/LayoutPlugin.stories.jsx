@@ -20,7 +20,8 @@ import { LayoutPlugin, INSERT_LAYOUT_COMMAND } from './LayoutPlugin';
 import { LayoutContainerNode } from '../components/LayoutContainerNode';
 import { LayoutItemNode } from '../components/LayoutItemNode';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
-import { MockUnitProvider } from '../../../../.storybook/__mocks__/MockUnitProvider';
+import { UnitProvider } from '../../../context/unitContext';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
   title: 'Editor3/Plugins/LayoutPlugin',
@@ -49,6 +50,8 @@ function InsertLayoutButton() {
 }
 
 const EditableTemplate = ({ editorState, showInsertButton }) => {
+  const unitId = 'layout-demo-editable';
+  
   const initialConfig = {
     namespace: 'LayoutPluginDemo',
     theme: LanguageEditorTheme,
@@ -58,8 +61,17 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
     nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, CodeHighlightNode, AutoLinkNode, LinkNode, LayoutContainerNode, LayoutItemNode],
   };
 
+  seedMockUnit({
+    id: unitId,
+    name: 'Layout Plugin Demo',
+    description: 'Demo for Layout Plugin',
+    data: editorState || null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <LexicalComposer initialConfig={initialConfig}>
         <style jsx global>{`
           .layout-container {
@@ -94,11 +106,13 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
           </div>
         </div>
       </LexicalComposer>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 
 const ReadOnlyTemplate = ({ editorState }) => {
+  const unitId = 'layout-demo-readonly';
+  
   const initialConfig = {
     namespace: 'LayoutPluginDemo',
     theme: LanguageEditorTheme,
@@ -108,8 +122,17 @@ const ReadOnlyTemplate = ({ editorState }) => {
     nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, CodeHighlightNode, AutoLinkNode, LinkNode, LayoutContainerNode, LayoutItemNode],
   };
 
+  seedMockUnit({
+    id: unitId,
+    name: 'Layout Plugin Demo (Read-Only)',
+    description: 'Demo for Layout Plugin',
+    data: editorState || null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <LexicalComposer initialConfig={initialConfig}>
         <style jsx global>{`
           .layout-container {
@@ -138,7 +161,7 @@ const ReadOnlyTemplate = ({ editorState }) => {
           </div>
         </div>
       </LexicalComposer>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 

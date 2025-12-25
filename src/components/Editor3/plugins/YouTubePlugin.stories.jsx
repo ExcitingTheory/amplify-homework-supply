@@ -18,7 +18,8 @@ import { Button } from '@mui/material';
 
 import YouTubePlugin, { INSERT_YOUTUBE_COMMAND, YouTubeNode } from './YouTubePlugin';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
-import { MockUnitProvider } from '../../../../.storybook/__mocks__/MockUnitProvider';
+import { UnitProvider } from '../../../context/unitContext';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
   title: 'Editor3/Plugins/YouTubePlugin',
@@ -47,6 +48,8 @@ function InsertYouTubeButton() {
 }
 
 const EditableTemplate = ({ editorState, showInsertButton }) => {
+  const unitId = 'youtube-demo-editable';
+  
   const initialConfig = {
     namespace: 'YouTubePluginDemo',
     theme: LanguageEditorTheme,
@@ -56,8 +59,17 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
     nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, CodeHighlightNode, AutoLinkNode, LinkNode, YouTubeNode],
   };
 
+  seedMockUnit({
+    id: unitId,
+    name: 'YouTube Plugin Demo',
+    description: 'Demo for YouTube Plugin',
+    data: editorState || null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <LexicalComposer initialConfig={initialConfig}>
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
           <h2>YouTube Plugin - Editable Mode</h2>
@@ -82,11 +94,13 @@ const EditableTemplate = ({ editorState, showInsertButton }) => {
           </div>
         </div>
       </LexicalComposer>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 
 const ReadOnlyTemplate = ({ editorState }) => {
+  const unitId = 'youtube-demo-readonly';
+  
   const initialConfig = {
     namespace: 'YouTubePluginDemo',
     theme: LanguageEditorTheme,
@@ -96,8 +110,17 @@ const ReadOnlyTemplate = ({ editorState }) => {
     nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, CodeHighlightNode, AutoLinkNode, LinkNode, YouTubeNode],
   };
 
+  seedMockUnit({
+    id: unitId,
+    name: 'YouTube Plugin Demo (Read-Only)',
+    description: 'Demo for YouTube Plugin',
+    data: editorState || null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <LexicalComposer initialConfig={initialConfig}>
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
           <h2>YouTube Plugin - Read-Only Mode</h2>
@@ -117,7 +140,7 @@ const ReadOnlyTemplate = ({ editorState }) => {
           </div>
         </div>
       </LexicalComposer>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 

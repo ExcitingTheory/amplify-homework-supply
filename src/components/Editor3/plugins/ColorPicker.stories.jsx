@@ -19,7 +19,8 @@ import { Card, CardContent, Typography, Box } from '@mui/material';
 
 import ColorPicker from './ColorPicker';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
-import { MockUnitProvider } from '../../../../.storybook/__mocks__/MockUnitProvider';
+import { UnitProvider } from '../../../context/unitContext';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
   title: 'Editor3/Plugins/ColorPicker',
@@ -35,11 +36,21 @@ const onError = (error) => {
 
 // Standalone ColorPicker demo without editor
 const StandaloneTemplate = () => {
+  const unitId = 'colorpicker-demo-standalone';
   const [selectedColor, setSelectedColor] = useState('#4a90e2');
   const [previewText, setPreviewText] = useState('Sample Text');
 
+  seedMockUnit({
+    id: unitId,
+    name: 'Color Picker Standalone Demo',
+    description: 'Demo for Color Picker',
+    data: null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <div style={{ padding: '20px' }}>
         <Typography variant="h4" gutterBottom>
           Color Picker Component
@@ -139,7 +150,7 @@ const StandaloneTemplate = () => {
           </ul>
         </Box>
       </div>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 
@@ -192,6 +203,8 @@ const EditorColorPickerPlugin = () => {
 };
 
 const EditorTemplate = ({ editorState }) => {
+  const unitId = 'colorpicker-demo-editor';
+  
   const initialConfig = {
     namespace: 'ColorPickerEditorDemo',
     theme: LanguageEditorTheme,
@@ -201,8 +214,17 @@ const EditorTemplate = ({ editorState }) => {
     nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, CodeHighlightNode, AutoLinkNode, LinkNode],
   };
 
+  seedMockUnit({
+    id: unitId,
+    name: 'Color Picker Editor Demo',
+    description: 'Demo for Color Picker in Editor',
+    data: editorState || null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+
   return (
-    <MockUnitProvider>
+    <UnitProvider id={unitId}>
       <LexicalComposer initialConfig={initialConfig}>
         <div style={{ padding: '20px', maxWidth: '800px' }}>
           <Typography variant="h4" gutterBottom>
@@ -233,7 +255,7 @@ const EditorTemplate = ({ editorState }) => {
           <EditorColorPickerPlugin />
         </div>
       </LexicalComposer>
-    </MockUnitProvider>
+    </UnitProvider>
   );
 };
 
