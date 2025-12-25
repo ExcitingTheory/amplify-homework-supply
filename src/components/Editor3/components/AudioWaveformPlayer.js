@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Box, IconButton, Typography, Slider } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
@@ -37,6 +37,10 @@ export default function AudioWaveformPlayer({
     const [isReady, setIsReady] = useState(false);
     const [blobUrl, setBlobUrl] = useState(null);
     const [isSeeking, setIsSeeking] = useState(false);
+    const loadedSourceRef = useRef(null);
+    const currentTimeRef = useRef(0);
+    const displayTimeRef = useRef(0);
+    const lastFrameTimeRef = useRef(performance.now());
 
     // Create blob URL only once from file
     useEffect(() => {
@@ -64,9 +68,7 @@ export default function AudioWaveformPlayer({
         const listener = {
             onTimeUpdate: (time) => {
                 if (isActive && !isSeeking) {
-                    setLocalTime(time);
-                    const newProgress = (time / localDuration) * 100;
-                    setLocalProgress(isNaN(newProgress) || !isFinite(newProgress) ? 0 : newProgress);
+                    currentTimeRef.current = time;
                 }
             },
             onDurationChange: (dur) => {
@@ -78,6 +80,8 @@ export default function AudioWaveformPlayer({
                 if (isActive) {
                     setLocalTime(0);
                     setLocalProgress(0);
+                    currentTimeRef.current = 0;
+                    displayTimeRef.current = 0;
                 }
             },
             onCanPlay: () => {
@@ -93,18 +97,81 @@ export default function AudioWaveformPlayer({
         };
 
         return audioPlayer.subscribe(listener);
-    }, [sourceUrl, isActive, audioPlayer, localDuration, isSeeking]);
+    }, [sourceUrl, isActive, audioPlayer, isSeeking]);
+
+    // Continuous animation loop for smooth progress updates
+    useEffect(() => {
+        // Don't update if we're seeking - let the slider control the state
+        if (!isActive || !isPlaying || isSeeking || localDuration === 0) {
+            return;
+        }
+
+        // Initialize displayTime to current audio position when playback starts
+        // Read directly from the audio element for the most accurate current time
+        const audioElement = audioPlayer.audioElement;
+        const initialTime = audioElement ? audioElement.currentTime : (audioPlayer.currentTime || 0);
+        displayTimeRef.current = initialTime;
+        currentTimeRef.current = initialTime;
+        
+        console.log('[AudioWaveformPlayer] Starting animation from time:', initialTime, 'duration:', localDuration);
+        
+        // Reset frame time when starting animation
+        lastFrameTimeRef.current = performance.now();
+        
+        let rafId;
+        const updateProgress = (timestamp) => {
+            const deltaTime = (timestamp - lastFrameTimeRef.current) / 1000; // Convert to seconds
+            lastFrameTimeRef.current = timestamp;
+            
+            // Clamp deltaTime to prevent huge jumps (e.g., when tab is backgrounded)
+            const clampedDelta = Math.min(deltaTime, 0.1);
+            
+            // Predict next position based on playback (assuming 1x speed)
+            displayTimeRef.current += clampedDelta;
+            
+            // Update currentTimeRef from audio element periodically
+            if (audioElement) {
+                currentTimeRef.current = audioElement.currentTime;
+            }
+            
+            // Check for large jumps (seeks) and snap immediately
+            const targetTime = currentTimeRef.current;
+            const drift = targetTime - displayTimeRef.current;
+            
+            if (Math.abs(drift) > 0.5) {
+                // Large difference - snap to correct position (likely a seek)
+                displayTimeRef.current = targetTime;
+            }
+            
+            const time = displayTimeRef.current;
+            setLocalTime(time);
+            const newProgress = Math.min((time / localDuration) * 100, 100);
+            console.log('[AudioWaveformPlayer] Updating progress:', newProgress, 'time:', time);
+            setLocalProgress(newProgress);
+            
+            rafId = requestAnimationFrame(updateProgress);
+        };
+
+        rafId = requestAnimationFrame(updateProgress);
+
+        return () => {
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+            }
+        };
+    }, [isActive, isPlaying, isSeeking, localDuration]);
 
     // Load source when component mounts or URL changes
     useEffect(() => {
-        if (sourceUrl) {
+        if (sourceUrl && loadedSourceRef.current !== sourceUrl) {
             console.log('[AudioWaveformPlayer] Loading source:', sourceUrl.substring(0, 50) + '...');
             setIsReady(false);
             audioPlayer.loadSource(sourceUrl);
+            loadedSourceRef.current = sourceUrl;
         }
     }, [sourceUrl, audioPlayer]);
 
-    const togglePlayPause = async () => {
+    const togglePlayPause = useCallback(async () => {
         if (!sourceUrl || !isReady) {
             console.warn('Audio not ready to play');
             return;
@@ -115,18 +182,22 @@ export default function AudioWaveformPlayer({
         } else {
             await audioPlayer.play(sourceUrl);
         }
-    };
+    }, [sourceUrl, isReady, isPlaying, audioPlayer]);
 
-    const handleSliderChange = (event, newValue) => {
+    const handleSliderChange = useCallback((event, newValue) => {
+        // Mark that we're seeking to prevent animation loop from updating
+        if (!isSeeking) {
+            setIsSeeking(true);
+        }
         // Update progress while dragging without seeking
-        setIsSeeking(true);
         setLocalProgress(newValue);
         // Update time display immediately for visual feedback
         const newTime = (newValue / 100) * localDuration;
         setLocalTime(newTime);
-    };
+        displayTimeRef.current = newTime;
+    }, [localDuration, isSeeking]);
 
-    const handleSeek = (event, newValue) => {
+    const handleSeek = useCallback((event, newValue) => {
         // Prevent event propagation to other sliders
         event.stopPropagation();
         
@@ -138,8 +209,11 @@ export default function AudioWaveformPlayer({
         const newTime = (newValue / 100) * localDuration;
         audioPlayer.seek(newTime);
         setLocalProgress(newValue);
+        // Update refs so animation continues from new position
+        currentTimeRef.current = newTime;
+        displayTimeRef.current = newTime;
         setIsSeeking(false);
-    };
+    }, [isActive, localDuration, audioPlayer]);
 
     const formatTime = (seconds) => {
         if (!seconds || isNaN(seconds)) return '0:00';
@@ -166,7 +240,8 @@ export default function AudioWaveformPlayer({
             borderColor: 'divider',
             borderRadius: 2,
             backgroundColor: 'background.paper',
-            maxWidth: width + 100
+            width: '100%',
+            maxWidth: 'max-content'
         }}>
             {/* Title */}
             {title && (
@@ -176,7 +251,7 @@ export default function AudioWaveformPlayer({
             )}
 
             {/* Waveform with progress overlay */}
-            <Box sx={{ position: 'relative' }}>
+            <Box sx={{ position: 'relative', borderRadius: 1, width: '100%' }}>
                 <StaticWaveform
                     file={file}
                     waveformData={waveformData}
@@ -198,7 +273,7 @@ export default function AudioWaveformPlayer({
                             opacity: 0.2,
                             pointerEvents: 'none',
                             transformOrigin: 'left',
-                            transform: `scaleX(${localProgress / 100})`,
+                            transform: `scaleX(${Math.min(localProgress / 100, 1)})`,
                             willChange: 'transform'
                         }}
                     />
@@ -223,12 +298,30 @@ export default function AudioWaveformPlayer({
                 {/* Progress slider */}
                 <Slider
                     value={isNaN(localProgress) || !isFinite(localProgress) ? 0 : localProgress}
+                    min={0}
+                    max={100}
                     onChange={handleSliderChange}
                     onChangeCommitted={handleSeek}
                     aria-label="Audio progress"
-                    disabled={!sourceUrl || localDuration === 0 || !isActive}
-                    sx={{ flexGrow: 1 }}
+                    disabled={false}
+                    // disabled={!sourceUrl || localDuration === 0}
+                    // sx={{ 
+                    //     flexGrow: 1,
+                    //     '& .MuiSlider-thumb': {
+                    //         transition: 'none', // Disable transition for smoother updates
+                    //     },
+                    //     '& .MuiSlider-track': {
+                    //         transition: 'none',
+                    //     }
+                    // }}
+                    track="normal"
+                    size="small"
                 />
+
+                {/* Debug display */}
+                <Typography variant="caption" sx={{ position: 'absolute', top: 0, left: 0, color: 'red' }}>
+                    {localProgress.toFixed(2)}%
+                </Typography>
 
                 {/* Time display */}
                 {showDuration && (

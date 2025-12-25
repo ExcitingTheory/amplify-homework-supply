@@ -12,8 +12,6 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { HeadingNode } from '@lexical/rich-text';
 
 import CustomAnswerPlugin, { CustomAnswerNode } from './CustomAnswerPlugin';
-import DictionaryProvider from '../../../context/dictionaryContext';
-import UnitProvider from '../../../context/unitContext';
 
 export default {
   title: 'Components/CustomAnswer/Audio and Drawing',
@@ -50,42 +48,38 @@ const ReadOnlyTemplate = ({ editorState }) => {
   };
 
   return (
-    <UnitProvider>
-      <DictionaryProvider>
-        <LexicalComposer initialConfig={initialConfig}>
-          <div style={{ 
-            padding: '2rem',
-            maxWidth: '900px',
-            margin: '0 auto',
-            backgroundColor: '#f5f5f5',
-            minHeight: '100vh'
-          }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              padding: '2rem',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }}>
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable 
-                    style={{
-                      minHeight: '400px',
-                      outline: 'none',
-                      padding: '1rem'
-                    }}
-                  />
-                }
-                placeholder={null}
-                ErrorBoundary={LexicalErrorBoundary}
+    <LexicalComposer initialConfig={initialConfig}>
+      <div style={{ 
+        padding: '2rem',
+        maxWidth: '900px',
+        margin: '0 auto',
+        backgroundColor: '#f5f5f5',
+        minHeight: '100vh'
+      }}>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          padding: '2rem',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        }}>
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable 
+                style={{
+                  minHeight: '400px',
+                  outline: 'none',
+                  padding: '1rem'
+                }}
               />
-              <HistoryPlugin />
-              <CustomAnswerPlugin />
-            </div>
+            }
+          placeholder={null}
+          ErrorBoundary={LexicalErrorBoundary}
+        />
+            <HistoryPlugin />
+            <CustomAnswerPlugin />
           </div>
-        </LexicalComposer>
-      </DictionaryProvider>
-    </UnitProvider>
+        </div>
+      </LexicalComposer>
   );
 };
 

@@ -1,24 +1,20 @@
-[01:08:18.488] [INFO] storybook v10.1.10
-[01:08:19.642] [DEBUG] Getting package.json info for /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/package.json...
-[01:08:20.954] [DEBUG] Serving static files from [36mpublic[39m at [36m/[39m
-[01:08:20.966] [INFO] Starting...
-[01:08:20.997] [WARN] unable to find package.json for @mui/icons-material
-[01:08:21.000] [WARN] unable to find package.json for openai
-[01:08:21.016] [WARN] No story files found for the specified pattern: [34msrc/**/*.mdx[39m
-[01:08:21.705] [DEBUG] Starting preview..
-[01:08:21.774] [INFO] Addon-docs: using MDX3
-[01:08:21.811] [INFO] Using implicit CSS loaders
-[01:08:22.578] [INFO] Using SWC as compiler
-[01:08:22.671] [INFO] Using default Webpack5 setup
-[01:08:23.081] [INFO] Storybook collects completely anonymous usage telemetry. We use it to shape Storybook's roadmap and prioritize features. You can learn more, including how to opt out, at https://storybook.js.org/telemetry
-[01:08:23.480] [DEBUG] Using tsconfig paths for react-docgen
-[01:09:07.213] [WARN] No version specified and unable to automatically determine one. No version in description file (usually package.json). Add version to description file /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/node_modules/next/dist/compiled/react-dom/package.json, or manually specify version in shared config.
-[01:09:07.214] [WARN] No version specified and unable to automatically determine one. No version in description file (usually package.json). Add version to description file /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/node_modules/next/dist/compiled/react/package.json, or manually specify version in shared config.
-[01:09:07.215] [WARN] No version specified and unable to automatically determine one. No version in description file (usually package.json). Add version to description file /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/node_modules/next/dist/compiled/react/package.json, or manually specify version in shared config.
-[01:09:07.216] [WARN] No version specified and unable to automatically determine one. No version in description file (usually package.json). Add version to description file /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/node_modules/next/dist/compiled/react/package.json, or manually specify version in shared config.
-[01:09:07.218] [ERROR] Failed to build the preview
-[01:09:07.224] [WARN] Force closed preview build
-[01:09:07.226] [ERROR] [38;2;241;97;97mSB_BUILDER-WEBPACK5_0003 (WebpackCompilationError): There were problems when compiling your code with Webpack.
+[03:22:41.854] [INFO] storybook v10.1.10
+[03:22:42.431] [DEBUG] Getting package.json info for /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/package.json...
+[03:22:44.162] [DEBUG] Serving static files from [36mpublic[39m at [36m/[39m
+[03:22:44.172] [INFO] Starting...
+[03:22:44.218] [WARN] unable to find package.json for @mui/icons-material
+[03:22:44.230] [WARN] unable to find package.json for openai
+[03:22:44.267] [WARN] No story files found for the specified pattern: [34msrc/**/*.mdx[39m
+[03:22:45.186] [DEBUG] Starting preview..
+[03:22:45.242] [INFO] Addon-docs: using MDX3
+[03:22:45.282] [INFO] Using implicit CSS loaders
+[03:22:46.294] [INFO] Using SWC as compiler
+[03:22:46.400] [INFO] Using default Webpack5 setup
+[03:22:47.108] [INFO] Storybook collects completely anonymous usage telemetry. We use it to shape Storybook's roadmap and prioritize features. You can learn more, including how to opt out, at https://storybook.js.org/telemetry
+[03:22:47.618] [DEBUG] Using tsconfig paths for react-docgen
+[03:23:32.927] [ERROR] Failed to build the preview
+[03:23:32.934] [WARN] Force closed preview build
+[03:23:32.935] [ERROR] [38;2;241;97;97mSB_BUILDER-WEBPACK5_0003 (WebpackCompilationError): There were problems when compiling your code with Webpack.
 Run Storybook with --debug-webpack for more information.[39m
     at starter (file://./node_modules/@storybook/builder-webpack5/dist/index.js:799:11)
     at starter.next (<anonymous>)
@@ -30,5 +26,5 @@ Run Storybook with --debug-webpack for more information.[39m
     at async withTelemetry (file://./node_modules/storybook/dist/_node-chunks/chunk-PGCRO4IZ.js:209:12)
     at async dev (file://./node_modules/storybook/dist/bin/core.js:2734:3)
     at async _Command.<anonymous> (file://./node_modules/storybook/dist/bin/core.js:2801:92)
-[01:09:07.227] [WARN] Broken build, fix the error above.
+[03:23:32.937] [WARN] Broken build, fix the error above.
 You may need to refresh the browser.

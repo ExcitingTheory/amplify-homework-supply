@@ -61,8 +61,7 @@ const config = {
     const path = require('path');
     const webpack = require('webpack');
     
-    // Fix React version conflicts
-    // Force all react imports to use the same instance
+    // Force all react imports to use the same instance via aliases
     const reactPath = path.resolve(__dirname, '../node_modules/react');
     const reactDomPath = path.resolve(__dirname, '../node_modules/react-dom');
     
@@ -78,42 +77,47 @@ const config = {
       [path.resolve(__dirname, '../src/utils/getCachedUrl')]: require.resolve('./__mocks__/getCachedUrl.js'),
     };
     
-    // Don't let any package use its own React - force them all to use ours as externals
-    config.externals = config.externals || {};
+    // Ensure symlinks are resolved properly
+    config.resolve.symlinks = false;
     
-    // Remove existing React from bundle and force single shared instance
+    // Add Module Federation plugin to share React modules
     const ModuleFederationPlugin = webpack.container.ModuleFederationPlugin;
     
     config.plugins.push(
       new ModuleFederationPlugin({
-        name: 'storybook',
+        name: 'amplify-homework-supply',
         shared: {
           react: {
             singleton: true,
-            requiredVersion: '^18.3.1',
+            requiredVersion: '18.3.1',
+            version: '18.3.1',
+            strictVersion: false,
             eager: true,
           },
           'react-dom': {
             singleton: true,
-            requiredVersion: '^18.3.1',
+            requiredVersion: '18.3.1',
+            version: '18.3.1',
+            strictVersion: false,
             eager: true,
           },
           'react/jsx-runtime': {
             singleton: true,
-            requiredVersion: '^18.3.1',
+            requiredVersion: '18.3.1',
+            version: '18.3.1',
+            strictVersion: false,
             eager: true,
           },
           'react/jsx-dev-runtime': {
             singleton: true,
-            requiredVersion: '^18.3.1',
+            requiredVersion: '18.3.1',
+            version: '18.3.1',
+            strictVersion: false,
             eager: true,
           },
         },
       })
     );
-    
-    // Ensure symlinks are resolved properly
-    config.resolve.symlinks = false;
     
     return config;
   },

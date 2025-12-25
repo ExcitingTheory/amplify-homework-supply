@@ -90,6 +90,30 @@ export const clearMockUnits = () => {
   Object.keys(mockGrades).forEach(key => delete mockGrades[key]);
   Object.keys(mockFiles).forEach(key => delete mockFiles[key]);
   console.log('[Mock DataStore] Cleared all mock data');
+  
+  // Always seed a default unit for stories that don't provide their own
+  seedMockUnit({
+    id: 'mock-unit-id',
+    name: 'Default Mock Unit',
+    description: 'A default unit for stories',
+    data: null,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+  
+  // Always seed a default grade for the default unit
+  seedMockGrade({
+    id: 'mock-grade-id',
+    unitID: 'mock-unit-id',
+    owner: 'mock-user-sub',
+    unitVersion: 1,
+    percentComplete: 0,
+    accuracy: 0,
+    complete: false,
+    timerStarted: false,
+    data: {},
+    _version: 1,
+  });
 };
 
 // Mock SortDirection enum
@@ -282,6 +306,74 @@ export class DataStore {
   static observeQuery(modelConstructor, predicate, options) {
     const modelName = modelConstructor?.name;
     console.log('Mock DataStore.observeQuery called for:', modelName);
+    
+    // Extract filter criteria from predicate if available
+    let filterFn = null;
+    if (predicate && typeof predicate === 'function') {
+      // Create a mock predicate builder to capture filter criteria
+      const predicateCapture = {
+        id: {
+          eq: (value) => {
+            filterFn = (item) => item.id === value;
+            console.log('[Mock DataStore] Filter by id.eq:', value);
+            return predicateCapture;
+          }
+        },
+        unitID: {
+          eq: (value) => {
+            filterFn = (item) => item.unitID === value;
+            console.log('[Mock DataStore] Filter by unitID.eq:', value);
+            return predicateCapture;
+          }
+        },
+        owner: {
+          eq: (value) => {
+            const currentFilter = filterFn;
+            filterFn = (item) => {
+              const ownerMatch = item.owner === value;
+              return currentFilter ? currentFilter(item) && ownerMatch : ownerMatch;
+            };
+            console.log('[Mock DataStore] Filter by owner.eq:', value);
+            return predicateCapture;
+          }
+        },
+        unitVersion: {
+          eq: (value) => {
+            const currentFilter = filterFn;
+            filterFn = (item) => {
+              const versionMatch = item.unitVersion === value;
+              return currentFilter ? currentFilter(item) && versionMatch : versionMatch;
+            };
+            console.log('[Mock DataStore] Filter by unitVersion.eq:', value);
+            return predicateCapture;
+          }
+        },
+        complete: {
+          eq: (value) => {
+            const currentFilter = filterFn;
+            filterFn = (item) => {
+              const completeMatch = item.complete === value;
+              return currentFilter ? currentFilter(item) && completeMatch : completeMatch;
+            };
+            console.log('[Mock DataStore] Filter by complete.eq:', value);
+            return predicateCapture;
+          }
+        },
+        and: (fn) => {
+          if (typeof fn === 'function') {
+            fn(predicateCapture);
+          }
+          return predicateCapture;
+        }
+      };
+      
+      try {
+        predicate(predicateCapture);
+      } catch (e) {
+        console.log('[Mock DataStore] Could not parse predicate:', e.message);
+      }
+    }
+    
     return {
       subscribe: (callback) => {
         console.log('Mock DataStore.observeQuery subscription created for:', modelName);
@@ -290,19 +382,32 @@ export class DataStore {
         let items = [];
         if (modelName === 'Unit') {
           items = Object.values(mockUnits);
-          console.log('[Mock DataStore] Returning', items.length, 'units');
+          if (filterFn) {
+            items = items.filter(filterFn);
+          }
+          console.log('[Mock DataStore] Returning', items.length, 'units (filtered)');
           // Store the callback for future updates
           activeSubscriptions.Unit.push(callback);
         } else if (modelName === 'Grade') {
           items = Object.values(mockGrades);
+          if (filterFn) {
+            items = items.filter(filterFn);
+          }
+          console.log('[Mock DataStore] Returning', items.length, 'grades (filtered)');
           activeSubscriptions.Grade.push(callback);
         } else if (modelName === 'File') {
           items = Object.values(mockFiles);
-          console.log('[Mock DataStore] Returning', items.length, 'files');
+          if (filterFn) {
+            items = items.filter(filterFn);
+          }
+          console.log('[Mock DataStore] Returning', items.length, 'files (filtered)');
           activeSubscriptions.File.push(callback);
         } else {
           const data = mockData[modelName];
           items = data ? Object.values(data) : [];
+          if (filterFn) {
+            items = items.filter(filterFn);
+          }
         }
         
         // Call immediately with current data

@@ -183,37 +183,32 @@ import {
 
 import { $isAtNodeEnd } from '@lexical/selection';
 
-import { Noto_Sans_JP, Oswald, Cormorant, DM_Sans, Inter } from 'next/font/google'
-
-
+// Removed Google Fonts import to fix Storybook build issues (fonts.googleapis.com unreachable)
+// Import from 'next/font/google' is commented out to prevent network errors
+// Font families are defined with fallbacks instead
 
 const drawerWidth = 400;
 
+// Font family fallback definitions (replaces next/font/google)
+const notoSansJp = {
+  style: { fontFamily: '"Noto Sans JP", sans-serif' }
+}
 
-const notoSansJp = Noto_Sans_JP({
-  weight: '400',
-  preload: false,
-})
+const oswald = {
+  style: { fontFamily: '"Oswald", sans-serif' }
+}
 
-const oswald = Oswald({
-  weight: '400',
-  preload: false,
-})
+const cormorant = {
+  style: { fontFamily: '"Cormorant", serif' }
+}
 
-const cormorant = Cormorant({
-  weight: '400',
-  preload: false,
-})
+const dmSans = {
+  style: { fontFamily: '"DM Sans", sans-serif' }
+}
 
-const dmSans = DM_Sans({
-  weight: '400',
-  preload: false,
-})
-
-const inter = Inter({
-  weight: '400',
-  preload: false,
-})
+const inter = {
+  style: { fontFamily: '"Inter", sans-serif' }
+}
 
 
 export function getSelectedNode(
@@ -1541,7 +1536,7 @@ function FontDropDown({
         <>
         <style jsx global>{`
             html {
-              font-family: ${notoSansJp.style.fontFamily} ${cormorant.style.fontFamily} ${inter.style.fontFamily} ${dmSans.style.fontFamily} ${oswald.style.fontFamily};
+              font-family: ${notoSansJp.style.fontFamily.split(',')[0]} ${cormorant.style.fontFamily.split(',')[0]} ${inter.style.fontFamily.split(',')[0]} ${dmSans.style.fontFamily.split(',')[0]} ${oswald.style.fontFamily.split(',')[0]};
             }            
         `}</style>
 

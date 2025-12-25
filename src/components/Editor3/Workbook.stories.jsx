@@ -167,6 +167,19 @@ export const EmptyWorkbook = {
         _version: 1,
         owner: 'mock-user-sub',
       });
+      
+      seedMockGrade({
+        id: 'grade-empty-1',
+        unitID: 'empty-workbook-id',
+        owner: 'mock-user-sub',
+        unitVersion: 1,
+        percentComplete: 0,
+        accuracy: 0,
+        complete: false,
+        timerStarted: false,
+        data: {},
+        _version: 1,
+      });
     },
   ],
   render: () => <Workbook />,
@@ -185,6 +198,19 @@ export const WorkbookWithContent = {
         data: sampleWorkbookState,
         _version: 1,
         owner: 'mock-user-sub',
+      });
+      
+      seedMockGrade({
+        id: 'grade-content-1',
+        unitID: 'workbook-with-content-id',
+        owner: 'mock-user-sub',
+        unitVersion: 1,
+        percentComplete: 0,
+        accuracy: 0,
+        complete: false,
+        timerStarted: false,
+        data: {},
+        _version: 1,
       });
     },
   ],
