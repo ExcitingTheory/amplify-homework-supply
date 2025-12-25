@@ -171,6 +171,95 @@ export const NoAudioSource = {
   },
 };
 
+export const WithRecording = {
+  args: {
+    enableRecording: true,
+    width: 600,
+    height: 80,
+    title: 'Record Your Audio',
+    showDuration: true,
+    gradeId: 'test-grade-123',
+    nodeKey: 'test-node-key',
+    metadata: {
+      phrase: 'Hello',
+      definition: 'A greeting',
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Player with recording enabled. Click the microphone icon to start recording, then stop to save. The recording will automatically calculate waveform data and upload if gradeId and nodeKey are provided.',
+      },
+    },
+  },
+};
+
+export const RecordingWithCallback = () => {
+  const [recordedFiles, setRecordedFiles] = React.useState([]);
+  
+  const handleRecordingComplete = (file, uploadResult) => {
+    console.log('Recording complete:', file, uploadResult);
+    setRecordedFiles([...recordedFiles, { file, uploadResult }]);
+  };
+  
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <AudioWaveformPlayer
+        enableRecording={true}
+        width={600}
+        height={80}
+        title="Record Your Pronunciation"
+        showDuration={true}
+        gradeId="test-grade-123"
+        nodeKey="pronunciation-practice"
+        metadata={{
+          phrase: 'こんにちは',
+          definition: 'Hello (Japanese)',
+        }}
+        onRecordingComplete={handleRecordingComplete}
+      />
+      
+      {recordedFiles.length > 0 && (
+        <Box sx={{ mt: 2 }}>
+          <h4>Recorded Files:</h4>
+          <ul>
+            {recordedFiles.map((item, i) => (
+              <li key={i}>
+                {item.file.name} - {item.file.size} bytes
+              </li>
+            ))}
+          </ul>
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+RecordingWithCallback.parameters = {
+  docs: {
+    description: {
+      story: 'Example with recording callback to track recorded files. The callback receives the file metadata and upload result.',
+    },
+  },
+};
+
+export const RecordingOnly = {
+  args: {
+    enableRecording: true,
+    width: 600,
+    height: 80,
+    title: 'Recording Only Mode',
+    showDuration: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Recording-only mode without gradeId/nodeKey. Recording will be calculated but not uploaded. Useful for testing or preview scenarios.',
+      },
+    },
+  },
+};
+
 const UsageExample = () => (
   <Box sx={{ p: 3, maxWidth: 800 }}>
     <h2>Usage Examples</h2>
