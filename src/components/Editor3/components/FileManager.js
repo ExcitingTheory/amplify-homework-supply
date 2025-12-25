@@ -52,7 +52,7 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { UnitFile } from '../../../models';
 import UnitContext from '../../../context/unitContext';
 import getCachedUrl from "../../../utils/getCachedUrl";
-import MusicIcon from '@mui/icons-material/MusicNote';
+import AudioWaveformPlayer from './AudioWaveformPlayer';
 
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
@@ -182,7 +182,7 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
                             console.log('fileGenerator', fileGenerator)
 
                             
-                            const { path } = fileGenerator.data.generateImageFile;
+                            const path = fileGenerator?.data?.generateImageFile?.path;
 
                             if (path) {
                                 console.log('s3Key', path, identityId)
@@ -583,7 +583,7 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
                             console.log('fileGenerator', fileGenerator)
 
                             
-                            const { path } = fileGenerator.data.generateAudioFile;
+                            const path = fileGenerator?.data?.generateAudioFile?.path;
 
                             if (path) {
                                 console.log('s3Key', path, identityId)
@@ -710,17 +710,12 @@ function ListItemImage({ file }) {
     const [url, setUrl] = React.useState(null);
 
     React.useEffect(() => {
-
         const asyncFunc = async () => {
-
             const _url = await getCachedUrl(file.path, 'protected', file.identityId)
-
             setUrl(_url);
         }
-
         asyncFunc();
-
-    }, [file.path]);
+    }, [file.path, file.identityId]);
 
     return (
         <>
@@ -734,17 +729,26 @@ function ListItemImage({ file }) {
                     }}
                 />
             }
-            {file.mimeType.includes('audio') &&
-                <MusicIcon
-
-                    style={{
-                        width: '3rem',
-                        height: '3rem',
-                        objectFit: 'contain',
-                    }} />
-
-
-            }
+            {file.mimeType.includes('audio') && (
+                url ? (
+                    <Box sx={{ width: '100%' }}>
+                        <AudioWaveformPlayer
+                            audioUrl={url}
+                            waveformData={file.waveformData ? JSON.parse(file.waveformData) : undefined}
+                            width={200}
+                            height={60}
+                            showDuration={false}
+                        />
+                        <Typography variant="caption" noWrap sx={{ display: 'block', textAlign: 'center', mt: 0.5 }}>
+                            {file.name}
+                        </Typography>
+                    </Box>
+                ) : (
+                    <Box sx={{ width: '100%', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CircularProgress size={24} />
+                    </Box>
+                )
+            )}
         </>)
 
 
@@ -1316,7 +1320,8 @@ export default function FileManager() {
                     {files
                         .filter(file => file.mimeType.includes('audio'))
                         .length > 0 && (
-                        <TreeItem itemId="audio" label={`Audio (${files.filter(f => f.mimeType.includes('audio')).length})`}>
+                        <TreeItem
+                        itemId="audio" label={`Audio (${files.filter(f => f.mimeType.includes('audio')).length})`}>
                             {files
                                 .filter(file => file.mimeType.includes('audio'))
                                 .map((file) => (
@@ -1324,18 +1329,16 @@ export default function FileManager() {
                                         itemId={file.id}
                                         key={file.id}
                                         label={
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, py: 1, width: '100%' }}>
                                                 <ListItemImage file={file} />
-                                                <Box sx={{ flex: 1, minWidth: 0 }}>
-                                                    <Typography noWrap>{file.name}</Typography>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between' }}>
                                                     <Typography variant="caption" color="text.secondary">
                                                         {(file.size / 1000).toFixed(2)} KB
                                                     </Typography>
-                                                </Box>
-                                                <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                                    {editor && (
-                                                        <IconButton
-                                                            size="small"
+                                                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                        {editor && (
+                                                            <IconButton
+                                                                size="small"
                                                             onClick={async (e) => {
                                                                 e.stopPropagation();
                                                                 await DataStore.save(
@@ -1364,6 +1367,7 @@ export default function FileManager() {
                                                     </IconButton>
                                                 </Box>
                                             </Box>
+                                        </Box>
                                         }
                                     />
                                 ))}

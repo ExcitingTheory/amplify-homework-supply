@@ -143,6 +143,7 @@ const SketchPad = ({ excalidrawData,
         }
         setCountdown(null);
         setPendingSubmission(null);
+        setImageData(null); // Clear the image so user can draw again
     }
 
     const startSubmissionCountdown = (justBase64, elements, appState) => {
@@ -267,6 +268,8 @@ const SketchPad = ({ excalidrawData,
             border: "3px solid #2196f3",
             borderRadius: "4px",
             boxShadow: "0 0 10px rgba(33, 150, 243, 0.5)",
+            position: "relative",
+            overflow: "hidden",
         }}>
             <Excalidraw
             initialData={excalidrawData}
@@ -287,7 +290,24 @@ const SketchPad = ({ excalidrawData,
                     theme: false,
                     saveAsImage: false,
                 },
+                tools: {
+                    image: false,
+                    text: false,
+                    arrow: false,
+                    line: false,
+                    rectangle: false,
+                    diamond: false,
+                    ellipse: false,
+                    freedraw: true,
+                    selection: false,
+                    eraser: true,
+                },
+                dockedSidebarBreakpoint: 0,
+                welcomeScreen: false,
             }}
+            viewModeEnabled={false}
+            zenModeEnabled={false}
+            gridModeEnabled={false}
             >
             </Excalidraw>
         </div>

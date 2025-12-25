@@ -1,12 +1,14 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, IconButton, Typography, Slider } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import StaticWaveform from './StaticWaveform';
+import { useAudioPlayer } from '../context/AudioPlayerContext';
 
 /**
  * AudioWaveformPlayer - Complete audio player with waveform visualization
  * 
+ * Uses shared audio context to ensure only one audio plays at a time.
  * Displays a static waveform with playback controls and progress tracking.
  * Shows current playback position on the waveform.
  * 
@@ -28,64 +30,115 @@ export default function AudioWaveformPlayer({
     title,
     showDuration = true
 }) {
-    const audioRef = useRef(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
-    const [progress, setProgress] = useState(0);
+    const audioPlayer = useAudioPlayer();
+    const [localTime, setLocalTime] = useState(0);
+    const [localDuration, setLocalDuration] = useState(0);
+    const [localProgress, setLocalProgress] = useState(0);
+    const [isReady, setIsReady] = useState(false);
+    const [blobUrl, setBlobUrl] = useState(null);
+    const [isSeeking, setIsSeeking] = useState(false);
 
-    // Use audioUrl if provided, otherwise try to get from file
-    const sourceUrl = audioUrl || (file ? URL.createObjectURL(file) : null);
-
+    // Create blob URL only once from file
     useEffect(() => {
-        const audio = audioRef.current;
-        if (!audio) return;
+        if (file && !audioUrl) {
+            const url = URL.createObjectURL(file);
+            setBlobUrl(url);
+            return () => {
+                URL.revokeObjectURL(url);
+                setBlobUrl(null);
+            };
+        }
+    }, [file, audioUrl]);
 
-        const updateTime = () => {
-            setCurrentTime(audio.currentTime);
-            setProgress((audio.currentTime / audio.duration) * 100);
+    // Use audioUrl if provided, otherwise use blob URL
+    const sourceUrl = audioUrl || blobUrl;
+
+    // Check if this player is currently active
+    const isActive = audioPlayer.currentSource === sourceUrl;
+    const isPlaying = isActive && audioPlayer.isPlaying;
+
+    // Subscribe to audio player events
+    useEffect(() => {
+        if (!sourceUrl) return;
+
+        const listener = {
+            onTimeUpdate: (time) => {
+                if (isActive && !isSeeking) {
+                    setLocalTime(time);
+                    const newProgress = (time / localDuration) * 100;
+                    setLocalProgress(isNaN(newProgress) || !isFinite(newProgress) ? 0 : newProgress);
+                }
+            },
+            onDurationChange: (dur) => {
+                if (isActive) {
+                    setLocalDuration(dur);
+                }
+            },
+            onEnded: () => {
+                if (isActive) {
+                    setLocalTime(0);
+                    setLocalProgress(0);
+                }
+            },
+            onCanPlay: () => {
+                if (isActive) {
+                    setIsReady(true);
+                }
+            },
+            onError: () => {
+                if (isActive) {
+                    setIsReady(false);
+                }
+            }
         };
 
-        const updateDuration = () => {
-            setDuration(audio.duration);
-        };
+        return audioPlayer.subscribe(listener);
+    }, [sourceUrl, isActive, audioPlayer, localDuration, isSeeking]);
 
-        const handleEnded = () => {
-            setIsPlaying(false);
-            setCurrentTime(0);
-            setProgress(0);
-        };
+    // Load source when component mounts or URL changes
+    useEffect(() => {
+        if (sourceUrl) {
+            console.log('[AudioWaveformPlayer] Loading source:', sourceUrl.substring(0, 50) + '...');
+            setIsReady(false);
+            audioPlayer.loadSource(sourceUrl);
+        }
+    }, [sourceUrl, audioPlayer]);
 
-        audio.addEventListener('timeupdate', updateTime);
-        audio.addEventListener('loadedmetadata', updateDuration);
-        audio.addEventListener('ended', handleEnded);
-
-        return () => {
-            audio.removeEventListener('timeupdate', updateTime);
-            audio.removeEventListener('loadedmetadata', updateDuration);
-            audio.removeEventListener('ended', handleEnded);
-        };
-    }, []);
-
-    const togglePlayPause = () => {
-        const audio = audioRef.current;
-        if (!audio) return;
+    const togglePlayPause = async () => {
+        if (!sourceUrl || !isReady) {
+            console.warn('Audio not ready to play');
+            return;
+        }
 
         if (isPlaying) {
-            audio.pause();
+            audioPlayer.pause();
         } else {
-            audio.play();
+            await audioPlayer.play(sourceUrl);
         }
-        setIsPlaying(!isPlaying);
+    };
+
+    const handleSliderChange = (event, newValue) => {
+        // Update progress while dragging without seeking
+        setIsSeeking(true);
+        setLocalProgress(newValue);
+        // Update time display immediately for visual feedback
+        const newTime = (newValue / 100) * localDuration;
+        setLocalTime(newTime);
     };
 
     const handleSeek = (event, newValue) => {
-        const audio = audioRef.current;
-        if (!audio) return;
+        // Prevent event propagation to other sliders
+        event.stopPropagation();
+        
+        if (!isActive || !localDuration) {
+            setIsSeeking(false);
+            return;
+        }
 
-        const newTime = (newValue / 100) * duration;
-        audio.currentTime = newTime;
-        setProgress(newValue);
+        const newTime = (newValue / 100) * localDuration;
+        audioPlayer.seek(newTime);
+        setLocalProgress(newValue);
+        setIsSeeking(false);
     };
 
     const formatTime = (seconds) => {
@@ -122,11 +175,6 @@ export default function AudioWaveformPlayer({
                 </Typography>
             )}
 
-            {/* Hidden audio element */}
-            {sourceUrl && (
-                <audio ref={audioRef} src={sourceUrl} preload="metadata" />
-            )}
-
             {/* Waveform with progress overlay */}
             <Box sx={{ position: 'relative' }}>
                 <StaticWaveform
@@ -138,18 +186,20 @@ export default function AudioWaveformPlayer({
                 />
                 
                 {/* Progress overlay */}
-                {duration > 0 && (
+                {localDuration > 0 && (
                     <Box
                         sx={{
                             position: 'absolute',
                             top: 0,
                             left: 0,
-                            width: `${progress}%`,
+                            width: '100%',
                             height: '100%',
                             backgroundColor: 'primary.main',
                             opacity: 0.2,
                             pointerEvents: 'none',
-                            transition: 'width 0.1s linear'
+                            transformOrigin: 'left',
+                            transform: `scaleX(${localProgress / 100})`,
+                            willChange: 'transform'
                         }}
                     />
                 )}
@@ -164,7 +214,7 @@ export default function AudioWaveformPlayer({
                 <IconButton
                     onClick={togglePlayPause}
                     color="primary"
-                    disabled={!sourceUrl}
+                    disabled={!sourceUrl || !isReady}
                     size="small"
                 >
                     {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
@@ -172,17 +222,18 @@ export default function AudioWaveformPlayer({
 
                 {/* Progress slider */}
                 <Slider
-                    value={progress}
-                    onChange={handleSeek}
+                    value={isNaN(localProgress) || !isFinite(localProgress) ? 0 : localProgress}
+                    onChange={handleSliderChange}
+                    onChangeCommitted={handleSeek}
                     aria-label="Audio progress"
-                    disabled={!sourceUrl || duration === 0}
+                    disabled={!sourceUrl || localDuration === 0 || !isActive}
                     sx={{ flexGrow: 1 }}
                 />
 
                 {/* Time display */}
                 {showDuration && (
                     <Typography variant="caption" color="text.secondary" sx={{ minWidth: 80, textAlign: 'right' }}>
-                        {formatTime(currentTime)} / {formatTime(duration)}
+                        {formatTime(localTime)} / {formatTime(localDuration)}
                     </Typography>
                 )}
             </Box>

@@ -1,3 +1,19 @@
+/**
+ * Storybook Preview Configuration
+ * 
+ * Global Mocking Strategy:
+ * - AWS Amplify modules (api, auth, storage, datastore, utils) are mocked via webpack aliases in main.js
+ * - Mock implementations are in .storybook/__mocks__/ directory
+ * - getCachedUrl utility is also mocked for safe file URL generation
+ * - All mocks are global and work across all stories without needing jest.mock()
+ * 
+ * Mock Features:
+ * - AI generation (text-to-image, text-to-speech) with realistic delays
+ * - File storage and retrieval with placeholder data URLs
+ * - Authentication with mock credentials
+ * - DataStore operations with in-memory storage
+ */
+
 import React from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -10,6 +26,7 @@ import { FilesProvider } from '../src/context/fileContext';
 import { DictionaryProvider } from '../src/context/dictionaryContext';
 import { SectionProvider } from '../src/context/sectionContext';
 import { UnitProvider } from '../src/context/unitContext';
+import { AudioPlayerProvider } from '../src/components/Editor3/context/AudioPlayerContext';
 
 // Import mock helpers
 import { clearMockUnits } from './__mocks__/aws-amplify-datastore';
@@ -44,15 +61,17 @@ const preview = {
       return (
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <FilesProvider>
-            <DictionaryProvider>
-              <UnitProvider id={unitId}>
-                <SectionProvider unitId={unitId}>
-                  <Story />
-                </SectionProvider>
-              </UnitProvider>
-            </DictionaryProvider>
-          </FilesProvider>
+          <AudioPlayerProvider>
+            <FilesProvider>
+              <DictionaryProvider>
+                <UnitProvider id={unitId}>
+                  <SectionProvider unitId={unitId}>
+                    <Story />
+                  </SectionProvider>
+                </UnitProvider>
+              </DictionaryProvider>
+            </FilesProvider>
+          </AudioPlayerProvider>
         </ThemeProvider>
       );
     },

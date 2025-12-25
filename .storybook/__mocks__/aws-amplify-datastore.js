@@ -9,11 +9,13 @@
 // Mock unit storage
 const mockUnits = {};
 const mockGrades = {};
+const mockFiles = {};
 
 // Store active subscriptions
 const activeSubscriptions = {
   Unit: [],
   Grade: [],
+  File: [],
 };
 
 // Helper to seed mock data for stories
@@ -64,10 +66,29 @@ export const seedMockGrade = (gradeData) => {
   }
 };
 
+// Helper to seed mock file data for stories
+export const seedMockFiles = (filesArray) => {
+  console.log('[Mock DataStore] Seeding files:', filesArray.length);
+  filesArray.forEach(file => {
+    if (file.id) {
+      mockFiles[file.id] = file;
+    }
+  });
+  console.log('[Mock DataStore] Total files in store:', Object.keys(mockFiles).length);
+  
+  // Notify all File subscribers about the new data
+  const items = Object.values(mockFiles);
+  activeSubscriptions.File.forEach(callback => {
+    console.log('[Mock DataStore] Notifying File subscriber with', items.length, 'files');
+    callback({ items, isSynced: true });
+  });
+};
+
 // Helper to clear mock data between stories
 export const clearMockUnits = () => {
   Object.keys(mockUnits).forEach(key => delete mockUnits[key]);
   Object.keys(mockGrades).forEach(key => delete mockGrades[key]);
+  Object.keys(mockFiles).forEach(key => delete mockFiles[key]);
   console.log('[Mock DataStore] Cleared all mock data');
 };
 
@@ -265,7 +286,7 @@ export class DataStore {
       subscribe: (callback) => {
         console.log('Mock DataStore.observeQuery subscription created for:', modelName);
         
-        // Merge seeded units with mock data
+        // Merge seeded data with mock data
         let items = [];
         if (modelName === 'Unit') {
           items = Object.values(mockUnits);
@@ -275,6 +296,10 @@ export class DataStore {
         } else if (modelName === 'Grade') {
           items = Object.values(mockGrades);
           activeSubscriptions.Grade.push(callback);
+        } else if (modelName === 'File') {
+          items = Object.values(mockFiles);
+          console.log('[Mock DataStore] Returning', items.length, 'files');
+          activeSubscriptions.File.push(callback);
         } else {
           const data = mockData[modelName];
           items = data ? Object.values(data) : [];
@@ -285,7 +310,7 @@ export class DataStore {
         
         return {
           unsubscribe: () => {
-            console.log('Mock DataStore.observeQuery subscription unsubscribed');
+            console.log('Mock DataStore.observeQuery subscription unsubscribed for:', modelName);
             // Remove the callback from active subscriptions
             if (modelName === 'Unit') {
               const index = activeSubscriptions.Unit.indexOf(callback);
@@ -296,6 +321,11 @@ export class DataStore {
               const index = activeSubscriptions.Grade.indexOf(callback);
               if (index > -1) {
                 activeSubscriptions.Grade.splice(index, 1);
+              }
+            } else if (modelName === 'File') {
+              const index = activeSubscriptions.File.indexOf(callback);
+              if (index > -1) {
+                activeSubscriptions.File.splice(index, 1);
               }
             }
           }

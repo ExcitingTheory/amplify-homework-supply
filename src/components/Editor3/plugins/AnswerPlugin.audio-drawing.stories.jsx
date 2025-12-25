@@ -43,10 +43,16 @@ const editorConfig = {
 };
 
 const ReadOnlyTemplate = ({ editorState }) => {
+  const initialConfig = {
+    ...editorConfig,
+    editorState: editorState ? JSON.stringify(editorState) : undefined,
+    editable: false
+  };
+
   return (
     <UnitProvider>
       <DictionaryProvider>
-        <LexicalComposer initialConfig={{ ...editorConfig, editorState: JSON.stringify(editorState), editable: false }}>
+        <LexicalComposer initialConfig={initialConfig}>
           <div style={{ 
             padding: '2rem',
             maxWidth: '900px',
@@ -640,10 +646,16 @@ const completedDrawingVocabState = {
 
 // Template with mock grade data
 const ReadOnlyTemplateWithGrade = ({ editorState, gradeData }) => {
+  const initialConfig = {
+    ...editorConfig,
+    editorState: editorState ? JSON.stringify(editorState) : undefined,
+    editable: false
+  };
+
   return (
     <UnitProvider value={{ grade: gradeData }}>
       <DictionaryProvider>
-        <LexicalComposer initialConfig={{ ...editorConfig, editorState: JSON.stringify(editorState), editable: false }}>
+        <LexicalComposer initialConfig={initialConfig}>
           <div style={{ 
             padding: '2rem',
             maxWidth: '900px',

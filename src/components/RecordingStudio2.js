@@ -7,9 +7,10 @@ import PlayIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import RecordIcon from '@mui/icons-material/KeyboardVoice';
 import StaticWaveform from './Editor3/components/StaticWaveform';
+import AudioWaveformPlayer from './Editor3/components/AudioWaveformPlayer';
 import { calculateWaveformData } from '../utils/calculateWaveformData';
 // import { SvgConverter } from './Editor2';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Card, CardContent } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 import { hexToRgb } from "../utils/hexToRgb";
@@ -23,6 +24,59 @@ import { fetchAuthSession } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 
 const client = generateClient();
+
+// Component to handle async audio URL loading
+function AudioRecordingCard({ file, index, identityId }) {
+  const [audioUrl, setAudioUrl] = React.useState(null);
+  
+  React.useEffect(() => {
+    if (file.path) {
+      getCachedUrl(file.path, 'protected', identityId)
+        .then(url => setAudioUrl(url))
+        .catch(err => console.error('Error loading audio URL:', err));
+    }
+  }, [file.path, identityId]);
+
+  return (
+    <Card 
+      sx={{ 
+        boxShadow: 3,
+        '&:hover': {
+          boxShadow: 6
+        }
+      }}
+    >
+      <CardContent>
+        {audioUrl ? (
+          <AudioWaveformPlayer
+            audioUrl={audioUrl}
+            file={file}
+            waveformData={file.waveformData ? JSON.parse(file.waveformData) : undefined}
+            width={600}
+            height={80}
+            title={file.name || `Recording ${index + 1}`}
+            showDuration={true}
+          />
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography variant="subtitle2" color="text.secondary">
+              {file.name || `Recording ${index + 1}`}
+            </Typography>
+            <StaticWaveform 
+              file={file} 
+              width={600} 
+              height={80}
+              backgroundColor="transparent"
+            />
+            <Typography variant="caption" color="text.secondary">
+              {new Date(file.createdAt).toLocaleString()}
+            </Typography>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperations, requestDefinition, feedback, isCorrect}) {
   // TODO: add a way to delete the recording
@@ -86,8 +140,8 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
 
 
 
-  const lookupWord = phrase + pronunciation;
-  const audioFile = audioFiles[lookupWord] ? audioFiles[phrase] : null;
+  const lookupWord = (phrase || '') + (pronunciation || '');
+  const audioFile = audioFiles[lookupWord] ? audioFiles[lookupWord] : null;
 
   console.log('audioFile', audioFile);
 
@@ -483,6 +537,24 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
       // height: '5rem',
       backgroundColor: 'white',
     }}/>
+    
+    {/* Display all existing audio recordings */}
+    {Object.keys(audioFiles).length > 0 && (
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>Existing Recordings</Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {Object.values(audioFiles).map((file, index) => (
+            <AudioRecordingCard 
+              key={file.id || index}
+              file={file}
+              index={index}
+              identityId={identityId}
+            />
+          ))}
+        </Box>
+      </Box>
+    )}
+    
     {audioFile && (
       <Box sx={{ mt: 2 }}>
         <Typography variant="caption" color="text.secondary">Static Waveform Preview:</Typography>

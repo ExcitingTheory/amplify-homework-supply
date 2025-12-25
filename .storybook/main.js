@@ -19,6 +19,23 @@ const config = {
     autodocs: "tag",
   },
 
+  typescript: {
+    reactDocgen: 'react-docgen-typescript',
+    reactDocgenTypescriptOptions: {
+      shouldExtractLiteralValuesFromEnum: true,
+      shouldRemoveUndefinedFromOptional: true,
+      propFilter: (prop) => (prop.parent ? !/node_modules/.test(prop.parent.fileName) : true),
+    },
+  },
+
+  // Explicitly define React version to avoid warnings
+  refs: {},
+  
+  env: (config) => ({
+    ...config,
+    REACT_VERSION: '18.3.1',
+  }),
+
   staticDirs: ['../public'],
   
   core: {
@@ -57,6 +74,8 @@ const config = {
       'aws-amplify/utils': require.resolve('./__mocks__/aws-amplify-utils.js'),
       'aws-amplify/api': require.resolve('./__mocks__/aws-amplify-api.js'),
       '@aws-amplify/datastore': require.resolve('./__mocks__/aws-amplify-datastore.js'),
+      // Mock the getCachedUrl utility
+      [path.resolve(__dirname, '../src/utils/getCachedUrl')]: require.resolve('./__mocks__/getCachedUrl.js'),
     };
     
     // Don't let any package use its own React - force them all to use ours as externals
@@ -71,22 +90,22 @@ const config = {
         shared: {
           react: {
             singleton: true,
-            requiredVersion: false,
+            requiredVersion: '^18.3.1',
             eager: true,
           },
           'react-dom': {
             singleton: true,
-            requiredVersion: false,
+            requiredVersion: '^18.3.1',
             eager: true,
           },
           'react/jsx-runtime': {
             singleton: true,
-            requiredVersion: false,
+            requiredVersion: '^18.3.1',
             eager: true,
           },
           'react/jsx-dev-runtime': {
             singleton: true,
-            requiredVersion: false,
+            requiredVersion: '^18.3.1',
             eager: true,
           },
         },

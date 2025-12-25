@@ -13,6 +13,7 @@ export const getCurrentUser = async () => ({
 });
 
 export const fetchAuthSession = async () => ({
+  identityId: 'us-east-1:mock-identity-123',
   tokens: {
     accessToken: { toString: () => 'mock-access-token' },
     idToken: { toString: () => 'mock-id-token' },

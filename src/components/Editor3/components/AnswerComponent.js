@@ -39,8 +39,8 @@ const SketchPad = dynamic(
   },
 );
 
-
-const MediaPlayerComponent = lazy(() => import('../components/MediaPlayerComponent'));
+import AudioWaveformPlayer from './AudioWaveformPlayer';
+import getCachedUrl from '../../../utils/getCachedUrl';
 
 
 const client = generateClient();
@@ -305,15 +305,30 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                         }}
                         color="textSecondary">{dictionary[wordId]?.phrase}</Typography>
                     }
-                    {currentPromptMethod === 'audio' &&
-                    <Suspense fallback={<div>Loading...</div>}>
-                    <MediaPlayerComponent
-                        words={
-                            [dictionary[wordId]]
-                        }
-                        />
-                    </Suspense>
-                    }
+                    {currentPromptMethod === 'audio' && (
+                        dictionary[wordId]?.audio ? (
+                            <AudioWaveformPlayer
+                                audioUrl={dictionary[wordId].audio[0]}
+                                waveformData={dictionary[wordId].waveformData ? JSON.parse(dictionary[wordId].waveformData) : undefined}
+                                width={400}
+                                height={60}
+                                title={dictionary[wordId].phrase}
+                            />
+                        ) : (
+                            <Typography variant="body1"
+                            display="flex"
+                            style={{
+                                flexBasis: '40%',
+                                minWidth: 'fit-content',
+                                textWrap: 'wrap',
+                                wordBreak: 'normal',
+                                fontStyle: 'italic',
+                                color: 'gray',
+                            }}>
+                                {dictionary[wordId]?.phrase} (audio not available)
+                            </Typography>
+                        )
+                    )}
                     <Box
                         display='flex'
                         style={{
@@ -417,16 +432,24 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                 {dictionary[wordId]?.phrase}
             </Typography>
             }
-            {currentPromptMethod === 'audio' &&
-            <Suspense fallback={<div>Loading...</div>}>
-            <MediaPlayerComponent
-                // className={className}
-                // format={this.__format}
-                // nodeKey={this.getKey()}
-                words={[dictionary[wordId]]}
-                />
-            </Suspense>
-            }
+            {currentPromptMethod === 'audio' && (
+                dictionary[wordId]?.audio ? (
+                    <AudioWaveformPlayer
+                        audioUrl={dictionary[wordId].audio[0]}
+                        waveformData={dictionary[wordId].waveformData ? JSON.parse(dictionary[wordId].waveformData) : undefined}
+                        width={400}
+                        height={60}
+                        title={dictionary[wordId].phrase}
+                    />
+                ) : (
+                    <Typography
+                        variant="body1"
+                        component="div"
+                        sx={{ flexGrow: 1, fontStyle: 'italic', color: 'gray' }}>
+                        {dictionary[wordId]?.phrase} (audio not available)
+                    </Typography>
+                )
+            )}
             <RecordingStudio2
                 item={dictionary[wordId]}
                 word={dictionary[wordId]?.phrase}
@@ -510,19 +533,21 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                     </Typography>
                      }
 
-                    {currentPromptMethod === 'audio' &&
-                    <Suspense fallback={<div>Loading...</div>}>
-                    <MediaPlayerComponent
-                        // className={className}
-                        // format={this.__format}
-                        // nodeKey={this.getKey()}
-                        words={
-                            [dictionary[wordId]]
-                        }
-                        requestDefinition={true}
-                        />
-                    </Suspense>
-                    }
+                    {currentPromptMethod === 'audio' && (
+                        dictionary[wordId]?.definitionAudio ? (
+                            <AudioWaveformPlayer
+                                audioUrl={dictionary[wordId].definitionAudio[0]}
+                                waveformData={dictionary[wordId].definitionWaveformData ? JSON.parse(dictionary[wordId].definitionWaveformData) : undefined}
+                                width={400}
+                                height={60}
+                                title={dictionary[wordId].definition}
+                            />
+                        ) : (
+                            <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'gray' }}>
+                                {dictionary[wordId]?.definition} (audio not available)
+                            </Typography>
+                        )
+                    )}
                     {/**
                  * Area for feedback from api call
                  */}

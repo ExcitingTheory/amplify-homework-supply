@@ -25,7 +25,7 @@ const SketchPad = dynamic(
     ssr: false,
   },
 );
-const MediaPlayerComponent = lazy(() => import('../.../../../components/MediaPlayerComponent'));
+import AudioWaveformPlayer from '../../components/AudioWaveformPlayer';
 import { RecordingStudio2 } from '../../../RecordingStudio2';
 import UnitContext from '../../../../context/unitContext';
 import DictionaryContext from '../../../../context/dictionaryContext';
@@ -329,14 +329,15 @@ export default function CustomAnswerComponent({
                                 </Box>
                             )}
 
-                            { currentPromptMethod === 'audio' &&
-                            <Suspense fallback={<div>{`Loading... questionID: ${questionID}`}</div>}>
-                            <MediaPlayerComponent
-                                questionIDs={[questionID]}
-                                
+                            { currentPromptMethod === 'audio' && question?.audio && (
+                                <AudioWaveformPlayer
+                                    audioUrl={question.audio[0]}
+                                    waveformData={question.waveformData ? JSON.parse(question.waveformData) : undefined}
+                                    width={400}
+                                    height={60}
+                                    title={question.prompt || "Audio Question"}
                                 />
-                            </Suspense>
-                            }
+                            )}
 
                             { currentInputMethod === 'text' &&
                             <Box

@@ -53,11 +53,11 @@ export async function uploadStudentSubmission({ file, gradeId, nodeKey, fileType
       },
     }).result;
     
-    console.log(`[UserSubmission] Upload successful: ${result.key}`);
+    console.log(`[UserSubmission] Upload successful: ${result.path}`);
     
     return {
-      key: result.key,
-      path: key,
+      path: result.path || key,
+      key: result.path || key, // For backwards compatibility
       filename,
       gradeId,
       nodeKey,

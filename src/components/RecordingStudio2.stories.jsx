@@ -1,5 +1,18 @@
 import React from 'react';
 import { RecordingStudio2 } from './RecordingStudio2';
+import FilesContext from '../context/fileContext';
+import UnitContext from '../context/unitContext';
+import { seedMockFiles } from '../../.storybook/__mocks__/aws-amplify-datastore';
+
+// Helper function to generate realistic waveform data
+const generateWaveformData = (length = 100) => {
+  return Array.from({ length }, (_, i) => {
+    const position = i / length;
+    const envelope = Math.sin(position * Math.PI);
+    const detail = Math.sin(i * 0.3) * 0.3 + Math.sin(i * 0.15) * 0.2;
+    return Math.max(0, Math.min(1, envelope * (0.5 + detail)));
+  });
+};
 
 export default {
   title: 'Components/RecordingStudio2',
@@ -63,26 +76,27 @@ export const WithFeedback = {
 };
 
 // Mock waveform data (simulates an audio waveform)
-const mockWaveformData = Array.from({ length: 600 }, (_, i) => {
-  const position = i / 600;
-  const envelope = Math.sin(position * Math.PI);
-  const detail = Math.sin(i * 0.1) * 0.3 + Math.sin(i * 0.05) * 0.2;
-  return Math.max(0, Math.min(1, envelope * (0.5 + detail)));
-});
+const mockWaveformData = generateWaveformData(200);
 
-// Mock audio blob for demonstration
-const createMockAudioBlob = () => {
-  // Create a simple audio context with silent audio for demo
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  const buffer = audioContext.createBuffer(1, audioContext.sampleRate * 2, audioContext.sampleRate);
-  const channelData = buffer.getChannelData(0);
-  
-  // Add some simple tone data
-  for (let i = 0; i < channelData.length; i++) {
-    channelData[i] = Math.sin(2 * Math.PI * 440 * i / audioContext.sampleRate) * 0.3;
-  }
-  
-  return buffer;
+// Mock file data for DataStore
+const mockFileData = {
+  id: 'audio-1',
+  name: 'bonjour_recording.mp3',
+  path: 'protected/audio/bonjour-recording.mp3',
+  mimeType: 'audio/mpeg',
+  waveformData: JSON.stringify(generateWaveformData(200)),
+  createdAt: new Date().toISOString(),
+  owner: 'mock-user-sub',
+  identityId: 'us-east-1:mock-identity-123',
+};
+
+// Mock audio files for FilesContext (keyed by lookupWord)
+const mockAudioFiles = {
+  'bonjourbohn-ZHOOR': {
+    key: 'audio/bonjour-recording.mp3',
+    lastModified: new Date(),
+    size: 12345,
+  },
 };
 
 export const WithRecordedAnswer = {
@@ -100,10 +114,60 @@ export const WithRecordedAnswer = {
     },
     isCorrect: true,
   },
+  decorators: [
+    (Story) => {
+      React.useEffect(() => {
+        // Seed the mock DataStore with file data
+        seedMockFiles([mockFileData]);
+      }, []);
+      
+      // Create mock contexts
+      const MockUnitProvider = ({ children }) => {
+        const mockUnitContextValue = {
+          grade: null,
+          createGrade: async () => ({ id: 'mock-grade-1', createdAt: new Date().toISOString() }),
+          saveGrade: async (data) => console.log('Mock saveGrade called with:', data),
+        };
+        
+        return (
+          <UnitContext.Provider value={mockUnitContextValue}>
+            {children}
+          </UnitContext.Provider>
+        );
+      };
+      
+      const MockFilesProvider = ({ children }) => {
+        const mockFilesContextValue = {
+          audioFiles: mockAudioFiles,
+          myFiles: [mockFileData],
+          myPlaylistFiles: { [mockFileData.id]: mockFileData },
+          myPlaylistUrls: {},
+          session: {
+            identityId: 'us-east-1:mock-identity-123',
+          },
+          refreshAudioFiles: () => console.log('Mock refreshAudioFiles called'),
+        };
+        
+        return (
+          <FilesContext.Provider value={mockFilesContextValue}>
+            {children}
+          </FilesContext.Provider>
+        );
+      };
+      
+      return (
+        <MockUnitProvider>
+          <MockFilesProvider>
+            <Story />
+          </MockFilesProvider>
+        </MockUnitProvider>
+      );
+    },
+  ],
   parameters: {
     docs: {
       description: {
-        story: 'Shows RecordingStudio2 with a previously recorded answer. The waveform visualization displays below the audio controls, and feedback shows the AI verification result.',
+        story: 'Shows RecordingStudio2 with a previously recorded answer displayed in an interactive AudioWaveformPlayer. Click play to hear the recording and see the waveform animate. Feedback shows the AI verification result.',
       },
     },
   },

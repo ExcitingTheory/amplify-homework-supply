@@ -6,12 +6,13 @@
 import React from 'react';
 import AudioWaveformPlayer from './AudioWaveformPlayer';
 import { Box } from '@mui/material';
+import { MOCK_AUDIO_BASE64, mockWaveformData } from '../../../../.storybook/__mocks__/media';
+
 
 export default {
   title: 'Components/AudioWaveformPlayer',
   component: AudioWaveformPlayer,
-  parameters: {
-    layout: 'padded',
+  parameters: {    layout: 'padded',
     docs: {
       description: {
         component: 'Complete audio player with waveform visualization, playback controls, and progress tracking.',
@@ -20,17 +21,9 @@ export default {
   },
 };
 
-// Mock waveform data (simulates an audio waveform)
-const mockWaveformData = Array.from({ length: 600 }, (_, i) => {
-  // Create a realistic-looking waveform with varying amplitudes
-  const position = i / 600;
-  const envelope = Math.sin(position * Math.PI); // Fade in/out at edges
-  const detail = Math.sin(i * 0.1) * 0.3 + Math.sin(i * 0.05) * 0.2;
-  return Math.max(0, Math.min(1, envelope * (0.5 + detail)));
-});
-
 export const WithWaveformData = {
   args: {
+    audioUrl: MOCK_AUDIO_BASE64,
     waveformData: mockWaveformData,
     width: 600,
     height: 80,
@@ -40,7 +33,7 @@ export const WithWaveformData = {
   parameters: {
     docs: {
       description: {
-        story: 'Audio player with pre-calculated waveform data. Shows static visualization since no actual audio is loaded.',
+        story: 'Audio player with pre-calculated waveform data and playable audio.',
       },
     },
   },
@@ -48,6 +41,7 @@ export const WithWaveformData = {
 
 export const CompactPlayer = {
   args: {
+    audioUrl: MOCK_AUDIO_BASE64,
     waveformData: mockWaveformData,
     width: 400,
     height: 60,
@@ -64,6 +58,7 @@ export const CompactPlayer = {
 
 export const WithTitle = {
   args: {
+    audioUrl: MOCK_AUDIO_BASE64,
     waveformData: mockWaveformData,
     width: 600,
     height: 80,
@@ -81,6 +76,7 @@ export const WithTitle = {
 
 export const NoDuration = {
   args: {
+    audioUrl: MOCK_AUDIO_BASE64,
     waveformData: mockWaveformData,
     width: 600,
     height: 80,
@@ -98,6 +94,7 @@ export const NoDuration = {
 export const VariousSizes = () => (
   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
     <AudioWaveformPlayer
+      audioUrl={MOCK_AUDIO_BASE64}
       waveformData={mockWaveformData}
       width={300}
       height={50}
@@ -105,12 +102,14 @@ export const VariousSizes = () => (
       showDuration={false}
     />
     <AudioWaveformPlayer
+      audioUrl={MOCK_AUDIO_BASE64}
       waveformData={mockWaveformData}
       width={450}
       height={70}
       title="Medium (450x70)"
     />
     <AudioWaveformPlayer
+      audioUrl={MOCK_AUDIO_BASE64}
       waveformData={mockWaveformData}
       width={700}
       height={100}
@@ -139,6 +138,7 @@ export const MultiplePlayersInList = () => {
       {recordings.map((recording) => (
         <AudioWaveformPlayer
           key={recording.id}
+          audioUrl={MOCK_AUDIO_BASE64}
           waveformData={recording.waveform}
           width={600}
           height={70}
