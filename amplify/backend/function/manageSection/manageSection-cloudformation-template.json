@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"12.12.6\",\"stackType\":\"function-Lambda\",\"metadata\":{}}",
+  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.1.1\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"\"}}",
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
@@ -16,21 +16,21 @@
     "s3Key": {
       "Type": "String"
     },
-    "authjapanese46739ab6bUserPoolId": {
+    "authjapanese56739ab6bUserPoolId": {
       "Type": "String",
-      "Default": "authjapanese46739ab6bUserPoolId"
+      "Default": "authjapanese56739ab6bUserPoolId"
     },
-    "apijapanese4GraphQLAPIIdOutput": {
+    "apijapanese5GraphQLAPIIdOutput": {
       "Type": "String",
-      "Default": "apijapanese4GraphQLAPIIdOutput"
+      "Default": "apijapanese5GraphQLAPIIdOutput"
     },
-    "apijapanese4GraphQLAPIEndpointOutput": {
+    "apijapanese5GraphQLAPIEndpointOutput": {
       "Type": "String",
-      "Default": "apijapanese4GraphQLAPIEndpointOutput"
+      "Default": "apijapanese5GraphQLAPIEndpointOutput"
     },
-    "apijapanese4GraphQLAPIKeyOutput": {
+    "apijapanese5GraphQLAPIKeyOutput": {
       "Type": "String",
-      "Default": "apijapanese4GraphQLAPIKeyOutput"
+      "Default": "apijapanese5GraphQLAPIKeyOutput"
     }
   },
   "Conditions": {
@@ -86,17 +86,17 @@
             "REGION": {
               "Ref": "AWS::Region"
             },
-            "AUTH_JAPANESE46739AB6B_USERPOOLID": {
-              "Ref": "authjapanese46739ab6bUserPoolId"
+            "AUTH_JAPANESE56739AB6B_USERPOOLID": {
+              "Ref": "authjapanese56739ab6bUserPoolId"
             },
-            "API_JAPANESE4_GRAPHQLAPIIDOUTPUT": {
-              "Ref": "apijapanese4GraphQLAPIIdOutput"
+            "API_JAPANESE5_GRAPHQLAPIIDOUTPUT": {
+              "Ref": "apijapanese5GraphQLAPIIdOutput"
             },
-            "API_JAPANESE4_GRAPHQLAPIENDPOINTOUTPUT": {
-              "Ref": "apijapanese4GraphQLAPIEndpointOutput"
+            "API_JAPANESE5_GRAPHQLAPIENDPOINTOUTPUT": {
+              "Ref": "apijapanese5GraphQLAPIEndpointOutput"
             },
-            "API_JAPANESE4_GRAPHQLAPIKEYOUTPUT": {
-              "Ref": "apijapanese4GraphQLAPIKeyOutput"
+            "API_JAPANESE5_GRAPHQLAPIKEYOUTPUT": {
+              "Ref": "apijapanese5GraphQLAPIKeyOutput"
             }
           }
         },
@@ -117,12 +117,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "japanese4LambdaRoleb9f312b7",
+            "japanese5LambdaRoleb9f312b7",
             {
               "Fn::Join": [
                 "",
                 [
-                  "japanese4LambdaRoleb9f312b7",
+                  "japanese5LambdaRoleb9f312b7",
                   "-",
                   {
                     "Ref": "env"
@@ -228,7 +228,7 @@
                       },
                       ":apis/",
                       {
-                        "Ref": "apijapanese4GraphQLAPIIdOutput"
+                        "Ref": "apijapanese5GraphQLAPIIdOutput"
                       },
                       "/types/Query/*"
                     ]
@@ -326,7 +326,7 @@
                       },
                       ":userpool/",
                       {
-                        "Ref": "authjapanese46739ab6bUserPoolId"
+                        "Ref": "authjapanese56739ab6bUserPoolId"
                       }
                     ]
                   ]

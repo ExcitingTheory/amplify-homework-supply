@@ -1096,6 +1096,62 @@ export const onCreateUnit = /* GraphQL */ `subscription OnCreateUnit(
       startedAt
       __typename
     }
+    documents {
+      items {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        unitID
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+    agentJobs {
+      items {
+        id
+        owner
+        identityId
+        type
+        status
+        documentID
+        unitID
+        responseId
+        webhookData
+        error
+        startedAt
+        completedAt
+        modelUsed
+        tokensUsed
+        estimatedCost
+        retryCount
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -1221,6 +1277,62 @@ export const onUpdateUnit = /* GraphQL */ `subscription OnUpdateUnit(
       startedAt
       __typename
     }
+    documents {
+      items {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        unitID
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+    agentJobs {
+      items {
+        id
+        owner
+        identityId
+        type
+        status
+        documentID
+        unitID
+        responseId
+        webhookData
+        error
+        startedAt
+        completedAt
+        modelUsed
+        tokensUsed
+        estimatedCost
+        retryCount
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -1340,6 +1452,62 @@ export const onDeleteUnit = /* GraphQL */ `subscription OnDeleteUnit(
         _deleted
         _lastChangedAt
         owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    documents {
+      items {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        unitID
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+    agentJobs {
+      items {
+        id
+        owner
+        identityId
+        type
+        status
+        documentID
+        unitID
+        responseId
+        webhookData
+        error
+        startedAt
+        completedAt
+        modelUsed
+        tokensUsed
+        estimatedCost
+        retryCount
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       nextToken
@@ -1589,6 +1757,1095 @@ export const onDeleteWord = /* GraphQL */ `subscription OnDeleteWord(
   APITypes.OnDeleteWordSubscriptionVariables,
   APITypes.OnDeleteWordSubscription
 >;
+export const onCreateDocument = /* GraphQL */ `subscription OnCreateDocument(
+  $filter: ModelSubscriptionDocumentFilterInput
+  $owner: String
+) {
+  onCreateDocument(filter: $filter, owner: $owner) {
+    id
+    filename
+    s3Key
+    status
+    owner
+    identityId
+    learner
+    unitID
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    extractedText
+    pageCount
+    fileSize
+    mimeType
+    uploadedAt
+    parsedContent {
+      items {
+        id
+        owner
+        identityId
+        documentID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        approved
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    agentJobs {
+      items {
+        id
+        owner
+        identityId
+        type
+        status
+        documentID
+        unitID
+        responseId
+        webhookData
+        error
+        startedAt
+        completedAt
+        modelUsed
+        tokensUsed
+        estimatedCost
+        retryCount
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateDocumentSubscriptionVariables,
+  APITypes.OnCreateDocumentSubscription
+>;
+export const onUpdateDocument = /* GraphQL */ `subscription OnUpdateDocument(
+  $filter: ModelSubscriptionDocumentFilterInput
+  $owner: String
+) {
+  onUpdateDocument(filter: $filter, owner: $owner) {
+    id
+    filename
+    s3Key
+    status
+    owner
+    identityId
+    learner
+    unitID
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    extractedText
+    pageCount
+    fileSize
+    mimeType
+    uploadedAt
+    parsedContent {
+      items {
+        id
+        owner
+        identityId
+        documentID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        approved
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    agentJobs {
+      items {
+        id
+        owner
+        identityId
+        type
+        status
+        documentID
+        unitID
+        responseId
+        webhookData
+        error
+        startedAt
+        completedAt
+        modelUsed
+        tokensUsed
+        estimatedCost
+        retryCount
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateDocumentSubscriptionVariables,
+  APITypes.OnUpdateDocumentSubscription
+>;
+export const onDeleteDocument = /* GraphQL */ `subscription OnDeleteDocument(
+  $filter: ModelSubscriptionDocumentFilterInput
+  $owner: String
+) {
+  onDeleteDocument(filter: $filter, owner: $owner) {
+    id
+    filename
+    s3Key
+    status
+    owner
+    identityId
+    learner
+    unitID
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    extractedText
+    pageCount
+    fileSize
+    mimeType
+    uploadedAt
+    parsedContent {
+      items {
+        id
+        owner
+        identityId
+        documentID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        approved
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    agentJobs {
+      items {
+        id
+        owner
+        identityId
+        type
+        status
+        documentID
+        unitID
+        responseId
+        webhookData
+        error
+        startedAt
+        completedAt
+        modelUsed
+        tokensUsed
+        estimatedCost
+        retryCount
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteDocumentSubscriptionVariables,
+  APITypes.OnDeleteDocumentSubscription
+>;
+export const onCreateParsedContent = /* GraphQL */ `subscription OnCreateParsedContent(
+  $filter: ModelSubscriptionParsedContentFilterInput
+  $owner: String
+) {
+  onCreateParsedContent(filter: $filter, owner: $owner) {
+    id
+    owner
+    identityId
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    vocabularyJSON
+    summariesJSON
+    objectivesJSON
+    conceptsJSON
+    responseId
+    modelUsed
+    tokensUsed
+    processingTime
+    createdAt
+    approved
+    importedAt
+    metadata
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateParsedContentSubscriptionVariables,
+  APITypes.OnCreateParsedContentSubscription
+>;
+export const onUpdateParsedContent = /* GraphQL */ `subscription OnUpdateParsedContent(
+  $filter: ModelSubscriptionParsedContentFilterInput
+  $owner: String
+) {
+  onUpdateParsedContent(filter: $filter, owner: $owner) {
+    id
+    owner
+    identityId
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    vocabularyJSON
+    summariesJSON
+    objectivesJSON
+    conceptsJSON
+    responseId
+    modelUsed
+    tokensUsed
+    processingTime
+    createdAt
+    approved
+    importedAt
+    metadata
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateParsedContentSubscriptionVariables,
+  APITypes.OnUpdateParsedContentSubscription
+>;
+export const onDeleteParsedContent = /* GraphQL */ `subscription OnDeleteParsedContent(
+  $filter: ModelSubscriptionParsedContentFilterInput
+  $owner: String
+) {
+  onDeleteParsedContent(filter: $filter, owner: $owner) {
+    id
+    owner
+    identityId
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    vocabularyJSON
+    summariesJSON
+    objectivesJSON
+    conceptsJSON
+    responseId
+    modelUsed
+    tokensUsed
+    processingTime
+    createdAt
+    approved
+    importedAt
+    metadata
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteParsedContentSubscriptionVariables,
+  APITypes.OnDeleteParsedContentSubscription
+>;
+export const onCreateAgentJob = /* GraphQL */ `subscription OnCreateAgentJob(
+  $filter: ModelSubscriptionAgentJobFilterInput
+  $owner: String
+) {
+  onCreateAgentJob(filter: $filter, owner: $owner) {
+    id
+    owner
+    identityId
+    type
+    status
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    unitID
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    responseId
+    webhookData
+    error
+    startedAt
+    completedAt
+    modelUsed
+    tokensUsed
+    estimatedCost
+    retryCount
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateAgentJobSubscriptionVariables,
+  APITypes.OnCreateAgentJobSubscription
+>;
+export const onUpdateAgentJob = /* GraphQL */ `subscription OnUpdateAgentJob(
+  $filter: ModelSubscriptionAgentJobFilterInput
+  $owner: String
+) {
+  onUpdateAgentJob(filter: $filter, owner: $owner) {
+    id
+    owner
+    identityId
+    type
+    status
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    unitID
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    responseId
+    webhookData
+    error
+    startedAt
+    completedAt
+    modelUsed
+    tokensUsed
+    estimatedCost
+    retryCount
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateAgentJobSubscriptionVariables,
+  APITypes.OnUpdateAgentJobSubscription
+>;
+export const onDeleteAgentJob = /* GraphQL */ `subscription OnDeleteAgentJob(
+  $filter: ModelSubscriptionAgentJobFilterInput
+  $owner: String
+) {
+  onDeleteAgentJob(filter: $filter, owner: $owner) {
+    id
+    owner
+    identityId
+    type
+    status
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    unitID
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    responseId
+    webhookData
+    error
+    startedAt
+    completedAt
+    modelUsed
+    tokensUsed
+    estimatedCost
+    retryCount
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteAgentJobSubscriptionVariables,
+  APITypes.OnDeleteAgentJobSubscription
+>;
 export const onCreateQuestionUnit = /* GraphQL */ `subscription OnCreateQuestionUnit(
   $filter: ModelSubscriptionQuestionUnitFilterInput
   $owner: String
@@ -1671,6 +2928,15 @@ export const onCreateQuestionUnit = /* GraphQL */ `subscription OnCreateQuestion
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
         nextToken
         startedAt
         __typename
@@ -1781,6 +3047,15 @@ export const onUpdateQuestionUnit = /* GraphQL */ `subscription OnUpdateQuestion
         startedAt
         __typename
       }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1883,6 +3158,15 @@ export const onDeleteQuestionUnit = /* GraphQL */ `subscription OnDeleteQuestion
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
         nextToken
         startedAt
         __typename
@@ -2584,6 +3868,15 @@ export const onCreateUnitFile = /* GraphQL */ `subscription OnCreateUnitFile(
         startedAt
         __typename
       }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2690,6 +3983,15 @@ export const onUpdateUnitFile = /* GraphQL */ `subscription OnUpdateUnitFile(
         startedAt
         __typename
       }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2792,6 +4094,15 @@ export const onDeleteUnitFile = /* GraphQL */ `subscription OnDeleteUnitFile(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
         nextToken
         startedAt
         __typename
@@ -3143,6 +4454,15 @@ export const onCreateUnitWord = /* GraphQL */ `subscription OnCreateUnitWord(
         startedAt
         __typename
       }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -3240,6 +4560,15 @@ export const onUpdateUnitWord = /* GraphQL */ `subscription OnUpdateUnitWord(
         startedAt
         __typename
       }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -3333,6 +4662,15 @@ export const onDeleteUnitWord = /* GraphQL */ `subscription OnDeleteUnitWord(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
         nextToken
         startedAt
         __typename

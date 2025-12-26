@@ -1,13 +1,13 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"12.12.6\",\"stackType\":\"function-Lambda\",\"metadata\":{}}",
+  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.1.1\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"\"}}",
   "Parameters": {
     "env": {
       "Type": "String"
     },
-    "authjapanese46739ab6bUserPoolId": {
+    "authjapanese56739ab6bUserPoolId": {
       "Type": "String",
-      "Default": "authjapanese46739ab6bUserPoolId"
+      "Default": "authjapanese56739ab6bUserPoolId"
     },
     "deploymentBucketName": {
       "Type": "String"
@@ -60,7 +60,7 @@
             },
             "GROUP": "Admins",
             "USERPOOL": {
-              "Ref": "authjapanese46739ab6bUserPoolId"
+              "Ref": "authjapanese56739ab6bUserPoolId"
             }
           }
         },
@@ -189,7 +189,7 @@
                     },
                     ":userpool/",
                     {
-                      "Ref": "authjapanese46739ab6bUserPoolId"
+                      "Ref": "authjapanese56739ab6bUserPoolId"
                     }
                   ]
                 ]

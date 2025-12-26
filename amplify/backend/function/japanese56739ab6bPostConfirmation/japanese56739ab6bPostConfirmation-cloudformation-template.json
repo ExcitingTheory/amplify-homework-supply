@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"12.12.6\",\"stackType\":\"function-Lambda\",\"metadata\":{}}",
+  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.1.1\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"\"}}",
   "Parameters": {
     "GROUP": {
       "Type": "String",
@@ -67,12 +67,12 @@
         "FunctionName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "japanese46739ab6bPostConfirmation",
+            "japanese56739ab6bPostConfirmation",
             {
               "Fn::Join": [
                 "",
                 [
-                  "japanese46739ab6bPostConfirmation",
+                  "japanese56739ab6bPostConfirmation",
                   "-",
                   {
                     "Ref": "env"
@@ -122,12 +122,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "japanese46739ab6bPostConfirmation",
+            "japanese56739ab6bPostConfirmation",
             {
               "Fn::Join": [
                 "",
                 [
-                  "japanese46739ab6bPostConfirmation",
+                  "japanese56739ab6bPostConfirmation",
                   "-",
                   {
                     "Ref": "env"

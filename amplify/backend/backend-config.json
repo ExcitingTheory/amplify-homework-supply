@@ -8,7 +8,7 @@
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "japanese46739ab6b"
+          "resourceName": "japanese56739ab6b"
         },
         {
           "attributes": [
@@ -22,14 +22,14 @@
       "providerPlugin": "awscloudformation",
       "service": "API Gateway"
     },
-    "japanese4": {
+    "japanese5": {
       "dependsOn": [
         {
           "attributes": [
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "japanese46739ab6b"
+          "resourceName": "japanese56739ab6b"
         }
       ],
       "output": {
@@ -42,7 +42,7 @@
           "defaultAuthentication": {
             "authenticationType": "AMAZON_COGNITO_USER_POOLS",
             "userPoolConfig": {
-              "userPoolId": "authjapanese46739ab6b"
+              "userPoolId": "authjapanese56739ab6b"
             }
           }
         }
@@ -52,7 +52,7 @@
     }
   },
   "auth": {
-    "japanese46739ab6b": {
+    "japanese56739ab6b": {
       "customAuth": false,
       "dependsOn": [
         {
@@ -61,7 +61,7 @@
             "Name"
           ],
           "category": "function",
-          "resourceName": "japanese46739ab6bPostConfirmation",
+          "resourceName": "japanese56739ab6bPostConfirmation",
           "triggerProvider": "Cognito"
         }
       ],
@@ -98,7 +98,7 @@
             "IdentityPoolId"
           ],
           "category": "auth",
-          "resourceName": "japanese46739ab6b"
+          "resourceName": "japanese56739ab6b"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -114,7 +114,7 @@
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "japanese46739ab6b"
+          "resourceName": "japanese56739ab6b"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -136,7 +136,7 @@
             "GraphQLAPIEndpointOutput"
           ],
           "category": "api",
-          "resourceName": "japanese4"
+          "resourceName": "japanese5"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -151,7 +151,7 @@
             "GraphQLAPIEndpointOutput"
           ],
           "category": "api",
-          "resourceName": "japanese4"
+          "resourceName": "japanese5"
         },
         {
           "attributes": [
@@ -164,7 +164,7 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
-    "japanese46739ab6bPostConfirmation": {
+    "japanese56739ab6bPostConfirmation": {
       "build": true,
       "dependsOn": [],
       "providerPlugin": "awscloudformation",
@@ -179,14 +179,14 @@
             "GraphQLAPIEndpointOutput"
           ],
           "category": "api",
-          "resourceName": "japanese4"
+          "resourceName": "japanese5"
         },
         {
           "attributes": [
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "japanese46739ab6b"
+          "resourceName": "japanese56739ab6b"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -201,14 +201,14 @@
             "GraphQLAPIEndpointOutput"
           ],
           "category": "api",
-          "resourceName": "japanese4"
+          "resourceName": "japanese5"
         },
         {
           "attributes": [
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "japanese46739ab6b"
+          "resourceName": "japanese56739ab6b"
         },
         {
           "attributes": [
@@ -222,128 +222,6 @@
       "service": "Lambda"
     }
   },
-  "parameters": {
-    "AMPLIFY_function_AdminQueries65120535_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "AdminQueries65120535"
-        }
-      ]
-    },
-    "AMPLIFY_function_AdminQueries65120535_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "AdminQueries65120535"
-        }
-      ]
-    },
-    "AMPLIFY_function_editorChat_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "editorChat"
-        }
-      ]
-    },
-    "AMPLIFY_function_editorChat_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "editorChat"
-        }
-      ]
-    },
-    "AMPLIFY_function_editorChat_secretsPathAmplifyAppId": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "editorChat"
-        }
-      ]
-    },
-    "AMPLIFY_function_getStudentSubmission_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "getStudentSubmission"
-        }
-      ]
-    },
-    "AMPLIFY_function_getStudentSubmission_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "getStudentSubmission"
-        }
-      ]
-    },
-    "AMPLIFY_function_japanese46739ab6bPostConfirmation_GROUP": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "japanese46739ab6bPostConfirmation"
-        }
-      ]
-    },
-    "AMPLIFY_function_japanese46739ab6bPostConfirmation_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "japanese46739ab6bPostConfirmation"
-        }
-      ]
-    },
-    "AMPLIFY_function_japanese46739ab6bPostConfirmation_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "japanese46739ab6bPostConfirmation"
-        }
-      ]
-    },
-    "AMPLIFY_function_manageSection_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "manageSection"
-        }
-      ]
-    },
-    "AMPLIFY_function_manageSection_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "manageSection"
-        }
-      ]
-    },
-    "AMPLIFY_function_openai_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "openai"
-        }
-      ]
-    },
-    "AMPLIFY_function_openai_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "openai"
-        }
-      ]
-    },
-    "AMPLIFY_function_openai_secretsPathAmplifyAppId": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "openai"
-        }
-      ]
-    }
-  },
   "storage": {
     "files": {
       "dependsOn": [
@@ -352,7 +230,7 @@
             "UserPoolId"
           ],
           "category": "auth",
-          "resourceName": "japanese46739ab6b"
+          "resourceName": "japanese56739ab6b"
         },
         {
           "attributes": [

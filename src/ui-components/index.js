@@ -4,12 +4,16 @@
  * Any changes to this file will be overwritten when running amplify pull. *
  **************************************************************************/
 
+export { default as AgentJobCreateForm } from "./AgentJobCreateForm";
+export { default as AgentJobUpdateForm } from "./AgentJobUpdateForm";
 export { default as AssignmentCreateForm } from "./AssignmentCreateForm";
 export { default as AssignmentUpdateForm } from "./AssignmentUpdateForm";
 export { default as AssistantCreateForm } from "./AssistantCreateForm";
 export { default as AssistantUpdateForm } from "./AssistantUpdateForm";
 export { default as ChatHistoryCreateForm } from "./ChatHistoryCreateForm";
 export { default as ChatHistoryUpdateForm } from "./ChatHistoryUpdateForm";
+export { default as DocumentCreateForm } from "./DocumentCreateForm";
+export { default as DocumentUpdateForm } from "./DocumentUpdateForm";
 export { default as FileCreateForm } from "./FileCreateForm";
 export { default as FileUpdateForm } from "./FileUpdateForm";
 export { default as GradeCreateForm } from "./GradeCreateForm";

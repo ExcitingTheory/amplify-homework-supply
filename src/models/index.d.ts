@@ -403,6 +403,8 @@ type EagerUnit = {
   readonly files?: (UnitFile | null)[] | null;
   readonly words?: (UnitWord | null)[] | null;
   readonly questions?: (QuestionUnit | null)[] | null;
+  readonly documents?: (Document | null)[] | null;
+  readonly agentJobs?: (AgentJob | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -428,6 +430,8 @@ type LazyUnit = {
   readonly files: AsyncCollection<UnitFile>;
   readonly words: AsyncCollection<UnitWord>;
   readonly questions: AsyncCollection<QuestionUnit>;
+  readonly documents: AsyncCollection<Document>;
+  readonly agentJobs: AsyncCollection<AgentJob>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -484,6 +488,182 @@ export declare type Word = LazyLoading extends LazyLoadingDisabled ? EagerWord :
 
 export declare const Word: (new (init: ModelInit<Word>) => Word) & {
   copyOf(source: Word, mutator: (draft: MutableModel<Word>) => MutableModel<Word> | void): Word;
+}
+
+type EagerDocument = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Document, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly filename: string;
+  readonly s3Key: string;
+  readonly status: string;
+  readonly owner?: string | null;
+  readonly identityId?: string | null;
+  readonly learner?: string | null;
+  readonly unitID?: string | null;
+  readonly unit?: Unit | null;
+  readonly extractedText?: string | null;
+  readonly pageCount?: number | null;
+  readonly fileSize?: number | null;
+  readonly mimeType?: string | null;
+  readonly uploadedAt?: string | null;
+  readonly parsedContent?: (ParsedContent | null)[] | null;
+  readonly agentJobs?: (AgentJob | null)[] | null;
+  readonly metadata?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyDocument = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Document, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly filename: string;
+  readonly s3Key: string;
+  readonly status: string;
+  readonly owner?: string | null;
+  readonly identityId?: string | null;
+  readonly learner?: string | null;
+  readonly unitID?: string | null;
+  readonly unit: AsyncItem<Unit | undefined>;
+  readonly extractedText?: string | null;
+  readonly pageCount?: number | null;
+  readonly fileSize?: number | null;
+  readonly mimeType?: string | null;
+  readonly uploadedAt?: string | null;
+  readonly parsedContent: AsyncCollection<ParsedContent>;
+  readonly agentJobs: AsyncCollection<AgentJob>;
+  readonly metadata?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type Document = LazyLoading extends LazyLoadingDisabled ? EagerDocument : LazyDocument
+
+export declare const Document: (new (init: ModelInit<Document>) => Document) & {
+  copyOf(source: Document, mutator: (draft: MutableModel<Document>) => MutableModel<Document> | void): Document;
+}
+
+type EagerParsedContent = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ParsedContent, 'id'>;
+    readOnlyFields: 'updatedAt';
+  };
+  readonly id: string;
+  readonly owner?: string | null;
+  readonly identityId?: string | null;
+  readonly documentID: string;
+  readonly document?: Document | null;
+  readonly vocabularyJSON?: string | null;
+  readonly summariesJSON?: string | null;
+  readonly objectivesJSON?: string | null;
+  readonly conceptsJSON?: string | null;
+  readonly responseId?: string | null;
+  readonly modelUsed?: string | null;
+  readonly tokensUsed?: number | null;
+  readonly processingTime?: number | null;
+  readonly createdAt?: string | null;
+  readonly approved?: boolean | null;
+  readonly importedAt?: string | null;
+  readonly metadata?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyParsedContent = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<ParsedContent, 'id'>;
+    readOnlyFields: 'updatedAt';
+  };
+  readonly id: string;
+  readonly owner?: string | null;
+  readonly identityId?: string | null;
+  readonly documentID: string;
+  readonly document: AsyncItem<Document | undefined>;
+  readonly vocabularyJSON?: string | null;
+  readonly summariesJSON?: string | null;
+  readonly objectivesJSON?: string | null;
+  readonly conceptsJSON?: string | null;
+  readonly responseId?: string | null;
+  readonly modelUsed?: string | null;
+  readonly tokensUsed?: number | null;
+  readonly processingTime?: number | null;
+  readonly createdAt?: string | null;
+  readonly approved?: boolean | null;
+  readonly importedAt?: string | null;
+  readonly metadata?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type ParsedContent = LazyLoading extends LazyLoadingDisabled ? EagerParsedContent : LazyParsedContent
+
+export declare const ParsedContent: (new (init: ModelInit<ParsedContent>) => ParsedContent) & {
+  copyOf(source: ParsedContent, mutator: (draft: MutableModel<ParsedContent>) => MutableModel<ParsedContent> | void): ParsedContent;
+}
+
+type EagerAgentJob = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<AgentJob, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly owner?: string | null;
+  readonly identityId?: string | null;
+  readonly type: string;
+  readonly status: string;
+  readonly documentID?: string | null;
+  readonly document?: Document | null;
+  readonly unitID?: string | null;
+  readonly unit?: Unit | null;
+  readonly responseId?: string | null;
+  readonly webhookData?: string | null;
+  readonly error?: string | null;
+  readonly startedAt?: string | null;
+  readonly completedAt?: string | null;
+  readonly modelUsed?: string | null;
+  readonly tokensUsed?: number | null;
+  readonly estimatedCost?: number | null;
+  readonly retryCount?: number | null;
+  readonly metadata?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyAgentJob = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<AgentJob, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly owner?: string | null;
+  readonly identityId?: string | null;
+  readonly type: string;
+  readonly status: string;
+  readonly documentID?: string | null;
+  readonly document: AsyncItem<Document | undefined>;
+  readonly unitID?: string | null;
+  readonly unit: AsyncItem<Unit | undefined>;
+  readonly responseId?: string | null;
+  readonly webhookData?: string | null;
+  readonly error?: string | null;
+  readonly startedAt?: string | null;
+  readonly completedAt?: string | null;
+  readonly modelUsed?: string | null;
+  readonly tokensUsed?: number | null;
+  readonly estimatedCost?: number | null;
+  readonly retryCount?: number | null;
+  readonly metadata?: string | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type AgentJob = LazyLoading extends LazyLoadingDisabled ? EagerAgentJob : LazyAgentJob
+
+export declare const AgentJob: (new (init: ModelInit<AgentJob>) => AgentJob) & {
+  copyOf(source: AgentJob, mutator: (draft: MutableModel<AgentJob>) => MutableModel<AgentJob> | void): AgentJob;
 }
 
 type EagerQuestionUnit = {

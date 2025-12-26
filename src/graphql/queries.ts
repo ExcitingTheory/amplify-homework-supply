@@ -1487,6 +1487,62 @@ export const getUnit = /* GraphQL */ `query GetUnit($id: ID!) {
       startedAt
       __typename
     }
+    documents {
+      items {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        unitID
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+    agentJobs {
+      items {
+        id
+        owner
+        identityId
+        type
+        status
+        documentID
+        unitID
+        responseId
+        webhookData
+        error
+        startedAt
+        completedAt
+        modelUsed
+        tokensUsed
+        estimatedCost
+        retryCount
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -1535,6 +1591,15 @@ export const listUnits = /* GraphQL */ `query ListUnits(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
         nextToken
         startedAt
         __typename
@@ -1597,6 +1662,15 @@ export const syncUnits = /* GraphQL */ `query SyncUnits(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
         nextToken
         startedAt
         __typename
@@ -1779,6 +1853,1111 @@ export const syncWords = /* GraphQL */ `query SyncWords(
   }
 }
 ` as GeneratedQuery<APITypes.SyncWordsQueryVariables, APITypes.SyncWordsQuery>;
+export const getDocument = /* GraphQL */ `query GetDocument($id: ID!) {
+  getDocument(id: $id) {
+    id
+    filename
+    s3Key
+    status
+    owner
+    identityId
+    learner
+    unitID
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    extractedText
+    pageCount
+    fileSize
+    mimeType
+    uploadedAt
+    parsedContent {
+      items {
+        id
+        owner
+        identityId
+        documentID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        approved
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    agentJobs {
+      items {
+        id
+        owner
+        identityId
+        type
+        status
+        documentID
+        unitID
+        responseId
+        webhookData
+        error
+        startedAt
+        completedAt
+        modelUsed
+        tokensUsed
+        estimatedCost
+        retryCount
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetDocumentQueryVariables,
+  APITypes.GetDocumentQuery
+>;
+export const listDocuments = /* GraphQL */ `query ListDocuments(
+  $filter: ModelDocumentFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listDocuments(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListDocumentsQueryVariables,
+  APITypes.ListDocumentsQuery
+>;
+export const syncDocuments = /* GraphQL */ `query SyncDocuments(
+  $filter: ModelDocumentFilterInput
+  $limit: Int
+  $nextToken: String
+  $lastSync: AWSTimestamp
+) {
+  syncDocuments(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    lastSync: $lastSync
+  ) {
+    items {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SyncDocumentsQueryVariables,
+  APITypes.SyncDocumentsQuery
+>;
+export const documentsByUnitID = /* GraphQL */ `query DocumentsByUnitID(
+  $unitID: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModeldocumentFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  documentsByUnitID(
+    unitID: $unitID
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.DocumentsByUnitIDQueryVariables,
+  APITypes.DocumentsByUnitIDQuery
+>;
+export const getParsedContent = /* GraphQL */ `query GetParsedContent($id: ID!) {
+  getParsedContent(id: $id) {
+    id
+    owner
+    identityId
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    vocabularyJSON
+    summariesJSON
+    objectivesJSON
+    conceptsJSON
+    responseId
+    modelUsed
+    tokensUsed
+    processingTime
+    createdAt
+    approved
+    importedAt
+    metadata
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetParsedContentQueryVariables,
+  APITypes.GetParsedContentQuery
+>;
+export const listParsedContents = /* GraphQL */ `query ListParsedContents(
+  $filter: ModelParsedContentFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listParsedContents(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      owner
+      identityId
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        unitID
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      vocabularyJSON
+      summariesJSON
+      objectivesJSON
+      conceptsJSON
+      responseId
+      modelUsed
+      tokensUsed
+      processingTime
+      createdAt
+      approved
+      importedAt
+      metadata
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListParsedContentsQueryVariables,
+  APITypes.ListParsedContentsQuery
+>;
+export const syncParsedContents = /* GraphQL */ `query SyncParsedContents(
+  $filter: ModelParsedContentFilterInput
+  $limit: Int
+  $nextToken: String
+  $lastSync: AWSTimestamp
+) {
+  syncParsedContents(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    lastSync: $lastSync
+  ) {
+    items {
+      id
+      owner
+      identityId
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        unitID
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      vocabularyJSON
+      summariesJSON
+      objectivesJSON
+      conceptsJSON
+      responseId
+      modelUsed
+      tokensUsed
+      processingTime
+      createdAt
+      approved
+      importedAt
+      metadata
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SyncParsedContentsQueryVariables,
+  APITypes.SyncParsedContentsQuery
+>;
+export const parsedContentsByDocumentID = /* GraphQL */ `query ParsedContentsByDocumentID(
+  $documentID: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelParsedContentFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  parsedContentsByDocumentID(
+    documentID: $documentID
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      owner
+      identityId
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        unitID
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      vocabularyJSON
+      summariesJSON
+      objectivesJSON
+      conceptsJSON
+      responseId
+      modelUsed
+      tokensUsed
+      processingTime
+      createdAt
+      approved
+      importedAt
+      metadata
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ParsedContentsByDocumentIDQueryVariables,
+  APITypes.ParsedContentsByDocumentIDQuery
+>;
+export const getAgentJob = /* GraphQL */ `query GetAgentJob($id: ID!) {
+  getAgentJob(id: $id) {
+    id
+    owner
+    identityId
+    type
+    status
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    unitID
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    responseId
+    webhookData
+    error
+    startedAt
+    completedAt
+    modelUsed
+    tokensUsed
+    estimatedCost
+    retryCount
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetAgentJobQueryVariables,
+  APITypes.GetAgentJobQuery
+>;
+export const listAgentJobs = /* GraphQL */ `query ListAgentJobs(
+  $filter: ModelAgentJobFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listAgentJobs(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      owner
+      identityId
+      type
+      status
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        unitID
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      responseId
+      webhookData
+      error
+      startedAt
+      completedAt
+      modelUsed
+      tokensUsed
+      estimatedCost
+      retryCount
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListAgentJobsQueryVariables,
+  APITypes.ListAgentJobsQuery
+>;
+export const syncAgentJobs = /* GraphQL */ `query SyncAgentJobs(
+  $filter: ModelAgentJobFilterInput
+  $limit: Int
+  $nextToken: String
+  $lastSync: AWSTimestamp
+) {
+  syncAgentJobs(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    lastSync: $lastSync
+  ) {
+    items {
+      id
+      owner
+      identityId
+      type
+      status
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        unitID
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      responseId
+      webhookData
+      error
+      startedAt
+      completedAt
+      modelUsed
+      tokensUsed
+      estimatedCost
+      retryCount
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SyncAgentJobsQueryVariables,
+  APITypes.SyncAgentJobsQuery
+>;
+export const agentJobsByDocumentID = /* GraphQL */ `query AgentJobsByDocumentID(
+  $documentID: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelAgentJobFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  agentJobsByDocumentID(
+    documentID: $documentID
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      owner
+      identityId
+      type
+      status
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        unitID
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      responseId
+      webhookData
+      error
+      startedAt
+      completedAt
+      modelUsed
+      tokensUsed
+      estimatedCost
+      retryCount
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.AgentJobsByDocumentIDQueryVariables,
+  APITypes.AgentJobsByDocumentIDQuery
+>;
+export const agentJobsByUnitID = /* GraphQL */ `query AgentJobsByUnitID(
+  $unitID: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelAgentJobFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  agentJobsByUnitID(
+    unitID: $unitID
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      owner
+      identityId
+      type
+      status
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        unitID
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      responseId
+      webhookData
+      error
+      startedAt
+      completedAt
+      modelUsed
+      tokensUsed
+      estimatedCost
+      retryCount
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.AgentJobsByUnitIDQueryVariables,
+  APITypes.AgentJobsByUnitIDQuery
+>;
 export const getQuestionUnit = /* GraphQL */ `query GetQuestionUnit($id: ID!) {
   getQuestionUnit(id: $id) {
     id
@@ -1858,6 +3037,15 @@ export const getQuestionUnit = /* GraphQL */ `query GetQuestionUnit($id: ID!) {
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
         nextToken
         startedAt
         __typename
@@ -3046,6 +4234,15 @@ export const getUnitFile = /* GraphQL */ `query GetUnitFile($id: ID!) {
         startedAt
         __typename
       }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -3807,6 +5004,15 @@ export const getUnitWord = /* GraphQL */ `query GetUnitWord($id: ID!) {
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
         nextToken
         startedAt
         __typename

@@ -84,6 +84,7 @@ type Unit @model @auth(rules: [
   assignments: [Assignment] @hasMany(indexName: "byUnit", fields: ["id"])
   words: [Word] @manyToMany(relationName: "UnitWord")
   grades: [Grade] @hasMany(indexName: "byUnit", fields: ["id"])
+  analyzedDocuments: [Document] @hasMany(indexName: "byUnit", fields: ["id"])
 }
 
 type Word @model @auth(rules: [
@@ -98,6 +99,84 @@ type Word @model @auth(rules: [
   definition: String
   audio: [String]
   units: [Unit] @manyToMany(relationName: "UnitWord")
+}
+
+type Document @model @auth(rules: [
+  { allow: private, operations: [read]},
+  { allow: groups, groups: ["Instructors", "Admins"], operations: [create, update, delete, read]},
+  { allow: owner, ownerField: "owner", operations: [create, update, delete, read]},
+  { allow: groups, groupsField: "learner", operations: [read]},
+  { allow: public, operations: [read]}
+  ]) {
+  id: ID!
+  filename: String!
+  s3Key: String!
+  status: String! # uploaded, extracting, extracted, analyzing, completed, failed
+  owner: String
+  identityId: String
+  learner: String
+  unitID: ID @index(name: "byUnit")
+  unit: Unit @belongsTo(fields: ["unitID"])
+  extractedText: String
+  pageCount: Int
+  fileSize: Int
+  mimeType: String
+  uploadedAt: AWSDateTime
+  parsedContent: [ParsedContent] @hasMany(indexName: "byDocument", fields: ["id"])
+  agentJobs: [AgentJob] @hasMany(indexName: "byDocument", fields: ["id"])
+  metadata: AWSJSON
+}
+
+type ParsedContent @model @auth(rules: [
+  { allow: private, operations: [read]},
+  { allow: groups, groups: ["Instructors", "Admins"], operations: [create, update, delete, read]},
+  { allow: owner, ownerField: "owner", operations: [create, update, delete, read]},
+  { allow: public, operations: [read]}
+  ]) {
+  id: ID!
+  owner: String
+  identityId: String
+  DocumentID: ID! @index(name: "byDocument")
+  Document: Document @hasMany(fields: ["DocumentID"])
+  vocabularyJSON: AWSJSON # [{word, definition, context, page}]
+  summariesJSON: AWSJSON # [{title, content, page_range}]
+  objectivesJSON: AWSJSON # [{objective, bloom_level}]
+  conceptsJSON: AWSJSON # [{concept, description, related_vocabulary}]
+  responseId: String # OpenAI response ID
+  modelUsed: String
+  tokensUsed: Int
+  processingTime: Int
+  createdAt: AWSDateTime
+  approved: Boolean
+  importedAt: AWSDateTime
+  metadata: AWSJSON
+}
+
+type AgentJob @model @auth(rules: [
+  { allow: private, operations: [read]},
+  { allow: groups, groups: ["Instructors", "Admins"], operations: [create, update, delete, read]},
+  { allow: owner, ownerField: "owner", operations: [create, update, delete, read]},
+  { allow: public, operations: [read]}
+  ]) {
+  id: ID!
+  owner: String
+  identityId: String
+  type: String! # pdf_analysis, exercise_generation, vocabulary_extraction
+  status: String! # queued, processing, completed, failed, cancelled
+  DocumentID: ID @index(name: "byDocument")
+  Document: Document @belongsTo(fields: ["DocumentID"])
+  unitID: ID @index(name: "byUnit")
+  unit: Unit @belongsTo(fields: ["unitID"])
+  responseId: String # OpenAI response ID for tracking
+  webhookData: AWSJSON # Raw webhook payload
+  error: AWSJSON # {message, code, stack, timestamp}
+  startedAt: AWSDateTime
+  completedAt: AWSDateTime
+  modelUsed: String
+  tokensUsed: Int
+  estimatedCost: Float
+  retryCount: Int
+  metadata: AWSJSON
 }
 
 

@@ -1,17 +1,17 @@
 /* Amplify Params - DO NOT EDIT
-  API_JAPANESE4_CHATHISTORYTABLE_ARN
-  API_JAPANESE4_CHATHISTORYTABLE_NAME
-  API_JAPANESE4_FILETABLE_ARN
-  API_JAPANESE4_FILETABLE_NAME
-  API_JAPANESE4_GRAPHQLAPIENDPOINTOUTPUT
-  API_JAPANESE4_GRAPHQLAPIIDOUTPUT
-  API_JAPANESE4_SECTIONTABLE_ARN
-  API_JAPANESE4_SECTIONTABLE_NAME
-  API_JAPANESE4_UNITTABLE_ARN
-  API_JAPANESE4_UNITTABLE_NAME
-  API_JAPANESE4_WORDTABLE_ARN
-  API_JAPANESE4_WORDTABLE_NAME
-  AUTH_JAPANESE46739AB6B_USERPOOLID
+  API_JAPANESE5_CHATHISTORYTABLE_ARN
+  API_JAPANESE5_CHATHISTORYTABLE_NAME
+  API_JAPANESE5_FILETABLE_ARN
+  API_JAPANESE5_FILETABLE_NAME
+  API_JAPANESE5_GRAPHQLAPIENDPOINTOUTPUT
+  API_JAPANESE5_GRAPHQLAPIIDOUTPUT
+  API_JAPANESE5_SECTIONTABLE_ARN
+  API_JAPANESE5_SECTIONTABLE_NAME
+  API_JAPANESE5_UNITTABLE_ARN
+  API_JAPANESE5_UNITTABLE_NAME
+  API_JAPANESE5_WORDTABLE_ARN
+  API_JAPANESE5_WORDTABLE_NAME
+  AUTH_JAPANESE56739AB6B_USERPOOLID
   ENV
   REGION
   STORAGE_FILES_BUCKETNAME
@@ -442,25 +442,25 @@ const tools = [
 
 
 
-const GRAPHQL_ENDPOINT = process.env.API_JAPANESE4_GRAPHQLAPIENDPOINTOUTPUT;
+const GRAPHQL_ENDPOINT = process.env.API_JAPANESE5_GRAPHQLAPIENDPOINTOUTPUT;
 const AWS_REGION = process.env.AWS_REGION || 'us-east-1';
 const ENV = process.env.ENV;
 const { Sha256 } = crypto;
 
-const USERPOOL_ID = process.env.AUTH_JAPANESE46739AB6B_USERPOOLID;
+const USERPOOL_ID = process.env.AUTH_JAPANESE56739AB6B_USERPOOLID;
 
 const command = new ListIdentityPoolsCommand({ MaxResults: 60 }); // Member must have value less than or equal to 60
 const client = new CognitoIdentityClient({ region: AWS_REGION });
 const responseListPools = await client.send(command);
 
 const pools = responseListPools?.IdentityPools || [];
-// find the first pool that has the name that contains the pattern: `japanese46739ab6b_identitypool_6739ab6b__${ENV}`
+// find the first pool that has the name that contains the pattern: `japanese56739ab6b_identitypool_6739ab6b__${ENV}`
 
 let IDENTITY_POOL_ID = null;
 
 for (const pool of pools) {
   console.log(pool?.IdentityPoolName)
-  if (pool?.IdentityPoolName == `japanese46739ab6b_identitypool_6739ab6b__${ENV}`) {
+  if (pool?.IdentityPoolName == `japanese56739ab6b_identitypool_6739ab6b__${ENV}`) {
     console.log('FOUND', pool?.IdentityPoolId)
     IDENTITY_POOL_ID = pool?.IdentityPoolId;
     break;

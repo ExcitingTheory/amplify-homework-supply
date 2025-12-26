@@ -16,13 +16,13 @@
     "s3Key": {
       "Type": "String"
     },
-    "apijapanese4GraphQLAPIIdOutput": {
+    "apijapanese5GraphQLAPIIdOutput": {
       "Type": "String",
-      "Default": "apijapanese4GraphQLAPIIdOutput"
+      "Default": "apijapanese5GraphQLAPIIdOutput"
     },
-    "apijapanese4GraphQLAPIEndpointOutput": {
+    "apijapanese5GraphQLAPIEndpointOutput": {
       "Type": "String",
-      "Default": "apijapanese4GraphQLAPIEndpointOutput"
+      "Default": "apijapanese5GraphQLAPIEndpointOutput"
     },
     "storagefilesBucketName": {
       "Type": "String",
@@ -82,21 +82,21 @@
             "REGION": {
               "Ref": "AWS::Region"
             },
-            "API_JAPANESE4_GRAPHQLAPIIDOUTPUT": {
-              "Ref": "apijapanese4GraphQLAPIIdOutput"
+            "API_JAPANESE5_GRAPHQLAPIIDOUTPUT": {
+              "Ref": "apijapanese5GraphQLAPIIdOutput"
             },
-            "API_JAPANESE4_GRAPHQLAPIENDPOINTOUTPUT": {
-              "Ref": "apijapanese4GraphQLAPIEndpointOutput"
+            "API_JAPANESE5_GRAPHQLAPIENDPOINTOUTPUT": {
+              "Ref": "apijapanese5GraphQLAPIEndpointOutput"
             },
             "STORAGE_FILES_BUCKETNAME": {
               "Ref": "storagefilesBucketName"
             },
-            "API_JAPANESE4_FILETABLE_NAME": {
+            "API_JAPANESE5_FILETABLE_NAME": {
               "Fn::ImportValue": {
-                "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
+                "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
               }
             },
-            "API_JAPANESE4_FILETABLE_ARN": {
+            "API_JAPANESE5_FILETABLE_ARN": {
               "Fn::Join": [
                 "",
                 [
@@ -111,18 +111,18 @@
                   ":table/",
                   {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
+                      "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
                     }
                   }
                 ]
               ]
             },
-            "API_JAPANESE4_GRADETABLE_NAME": {
+            "API_JAPANESE5_GRADETABLE_NAME": {
               "Fn::ImportValue": {
-                "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:GradeTable:Name"
+                "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:GradeTable:Name"
               }
             },
-            "API_JAPANESE4_GRADETABLE_ARN": {
+            "API_JAPANESE5_GRADETABLE_ARN": {
               "Fn::Join": [
                 "",
                 [
@@ -137,18 +137,18 @@
                   ":table/",
                   {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:GradeTable:Name"
+                      "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:GradeTable:Name"
                     }
                   }
                 ]
               ]
             },
-            "API_JAPANESE4_UNITTABLE_NAME": {
+            "API_JAPANESE5_UNITTABLE_NAME": {
               "Fn::ImportValue": {
-                "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
+                "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
               }
             },
-            "API_JAPANESE4_UNITTABLE_ARN": {
+            "API_JAPANESE5_UNITTABLE_ARN": {
               "Fn::Join": [
                 "",
                 [
@@ -163,7 +163,7 @@
                   ":table/",
                   {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
+                      "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
                     }
                   }
                 ]
@@ -299,7 +299,7 @@
                       },
                       ":apis/",
                       {
-                        "Ref": "apijapanese4GraphQLAPIIdOutput"
+                        "Ref": "apijapanese5GraphQLAPIIdOutput"
                       },
                       "/types/Query/*"
                     ]
@@ -371,7 +371,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
                         }
                       }
                     ]
@@ -392,7 +392,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
                         }
                       },
                       "/index/*"
@@ -428,7 +428,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:GradeTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:GradeTable:Name"
                         }
                       }
                     ]
@@ -449,7 +449,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:GradeTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:GradeTable:Name"
                         }
                       },
                       "/index/*"
@@ -485,7 +485,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
                         }
                       }
                     ]
@@ -506,7 +506,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
                         }
                       },
                       "/index/*"

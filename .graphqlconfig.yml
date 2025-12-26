@@ -1,6 +1,6 @@
 projects:
-  japanese4:
-    schemaPath: amplify/backend/api/japanese4/build/schema.graphql
+  japanese5:
+    schemaPath: amplify/backend/api/japanese5/build/schema.graphql
     includes:
       - src/graphql/**/*.ts
     excludes:

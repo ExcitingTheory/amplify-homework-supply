@@ -1,10 +1,10 @@
 {
   "version": "1",
   "cognitoConfig": {
-    "identityPoolName": "japanese46739ab6b_identitypool_6739ab6b",
+    "identityPoolName": "japanese56739ab6b_identitypool_6739ab6b",
     "allowUnauthenticatedIdentities": true,
     "resourceNameTruncated": "japane6739ab6b",
-    "userPoolName": "japanese46739ab6b_userpool_6739ab6b",
+    "userPoolName": "japanese56739ab6b_userpool_6739ab6b",
     "autoVerifiedAttributes": [
       "email"
     ],
@@ -37,7 +37,7 @@
     "userpoolClientLambdaRole": "japane6739ab6b_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": true,
     "sharedId": "6739ab6b",
-    "resourceName": "japanese46739ab6b",
+    "resourceName": "japanese56739ab6b",
     "authSelections": "identityPoolAndUserPool",
     "useDefault": "manual",
     "usernameAttributes": [
@@ -72,7 +72,7 @@
     "dependsOn": [
       {
         "category": "function",
-        "resourceName": "japanese46739ab6bPostConfirmation",
+        "resourceName": "japanese56739ab6bPostConfirmation",
         "triggerProvider": "Cognito",
         "attributes": [
           "Arn",
@@ -91,8 +91,8 @@
     "adminQueries": true,
     "hostedUI": false,
     "adminQueryGroup": "Admins",
-    "verificationBucketName": "japanese46739ab6bverificationbucket",
+    "verificationBucketName": "japanese56739ab6bverificationbucket",
     "authProviders": [],
-    "authTriggerConnections": "[\n  {\n    \"triggerType\": \"PostConfirmation\",\n    \"lambdaFunctionName\": \"japanese46739ab6bPostConfirmation\"\n  }\n]"
+    "authTriggerConnections": "[\n  {\n    \"triggerType\": \"PostConfirmation\",\n    \"lambdaFunctionName\": \"japanese56739ab6bPostConfirmation\"\n  }\n]"
   }
 }

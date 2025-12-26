@@ -31,7 +31,7 @@ Using service: Cognito, provided by: awscloudformation
 ✅ Successfully updated AdminQueries65120535 function locally
 ✅ Successfully updated AdminQueries API locally
 Successfully updated the Cognito trigger locally
-✅ Successfully updated auth resource japanese46739ab6b locally
+✅ Successfully updated auth resource japanese56739ab6b locally
 
 ✅ Some next steps:
 "amplify push" will build all your local backend resources and provision it in the cloud
@@ -50,13 +50,13 @@ colinbarrett-fox@Colins-MBP amplify-homework-supply % amplify status
 ┌──────────┬───────────────────────────────────┬───────────┬───────────────────┐
 │ Category │ Resource name                     │ Operation │ Provider plugin   │
 ├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
-│ Auth     │ japanese46739ab6b                 │ No Change │ awscloudformation │
+│ Auth     │ japanese56739ab6b                 │ No Change │ awscloudformation │
 ├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
 │ Auth     │ userPoolGroups                    │ No Change │ awscloudformation │
 ├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
 │ Storage  │ files                             │ No Change │ awscloudformation │
 ├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
-│ Api      │ japanese4                         │ No Change │ awscloudformation │
+│ Api      │ japanese5                         │ No Change │ awscloudformation │
 ├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
 │ Api      │ AdminQueries                      │ No Change │ awscloudformation │
 ├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
@@ -64,7 +64,7 @@ colinbarrett-fox@Colins-MBP amplify-homework-supply % amplify status
 ├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
 │ Function │ AdminQueries65120535              │ No Change │ awscloudformation │
 ├──────────┼───────────────────────────────────┼───────────┼───────────────────┤
-│ Function │ japanese46739ab6bPostConfirmation │ No Change │ awscloudformation │
+│ Function │ japanese56739ab6bPostConfirmation │ No Change │ awscloudformation │
 └──────────┴───────────────────────────────────┴───────────┴───────────────────┘
 
 GraphQL endpoint: https://7lgt53fzabgm7cfddi24xluuye.appsync-api.us-east-1.amazonaws.com/graphql
@@ -72,8 +72,8 @@ GraphQL API KEY: da2-gj7mgrqwwjcdhicwlwijcmn2li
 
 GraphQL transformer version: 2
 REST API endpoint: https://bmoc1ceshd.execute-api.us-east-1.amazonaws.com/main
-Hosted UI Endpoint: https://japanese498078882-98078882-main.auth.us-east-1.amazoncognito.com/
-Test Your Hosted UI Endpoint: https://japanese498078882-98078882-main.auth.us-east-1.amazoncognito.com/login?response_type=code&client_id=365tfqgt7t48e4rlpuljippdm4&redirect_uri=http://localhost:3000/
+Hosted UI Endpoint: https://japanese598078882-98078882-main.auth.us-east-1.amazoncognito.com/
+Test Your Hosted UI Endpoint: https://japanese598078882-98078882-main.auth.us-east-1.amazoncognito.com/login?response_type=code&client_id=365tfqgt7t48e4rlpuljippdm4&redirect_uri=http://localhost:3000/
 
 
 colinbarrett-fox@Colins-MBP amplify-homework-supply % 

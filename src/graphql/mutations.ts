@@ -8,6 +8,13 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
+export const analyzePdf = /* GraphQL */ `mutation AnalyzePdf($documentId: ID!) {
+  analyzePdf(documentId: $documentId)
+}
+` as GeneratedMutation<
+  APITypes.AnalyzePdfMutationVariables,
+  APITypes.AnalyzePdfMutation
+>;
 export const createSectionGroup = /* GraphQL */ `mutation CreateSectionGroup($name: String!, $description: String!) {
   createSectionGroup(name: $name, description: $description)
 }
@@ -1362,6 +1369,62 @@ export const createUnit = /* GraphQL */ `mutation CreateUnit(
       startedAt
       __typename
     }
+    documents {
+      items {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        unitID
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+    agentJobs {
+      items {
+        id
+        owner
+        identityId
+        type
+        status
+        documentID
+        unitID
+        responseId
+        webhookData
+        error
+        startedAt
+        completedAt
+        modelUsed
+        tokensUsed
+        estimatedCost
+        retryCount
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -1487,6 +1550,62 @@ export const updateUnit = /* GraphQL */ `mutation UpdateUnit(
       startedAt
       __typename
     }
+    documents {
+      items {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        unitID
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+    agentJobs {
+      items {
+        id
+        owner
+        identityId
+        type
+        status
+        documentID
+        unitID
+        responseId
+        webhookData
+        error
+        startedAt
+        completedAt
+        modelUsed
+        tokensUsed
+        estimatedCost
+        retryCount
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -1606,6 +1725,62 @@ export const deleteUnit = /* GraphQL */ `mutation DeleteUnit(
         _deleted
         _lastChangedAt
         owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    documents {
+      items {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        unitID
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+    agentJobs {
+      items {
+        id
+        owner
+        identityId
+        type
+        status
+        documentID
+        unitID
+        responseId
+        webhookData
+        error
+        startedAt
+        completedAt
+        modelUsed
+        tokensUsed
+        estimatedCost
+        retryCount
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
         __typename
       }
       nextToken
@@ -1855,6 +2030,1095 @@ export const deleteWord = /* GraphQL */ `mutation DeleteWord(
   APITypes.DeleteWordMutationVariables,
   APITypes.DeleteWordMutation
 >;
+export const createDocument = /* GraphQL */ `mutation CreateDocument(
+  $input: CreateDocumentInput!
+  $condition: ModelDocumentConditionInput
+) {
+  createDocument(input: $input, condition: $condition) {
+    id
+    filename
+    s3Key
+    status
+    owner
+    identityId
+    learner
+    unitID
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    extractedText
+    pageCount
+    fileSize
+    mimeType
+    uploadedAt
+    parsedContent {
+      items {
+        id
+        owner
+        identityId
+        documentID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        approved
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    agentJobs {
+      items {
+        id
+        owner
+        identityId
+        type
+        status
+        documentID
+        unitID
+        responseId
+        webhookData
+        error
+        startedAt
+        completedAt
+        modelUsed
+        tokensUsed
+        estimatedCost
+        retryCount
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateDocumentMutationVariables,
+  APITypes.CreateDocumentMutation
+>;
+export const updateDocument = /* GraphQL */ `mutation UpdateDocument(
+  $input: UpdateDocumentInput!
+  $condition: ModelDocumentConditionInput
+) {
+  updateDocument(input: $input, condition: $condition) {
+    id
+    filename
+    s3Key
+    status
+    owner
+    identityId
+    learner
+    unitID
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    extractedText
+    pageCount
+    fileSize
+    mimeType
+    uploadedAt
+    parsedContent {
+      items {
+        id
+        owner
+        identityId
+        documentID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        approved
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    agentJobs {
+      items {
+        id
+        owner
+        identityId
+        type
+        status
+        documentID
+        unitID
+        responseId
+        webhookData
+        error
+        startedAt
+        completedAt
+        modelUsed
+        tokensUsed
+        estimatedCost
+        retryCount
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateDocumentMutationVariables,
+  APITypes.UpdateDocumentMutation
+>;
+export const deleteDocument = /* GraphQL */ `mutation DeleteDocument(
+  $input: DeleteDocumentInput!
+  $condition: ModelDocumentConditionInput
+) {
+  deleteDocument(input: $input, condition: $condition) {
+    id
+    filename
+    s3Key
+    status
+    owner
+    identityId
+    learner
+    unitID
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    extractedText
+    pageCount
+    fileSize
+    mimeType
+    uploadedAt
+    parsedContent {
+      items {
+        id
+        owner
+        identityId
+        documentID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        approved
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    agentJobs {
+      items {
+        id
+        owner
+        identityId
+        type
+        status
+        documentID
+        unitID
+        responseId
+        webhookData
+        error
+        startedAt
+        completedAt
+        modelUsed
+        tokensUsed
+        estimatedCost
+        retryCount
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteDocumentMutationVariables,
+  APITypes.DeleteDocumentMutation
+>;
+export const createParsedContent = /* GraphQL */ `mutation CreateParsedContent(
+  $input: CreateParsedContentInput!
+  $condition: ModelParsedContentConditionInput
+) {
+  createParsedContent(input: $input, condition: $condition) {
+    id
+    owner
+    identityId
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    vocabularyJSON
+    summariesJSON
+    objectivesJSON
+    conceptsJSON
+    responseId
+    modelUsed
+    tokensUsed
+    processingTime
+    createdAt
+    approved
+    importedAt
+    metadata
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateParsedContentMutationVariables,
+  APITypes.CreateParsedContentMutation
+>;
+export const updateParsedContent = /* GraphQL */ `mutation UpdateParsedContent(
+  $input: UpdateParsedContentInput!
+  $condition: ModelParsedContentConditionInput
+) {
+  updateParsedContent(input: $input, condition: $condition) {
+    id
+    owner
+    identityId
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    vocabularyJSON
+    summariesJSON
+    objectivesJSON
+    conceptsJSON
+    responseId
+    modelUsed
+    tokensUsed
+    processingTime
+    createdAt
+    approved
+    importedAt
+    metadata
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateParsedContentMutationVariables,
+  APITypes.UpdateParsedContentMutation
+>;
+export const deleteParsedContent = /* GraphQL */ `mutation DeleteParsedContent(
+  $input: DeleteParsedContentInput!
+  $condition: ModelParsedContentConditionInput
+) {
+  deleteParsedContent(input: $input, condition: $condition) {
+    id
+    owner
+    identityId
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    vocabularyJSON
+    summariesJSON
+    objectivesJSON
+    conceptsJSON
+    responseId
+    modelUsed
+    tokensUsed
+    processingTime
+    createdAt
+    approved
+    importedAt
+    metadata
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteParsedContentMutationVariables,
+  APITypes.DeleteParsedContentMutation
+>;
+export const createAgentJob = /* GraphQL */ `mutation CreateAgentJob(
+  $input: CreateAgentJobInput!
+  $condition: ModelAgentJobConditionInput
+) {
+  createAgentJob(input: $input, condition: $condition) {
+    id
+    owner
+    identityId
+    type
+    status
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    unitID
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    responseId
+    webhookData
+    error
+    startedAt
+    completedAt
+    modelUsed
+    tokensUsed
+    estimatedCost
+    retryCount
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAgentJobMutationVariables,
+  APITypes.CreateAgentJobMutation
+>;
+export const updateAgentJob = /* GraphQL */ `mutation UpdateAgentJob(
+  $input: UpdateAgentJobInput!
+  $condition: ModelAgentJobConditionInput
+) {
+  updateAgentJob(input: $input, condition: $condition) {
+    id
+    owner
+    identityId
+    type
+    status
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    unitID
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    responseId
+    webhookData
+    error
+    startedAt
+    completedAt
+    modelUsed
+    tokensUsed
+    estimatedCost
+    retryCount
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAgentJobMutationVariables,
+  APITypes.UpdateAgentJobMutation
+>;
+export const deleteAgentJob = /* GraphQL */ `mutation DeleteAgentJob(
+  $input: DeleteAgentJobInput!
+  $condition: ModelAgentJobConditionInput
+) {
+  deleteAgentJob(input: $input, condition: $condition) {
+    id
+    owner
+    identityId
+    type
+    status
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      unitID
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    unitID
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    responseId
+    webhookData
+    error
+    startedAt
+    completedAt
+    modelUsed
+    tokensUsed
+    estimatedCost
+    retryCount
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAgentJobMutationVariables,
+  APITypes.DeleteAgentJobMutation
+>;
 export const createQuestionUnit = /* GraphQL */ `mutation CreateQuestionUnit(
   $input: CreateQuestionUnitInput!
   $condition: ModelQuestionUnitConditionInput
@@ -1937,6 +3201,15 @@ export const createQuestionUnit = /* GraphQL */ `mutation CreateQuestionUnit(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
         nextToken
         startedAt
         __typename
@@ -2047,6 +3320,15 @@ export const updateQuestionUnit = /* GraphQL */ `mutation UpdateQuestionUnit(
         startedAt
         __typename
       }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2149,6 +3431,15 @@ export const deleteQuestionUnit = /* GraphQL */ `mutation DeleteQuestionUnit(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
         nextToken
         startedAt
         __typename
@@ -2850,6 +4141,15 @@ export const createUnitFile = /* GraphQL */ `mutation CreateUnitFile(
         startedAt
         __typename
       }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2956,6 +4256,15 @@ export const updateUnitFile = /* GraphQL */ `mutation UpdateUnitFile(
         startedAt
         __typename
       }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -3058,6 +4367,15 @@ export const deleteUnitFile = /* GraphQL */ `mutation DeleteUnitFile(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
         nextToken
         startedAt
         __typename
@@ -3409,6 +4727,15 @@ export const createUnitWord = /* GraphQL */ `mutation CreateUnitWord(
         startedAt
         __typename
       }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -3506,6 +4833,15 @@ export const updateUnitWord = /* GraphQL */ `mutation UpdateUnitWord(
         startedAt
         __typename
       }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -3599,6 +4935,15 @@ export const deleteUnitWord = /* GraphQL */ `mutation DeleteUnitWord(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        __typename
+      }
+      agentJobs {
         nextToken
         startedAt
         __typename

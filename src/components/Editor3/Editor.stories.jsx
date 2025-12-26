@@ -261,7 +261,26 @@ export const EmptyEditor = {
 
     // Make a link by typing out the URL
     // make a link with selected text
-    // 
+    // make a youtube embed link
+    // Insert Due Date
+    // Insert Timer
+    // Insert Meaning Association
+    // Insert Short Answer: Vocabulary
+    // Insert Short Answer: Custom
+    // Insert Audio Playlist
+    // Insert Multiple Choice
+    // Insert Layout
+    // Insert Horizontal Rule
+    // Insert Table
+
+    // Use Filemanager to insert an image
+    // Use Filemanager to insert audio file
+    // Use Filemanager to generate image with AI
+    // Use Filemanager to generate audio with AI
+    // Use Sidebar to set Featured Image
+
+    // Open the content in preview
+    // Complete the unit exercise
 
   },
 };

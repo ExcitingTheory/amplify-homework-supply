@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"12.12.6\",\"stackType\":\"function-Lambda\",\"metadata\":{}}",
+  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"14.1.1\",\"stackType\":\"function-Lambda\",\"metadata\":{\"whyContinueWithGen1\":\"\"}}",
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
@@ -16,13 +16,13 @@
     "s3Key": {
       "Type": "String"
     },
-    "apijapanese4GraphQLAPIIdOutput": {
+    "apijapanese5GraphQLAPIIdOutput": {
       "Type": "String",
-      "Default": "apijapanese4GraphQLAPIIdOutput"
+      "Default": "apijapanese5GraphQLAPIIdOutput"
     },
-    "apijapanese4GraphQLAPIEndpointOutput": {
+    "apijapanese5GraphQLAPIEndpointOutput": {
       "Type": "String",
-      "Default": "apijapanese4GraphQLAPIEndpointOutput"
+      "Default": "apijapanese5GraphQLAPIEndpointOutput"
     },
     "storagefilesBucketName": {
       "Type": "String",
@@ -31,9 +31,9 @@
     "secretsPathAmplifyAppId": {
       "Type": "String"
     },
-    "authjapanese46739ab6bUserPoolId": {
+    "authjapanese56739ab6bUserPoolId": {
       "Type": "String",
-      "Default": "authjapanese46739ab6bUserPoolId"
+      "Default": "authjapanese56739ab6bUserPoolId"
     }
   },
   "Conditions": {
@@ -89,21 +89,21 @@
             "REGION": {
               "Ref": "AWS::Region"
             },
-            "API_JAPANESE4_GRAPHQLAPIIDOUTPUT": {
-              "Ref": "apijapanese4GraphQLAPIIdOutput"
+            "API_JAPANESE5_GRAPHQLAPIIDOUTPUT": {
+              "Ref": "apijapanese5GraphQLAPIIdOutput"
             },
-            "API_JAPANESE4_GRAPHQLAPIENDPOINTOUTPUT": {
-              "Ref": "apijapanese4GraphQLAPIEndpointOutput"
+            "API_JAPANESE5_GRAPHQLAPIENDPOINTOUTPUT": {
+              "Ref": "apijapanese5GraphQLAPIEndpointOutput"
             },
             "STORAGE_FILES_BUCKETNAME": {
               "Ref": "storagefilesBucketName"
             },
-            "API_JAPANESE4_FILETABLE_NAME": {
+            "API_JAPANESE5_FILETABLE_NAME": {
               "Fn::ImportValue": {
-                "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
+                "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
               }
             },
-            "API_JAPANESE4_FILETABLE_ARN": {
+            "API_JAPANESE5_FILETABLE_ARN": {
               "Fn::Join": [
                 "",
                 [
@@ -118,18 +118,18 @@
                   ":table/",
                   {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
+                      "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
                     }
                   }
                 ]
               ]
             },
-            "API_JAPANESE4_CHATHISTORYTABLE_NAME": {
+            "API_JAPANESE5_CHATHISTORYTABLE_NAME": {
               "Fn::ImportValue": {
-                "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:ChatHistoryTable:Name"
+                "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:ChatHistoryTable:Name"
               }
             },
-            "API_JAPANESE4_CHATHISTORYTABLE_ARN": {
+            "API_JAPANESE5_CHATHISTORYTABLE_ARN": {
               "Fn::Join": [
                 "",
                 [
@@ -144,18 +144,18 @@
                   ":table/",
                   {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:ChatHistoryTable:Name"
+                      "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:ChatHistoryTable:Name"
                     }
                   }
                 ]
               ]
             },
-            "API_JAPANESE4_SECTIONTABLE_NAME": {
+            "API_JAPANESE5_SECTIONTABLE_NAME": {
               "Fn::ImportValue": {
-                "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:SectionTable:Name"
+                "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:SectionTable:Name"
               }
             },
-            "API_JAPANESE4_SECTIONTABLE_ARN": {
+            "API_JAPANESE5_SECTIONTABLE_ARN": {
               "Fn::Join": [
                 "",
                 [
@@ -170,18 +170,18 @@
                   ":table/",
                   {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:SectionTable:Name"
+                      "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:SectionTable:Name"
                     }
                   }
                 ]
               ]
             },
-            "API_JAPANESE4_UNITTABLE_NAME": {
+            "API_JAPANESE5_UNITTABLE_NAME": {
               "Fn::ImportValue": {
-                "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
+                "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
               }
             },
-            "API_JAPANESE4_UNITTABLE_ARN": {
+            "API_JAPANESE5_UNITTABLE_ARN": {
               "Fn::Join": [
                 "",
                 [
@@ -196,18 +196,18 @@
                   ":table/",
                   {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
+                      "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
                     }
                   }
                 ]
               ]
             },
-            "API_JAPANESE4_WORDTABLE_NAME": {
+            "API_JAPANESE5_WORDTABLE_NAME": {
               "Fn::ImportValue": {
-                "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:WordTable:Name"
+                "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:WordTable:Name"
               }
             },
-            "API_JAPANESE4_WORDTABLE_ARN": {
+            "API_JAPANESE5_WORDTABLE_ARN": {
               "Fn::Join": [
                 "",
                 [
@@ -222,7 +222,7 @@
                   ":table/",
                   {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:WordTable:Name"
+                      "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:WordTable:Name"
                     }
                   }
                 ]
@@ -250,8 +250,8 @@
                 ]
               ]
             },
-            "AUTH_JAPANESE46739AB6B_USERPOOLID": {
-              "Ref": "authjapanese46739ab6bUserPoolId"
+            "AUTH_JAPANESE56739AB6B_USERPOOLID": {
+              "Ref": "authjapanese56739ab6bUserPoolId"
             }
           }
         },
@@ -272,12 +272,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "japanese4LambdaRole7a23f9b4",
+            "japanese5LambdaRole7a23f9b4",
             {
               "Fn::Join": [
                 "",
                 [
-                  "japanese4LambdaRole7a23f9b4",
+                  "japanese5LambdaRole7a23f9b4",
                   "-",
                   {
                     "Ref": "env"
@@ -383,7 +383,7 @@
                       },
                       ":apis/",
                       {
-                        "Ref": "apijapanese4GraphQLAPIIdOutput"
+                        "Ref": "apijapanese5GraphQLAPIIdOutput"
                       },
                       "/types/Query/*"
                     ]
@@ -403,7 +403,7 @@
                       },
                       ":apis/",
                       {
-                        "Ref": "apijapanese4GraphQLAPIIdOutput"
+                        "Ref": "apijapanese5GraphQLAPIIdOutput"
                       },
                       "/types/Mutation/*"
                     ]
@@ -444,7 +444,7 @@
                       },
                       ":userpool/",
                       {
-                        "Ref": "authjapanese46739ab6bUserPoolId"
+                        "Ref": "authjapanese56739ab6bUserPoolId"
                       }
                     ]
                   ]
@@ -523,7 +523,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
                         }
                       }
                     ]
@@ -544,7 +544,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
                         }
                       },
                       "/index/*"
@@ -587,7 +587,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:ChatHistoryTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:ChatHistoryTable:Name"
                         }
                       }
                     ]
@@ -608,7 +608,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:ChatHistoryTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:ChatHistoryTable:Name"
                         }
                       },
                       "/index/*"
@@ -651,7 +651,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:SectionTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:SectionTable:Name"
                         }
                       }
                     ]
@@ -672,7 +672,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:SectionTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:SectionTable:Name"
                         }
                       },
                       "/index/*"
@@ -715,7 +715,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
                         }
                       }
                     ]
@@ -736,7 +736,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:UnitTable:Name"
                         }
                       },
                       "/index/*"
@@ -779,7 +779,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:WordTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:WordTable:Name"
                         }
                       }
                     ]
@@ -800,7 +800,7 @@
                       ":table/",
                       {
                         "Fn::ImportValue": {
-                          "Fn::Sub": "${apijapanese4GraphQLAPIIdOutput}:GetAtt:WordTable:Name"
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:WordTable:Name"
                         }
                       },
                       "/index/*"
