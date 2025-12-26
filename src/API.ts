@@ -79,7 +79,7 @@ export type Unit = {
   files?: ModelUnitFileConnection | null,
   words?: ModelUnitWordConnection | null,
   questions?: ModelQuestionUnitConnection | null,
-  documents?: ModeldocumentConnection | null,
+  documents?: ModelDocumentConnection | null,
   agentJobs?: ModelAgentJobConnection | null,
   createdAt: string,
   updatedAt: string,
@@ -310,14 +310,15 @@ export type QuestionFile = {
   owner?: string | null,
 };
 
-export type ModeldocumentConnection = {
-  __typename: "ModeldocumentConnection",
-  items:  Array<document | null >,
+export type ModelDocumentConnection = {
+  __typename: "ModelDocumentConnection",
+  items:  Array<Document | null >,
   nextToken?: string | null,
+  startedAt?: number | null,
 };
 
-export type document = {
-  __typename: "document",
+export type Document = {
+  __typename: "Document",
   id: string,
   filename: string,
   s3Key: string,
@@ -355,7 +356,7 @@ export type ParsedContent = {
   owner?: string | null,
   identityId?: string | null,
   documentID: string,
-  document?: document | null,
+  document?: Document | null,
   vocabularyJSON?: string | null,
   summariesJSON?: string | null,
   objectivesJSON?: string | null,
@@ -389,7 +390,7 @@ export type AgentJob = {
   type: string,
   status: string,
   documentID?: string | null,
-  document?: document | null,
+  document?: Document | null,
   unitID?: string | null,
   unit?: Unit | null,
   responseId?: string | null,
@@ -1702,33 +1703,6 @@ export type ModelDocumentFilterInput = {
   _deleted?: ModelBooleanInput | null,
 };
 
-export type ModelDocumentConnection = {
-  __typename: "ModelDocumentConnection",
-  items:  Array<document | null >,
-  nextToken?: string | null,
-  startedAt?: number | null,
-};
-
-export type ModeldocumentFilterInput = {
-  id?: ModelIDInput | null,
-  filename?: ModelStringInput | null,
-  s3Key?: ModelStringInput | null,
-  status?: ModelStringInput | null,
-  owner?: ModelStringInput | null,
-  identityId?: ModelStringInput | null,
-  learner?: ModelStringInput | null,
-  unitID?: ModelIDInput | null,
-  extractedText?: ModelStringInput | null,
-  pageCount?: ModelIntInput | null,
-  fileSize?: ModelIntInput | null,
-  mimeType?: ModelStringInput | null,
-  uploadedAt?: ModelStringInput | null,
-  metadata?: ModelStringInput | null,
-  and?: Array< ModeldocumentFilterInput | null > | null,
-  or?: Array< ModeldocumentFilterInput | null > | null,
-  not?: ModeldocumentFilterInput | null,
-};
-
 export type ModelParsedContentFilterInput = {
   id?: ModelIDInput | null,
   owner?: ModelStringInput | null,
@@ -2223,14 +2197,6 @@ export type ModelSubscriptionUnitWordFilterInput = {
   or?: Array< ModelSubscriptionUnitWordFilterInput | null > | null,
   _deleted?: ModelBooleanInput | null,
   owner?: ModelStringInput | null,
-};
-
-export type AnalyzePdfMutationVariables = {
-  documentId: string,
-};
-
-export type AnalyzePdfMutation = {
-  analyzePdf?: string | null,
 };
 
 export type CreateSectionGroupMutationVariables = {
@@ -3580,9 +3546,9 @@ export type CreateUnitMutation = {
       startedAt?: number | null,
     } | null,
     documents?:  {
-      __typename: "ModeldocumentConnection",
+      __typename: "ModelDocumentConnection",
       items:  Array< {
-        __typename: "document",
+        __typename: "Document",
         id: string,
         filename: string,
         s3Key: string,
@@ -3604,6 +3570,7 @@ export type CreateUnitMutation = {
         _lastChangedAt: number,
       } | null >,
       nextToken?: string | null,
+      startedAt?: number | null,
     } | null,
     agentJobs?:  {
       __typename: "ModelAgentJobConnection",
@@ -3760,9 +3727,9 @@ export type UpdateUnitMutation = {
       startedAt?: number | null,
     } | null,
     documents?:  {
-      __typename: "ModeldocumentConnection",
+      __typename: "ModelDocumentConnection",
       items:  Array< {
-        __typename: "document",
+        __typename: "Document",
         id: string,
         filename: string,
         s3Key: string,
@@ -3784,6 +3751,7 @@ export type UpdateUnitMutation = {
         _lastChangedAt: number,
       } | null >,
       nextToken?: string | null,
+      startedAt?: number | null,
     } | null,
     agentJobs?:  {
       __typename: "ModelAgentJobConnection",
@@ -3940,9 +3908,9 @@ export type DeleteUnitMutation = {
       startedAt?: number | null,
     } | null,
     documents?:  {
-      __typename: "ModeldocumentConnection",
+      __typename: "ModelDocumentConnection",
       items:  Array< {
-        __typename: "document",
+        __typename: "Document",
         id: string,
         filename: string,
         s3Key: string,
@@ -3964,6 +3932,7 @@ export type DeleteUnitMutation = {
         _lastChangedAt: number,
       } | null >,
       nextToken?: string | null,
+      startedAt?: number | null,
     } | null,
     agentJobs?:  {
       __typename: "ModelAgentJobConnection",
@@ -4238,7 +4207,7 @@ export type CreateDocumentMutationVariables = {
 
 export type CreateDocumentMutation = {
   createDocument?:  {
-    __typename: "document",
+    __typename: "Document",
     id: string,
     filename: string,
     s3Key: string,
@@ -4286,8 +4255,9 @@ export type CreateDocumentMutation = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -4379,7 +4349,7 @@ export type UpdateDocumentMutationVariables = {
 
 export type UpdateDocumentMutation = {
   updateDocument?:  {
-    __typename: "document",
+    __typename: "Document",
     id: string,
     filename: string,
     s3Key: string,
@@ -4427,8 +4397,9 @@ export type UpdateDocumentMutation = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -4520,7 +4491,7 @@ export type DeleteDocumentMutationVariables = {
 
 export type DeleteDocumentMutation = {
   deleteDocument?:  {
-    __typename: "document",
+    __typename: "Document",
     id: string,
     filename: string,
     s3Key: string,
@@ -4568,8 +4539,9 @@ export type DeleteDocumentMutation = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -4667,7 +4639,7 @@ export type CreateParsedContentMutation = {
     identityId?: string | null,
     documentID: string,
     document?:  {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -4749,7 +4721,7 @@ export type UpdateParsedContentMutation = {
     identityId?: string | null,
     documentID: string,
     document?:  {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -4831,7 +4803,7 @@ export type DeleteParsedContentMutation = {
     identityId?: string | null,
     documentID: string,
     document?:  {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -4915,7 +4887,7 @@ export type CreateAgentJobMutation = {
     status: string,
     documentID?: string | null,
     document?:  {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -5005,8 +4977,9 @@ export type CreateAgentJobMutation = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -5052,7 +5025,7 @@ export type UpdateAgentJobMutation = {
     status: string,
     documentID?: string | null,
     document?:  {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -5142,8 +5115,9 @@ export type UpdateAgentJobMutation = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -5189,7 +5163,7 @@ export type DeleteAgentJobMutation = {
     status: string,
     documentID?: string | null,
     document?:  {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -5279,8 +5253,9 @@ export type DeleteAgentJobMutation = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -5402,8 +5377,9 @@ export type CreateQuestionUnitMutation = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -5516,8 +5492,9 @@ export type UpdateQuestionUnitMutation = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -5630,8 +5607,9 @@ export type DeleteQuestionUnitMutation = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -6329,8 +6307,9 @@ export type CreateUnitFileMutation = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -6443,8 +6422,9 @@ export type UpdateUnitFileMutation = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -6557,8 +6537,9 @@ export type DeleteUnitFileMutation = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -6909,8 +6890,9 @@ export type CreateUnitWordMutation = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -7014,8 +6996,9 @@ export type UpdateUnitWordMutation = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -7119,8 +7102,9 @@ export type DeleteUnitWordMutation = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -8565,9 +8549,9 @@ export type GetUnitQuery = {
       startedAt?: number | null,
     } | null,
     documents?:  {
-      __typename: "ModeldocumentConnection",
+      __typename: "ModelDocumentConnection",
       items:  Array< {
-        __typename: "document",
+        __typename: "Document",
         id: string,
         filename: string,
         s3Key: string,
@@ -8589,6 +8573,7 @@ export type GetUnitQuery = {
         _lastChangedAt: number,
       } | null >,
       nextToken?: string | null,
+      startedAt?: number | null,
     } | null,
     agentJobs?:  {
       __typename: "ModelAgentJobConnection",
@@ -8676,8 +8661,9 @@ export type ListUnitsQuery = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -8744,8 +8730,9 @@ export type SyncUnitsQuery = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -8937,7 +8924,7 @@ export type GetDocumentQueryVariables = {
 
 export type GetDocumentQuery = {
   getDocument?:  {
-    __typename: "document",
+    __typename: "Document",
     id: string,
     filename: string,
     s3Key: string,
@@ -8985,8 +8972,9 @@ export type GetDocumentQuery = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -9081,7 +9069,7 @@ export type ListDocumentsQuery = {
   listDocuments?:  {
     __typename: "ModelDocumentConnection",
     items:  Array< {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -9147,7 +9135,7 @@ export type SyncDocumentsQuery = {
   syncDocuments?:  {
     __typename: "ModelDocumentConnection",
     items:  Array< {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -9205,16 +9193,16 @@ export type SyncDocumentsQuery = {
 export type DocumentsByUnitIDQueryVariables = {
   unitID: string,
   sortDirection?: ModelSortDirection | null,
-  filter?: ModeldocumentFilterInput | null,
+  filter?: ModelDocumentFilterInput | null,
   limit?: number | null,
   nextToken?: string | null,
 };
 
 export type DocumentsByUnitIDQuery = {
   documentsByUnitID?:  {
-    __typename: "ModeldocumentConnection",
+    __typename: "ModelDocumentConnection",
     items:  Array< {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -9265,6 +9253,7 @@ export type DocumentsByUnitIDQuery = {
       _lastChangedAt: number,
     } | null >,
     nextToken?: string | null,
+    startedAt?: number | null,
   } | null,
 };
 
@@ -9280,7 +9269,7 @@ export type GetParsedContentQuery = {
     identityId?: string | null,
     documentID: string,
     document?:  {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -9365,7 +9354,7 @@ export type ListParsedContentsQuery = {
       identityId?: string | null,
       documentID: string,
       document?:  {
-        __typename: "document",
+        __typename: "Document",
         id: string,
         filename: string,
         s3Key: string,
@@ -9425,7 +9414,7 @@ export type SyncParsedContentsQuery = {
       identityId?: string | null,
       documentID: string,
       document?:  {
-        __typename: "document",
+        __typename: "Document",
         id: string,
         filename: string,
         s3Key: string,
@@ -9486,7 +9475,7 @@ export type ParsedContentsByDocumentIDQuery = {
       identityId?: string | null,
       documentID: string,
       document?:  {
-        __typename: "document",
+        __typename: "Document",
         id: string,
         filename: string,
         s3Key: string,
@@ -9543,7 +9532,7 @@ export type GetAgentJobQuery = {
     status: string,
     documentID?: string | null,
     document?:  {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -9633,8 +9622,9 @@ export type GetAgentJobQuery = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -9683,7 +9673,7 @@ export type ListAgentJobsQuery = {
       status: string,
       documentID?: string | null,
       document?:  {
-        __typename: "document",
+        __typename: "Document",
         id: string,
         filename: string,
         s3Key: string,
@@ -9764,7 +9754,7 @@ export type SyncAgentJobsQuery = {
       status: string,
       documentID?: string | null,
       document?:  {
-        __typename: "document",
+        __typename: "Document",
         id: string,
         filename: string,
         s3Key: string,
@@ -9846,7 +9836,7 @@ export type AgentJobsByDocumentIDQuery = {
       status: string,
       documentID?: string | null,
       document?:  {
-        __typename: "document",
+        __typename: "Document",
         id: string,
         filename: string,
         s3Key: string,
@@ -9928,7 +9918,7 @@ export type AgentJobsByUnitIDQuery = {
       status: string,
       documentID?: string | null,
       document?:  {
-        __typename: "document",
+        __typename: "Document",
         id: string,
         filename: string,
         s3Key: string,
@@ -10080,8 +10070,9 @@ export type GetQuestionUnitQuery = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -11213,8 +11204,9 @@ export type GetUnitFileQuery = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -11947,8 +11939,9 @@ export type GetUnitWordQuery = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -13326,9 +13319,9 @@ export type OnCreateUnitSubscription = {
       startedAt?: number | null,
     } | null,
     documents?:  {
-      __typename: "ModeldocumentConnection",
+      __typename: "ModelDocumentConnection",
       items:  Array< {
-        __typename: "document",
+        __typename: "Document",
         id: string,
         filename: string,
         s3Key: string,
@@ -13350,6 +13343,7 @@ export type OnCreateUnitSubscription = {
         _lastChangedAt: number,
       } | null >,
       nextToken?: string | null,
+      startedAt?: number | null,
     } | null,
     agentJobs?:  {
       __typename: "ModelAgentJobConnection",
@@ -13506,9 +13500,9 @@ export type OnUpdateUnitSubscription = {
       startedAt?: number | null,
     } | null,
     documents?:  {
-      __typename: "ModeldocumentConnection",
+      __typename: "ModelDocumentConnection",
       items:  Array< {
-        __typename: "document",
+        __typename: "Document",
         id: string,
         filename: string,
         s3Key: string,
@@ -13530,6 +13524,7 @@ export type OnUpdateUnitSubscription = {
         _lastChangedAt: number,
       } | null >,
       nextToken?: string | null,
+      startedAt?: number | null,
     } | null,
     agentJobs?:  {
       __typename: "ModelAgentJobConnection",
@@ -13686,9 +13681,9 @@ export type OnDeleteUnitSubscription = {
       startedAt?: number | null,
     } | null,
     documents?:  {
-      __typename: "ModeldocumentConnection",
+      __typename: "ModelDocumentConnection",
       items:  Array< {
-        __typename: "document",
+        __typename: "Document",
         id: string,
         filename: string,
         s3Key: string,
@@ -13710,6 +13705,7 @@ export type OnDeleteUnitSubscription = {
         _lastChangedAt: number,
       } | null >,
       nextToken?: string | null,
+      startedAt?: number | null,
     } | null,
     agentJobs?:  {
       __typename: "ModelAgentJobConnection",
@@ -13984,7 +13980,7 @@ export type OnCreateDocumentSubscriptionVariables = {
 
 export type OnCreateDocumentSubscription = {
   onCreateDocument?:  {
-    __typename: "document",
+    __typename: "Document",
     id: string,
     filename: string,
     s3Key: string,
@@ -14032,8 +14028,9 @@ export type OnCreateDocumentSubscription = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -14125,7 +14122,7 @@ export type OnUpdateDocumentSubscriptionVariables = {
 
 export type OnUpdateDocumentSubscription = {
   onUpdateDocument?:  {
-    __typename: "document",
+    __typename: "Document",
     id: string,
     filename: string,
     s3Key: string,
@@ -14173,8 +14170,9 @@ export type OnUpdateDocumentSubscription = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -14266,7 +14264,7 @@ export type OnDeleteDocumentSubscriptionVariables = {
 
 export type OnDeleteDocumentSubscription = {
   onDeleteDocument?:  {
-    __typename: "document",
+    __typename: "Document",
     id: string,
     filename: string,
     s3Key: string,
@@ -14314,8 +14312,9 @@ export type OnDeleteDocumentSubscription = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -14413,7 +14412,7 @@ export type OnCreateParsedContentSubscription = {
     identityId?: string | null,
     documentID: string,
     document?:  {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -14495,7 +14494,7 @@ export type OnUpdateParsedContentSubscription = {
     identityId?: string | null,
     documentID: string,
     document?:  {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -14577,7 +14576,7 @@ export type OnDeleteParsedContentSubscription = {
     identityId?: string | null,
     documentID: string,
     document?:  {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -14661,7 +14660,7 @@ export type OnCreateAgentJobSubscription = {
     status: string,
     documentID?: string | null,
     document?:  {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -14751,8 +14750,9 @@ export type OnCreateAgentJobSubscription = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -14798,7 +14798,7 @@ export type OnUpdateAgentJobSubscription = {
     status: string,
     documentID?: string | null,
     document?:  {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -14888,8 +14888,9 @@ export type OnUpdateAgentJobSubscription = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -14935,7 +14936,7 @@ export type OnDeleteAgentJobSubscription = {
     status: string,
     documentID?: string | null,
     document?:  {
-      __typename: "document",
+      __typename: "Document",
       id: string,
       filename: string,
       s3Key: string,
@@ -15025,8 +15026,9 @@ export type OnDeleteAgentJobSubscription = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -15148,8 +15150,9 @@ export type OnCreateQuestionUnitSubscription = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -15262,8 +15265,9 @@ export type OnUpdateQuestionUnitSubscription = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -15376,8 +15380,9 @@ export type OnDeleteQuestionUnitSubscription = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -16075,8 +16080,9 @@ export type OnCreateUnitFileSubscription = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -16189,8 +16195,9 @@ export type OnUpdateUnitFileSubscription = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -16303,8 +16310,9 @@ export type OnDeleteUnitFileSubscription = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -16655,8 +16663,9 @@ export type OnCreateUnitWordSubscription = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -16760,8 +16769,9 @@ export type OnUpdateUnitWordSubscription = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",
@@ -16865,8 +16875,9 @@ export type OnDeleteUnitWordSubscription = {
         startedAt?: number | null,
       } | null,
       documents?:  {
-        __typename: "ModeldocumentConnection",
+        __typename: "ModelDocumentConnection",
         nextToken?: string | null,
+        startedAt?: number | null,
       } | null,
       agentJobs?:  {
         __typename: "ModelAgentJobConnection",

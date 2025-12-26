@@ -1511,6 +1511,7 @@ export const getUnit = /* GraphQL */ `query GetUnit($id: ID!) {
         __typename
       }
       nextToken
+      startedAt
       __typename
     }
     agentJobs {
@@ -1597,6 +1598,7 @@ export const listUnits = /* GraphQL */ `query ListUnits(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -1668,6 +1670,7 @@ export const syncUnits = /* GraphQL */ `query SyncUnits(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -1902,6 +1905,7 @@ export const getDocument = /* GraphQL */ `query GetDocument($id: ID!) {
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -2133,7 +2137,7 @@ export const syncDocuments = /* GraphQL */ `query SyncDocuments(
 export const documentsByUnitID = /* GraphQL */ `query DocumentsByUnitID(
   $unitID: ID!
   $sortDirection: ModelSortDirection
-  $filter: ModeldocumentFilterInput
+  $filter: ModelDocumentFilterInput
   $limit: Int
   $nextToken: String
 ) {
@@ -2196,6 +2200,7 @@ export const documentsByUnitID = /* GraphQL */ `query DocumentsByUnitID(
       __typename
     }
     nextToken
+    startedAt
     __typename
   }
 }
@@ -2576,6 +2581,7 @@ export const getAgentJob = /* GraphQL */ `query GetAgentJob($id: ID!) {
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -3043,6 +3049,7 @@ export const getQuestionUnit = /* GraphQL */ `query GetQuestionUnit($id: ID!) {
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -4236,6 +4243,7 @@ export const getUnitFile = /* GraphQL */ `query GetUnitFile($id: ID!) {
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -5010,6 +5018,7 @@ export const getUnitWord = /* GraphQL */ `query GetUnitWord($id: ID!) {
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {

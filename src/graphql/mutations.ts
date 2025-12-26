@@ -8,13 +8,6 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
-export const analyzePdf = /* GraphQL */ `mutation AnalyzePdf($documentId: ID!) {
-  analyzePdf(documentId: $documentId)
-}
-` as GeneratedMutation<
-  APITypes.AnalyzePdfMutationVariables,
-  APITypes.AnalyzePdfMutation
->;
 export const createSectionGroup = /* GraphQL */ `mutation CreateSectionGroup($name: String!, $description: String!) {
   createSectionGroup(name: $name, description: $description)
 }
@@ -1393,6 +1386,7 @@ export const createUnit = /* GraphQL */ `mutation CreateUnit(
         __typename
       }
       nextToken
+      startedAt
       __typename
     }
     agentJobs {
@@ -1574,6 +1568,7 @@ export const updateUnit = /* GraphQL */ `mutation UpdateUnit(
         __typename
       }
       nextToken
+      startedAt
       __typename
     }
     agentJobs {
@@ -1755,6 +1750,7 @@ export const deleteUnit = /* GraphQL */ `mutation DeleteUnit(
         __typename
       }
       nextToken
+      startedAt
       __typename
     }
     agentJobs {
@@ -2082,6 +2078,7 @@ export const createDocument = /* GraphQL */ `mutation CreateDocument(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -2224,6 +2221,7 @@ export const updateDocument = /* GraphQL */ `mutation UpdateDocument(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -2366,6 +2364,7 @@ export const deleteDocument = /* GraphQL */ `mutation DeleteDocument(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -2807,6 +2806,7 @@ export const createAgentJob = /* GraphQL */ `mutation CreateAgentJob(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -2945,6 +2945,7 @@ export const updateAgentJob = /* GraphQL */ `mutation UpdateAgentJob(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -3083,6 +3084,7 @@ export const deleteAgentJob = /* GraphQL */ `mutation DeleteAgentJob(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -3207,6 +3209,7 @@ export const createQuestionUnit = /* GraphQL */ `mutation CreateQuestionUnit(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -3322,6 +3325,7 @@ export const updateQuestionUnit = /* GraphQL */ `mutation UpdateQuestionUnit(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -3437,6 +3441,7 @@ export const deleteQuestionUnit = /* GraphQL */ `mutation DeleteQuestionUnit(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -4143,6 +4148,7 @@ export const createUnitFile = /* GraphQL */ `mutation CreateUnitFile(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -4258,6 +4264,7 @@ export const updateUnitFile = /* GraphQL */ `mutation UpdateUnitFile(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -4373,6 +4380,7 @@ export const deleteUnitFile = /* GraphQL */ `mutation DeleteUnitFile(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -4729,6 +4737,7 @@ export const createUnitWord = /* GraphQL */ `mutation CreateUnitWord(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -4835,6 +4844,7 @@ export const updateUnitWord = /* GraphQL */ `mutation UpdateUnitWord(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -4941,6 +4951,7 @@ export const deleteUnitWord = /* GraphQL */ `mutation DeleteUnitWord(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {

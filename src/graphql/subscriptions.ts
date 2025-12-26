@@ -1120,6 +1120,7 @@ export const onCreateUnit = /* GraphQL */ `subscription OnCreateUnit(
         __typename
       }
       nextToken
+      startedAt
       __typename
     }
     agentJobs {
@@ -1301,6 +1302,7 @@ export const onUpdateUnit = /* GraphQL */ `subscription OnUpdateUnit(
         __typename
       }
       nextToken
+      startedAt
       __typename
     }
     agentJobs {
@@ -1482,6 +1484,7 @@ export const onDeleteUnit = /* GraphQL */ `subscription OnDeleteUnit(
         __typename
       }
       nextToken
+      startedAt
       __typename
     }
     agentJobs {
@@ -1809,6 +1812,7 @@ export const onCreateDocument = /* GraphQL */ `subscription OnCreateDocument(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -1951,6 +1955,7 @@ export const onUpdateDocument = /* GraphQL */ `subscription OnUpdateDocument(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -2093,6 +2098,7 @@ export const onDeleteDocument = /* GraphQL */ `subscription OnDeleteDocument(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -2534,6 +2540,7 @@ export const onCreateAgentJob = /* GraphQL */ `subscription OnCreateAgentJob(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -2672,6 +2679,7 @@ export const onUpdateAgentJob = /* GraphQL */ `subscription OnUpdateAgentJob(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -2810,6 +2818,7 @@ export const onDeleteAgentJob = /* GraphQL */ `subscription OnDeleteAgentJob(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -2934,6 +2943,7 @@ export const onCreateQuestionUnit = /* GraphQL */ `subscription OnCreateQuestion
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -3049,6 +3059,7 @@ export const onUpdateQuestionUnit = /* GraphQL */ `subscription OnUpdateQuestion
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -3164,6 +3175,7 @@ export const onDeleteQuestionUnit = /* GraphQL */ `subscription OnDeleteQuestion
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -3870,6 +3882,7 @@ export const onCreateUnitFile = /* GraphQL */ `subscription OnCreateUnitFile(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -3985,6 +3998,7 @@ export const onUpdateUnitFile = /* GraphQL */ `subscription OnUpdateUnitFile(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -4100,6 +4114,7 @@ export const onDeleteUnitFile = /* GraphQL */ `subscription OnDeleteUnitFile(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -4456,6 +4471,7 @@ export const onCreateUnitWord = /* GraphQL */ `subscription OnCreateUnitWord(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -4562,6 +4578,7 @@ export const onUpdateUnitWord = /* GraphQL */ `subscription OnUpdateUnitWord(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
@@ -4668,6 +4685,7 @@ export const onDeleteUnitWord = /* GraphQL */ `subscription OnDeleteUnitWord(
       }
       documents {
         nextToken
+        startedAt
         __typename
       }
       agentJobs {
