@@ -59,7 +59,7 @@ ul li.editor-listItem.editor-nested-listitem {
     cursor: grab;
     opacity: 0;
     position: absolute;
-    left: 0;
+    left: 4px;
     top: 0;
     will-change: transform;
   }

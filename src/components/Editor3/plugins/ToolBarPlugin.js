@@ -387,7 +387,7 @@ function LayoutModal({editor}) {
     return (
         <>
         <MenuItem
-        
+        tabIndex={-1}
         onClick={handleOpen}
         >
 
@@ -432,6 +432,7 @@ function LayoutModal({editor}) {
                                     key={label}
                                     value={value}
                                     label={label}
+                                    tabIndex={-1}
                                     onClick={() => {
                                         setLayout(value);
                                         handleMenuClose();
@@ -789,6 +790,7 @@ const StatusSelect = () => {
 
                         <MenuItem
                             value="DRAFT"
+                            tabIndex={-1}
                         >
                             <DraftIcon />&nbsp;
                             <span className='text'>Draft</span>
@@ -796,6 +798,7 @@ const StatusSelect = () => {
 
                         <MenuItem
                             value="PUBLISHED"
+                            tabIndex={-1}
                         >
                             <PublishedIcon />&nbsp;
                             <span className='text'>Published</span>
@@ -803,6 +806,7 @@ const StatusSelect = () => {
 
                         <MenuItem
                             value="ARCHIVED"
+                            tabIndex={-1}
                         >
                             <ArchivedIcon />&nbsp;
                             <span className='text'>Archived</span>
@@ -857,43 +861,64 @@ const TextAlignmentDropdown = ({
             // buttonAriaLabel="Formatting options for text alignment"
             >
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {
                         activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left');
+                        activeEditor.focus();
+                        handleClose();
                     }}
+                    label="Left Align"
                 >
                     <FormatAlignLeftIcon />&nbsp;
                     <span className="text">Left Align</span>
                 </MenuItem>
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {
                         activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center');
+                        activeEditor.focus();
+                        handleClose();
                     }}
+                    label="Center Align"
                 >
                     <FormatAlignCenterIcon />&nbsp;
                     <span className="text">Center Align</span>
                 </MenuItem>
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {
                         activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right');
+                        activeEditor.focus();
+                        handleClose();
                     }}
+                    label="Right Align"
                 >
                     <FormatAlignRightIcon />&nbsp;
                     <span className="text">Right Align</span>
                 </MenuItem>
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {
                         activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'justify');
+                        activeEditor.focus();
+                        handleClose();
                     }}
+                    label="Justify Align"
                 >
                     <FormatAlignJustifyIcon />&nbsp;
                     <span className="text">Justify Align</span>
                 </MenuItem>
                 <Divider />
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {
                         activeEditor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined);
+                        activeEditor.focus();
+                        handleClose();
                     }}
-                    className="item">
+                    className="item"
+                    label={isRTL ? 'Outdent' : 'Indent'}
+                    >
                     {isRTL ? (
                         <FormatIndentIncreaseIcon />
                     ) : (
@@ -903,10 +928,15 @@ const TextAlignmentDropdown = ({
                     <span className="text">Outdent</span>
                 </MenuItem>
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {
                         activeEditor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
+                        activeEditor.focus();
+                        handleClose();
                     }}
-                    className="item">
+                    className="item"
+                    label={isRTL ? 'Outdent' : 'Indent'}
+                    >
                     <i className={'icon ' + (isRTL ? 'outdent' : 'indent')} />
                     {isRTL ? (
                         <FormatIndentDecreaseIcon />
@@ -1021,6 +1051,7 @@ const InsertNodeDropDown = ({
             >
 
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {
                         setTabValue(0)
                         setOpenTab(true)
@@ -1035,6 +1066,7 @@ const InsertNodeDropDown = ({
                 </MenuItem>
 
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {
                         setTabValue(0)
                         setOpenTab(true)
@@ -1049,6 +1081,7 @@ const InsertNodeDropDown = ({
                 </MenuItem>
 
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {
                         editor.dispatchCommand(
                             INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND,
@@ -1066,6 +1099,7 @@ const InsertNodeDropDown = ({
                   */}
 
                   <MenuItem
+                    tabIndex={-1}
                     onClick={() => {    
                         editor.dispatchCommand(
                             INSERT_ANSWER_BLOCK_COMMAND,
@@ -1080,6 +1114,7 @@ const InsertNodeDropDown = ({
                 </MenuItem>
 
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {    
                         editor.dispatchCommand(
                             INSERT_CUSTOM_ANSWER_BLOCK_COMMAND,
@@ -1113,6 +1148,7 @@ const InsertNodeDropDown = ({
 
 
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {
                         editor.dispatchCommand(
                             INSERT_PLAYLIST_COMMAND,
@@ -1126,6 +1162,7 @@ const InsertNodeDropDown = ({
                 </MenuItem>
 
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {
                         editor.dispatchCommand(
                             INSERT_QUIZ_COMMAND,
@@ -1139,6 +1176,7 @@ const InsertNodeDropDown = ({
                 </MenuItem>
 
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {
                         editor.dispatchCommand(
                             INSERT_HORIZONTAL_RULE_COMMAND,
@@ -1214,11 +1252,14 @@ function TextFormatDropDown({
                 anchorEl={anchorEl}
             >
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {
                         activeEditor.dispatchCommand(
                             FORMAT_TEXT_COMMAND,
                             'strikethrough',
                         );
+                        activeEditor.focus();
+                        handleClose();
                     }}
                     className={isStrikethrough ? 'active' : ''}
                     title="Strikethrough"
@@ -1228,8 +1269,11 @@ function TextFormatDropDown({
 
                 </MenuItem>
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {
                         activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, 'subscript');
+                        activeEditor.focus();
+                        handleClose();
                     }}
                     className={isSubscript ? 'active' : ''}
                     title="Subscript"
@@ -1238,11 +1282,14 @@ function TextFormatDropDown({
                     <span className="text">Subscript</span>
                 </MenuItem>
                 <MenuItem
+                    tabIndex={-1}
                     onClick={() => {
                         activeEditor.dispatchCommand(
                             FORMAT_TEXT_COMMAND,
                             'superscript',
                         );
+                        activeEditor.focus();
+                        handleClose();
                     }}
                     className={isSuperscript ? 'active' : ''}
                     title="Superscript"
@@ -1251,7 +1298,12 @@ function TextFormatDropDown({
                     <span className="text">Superscript</span>
                 </MenuItem>
                 <MenuItem
-                    onClick={clearFormatting}
+                    tabIndex={-1}
+                    onClick={() => {
+                        clearFormatting();
+                        activeEditor.focus();
+                        handleClose();
+                    }}
                     className="item"
                     title="Clear text formatting"
                     aria-label="Clear all text formatting">
@@ -1288,6 +1340,7 @@ function BlockFormatDropDown({
                 $setBlocksType(selection, () => $createParagraphNode());
             }
         });
+        editor.focus();
     };
 
     const formatHeading = (headingSize) => {
@@ -1302,6 +1355,7 @@ function BlockFormatDropDown({
                 }
             });
         }
+        editor.focus();
     };
 
     const formatWordList = () => {
@@ -1310,6 +1364,7 @@ function BlockFormatDropDown({
         } else {
             editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
         }
+        editor.focus();
     };
 
     const formatBulletList = () => {
@@ -1318,6 +1373,7 @@ function BlockFormatDropDown({
         } else {
             editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
         }
+        editor.focus();
     };
 
     const formatCheckList = () => {
@@ -1326,6 +1382,7 @@ function BlockFormatDropDown({
         } else {
             editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
         }
+        editor.focus();
     };
 
     const formatNumberedList = () => {
@@ -1334,6 +1391,7 @@ function BlockFormatDropDown({
         } else {
             editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
         }
+        editor.focus();
     };
 
     const formatQuote = () => {
@@ -1348,6 +1406,7 @@ function BlockFormatDropDown({
                 }
             });
         }
+        editor.focus();
     };
 
     const formatCode = () => {
@@ -1372,6 +1431,8 @@ function BlockFormatDropDown({
                 }
             });
         }
+        // Use requestAnimationFrame to ensure focus happens after DOM updates are complete
+        requestAnimationFrame(() => editor.focus());
     };
 
     return (
@@ -1420,6 +1481,8 @@ function BlockFormatDropDown({
                     <MenuItem
                         value="paragraph"
                         onClick={formatParagraph}
+                        name='paragraph format'
+                        tabIndex={-1}
                     >
                         <ParagraphIcon />&nbsp;
                         <span className='text'>Normal</span>
@@ -1427,6 +1490,8 @@ function BlockFormatDropDown({
                     <MenuItem
                         value="h1"
                         onClick={() => formatHeading('h1')}
+                        name="h1"
+                        tabIndex={-1}
                     >
                         <span className='icon'>H1</span>&nbsp;
                         <span className='menu-htext'>Heading 1</span>
@@ -1434,6 +1499,8 @@ function BlockFormatDropDown({
                     <MenuItem
                         value='h2'
                         onClick={() => formatHeading('h2')}
+                        name="h2"   
+                        tabIndex={-1}
                     >
                         <span className='icon'>H2</span>&nbsp;
                         <span className='menu-htext'>Heading 2</span>
@@ -1441,6 +1508,8 @@ function BlockFormatDropDown({
                     <MenuItem
                         value='h3'
                         onClick={() => formatHeading('h3')}
+                        name="h3"
+                        tabIndex={-1}
                     >
                         <span className='icon'>H3</span>&nbsp;
                         <span className='menu-htext'>Heading 3</span>
@@ -1452,6 +1521,8 @@ function BlockFormatDropDown({
                             console.log('bullet')
                             formatBulletList()
                         }}
+                        name="bullet"
+                        tabIndex={-1}
                     >
                         <FormatListBulletedIcon />&nbsp;
                         <span className='text'>Bulleted</span>
@@ -1459,6 +1530,8 @@ function BlockFormatDropDown({
                     <MenuItem
                         value='number'
                         onClick={formatNumberedList}
+                        name="number"
+                        tabIndex={-1}
                     >
                         <FormatListNumberedIcon />&nbsp;
                         <span className="text">Numbered</span>
@@ -1476,14 +1549,18 @@ function BlockFormatDropDown({
                 </MenuItem> */}
                     <MenuItem
                         value='quote'
+                        name="quote"
                         onClick={formatQuote}
+                        tabIndex={-1}
                     >
                         <FormatQuoteIcon />&nbsp;
                         <span className="text">Quote</span>
                     </MenuItem>
                     <MenuItem
                         value='code'
+                        name="code"
                         onClick={formatCode}
+                        tabIndex={-1}
                     >
                         <CodeIcon />&nbsp;
                         <span className="text">Code Block</span>
@@ -1521,6 +1598,7 @@ function FontDropDown({
                     });
                 }
             });
+            editor.focus();
             handleClose();
         },
 
@@ -1568,6 +1646,7 @@ function FontDropDown({
                 {(style === 'font-family' ? FONT_FAMILY_OPTIONS : FONT_SIZE_OPTIONS).map(
                     ([option, text]) => (
                         <MenuItem
+                            tabIndex={-1}
                             onClick={() => handleClick(option)}
                             key={option}>
                             {style === 'font-family' ? (

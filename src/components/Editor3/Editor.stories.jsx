@@ -1,5 +1,7 @@
 import React from 'react';
+import { within, waitFor, screen } from 'storybook/test';
 import Editor, { Workbook } from './index';
+import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
 import { seedMockUnit } from '../../../.storybook/__mocks__/aws-amplify-datastore';
 
 // Verify models are loading - this will show in console
@@ -88,6 +90,179 @@ export const EmptyEditor = {
   render: () => <Editor />,
   parameters: {
     unitId: 'empty-editor-id',
+  },
+  play: async ({ canvas, userEvent }) => {
+    // Wait for editor to load
+    const editorContent = await canvas.findByRole('textbox');
+    await userEvent.click(editorContent);
+    
+    // Type heading 1 text
+    await userEvent.keyboard('Heading 1');
+    
+    // Open Block Format dropdown and select H1
+    const blockFormatSelect = canvas.getByRole('combobox', { name: /block format/i });
+    await userEvent.click(blockFormatSelect);
+    
+    // Options render in portal, use screen to find them
+    const h1Option = await screen.findByRole('option', { name: /Heading 1/i });
+    await userEvent.click(h1Option);
+    await userEvent.keyboard('{Enter}');
+    
+    // Type heading 2 text
+    await userEvent.keyboard('Heading 2');
+    
+    // Open Block Format dropdown and select H2
+    await userEvent.click(blockFormatSelect);
+    const h2Option = await screen.findByRole('option', { name: /Heading 2/i });
+    await userEvent.click(h2Option);
+    await userEvent.keyboard('{Enter}');
+    
+    // Type heading 3 text
+    await userEvent.keyboard('Heading 3');
+    
+    // Open Block Format dropdown and select H3
+    await userEvent.click(blockFormatSelect);
+    const h3Option = await screen.findByRole('option', { name: /Heading 3/i });
+    await userEvent.click(h3Option);
+    await userEvent.keyboard('{Enter}');
+
+    // Add a bulleted list
+    await userEvent.keyboard('{Enter}');
+    await userEvent.click(blockFormatSelect);
+    const bulletBtn = await screen.findByRole('option', { name: /Bulleted/i });
+    await userEvent.click(bulletBtn);
+    await userEvent.keyboard('First list item{Enter}Second list item{Enter}');
+    const alignMenu = canvas.getByRole('button', { name: /Align/i });
+    await userEvent.click(alignMenu);
+    const indentBtn = await screen.findByRole('menuitem', { name: /Indent/i });
+    await userEvent.click(indentBtn);
+    await userEvent.keyboard('Third list item{Enter}');
+    await userEvent.click(alignMenu);
+    const outdentBtn = await screen.findByRole('menuitem', { name: /Outdent/i });
+    await userEvent.click(outdentBtn);
+    await userEvent.keyboard('Another Item{Enter}{Enter}{Enter}');
+
+    // Add a numbered list
+    await userEvent.click(blockFormatSelect);
+    const numberBtn = await screen.findByRole('option', { name: /Numbered/i });
+    await userEvent.click(numberBtn);
+    await userEvent.keyboard('First numbered item{Enter}');
+    await userEvent.click(alignMenu);
+    const indentBtn2 = await screen.findByRole('menuitem', { name: /Indent/i });
+    await userEvent.click(indentBtn2);
+    await userEvent.keyboard('Second numbered item{Enter}');
+    await userEvent.click(alignMenu);
+    const indentBtn3 = await screen.findByRole('menuitem', { name: /Indent/i });
+    await userEvent.click(indentBtn3);
+    await userEvent.keyboard('Third numbered item{Enter}{Enter}{Enter}');
+
+    // Add a quote
+    await userEvent.keyboard('{Enter}');
+    await userEvent.click(blockFormatSelect);
+    const quoteBtn = await screen.findByRole('option', { name: /Quote/i });
+    await userEvent.click(quoteBtn);
+    await userEvent.keyboard('This is an inspiring quote.{Enter}{Enter}');
+
+    // Add code block
+    await userEvent.click(blockFormatSelect);
+    const codeBtn = await screen.findByRole('option', { name: /Code Block/i });
+    await userEvent.click(codeBtn);
+    await userEvent.keyboard('function example() {{{Enter}  console.log("Hello");{Enter}}{Enter}');
+    // delete the two spaces at start of second line
+    await userEvent.keyboard('{Backspace}{Backspace}');
+    await userEvent.keyboard('{Enter}{Enter}{Enter}');
+    // Add a paragraph
+    await userEvent.keyboard('This is a sample paragraph added at the end.');
+    
+    // hit enter, click bold button, type bold text, click bold button again to toggle off
+    await userEvent.keyboard('{Enter}');
+    const boldButton = await canvas.getByRole('button', { name: /Bold/i });
+    await userEvent.click(boldButton);
+    await userEvent.keyboard('This text is bold.');
+    await userEvent.click(boldButton);
+
+    // Italic text
+    await userEvent.keyboard('{Enter}');
+    const italicButton = await canvas.getByRole('button', { name: /Italic/i });
+    await userEvent.click(italicButton);
+    await userEvent.keyboard('This text is italic.');
+    await userEvent.click(italicButton);
+
+    // Underlined text
+    await userEvent.keyboard('{Enter}');
+    const underlineButton = await canvas.getByRole('button', { name: /Underline/i });
+    await userEvent.click(underlineButton);
+    await userEvent.keyboard('This text is underlined.');
+    await userEvent.click(underlineButton);
+
+    // this is bold and italic text and underline
+    await userEvent.keyboard('{Enter}');
+    await userEvent.click(boldButton);
+    await userEvent.click(italicButton);
+    await userEvent.click(underlineButton);
+    await userEvent.keyboard('This text is bold, italic, and underlined.');
+    await userEvent.click(boldButton);
+    await userEvent.click(italicButton);
+    await userEvent.click(underlineButton);
+
+    // Strikethrough text
+    await userEvent.keyboard('{Enter}');
+    // open Text Format dropdown
+    const textFormatSelect = canvas.getByRole('button', { name: /Formatting options for text styles/i });
+    await userEvent.click(textFormatSelect);
+    let strikethroughOption = await screen.findByRole('menuitem', { name: /Strikethrough/i });
+    await userEvent.click(strikethroughOption);
+    await userEvent.keyboard('This text is strikethrough.');
+    await userEvent.click(textFormatSelect);
+    strikethroughOption = await screen.findByRole('menuitem', { name: /Strikethrough/i });
+    await userEvent.click(strikethroughOption);
+
+    // subscript text
+    await userEvent.keyboard('{Space}');
+    await userEvent.click(textFormatSelect);
+    let subscriptOption = await screen.findByRole('menuitem', { name: /Subscript/i });
+    await userEvent.click(subscriptOption);
+    await userEvent.keyboard('This text is subscript. ');
+    await userEvent.click(textFormatSelect);
+    subscriptOption = await screen.findByRole('menuitem', { name: /Subscript/i });
+    await userEvent.click(subscriptOption);
+    
+    // superscript text
+    await userEvent.keyboard('{Space}');
+    await userEvent.click(textFormatSelect);
+    let superscriptOption = await screen.findByRole('menuitem', { name: /Superscript/i });
+    await userEvent.click(superscriptOption);
+    await userEvent.keyboard(' This text is superscript.');
+    await userEvent.click(textFormatSelect);
+    superscriptOption = await screen.findByRole('menuitem', { name: /Superscript/i });
+    await userEvent.click(superscriptOption);
+
+    // left align
+    await userEvent.keyboard('{Enter}');
+    await userEvent.click(alignMenu);
+    const leftAlignBtn = await screen.findByRole('menuitem', { name: /Left Align/i });
+    await userEvent.click(leftAlignBtn);
+    await userEvent.keyboard('This text is left-aligned.{Enter}{Enter}');
+    // center align
+    await userEvent.click(alignMenu);
+    const centerAlignBtn = await screen.findByRole('menuitem', { name: /Center Align/i });
+    await userEvent.click(centerAlignBtn);
+    await userEvent.keyboard('This text is center-aligned.{Enter}{Enter}');
+    // right align
+    await userEvent.click(alignMenu);
+    const rightAlignBtn = await screen.findByRole('menuitem', { name: /Right Align/i });
+    await userEvent.click(rightAlignBtn);
+    await userEvent.keyboard('This text is right-aligned.{Enter}{Enter}');
+    // justify align
+    await userEvent.click(alignMenu);
+    const justifyAlignBtn = await screen.findByRole('menuitem', { name: /Justify Align/i });
+    await userEvent.click(justifyAlignBtn);
+    await userEvent.keyboard('This text is justified. It will stretch across the full width of the container, creating even edges on both sides. This is particularly useful for formal documents or publications.{Enter}{Enter}');
+
+    // Make a link by typing out the URL
+    // make a link with selected text
+    // 
+
   },
 };
 

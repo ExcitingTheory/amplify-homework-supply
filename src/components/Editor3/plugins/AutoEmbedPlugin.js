@@ -307,30 +307,7 @@ export default function AutoEmbedPlugin() {
         menuRenderFn={(
           anchorElementRef,
           {selectedIndex, options, selectOptionAndCleanUp, setHighlightedIndex},
-        ) =>
-          anchorElementRef.current
-            ? ReactDOM.createPortal(
-                <div
-                  className="typeahead-popover auto-embed-menu"
-                  style={{
-                    marginLeft: anchorElementRef.current.style.width,
-                    width: 200,
-                  }}>
-                  <AutoEmbedMenu
-                    options={options}
-                    selectedItemIndex={selectedIndex}
-                    onOptionClick={(option, index) => {
-                      setHighlightedIndex(index);
-                      selectOptionAndCleanUp(option);
-                    }}
-                    onOptionMouseEnter={(index) => {
-                      setHighlightedIndex(index);
-                    }}
-                  />
-                </div>,
-                anchorElementRef.current,
-              )
-            : null
+        ) => null // Disabled - using FloatingLinkEditor for YouTube embeds instead
         }
       />
     </>

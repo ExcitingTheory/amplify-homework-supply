@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { userEvent, within, waitFor, expect } from 'storybook/test';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -316,6 +317,132 @@ export const WithEditor = {
         story: 'FileManager integrated with the Lexical editor. Click on files to insert them into the editor content. Demonstrates drag-and-drop upload, file organization by type, and AI generation capabilities.',
       },
     },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for FileManager to load
+    await waitFor(() => {
+      return canvasElement.querySelector('[aria-label=\"Search\"]') !== null;
+    }, { timeout: 3000 });
+
+    // Test search functionality
+    const searchInput = canvasElement.querySelector('input[type=\"text\"]');
+    if (searchInput) {
+      await userEvent.click(searchInput);
+      await userEvent.keyboard('audio');
+      
+      // Click search button
+      const searchButton = canvasElement.querySelector('[aria-label=\"Search\"]');
+      if (searchButton) {
+        await userEvent.click(searchButton);
+        await waitFor(() => true, { timeout: 500 });
+      }
+      
+      // Clear search
+      await userEvent.clear(searchInput);
+    }
+
+    // Expand audio files category
+    await waitFor(async () => {
+      const audioCategory = Array.from(canvasElement.querySelectorAll('[role=\"treeitem\"]'))
+        .find(el => el.textContent.includes('Audio'));
+      
+      if (audioCategory) {
+        // Check if it's collapsed
+        const isExpanded = audioCategory.getAttribute('aria-expanded') === 'true';
+        if (!isExpanded) {
+          await userEvent.click(audioCategory);
+        }
+        return true;
+      }
+      return false;
+    }, { timeout: 2000, onTimeout: () => console.log('Audio category not found') });
+
+    // Wait for files to appear
+    await waitFor(() => true, { timeout: 500 });
+
+    // Click on an audio file to insert it into editor
+    await waitFor(async () => {
+      const addButtons = canvasElement.querySelectorAll('[aria-label=\"Add\"], button[title*=\"insert\" i]');
+      if (addButtons.length > 0) {
+        // Click first add button
+        await userEvent.click(addButtons[0]);
+        
+        // Verify it was added to editor
+        await waitFor(() => {
+          const editorContent = canvasElement.querySelector('[contenteditable=\"true\"]');
+          return editorContent && editorContent.children.length > 0;
+        }, { timeout: 1000 });
+        
+        return true;
+      }
+      return false;
+    }, { timeout: 2000, onTimeout: () => console.log('Add buttons not found') });
+
+    // Expand images category
+    await waitFor(async () => {
+      const imageCategory = Array.from(canvasElement.querySelectorAll('[role=\"treeitem\"]'))
+        .find(el => el.textContent.includes('Image'));
+      
+      if (imageCategory) {
+        const isExpanded = imageCategory.getAttribute('aria-expanded') === 'true';
+        if (!isExpanded) {
+          await userEvent.click(imageCategory);
+        }
+        return true;
+      }
+      return false;
+    }, { timeout: 2000, onTimeout: () => console.log('Image category not found') });
+
+    await waitFor(() => true, { timeout: 500 });
+
+    // Click on an image file to insert it
+    await waitFor(async () => {
+      // Look for image add buttons
+      const imageTreeItems = Array.from(canvasElement.querySelectorAll('[role=\"treeitem\"]'))
+        .filter(el => el.querySelector('img'));
+      
+      if (imageTreeItems.length > 0) {
+        const addButton = imageTreeItems[0].querySelector('button[aria-label=\"Add\"]');
+        if (addButton) {
+          await userEvent.click(addButton);
+          return true;
+        }
+      }
+      return false;
+    }, { timeout: 2000, onTimeout: () => console.log('Image add button not found') });
+
+    // Test AI generation buttons if present
+    await waitFor(async () => {
+      const generateButtons = Array.from(canvasElement.querySelectorAll('button'))
+        .filter(btn => btn.textContent.includes('Generate') || btn.querySelector('[data-testid*=\"AutoAwesome\"]'));
+      
+      if (generateButtons.length > 0) {
+        // Click first generate button
+        await userEvent.click(generateButtons[0]);
+        
+        // Wait for modal/form to appear
+        await waitFor(() => {
+          const modal = canvasElement.querySelector('[role=\"dialog\"], [role=\"presentation\"]');
+          return modal !== null;
+        }, { timeout: 1000, onTimeout: () => console.log('Generate modal not found') });
+        
+        // Close modal by pressing Escape
+        await userEvent.keyboard('{Escape}');
+        
+        return true;
+      }
+      return false;
+    }, { timeout: 2000, onTimeout: () => console.log('Generate buttons not found') });
+
+    // Scroll through the file list
+    const fileList = canvasElement.querySelector('[role=\"tree\"]')?.parentElement;
+    if (fileList) {
+      fileList.scrollTop = 100;
+      await waitFor(() => true, { timeout: 300 });
+      fileList.scrollTop = 0;
+    }
   },
 };
 

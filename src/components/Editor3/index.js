@@ -55,6 +55,8 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
 
 import ToolBarPlugin from './plugins/ToolBarPlugin';
+import CodeHighlightPlugin from './plugins/CodeHighlightPlugin';
+import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
 
 
 import UnitContext from '../../context/unitContext';
@@ -433,6 +435,8 @@ export default function Editor() {
             <AutoFocusPlugin />
             <CheckListPlugin />
             <ClearEditorPlugin />
+            <CodeHighlightPlugin />
+            <CodeActionMenuPlugin />
             <HashtagPlugin />
             <HistoryPlugin />
             <HorizontalRulePlugin />
@@ -524,6 +528,8 @@ export default function Editor() {
                       style={{
                         margin: '0',
                         padding: '0',
+                        paddingLeft: '40px',
+                        position: 'relative',
                         // marginTop: '3.3rem',
                       }}
                     >

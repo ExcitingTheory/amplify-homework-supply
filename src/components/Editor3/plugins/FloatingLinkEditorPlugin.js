@@ -38,7 +38,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CheckIcon from '@mui/icons-material/Check';
 import LinkIcon from '@mui/icons-material/Link';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import CloseIcon from '@mui/icons-material/Close';
@@ -64,29 +64,55 @@ export function setFloatingElemPositionForLinkEditor(
 
     if (targetRect === null || !scrollerElem) {
         floatingElem.style.opacity = '0';
-        floatingElem.style.transform = 'translate(-10000px, -10000px)';
+        floatingElem.style.display = 'none';
+        floatingElem.style.visibility = 'hidden';
+        floatingElem.style.boxShadow = 'none';
+        floatingElem.style.border = 'none';
+        floatingElem.style.outline = 'none';
+        floatingElem.style.borderRadius = '0';
         return;
     }
+
+    // Make element visible but transparent to measure it
+    floatingElem.style.opacity = '0';
+    floatingElem.style.display = 'flex';
+    floatingElem.style.visibility = 'visible';
 
     const floatingElemRect = floatingElem.getBoundingClientRect();
     const anchorElementRect = anchorElem.getBoundingClientRect();
     const editorScrollerRect = scrollerElem.getBoundingClientRect();
 
-    let top = targetRect.top - verticalGap;
+    // Start by positioning below the link
+    let top = targetRect.bottom + verticalGap;
     let left = targetRect.left - horizontalOffset;
 
-    if (top < editorScrollerRect.top) {
-        top += floatingElemRect.height + targetRect.height + verticalGap * 2;
-    }
-
-    if (left + floatingElemRect.width > editorScrollerRect.right) {
-        left = editorScrollerRect.right - floatingElemRect.width - horizontalOffset;
-    }
-
+    // Convert to relative coordinates early
     top -= anchorElementRect.top;
     left -= anchorElementRect.left;
 
+    // Calculate the relative bounds of the scroller
+    const scrollerTop = editorScrollerRect.top - anchorElementRect.top;
+    const scrollerLeft = editorScrollerRect.left - anchorElementRect.left;
+    const scrollerRight = editorScrollerRect.right - anchorElementRect.left;
+    const scrollerBottom = editorScrollerRect.bottom - anchorElementRect.top;
+
+    // If it would go below the bottom, position it above the link instead
+    if (top + floatingElemRect.height > scrollerBottom) {
+        const targetTop = targetRect.top - anchorElementRect.top;
+        top = targetTop - floatingElemRect.height - verticalGap;
+    }
+
+    // Clamp to container bounds
+    top = Math.max(scrollerTop, Math.min(top, scrollerBottom - floatingElemRect.height));
+    left = Math.max(scrollerLeft, Math.min(left, scrollerRight - floatingElemRect.width));
+
     floatingElem.style.opacity = '1';
+    floatingElem.style.display = 'flex';
+    floatingElem.style.visibility = 'visible';
+    floatingElem.style.boxShadow = '0 5px 10px rgba(0, 0, 0, 0.3)';
+    floatingElem.style.border = '1px solid #333';
+    floatingElem.style.outline = '1px solid #eee';
+    floatingElem.style.borderRadius = '0 0 9px 9px';
     floatingElem.style.transform = `translate(${left}px, ${top}px)`;
 }
 
@@ -109,12 +135,14 @@ function FloatingLinkEditor({
 
     const updateLinkEditor = useCallback(() => {
         const selection = $getSelection();
+        let linkNode = null;
+        
         if ($isRangeSelection(selection)) {
             const node = getSelectedNode(selection);
             const parent = node.getParent();
             
             // Check for both regular links and auto-links
-            const linkNode = $isLinkNode(parent) || $isAutoLinkNode(parent) 
+            linkNode = $isLinkNode(parent) || $isAutoLinkNode(parent) 
                 ? parent 
                 : ($isLinkNode(node) || $isAutoLinkNode(node) ? node : null);
             
@@ -124,6 +152,7 @@ function FloatingLinkEditor({
                 setLinkUrl('');
             }
         }
+        
         const editorElem = editorRef.current;
         const nativeSelection = window.getSelection();
         const activeElement = document.activeElement;
@@ -141,11 +170,34 @@ function FloatingLinkEditor({
             rootElement.contains(nativeSelection.anchorNode) &&
             editor.isEditable()
         ) {
-            const domRect =
-                nativeSelection.focusNode?.parentElement?.getBoundingClientRect();
-            if (domRect) {
-                domRect.y += 40;
-                setFloatingElemPositionForLinkEditor(domRect, editorElem, anchorElem, verticalGap, drawerWidth);
+            let domRect = null;
+            
+            // Try to get the rect from the actual link node's DOM element
+            if (isLink && linkNode) {
+                const linkDomElement = editor.getElementByKey(linkNode.getKey());
+                if (linkDomElement) {
+                    domRect = linkDomElement.getBoundingClientRect();
+                }
+            }
+            
+            // Fallback to native selection if we couldn't get the link element
+            if (!domRect && nativeSelection.focusNode?.parentElement) {
+                domRect = nativeSelection.focusNode.parentElement.getBoundingClientRect();
+            }
+            
+            if (domRect && isLink) {
+                // Create a mutable rect object (DOMRect is read-only)
+                const adjustedRect = {
+                    top: domRect.top + 40,
+                    left: domRect.left,
+                    bottom: domRect.bottom,
+                    right: domRect.right,
+                    width: domRect.width,
+                    height: domRect.height,
+                };
+                setFloatingElemPositionForLinkEditor(adjustedRect, editorElem, anchorElem, verticalGap, drawerWidth);
+            } else {
+                setFloatingElemPositionForLinkEditor(null, editorElem, anchorElem, verticalGap, drawerWidth);
             }
             setLastSelection(selection);
         } else if (!activeElement || activeElement.className !== 'link-input') {
@@ -158,7 +210,7 @@ function FloatingLinkEditor({
         }
 
         return true;
-    }, [anchorElem, editor, drawerWidth]);
+    }, [anchorElem, editor, drawerWidth, isLink]);
 
     useEffect(() => {
         const scrollerElem = anchorElem.parentElement;
@@ -273,7 +325,6 @@ function FloatingLinkEditor({
     return (<>
         <style global jsx>{`
         .link-editor {
-            display: flex;
             position: absolute;
             top: 0;
             left: 0;
@@ -282,10 +333,11 @@ function FloatingLinkEditor({
             min-width: 400px;
             width: fit-content;
             opacity: 0;
+            visibility: hidden;
+            display: flex;
             background-color: #fff;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
             border-radius: 0 0 9px 9px;
-            transition: opacity 0.5s;
+            transition: opacity 0.5s, visibility 0.5s;
             will-change: transform;
             outline: 1px solid #eee;
             outline-offset: -1px;
@@ -313,6 +365,17 @@ function FloatingLinkEditor({
         <div ref={editorRef} className="link-editor">
             {!isLink ? null : isEditMode ? (
                 <>
+                    <Button
+                        className="link-cancel"
+                        role="button"
+                        tabIndex={0}
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => {
+                            setEditMode(false);
+                        }}
+                    >
+                        <CloseIcon />
+                    </Button>
                     <input
                         ref={inputRef}
                         className="link-input"
@@ -325,25 +388,13 @@ function FloatingLinkEditor({
                         }}
                     />
                         <Button
-                            className="link-cancel"
-                            role="button"
-                            tabIndex={0}
-                            onMouseDown={(event) => event.preventDefault()}
-                            onClick={() => {
-                                setEditMode(false);
-                            }}
-                        >
-                            <CancelIcon />
-                        </Button>
-
-                        <Button
                             className="link-confirm"
                             role="button"
                             tabIndex={0}
                             onMouseDown={(event) => event.preventDefault()}
                             onClick={handleLinkSubmission}
                         >
-                            <CheckCircleIcon />
+                            <CheckIcon />
                         </Button>
                 </>
             ) : (
@@ -422,9 +473,12 @@ function useFloatingLinkEditorToolbar(
             const node = getSelectedNode(selection);
             const linkParent = $findMatchingParent(node, $isLinkNode);
             const autoLinkParent = $findMatchingParent(node, $isAutoLinkNode);
+            
+            // Also check if the node itself is a link
+            const isNodeLink = $isLinkNode(node) || $isAutoLinkNode(node);
 
             // Show for both regular links and auto links
-            if (linkParent != null || autoLinkParent != null) {
+            if (linkParent != null || autoLinkParent != null || isNodeLink) {
                 setIsLink(true);
             } else {
                 setIsLink(false);

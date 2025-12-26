@@ -2,6 +2,8 @@ import React from 'react';
 import { Workbook } from './index';
 import { seedMockUnit, seedMockGrade } from '../../../.storybook/__mocks__/aws-amplify-datastore';
 
+import { userEvent, within, waitFor, expect } from 'storybook/test';
+
 export default {
   title: 'Workbook/Workbook',
   component: Workbook,
@@ -1901,6 +1903,114 @@ export const KitchenSink = {
   render: () => <Workbook />,
   parameters: {
     unitId: 'kitchen-sink-workbook-id',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for workbook to load
+    await waitFor(() => {
+      return canvasElement.querySelector('[data-lexical-editor=\"true\"]') !== null;
+    }, { timeout: 3000 });
+
+    // Scroll through and interact with different components
+    // 1. Interact with Meaning Association Exercise
+    await waitFor(async () => {
+      const meaningCards = canvasElement.querySelectorAll('[draggable=\"true\"]');
+      if (meaningCards.length >= 2) {
+        // Drag first card
+        const firstCard = meaningCards[0];
+        const secondCard = meaningCards[1];
+        
+        // Simulate drag and drop by clicking
+        await userEvent.click(firstCard);
+        return true;
+      }
+      return false;
+    }, { timeout: 2000, onTimeout: () => console.log('Meaning association cards not found') });
+
+    // 2. Scroll to find and interact with Quiz questions
+    await waitFor(async () => {
+      const quizCheckboxes = canvasElement.querySelectorAll('input[type=\"checkbox\"]');
+      if (quizCheckboxes.length > 0) {
+        // Check first quiz answer
+        await userEvent.click(quizCheckboxes[0]);
+        // Check second quiz answer after delay
+        setTimeout(async () => {
+          if (quizCheckboxes[1]) {
+            await userEvent.click(quizCheckboxes[1]);
+          }
+        }, 500);
+        return true;
+      }
+      return false;
+    }, { timeout: 2000, onTimeout: () => console.log('Quiz checkboxes not found') });
+
+    // 3. Interact with Custom Answer components (text inputs)
+    await waitFor(async () => {
+      const textInputs = canvasElement.querySelectorAll('textarea, input[type=\"text\"]');
+      if (textInputs.length > 0) {
+        // Type into first custom answer field
+        await userEvent.click(textInputs[0]);
+        await userEvent.keyboard('This is my answer to the question');
+        
+        // Type into second field if exists
+        if (textInputs[1]) {
+          setTimeout(async () => {
+            await userEvent.click(textInputs[1]);
+            await userEvent.keyboard('Another practice answer');
+          }, 500);
+        }
+        return true;
+      }
+      return false;
+    }, { timeout: 2000, onTimeout: () => console.log('Text inputs not found') });
+
+    // 4. Look for and interact with audio players if present
+    await waitFor(async () => {
+      const playButtons = canvasElement.querySelectorAll('[aria-label=\"Play\"], [title*=\"play\" i]');
+      if (playButtons.length > 0) {
+        // Click first play button
+        await userEvent.click(playButtons[0]);
+        
+        // Pause after a moment
+        setTimeout(async () => {
+          const pauseButtons = canvasElement.querySelectorAll('[aria-label=\"Pause\"], [title*=\"pause\" i]');
+          if (pauseButtons[0]) {
+            await userEvent.click(pauseButtons[0]);
+          }
+        }, 1000);
+        return true;
+      }
+      return false;
+    }, { timeout: 2000, onTimeout: () => console.log('Play buttons not found') });
+
+    // 5. Test radio buttons for multiple choice if present
+    await waitFor(async () => {
+      const radioButtons = canvasElement.querySelectorAll('input[type=\"radio\"]');
+      if (radioButtons.length > 0) {
+        // Select first radio option
+        await userEvent.click(radioButtons[0]);
+        
+        // Select a different option after delay
+        setTimeout(async () => {
+          if (radioButtons[2]) {
+            await userEvent.click(radioButtons[2]);
+          }
+        }, 500);
+        return true;
+      }
+      return false;
+    }, { timeout: 2000, onTimeout: () => console.log('Radio buttons not found') });
+
+    // 6. Scroll through the workbook
+    const workbookContainer = canvasElement.querySelector('[data-lexical-editor=\"true\"]')?.parentElement;
+    if (workbookContainer) {
+      workbookContainer.scrollTop = 300;
+      await waitFor(() => true, { timeout: 500 });
+      workbookContainer.scrollTop = 600;
+      await waitFor(() => true, { timeout: 500 });
+      workbookContainer.scrollTop = 900;
+    }
   },
 };
 
