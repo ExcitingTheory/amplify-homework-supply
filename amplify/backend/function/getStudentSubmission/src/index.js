@@ -205,7 +205,7 @@ exports.handler = async (event) => {
  * Fetch a Grade record from DynamoDB
  */
 async function getGrade(gradeId) {
-  const tableName = `Grade-${process.env.API_AMPLIFY HOMEWORKSUPPLY_GRAPHQLAPIIDOUTPUT}-${ENV}`;
+  const tableName = `Grade-${process.env.API_AMPLIFYHOMEWORKSUPPLY_GRAPHQLAPIIDOUTPUT}-${ENV}`;
   
   const params = {
     TableName: tableName,
