@@ -277,6 +277,20 @@ export const chatAssistantThread = /* GraphQL */ `mutation ChatAssistantThread($
   APITypes.ChatAssistantThreadMutationVariables,
   APITypes.ChatAssistantThreadMutation
 >;
+export const analyzePDF = /* GraphQL */ `mutation AnalyzePDF($documentID: ID!) {
+  analyzePDF(documentID: $documentID) {
+    success
+    documentID
+    responseId
+    pageCount
+    message
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.AnalyzePDFMutationVariables,
+  APITypes.AnalyzePDFMutation
+>;
 export const createAssistant = /* GraphQL */ `mutation CreateAssistant(
   $input: CreateAssistantInput!
   $condition: ModelAssistantConditionInput
@@ -3120,6 +3134,99 @@ export const deleteAgentJob = /* GraphQL */ `mutation DeleteAgentJob(
 ` as GeneratedMutation<
   APITypes.DeleteAgentJobMutationVariables,
   APITypes.DeleteAgentJobMutation
+>;
+export const createSettings = /* GraphQL */ `mutation CreateSettings(
+  $input: CreateSettingsInput!
+  $condition: ModelSettingsConditionInput
+) {
+  createSettings(input: $input, condition: $condition) {
+    id
+    owner
+    identityId
+    autoAnalyzePDFs
+    pdfAnalysisModel
+    editorTheme
+    editorFontSize
+    defaultAIModel
+    assistantVoice
+    emailNotifications
+    webhookNotifications
+    language
+    timezone
+    metadata
+    updatedAt
+    createdAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateSettingsMutationVariables,
+  APITypes.CreateSettingsMutation
+>;
+export const updateSettings = /* GraphQL */ `mutation UpdateSettings(
+  $input: UpdateSettingsInput!
+  $condition: ModelSettingsConditionInput
+) {
+  updateSettings(input: $input, condition: $condition) {
+    id
+    owner
+    identityId
+    autoAnalyzePDFs
+    pdfAnalysisModel
+    editorTheme
+    editorFontSize
+    defaultAIModel
+    assistantVoice
+    emailNotifications
+    webhookNotifications
+    language
+    timezone
+    metadata
+    updatedAt
+    createdAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateSettingsMutationVariables,
+  APITypes.UpdateSettingsMutation
+>;
+export const deleteSettings = /* GraphQL */ `mutation DeleteSettings(
+  $input: DeleteSettingsInput!
+  $condition: ModelSettingsConditionInput
+) {
+  deleteSettings(input: $input, condition: $condition) {
+    id
+    owner
+    identityId
+    autoAnalyzePDFs
+    pdfAnalysisModel
+    editorTheme
+    editorFontSize
+    defaultAIModel
+    assistantVoice
+    emailNotifications
+    webhookNotifications
+    language
+    timezone
+    metadata
+    updatedAt
+    createdAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteSettingsMutationVariables,
+  APITypes.DeleteSettingsMutation
 >;
 export const createQuestionUnit = /* GraphQL */ `mutation CreateQuestionUnit(
   $input: CreateQuestionUnitInput!

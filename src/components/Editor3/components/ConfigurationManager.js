@@ -1,9 +1,9 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Switch, FormControlLabel, Divider } from "@mui/material";
 import { DataStore } from "aws-amplify/datastore";
 import { uploadData } from "aws-amplify/storage";
 import UnitContext from "../../../context/unitContext";
-import { Unit } from "../../../models";
+import { Unit, Settings } from "../../../models";
 import CameraIcon from '@mui/icons-material/Camera';
 import getCachedUrl from "../../../utils/getCachedUrl";
 import FilesContext from "../../../context/fileContext";
@@ -38,12 +38,53 @@ export default function ConfigurationManager() {
   const [filesToUpload, setFilesToUpload] = React.useState([]);
   const [fileOperations, setFileOperations] = React.useState([]);
   const [inProgress, setInProgress] = React.useState(false);
+  const [settings, setSettings] = React.useState(null);
+  const [loadingSettings, setLoadingSettings] = React.useState(true);
 
   const { unit } = React.useContext(UnitContext);
 
   const {
     session: { identityId }
   } = React.useContext(FilesContext);
+
+  // Subscribe to user settings with initial load
+  React.useEffect(() => {
+    const subscription = DataStore.observeQuery(Settings).subscribe(async ({ items }) => {
+      if (items.length > 0) {
+        setSettings(items[0]);
+        setLoadingSettings(false);
+      } else {
+        // Create default settings if none exist
+        try {
+          const newSettings = await DataStore.save(new Settings({
+            autoAnalyzePDFs: true,
+            pdfAnalysisModel: 'gpt-4',
+          }));
+          setSettings(newSettings);
+        } catch (error) {
+          console.error('Error creating settings:', error);
+        } finally {
+          setLoadingSettings(false);
+        }
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSettingChange = async (field, value) => {
+    if (!settings) return;
+    try {
+      const updated = await DataStore.save(
+        Settings.copyOf(settings, (draft) => {
+          draft[field] = value;
+        })
+      );
+      setSettings(updated);
+    } catch (error) {
+      console.error('Error updating settings:', error);
+    }
+  };
 
   React.useEffect(() => {
 
@@ -73,12 +114,12 @@ export default function ConfigurationManager() {
         }
 
         // TODO - add support for featured video and featured audio
-        /**else if (isMimeType(file, ACCEPTABLE_AUDIO_TYPES)) {
+        else if (isMimeType(file, ACCEPTABLE_AUDIO_TYPES)) {
             newFilename = `audio/${_uuid}-${file.name}`
             // Way to determine length of audio file?
         } else if (isMimeType(file, ACCEPTABLE_FILE_TYPES)) {
             newFilename = `files/${_uuid}-${file.name}`
-        }*/
+        }
 
         console.log('uploading newFilename', newFilename);
         console.log('uploading file', fileInput);
@@ -177,18 +218,32 @@ export default function ConfigurationManager() {
     style={{
       display: 'flex',
       flexDirection: 'column',
-      // alignItems: 'center',
-      // justifyContent: 'center',
-      // padding: '1rem',
-      // height: '100%',
-      // width: '100%',
+      padding: '1rem',
     }}
   >
+    {/* PDF Analysis Settings */}
+    <Typography variant="h6" sx={{ mb: 2 }}>
+      PDF Analysis Settings
+    </Typography>
+    <Box sx={{ mb: 3 }}>
+      <FormControlLabel
+        control={
+          <Switch
+            checked={settings?.autoAnalyzePDFs ?? true}
+            onChange={(e) => handleSettingChange('autoAnalyzePDFs', e.target.checked)}
+            disabled={loadingSettings}
+          />
+        }
+        label="Automatically analyze PDFs on upload"
+      />
+      <Typography variant="caption" display="block" color="text.secondary" sx={{ ml: 4 }}>
+        When enabled, PDFs will be sent to OpenAI for vocabulary extraction immediately after upload.
+      </Typography>
+    </Box>
+    
+    <Divider sx={{ my: 2 }} />
 
-
-
-
-
+    {/* Featured Image Section */}
     <div
       style={{
         position: 'relative',

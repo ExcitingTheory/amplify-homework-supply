@@ -107,7 +107,17 @@
         "japanese56739ab6b": {},
         "files": {},
         "japanese5": {},
-        "userPoolGroups": {}
+        "userPoolGroups": {},
+        "analyzePdf": {
+          "secretsPathAmplifyAppId": "d29i5pr81uhal1",
+          "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
+          "s3Key": "amplify-builds/analyzePdf-50344447374a394a6167-build.zip"
+        },
+        "openaiWebhook": {
+          "secretsPathAmplifyAppId": "d29i5pr81uhal1",
+          "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
+          "s3Key": "amplify-builds/openaiWebhook-4a63426f5a7842433744-build.zip"
+        }
       },
       "api": {
         "AdminQueries": {},

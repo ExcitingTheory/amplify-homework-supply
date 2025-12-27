@@ -94,16 +94,16 @@ export default function VerticalTabsRo({
             setOpen(true);
           }}
           label={<HistoryIcon />} {...a11yProps('Previous Attempts')} />
-        <Tab 
+        <Tab
           onClick={() => {
             setOpen(true);
           }}
           label={<ChatIcon />} {...a11yProps('AI Assistant')} />
-        {/* <Tab
+        <Tab
           onClick={() => {
             setOpen(true);
           }}
-          label={<ConfigIcon />} {...a11yProps('Configuration')} /> */}
+          label={<ConfigIcon />} {...a11yProps('Settings')} />
         {/* <Tab
           onClick={() => {
             setOpen(true);
@@ -125,9 +125,9 @@ export default function VerticalTabsRo({
       <TabPanel value={value} index={1} overflowY='hidden' >
       <ChatSidebar />
       </TabPanel>
-      {/* <TabPanel value={value} index={2} overflowY='auto'>
+      <TabPanel value={value} index={2} overflowY='auto'>
         <ConfigurationManager />
-      </TabPanel> */}
+      </TabPanel>
       {/* <TabPanel value={value} index={3} overflowY='hidden'>
         <ChatSidebar />
       </TabPanel>

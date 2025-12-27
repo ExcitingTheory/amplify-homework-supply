@@ -32,14 +32,38 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 
 import FilesContext from "../../../context/fileContext";
+import SettingsContext from "../../../context/settingsContext";
+
+const analyzePDFMutation = /* GraphQL */ `
+  mutation AnalyzePDF($documentID: ID!) {
+    analyzePDF(documentID: $documentID) {
+      success
+      documentID
+      responseId
+      pageCount
+      message
+    }
+  }
+`;
+
+const cancelPDFAnalysisMutation = /* GraphQL */ `
+  mutation CancelPDFAnalysis($documentID: ID!) {
+    cancelPDFAnalysis(documentID: $documentID) {
+      success
+      documentID
+      message
+    }
+  }
+`;
 
 import { DataStore } from 'aws-amplify/datastore';
 import { uploadData, remove } from 'aws-amplify/storage';
 import { fetchAuthSession } from 'aws-amplify/auth';
+import { generateClient } from 'aws-amplify/api';
 import { calculateWaveformData } from '../../../utils/calculateWaveformData';
 
 import { FileProtectionLevels } from '../../../models';
-import { File as FileModel } from '../../../models';
+import { File as FileModel, Document, Settings } from '../../../models';
 import {
     ACCEPTABLE_AUDIO_TYPES,
     ACCEPTABLE_FILE_TYPES,
@@ -47,6 +71,7 @@ import {
 } from '../plugins/DragDropPastePlugin';
 import { INSERT_PLAYLIST_COMMAND } from "../plugins/PlaylistPlugin";
 import { INSERT_IMAGE_COMMAND } from "../plugins/ImagesPlugin";
+import { INSERT_PDF_COMMAND } from "../plugins/PdfViewerPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
 import { UnitFile } from '../../../models';
@@ -55,9 +80,16 @@ import getCachedUrl from "../../../utils/getCachedUrl";
 import AudioWaveformPlayer from './AudioWaveformPlayer';
 
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import ErrorIcon from '@mui/icons-material/Error';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import CancelIcon from '@mui/icons-material/Cancel';
+import Chip from '@mui/material/Chip';
 
 import TextareaAutosize from '@mui/material/TextareaAutosize';
-import { generateClient } from 'aws-amplify/api';
 
 import { useTheme } from '@mui/material/styles';
 
@@ -805,12 +837,99 @@ export default function FileManager() {
     const [newFileFormOpen, setNewFileFormOpen] = React.useState(false);
 
     const [generator, setGenerator] = React.useState('image');
+    
+    const [settings, setSettings] = React.useState(null);
+    const [documentStatuses, setDocumentStatuses] = React.useState({});
 
     const { files, session } = React.useContext(FilesContext);
     const { identityId } = session;
     const { unit } = React.useContext(UnitContext);
 
     console.log('FilesContext.files', files);
+
+    // Subscribe to user settings with initial load
+    React.useEffect(() => {
+        const subscription = DataStore.observeQuery(Settings).subscribe(async ({ items }) => {
+            if (items.length > 0) {
+                setSettings(items[0]);
+            } else {
+                // Create default settings if none exist
+                try {
+                    const newSettings = await DataStore.save(new Settings({
+                        autoAnalyzePDFs: true,
+                        pdfAnalysisModel: 'gpt-4',
+                    }));
+                    setSettings(newSettings);
+                } catch (error) {
+                    console.error('Error creating settings:', error);
+                }
+            }
+        });
+        
+        return () => subscription.unsubscribe();
+    }, []);
+    
+    // Subscribe to Document status changes
+    React.useEffect(() => {
+        const subscription = DataStore.observeQuery(Document).subscribe(({ items }) => {
+            const statusMap = {};
+            items.forEach(doc => {
+                statusMap[doc.s3Key] = {
+                    id: doc.id,
+                    status: doc.status,
+                    pageCount: doc.pageCount,
+                    extractedText: doc.extractedText,
+                };
+            });
+            setDocumentStatuses(statusMap);
+            console.log('[FileManager] Document statuses updated:', statusMap);
+        });
+        
+        return () => subscription.unsubscribe();
+    }, []);
+    
+    // Helper function to get status display info
+    const getDocumentStatusInfo = (status) => {
+        const statusConfig = {
+            'uploaded': {
+                icon: <CloudUploadIcon fontSize="small" />,
+                color: 'default',
+                label: 'Ready',
+                chipColor: 'default',
+            },
+            'extracting': {
+                icon: <HourglassEmptyIcon fontSize="small" />,
+                color: 'info',
+                label: 'Extracting...',
+                chipColor: 'info',
+            },
+            'extracted': {
+                icon: <HourglassEmptyIcon fontSize="small" />,
+                color: 'primary',
+                label: 'Extracted',
+                chipColor: 'primary',
+            },
+            'analyzing': {
+                icon: <HourglassEmptyIcon fontSize="small" />,
+                color: 'warning',
+                label: 'Analyzing...',
+                chipColor: 'warning',
+            },
+            'completed': {
+                icon: <CheckCircleIcon fontSize="small" />,
+                color: 'success',
+                label: 'Analyzed',
+                chipColor: 'success',
+            },
+            'failed': {
+                icon: <ErrorIcon fontSize="small" />,
+                color: 'error',
+                label: 'Failed',
+                chipColor: 'error',
+            },
+        };
+        return statusConfig[status] || statusConfig['uploaded'];
+    };
 
     const toggleNewAudioFileForm = () => {
         setNewAudioFileFormOpen(!newAudioFileFormOpen);
@@ -915,6 +1034,25 @@ export default function FileManager() {
                     const newFile = await DataStore.save(new FileModel(fileData));
 
                     console.log('newFile', newFile);
+
+                    // If PDF, create Document record
+                    if (file.type === 'application/pdf') {
+                        const document = await DataStore.save(new Document({
+                            filename: file.name,
+                            s3Key: newFilename,
+                            status: 'uploaded',
+                            identityId,
+                            unitID: unit?.id,
+                        }));
+                        console.log('Created Document record:', document);
+                        
+                        // Auto-analyze if enabled in settings
+                        if (settings?.autoAnalyzePDFs) {
+                            console.log('Auto-analyzing PDF:', document.id);
+                            // TODO: Call analyzePdf Lambda function
+                            // await triggerPdfAnalysis(document.id);
+                        }
+                    }
                 } catch (error) {
                     console.error(error);
                 }
@@ -1375,11 +1513,166 @@ export default function FileManager() {
                     )}
                     
                     {files
-                        .filter(file => !file.mimeType.includes('image') && !file.mimeType.includes('audio'))
+                        .filter(file => file.mimeType === 'application/pdf')
                         .length > 0 && (
-                        <TreeItem itemId="other" label={`Other Files (${files.filter(f => !f.mimeType.includes('image') && !f.mimeType.includes('audio')).length})`}>
+                        <TreeItem itemId="pdfs" label={`PDFs (${files.filter(f => f.mimeType === 'application/pdf').length})`}>
                             {files
-                                .filter(file => !file.mimeType.includes('image') && !file.mimeType.includes('audio'))
+                                .filter(file => file.mimeType === 'application/pdf')
+                                .map((file) => {
+                                    const docStatus = documentStatuses[file.path];
+                                    const statusInfo = getDocumentStatusInfo(docStatus?.status || 'uploaded');
+                                    const isProcessing = ['extracting', 'analyzing'].includes(docStatus?.status);
+                                    
+                                    return (
+                                    <TreeItem
+                                        itemId={file.id}
+                                        key={file.id}
+                                        label={
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+                                                <PictureAsPdfIcon 
+                                                    color={statusInfo.color} 
+                                                    sx={{ 
+                                                        animation: isProcessing ? 'pulse 2s infinite' : 'none',
+                                                        '@keyframes pulse': {
+                                                            '0%, 100%': { opacity: 1 },
+                                                            '50%': { opacity: 0.5 },
+                                                        },
+                                                    }}
+                                                />
+                                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                                    <Typography noWrap>{file.name}</Typography>
+                                                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            {(file.size / 1000).toFixed(2)} KB
+                                                        </Typography>
+                                                        {docStatus?.pageCount && (
+                                                            <Typography variant="caption" color="text.secondary">
+                                                                • {docStatus.pageCount} pages
+                                                            </Typography>
+                                                        )}
+                                                        <Chip 
+                                                            size="small" 
+                                                            label={statusInfo.label}
+                                                            color={statusInfo.chipColor}
+                                                            icon={statusInfo.icon}
+                                                            sx={{ height: 20, fontSize: '0.7rem' }}
+                                                        />
+                                                    </Box>
+                                                </Box>
+                                                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                    {/* Insert PDF into editor - always available */}
+                                                    {editor && (
+                                                        <IconButton
+                                                            size="small"
+                                                            title="Insert PDF"
+                                                            onClick={async (e) => {
+                                                                e.stopPropagation();
+                                                                editor.dispatchCommand(INSERT_PDF_COMMAND, {
+                                                                    path: file.path,
+                                                                    identityId: file.identityId,
+                                                                    filename: file.name,
+                                                                });
+                                                            }}
+                                                        >
+                                                            <AddIcon />
+                                                        </IconButton>
+                                                    )}
+                                                    
+                                                    {/* Cancel button - only during processing */}
+                                                    {isProcessing && (
+                                                        <IconButton
+                                                            size="small"
+                                                            title="Cancel Analysis"
+                                                            color="warning"
+                                                            onClick={async (e) => {
+                                                                e.stopPropagation();
+                                                                try {
+                                                                    const documents = await DataStore.query(Document, (d) => d.s3Key.eq(file.path));
+                                                                    if (documents.length === 0) return;
+                                                                    
+                                                                    const client = generateClient();
+                                                                    const result = await client.graphql({
+                                                                        query: cancelPDFAnalysisMutation,
+                                                                        variables: { documentID: documents[0].id }
+                                                                    });
+                                                                    
+                                                                    if (result.data.cancelPDFAnalysis.success) {
+                                                                        alert(`Analysis cancelled for: ${file.name}`);
+                                                                    }
+                                                                } catch (error) {
+                                                                    console.error('Error cancelling analysis:', error);
+                                                                    alert('Failed to cancel: ' + error.message);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <CancelIcon />
+                                                        </IconButton>
+                                                    )}
+                                                    
+                                                    {/* Analyze button - only when not processing/completed */}
+                                                    {!['completed', 'analyzing', 'extracting'].includes(docStatus?.status) && (
+                                                        <IconButton
+                                                            size="small"
+                                                            title="Analyze PDF"
+                                                            disabled={isProcessing}
+                                                            onClick={async (e) => {
+                                                                e.stopPropagation();
+                                                                try {
+                                                                    // Find the Document record for this file
+                                                                    const documents = await DataStore.query(Document, (d) => d.s3Key.eq(file.path));
+                                                                    if (documents.length === 0) {
+                                                                        alert('Document record not found. Please upload the PDF again.');
+                                                                        return;
+                                                                    }
+                                                                    
+                                                                    const client = generateClient();
+                                                                    const result = await client.graphql({
+                                                                        query: analyzePDFMutation,
+                                                                        variables: { documentID: documents[0].id }
+                                                                    });
+                                                                    
+                                                                    if (result.data.analyzePDF.success) {
+                                                                        alert(`PDF analysis started! Document ID: ${result.data.analyzePDF.documentID}`);
+                                                                    } else {
+                                                                        alert(`Analysis failed: ${result.data.analyzePDF.message}`);
+                                                                    }
+                                                                } catch (error) {
+                                                                    console.error('Error analyzing PDF:', error);
+                                                                    alert('Failed to analyze PDF: ' + error.message);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <AnalyticsIcon />
+                                                        </IconButton>
+                                                    )}
+                                                    
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={async (e) => {
+                                                            e.stopPropagation();
+                                                            const confirmed = window.confirm(`Are you sure you want to delete ${file.path}?`);
+                                                            if (!confirmed) return;
+                                                            await DataStore.delete(file);
+                                                            await remove(file);
+                                                        }}
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Box>
+                                            </Box>
+                                        }
+                                    />
+                                    );
+                                })}
+                        </TreeItem>
+                    )}
+                    
+                    {files
+                        .filter(file => !file.mimeType.includes('image') && !file.mimeType.includes('audio') && file.mimeType !== 'application/pdf')
+                        .length > 0 && (
+                        <TreeItem itemId="other" label={`Other Files (${files.filter(f => !f.mimeType.includes('image') && !f.mimeType.includes('audio') && f.mimeType !== 'application/pdf').length})`}>
+                            {files
+                                .filter(file => !file.mimeType.includes('image') && !file.mimeType.includes('audio') && file.mimeType !== 'application/pdf')
                                 .map((file) => (
                                     <TreeItem
                                         itemId={file.id}

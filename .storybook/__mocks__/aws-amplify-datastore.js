@@ -10,12 +10,16 @@
 const mockUnits = {};
 const mockGrades = {};
 const mockFiles = {};
+const mockSettings = {};
+const mockDocuments = {};
 
 // Store active subscriptions
 const activeSubscriptions = {
   Unit: [],
   Grade: [],
   File: [],
+  Settings: [],
+  Document: [],
 };
 
 // Helper to seed mock data for stories
@@ -72,14 +76,138 @@ export const seedMockFiles = (filesArray) => {
   filesArray.forEach(file => {
     if (file.id) {
       mockFiles[file.id] = file;
+      
+      // If it's a PDF, also create a Document record for it
+      if (file.mimeType === 'application/pdf') {
+        const docId = `doc-${file.id}`;
+        mockDocuments[docId] = {
+          id: docId,
+          filename: file.name,
+          s3Key: file.path,
+          status: 'uploaded',
+          identityId: file.identityId,
+          createdAt: file.createdAt,
+          updatedAt: file.createdAt,
+        };
+        console.log('[Mock DataStore] Created Document record for PDF:', docId);
+      }
     }
   });
   console.log('[Mock DataStore] Total files in store:', Object.keys(mockFiles).length);
+  console.log('[Mock DataStore] Total documents in store:', Object.keys(mockDocuments).length);
   
   // Notify all File subscribers about the new data
   const items = Object.values(mockFiles);
   activeSubscriptions.File.forEach(callback => {
     console.log('[Mock DataStore] Notifying File subscriber with', items.length, 'files');
+    callback({ items, isSynced: true });
+  });
+  
+  // Notify all Document subscribers
+  const docItems = Object.values(mockDocuments);
+  activeSubscriptions.Document.forEach(callback => {
+    console.log('[Mock DataStore] Notifying Document subscriber with', docItems.length, 'documents');
+    callback({ items: docItems, isSynced: true });
+  });
+};
+
+// Helper to simulate PDF analysis status progression (for Storybook demos)
+let activeAnalysisTimeouts = {};
+
+export const simulateDocumentAnalysis = (documentId) => {
+  console.log('[Mock DataStore] Simulating analysis for document:', documentId);
+  
+  // Clear any existing timeouts for this document
+  if (activeAnalysisTimeouts[documentId]) {
+    activeAnalysisTimeouts[documentId].forEach(timeout => clearTimeout(timeout));
+  }
+  activeAnalysisTimeouts[documentId] = [];
+  
+  // Update to extracting
+  const timeout1 = setTimeout(() => {
+    if (mockDocuments[documentId]) {
+      mockDocuments[documentId].status = 'extracting';
+      const docItems = Object.values(mockDocuments);
+      activeSubscriptions.Document.forEach(callback => {
+        callback({ items: docItems, isSynced: true });
+      });
+    }
+  }, 1000);
+  activeAnalysisTimeouts[documentId].push(timeout1);
+  
+  // Update to extracted
+  const timeout2 = setTimeout(() => {
+    if (mockDocuments[documentId]) {
+      mockDocuments[documentId].status = 'extracted';
+      mockDocuments[documentId].pageCount = Math.floor(Math.random() * 50) + 10;
+      const docItems = Object.values(mockDocuments);
+      activeSubscriptions.Document.forEach(callback => {
+        callback({ items: docItems, isSynced: true });
+      });
+    }
+  }, 2500);
+  activeAnalysisTimeouts[documentId].push(timeout2);
+  
+  // Update to analyzing
+  const timeout3 = setTimeout(() => {
+    if (mockDocuments[documentId]) {
+      mockDocuments[documentId].status = 'analyzing';
+      const docItems = Object.values(mockDocuments);
+      activeSubscriptions.Document.forEach(callback => {
+        callback({ items: docItems, isSynced: true });
+      });
+    }
+  }, 4000);
+  activeAnalysisTimeouts[documentId].push(timeout3);
+  
+  // Update to completed
+  const timeout4 = setTimeout(() => {
+    if (mockDocuments[documentId]) {
+      mockDocuments[documentId].status = 'completed';
+      const docItems = Object.values(mockDocuments);
+      activeSubscriptions.Document.forEach(callback => {
+        callback({ items: docItems, isSynced: true });
+      });
+      // Clean up timeouts
+      delete activeAnalysisTimeouts[documentId];
+    }
+  }, 6000);
+  activeAnalysisTimeouts[documentId].push(timeout4);
+};
+
+// Helper to cancel PDF analysis (for Storybook demos)
+export const cancelDocumentAnalysis = (documentId) => {
+  console.log('[Mock DataStore] Cancelling analysis for document:', documentId);
+  
+  // Clear all pending timeouts
+  if (activeAnalysisTimeouts[documentId]) {
+    activeAnalysisTimeouts[documentId].forEach(timeout => clearTimeout(timeout));
+    delete activeAnalysisTimeouts[documentId];
+  }
+  
+  // Reset status to uploaded
+  if (mockDocuments[documentId]) {
+    mockDocuments[documentId].status = 'uploaded';
+    const docItems = Object.values(mockDocuments);
+    activeSubscriptions.Document.forEach(callback => {
+      callback({ items: docItems, isSynced: true });
+    });
+  }
+};
+
+// Helper to seed mock settings data for stories
+export const seedMockSettings = (settingsData) => {
+  console.log('[Mock DataStore] Seeding settings:', settingsData);
+  if (!settingsData.id) {
+    settingsData.id = 'settings-1';
+  }
+  mockSettings[settingsData.id] = settingsData;
+  console.log('[Mock DataStore] Total settings in store:', Object.keys(mockSettings).length);
+  
+  // Notify all Settings subscribers about the new data
+  const items = Object.values(mockSettings);
+  activeSubscriptions.Settings.forEach(callback => {
+    console.log('[Mock DataStore] Notifying Settings subscriber with', items.length, 'settings');
     callback({ items, isSynced: true });
   });
 };
@@ -89,6 +217,8 @@ export const clearMockUnits = () => {
   Object.keys(mockUnits).forEach(key => delete mockUnits[key]);
   Object.keys(mockGrades).forEach(key => delete mockGrades[key]);
   Object.keys(mockFiles).forEach(key => delete mockFiles[key]);
+  Object.keys(mockSettings).forEach(key => delete mockSettings[key]);
+  Object.keys(mockDocuments).forEach(key => delete mockDocuments[key]);
   console.log('[Mock DataStore] Cleared all mock data');
   
   // Always seed a default unit for stories that don't provide their own
@@ -230,6 +360,15 @@ export class DataStore {
       activeSubscriptions.Grade.forEach(callback => {
         callback({ items: Object.values(mockGrades), isSynced: true });
       });
+    } else if (model.id && model.autoAnalyzePDFs !== undefined) {
+      // This is Settings
+      mockSettings[model.id] = model;
+      console.log('[Mock DataStore] Updated settings:', model.id);
+      
+      // Notify all Settings subscribers
+      activeSubscriptions.Settings.forEach(callback => {
+        callback({ items: Object.values(mockSettings), isSynced: true });
+      });
     } else if (model.id && model.data) {
       // Could be a Unit
       mockUnits[model.id] = model;
@@ -246,7 +385,7 @@ export class DataStore {
 
   static async query(modelConstructor, idOrPredicate) {
     const modelName = modelConstructor?.name;
-    console.log('Mock DataStore.query called for:', modelName, 'with id:', idOrPredicate);
+    console.log('Mock DataStore.query called for:', modelName, 'with predicate:', typeof idOrPredicate);
     
     // If idOrPredicate is a string, treat it as an ID lookup
     if (typeof idOrPredicate === 'string') {
@@ -257,6 +396,35 @@ export class DataStore {
       }
       console.log('Mock DataStore: No data found for id:', idOrPredicate);
       return null;
+    }
+    
+    // Handle predicate function for Document queries
+    if (modelName === 'Document' && typeof idOrPredicate === 'function') {
+      // Extract filter criteria from predicate
+      let s3KeyFilter = null;
+      const predicateCapture = {
+        s3Key: {
+          eq: (value) => {
+            s3KeyFilter = value;
+            console.log('[Mock DataStore] Filtering Document by s3Key.eq:', value);
+            return predicateCapture;
+          }
+        }
+      };
+      
+      try {
+        idOrPredicate(predicateCapture);
+      } catch (e) {
+        console.log('[Mock DataStore] Could not parse predicate:', e.message);
+      }
+      
+      // Filter documents by s3Key if specified
+      let results = Object.values(mockDocuments);
+      if (s3KeyFilter) {
+        results = results.filter(doc => doc.s3Key === s3KeyFilter);
+      }
+      console.log('[Mock DataStore] Returning', results.length, 'documents');
+      return results;
     }
     
     // Otherwise return all items for that model
@@ -402,6 +570,20 @@ export class DataStore {
           }
           console.log('[Mock DataStore] Returning', items.length, 'files (filtered)');
           activeSubscriptions.File.push(callback);
+        } else if (modelName === 'Settings') {
+          items = Object.values(mockSettings);
+          if (filterFn) {
+            items = items.filter(filterFn);
+          }
+          console.log('[Mock DataStore] Returning', items.length, 'settings (filtered)');
+          activeSubscriptions.Settings.push(callback);
+        } else if (modelName === 'Document') {
+          items = Object.values(mockDocuments);
+          if (filterFn) {
+            items = items.filter(filterFn);
+          }
+          console.log('[Mock DataStore] Returning', items.length, 'documents (filtered)');
+          activeSubscriptions.Document.push(callback);
         } else {
           const data = mockData[modelName];
           items = data ? Object.values(data) : [];
@@ -431,6 +613,16 @@ export class DataStore {
               const index = activeSubscriptions.File.indexOf(callback);
               if (index > -1) {
                 activeSubscriptions.File.splice(index, 1);
+              }
+            } else if (modelName === 'Settings') {
+              const index = activeSubscriptions.Settings.indexOf(callback);
+              if (index > -1) {
+                activeSubscriptions.Settings.splice(index, 1);
+              }
+            } else if (modelName === 'Document') {
+              const index = activeSubscriptions.Document.indexOf(callback);
+              if (index > -1) {
+                activeSubscriptions.Document.splice(index, 1);
               }
             }
           }

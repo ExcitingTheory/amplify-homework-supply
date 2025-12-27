@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "api": {
+      "japanese5": [
+        "Query",
+        "Mutation"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "secretNames": [
+    "OPENAI_WEBHOOK_SECRET"
+  ]
+}

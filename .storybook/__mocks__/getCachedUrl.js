@@ -7,6 +7,71 @@
 // This is a complete WAV file with RIFF header, fmt chunk, and data chunk containing audio samples
 const MOCK_AUDIO_BASE64 = 'data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAD//wAA';
 
+// Create a simple mock PDF blob URL
+const createMockPdfUrl = () => {
+  const pdfContent = `%PDF-1.4
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/Resources <<
+/Font <<
+/F1 <<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+>>
+>>
+/MediaBox [0 0 612 792]
+/Contents 4 0 R
+>>
+endobj
+4 0 obj
+<<
+/Length 44
+>>
+stream
+BT
+/F1 12 Tf
+100 700 Td
+(Mock PDF Document) Tj
+ET
+endstream
+endobj
+xref
+0 5
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000317 00000 n 
+trailer
+<<
+/Size 5
+/Root 1 0 R
+>>
+startxref
+410
+%%EOF`;
+  
+  const blob = new Blob([pdfContent], { type: 'application/pdf' });
+  return URL.createObjectURL(blob);
+};
+
 const getCachedUrl = async (path, level, identityId) => {
   console.log('[Mock getCachedUrl]', { path, level, identityId });
   
@@ -41,6 +106,9 @@ const getCachedUrl = async (path, level, identityId) => {
   } else if (path.includes('.mp3') || path.includes('.wav')) {
     // Return real valid audio file for all audio requests
     return MOCK_AUDIO_BASE64;
+  } else if (path.includes('.pdf')) {
+    // Return real valid PDF blob URL
+    return createMockPdfUrl();
   }
   
   // Default: return mock S3 URL

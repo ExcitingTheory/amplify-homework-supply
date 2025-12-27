@@ -2855,6 +2855,99 @@ export const onDeleteAgentJob = /* GraphQL */ `subscription OnDeleteAgentJob(
   APITypes.OnDeleteAgentJobSubscriptionVariables,
   APITypes.OnDeleteAgentJobSubscription
 >;
+export const onCreateSettings = /* GraphQL */ `subscription OnCreateSettings(
+  $filter: ModelSubscriptionSettingsFilterInput
+  $owner: String
+) {
+  onCreateSettings(filter: $filter, owner: $owner) {
+    id
+    owner
+    identityId
+    autoAnalyzePDFs
+    pdfAnalysisModel
+    editorTheme
+    editorFontSize
+    defaultAIModel
+    assistantVoice
+    emailNotifications
+    webhookNotifications
+    language
+    timezone
+    metadata
+    updatedAt
+    createdAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateSettingsSubscriptionVariables,
+  APITypes.OnCreateSettingsSubscription
+>;
+export const onUpdateSettings = /* GraphQL */ `subscription OnUpdateSettings(
+  $filter: ModelSubscriptionSettingsFilterInput
+  $owner: String
+) {
+  onUpdateSettings(filter: $filter, owner: $owner) {
+    id
+    owner
+    identityId
+    autoAnalyzePDFs
+    pdfAnalysisModel
+    editorTheme
+    editorFontSize
+    defaultAIModel
+    assistantVoice
+    emailNotifications
+    webhookNotifications
+    language
+    timezone
+    metadata
+    updatedAt
+    createdAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateSettingsSubscriptionVariables,
+  APITypes.OnUpdateSettingsSubscription
+>;
+export const onDeleteSettings = /* GraphQL */ `subscription OnDeleteSettings(
+  $filter: ModelSubscriptionSettingsFilterInput
+  $owner: String
+) {
+  onDeleteSettings(filter: $filter, owner: $owner) {
+    id
+    owner
+    identityId
+    autoAnalyzePDFs
+    pdfAnalysisModel
+    editorTheme
+    editorFontSize
+    defaultAIModel
+    assistantVoice
+    emailNotifications
+    webhookNotifications
+    language
+    timezone
+    metadata
+    updatedAt
+    createdAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteSettingsSubscriptionVariables,
+  APITypes.OnDeleteSettingsSubscription
+>;
 export const onCreateQuestionUnit = /* GraphQL */ `subscription OnCreateQuestionUnit(
   $filter: ModelSubscriptionQuestionUnitFilterInput
   $owner: String

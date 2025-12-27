@@ -2,6 +2,8 @@
  * Mock aws-amplify/api for Storybook
  */
 
+import { simulateDocumentAnalysis } from './aws-amplify-datastore.js';
+
 export const generateClient = () => ({
   graphql: async ({ query, variables }) => {
     console.log('Mock GraphQL call:', { query, variables });
@@ -85,6 +87,50 @@ export const generateClient = () => ({
               finish_reason: 'stop'
             }]
           })
+        }
+      };
+    }
+    
+    // Mock PDF analysis
+    if (query.includes('analyzePDF')) {
+      console.log('[Mock API] Analyzing PDF:', variables);
+      
+      // Trigger status progression simulation
+      simulateDocumentAnalysis(variables.documentID);
+      
+      // Immediate response
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      return {
+        data: {
+          analyzePDF: {
+            success: true,
+            documentID: variables.documentID,
+            responseId: `mock-response-${Date.now()}`,
+            pageCount: Math.floor(Math.random() * 50) + 10,
+            message: 'PDF analysis started successfully. Watch the status badge update in real-time!'
+          }
+        }
+      };
+    }
+    
+    // Mock PDF analysis cancellation
+    if (query.includes('cancelPDFAnalysis')) {
+      console.log('[Mock API] Cancelling PDF analysis:', variables);
+      
+      // Trigger cancellation in mock
+      const { cancelDocumentAnalysis } = await import('./aws-amplify-datastore.js');
+      cancelDocumentAnalysis(variables.documentID);
+      
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      return {
+        data: {
+          cancelPDFAnalysis: {
+            success: true,
+            documentID: variables.documentID,
+            message: 'Analysis cancelled successfully'
+          }
         }
       };
     }

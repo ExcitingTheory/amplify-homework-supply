@@ -3,7 +3,7 @@ import { DataStore } from "aws-amplify/datastore";
 import { list } from "aws-amplify/storage";
 import { getCurrentUser } from "aws-amplify/auth";
 
-import { File, Unit } from "../models";
+import { File, Unit, Document } from "../models";
 import { Hub, Cache } from "aws-amplify/utils";
 
 import { fetchAuthSession } from "aws-amplify/auth";
@@ -24,6 +24,7 @@ const FilesProvider = ({ children }) => {
   const [myFiles, setMyFiles] = React.useState([])
   const [myPlaylistFiles, setMyPlaylistFiles] = React.useState({})
   const [myPlaylistUrls, setMyPlaylistUrls] = React.useState({})
+  const [myPdfs, setMyPdfs] = React.useState({})
 
   const [session, setSession] = React.useState({
     error: undefined,
@@ -132,10 +133,14 @@ const FilesProvider = ({ children }) => {
           });
 
           const _playlistFiltered = {}
+          const _pdfsFiltered = {}
 
           items.forEach((item) => {
             if (ACCEPTABLE_PLAYLIST_TYPES.includes(item.mimeType)) {
               _playlistFiltered[item.id] = item
+            }
+            if (item.mimeType === 'application/pdf') {
+              _pdfsFiltered[item.id] = item
             }
           })
 
@@ -143,6 +148,12 @@ const FilesProvider = ({ children }) => {
             const prevStr = JSON.stringify(prev);
             const newStr = JSON.stringify(_playlistFiltered);
             return prevStr === newStr ? prev : _playlistFiltered;
+          });
+          
+          setMyPdfs(prev => {
+            const prevStr = JSON.stringify(prev);
+            const newStr = JSON.stringify(_pdfsFiltered);
+            return prevStr === newStr ? prev : _pdfsFiltered;
           });
           
           setMyFiles(prev => {
@@ -185,12 +196,14 @@ const FilesProvider = ({ children }) => {
     myFiles,
     myPlaylistFiles,
     myPlaylistUrls,
+    myPdfs,
     session
   }), [
     audioFiles,
     myFiles,
     myPlaylistFiles,
     myPlaylistUrls,
+    myPdfs,
     session,
   ]);
 

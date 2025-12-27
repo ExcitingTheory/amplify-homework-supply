@@ -410,6 +410,15 @@ export type AgentJob = {
   _lastChangedAt: number,
 };
 
+export type AnalyzePDFResult = {
+  __typename: "AnalyzePDFResult",
+  success: boolean,
+  documentID: string,
+  responseId?: string | null,
+  pageCount?: number | null,
+  message?: string | null,
+};
+
 export type CreateAssistantInput = {
   id?: string | null,
   model?: string | null,
@@ -1253,6 +1262,94 @@ export type DeleteAgentJobInput = {
   _version?: number | null,
 };
 
+export type CreateSettingsInput = {
+  id?: string | null,
+  owner?: string | null,
+  identityId?: string | null,
+  autoAnalyzePDFs?: boolean | null,
+  pdfAnalysisModel?: string | null,
+  editorTheme?: string | null,
+  editorFontSize?: number | null,
+  defaultAIModel?: string | null,
+  assistantVoice?: string | null,
+  emailNotifications?: boolean | null,
+  webhookNotifications?: boolean | null,
+  language?: string | null,
+  timezone?: string | null,
+  metadata?: string | null,
+  updatedAt?: string | null,
+  _version?: number | null,
+};
+
+export type ModelSettingsConditionInput = {
+  owner?: ModelStringInput | null,
+  identityId?: ModelStringInput | null,
+  autoAnalyzePDFs?: ModelBooleanInput | null,
+  pdfAnalysisModel?: ModelStringInput | null,
+  editorTheme?: ModelStringInput | null,
+  editorFontSize?: ModelIntInput | null,
+  defaultAIModel?: ModelStringInput | null,
+  assistantVoice?: ModelStringInput | null,
+  emailNotifications?: ModelBooleanInput | null,
+  webhookNotifications?: ModelBooleanInput | null,
+  language?: ModelStringInput | null,
+  timezone?: ModelStringInput | null,
+  metadata?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelSettingsConditionInput | null > | null,
+  or?: Array< ModelSettingsConditionInput | null > | null,
+  not?: ModelSettingsConditionInput | null,
+  _deleted?: ModelBooleanInput | null,
+  createdAt?: ModelStringInput | null,
+};
+
+export type Settings = {
+  __typename: "Settings",
+  id: string,
+  owner?: string | null,
+  identityId?: string | null,
+  autoAnalyzePDFs?: boolean | null,
+  pdfAnalysisModel?: string | null,
+  editorTheme?: string | null,
+  editorFontSize?: number | null,
+  defaultAIModel?: string | null,
+  assistantVoice?: string | null,
+  emailNotifications?: boolean | null,
+  webhookNotifications?: boolean | null,
+  language?: string | null,
+  timezone?: string | null,
+  metadata?: string | null,
+  updatedAt?: string | null,
+  createdAt: string,
+  _version: number,
+  _deleted?: boolean | null,
+  _lastChangedAt: number,
+};
+
+export type UpdateSettingsInput = {
+  id: string,
+  owner?: string | null,
+  identityId?: string | null,
+  autoAnalyzePDFs?: boolean | null,
+  pdfAnalysisModel?: string | null,
+  editorTheme?: string | null,
+  editorFontSize?: number | null,
+  defaultAIModel?: string | null,
+  assistantVoice?: string | null,
+  emailNotifications?: boolean | null,
+  webhookNotifications?: boolean | null,
+  language?: string | null,
+  timezone?: string | null,
+  metadata?: string | null,
+  updatedAt?: string | null,
+  _version?: number | null,
+};
+
+export type DeleteSettingsInput = {
+  id: string,
+  _version?: number | null,
+};
+
 export type CreateQuestionUnitInput = {
   id?: string | null,
   questionId: string,
@@ -1753,6 +1850,36 @@ export type ModelAgentJobFilterInput = {
   _deleted?: ModelBooleanInput | null,
 };
 
+export type ModelSettingsFilterInput = {
+  id?: ModelIDInput | null,
+  owner?: ModelStringInput | null,
+  identityId?: ModelStringInput | null,
+  autoAnalyzePDFs?: ModelBooleanInput | null,
+  pdfAnalysisModel?: ModelStringInput | null,
+  editorTheme?: ModelStringInput | null,
+  editorFontSize?: ModelIntInput | null,
+  defaultAIModel?: ModelStringInput | null,
+  assistantVoice?: ModelStringInput | null,
+  emailNotifications?: ModelBooleanInput | null,
+  webhookNotifications?: ModelBooleanInput | null,
+  language?: ModelStringInput | null,
+  timezone?: ModelStringInput | null,
+  metadata?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
+  and?: Array< ModelSettingsFilterInput | null > | null,
+  or?: Array< ModelSettingsFilterInput | null > | null,
+  not?: ModelSettingsFilterInput | null,
+  _deleted?: ModelBooleanInput | null,
+};
+
+export type ModelSettingsConnection = {
+  __typename: "ModelSettingsConnection",
+  items:  Array<Settings | null >,
+  nextToken?: string | null,
+  startedAt?: number | null,
+};
+
 export type ModelQuestionUnitFilterInput = {
   id?: ModelIDInput | null,
   questionId?: ModelIDInput | null,
@@ -2127,6 +2254,28 @@ export type ModelSubscriptionAgentJobFilterInput = {
   owner?: ModelStringInput | null,
 };
 
+export type ModelSubscriptionSettingsFilterInput = {
+  id?: ModelSubscriptionIDInput | null,
+  identityId?: ModelSubscriptionStringInput | null,
+  autoAnalyzePDFs?: ModelSubscriptionBooleanInput | null,
+  pdfAnalysisModel?: ModelSubscriptionStringInput | null,
+  editorTheme?: ModelSubscriptionStringInput | null,
+  editorFontSize?: ModelSubscriptionIntInput | null,
+  defaultAIModel?: ModelSubscriptionStringInput | null,
+  assistantVoice?: ModelSubscriptionStringInput | null,
+  emailNotifications?: ModelSubscriptionBooleanInput | null,
+  webhookNotifications?: ModelSubscriptionBooleanInput | null,
+  language?: ModelSubscriptionStringInput | null,
+  timezone?: ModelSubscriptionStringInput | null,
+  metadata?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionSettingsFilterInput | null > | null,
+  or?: Array< ModelSubscriptionSettingsFilterInput | null > | null,
+  _deleted?: ModelBooleanInput | null,
+  owner?: ModelStringInput | null,
+};
+
 export type ModelSubscriptionQuestionUnitFilterInput = {
   id?: ModelSubscriptionIDInput | null,
   questionId?: ModelSubscriptionIDInput | null,
@@ -2476,6 +2625,21 @@ export type ChatAssistantThreadMutationVariables = {
 
 export type ChatAssistantThreadMutation = {
   chatAssistantThread?: string | null,
+};
+
+export type AnalyzePDFMutationVariables = {
+  documentID: string,
+};
+
+export type AnalyzePDFMutation = {
+  analyzePDF?:  {
+    __typename: "AnalyzePDFResult",
+    success: boolean,
+    documentID: string,
+    responseId?: string | null,
+    pageCount?: number | null,
+    message?: string | null,
+  } | null,
 };
 
 export type CreateAssistantMutationVariables = {
@@ -5280,6 +5444,96 @@ export type DeleteAgentJobMutation = {
     metadata?: string | null,
     createdAt: string,
     updatedAt: string,
+    _version: number,
+    _deleted?: boolean | null,
+    _lastChangedAt: number,
+  } | null,
+};
+
+export type CreateSettingsMutationVariables = {
+  input: CreateSettingsInput,
+  condition?: ModelSettingsConditionInput | null,
+};
+
+export type CreateSettingsMutation = {
+  createSettings?:  {
+    __typename: "Settings",
+    id: string,
+    owner?: string | null,
+    identityId?: string | null,
+    autoAnalyzePDFs?: boolean | null,
+    pdfAnalysisModel?: string | null,
+    editorTheme?: string | null,
+    editorFontSize?: number | null,
+    defaultAIModel?: string | null,
+    assistantVoice?: string | null,
+    emailNotifications?: boolean | null,
+    webhookNotifications?: boolean | null,
+    language?: string | null,
+    timezone?: string | null,
+    metadata?: string | null,
+    updatedAt?: string | null,
+    createdAt: string,
+    _version: number,
+    _deleted?: boolean | null,
+    _lastChangedAt: number,
+  } | null,
+};
+
+export type UpdateSettingsMutationVariables = {
+  input: UpdateSettingsInput,
+  condition?: ModelSettingsConditionInput | null,
+};
+
+export type UpdateSettingsMutation = {
+  updateSettings?:  {
+    __typename: "Settings",
+    id: string,
+    owner?: string | null,
+    identityId?: string | null,
+    autoAnalyzePDFs?: boolean | null,
+    pdfAnalysisModel?: string | null,
+    editorTheme?: string | null,
+    editorFontSize?: number | null,
+    defaultAIModel?: string | null,
+    assistantVoice?: string | null,
+    emailNotifications?: boolean | null,
+    webhookNotifications?: boolean | null,
+    language?: string | null,
+    timezone?: string | null,
+    metadata?: string | null,
+    updatedAt?: string | null,
+    createdAt: string,
+    _version: number,
+    _deleted?: boolean | null,
+    _lastChangedAt: number,
+  } | null,
+};
+
+export type DeleteSettingsMutationVariables = {
+  input: DeleteSettingsInput,
+  condition?: ModelSettingsConditionInput | null,
+};
+
+export type DeleteSettingsMutation = {
+  deleteSettings?:  {
+    __typename: "Settings",
+    id: string,
+    owner?: string | null,
+    identityId?: string | null,
+    autoAnalyzePDFs?: boolean | null,
+    pdfAnalysisModel?: string | null,
+    editorTheme?: string | null,
+    editorFontSize?: number | null,
+    defaultAIModel?: string | null,
+    assistantVoice?: string | null,
+    emailNotifications?: boolean | null,
+    webhookNotifications?: boolean | null,
+    language?: string | null,
+    timezone?: string | null,
+    metadata?: string | null,
+    updatedAt?: string | null,
+    createdAt: string,
     _version: number,
     _deleted?: boolean | null,
     _lastChangedAt: number,
@@ -9971,6 +10225,108 @@ export type AgentJobsByUnitIDQuery = {
       metadata?: string | null,
       createdAt: string,
       updatedAt: string,
+      _version: number,
+      _deleted?: boolean | null,
+      _lastChangedAt: number,
+    } | null >,
+    nextToken?: string | null,
+    startedAt?: number | null,
+  } | null,
+};
+
+export type GetSettingsQueryVariables = {
+  id: string,
+};
+
+export type GetSettingsQuery = {
+  getSettings?:  {
+    __typename: "Settings",
+    id: string,
+    owner?: string | null,
+    identityId?: string | null,
+    autoAnalyzePDFs?: boolean | null,
+    pdfAnalysisModel?: string | null,
+    editorTheme?: string | null,
+    editorFontSize?: number | null,
+    defaultAIModel?: string | null,
+    assistantVoice?: string | null,
+    emailNotifications?: boolean | null,
+    webhookNotifications?: boolean | null,
+    language?: string | null,
+    timezone?: string | null,
+    metadata?: string | null,
+    updatedAt?: string | null,
+    createdAt: string,
+    _version: number,
+    _deleted?: boolean | null,
+    _lastChangedAt: number,
+  } | null,
+};
+
+export type ListSettingsQueryVariables = {
+  filter?: ModelSettingsFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListSettingsQuery = {
+  listSettings?:  {
+    __typename: "ModelSettingsConnection",
+    items:  Array< {
+      __typename: "Settings",
+      id: string,
+      owner?: string | null,
+      identityId?: string | null,
+      autoAnalyzePDFs?: boolean | null,
+      pdfAnalysisModel?: string | null,
+      editorTheme?: string | null,
+      editorFontSize?: number | null,
+      defaultAIModel?: string | null,
+      assistantVoice?: string | null,
+      emailNotifications?: boolean | null,
+      webhookNotifications?: boolean | null,
+      language?: string | null,
+      timezone?: string | null,
+      metadata?: string | null,
+      updatedAt?: string | null,
+      createdAt: string,
+      _version: number,
+      _deleted?: boolean | null,
+      _lastChangedAt: number,
+    } | null >,
+    nextToken?: string | null,
+    startedAt?: number | null,
+  } | null,
+};
+
+export type SyncSettingsQueryVariables = {
+  filter?: ModelSettingsFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+  lastSync?: number | null,
+};
+
+export type SyncSettingsQuery = {
+  syncSettings?:  {
+    __typename: "ModelSettingsConnection",
+    items:  Array< {
+      __typename: "Settings",
+      id: string,
+      owner?: string | null,
+      identityId?: string | null,
+      autoAnalyzePDFs?: boolean | null,
+      pdfAnalysisModel?: string | null,
+      editorTheme?: string | null,
+      editorFontSize?: number | null,
+      defaultAIModel?: string | null,
+      assistantVoice?: string | null,
+      emailNotifications?: boolean | null,
+      webhookNotifications?: boolean | null,
+      language?: string | null,
+      timezone?: string | null,
+      metadata?: string | null,
+      updatedAt?: string | null,
+      createdAt: string,
       _version: number,
       _deleted?: boolean | null,
       _lastChangedAt: number,
@@ -15053,6 +15409,96 @@ export type OnDeleteAgentJobSubscription = {
     metadata?: string | null,
     createdAt: string,
     updatedAt: string,
+    _version: number,
+    _deleted?: boolean | null,
+    _lastChangedAt: number,
+  } | null,
+};
+
+export type OnCreateSettingsSubscriptionVariables = {
+  filter?: ModelSubscriptionSettingsFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnCreateSettingsSubscription = {
+  onCreateSettings?:  {
+    __typename: "Settings",
+    id: string,
+    owner?: string | null,
+    identityId?: string | null,
+    autoAnalyzePDFs?: boolean | null,
+    pdfAnalysisModel?: string | null,
+    editorTheme?: string | null,
+    editorFontSize?: number | null,
+    defaultAIModel?: string | null,
+    assistantVoice?: string | null,
+    emailNotifications?: boolean | null,
+    webhookNotifications?: boolean | null,
+    language?: string | null,
+    timezone?: string | null,
+    metadata?: string | null,
+    updatedAt?: string | null,
+    createdAt: string,
+    _version: number,
+    _deleted?: boolean | null,
+    _lastChangedAt: number,
+  } | null,
+};
+
+export type OnUpdateSettingsSubscriptionVariables = {
+  filter?: ModelSubscriptionSettingsFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnUpdateSettingsSubscription = {
+  onUpdateSettings?:  {
+    __typename: "Settings",
+    id: string,
+    owner?: string | null,
+    identityId?: string | null,
+    autoAnalyzePDFs?: boolean | null,
+    pdfAnalysisModel?: string | null,
+    editorTheme?: string | null,
+    editorFontSize?: number | null,
+    defaultAIModel?: string | null,
+    assistantVoice?: string | null,
+    emailNotifications?: boolean | null,
+    webhookNotifications?: boolean | null,
+    language?: string | null,
+    timezone?: string | null,
+    metadata?: string | null,
+    updatedAt?: string | null,
+    createdAt: string,
+    _version: number,
+    _deleted?: boolean | null,
+    _lastChangedAt: number,
+  } | null,
+};
+
+export type OnDeleteSettingsSubscriptionVariables = {
+  filter?: ModelSubscriptionSettingsFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnDeleteSettingsSubscription = {
+  onDeleteSettings?:  {
+    __typename: "Settings",
+    id: string,
+    owner?: string | null,
+    identityId?: string | null,
+    autoAnalyzePDFs?: boolean | null,
+    pdfAnalysisModel?: string | null,
+    editorTheme?: string | null,
+    editorFontSize?: number | null,
+    defaultAIModel?: string | null,
+    assistantVoice?: string | null,
+    emailNotifications?: boolean | null,
+    webhookNotifications?: boolean | null,
+    language?: string | null,
+    timezone?: string | null,
+    metadata?: string | null,
+    updatedAt?: string | null,
+    createdAt: string,
     _version: number,
     _deleted?: boolean | null,
     _lastChangedAt: number,

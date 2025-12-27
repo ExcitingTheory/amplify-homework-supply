@@ -2964,6 +2964,114 @@ export const agentJobsByUnitID = /* GraphQL */ `query AgentJobsByUnitID(
   APITypes.AgentJobsByUnitIDQueryVariables,
   APITypes.AgentJobsByUnitIDQuery
 >;
+export const getSettings = /* GraphQL */ `query GetSettings($id: ID!) {
+  getSettings(id: $id) {
+    id
+    owner
+    identityId
+    autoAnalyzePDFs
+    pdfAnalysisModel
+    editorTheme
+    editorFontSize
+    defaultAIModel
+    assistantVoice
+    emailNotifications
+    webhookNotifications
+    language
+    timezone
+    metadata
+    updatedAt
+    createdAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetSettingsQueryVariables,
+  APITypes.GetSettingsQuery
+>;
+export const listSettings = /* GraphQL */ `query ListSettings(
+  $filter: ModelSettingsFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listSettings(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      owner
+      identityId
+      autoAnalyzePDFs
+      pdfAnalysisModel
+      editorTheme
+      editorFontSize
+      defaultAIModel
+      assistantVoice
+      emailNotifications
+      webhookNotifications
+      language
+      timezone
+      metadata
+      updatedAt
+      createdAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListSettingsQueryVariables,
+  APITypes.ListSettingsQuery
+>;
+export const syncSettings = /* GraphQL */ `query SyncSettings(
+  $filter: ModelSettingsFilterInput
+  $limit: Int
+  $nextToken: String
+  $lastSync: AWSTimestamp
+) {
+  syncSettings(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    lastSync: $lastSync
+  ) {
+    items {
+      id
+      owner
+      identityId
+      autoAnalyzePDFs
+      pdfAnalysisModel
+      editorTheme
+      editorFontSize
+      defaultAIModel
+      assistantVoice
+      emailNotifications
+      webhookNotifications
+      language
+      timezone
+      metadata
+      updatedAt
+      createdAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SyncSettingsQueryVariables,
+  APITypes.SyncSettingsQuery
+>;
 export const getQuestionUnit = /* GraphQL */ `query GetQuestionUnit($id: ID!) {
   getQuestionUnit(id: $id) {
     id

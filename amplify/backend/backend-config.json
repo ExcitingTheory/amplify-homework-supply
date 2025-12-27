@@ -120,6 +120,28 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "analyzePdf": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "japanese5"
+        },
+        {
+          "attributes": [
+            "BucketName"
+          ],
+          "category": "storage",
+          "resourceName": "files"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "editorChat": {
       "build": true,
       "dependsOn": [
@@ -220,6 +242,21 @@
       ],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
+    },
+    "openaiWebhook": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "japanese5"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
     }
   },
   "parameters": {
@@ -236,6 +273,30 @@
         {
           "category": "function",
           "resourceName": "AdminQueries65120535"
+        }
+      ]
+    },
+    "AMPLIFY_function_analyzePdf_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "analyzePdf"
+        }
+      ]
+    },
+    "AMPLIFY_function_analyzePdf_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "analyzePdf"
+        }
+      ]
+    },
+    "AMPLIFY_function_analyzePdf_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "analyzePdf"
         }
       ]
     },
@@ -308,6 +369,30 @@
         {
           "category": "function",
           "resourceName": "manageSection"
+        }
+      ]
+    },
+    "AMPLIFY_function_openaiWebhook_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "openaiWebhook"
+        }
+      ]
+    },
+    "AMPLIFY_function_openaiWebhook_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "openaiWebhook"
+        }
+      ]
+    },
+    "AMPLIFY_function_openaiWebhook_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "openaiWebhook"
         }
       ]
     },

@@ -13,6 +13,22 @@ type Mutation {
   updateAssistantEditor(assistantId: String!, additionalInstructions: String!, model: String): String @function(name: "openai-${env}")
   deleteAssistantEditor(assistantId: String!, threadId: String!): String @function(name: "openai-${env}")
   chatAssistantThread(assistantId: String!, messages: String!): String @function(name: "openai-${env}")
+  analyzePDF(documentID: ID!): AnalyzePDFResult @function(name: "analyzePdf-${env}")
+  cancelPDFAnalysis(documentID: ID!): CancelPDFAnalysisResult @function(name: "analyzePdf-${env}")
+}
+
+type AnalyzePDFResult {
+  success: Boolean!
+  documentID: ID!
+  responseId: String
+  pageCount: Int
+  message: String
+}
+
+type CancelPDFAnalysisResult {
+  success: Boolean!
+  documentID: ID!
+  message: String
 }
 
 type Query {
@@ -310,6 +326,31 @@ type AgentJob @model @auth(rules: [
   estimatedCost: Float
   retryCount: Int
   metadata: AWSJSON
+}
+
+type Settings @model @auth(rules: [
+  { allow: owner },
+  ]) {
+  id: ID!
+  owner: String
+  identityId: String
+  # PDF Analysis Settings
+  autoAnalyzePDFs: Boolean # Automatically analyze PDFs on upload
+  pdfAnalysisModel: String # OpenAI model to use (default: gpt-4)
+  # Editor Settings
+  editorTheme: String # light, dark, auto
+  editorFontSize: Int
+  # AI Assistant Settings
+  defaultAIModel: String
+  assistantVoice: String # shimmer, alloy, echo, etc.
+  # Notification Settings
+  emailNotifications: Boolean
+  webhookNotifications: Boolean
+  # Other Settings
+  language: String # en, ja, etc.
+  timezone: String
+  metadata: AWSJSON # For additional settings
+  updatedAt: AWSDateTime
 }
 
 

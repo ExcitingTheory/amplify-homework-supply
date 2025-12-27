@@ -14,6 +14,26 @@ export enum FileProtectionLevels {
   PROTECTED = "PROTECTED"
 }
 
+type EagerAnalyzePDFResult = {
+  readonly success: boolean;
+  readonly documentID: string;
+  readonly responseId?: string | null;
+  readonly pageCount?: number | null;
+  readonly message?: string | null;
+}
+
+type LazyAnalyzePDFResult = {
+  readonly success: boolean;
+  readonly documentID: string;
+  readonly responseId?: string | null;
+  readonly pageCount?: number | null;
+  readonly message?: string | null;
+}
+
+export declare type AnalyzePDFResult = LazyLoading extends LazyLoadingDisabled ? EagerAnalyzePDFResult : LazyAnalyzePDFResult
+
+export declare const AnalyzePDFResult: (new (init: ModelInit<AnalyzePDFResult>) => AnalyzePDFResult)
+
 type EagerStudentInfo = {
   readonly id: string;
   readonly name?: string | null;
@@ -664,6 +684,58 @@ export declare type AgentJob = LazyLoading extends LazyLoadingDisabled ? EagerAg
 
 export declare const AgentJob: (new (init: ModelInit<AgentJob>) => AgentJob) & {
   copyOf(source: AgentJob, mutator: (draft: MutableModel<AgentJob>) => MutableModel<AgentJob> | void): AgentJob;
+}
+
+type EagerSettings = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Settings, 'id'>;
+    readOnlyFields: 'createdAt';
+  };
+  readonly id: string;
+  readonly owner?: string | null;
+  readonly identityId?: string | null;
+  readonly autoAnalyzePDFs?: boolean | null;
+  readonly pdfAnalysisModel?: string | null;
+  readonly editorTheme?: string | null;
+  readonly editorFontSize?: number | null;
+  readonly defaultAIModel?: string | null;
+  readonly assistantVoice?: string | null;
+  readonly emailNotifications?: boolean | null;
+  readonly webhookNotifications?: boolean | null;
+  readonly language?: string | null;
+  readonly timezone?: string | null;
+  readonly metadata?: string | null;
+  readonly updatedAt?: string | null;
+  readonly createdAt?: string | null;
+}
+
+type LazySettings = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<Settings, 'id'>;
+    readOnlyFields: 'createdAt';
+  };
+  readonly id: string;
+  readonly owner?: string | null;
+  readonly identityId?: string | null;
+  readonly autoAnalyzePDFs?: boolean | null;
+  readonly pdfAnalysisModel?: string | null;
+  readonly editorTheme?: string | null;
+  readonly editorFontSize?: number | null;
+  readonly defaultAIModel?: string | null;
+  readonly assistantVoice?: string | null;
+  readonly emailNotifications?: boolean | null;
+  readonly webhookNotifications?: boolean | null;
+  readonly language?: string | null;
+  readonly timezone?: string | null;
+  readonly metadata?: string | null;
+  readonly updatedAt?: string | null;
+  readonly createdAt?: string | null;
+}
+
+export declare type Settings = LazyLoading extends LazyLoadingDisabled ? EagerSettings : LazySettings
+
+export declare const Settings: (new (init: ModelInit<Settings>) => Settings) & {
+  copyOf(source: Settings, mutator: (draft: MutableModel<Settings>) => MutableModel<Settings> | void): Settings;
 }
 
 type EagerQuestionUnit = {

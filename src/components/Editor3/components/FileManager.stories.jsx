@@ -17,11 +17,14 @@ import { HeadingNode } from '@lexical/rich-text';
 
 import FileManager from './FileManager';
 import { FilesProvider } from '../../../context/fileContext';
+import { SettingsProvider } from '../../../context/settingsContext';
 import { UnitProvider } from '../../../context/unitContext';
 import PlaylistPlugin, { PlaylistNode } from '../plugins/PlaylistPlugin';
+import PdfViewerPlugin from '../plugins/PdfViewerPlugin';
+import { PdfViewerNode } from './PdfViewerNode';
 import ImagesPlugin from '../plugins/ImagesPlugin';
 import { ImageNode } from '../components/ImageNode';
-import { seedMockFiles } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockFiles, seedMockSettings } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
   title: 'Components/FileManager',
@@ -68,7 +71,7 @@ const editorConfig = {
     },
   },
   onError: (error) => console.error(error),
-  nodes: [HeadingNode, ImageNode, PlaylistNode],
+  nodes: [HeadingNode, ImageNode, PlaylistNode, PdfViewerNode],
 };
 
 // Store for tracking uploaded files across component instances
@@ -155,6 +158,36 @@ const mockFiles = [
     waveformData: generateWaveformData(100, 'medium'),
     createdAt: new Date().toISOString(),
   },
+  {
+    id: 'file-6',
+    name: 'japanese-grammar-guide.pdf',
+    path: 'protected/documents/japanese-grammar-guide.pdf',
+    mimeType: 'application/pdf',
+    size: 2458000,
+    identityId: 'us-east-1:abc-123',
+    level: 'PROTECTED',
+    createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+  },
+  {
+    id: 'file-7',
+    name: 'vocabulary-list-chapter-1.pdf',
+    path: 'protected/documents/vocabulary-list-chapter-1.pdf',
+    mimeType: 'application/pdf',
+    size: 458000,
+    identityId: 'us-east-1:abc-123',
+    level: 'PROTECTED',
+    createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+  },
+  {
+    id: 'file-8',
+    name: 'lesson-plan.pdf',
+    path: 'protected/documents/lesson-plan.pdf',
+    mimeType: 'application/pdf',
+    size: 1234000,
+    identityId: 'us-east-1:abc-123',
+    level: 'PROTECTED',
+    createdAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+  },
 ];
 
 const mockSession = {
@@ -168,144 +201,165 @@ const mockUnit = {
   description: 'Introduction to basic Japanese greetings',
 };
 
+const mockSettings = {
+  id: 'settings-1',
+  autoAnalyzePDFs: true,
+  pdfAnalysisModel: 'gpt-4',
+  editorTheme: 'auto',
+  editorFontSize: 14,
+  defaultAIModel: 'gpt-4',
+  assistantVoice: 'shimmer',
+  emailNotifications: true,
+  webhookNotifications: false,
+  language: 'en',
+  timezone: 'America/New_York',
+};
+
 // Template with editor integration
-const EditorTemplate = ({ files: initialFiles = mockFiles }) => {
-  // Seed the mock DataStore with files on mount
+const EditorTemplate = ({ files: initialFiles = mockFiles, settings = mockSettings, autoAnalyze = true }) => {
+  // Seed the mock DataStore with files and settings on mount
   useEffect(() => {
     console.log('[FileManager.stories] Seeding mock files:', initialFiles.length);
     seedMockFiles(initialFiles);
-  }, [initialFiles]);
+    seedMockSettings({ ...settings, autoAnalyzePDFs: autoAnalyze });
+  }, [initialFiles, settings, autoAnalyze]);
 
   return (
-    <FilesProvider>
-      <UnitProvider value={{ unit: mockUnit }}>
-        <LexicalComposer initialConfig={editorConfig}>
-          <div style={{ 
-            display: 'flex',
-            height: '100vh',
-            backgroundColor: '#f5f5f5'
-          }}>
-            {/* Editor Section */}
+    <SettingsProvider>
+      <FilesProvider>
+        <UnitProvider value={{ unit: mockUnit }}>
+          <LexicalComposer initialConfig={editorConfig}>
             <div style={{ 
-              flex: 1,
-              padding: '2rem',
-              overflowY: 'auto'
-            }}>
-              <div style={{
-                backgroundColor: 'white',
-                borderRadius: '8px',
-                padding: '2rem',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                minHeight: '600px'
-              }}>
-                <h2 style={{ marginTop: 0 }}>Content Editor</h2>
-                <p style={{ color: '#666', marginBottom: '2rem' }}>
-                  Click files in the File Manager to insert them into your content.
-                </p>
-                <RichTextPlugin
-                  contentEditable={
-                    <ContentEditable 
-                      style={{
-                        minHeight: '400px',
-                        outline: 'none',
-                        padding: '1rem',
-                        border: '1px solid #e0e0e0',
-                        borderRadius: '4px'
-                      }}
-                    />
-                  }
-                  placeholder={
-                    <div style={{ 
-                      position: 'absolute', 
-                      top: '1rem', 
-                      left: '1rem',
-                      color: '#999',
-                      pointerEvents: 'none'
-                    }}>
-                      Start typing or insert files from the File Manager...
-                    </div>
-                  }
-                  ErrorBoundary={LexicalErrorBoundary}
-                />
-                <HistoryPlugin />
-                <PlaylistPlugin />
-                <ImagesPlugin captionsEnabled={true} />
-              </div>
-            </div>
-
-            {/* File Manager Section */}
-            <div style={{ 
-              width: '400px',
-              borderLeft: '1px solid #e0e0e0',
-              backgroundColor: 'white',
               display: 'flex',
-              flexDirection: 'column'
+              height: '100vh',
+              backgroundColor: '#f5f5f5'
             }}>
-              <div style={{
-                padding: '1rem',
-                borderBottom: '1px solid #e0e0e0',
-                backgroundColor: '#fafafa'
+              {/* Editor Section */}
+              <div style={{ 
+                flex: 1,
+                padding: '2rem',
+                overflowY: 'auto'
               }}>
-                <h3 style={{ margin: 0 }}>File Manager</h3>
-                <p style={{ margin: '0.5rem 0 0', fontSize: '0.875rem', color: '#666' }}>
-                  Upload, search, and manage your media files
-                </p>
+                <div style={{
+                  backgroundColor: 'white',
+                  borderRadius: '8px',
+                  padding: '2rem',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  minHeight: '600px'
+                }}>
+                  <h2 style={{ marginTop: 0 }}>Content Editor</h2>
+                  <p style={{ color: '#666', marginBottom: '2rem' }}>
+                    Click files in the File Manager to insert them into your content.
+                  </p>
+                  <RichTextPlugin
+                    contentEditable={
+                      <ContentEditable 
+                        style={{
+                          minHeight: '400px',
+                          outline: 'none',
+                          padding: '1rem',
+                          border: '1px solid #e0e0e0',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    }
+                    placeholder={
+                      <div style={{ 
+                        position: 'absolute', 
+                        top: '1rem', 
+                        left: '1rem',
+                        color: '#999',
+                        pointerEvents: 'none'
+                      }}>
+                        Start typing or insert files from the File Manager...
+                      </div>
+                    }
+                    ErrorBoundary={LexicalErrorBoundary}
+                  />
+                  <HistoryPlugin />
+                  <PlaylistPlugin />
+                  <PdfViewerPlugin />
+                  <ImagesPlugin captionsEnabled={true} />
+                </div>
               </div>
-              <div style={{ flex: 1, overflow: 'hidden' }}>
-                <FileManager />
+
+              {/* File Manager Section */}
+              <div style={{ 
+                width: '400px',
+                borderLeft: '1px solid #e0e0e0',
+                backgroundColor: 'white',
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                <div style={{
+                  padding: '1rem',
+                  borderBottom: '1px solid #e0e0e0',
+                  backgroundColor: '#fafafa'
+                }}>
+                  <h3 style={{ margin: 0 }}>File Manager</h3>
+                  <p style={{ margin: '0.5rem 0 0', fontSize: '0.875rem', color: '#666' }}>
+                    Upload, search, and manage your media files
+                  </p>
+                </div>
+                <div style={{ flex: 1, overflow: 'hidden' }}>
+                  <FileManager />
+                </div>
               </div>
             </div>
-          </div>
-        </LexicalComposer>
-      </UnitProvider>
-    </FilesProvider>
+          </LexicalComposer>
+        </UnitProvider>
+      </FilesProvider>
+    </SettingsProvider>
   );
 };
 
 // Standalone template without editor
-const StandaloneTemplate = ({ files: initialFiles = mockFiles }) => {
-  // Seed the mock DataStore with files on mount
+const StandaloneTemplate = ({ files: initialFiles = mockFiles, settings = mockSettings, autoAnalyze = true }) => {
+  // Seed the mock DataStore with files and settings on mount
   useEffect(() => {
     console.log('[FileManager.stories] Seeding mock files:', initialFiles.length);
     seedMockFiles(initialFiles);
-  }, [initialFiles]);
+    seedMockSettings({ ...settings, autoAnalyzePDFs: autoAnalyze });
+  }, [initialFiles, settings, autoAnalyze]);
 
   return (
-    <FilesProvider>
-      <UnitProvider value={{ unit: mockUnit }}>
-        <div style={{ 
-          padding: '2rem',
-          backgroundColor: '#f5f5f5',
-          minHeight: '100vh'
-        }}>
-          <div style={{
-            maxWidth: '500px',
-            margin: '0 auto',
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            height: 'calc(100vh - 4rem)',
-            display: 'flex',
-            flexDirection: 'column'
+    <SettingsProvider>
+      <FilesProvider>
+        <UnitProvider value={{ unit: mockUnit }}>
+          <div style={{ 
+            padding: '2rem',
+            backgroundColor: '#f5f5f5',
+            minHeight: '100vh'
           }}>
             <div style={{
-              padding: '1.5rem',
-              borderBottom: '1px solid #e0e0e0'
+              maxWidth: '500px',
+              margin: '0 auto',
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              height: 'calc(100vh - 4rem)',
+              display: 'flex',
+              flexDirection: 'column'
             }}>
-              <h2 style={{ margin: 0 }}>File Manager</h2>
-              <p style={{ margin: '0.5rem 0 0', color: '#666' }}>
-                Standalone file management interface
-              </p>
-            </div>
-            <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-              <LexicalComposer initialConfig={editorConfig}>
-                <FileManager />
-              </LexicalComposer>
+              <div style={{
+                padding: '1.5rem',
+                borderBottom: '1px solid #e0e0e0'
+              }}>
+                <h2 style={{ margin: 0 }}>File Manager</h2>
+                <p style={{ margin: '0.5rem 0 0', color: '#666' }}>
+                  Standalone file management interface
+                </p>
+              </div>
+              <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+                <LexicalComposer initialConfig={editorConfig}>
+                  <FileManager />
+                </LexicalComposer>
+              </div>
             </div>
           </div>
-        </div>
-      </UnitProvider>
-    </FilesProvider>
+        </UnitProvider>
+      </FilesProvider>
+    </SettingsProvider>
   );
 };
 
@@ -485,6 +539,39 @@ export const ImagesOnly = {
     docs: {
       description: {
         story: 'FileManager showing only image files. Perfect for visual content organization.',
+      },
+    },
+  },
+};
+
+export const PDFsOnly = {
+  render: () => <EditorTemplate files={mockFiles.filter(f => f.mimeType === 'application/pdf')} />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'FileManager showing only PDF files. Try clicking the Analyze button to see PDF analysis in action (mocked).',
+      },
+    },
+  },
+};
+
+export const WithAutoAnalyzeEnabled = {
+  render: () => <EditorTemplate autoAnalyze={true} />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'FileManager with auto-analyze PDFs enabled. When PDFs are uploaded, they are automatically analyzed.',
+      },
+    },
+  },
+};
+
+export const WithAutoAnalyzeDisabled = {
+  render: () => <EditorTemplate autoAnalyze={false} />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'FileManager with auto-analyze PDFs disabled. PDFs can be manually analyzed using the Analyze button.',
       },
     },
   },

@@ -1,0 +1,251 @@
+/**
+ * @fileoverview PdfViewerComponent - React component for viewing PDF documents.
+ * 
+ * Displays PDF documents using react-pdf with navigation controls,
+ * zoom capabilities, and page tracking.
+ * 
+ * @module PdfViewerComponent
+ */
+
+import React, { useState } from 'react';
+import { Box, IconButton, Typography, Paper, ButtonGroup } from '@mui/material';
+import { 
+    ZoomIn as ZoomInIcon,
+    ZoomOut as ZoomOutIcon,
+    NavigateBefore as NavigateBeforeIcon,
+    NavigateNext as NavigateNextIcon,
+    PictureAsPdf as PdfIcon,
+} from '@mui/icons-material';
+import getCachedUrl from '../../../utils/getCachedUrl';
+
+/**
+ * PdfViewerComponent - Displays PDF documents with controls.
+ * 
+ * @param {Object} props - Component props
+ * @param {string} props.path - S3 path to the PDF file
+ * @param {string} props.identityId - AWS Cognito identity ID
+ * @param {string} props.filename - Display name for the PDF
+ * @param {string} props.nodeKey - Lexical node key
+ * @returns {React.ReactElement} PDF viewer component
+ */
+export default function PdfViewerComponent({ 
+    path, 
+    identityId, 
+    filename,
+    nodeKey 
+}) {
+    const [pdfUrl, setPdfUrl] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [numPages, setNumPages] = useState(null);
+    const [scale, setScale] = useState(1.0);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Load PDF from S3 on mount
+    React.useEffect(() => {
+        const loadPdf = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                
+                const url = await getCachedUrl(path, 'protected', identityId);
+                
+                setPdfUrl(url);
+            } catch (err) {
+                console.error('Error loading PDF:', err);
+                setError('Failed to load PDF');
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        loadPdf();
+    }, [path, identityId]);
+
+    const handleZoomIn = () => {
+        setScale(prev => Math.min(prev + 0.25, 3.0));
+    };
+
+    const handleZoomOut = () => {
+        setScale(prev => Math.max(prev - 0.25, 0.5));
+    };
+
+    const handlePrevPage = () => {
+        setCurrentPage(prev => Math.max(prev - 1, 1));
+    };
+
+    const handleNextPage = () => {
+        setCurrentPage(prev => Math.min(prev + 1, numPages || 1));
+    };
+
+    if (loading) {
+        return (
+            <Paper 
+                elevation={2} 
+                sx={{ 
+                    p: 4, 
+                    textAlign: 'center',
+                    bgcolor: 'grey.50',
+                    my: 2,
+                }}
+            >
+                <PdfIcon sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
+                <Typography variant="body2" color="text.secondary">
+                    Loading PDF: {filename}
+                </Typography>
+            </Paper>
+        );
+    }
+
+    if (error) {
+        return (
+            <Paper 
+                elevation={2} 
+                sx={{ 
+                    p: 4, 
+                    textAlign: 'center',
+                    bgcolor: 'error.50',
+                    my: 2,
+                    border: '1px solid',
+                    borderColor: 'error.200',
+                }}
+            >
+                <PdfIcon sx={{ fontSize: 48, color: 'error.main', mb: 2 }} />
+                <Typography variant="body1" color="error.main" gutterBottom>
+                    {error}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                    {filename}
+                </Typography>
+            </Paper>
+        );
+    }
+
+    return (
+        <Paper 
+            elevation={2} 
+            sx={{ 
+                my: 2,
+                overflow: 'hidden',
+            }}
+        >
+            {/* Controls Bar */}
+            <Box 
+                sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between',
+                    p: 1,
+                    bgcolor: 'grey.100',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                }}
+            >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <PdfIcon sx={{ color: 'error.main' }} />
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {filename}
+                    </Typography>
+                </Box>
+
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    {/* Page Navigation */}
+                    {numPages && (
+                        <ButtonGroup size="small" variant="outlined">
+                            <IconButton 
+                                size="small" 
+                                onClick={handlePrevPage}
+                                disabled={currentPage <= 1}
+                            >
+                                <NavigateBeforeIcon fontSize="small" />
+                            </IconButton>
+                            <Box 
+                                sx={{ 
+                                    px: 2, 
+                                    display: 'flex', 
+                                    alignItems: 'center',
+                                    bgcolor: 'background.paper',
+                                    border: '1px solid',
+                                    borderColor: 'divider',
+                                }}
+                            >
+                                <Typography variant="body2">
+                                    {currentPage} / {numPages}
+                                </Typography>
+                            </Box>
+                            <IconButton 
+                                size="small" 
+                                onClick={handleNextPage}
+                                disabled={currentPage >= numPages}
+                            >
+                                <NavigateNextIcon fontSize="small" />
+                            </IconButton>
+                        </ButtonGroup>
+                    )}
+
+                    {/* Zoom Controls */}
+                    <ButtonGroup size="small" variant="outlined">
+                        <IconButton 
+                            size="small" 
+                            onClick={handleZoomOut}
+                            disabled={scale <= 0.5}
+                        >
+                            <ZoomOutIcon fontSize="small" />
+                        </IconButton>
+                        <Box 
+                            sx={{ 
+                                px: 2, 
+                                display: 'flex', 
+                                alignItems: 'center',
+                                bgcolor: 'background.paper',
+                                border: '1px solid',
+                                borderColor: 'divider',
+                            }}
+                        >
+                            <Typography variant="body2">
+                                {Math.round(scale * 100)}%
+                            </Typography>
+                        </Box>
+                        <IconButton 
+                            size="small" 
+                            onClick={handleZoomIn}
+                            disabled={scale >= 3.0}
+                        >
+                            <ZoomInIcon fontSize="small" />
+                        </IconButton>
+                    </ButtonGroup>
+                </Box>
+            </Box>
+
+            {/* PDF Viewer */}
+            <Box 
+                sx={{ 
+                    p: 2,
+                    bgcolor: 'grey.50',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    minHeight: 400,
+                    maxHeight: 800,
+                    overflow: 'auto',
+                }}
+            >
+                {pdfUrl ? (
+                    <iframe
+                        src={`${pdfUrl}#page=${currentPage}&zoom=${scale * 100}`}
+                        style={{
+                            width: '100%',
+                            minHeight: '600px',
+                            border: 'none',
+                            backgroundColor: 'white',
+                        }}
+                        title={filename}
+                    />
+                ) : (
+                    <Typography variant="body2" color="text.secondary">
+                        No PDF to display
+                    </Typography>
+                )}
+            </Box>
+        </Paper>
+    );
+}

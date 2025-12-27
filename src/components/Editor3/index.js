@@ -100,6 +100,9 @@ import PlaylistPlugin, {
   PlaylistNode,
 } from './plugins/PlaylistPlugin';
 
+import PdfViewerPlugin from './plugins/PdfViewerPlugin';
+import { PdfViewerNode } from './components/PdfViewerNode';
+
 import { LayoutPlugin } from './plugins/LayoutPlugin';
 import { LayoutContainerNode } from './components/LayoutContainerNode';
 import { LayoutItemNode } from './components/LayoutItemNode';
@@ -146,6 +149,7 @@ export const EditorNodes = [
   ImageNode,
   QuizNode,
   PlaylistNode,
+  PdfViewerNode,
   LayoutContainerNode,
   LayoutItemNode,
   NewTableNode,
@@ -464,6 +468,7 @@ export default function Editor() {
             <DataPlugin />
             <MeaningAssociationPlugin />
             <PlaylistPlugin />
+            <PdfViewerPlugin />
             <AutocompletePlugin />
             <DragDropPastePlugin />
             <ImagesPlugin />
@@ -655,6 +660,7 @@ export function Workbook() {
             <StoryProgressPlugin />
             <MeaningAssociationPlugin />
             <PlaylistPlugin />
+            <PdfViewerPlugin />
             <ImagesPlugin />
             <QuizPlugin />
             <UnitCompletedPlugin />
