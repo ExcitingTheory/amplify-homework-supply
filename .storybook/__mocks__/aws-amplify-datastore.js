@@ -12,6 +12,11 @@ const mockGrades = {};
 const mockFiles = {};
 const mockSettings = {};
 const mockDocuments = {};
+const mockParsedContent = {};
+const mockWords = {};
+
+// Export storage for seed data
+export { mockUnits, mockGrades, mockFiles, mockSettings, mockDocuments, mockParsedContent, mockWords };
 
 // Store active subscriptions
 const activeSubscriptions = {
@@ -20,6 +25,8 @@ const activeSubscriptions = {
   File: [],
   Settings: [],
   Document: [],
+  ParsedContent: [],
+  Word: [],
 };
 
 // Helper to seed mock data for stories
@@ -219,6 +226,8 @@ export const clearMockUnits = () => {
   Object.keys(mockFiles).forEach(key => delete mockFiles[key]);
   Object.keys(mockSettings).forEach(key => delete mockSettings[key]);
   Object.keys(mockDocuments).forEach(key => delete mockDocuments[key]);
+  Object.keys(mockParsedContent).forEach(key => delete mockParsedContent[key]);
+  Object.keys(mockWords).forEach(key => delete mockWords[key]);
   console.log('[Mock DataStore] Cleared all mock data');
   
   // Always seed a default unit for stories that don't provide their own
@@ -363,9 +372,29 @@ export class DataStore {
     const isUnit = model.name && model.data !== undefined && !model.unitID;
     const isFile = model.path && model.mimeType;
     const isDocument = model.filename && model.s3Key && model.status;
+    const isParsedContent = model.documentID && model.vocabularyJSON !== undefined;
+    const isWord = model.phrase && model.definition;
     
     // Update the mock data based on model type
-    if (isDocument) {
+    if (isParsedContent) {
+      // This is a ParsedContent
+      mockParsedContent[model.id] = model;
+      console.log('[Mock DataStore] Saved ParsedContent:', model.id, 'for document:', model.documentID);
+      
+      // Notify all ParsedContent subscribers
+      activeSubscriptions.ParsedContent.forEach(callback => {
+        callback({ items: Object.values(mockParsedContent), isSynced: true });
+      });
+    } else if (isWord) {
+      // This is a Word
+      mockWords[model.id] = model;
+      console.log('[Mock DataStore] Saved Word:', model.id, model.phrase);
+      
+      // Notify all Word subscribers
+      activeSubscriptions.Word.forEach(callback => {
+        callback({ items: Object.values(mockWords), isSynced: true });
+      });
+    } else if (isDocument) {
       // This is a Document
       mockDocuments[model.id] = model;
       console.log('[Mock DataStore] Saved Document:', model.id, model.filename);
@@ -423,6 +452,24 @@ export class DataStore {
     
     // If idOrPredicate is a string, treat it as an ID lookup
     if (typeof idOrPredicate === 'string') {
+      // Check custom model storage first
+      if (modelName === 'Document' && mockDocuments[idOrPredicate]) {
+        return mockDocuments[idOrPredicate];
+      }
+      if (modelName === 'ParsedContent' && mockParsedContent[idOrPredicate]) {
+        return mockParsedContent[idOrPredicate];
+      }
+      if (modelName === 'Word' && mockWords[idOrPredicate]) {
+        return mockWords[idOrPredicate];
+      }
+      if (modelName === 'Unit' && mockUnits[idOrPredicate]) {
+        return mockUnits[idOrPredicate];
+      }
+      if (modelName === 'Grade' && mockGrades[idOrPredicate]) {
+        return mockGrades[idOrPredicate];
+      }
+      
+      // Fall back to mockData
       const data = mockData[modelName];
       if (data && data[idOrPredicate]) {
         console.log('Mock DataStore returning:', data[idOrPredicate]);
@@ -430,6 +477,33 @@ export class DataStore {
       }
       console.log('Mock DataStore: No data found for id:', idOrPredicate);
       return null;
+    }
+    
+    // Handle predicate function for ParsedContent queries
+    if (modelName === 'ParsedContent' && typeof idOrPredicate === 'function') {
+      let documentIDFilter = null;
+      const predicateCapture = {
+        documentID: {
+          eq: (value) => {
+            documentIDFilter = value;
+            console.log('[Mock DataStore] Filtering ParsedContent by documentID.eq:', value);
+            return predicateCapture;
+          }
+        }
+      };
+      
+      try {
+        idOrPredicate(predicateCapture);
+      } catch (e) {
+        console.log('[Mock DataStore] Could not parse predicate:', e.message);
+      }
+      
+      let results = Object.values(mockParsedContent);
+      if (documentIDFilter) {
+        results = results.filter(pc => pc.documentID === documentIDFilter);
+      }
+      console.log('[Mock DataStore] Returning', results.length, 'parsed content records');
+      return results;
     }
     
     // Handle predicate function for Document queries
@@ -462,6 +536,16 @@ export class DataStore {
     }
     
     // Otherwise return all items for that model
+    if (modelName === 'Document') {
+      return Object.values(mockDocuments);
+    }
+    if (modelName === 'ParsedContent') {
+      return Object.values(mockParsedContent);
+    }
+    if (modelName === 'Word') {
+      return Object.values(mockWords);
+    }
+    
     const data = mockData[modelName];
     if (data) {
       return Object.values(data);
@@ -525,6 +609,13 @@ export class DataStore {
           eq: (value) => {
             filterFn = (item) => item.unitID === value;
             console.log('[Mock DataStore] Filter by unitID.eq:', value);
+            return predicateCapture;
+          }
+        },
+        documentID: {
+          eq: (value) => {
+            filterFn = (item) => item.documentID === value;
+            console.log('[Mock DataStore] Filter by documentID.eq:', value);
             return predicateCapture;
           }
         },
@@ -618,6 +709,20 @@ export class DataStore {
           }
           console.log('[Mock DataStore] Returning', items.length, 'documents (filtered)');
           activeSubscriptions.Document.push(callback);
+        } else if (modelName === 'ParsedContent') {
+          items = Object.values(mockParsedContent);
+          if (filterFn) {
+            items = items.filter(filterFn);
+          }
+          console.log('[Mock DataStore] Returning', items.length, 'parsed content records (filtered)');
+          activeSubscriptions.ParsedContent.push(callback);
+        } else if (modelName === 'Word') {
+          items = Object.values(mockWords);
+          if (filterFn) {
+            items = items.filter(filterFn);
+          }
+          console.log('[Mock DataStore] Returning', items.length, 'words (filtered)');
+          activeSubscriptions.Word.push(callback);
         } else {
           const data = mockData[modelName];
           items = data ? Object.values(data) : [];
@@ -657,6 +762,16 @@ export class DataStore {
               const index = activeSubscriptions.Document.indexOf(callback);
               if (index > -1) {
                 activeSubscriptions.Document.splice(index, 1);
+              }
+            } else if (modelName === 'ParsedContent') {
+              const index = activeSubscriptions.ParsedContent.indexOf(callback);
+              if (index > -1) {
+                activeSubscriptions.ParsedContent.splice(index, 1);
+              }
+            } else if (modelName === 'Word') {
+              const index = activeSubscriptions.Word.indexOf(callback);
+              if (index > -1) {
+                activeSubscriptions.Word.splice(index, 1);
               }
             }
           }

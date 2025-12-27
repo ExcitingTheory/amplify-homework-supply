@@ -8,6 +8,10 @@ import {
     IconButton,
     Typography,
     Paper,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
 } from "@mui/material";
 import { DataStore } from '@aws-amplify/datastore';
 import ChatIcon from '@mui/icons-material/Chat';
@@ -17,12 +21,15 @@ import UploadFile from '@mui/icons-material/UploadFile';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import CancelIcon from '@mui/icons-material/Cancel';
+import RateReviewIcon from '@mui/icons-material/RateReview';
 import { Section, Document } from "../models";
 import UnitContext from "../context/unitContext";
 import { useChat } from 'ai/react';
 import { fetchAuthSession } from 'aws-amplify/auth';
-import { uploadAndAnalyzePDF } from '../utils/fileUploadUtils';
+import { uploadAndAnalyzePDF, cancelPDFAnalysis } from '../utils/fileUploadUtils';
 import FilesContext from "../context/fileContext";
+import VocabularyReview from "./VocabularyReview";
 
 const ChatSidebar = () => {
     const [sections, setSections] = useState([]);
@@ -32,6 +39,8 @@ const ChatSidebar = () => {
     const [pdfProcessingStatus, setPdfProcessingStatus] = useState({}); // { fileIndex: { status: 'uploading'|'uploaded'|'analyzing'|'analyzed'|'error', progress: 0-100, message: '', documentId: '' } }
     const [documentStatuses, setDocumentStatuses] = useState({}); // { documentId: { status: 'uploaded'|'extracting'|'analyzing'|'completed'|'failed' } }
     const fileInputRef = useRef(null);
+    const [vocabularyReviewDialogOpen, setVocabularyReviewDialogOpen] = useState(false);
+    const [reviewDocumentId, setReviewDocumentId] = useState(null);
 
     const {
         unit,
@@ -155,6 +164,14 @@ const ChatSidebar = () => {
                             message: 'Extracting text...',
                         };
                         hasChanges = true;
+                    } else if (docStatus === 'uploaded' && ['analyzing', 'extracting'].includes(status.status)) {
+                        // Document went back to uploaded - likely cancelled
+                        updated[index] = {
+                            ...status,
+                            status: 'cancelled',
+                            message: 'Analysis cancelled',
+                        };
+                        hasChanges = true;
                     } else if (docStatus === 'failed') {
                         updated[index] = {
                             ...status,
@@ -205,6 +222,63 @@ const ChatSidebar = () => {
             delete newStatus[index];
             return newStatus;
         });
+    };
+    
+    // Cancel PDF processing
+    const cancelProcessing = async (index) => {
+        const status = pdfProcessingStatus[index];
+        if (!status || !status.documentId) {
+            console.warn('[ChatSidebar] No document ID to cancel');
+            return;
+        }
+
+        try {
+            console.log('[ChatSidebar] Cancelling analysis for document:', status.documentId);
+            
+            setPdfProcessingStatus(prev => ({
+                ...prev,
+                [index]: { 
+                    ...prev[index],
+                    message: 'Cancelling...' 
+                }
+            }));
+
+            await cancelPDFAnalysis(status.documentId);
+            
+            setPdfProcessingStatus(prev => ({
+                ...prev,
+                [index]: { 
+                    ...prev[index],
+                    status: 'cancelled',
+                    message: 'Analysis cancelled' 
+                }
+            }));
+        } catch (error) {
+            console.error('[ChatSidebar] Error cancelling analysis:', error);
+            setPdfProcessingStatus(prev => ({
+                ...prev,
+                [index]: { 
+                    ...prev[index],
+                    message: `Cancel failed: ${error.message}` 
+                }
+            }));
+        }
+    };
+    
+    // Open vocabulary review dialog
+    const openVocabularyReview = (documentId) => {
+        setReviewDocumentId(documentId);
+        setVocabularyReviewDialogOpen(true);
+    };
+    
+    // Handle vocabulary import completion
+    const handleVocabularyImportComplete = (result) => {
+        console.log('[ChatSidebar] Vocabulary import complete:', result);
+        // Could show a success message or update UI
+        // Optionally close the dialog after a delay
+        setTimeout(() => {
+            setVocabularyReviewDialogOpen(false);
+        }, 2000);
     };
 
     // Process PDFs when they're added
@@ -495,14 +569,16 @@ const ChatSidebar = () => {
                                         bgcolor: isPDF ? (
                                             status?.status === 'error' ? 'error.light' :
                                             status?.status === 'analyzed' ? 'success.light' :
-                                            status?.status === 'analyzing' ? 'warning.light' :
+                                            status?.status === 'analyzing' || status?.status === 'extracting' ? 'warning.light' :
+                                            status?.status === 'cancelled' ? 'grey.200' :
                                             'grey.100'
                                         ) : 'grey.100',
                                         border: isPDF ? '1px solid' : 'none',
                                         borderColor: isPDF ? (
                                             status?.status === 'error' ? 'error.main' :
                                             status?.status === 'analyzed' ? 'success.main' :
-                                            status?.status === 'analyzing' ? 'warning.main' :
+                                            status?.status === 'analyzing' || status?.status === 'extracting' ? 'warning.main' :
+                                            status?.status === 'cancelled' ? 'grey.400' :
                                             'grey.300'
                                         ) : 'transparent',
                                     }}
@@ -538,10 +614,37 @@ const ChatSidebar = () => {
                                         )}
                                     </Box>
                                     
+                                    {/* Cancel button for processing PDFs */}
+                                    {isPDF && status && ['uploading', 'analyzing', 'extracting'].includes(status.status) && (
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => cancelProcessing(index)}
+                                            sx={{ p: 0.5 }}
+                                            title="Cancel analysis"
+                                        >
+                                            <CancelIcon sx={{ fontSize: 16, color: 'warning.main' }} />
+                                        </IconButton>
+                                    )}
+                                    
+                                    {/* Review Vocabulary button for completed PDFs */}
+                                    {isPDF && status && status.status === 'analyzed' && status.documentId && (
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => openVocabularyReview(status.documentId)}
+                                            sx={{ p: 0.5 }}
+                                            title="Review vocabulary"
+                                            color="primary"
+                                        >
+                                            <RateReviewIcon sx={{ fontSize: 16 }} />
+                                        </IconButton>
+                                    )}
+                                    
+                                    {/* Remove/Delete button */}
                                     <IconButton
                                         size="small"
                                         onClick={() => removeFile(index)}
                                         sx={{ p: 0.5 }}
+                                        title="Remove file"
                                     >
                                         <DeleteIcon sx={{ fontSize: 16 }} />
                                     </IconButton>
@@ -610,6 +713,35 @@ const ChatSidebar = () => {
                     </Box>
                 </Paper>
             </Box>
+            
+            {/* Vocabulary Review Dialog */}
+            <Dialog
+                open={vocabularyReviewDialogOpen}
+                onClose={() => setVocabularyReviewDialogOpen(false)}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle>
+                    Review & Import Vocabulary
+                    <IconButton
+                        onClick={() => setVocabularyReviewDialogOpen(false)}
+                        sx={{ position: 'absolute', right: 8, top: 8 }}
+                    >
+                        <DeleteIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent dividers sx={{ p: 0 }}>
+                    {reviewDocumentId && (
+                        <VocabularyReview
+                            documentId={reviewDocumentId}
+                            unitId={unit?.id}
+                            owner={session?.sub}
+                            identityId={identityId}
+                            onImportComplete={handleVocabularyImportComplete}
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

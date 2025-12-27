@@ -84,6 +84,31 @@ export async function analyzePDF(documentId) {
 }
 
 /**
+ * Mock cancel PDF analysis
+ */
+export async function cancelPDFAnalysis(documentId) {
+    console.log('[MOCK] Cancelling PDF analysis:', { documentId });
+    
+    if (!documentId) {
+        const error = new Error('Document ID is required for cancellation');
+        console.error('[MOCK] Cancel error:', error);
+        throw error;
+    }
+    
+    // Simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const result = {
+        success: true,
+        documentID: documentId,
+        message: 'Analysis cancelled successfully (mocked)',
+    };
+    
+    console.log('[MOCK] Cancel result:', result);
+    return result;
+}
+
+/**
  * Mock upload and analyze PDF
  */
 export async function uploadAndAnalyzePDF(file, identityId, unitId, autoAnalyze = true, onProgress = null) {

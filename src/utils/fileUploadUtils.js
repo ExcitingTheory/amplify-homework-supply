@@ -29,6 +29,16 @@ const analyzePDFMutation = /* GraphQL */ `
   }
 `;
 
+const cancelPDFAnalysisMutation = /* GraphQL */ `
+  mutation CancelPDFAnalysis($documentID: ID!) {
+    cancelPDFAnalysis(documentID: $documentID) {
+      success
+      documentID
+      message
+    }
+  }
+`;
+
 /**
  * Upload a file to S3 and create database records
  * @param {File} file - The file to upload
@@ -134,6 +144,25 @@ export async function analyzePDF(documentId) {
         return result.data.analyzePDF;
     } else {
         throw new Error(result.data.analyzePDF.message || 'Analysis failed');
+    }
+}
+
+/**
+ * Cancel an in-progress PDF analysis
+ * @param {string} documentId - Document ID to cancel analysis for
+ * @returns {Promise<Object>} Cancellation result
+ */
+export async function cancelPDFAnalysis(documentId) {
+    const result = await client.graphql({
+        query: cancelPDFAnalysisMutation,
+        variables: { documentID: documentId }
+    });
+
+    if (result.data.cancelPDFAnalysis.success) {
+        console.log('PDF analysis cancelled:', result.data.cancelPDFAnalysis);
+        return result.data.cancelPDFAnalysis;
+    } else {
+        throw new Error(result.data.cancelPDFAnalysis.message || 'Cancellation failed');
     }
 }
 
