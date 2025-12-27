@@ -1,20 +1,19 @@
-[13:45:37.334] [INFO] storybook v10.1.10
-[13:45:38.618] [DEBUG] Getting package.json info for /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/package.json...
-[13:45:40.092] [DEBUG] Serving static files from [36mpublic[39m at [36m/[39m
-[13:45:40.104] [INFO] Starting...
-[13:45:40.141] [WARN] unable to find package.json for @mui/icons-material
-[13:45:40.148] [WARN] unable to find package.json for openai
-[13:45:40.176] [WARN] No story files found for the specified pattern: [34msrc/**/*.mdx[39m
-[13:45:40.953] [DEBUG] Starting preview..
-[13:45:41.003] [INFO] Addon-docs: using MDX3
-[13:45:41.042] [INFO] Using implicit CSS loaders
-[13:45:42.059] [INFO] Using SWC as compiler
-[13:45:42.154] [INFO] Using default Webpack5 setup
-[13:45:42.671] [INFO] Storybook collects completely anonymous usage telemetry. We use it to shape Storybook's roadmap and prioritize features. You can learn more, including how to opt out, at https://storybook.js.org/telemetry
-[13:45:43.212] [DEBUG] Using tsconfig paths for react-docgen
-[13:46:33.237] [ERROR] Failed to build the preview
-[13:46:33.246] [WARN] Force closed preview build
-[13:46:33.248] [ERROR] [38;2;241;97;97mSB_BUILDER-WEBPACK5_0003 (WebpackCompilationError): There were problems when compiling your code with Webpack.
+[23:36:18.080] [INFO] storybook v10.1.10
+[23:36:18.634] [DEBUG] Getting package.json info for /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/package.json...
+[23:36:20.181] [DEBUG] Serving static files from [36mpublic[39m at [36m/[39m
+[23:36:20.192] [INFO] Starting...
+[23:36:20.224] [WARN] unable to find package.json for @mui/icons-material
+[23:36:20.227] [WARN] unable to find package.json for openai
+[23:36:20.241] [WARN] No story files found for the specified pattern: [34msrc/**/*.mdx[39m
+[23:36:20.906] [DEBUG] Starting preview..
+[23:36:20.956] [INFO] Addon-docs: using MDX3
+[23:36:20.994] [INFO] Using implicit CSS loaders
+[23:36:21.998] [INFO] Using SWC as compiler
+[23:36:22.070] [INFO] Using default Webpack5 setup
+[23:36:22.904] [DEBUG] Using tsconfig paths for react-docgen
+[23:37:05.566] [ERROR] Failed to build the preview
+[23:37:05.572] [WARN] Force closed preview build
+[23:37:05.574] [ERROR] [38;2;241;97;97mSB_BUILDER-WEBPACK5_0003 (WebpackCompilationError): There were problems when compiling your code with Webpack.
 Run Storybook with --debug-webpack for more information.[39m
     at starter (file://./node_modules/@storybook/builder-webpack5/dist/index.js:799:11)
     at starter.next (<anonymous>)
@@ -26,5 +25,5 @@ Run Storybook with --debug-webpack for more information.[39m
     at async withTelemetry (file://./node_modules/storybook/dist/_node-chunks/chunk-PGCRO4IZ.js:209:12)
     at async dev (file://./node_modules/storybook/dist/bin/core.js:2734:3)
     at async _Command.<anonymous> (file://./node_modules/storybook/dist/bin/core.js:2801:92)
-[13:46:33.252] [WARN] Broken build, fix the error above.
+[23:37:05.577] [WARN] Broken build, fix the error above.
 You may need to refresh the browser.

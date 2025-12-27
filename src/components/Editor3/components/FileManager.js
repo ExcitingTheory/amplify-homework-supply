@@ -61,6 +61,7 @@ import { uploadData, remove } from 'aws-amplify/storage';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import { calculateWaveformData } from '../../../utils/calculateWaveformData';
+import { uploadFile, uploadAndAnalyzePDF, analyzePDF } from '../../../utils/fileUploadUtils';
 
 import { FileProtectionLevels } from '../../../models';
 import { File as FileModel, Document, Settings } from '../../../models';
@@ -953,110 +954,48 @@ export default function FileManager() {
     React.useEffect(() => {
 
         const asyncFunc = async () => {
-            // when audio files change, upload them to S3
+            // when files change, upload them to S3
             // and update the entry in the database
 
             if (filesToUpload.length === 0) {
                 return;
             }
 
-            
-            const accessLevel = 'protected';
-
             const fileKeys = await Promise.allSettled(filesToUpload.map(async (fileInput) => {
                 const { file } = fileInput;
-                let newFilename;
-                let thumbnailFilename;
 
-                if (isMimeType(file, ACCEPTABLE_IMAGE_TYPES)) {
-                    newFilename = `images/${file.name}`
-                    thumbnailFilename = `thumbnails/${file.name}`
-                    // What if a duplicate file is uploaded. make sure to check for that by hashing the file and checking if it exists in the database
-                } else if (isMimeType(file, ACCEPTABLE_AUDIO_TYPES)) {
-                    newFilename = `audio/${file.name}`
-                    // Way to determine length of audio file?
-                } else if (isMimeType(file, ACCEPTABLE_FILE_TYPES)) {
-                    newFilename = `files/${file.name}`
-                }
-
-                console.log('uploading newFilename', newFilename);
                 console.log('uploading file', fileInput);
                 console.log('fileOperations', fileOperations);
 
-                const result = await uploadData({
-                    key: newFilename,
-                    data: file,
-                    options: {
-                        contentType: file.type,
-                        contentLength: file.size,
-                        accessLevel,
+                try {
+                    // Use shared utility for file upload
+                    const result = await uploadFile(
+                        file,
                         identityId,
-                        progressCallback(progress) {
-                            console.log(`Uploaded: ${progress.loaded}/${progress.total}`);
-
+                        unit?.id,
+                        (loaded, total) => {
                             setFileOperations((prev) => {
                                 const newFileOperations = [...prev];
-                                newFileOperations[fileInput.index].progress = Math.round(progress.loaded / progress.total * 100) + '%';
+                                newFileOperations[fileInput.index].progress = Math.round(loaded / total * 100) + '%';
                                 return newFileOperations;
-                            })
+                            });
                         }
-                    }
-                });
-                console.log('result!!___', result);
+                    );
 
-                // Calculate waveform data for audio files
-                let waveformData = null;
-                if (isMimeType(file, ACCEPTABLE_AUDIO_TYPES)) {
-                    try {
-                        waveformData = await calculateWaveformData(file, 600);
-                        console.log('Calculated waveform data:', waveformData);
-                    } catch (error) {
-                        console.error('Error calculating waveform:', error);
-                    }
-                }
+                    console.log('Upload result:', result);
 
-                // Create a new entry in the database using the File model
-                try {
-                    const fileData = {
-                        path: newFilename,
-                        identityId,
-                        name: file.name,
-                        size: file.size,
-                        mimeType: file.type,
-                        level: 'PROTECTED',
-                    };
-                    
-                    // Add waveform data if it was calculated
-                    if (waveformData) {
-                        fileData.waveformData = JSON.stringify(waveformData);
-                    }
-                    
-                    const newFile = await DataStore.save(new FileModel(fileData));
-
-                    console.log('newFile', newFile);
-
-                    // If PDF, create Document record
-                    if (file.type === 'application/pdf') {
-                        const document = await DataStore.save(new Document({
-                            filename: file.name,
-                            s3Key: newFilename,
-                            status: 'uploaded',
-                            identityId,
-                            unitID: unit?.id,
-                        }));
-                        console.log('Created Document record:', document);
-                        
-                        // Auto-analyze if enabled in settings
-                        if (settings?.autoAnalyzePDFs) {
-                            console.log('Auto-analyzing PDF:', document.id);
-                            // TODO: Call analyzePdf Lambda function
-                            // await triggerPdfAnalysis(document.id);
+                    // If PDF and auto-analyze is enabled, trigger analysis
+                    if (file.type === 'application/pdf' && settings?.autoAnalyzePDFs && result.documentModel) {
+                        console.log('Auto-analyzing PDF:', result.documentModel.id);
+                        try {
+                            await analyzePDF(result.documentModel.id);
+                        } catch (error) {
+                            console.error('Auto-analysis failed:', error);
                         }
                     }
                 } catch (error) {
-                    console.error(error);
+                    console.error('Error uploading file:', error);
                 }
-
             }));
 
             // timeout to allow for the UI to update
@@ -1625,17 +1564,8 @@ export default function FileManager() {
                                                                         return;
                                                                     }
                                                                     
-                                                                    const client = generateClient();
-                                                                    const result = await client.graphql({
-                                                                        query: analyzePDFMutation,
-                                                                        variables: { documentID: documents[0].id }
-                                                                    });
-                                                                    
-                                                                    if (result.data.analyzePDF.success) {
-                                                                        alert(`PDF analysis started! Document ID: ${result.data.analyzePDF.documentID}`);
-                                                                    } else {
-                                                                        alert(`Analysis failed: ${result.data.analyzePDF.message}`);
-                                                                    }
+                                                                    const result = await analyzePDF(documents[0].id);
+                                                                    alert(`PDF analysis started! Document ID: ${result.documentID}`);
                                                                 } catch (error) {
                                                                     console.error('Error analyzing PDF:', error);
                                                                     alert('Failed to analyze PDF: ' + error.message);

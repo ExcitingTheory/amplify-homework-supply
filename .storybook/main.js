@@ -73,6 +73,8 @@ const config = {
       'aws-amplify/utils': require.resolve('./__mocks__/aws-amplify-utils.js'),
       'aws-amplify/api': require.resolve('./__mocks__/aws-amplify-api.js'),
       '@aws-amplify/datastore': require.resolve('./__mocks__/aws-amplify-datastore.js'),
+      'ai/react': require.resolve('./__mocks__/ai-react.js'),
+      '../utils/fileUploadUtils': require.resolve('./__mocks__/fileUploadUtils.js'),
       // Use real getCachedUrl to test caching logic
     };
     

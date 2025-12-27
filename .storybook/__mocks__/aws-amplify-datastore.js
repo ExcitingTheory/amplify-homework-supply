@@ -349,9 +349,43 @@ export class DataStore {
     console.log('[Mock DataStore] model.data type:', typeof model.data);
     console.log('[Mock DataStore] model.data keys:', model.data ? Object.keys(model.data) : 'no data');
     
+    // If model doesn't have an ID, generate one
+    if (!model.id) {
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substr(2, 9);
+      model.id = `mock-${timestamp}-${random}`;
+      console.log('[Mock DataStore] Generated ID:', model.id);
+    }
+    
+    // Detect model type by checking properties
+    const isGrade = model.unitID && model.data !== undefined;
+    const isSettings = model.autoAnalyzePDFs !== undefined;
+    const isUnit = model.name && model.data !== undefined && !model.unitID;
+    const isFile = model.path && model.mimeType;
+    const isDocument = model.filename && model.s3Key && model.status;
+    
     // Update the mock data based on model type
-    if (model.id && model.unitID) {
-      // This is likely a Grade
+    if (isDocument) {
+      // This is a Document
+      mockDocuments[model.id] = model;
+      console.log('[Mock DataStore] Saved Document:', model.id, model.filename);
+      console.log('[Mock DataStore] Document will be returned with ID:', model.id);
+      
+      // Notify all Document subscribers
+      activeSubscriptions.Document.forEach(callback => {
+        callback({ items: Object.values(mockDocuments), isSynced: true });
+      });
+    } else if (isFile) {
+      // This is a File
+      mockFiles[model.id] = model;
+      console.log('[Mock DataStore] Saved File:', model.id, model.name);
+      
+      // Notify all File subscribers
+      activeSubscriptions.File.forEach(callback => {
+        callback({ items: Object.values(mockFiles), isSynced: true });
+      });
+    } else if (isGrade) {
+      // This is a Grade
       mockGrades[model.id] = model;
       console.log('[Mock DataStore] Updated grade:', model.id);
       console.log('[Mock DataStore] mockGrades[model.id].data:', mockGrades[model.id].data);
@@ -360,7 +394,7 @@ export class DataStore {
       activeSubscriptions.Grade.forEach(callback => {
         callback({ items: Object.values(mockGrades), isSynced: true });
       });
-    } else if (model.id && model.autoAnalyzePDFs !== undefined) {
+    } else if (isSettings) {
       // This is Settings
       mockSettings[model.id] = model;
       console.log('[Mock DataStore] Updated settings:', model.id);
@@ -369,8 +403,8 @@ export class DataStore {
       activeSubscriptions.Settings.forEach(callback => {
         callback({ items: Object.values(mockSettings), isSynced: true });
       });
-    } else if (model.id && model.data) {
-      // Could be a Unit
+    } else if (isUnit) {
+      // This is a Unit
       mockUnits[model.id] = model;
       console.log('[Mock DataStore] Updated unit:', model.id);
       

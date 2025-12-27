@@ -30,6 +30,47 @@ import { AudioPlayerProvider } from '../src/components/Editor3/context/AudioPlay
 
 // Import mock helpers
 import { clearMockUnits } from './__mocks__/aws-amplify-datastore';
+import { mockChatAPI } from './__mocks__/chat-api';
+
+// Mock fetch for /api/chat endpoint
+const originalFetch = global.fetch;
+global.fetch = async (url, options) => {
+  // Intercept chat API calls
+  if (typeof url === 'string' && url.includes('/api/chat')) {
+    console.log('[Mock Fetch] Intercepted /api/chat');
+    
+    const body = JSON.parse(options?.body || '{}');
+    const { messages, context } = body;
+    
+    // Generate mock response
+    const responseText = await mockChatAPI(messages, context);
+    
+    // Create a readable stream that simulates streaming response
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        // Simulate streaming by sending chunks
+        const words = responseText.split(' ');
+        for (let i = 0; i < words.length; i++) {
+          await new Promise(resolve => setTimeout(resolve, 50));
+          const chunk = words[i] + (i < words.length - 1 ? ' ' : '');
+          controller.enqueue(encoder.encode(`0:"${chunk}"\n`));
+        }
+        controller.close();
+      }
+    });
+    
+    return new Response(stream, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+      },
+    });
+  }
+  
+  // Pass through other requests
+  return originalFetch(url, options);
+};
 
 // Create a basic theme - you can customize this to match your app's theme
 const theme = createTheme({

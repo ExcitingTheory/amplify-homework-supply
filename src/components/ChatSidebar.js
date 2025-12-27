@@ -1,34 +1,37 @@
 // react component that renders the chat session with the user and the bot
 import React, { useState, useEffect, useRef } from "react";
-import { chat, initAssistantEditor, useAssistantEditor } from "../graphql/mutations";
 import {
     TextField,
     Button,
     CircularProgress,
     Box,
+    IconButton,
+    Typography,
+    Paper,
 } from "@mui/material";
-import { generateClient } from 'aws-amplify/api';
 import { DataStore } from '@aws-amplify/datastore';
 import ChatIcon from '@mui/icons-material/Chat';
-import { Assistant } from "../models";
-import { Section } from "../models";
-import { Unit } from "../models";
+import DeleteIcon from '@mui/icons-material/Delete';
+import SendIcon from '@mui/icons-material/Send';
+import UploadFile from '@mui/icons-material/UploadFile';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import { Section, Document } from "../models";
 import UnitContext from "../context/unitContext";
-
-import { updateAssistantEditor, deleteAssistantEditor } from "../graphql/mutations";
-
-const client = generateClient();
+import { useChat } from 'ai/react';
+import { fetchAuthSession } from 'aws-amplify/auth';
+import { uploadAndAnalyzePDF } from '../utils/fileUploadUtils';
+import FilesContext from "../context/fileContext";
 
 const ChatSidebar = () => {
-    const [messages, setMessages] = useState([]);
-    const [message, setMessage] = useState("");
-    const [isBusy, setIsBusy] = useState(false);
-    const [assistantId, setAssistantId] = useState(null);
-    const [threadId, setThreadId] = useState(null);
-    const [modelId, setModelId] = useState(null);
-    const [assistants, setAssistants] = useState([]);
-    const [thisAssistant, setThisAssistant] = useState(null);
     const [sections, setSections] = useState([]);
+    const chatContainerRef = useRef(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [uploadedFiles, setUploadedFiles] = useState([]);
+    const [pdfProcessingStatus, setPdfProcessingStatus] = useState({}); // { fileIndex: { status: 'uploading'|'uploaded'|'analyzing'|'analyzed'|'error', progress: 0-100, message: '', documentId: '' } }
+    const [documentStatuses, setDocumentStatuses] = useState({}); // { documentId: { status: 'uploaded'|'extracting'|'analyzing'|'completed'|'failed' } }
+    const fileInputRef = useRef(null);
 
     const {
         unit,
@@ -36,461 +39,577 @@ const ChatSidebar = () => {
         questionBank,
         dictionary,
     } = React.useContext(UnitContext);
+    
+    const { session } = React.useContext(FilesContext);
+    const { identityId } = session || {};
 
-    // const [model, setModel] = useState("gpt-3.5-turbo");
-
-    // const assistantId = useRef(null);
-
-    const sendMessage = async () => {
-        setIsBusy(true);
-        const newMessages = [...messages, { role: "user", content: message }];
-        setMessages(newMessages);
-        setMessage("");
-
-        const response = await client.graphql({
-            query: chat,
-            variables: {
-                messages: JSON.stringify(newMessages),
-                // model, TODO add model to the mutation when we have access to gpt-4
+    // Use Vercel AI SDK's useChat hook
+    const { messages, input, handleInputChange, handleSubmit, isLoading, reload, stop } = useChat({
+        api: '/api/chat',
+        body: {
+            context: {
+                unit: unit ? {
+                    id: unit.id,
+                    name: unit.name,
+                    description: unit.description,
+                    data: unit.data,
+                } : null,
+                files: files ? Object.values(files).map(f => ({
+                    id: f.id,
+                    name: f.name,
+                    description: f.description,
+                    mimeType: f.mimeType,
+                })) : [],
+                questionBank: questionBank ? Object.values(questionBank).map(q => ({
+                    id: q.id,
+                    prompt: q.prompt,
+                    answer: q.answer,
+                })) : [],
+                dictionary: dictionary ? Object.values(dictionary).map(d => ({
+                    id: d.id,
+                    phrase: d.phrase,
+                    definition: d.definition,
+                })) : [],
+                sections: sections.map(s => ({
+                    id: s.id,
+                    name: s.name,
+                    description: s.description,
+                })),
             },
-        })
+        },
+        onError: (error) => {
+            console.error('Chat error:', error);
+        },
+    });
 
-        // {
-        //     "data": {
-        //         "chat": "{statusCode=200, body={\"id\":\"chatcmpl-7mZh0vJW0M7u5VxTpaKnJqPJBWsf2\",\"object\":\"chat.completion\",\"created\":1691811302,\"model\":\"gpt-3.5-turbo-0613\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Hello! How can I assist you today?\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":19,\"completion_tokens\":9,\"total_tokens\":28}}}"
-        //     }
-        // }
-
-
-
-        // {
-        //     "data": {
-        //       "chat": "{\"id\":\"chatcmpl-7mk4grW87QmcciKFN6ewsSovcv1jq\",\"object\":\"chat.completion\",\"created\":1691851210,\"model\":\"gpt-3.5-turbo-0613\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Certainly! Here are some of the top search engines:\\n\\n1. Google (www.google.com)\\n2. Bing (www.bing.com)\\n3. Yahoo (www.yahoo.com)\\n4. Baidu (www.baidu.com)\\n5. Yandex (www.yandex.com)\\n6. DuckDuckGo (www.duckduckgo.com)\\n7. AOL (www.aol.com)\\n\\nPlease note that rankings and popularity may vary depending on the region and user preferences.\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":28,\"completion_tokens\":94,\"total_tokens\":122}}"
-        //     }
-        //   }
-
-
-        console.log('ChatSidebar.response', response)
-
-        const assistantResponse = JSON.parse(response?.data?.chat || {});
-
-        console.log('ChatSidebar.assistantResponse', assistantResponse)
-
-        const systemMessage = assistantResponse.choices[0].message;
-
-        // Merge the response message with the existing messages
-        const mergedMessages = [...newMessages, systemMessage];
-        setMessages(mergedMessages);
-        setIsBusy(false);
-    };
-
-    const messageAssistant = async () => {
-        setIsBusy(true);
-        const newMessages = [...messages, { role: "user", content: message }];
-        setMessages(newMessages);
-
-        console.log('ChatSidebar.assistantId', assistantId)
-        console.log('ChatSidebar.threadId', threadId)
-
-        const response = await client.graphql({
-            query: useAssistantEditor,
-            variables: {
-                assistantId,
-                threadId,
-                threadInstructions: JSON.stringify(newMessages),
-            },
-        })
-
-        const toolsRuns = JSON.parse(response?.data?.useAssistantEditor || {})
-
-        console.log('ChatSidebar.toolsRuns', toolsRuns)
-
-        const functionCalls = toolsRuns?.required_action?.submit_tool_outputs?.tool_calls || []
-
-        let systemMessage = ''
-
-        for (let i = 0; i < functionCalls.length; i++) {
-            const functionCall = functionCalls[i]
-            console.log('ChatSidebar.functionCall', functionCall)
-            const args = JSON.parse(functionCall?.function?.arguments|| {})
-            const name = functionCall?.function?.name
-
-            console.log('ChatSidebar.args', args)
-            console.log('ChatSidebar.name', name)
-
-            // for now append to the system message
-            systemMessage += `Function: ${name}\n`
-            systemMessage += `Arguments: ${JSON.stringify(args)}\n`
-        }
-
-        console.log('ChatSidebar.systemMessage', systemMessage)
-
-
-        // Merge the response message with the existing messages
-
-        const newMessageAssistant = [...messages, { role: "assistant", content: systemMessage }];
-
-        const mergedMessages = [...newMessages, systemMessage];
-        setMessages(newMessageAssistant);
-        setIsBusy(false);
-
-        // await DataStore.save(
-        //     Assistant.copyOf(assistants[0]?.id, updated => {
-        //         updated.messages = JSON.stringify(mergedMessages)
-        //     })
-        // )
-    };
-
-    function getInstructions(unit, files, questionBank, dictionary, sections) {
-        let additionalInstructions
-        // add the current time to the additional instructions
-        additionalInstructions = `The following is a summary of records in the database.\nCurrent Time: ${new Date().toLocaleString()}\n\nAll available unit data:\n ${JSON.stringify(unit?.data)}\n`
-
-        if (unit) {
-            additionalInstructions += `\nThis Unit is being worked on:\nname|description|id\n${encodeURIComponent(unit.name)}|${encodeURIComponent(unit.description)}|${unit.id}\n`
-
-            // additionalInstructions += `\nData to see what is being worked on: ${JSON.stringify(unit.data)}\n`
-
-        }
-        if (sections) {
-            console.log('ChatSidebar.sections', sections)
-            additionalInstructions += `\nSections already in the database:\nname|description|id\n`
-            for (let i = 0; i < sections.length; i++) {
-                const section = sections[i]
-                additionalInstructions += `${encodeURIComponent(section.name)}|${encodeURIComponent(section.description)}|${section.id}\n`
-            }
-        }
-        if (files) {
-            additionalInstructions += `\nFiles already in the database:\nid|name|description|type\n`
-            const _files = Object.entries(files)
-            console.log('ChatSidebar._files', _files)
-
-            for (let i = 0; i < _files.length; i++) {
-                const file = _files[i][1]
-                additionalInstructions += `${file.id}|${encodeURIComponent(file.name)}|${encodeURIComponent(file.description)}|${file.mimeType}\n`
-            }
-        }
-        if (questionBank) {
-            additionalInstructions += `\nQuestions already in the database:\nid|prompt|answer\n`
-            const _questions = Object.entries(questionBank)
-            for (let i = 0; i < _questions.length; i++) {
-                const question = _questions[i][1]
-                additionalInstructions += `${question.id}|${question.prompt}|${question.answer}\n`
-            }
-        }
-        if (dictionary) {
-            additionalInstructions += `\nVocabulary Words already in the database:\nid|word|definition\n`
-
-            const _dict = Object.entries(dictionary)
-            for (let i = 0; i < _dict.length; i++) {
-                const entry = _dict[i][1]
-                additionalInstructions += `${entry.id}|${entry.phrase}|${entry.definition}\n`
-            }
-        }
-
-        console.log('ChatSidebar.additionalInstructions', additionalInstructions)
-        return additionalInstructions
-    }
-
-    const getAssistant = async (additionalInstructions) => {
-        const model = "gpt-4o";
-
-        console.log('ChatSidebar.getAssistant', model, additionalInstructions)
-        const _assistant = await client.graphql({
-            query: initAssistantEditor,
-            variables: {
-                model,
-                additionalInstructions
-            },
-        })
-
-        console.log('ChatSidebar._assistant', _assistant)
-
-        const {
-            assistantId,
-            threadId
-        } = JSON.parse(_assistant?.data?.initAssistantEditor || {})
-
-        console.log('ChatSidebar.assistantId', assistantId)
-        console.log('ChatSidebar.threadId', threadId)
-
-        return {
-            assistantId,
-            threadId
-        }
-    }
-
-    async function deleteAssistant() {
-        console.log('deleteAssistant', assistantId)
-        console.log('deleteAssistant.assistants', assistants)
-        console.log('deleteAssistant.thisAssistant', thisAssistant)
-
-        if (thisAssistant.id) {
-
-            const dataWork = DataStore.delete(Assistant, thisAssistant.id)
-            const gqlClient = client.graphql({
-                query: deleteAssistantEditor,
-                variables: {
-                    assistantId,
-                    threadId,
-                },
-            })
-
-            Promise.all([dataWork, gqlClient])
-
-            setMessages([])
-            setAssistantId(null)
-            setThreadId(null)
-            setModelId(null)
-            setThisAssistant(null)
-        } else {
-            console.error('Assistant does not have an id')
-        }
-    }
-
-    async function fetchAssistants() {
-        console.log('fetchAssistants', unit, files, questionBank, dictionary, sections)
-        const additionalInstructions = getInstructions(unit, files, questionBank, dictionary, sections)
-
-        console.log('fetchAssistants.additionalInstructions', additionalInstructions)
-
-        const _assistants = await DataStore.query(Assistant)
-
-        console.log('fetchAssistants._assistants', _assistants)
-        if (_assistants.length === 0) {
-
-        const {
-            assistantId: _assistantId,
-            threadId: _thread
-        } = await getAssistant(additionalInstructions)
-            setAssistantId(_assistantId)
-            setThreadId(_thread)
-            setModelId(null)
-            setThisAssistant(null)
-
-        } else if (_assistants.length > 0) {
-            for (let i = 0; i < _assistants.length; i++) {
-                const assistant = _assistants[i]
-
-                console.log('fetchAssistants.assistant', assistant)
-                if (!assistant?.assistantId) {
-                    const {
-                        assistantId: _assistantId,
-                        threadId: _thread
-                    } = await getAssistant(additionalInstructions)
-
-                    //update the assistantId in the model
-                    try {
-                        await DataStore.save(
-                            Assistant.copyOf(assistant, updated => {
-                                updated.assistantId = _assistantId
-                                updated.threadId = _thread
-                            })
-                        );
-                        console.log('saved assistant')
-                    } catch (errors) {
-                        console.error(errors)
-                    }
-
-                    setAssistantId(_assistantId)
-                    setThreadId(_thread)
-                    setModelId(assistant.id)
-                    setThisAssistant(assistant)
-
-                    break
-                } else if (assistant?.assistantId) {
-                    setAssistantId(assistant?.assistantId)
-                    setThreadId(assistant?.threadId)
-                    setModelId(assistant.id)
-                    setThisAssistant(assistant)
-                    break
-                }
-
-
-            }
-            setAssistants(_assistants)
-            // if the assistant has messages, set the messages
-            if (_assistants[0]?.messages) {
-                setMessages(JSON.parse(_assistants[0].messages))
-            }
-        }
-    }
-
+    // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
-        fetchAssistants()
-        const subscription = DataStore.observe(Assistant).subscribe(() => fetchAssistants())
-
-        return function cleanup() {
-            subscription.unsubscribe();
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
-    }, [])
+    }, [messages]);
 
+    // Fetch sections
     useEffect(() => {
-        fetchSections()
+        fetchSections();
         async function fetchSections() {
-            // const myUserId = user.username
-
-            // const sectionData = await DataStore.query(Section, s => s.owner.ne(myUserId))
-
-            const sectionData = await DataStore.query(Section)
-            setSections(sectionData)
+            const sectionData = await DataStore.query(Section);
+            setSections(sectionData);
         }
-        const subscription = DataStore.observe(Section).subscribe(() => fetchSections())
+        const subscription = DataStore.observe(Section).subscribe(() => fetchSections());
 
         return function cleanup() {
             subscription.unsubscribe();
+        };
+    }, []);
+    
+    // Subscribe to Document status changes
+    useEffect(() => {
+        const subscription = DataStore.observeQuery(Document).subscribe(({ items }) => {
+            const statusMap = {};
+            items.forEach(doc => {
+                statusMap[doc.id] = {
+                    status: doc.status,
+                    pageCount: doc.pageCount,
+                    s3Key: doc.s3Key,
+                };
+            });
+            setDocumentStatuses(statusMap);
+            console.log('[ChatSidebar] Document statuses updated:', statusMap);
+        });
+        
+        return () => subscription.unsubscribe();
+    }, []);
+    
+    // Update PDF processing status when document status changes
+    useEffect(() => {
+        setPdfProcessingStatus(prev => {
+            const updated = { ...prev };
+            let hasChanges = false;
+            
+            Object.entries(updated).forEach(([index, status]) => {
+                if (status.documentId && documentStatuses[status.documentId]) {
+                    const docStatus = documentStatuses[status.documentId].status;
+                    const pageCount = documentStatuses[status.documentId].pageCount;
+                    
+                    // Map document status to processing status
+                    if (docStatus === 'completed' && status.status !== 'analyzed') {
+                        updated[index] = {
+                            ...status,
+                            status: 'analyzed',
+                            progress: 100,
+                            message: `Analysis complete! ${pageCount ? `${pageCount} pages analyzed.` : ''}`.trim(),
+                        };
+                        hasChanges = true;
+                    } else if (docStatus === 'analyzing' && status.status !== 'analyzing') {
+                        updated[index] = {
+                            ...status,
+                            status: 'analyzing',
+                            message: 'Analyzing content...',
+                        };
+                        hasChanges = true;
+                    } else if (docStatus === 'extracting' && status.status !== 'extracting') {
+                        updated[index] = {
+                            ...status,
+                            status: 'extracting',
+                            message: 'Extracting text...',
+                        };
+                        hasChanges = true;
+                    } else if (docStatus === 'failed') {
+                        updated[index] = {
+                            ...status,
+                            status: 'error',
+                            message: 'Analysis failed',
+                        };
+                        hasChanges = true;
+                    }
+                }
+            });
+            
+            return hasChanges ? updated : prev;
+        });
+    }, [documentStatuses]);
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+    };
+
+    const handleDrop = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+
+        const files = Array.from(e.dataTransfer.files);
+        console.log('Files dropped:', files);
+        setUploadedFiles(prev => [...prev, ...files]);
+    };
+
+    const handleFileSelect = (e) => {
+        const files = Array.from(e.target.files);
+        console.log('Files selected:', files);
+        setUploadedFiles(prev => [...prev, ...files]);
+    };
+
+    const removeFile = (index) => {
+        setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+        setPdfProcessingStatus(prev => {
+            const newStatus = { ...prev };
+            delete newStatus[index];
+            return newStatus;
+        });
+    };
+
+    // Process PDFs when they're added
+    const processPDF = async (file, index) => {
+        if (file.type !== 'application/pdf') return;
+
+        try {
+            console.log('[ChatSidebar] Processing PDF:', file.name, { index });
+            
+            // Update status to uploading
+            setPdfProcessingStatus(prev => ({
+                ...prev,
+                [index]: { status: 'uploading', progress: 0, message: 'Uploading PDF...' }
+            }));
+
+            // Get identity ID if not already available
+            const session = await fetchAuthSession();
+            const currentIdentityId = identityId || session.identityId;
+            
+            console.log('[ChatSidebar] Identity ID:', currentIdentityId);
+            console.log('[ChatSidebar] Unit ID:', unit?.id);
+
+            // Upload and analyze
+            const result = await uploadAndAnalyzePDF(
+                file,
+                currentIdentityId,
+                unit?.id,
+                true, // auto-analyze
+                (loaded, total) => {
+                    const progress = Math.round((loaded / total) * 100);
+                    setPdfProcessingStatus(prev => ({
+                        ...prev,
+                        [index]: { 
+                            status: 'uploading', 
+                            progress, 
+                            message: `Uploading... ${progress}%` 
+                        }
+                    }));
+                }
+            );
+            
+            console.log('[ChatSidebar] Upload result:', result);
+
+            // Update status based on result - store documentId for tracking
+            if (result.analysisResult && result.analysisResult.success) {
+                setPdfProcessingStatus(prev => ({
+                    ...prev,
+                    [index]: { 
+                        status: 'analyzing', 
+                        progress: 100, 
+                        message: 'PDF uploaded, analysis started...',
+                        documentId: result.documentModel?.id,
+                    }
+                }));
+            } else if (result.documentModel) {
+                setPdfProcessingStatus(prev => ({
+                    ...prev,
+                    [index]: { 
+                        status: 'uploaded', 
+                        progress: 100, 
+                        message: 'PDF uploaded successfully',
+                        documentId: result.documentModel?.id,
+                    }
+                }));
+            } else {
+                setPdfProcessingStatus(prev => ({
+                    ...prev,
+                    [index]: { 
+                        status: 'uploaded', 
+                        progress: 100, 
+                        message: 'PDF uploaded (no document created)' 
+                    }
+                }));
+            }
+        } catch (error) {
+            console.error('[ChatSidebar] Error processing PDF:', error);
+            setPdfProcessingStatus(prev => ({
+                ...prev,
+                [index]: { 
+                    status: 'error', 
+                    progress: 0, 
+                    message: `Error: ${error.message}` 
+                }
+            }));
         }
-    }, [])
+    };
 
-
-    // delete and reinitialize the assistant when files change
-    // useEffect(() => {
-    //     if (assistantId) {
-    //         if (files || questionBank || dictionary || unit || sections) {
-    //             reinitializeAssistant({
-    //                 id: assistantId,
-    //                 files,
-    //                 questionBank,
-    //                 dictionary,
-    //                 unit,
-    //                 sections
-    //             })
-    //         }
-    //     }
-    // }, [JSON.stringify(files), JSON.stringify(questionBank), JSON.stringify(dictionary), JSON.stringify(unit), JSON.stringify(sections), assistantId])
+    // Detect PDFs and offer to process them
+    useEffect(() => {
+        uploadedFiles.forEach((file, index) => {
+            if (file.type === 'application/pdf' && !pdfProcessingStatus[index]) {
+                // Ask user if they want to process the PDF
+                const shouldProcess = window.confirm(
+                    `Would you like to upload and analyze "${file.name}"? This will extract text and generate vocabulary.`
+                );
+                
+                if (shouldProcess) {
+                    processPDF(file, index);
+                } else {
+                    // Mark as declined
+                    setPdfProcessingStatus(prev => ({
+                        ...prev,
+                        [index]: { 
+                            status: 'declined', 
+                            progress: 0, 
+                            message: 'Analysis declined' 
+                        }
+                    }));
+                }
+            }
+        });
+    }, [uploadedFiles]);
 
     return (
         <>
             <style global jsx>{`
-                .chat-message.user {
-                    background-color: lightgray;
-                    margin: 0.5rem;
+                .chat-message {
+                    margin: 0.75rem;
+                    padding: 0.75rem 1rem;
                     border-radius: 1rem;
-                    max-width: 90%;
-                    align-self: flex-start;
+                    max-width: 85%;
+                    word-wrap: break-word;
+                }
+                .chat-message.user {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    align-self: flex-end;
+                    border-bottom-right-radius: 0.25rem;
                 }
                 .chat-message.assistant {
-                    background-color: lightblue;
-                    border-radius: 1rem;
-                    margin: 0.5rem;
-                    max-width: 90%;
-                    align-self: flex-end;
+                    background-color: #f3f4f6;
+                    color: #1f2937;
+                    align-self: flex-start;
+                    border-bottom-left-radius: 0.25rem;
+                    border: 1px solid #e5e7eb;
+                }
+                .chat-message pre {
+                    margin: 0;
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                    font-family: inherit;
+                    font-size: 0.9rem;
+                    line-height: 1.5;
                 }
             `}</style>
-            <div
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "calc(100vh - 15rem)",
-                    overflowY: "auto",
-                    width: "100%",
-                    margin: '0',
-                    padding: '0',
-
-                }}
-                className="chat-messages">
-                <Box
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        margin: '0.5rem 0rem 0.5rem 0rem',
-                        padding: '0.5rem',
-                        borderBottom: '1px solid #ccc',
-                    }}
-                >
-                    {/* <button
-                            onClick={async () => {
-                                fetchAssistants();
-                            }
-                            }>Create Assistant</button> */}
-                    <button
-                        onClick={async () => {
-                            setMessages([]);
-                            await deleteAssistant();
-                            await fetchAssistants();
-
-                        }
-                        }>Clear Chat</button>
-                </Box>
-                {messages.map((message, index) => (
-                    <div
-                        key={index}
-                        className={`chat-message ${message.role === "user" ? "user" : "assistant"
-                            }`}
-                    >
-                        <pre
-                            style={{
-                                margin: '1rem',
-                                whiteSpace: 'pre-wrap',
-                                wordWrap: 'break-word',
-                                textWrap: 'wrap',
-                            }}
-                        >{message.content}</pre>
-                    </div>
-                ))}
-            </div>
-            <div
-                // display="flex"
-                // flexDirection="row"
-                // justifyContent="space-between"
-                className="chat-input"
-                onClick={(e) => {
-                    // do nothing
-                    e.stopPropagation();
-
-                }}
+            
+            <Box 
+                sx={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
             >
-                <Box
-                    style={{
+                {/* Drag overlay */}
+                {isDragging && (
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            bgcolor: 'primary.main',
+                            opacity: 0.9,
+                            zIndex: 1000,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            pointerEvents: 'none',
+                        }}
+                    >
+                        <Box sx={{ textAlign: 'center', color: 'white' }}>
+                            <UploadFile sx={{ fontSize: 64, mb: 2 }} />
+                            <Typography variant="h6">Drop files here</Typography>
+                            <Typography variant="body2">Attach files to your message</Typography>
+                        </Box>
+                    </Box>
+                )}
+                {/* Header */}
+                <Paper
+                    elevation={0}
+                    sx={{
+                        p: 1.5,
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
                         display: 'flex',
-                        flexDirection: 'row',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        margin: '0.5rem 0rem 0.5rem 0rem',
-                        padding: '0.5rem',
-                        borderTop: '1px solid #ccc',
                     }}
                 >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <ChatIcon color="primary" />
+                        <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
+                            AI Assistant
+                        </Typography>
+                    </Box>
+                    <IconButton
+                        size="small"
+                        onClick={() => reload()}
+                        title="Clear chat"
+                        sx={{ color: 'error.main' }}
+                    >
+                        <DeleteIcon fontSize="small" />
+                    </IconButton>
+                </Paper>
 
-                    <TextField
-                        value={message}
-                        onInput={(e) => setMessage(e.target.value)}
-                        onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                                // sendMessage();
-                                messageAssistant();
-
-                            }
-                        }}
-                        type='text'
-                        style={{
-                            width: '90%',
-                            margin: '0.2rem'
-                        }}
-                        id="outlined-basic"
-                        label="Chat with your AI Assistant"
-                        variant="outlined" />
-
-                    {isBusy &&
-                        <Button aria-label="chatting" onClick={() => {
-                            setIsBusy(false);
-                        }}>
-                            <CircularProgress />
-                        </Button>
-
-                    }
-                    {!isBusy &&
-                        <Button aria-label="chat" onClick={() => {
-                            // sendMessage();
-                            messageAssistant();
-                        }}>
-                            <ChatIcon />
-                        </Button>
-                    }
+                {/* Messages */}
+                <Box
+                    ref={chatContainerRef}
+                    sx={{
+                        flex: 1,
+                        overflowY: 'auto',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        p: 1,
+                        bgcolor: 'grey.50',
+                    }}
+                >
+                    {messages.length === 0 && (
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '100%',
+                                color: 'text.secondary',
+                                textAlign: 'center',
+                                p: 3,
+                            }}
+                        >
+                            <ChatIcon sx={{ fontSize: 48, mb: 2, opacity: 0.3 }} />
+                            <Typography variant="body2">
+                                Ask me anything about your curriculum, files, or content!
+                            </Typography>
+                        </Box>
+                    )}
+                    {messages.map((message) => (
+                        <div
+                            key={message.id}
+                            className={`chat-message ${message.role}`}
+                        >
+                            <pre>{message.content}</pre>
+                        </div>
+                    ))}
+                    {isLoading && (
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1,
+                                p: 2,
+                                color: 'text.secondary',
+                            }}
+                        >
+                            <CircularProgress size={16} />
+                            <Typography variant="body2">Thinking...</Typography>
+                        </Box>
+                    )}
                 </Box>
-            </div>
+
+                {/* Input */}
+                <Paper
+                    component="form"
+                    onSubmit={handleSubmit}
+                    elevation={2}
+                    sx={{
+                        p: 1.5,
+                        borderTop: '1px solid',
+                        borderColor: 'divider',
+                    }}
+                >
+                    {/* File attachments */}
+                    {uploadedFiles.length > 0 && (
+                        <Box sx={{ mb: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                            {uploadedFiles.map((file, index) => {
+                                const isPDF = file.type === 'application/pdf';
+                                const status = pdfProcessingStatus[index];
+                                
+                                return (
+                                <Paper
+                                    key={index}
+                                    elevation={1}
+                                    sx={{
+                                        p: 1,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1,
+                                        bgcolor: isPDF ? (
+                                            status?.status === 'error' ? 'error.light' :
+                                            status?.status === 'analyzed' ? 'success.light' :
+                                            status?.status === 'analyzing' ? 'warning.light' :
+                                            'grey.100'
+                                        ) : 'grey.100',
+                                        border: isPDF ? '1px solid' : 'none',
+                                        borderColor: isPDF ? (
+                                            status?.status === 'error' ? 'error.main' :
+                                            status?.status === 'analyzed' ? 'success.main' :
+                                            status?.status === 'analyzing' ? 'warning.main' :
+                                            'grey.300'
+                                        ) : 'transparent',
+                                    }}
+                                >
+                                    {isPDF && <PictureAsPdfIcon sx={{ fontSize: 18, color: 'error.main' }} />}
+                                    {!isPDF && <AttachFileIcon sx={{ fontSize: 18 }} />}
+                                    
+                                    <Box sx={{ flex: 1 }}>
+                                        <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+                                            {file.name}
+                                        </Typography>
+                                        {status && (
+                                            <Typography 
+                                                variant="caption" 
+                                                sx={{ 
+                                                    fontSize: '0.65rem',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 0.5,
+                                                    color: status.status === 'error' ? 'error.main' : 
+                                                           status.status === 'analyzed' ? 'success.main' :
+                                                           'text.secondary'
+                                                }}
+                                            >
+                                                {status.status === 'uploading' && (
+                                                    <CircularProgress size={10} />
+                                                )}
+                                                {status.status === 'analyzed' && (
+                                                    <CheckCircleIcon sx={{ fontSize: 12 }} />
+                                                )}
+                                                {status.message}
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                    
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => removeFile(index)}
+                                        sx={{ p: 0.5 }}
+                                    >
+                                        <DeleteIcon sx={{ fontSize: 16 }} />
+                                    </IconButton>
+                                </Paper>
+                            )})}
+                        </Box>
+                    )}
+
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                        {/* Hidden file input */}
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            multiple
+                            hidden
+                            onChange={handleFileSelect}
+                        />
+                        
+                        {/* Attach button */}
+                        <IconButton
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isLoading}
+                            sx={{ alignSelf: 'flex-end' }}
+                        >
+                            <UploadFile />
+                        </IconButton>
+
+                        <TextField
+                            fullWidth
+                            size="small"
+                            value={input}
+                            onChange={handleInputChange}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSubmit(e);
+                                }
+                            }}
+                            placeholder="Ask me anything..."
+                            disabled={isLoading}
+                            multiline
+                            maxRows={4}
+                            variant="outlined"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: 2,
+                                },
+                            }}
+                        />
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            disabled={isLoading || !input.trim()}
+                            sx={{
+                                minWidth: 'auto',
+                                px: 2,
+                                borderRadius: 2,
+                            }}
+                        >
+                            {isLoading ? (
+                                <CircularProgress size={20} color="inherit" />
+                            ) : (
+                                <SendIcon />
+                            )}
+                        </Button>
+                    </Box>
+                </Paper>
+            </Box>
         </>
     );
 }
