@@ -73,8 +73,7 @@ const config = {
       'aws-amplify/utils': require.resolve('./__mocks__/aws-amplify-utils.js'),
       'aws-amplify/api': require.resolve('./__mocks__/aws-amplify-api.js'),
       '@aws-amplify/datastore': require.resolve('./__mocks__/aws-amplify-datastore.js'),
-      // Mock the getCachedUrl utility
-      [path.resolve(__dirname, '../src/utils/getCachedUrl')]: require.resolve('./__mocks__/getCachedUrl.js'),
+      // Use real getCachedUrl to test caching logic
     };
     
     // Ensure symlinks are resolved properly
