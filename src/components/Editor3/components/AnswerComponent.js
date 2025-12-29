@@ -40,6 +40,45 @@ const SketchPad = dynamic(
 import AudioWaveformPlayer from './AudioWaveformPlayer';
 import getCachedUrl from '../../../utils/getCachedUrl';
 
+// Component to handle signed URL for word audio
+function SignedAudioPlayer({ audioKey, identityId, waveformData, width, height, title }) {
+  const [signedUrl, setSignedUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const signUrl = async () => {
+      if (audioKey) {
+        try {
+          const url = await getCachedUrl(audioKey, 'protected', identityId);
+          setSignedUrl(url);
+        } catch (error) {
+          console.error('Error signing audio URL:', error);
+        }
+      }
+      setLoading(false);
+    };
+    signUrl();
+  }, [audioKey, identityId]);
+
+  if (loading) {
+    return <Typography variant="body2" sx={{ opacity: 0.6 }}>Loading audio...</Typography>;
+  }
+
+  if (!signedUrl) {
+    return <Typography variant="body2" sx={{ opacity: 0.6, fontStyle: 'italic' }}>Audio not available</Typography>;
+  }
+
+  return (
+    <AudioWaveformPlayer
+      audioUrl={signedUrl}
+      waveformData={waveformData}
+      width={width}
+      height={height}
+      title={title}
+    />
+  );
+}
+
 
 const client = generateClient();
 
@@ -307,8 +346,9 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                     }
                     {currentPromptMethod === 'audio' && (
                         dictionary[wordId]?.audio ? (
-                            <AudioWaveformPlayer
-                                audioUrl={dictionary[wordId].audio[0]}
+                            <SignedAudioPlayer
+                                audioKey={dictionary[wordId].audio[0]}
+                                identityId={dictionary[wordId].identityId}
                                 waveformData={dictionary[wordId].waveformData ? JSON.parse(dictionary[wordId].waveformData) : undefined}
                                 width={400}
                                 height={60}
@@ -434,8 +474,9 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
             }
             {currentPromptMethod === 'audio' && (
                 dictionary[wordId]?.audio ? (
-                    <AudioWaveformPlayer
-                        audioUrl={dictionary[wordId].audio[0]}
+                    <SignedAudioPlayer
+                        audioKey={dictionary[wordId].audio[0]}
+                        identityId={dictionary[wordId].identityId}
                         waveformData={dictionary[wordId].waveformData ? JSON.parse(dictionary[wordId].waveformData) : undefined}
                         width={400}
                         height={60}
@@ -480,8 +521,9 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                 
                 {currentPromptMethod === 'audio' && (
                     dictionary[wordId]?.audio ? (
-                        <AudioWaveformPlayer
-                            audioUrl={dictionary[wordId].audio[0]}
+                        <SignedAudioPlayer
+                            audioKey={dictionary[wordId].audio[0]}
+                            identityId={dictionary[wordId].identityId}
                             waveformData={dictionary[wordId].waveformData ? JSON.parse(dictionary[wordId].waveformData) : undefined}
                             width={400}
                             height={60}
@@ -550,8 +592,9 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
 
                     {currentPromptMethod === 'audio' && (
                         dictionary[wordId]?.definitionAudio ? (
-                            <AudioWaveformPlayer
-                                audioUrl={dictionary[wordId].definitionAudio[0]}
+                            <SignedAudioPlayer
+                                audioKey={dictionary[wordId].definitionAudio[0]}
+                                identityId={dictionary[wordId].identityId}
                                 waveformData={dictionary[wordId].definitionWaveformData ? JSON.parse(dictionary[wordId].definitionWaveformData) : undefined}
                                 width={400}
                                 height={60}
@@ -648,8 +691,9 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                 
                 {currentPromptMethod === 'audio' && (
                     dictionary[wordId]?.definitionAudio ? (
-                        <AudioWaveformPlayer
-                            audioUrl={dictionary[wordId].definitionAudio[0]}
+                        <SignedAudioPlayer
+                            audioKey={dictionary[wordId].definitionAudio[0]}
+                            identityId={dictionary[wordId].identityId}
                             waveformData={dictionary[wordId].definitionWaveformData ? JSON.parse(dictionary[wordId].definitionWaveformData) : undefined}
                             width={400}
                             height={60}
@@ -690,8 +734,9 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                 
                 {currentPromptMethod === 'audio' && (
                     dictionary[wordId]?.definitionAudio ? (
-                        <AudioWaveformPlayer
-                            audioUrl={dictionary[wordId].definitionAudio[0]}
+                        <SignedAudioPlayer
+                            audioKey={dictionary[wordId].definitionAudio[0]}
+                            identityId={dictionary[wordId].identityId}
                             waveformData={dictionary[wordId].definitionWaveformData ? JSON.parse(dictionary[wordId].definitionWaveformData) : undefined}
                             width={400}
                             height={60}

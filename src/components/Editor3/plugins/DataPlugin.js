@@ -89,6 +89,14 @@ export default function DataPlugin() {
             // Use queueMicrotask to avoid flushSync warning in React 18+
             queueMicrotask(() => {
                 editor.setEditorState(_editorState);
+                
+                // Trigger a small update to ensure code highlighting is applied
+                setTimeout(() => {
+                    editor.update(() => {
+                        // This empty update will trigger the update listeners
+                        // which will cause CodeHighlightPlugin to re-process code blocks
+                    });
+                }, 50);
             });
             isInitializedRef.current = true;
         } catch (error) {

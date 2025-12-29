@@ -201,7 +201,6 @@ export default function AudioWaveformPlayer({
             const time = displayTimeRef.current;
             setLocalTime(time);
             const newProgress = Math.min((time / localDuration) * 100, 100);
-            console.log('[AudioWaveformPlayer] Updating progress:', newProgress, 'time:', time);
             setLocalProgress(newProgress);
             
             rafId = requestAnimationFrame(updateProgress);
@@ -219,7 +218,6 @@ export default function AudioWaveformPlayer({
     // Load source when component mounts or URL changes
     useEffect(() => {
         if (sourceUrl && loadedSourceRef.current !== sourceUrl) {
-            console.log('[AudioWaveformPlayer] Loading source:', sourceUrl.substring(0, 50) + '...');
             setIsReady(false);
             audioPlayer.loadSource(sourceUrl);
             loadedSourceRef.current = sourceUrl;
@@ -228,7 +226,6 @@ export default function AudioWaveformPlayer({
 
     const togglePlayPause = useCallback(async () => {
         if (!sourceUrl || !isReady) {
-            console.warn('Audio not ready to play');
             return;
         }
 

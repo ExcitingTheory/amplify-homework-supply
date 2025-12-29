@@ -27,6 +27,7 @@ import {
 } from '@mui/material';
 import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
 import AudioWaveformPlayer from '../components/AudioWaveformPlayer';
+import getCachedUrl from '../../../utils/getCachedUrl';
 
   /**
    * WordBlockComponent - Displays word information in a block.
@@ -48,6 +49,31 @@ import AudioWaveformPlayer from '../components/AudioWaveformPlayer';
     const { wordMapId: dictionary } = useContext(DictionaryContext);
     const word = dictionary[wordID];
     const isEditable = useLexicalEditable();
+    const [signedAudioUrl, setSignedAudioUrl] = useState(null);
+    const [audioLoading, setAudioLoading] = useState(false);
+
+    // Sign the audio URL when word changes
+    useEffect(() => {
+      const signAudioUrl = async () => {
+        if (word?.audio && word.audio[0]) {
+          setAudioLoading(true);
+          try {
+            const url = await getCachedUrl(word.audio[0], 'protected', word.identityId);
+            setSignedAudioUrl(url);
+          } catch (error) {
+            console.error('Error signing word audio URL:', error);
+            setSignedAudioUrl(null);
+          } finally {
+            setAudioLoading(false);
+          }
+        } else {
+          setSignedAudioUrl(null);
+          setAudioLoading(false);
+        }
+      };
+
+      signAudioUrl();
+    }, [word?.audio, word?.identityId]);
 
     if (!word) {
       return (
@@ -118,14 +144,18 @@ import AudioWaveformPlayer from '../components/AudioWaveformPlayer';
                 {/* Audio Player with Waveform */}
                 {word.audio && word.audio.length > 0 && (
                   <Box sx={{ mb: 1.5 }}>
-                    <AudioWaveformPlayer
-                      audioUrl={word.audio[0]}
-                      waveformData={word.waveformData ? JSON.parse(word.waveformData) : undefined}
-                      width={400}
-                      height={60}
-                      title={null}
-                      enableRecording={false}
-                    />
+                    {audioLoading ? (
+                      <Typography variant="body2" sx={{ opacity: 0.6 }}>Loading audio...</Typography>
+                    ) : signedAudioUrl ? (
+                      <AudioWaveformPlayer
+                        audioUrl={signedAudioUrl}
+                        waveformData={word.waveformData ? JSON.parse(word.waveformData) : undefined}
+                        title={null}
+                        enableRecording={false}
+                      />
+                    ) : (
+                      <Typography variant="body2" sx={{ opacity: 0.6, fontStyle: 'italic' }}>Audio not available</Typography>
+                    )}
                   </Box>
                 )}
 

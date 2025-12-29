@@ -2,7 +2,8 @@ import React from 'react';
 import { within, waitFor, screen, waitForElementToBeRemoved } from 'storybook/test';
 import Editor, { Workbook } from './index';
 import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
-import { seedMockUnit } from '../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit, seedMockFiles, seedMockWords } from '../../../.storybook/__mocks__/aws-amplify-datastore';
+const { MOCK_AUDIO_BASE64, mockWaveformData, MOCK_IMAGE_URL_1, MOCK_IMAGE_URL_2 } = await import('../../../.storybook/__mocks__/media');
 
 // Verify models are loading - this will show in console
 import { Unit, Grade } from '../../models';
@@ -1279,7 +1280,7 @@ const kitchenSinkEditorState = {
       {
         type: 'word-block',
         version: 1,
-        wordID: 'sample-word-id',
+        wordID: 'word-1',
         format: '',
       },
       {
@@ -1693,9 +1694,173 @@ const kitchenSinkEditorState = {
   },
 };
 
+
+const mockFiles = [
+  {
+    id: 'file-1',
+    name: 'sample-audio.mp3',
+    path: MOCK_AUDIO_BASE64,
+    mimeType: 'audio/mpeg',
+    size: 2458000,
+    identityId: 'us-east-1:abc-123',
+    level: 'PROTECTED',
+    waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'file-2',
+    name: 'vocabulary-image.jpeg',
+    path: MOCK_IMAGE_URL_2,
+    mimeType: 'image/jpeg',
+    size: 125000,
+    identityId: 'us-east-1:abc-123',
+    level: 'PROTECTED',
+  },
+  {
+    id: 'file-3',
+    name: 'lesson-recording.mp3',
+    path: MOCK_AUDIO_BASE64,
+    mimeType: 'audio/mpeg',
+    size: 4856000,
+    identityId: 'us-east-1:abc-123',
+    level: 'PROTECTED',
+    waveformData: JSON.stringify(mockWaveformData.slice(50, 250)),
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'file-4',
+    name: 'diagram.jpeg',
+    path: MOCK_IMAGE_URL_1,
+    mimeType: 'image/jpeg',
+    size: 340000,
+    identityId: 'us-east-1:abc-123',
+    level: 'PROTECTED',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'file-5',
+    name: 'pronunciation-guide.mp3',
+    path:MOCK_AUDIO_BASE64,
+    mimeType: 'audio/mpeg',
+    size: 1234000,
+    identityId: 'us-east-1:abc-123',
+    level: 'PROTECTED',
+    waveformData: JSON.stringify(mockWaveformData.slice(300, 400)),
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'file-6',
+    name: 'japanese-grammar-guide.pdf',
+    path: 'protected/documents/japanese-grammar-guide.pdf',
+    mimeType: 'application/pdf',
+    size: 2458000,
+    identityId: 'us-east-1:abc-123',
+    level: 'PROTECTED',
+    createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+  },
+  {
+    id: 'file-7',
+    name: 'vocabulary-list-chapter-1.pdf',
+    path: 'protected/documents/vocabulary-list-chapter-1.pdf',
+    mimeType: 'application/pdf',
+    size: 458000,
+    identityId: 'us-east-1:abc-123',
+    level: 'PROTECTED',
+    createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+  },
+  {
+    id: 'file-8',
+    name: 'lesson-plan.pdf',
+    path: 'protected/documents/lesson-plan.pdf',
+    mimeType: 'application/pdf',
+    size: 1234000,
+    identityId: 'us-east-1:abc-123',
+    level: 'PROTECTED',
+    createdAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+  },
+];
+
 export const KitchenSink = {
   loaders: [
     async () => {
+      seedMockFiles(mockFiles);
+      
+      // Create mock words for the word blocks
+      seedMockWords([
+        {
+          id: 'word-1',
+          phrase: '勉強',
+          definition: 'to study; studying',
+          pronunciation: 'べんきょう',
+          partOfSpeech: 'noun/verb',
+          context: 'education',
+          level: 'beginner',
+          audio: [MOCK_AUDIO_BASE64],
+          waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
+          owner: 'mock-user-sub',
+          identityId: 'us-east-1:abc-123',
+        },
+        {
+          id: 'word-2',
+          phrase: '学校',
+          definition: 'school',
+          pronunciation: 'がっこう',
+          partOfSpeech: 'noun',
+          context: 'education',
+          level: 'beginner',
+          audio: [MOCK_AUDIO_BASE64],
+          waveformData: JSON.stringify(mockWaveformData.slice(50, 200)),
+          owner: 'mock-user-sub',
+          identityId: 'us-east-1:abc-123',
+        },
+        {
+          id: 'word-3',
+          phrase: '先生',
+          definition: 'teacher',
+          pronunciation: 'せんせい',
+          partOfSpeech: 'noun',
+          context: 'education',
+          level: 'beginner',
+          owner: 'mock-user-sub',
+          identityId: 'us-east-1:abc-123',
+        },
+        {
+          id: 'word-4',
+          phrase: '図書館',
+          definition: 'library',
+          pronunciation: 'としょかん',
+          partOfSpeech: 'noun',
+          context: 'education',
+          level: 'intermediate',
+          owner: 'mock-user-sub',
+          identityId: 'us-east-1:abc-123',
+        },
+        {
+          id: 'word-5',
+          phrase: 'bonjour',
+          definition: 'hello, good morning',
+          pronunciation: 'bon-ZHOOR',
+          partOfSpeech: 'interjection',
+          context: 'greetings',
+          level: 'beginner',
+          audio: [MOCK_AUDIO_BASE64],
+          waveformData: JSON.stringify(mockWaveformData.slice(300, 400)),
+          owner: 'mock-user-sub',
+          identityId: 'us-east-1:abc-123',
+        },
+        {
+          id: 'word-6',
+          phrase: 'au revoir',
+          definition: 'goodbye',
+          pronunciation: 'oh ruh-VWAR',
+          partOfSpeech: 'interjection',
+          context: 'greetings',
+          level: 'beginner',
+          owner: 'mock-user-sub',
+          identityId: 'us-east-1:abc-123',
+        },
+      ]);
+      
       // Seed the mock DataStore with kitchen sink data
       seedMockUnit({
         id: KITCHEN_SINK_ID,
@@ -1703,6 +1868,8 @@ export const KitchenSink = {
         description: 'Comprehensive example showing all available editor block types',
         data: kitchenSinkEditorState,
         _version: 1,
+        wordIDs: ['word-1', 'word-2', 'word-3', 'word-4', 'word-5', 'word-6'],
+        fileIDs: ['audio-1', 'audio-2', 'audio-3'],
         owner: 'mock-user-sub',
       });
     },
@@ -1710,235 +1877,5 @@ export const KitchenSink = {
   render: () => <Editor />,
   parameters: {
     unitId: KITCHEN_SINK_ID,
-  },
-};
-
-const dataPluginDemoState = {
-  root: {
-    children: [
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'DataPlugin Demo',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h1',
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'This editor content is loaded by the DataPlugin from the unit.data property in UnitContext.',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: 'How DataPlugin Works:',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'heading',
-        version: 1,
-        tag: 'h2',
-      },
-      {
-        children: [
-          {
-            children: [
-              {
-                children: [
-                  {
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Monitors unit.data from UnitContext',
-                    type: 'text',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                type: 'listitem',
-                version: 1,
-                value: 1,
-              },
-              {
-                children: [
-                  {
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Parses JSON editor state from unit.data',
-                    type: 'text',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                type: 'listitem',
-                version: 1,
-                value: 2,
-              },
-              {
-                children: [
-                  {
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Tracks unit._version to prevent unnecessary updates',
-                    type: 'text',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                type: 'listitem',
-                version: 1,
-                value: 3,
-              },
-              {
-                children: [
-                  {
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Loads editor state when data changes',
-                    type: 'text',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                type: 'listitem',
-                version: 1,
-                value: 4,
-              },
-              {
-                children: [
-                  {
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Preserves selection state via editorSelectionRef',
-                    type: 'text',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                type: 'listitem',
-                version: 1,
-                value: 5,
-              },
-            ],
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            type: 'list',
-            version: 1,
-            listType: 'bullet',
-            start: 1,
-            tag: 'ul',
-          },
-        ],
-        direction: null,
-        format: '',
-        indent: 0,
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        children: [
-          {
-            detail: 0,
-            format: 1,
-            mode: 'normal',
-            style: '',
-            text: 'Note:',
-            type: 'text',
-            version: 1,
-          },
-          {
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-            text: ' In production, this syncs with AWS DataStore. In Storybook, it loads from the MockUnitProvider.',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        type: 'paragraph',
-        version: 1,
-      },
-    ],
-    direction: 'ltr',
-    format: '',
-    indent: 0,
-    type: 'root',
-    version: 1,
-  },
-};
-
-export const DataPluginDemo = {
-  loaders: [
-    async () => {
-      seedMockUnit({
-        id: 'data-plugin-demo-id',
-        name: 'DataPlugin Synchronization Demo',
-        description: 'Demonstrates how DataPlugin loads editor state from unit.data',
-        data: dataPluginDemoState,
-        _version: 1,
-        owner: 'mock-user-sub',
-      });
-    },
-  ],
-  render: () => <Editor />,
-  parameters: {
-    unitId: 'data-plugin-demo-id',
   },
 };
