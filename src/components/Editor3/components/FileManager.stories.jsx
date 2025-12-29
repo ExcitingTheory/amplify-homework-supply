@@ -203,8 +203,8 @@ const mockUnit = {
 
 const mockSettings = {
   id: 'settings-1',
-  autoAnalyzePDFs: true,
-  pdfAnalysisModel: 'gpt-4',
+  autoAnalyzeDocuments: true,
+  documentAnalysisModel: 'gpt-4',
   editorTheme: 'auto',
   editorFontSize: 14,
   defaultAIModel: 'gpt-4',
@@ -221,7 +221,7 @@ const EditorTemplate = ({ files: initialFiles = mockFiles, settings = mockSettin
   useEffect(() => {
     console.log('[FileManager.stories] Seeding mock files:', initialFiles.length);
     seedMockFiles(initialFiles);
-    seedMockSettings({ ...settings, autoAnalyzePDFs: autoAnalyze });
+    seedMockSettings({ ...settings, autoAnalyzeDocuments: autoAnalyze });
   }, [initialFiles, settings, autoAnalyze]);
 
   return (
@@ -285,7 +285,6 @@ const EditorTemplate = ({ files: initialFiles = mockFiles, settings = mockSettin
 
               {/* File Manager Section */}
               <div style={{ 
-                width: '400px',
                 borderLeft: '1px solid #e0e0e0',
                 backgroundColor: 'white',
                 display: 'flex',
@@ -319,7 +318,7 @@ const StandaloneTemplate = ({ files: initialFiles = mockFiles, settings = mockSe
   useEffect(() => {
     console.log('[FileManager.stories] Seeding mock files:', initialFiles.length);
     seedMockFiles(initialFiles);
-    seedMockSettings({ ...settings, autoAnalyzePDFs: autoAnalyze });
+    seedMockSettings({ ...settings, autoAnalyzeDocuments: autoAnalyze });
   }, [initialFiles, settings, autoAnalyze]);
 
   return (

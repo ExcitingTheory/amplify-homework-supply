@@ -13,11 +13,11 @@ type Mutation {
   updateAssistantEditor(assistantId: String!, additionalInstructions: String!, model: String): String @function(name: "openai-${env}")
   deleteAssistantEditor(assistantId: String!, threadId: String!): String @function(name: "openai-${env}")
   chatAssistantThread(assistantId: String!, messages: String!): String @function(name: "openai-${env}")
-  analyzePDF(documentID: ID!): AnalyzePDFResult @function(name: "analyzePdf-${env}")
-  cancelPDFAnalysis(documentID: ID!): CancelPDFAnalysisResult @function(name: "analyzePdf-${env}")
+  analyzeDocument(documentID: ID!): AnalyzeDocumentResult @function(name: "analyzeDocument-${env}")
+  cancelDocumentAnalysis(documentID: ID!): CancelDocumentAnalysisResult @function(name: "analyzeDocument-${env}")
 }
 
-type AnalyzePDFResult {
+type AnalyzeDocumentResult {
   success: Boolean!
   documentID: ID!
   responseId: String
@@ -25,7 +25,7 @@ type AnalyzePDFResult {
   message: String
 }
 
-type CancelPDFAnalysisResult {
+type CancelDocumentAnalysisResult {
   success: Boolean!
   documentID: ID!
   message: String
@@ -293,6 +293,7 @@ type ParsedContent @model @auth(rules: [
   summariesJSON: AWSJSON # [{title, content, page_range}]
   objectivesJSON: AWSJSON # [{objective, bloom_level}]
   conceptsJSON: AWSJSON # [{concept, description, related_vocabulary}]
+  questionsJSON: AWSJSON # [{question, expectedAnswer, hint, type}]
   responseId: String # OpenAI response ID
   modelUsed: String
   tokensUsed: Int
@@ -334,9 +335,9 @@ type Settings @model @auth(rules: [
   id: ID!
   owner: String
   identityId: String
-  # PDF Analysis Settings
-  autoAnalyzePDFs: Boolean # Automatically analyze PDFs on upload
-  pdfAnalysisModel: String # OpenAI model to use (default: gpt-4)
+  # Document Analysis Settings
+  autoAnalyzeDocuments: Boolean # Automatically analyze documents on upload
+  documentAnalysisModel: String # OpenAI model to use (default: gpt-4)
   # Editor Settings
   editorTheme: String # light, dark, auto
   editorFontSize: Int

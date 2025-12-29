@@ -41,28 +41,6 @@ import AddIcon from '@mui/icons-material/Add';
 import FilesContext from "../../../context/fileContext";
 import SettingsContext from "../../../context/settingsContext";
 
-const analyzePDFMutation = /* GraphQL */ `
-  mutation AnalyzePDF($documentID: ID!) {
-    analyzePDF(documentID: $documentID) {
-      success
-      documentID
-      responseId
-      pageCount
-      message
-    }
-  }
-`;
-
-const cancelPDFAnalysisMutation = /* GraphQL */ `
-  mutation CancelPDFAnalysis($documentID: ID!) {
-    cancelPDFAnalysis(documentID: $documentID) {
-      success
-      documentID
-      message
-    }
-  }
-`;
-
 import { DataStore } from 'aws-amplify/datastore';
 import { uploadData, remove } from 'aws-amplify/storage';
 import { fetchAuthSession } from 'aws-amplify/auth';
@@ -99,6 +77,9 @@ import Chip from '@mui/material/Chip';
 import ImageIcon from '@mui/icons-material/Image';
 import AudioFileIcon from '@mui/icons-material/AudioFile';
 import FolderIcon from '@mui/icons-material/Folder';
+import DescriptionIcon from '@mui/icons-material/Description';
+import ArticleIcon from '@mui/icons-material/Article';
+import TableChartIcon from '@mui/icons-material/TableChart';
 
 import TextareaAutosize from '@mui/material/TextareaAutosize';
 
@@ -815,8 +796,15 @@ export default function FileManager() {
             filteredFiles = files.filter(f => f.mimeType.includes('image'));
         } else if (generator === 'audio') {
             filteredFiles = files.filter(f => f.mimeType.includes('audio'));
-        } else if (generator === 'pdf') {
-            filteredFiles = files.filter(f => f.mimeType.includes('pdf'));
+        } else if (generator === 'document') {
+            filteredFiles = files.filter(f => 
+                f.mimeType === 'application/pdf' || 
+                f.mimeType === 'text/plain' ||
+                f.mimeType === 'text/markdown' ||
+                f.mimeType === 'text/csv' ||
+                f.mimeType === 'application/msword' ||
+                f.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            );
         }
         
         const matchingFile = filteredFiles.find(file => 
@@ -829,8 +817,15 @@ export default function FileManager() {
                 apiRef.current?.setItemExpansion(null, 'images', true);
             } else if (matchingFile.mimeType.includes('audio')) {
                 apiRef.current?.setItemExpansion(null, 'audio', true);
-            } else {
-                apiRef.current?.setItemExpansion(null, 'other', true);
+            } else if (
+                matchingFile.mimeType === 'application/pdf' || 
+                matchingFile.mimeType === 'text/plain' ||
+                matchingFile.mimeType === 'text/markdown' ||
+                matchingFile.mimeType === 'text/csv' ||
+                matchingFile.mimeType === 'application/msword' ||
+                matchingFile.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            ) { 
+                apiRef.current?.setItemExpansion(null, 'document', true);
             }
             
             // Focus and scroll to the item
@@ -874,8 +869,8 @@ export default function FileManager() {
                 // Create default settings if none exist
                 try {
                     const newSettings = await DataStore.save(new Settings({
-                        autoAnalyzePDFs: true,
-                        pdfAnalysisModel: 'gpt-4',
+                        autoAnalyzeDocuments: true,
+                        documentAnalysisModel: 'gpt-4',
                     }));
                     setSettings(newSettings);
                 } catch (error) {
@@ -1019,8 +1014,8 @@ export default function FileManager() {
                     console.log('Upload result:', result);
 
                     // If PDF and auto-analyze is enabled, trigger analysis
-                    if (file.type === 'application/pdf' && settings?.autoAnalyzePDFs && result.documentModel) {
-                        console.log('Auto-analyzing PDF:', result.documentModel.id);
+                    if (file.type === 'application/pdf' && settings?.autoAnalyzeDocuments && result.documentModel) {
+                        console.log('Auto-analyzing document:', result.documentModel.id);
                         try {
                             await analyzePDF(result.documentModel.id);
                         } catch (error) {
@@ -1159,6 +1154,15 @@ export default function FileManager() {
                         setNewAudioFileFormOpen(false);
                         setNewVideoFileFormOpen(false);
                         
+                        // Expand the appropriate tree section
+                        if (newValue === 'image' && apiRef.current) {
+                            apiRef.current.setItemExpansion(null, 'images', true);
+                        } else if (newValue === 'audio' && apiRef.current) {
+                            apiRef.current.setItemExpansion(null, 'audio', true);
+                        } else if (newValue === 'document' && apiRef.current) {
+                            apiRef.current.setItemExpansion(null, 'documents', true);
+                        }
+                        
                         // Open the selected form if generation is active
                         if (newFileFormOpen) {
                             if (newValue === 'image') {
@@ -1208,11 +1212,11 @@ export default function FileManager() {
                     />
                     <Tab 
                         label={
-                            <Tooltip title="PDFs">
+                            <Tooltip title="Documents">
                                 <PictureAsPdfIcon fontSize="small" />
                             </Tooltip>
                         }
-                        value="pdf" 
+                        value="document" 
                     />
                     <Tab 
                         label={
@@ -1276,7 +1280,7 @@ export default function FileManager() {
                                 }}
                                 size="small"
                                 fullWidth
-                                placeholder={`Search ${generator === 'all' ? 'all files' : generator === 'image' ? 'images' : generator === 'audio' ? 'audio' : 'PDFs'}...`}
+                                placeholder={`Search ${generator === 'all' ? 'all files' : generator === 'image' ? 'images' : generator === 'audio' ? 'audio' : generator === 'document' ? 'documents' : 'files'}...`}
                                 InputProps={{
                                     endAdornment: (
                                         <IconButton
@@ -1507,32 +1511,68 @@ export default function FileManager() {
                         </TreeItem>
                     )}
                     
-                    {files.filter(file => file.mimeType === 'application/pdf').length > 0 && (
+                    {files.filter(file => 
+                        file.mimeType === 'application/pdf' || 
+                        file.mimeType === 'text/plain' ||
+                        file.mimeType === 'text/markdown' ||
+                        file.mimeType === 'text/csv' ||
+                        file.mimeType === 'application/msword' ||
+                        file.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                    ).length > 0 && (
                         <TreeItem 
-                            itemId="pdfs"
+                            itemId="documents"
                             onClick={(e) => {
-                                if (generator !== 'all' && generator !== 'pdf') {
+                                if (generator !== 'all' && generator !== 'document') {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    setGenerator('pdf');
+                                    setGenerator('document');
                                 }
                             }}
                             label={
                                 <Box 
                                     sx={{ 
-                                        opacity: generator !== 'all' && generator !== 'pdf' ? 0.5 : 1,
+                                        opacity: generator !== 'all' && generator !== 'document' ? 0.5 : 1,
                                     }}
                                 >
-                                    {`PDFs (${files.filter(f => f.mimeType === 'application/pdf').length})`}
+                                    {`Documents (${files.filter(f => 
+                                        f.mimeType === 'application/pdf' || 
+                                        f.mimeType === 'text/plain' ||
+                                        f.mimeType === 'text/markdown' ||
+                                        f.mimeType === 'text/csv' ||
+                                        f.mimeType === 'application/msword' ||
+                                        f.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                                    ).length})`}
                                 </Box>
                             }
                         >
                             {files
-                                .filter(file => file.mimeType === 'application/pdf')
+                                .filter(file => 
+                                    file.mimeType === 'application/pdf' || 
+                                    file.mimeType === 'text/plain' ||
+                                    file.mimeType === 'text/markdown' ||
+                                    file.mimeType === 'text/csv' ||
+                                    file.mimeType === 'application/msword' ||
+                                    file.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                                )
                                 .map((file) => {
                                     const docStatus = documentStatuses[file.path];
                                     const statusInfo = getDocumentStatusInfo(docStatus?.status || 'uploaded');
                                     const isProcessing = ['extracting', 'analyzing'].includes(docStatus?.status);
+                                    
+                                    // Helper function to get appropriate icon
+                                    const getDocumentIcon = (mimeType) => {
+                                        if (mimeType === 'application/pdf') return PictureAsPdfIcon;
+                                        if (mimeType === 'text/plain') return DescriptionIcon;
+                                        if (mimeType === 'text/markdown') return ArticleIcon;
+                                        if (mimeType === 'text/csv') return TableChartIcon;
+                                        if (mimeType === 'application/msword' || 
+                                            mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                                            return ArticleIcon;
+                                        }
+                                        return DescriptionIcon;
+                                    };
+                                    
+                                    const DocumentIcon = getDocumentIcon(file.mimeType);
                                     
                                     return (
                                     <TreeItem
@@ -1540,7 +1580,7 @@ export default function FileManager() {
                                         key={file.id}
                                         label={
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
-                                                <PictureAsPdfIcon 
+                                                <DocumentIcon 
                                                     color={statusInfo.color} 
                                                     sx={{ 
                                                         animation: isProcessing ? 'pulse 2s infinite' : 'none',
@@ -1572,10 +1612,10 @@ export default function FileManager() {
                                                 </Box>
                                                 <Box sx={{ display: 'flex', gap: 0.5 }}>
                                                     {/* Insert PDF into editor - always available */}
-                                                    {editor && (
+                                                    {editor && file.mimeType === 'application/pdf' && (
                                                         <IconButton
                                                             size="small"
-                                                            title="Insert PDF"
+                                                            title="Insert Document"
                                                             onClick={async (e) => {
                                                                 e.stopPropagation();
                                                                 editor.dispatchCommand(INSERT_PDF_COMMAND, {
@@ -1670,11 +1710,38 @@ export default function FileManager() {
                     )}
                     
                     {generator === 'all' && files
-                        .filter(file => !file.mimeType.includes('image') && !file.mimeType.includes('audio') && file.mimeType !== 'application/pdf')
+                        .filter(file => 
+                            !file.mimeType.includes('image') && 
+                            !file.mimeType.includes('audio') && 
+                            file.mimeType !== 'application/pdf' &&
+                            file.mimeType !== 'text/plain' &&
+                            file.mimeType !== 'text/markdown' &&
+                            file.mimeType !== 'text/csv' &&
+                            file.mimeType !== 'application/msword' &&
+                            file.mimeType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                        )
                         .length > 0 && (
-                        <TreeItem itemId="other" label={`Other Files (${files.filter(f => !f.mimeType.includes('image') && !f.mimeType.includes('audio') && f.mimeType !== 'application/pdf').length})`}>
+                        <TreeItem itemId="other" label={`Other Files (${files.filter(f => 
+                            !f.mimeType.includes('image') && 
+                            !f.mimeType.includes('audio') && 
+                            f.mimeType !== 'application/pdf' &&
+                            f.mimeType !== 'text/plain' &&
+                            f.mimeType !== 'text/markdown' &&
+                            f.mimeType !== 'text/csv' &&
+                            f.mimeType !== 'application/msword' &&
+                            f.mimeType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                        ).length})`}>
                             {files
-                                .filter(file => !file.mimeType.includes('image') && !file.mimeType.includes('audio') && file.mimeType !== 'application/pdf')
+                                .filter(file => 
+                                    !file.mimeType.includes('image') && 
+                                    !file.mimeType.includes('audio') && 
+                                    file.mimeType !== 'application/pdf' &&
+                                    file.mimeType !== 'text/plain' &&
+                                    file.mimeType !== 'text/markdown' &&
+                                    file.mimeType !== 'text/csv' &&
+                                    file.mimeType !== 'application/msword' &&
+                                    file.mimeType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                                )
                                 .map((file) => (
                                     <TreeItem
                                         itemId={file.id}

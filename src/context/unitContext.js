@@ -419,18 +419,24 @@ const UnitProvider = ({ children, id }) => {
       const _questions = await Promise.allSettled(_unitQuestionsWork)
 
       _words.forEach(w => {
-        const _w = w.value
-        _dictionary[_w.id] = _w
+        if (w.status === 'fulfilled' && w.value) {
+          const _w = w.value
+          _dictionary[_w.id] = _w
+        }
       })
 
       _unitsFiles.forEach(async f => {
-        const _f = f.value
-        _files[_f.id] = _f
+        if (f.status === 'fulfilled' && f.value) {
+          const _f = f.value
+          _files[_f.id] = _f
+        }
       })
 
       _questions.forEach(q => {
-        const _q = q.value
-        _questionBank[_q.id] = _q
+        if (q.status === 'fulfilled' && q.value) {
+          const _q = q.value
+          _questionBank[_q.id] = _q
+        }
       })
 
       const _urlsOutput = await Promise.allSettled(urlsWork)

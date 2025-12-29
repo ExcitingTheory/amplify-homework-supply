@@ -43,12 +43,6 @@ Mocks DataStore operations with in-memory storage:
 - `DataStore.delete()` - Removes from memory
 - `DataStore.observe()` - Observable subscriptions
 
-### `getCachedUrl.js`
-Mocks the utility for fetching presigned S3 URLs:
-- Returns data URLs for generated content
-- Returns SVG placeholders for images
-- Returns mock audio data for audio files
-
 ## Usage in Stories
 
 No special imports needed! Just write your stories normally:
@@ -62,41 +56,3 @@ export const Default = {
 ```
 
 The mocks are automatically active for all stories.
-
-## Testing AI Generation
-
-The AI generation mocks simulate:
-
-1. **Text-to-Image** (DALL-E):
-   - 1.5s delay
-   - Returns path: `protected/images/generated-{timestamp}.png`
-   - getCachedUrl returns a placeholder image data URL
-
-2. **Text-to-Speech** (OpenAI TTS):
-   - 1.5s delay  
-   - Returns path: `protected/audio/generated-{timestamp}.mp3`
-   - getCachedUrl returns a silent audio data URL
-   - Includes mock waveform data
-
-## Debugging
-
-All mocks include console.log statements. Check the browser console to see:
-- `[Mock API]` - GraphQL calls
-- `[Mock Auth]` - Authentication calls
-- `[Mock Storage]` - S3 operations
-- `[Mock getCachedUrl]` - URL generation
-
-## Adding New Mocks
-
-1. Create a new mock file in this directory
-2. Add webpack alias in `.storybook/main.js`
-3. Export the mocked functions/objects
-4. Update this README
-
-## Why Not Jest Mocks?
-
-Storybook doesn't use Jest, so `jest.mock()` doesn't work. Instead, we use:
-- Webpack module aliasing for global mocks
-- Works consistently across all stories
-- No need to repeat mock setup in each story file
-- Better performance (mocks resolved at build time)

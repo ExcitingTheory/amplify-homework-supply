@@ -1935,6 +1935,7 @@ export const getDocument = /* GraphQL */ `query GetDocument($id: ID!) {
         summariesJSON
         objectivesJSON
         conceptsJSON
+        questionsJSON
         responseId
         modelUsed
         tokensUsed
@@ -2269,6 +2270,7 @@ export const getParsedContent = /* GraphQL */ `query GetParsedContent($id: ID!) 
     summariesJSON
     objectivesJSON
     conceptsJSON
+    questionsJSON
     responseId
     modelUsed
     tokensUsed
@@ -2325,6 +2327,7 @@ export const listParsedContents = /* GraphQL */ `query ListParsedContents(
       summariesJSON
       objectivesJSON
       conceptsJSON
+      questionsJSON
       responseId
       modelUsed
       tokensUsed
@@ -2391,6 +2394,7 @@ export const syncParsedContents = /* GraphQL */ `query SyncParsedContents(
       summariesJSON
       objectivesJSON
       conceptsJSON
+      questionsJSON
       responseId
       modelUsed
       tokensUsed
@@ -2459,6 +2463,7 @@ export const parsedContentsByDocumentID = /* GraphQL */ `query ParsedContentsByD
       summariesJSON
       objectivesJSON
       conceptsJSON
+      questionsJSON
       responseId
       modelUsed
       tokensUsed
@@ -2969,8 +2974,8 @@ export const getSettings = /* GraphQL */ `query GetSettings($id: ID!) {
     id
     owner
     identityId
-    autoAnalyzePDFs
-    pdfAnalysisModel
+    autoAnalyzeDocuments
+    documentAnalysisModel
     editorTheme
     editorFontSize
     defaultAIModel
@@ -3002,8 +3007,8 @@ export const listSettings = /* GraphQL */ `query ListSettings(
       id
       owner
       identityId
-      autoAnalyzePDFs
-      pdfAnalysisModel
+      autoAnalyzeDocuments
+      documentAnalysisModel
       editorTheme
       editorFontSize
       defaultAIModel
@@ -3045,8 +3050,8 @@ export const syncSettings = /* GraphQL */ `query SyncSettings(
       id
       owner
       identityId
-      autoAnalyzePDFs
-      pdfAnalysisModel
+      autoAnalyzeDocuments
+      documentAnalysisModel
       editorTheme
       editorFontSize
       defaultAIModel

@@ -1842,6 +1842,7 @@ export const onCreateDocument = /* GraphQL */ `subscription OnCreateDocument(
         summariesJSON
         objectivesJSON
         conceptsJSON
+        questionsJSON
         responseId
         modelUsed
         tokensUsed
@@ -1985,6 +1986,7 @@ export const onUpdateDocument = /* GraphQL */ `subscription OnUpdateDocument(
         summariesJSON
         objectivesJSON
         conceptsJSON
+        questionsJSON
         responseId
         modelUsed
         tokensUsed
@@ -2128,6 +2130,7 @@ export const onDeleteDocument = /* GraphQL */ `subscription OnDeleteDocument(
         summariesJSON
         objectivesJSON
         conceptsJSON
+        questionsJSON
         responseId
         modelUsed
         tokensUsed
@@ -2253,6 +2256,7 @@ export const onCreateParsedContent = /* GraphQL */ `subscription OnCreateParsedC
     summariesJSON
     objectivesJSON
     conceptsJSON
+    questionsJSON
     responseId
     modelUsed
     tokensUsed
@@ -2336,6 +2340,7 @@ export const onUpdateParsedContent = /* GraphQL */ `subscription OnUpdateParsedC
     summariesJSON
     objectivesJSON
     conceptsJSON
+    questionsJSON
     responseId
     modelUsed
     tokensUsed
@@ -2419,6 +2424,7 @@ export const onDeleteParsedContent = /* GraphQL */ `subscription OnDeleteParsedC
     summariesJSON
     objectivesJSON
     conceptsJSON
+    questionsJSON
     responseId
     modelUsed
     tokensUsed
@@ -2863,8 +2869,8 @@ export const onCreateSettings = /* GraphQL */ `subscription OnCreateSettings(
     id
     owner
     identityId
-    autoAnalyzePDFs
-    pdfAnalysisModel
+    autoAnalyzeDocuments
+    documentAnalysisModel
     editorTheme
     editorFontSize
     defaultAIModel
@@ -2894,8 +2900,8 @@ export const onUpdateSettings = /* GraphQL */ `subscription OnUpdateSettings(
     id
     owner
     identityId
-    autoAnalyzePDFs
-    pdfAnalysisModel
+    autoAnalyzeDocuments
+    documentAnalysisModel
     editorTheme
     editorFontSize
     defaultAIModel
@@ -2925,8 +2931,8 @@ export const onDeleteSettings = /* GraphQL */ `subscription OnDeleteSettings(
     id
     owner
     identityId
-    autoAnalyzePDFs
-    pdfAnalysisModel
+    autoAnalyzeDocuments
+    documentAnalysisModel
     editorTheme
     editorFontSize
     defaultAIModel

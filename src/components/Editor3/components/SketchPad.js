@@ -1,4 +1,5 @@
 import { Excalidraw } from "@excalidraw/excalidraw";
+import "@excalidraw/excalidraw/index.css";
 import { useState, useEffect, useRef, useContext } from "react";
 import { exportToCanvas } from "@excalidraw/excalidraw";
 import { generateClient } from "aws-amplify/api";
@@ -11,7 +12,7 @@ const client = generateClient();
 // TODO Add a version to the data so that we can update the data when the version is higher than the current working copy, which should be one above the last saved version
 
 const SketchPad = ({ excalidrawData,
-    persistData,
+    persistData = () => {},
     expect,
     setFeedback,
     feedback,
@@ -102,17 +103,19 @@ const SketchPad = ({ excalidrawData,
                     }
                 });
                 
-                console.log('[SketchPad] Drawing uploaded:', uploadResult.path);
+                console.log('[SketchPad] Drawing uploaded:', uploadResult?.path);
                 
                 // Store S3 path in persistData
                 // This will be picked up by the parent component to update grade.files[]
-                persistData({
-                    elements,
-                    appState,
-                    version: nextVersion,
-                    s3Path: uploadResult.path,
-                    imageSize: base64Size,
-                });
+                if (uploadResult?.path) {
+                    persistData({
+                        elements,
+                        appState,
+                        version: nextVersion,
+                        s3Path: uploadResult.path,
+                        imageSize: base64Size,
+                    });
+                }
             } catch (error) {
                 console.error('[SketchPad] S3 upload failed:', error);
             }
@@ -127,8 +130,18 @@ const SketchPad = ({ excalidrawData,
                     model: "gpt-4o",
                 },
             });
-            const mainData = JSON.parse(response?.data?.verifyImage) || {}
-            const data = JSON.parse(mainData?.choices[0]?.message?.content) || {}
+            
+            if (!response?.data?.verifyImage) {
+                throw new Error('No response from verification API');
+            }
+            
+            const mainData = JSON.parse(response.data.verifyImage);
+            
+            if (!mainData?.choices?.[0]?.message?.content) {
+                throw new Error('Invalid API response format');
+            }
+            
+            const data = JSON.parse(mainData.choices[0].message.content);
             
             setFeedback(data);
         } catch (error) {

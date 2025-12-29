@@ -98,8 +98,17 @@ export const seedMockFiles = (filesArray) => {
     if (file.id) {
       mockFiles[file.id] = file;
       
-      // If it's a PDF, also create a Document record for it
-      if (file.mimeType === 'application/pdf') {
+      // Create Document record for supported document types
+      const documentTypes = [
+        'application/pdf',
+        'text/plain',
+        'text/markdown',
+        'text/csv',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+      
+      if (documentTypes.includes(file.mimeType)) {
         const docId = `doc-${file.id}`;
         mockDocuments[docId] = {
           id: docId,
@@ -110,7 +119,7 @@ export const seedMockFiles = (filesArray) => {
           createdAt: file.createdAt,
           updatedAt: file.createdAt,
         };
-        console.log('[Mock DataStore] Created Document record for PDF:', docId);
+        console.log('[Mock DataStore] Created Document record for', file.mimeType, ':', docId);
       }
     }
   });
@@ -619,6 +628,50 @@ export const clearMockUnits = () => {
       waveformData: JSON.stringify([0.2,0.4,0.6,0.8,0.95,0.9,0.75,0.6,0.4,0.2,0.1,0.3,0.5,0.7,0.85,0.95,0.85,0.7,0.5,0.3,0.15,0.35,0.55,0.75,0.9,1.0,0.9,0.75,0.55,0.35,0.25,0.45,0.65,0.8,0.9,0.95,0.9,0.8,0.65,0.45,0.2,0.35,0.5,0.65,0.8,0.9,0.8,0.65,0.5,0.35,0.15,0.3,0.45,0.6,0.75,0.85,0.75,0.6,0.45,0.3,0.1,0.25,0.4,0.55,0.7,0.8,0.7,0.55,0.4,0.25,0.15,0.3,0.45,0.6,0.7,0.75,0.7,0.6,0.45,0.3,0.1,0.2,0.35,0.5,0.65,0.75,0.65,0.5,0.35,0.2,0.05,0.15,0.3,0.45,0.6,0.7,0.6,0.45,0.3,0.15]),
       _version: 1,
     },
+    {
+      id: 'file-9',
+      name: 'vocabulary-list.txt',
+      path: 'data:text/plain;base64,Vm9jYWJ1bGFyeSBMaXN0IC0gSmFwYW5lc2UgQmFzaWNzCgpXb3JkOiDjgZPjgpPjgavjgaHjga8KUHJvbnVuY2lhdGlvbjoga29ubmljaGl3YQpEZWZpbml0aW9uOiBIZWxsbywgZ29vZCBhZnRlcm5vb24KCldvcmQ6IOOBguOCiuOBjOOBqOOBhgpQcm9udW5jaWF0aW9uOiBhcmlnYXRvdQpEZWZpbml0aW9uOiBUaGFuayB5b3UKCldvcmQ6IOOBleOCiOOBhuOBquOCiQpQcm9udW5jaWF0aW9uOiBzYXlvdW5hcmEKRGVmaW5pdGlvbjogR29vZGJ5ZQoKV29yZDog54yrClByb251bmNpYXRpb246IG5la28KRGVmaW5pdGlvbjogQ2F0CgpXb3JkOiDniKsKUHJvbnVuY2lhdGlvbjogaW51CkRlZmluaXRpb246IERvZwoKV29yZDog5pysClByb251bmNpYXRpb246IGhvbgpEZWZpbml0aW9uOiBCb29rCgpXb3JkOiDmsLQKUHJvbnVuY2lhdGlvbjogbWl6dQpEZWZpbml0aW9uOiBXYXRlcgoKV29yZDog5a2m5qChClByb251bmNpYXRpb246IGdha2tvdQpEZWZpbml0aW9uOiBTY2hvb2w=',
+      mimeType: 'text/plain',
+      size: 542,
+      identityId: 'mock-identity-id',
+      owner: 'mock-user-sub',
+      createdAt: new Date('2024-01-23T10:00:00Z').toISOString(),
+      _version: 1,
+    },
+    {
+      id: 'file-10',
+      name: 'student-grades.csv',
+      path: 'data:text/csv;base64,U3R1ZGVudCBOYW1lLFVuaXQsU2NvcmUsRGF0ZSxOb3RlcwpKb2huIFNtaXRoLEphcGFuZXNlIDEwMSw5NSwyMDI0LTAxLTE1LEV4Y2VsbGVudCBwcm9udW5jaWF0aW9uCkVtaWx5IEpvaG5zb24sSmFwYW5lc2UgMTAxLDg4LDIwMjQtMDEtMTUsR29vZCBlZmZvcnQKTWljaGFlbCBCcm93bixKYXBhbmVzZSAxMDEsOTIsMjAyNC0wMS0xNSxTdHJvbmcgdm9jYWJ1bGFyeQpTYXJhaCBEYXZpcyxKYXBhbmVzZSAxMDEsNzgsMjAyNC0wMS0xNSxOZWVkcyBtb3JlIHByYWN0aWNlCkRhdmlkIFdpbHNvbixKYXBhbmVzZSAxMDEsOTAsMjAyNC0wMS0xNSxXZWxsIGRvbmUKTGlzYSBNYXJ0aW5leixKYXBhbmVzZSAxMDEsODUsMjAyNC0wMS0xNSxJbXByb3ZpbmcKSmFtZXMgQW5kZXJzb24sSmFwYW5lc2UgMTAxLDk3LDIwMjQtMDEtMTUsT3V0c3RhbmRpbmcKTWFyeSBUaG9tYXMsSmFwYW5lc2UgMTAxLDgzLDIwMjQtMDEtMTUsR29vZCBwcm9ncmVzcwpSb2JlcnQgSmFja3NvbixKYXBhbmVzZSAxMDEsOTEsMjAyNC0wMS0xNSxDb25zaXN0ZW50IHdvcmsKSmVubmlmZXIgV2hpdGUsSmFwYW5lc2UgMTAxLDg2LDIwMjQtMDEtMTUsV2VsbCBwcmVwYXJlZA==',
+      mimeType: 'text/csv',
+      size: 648,
+      identityId: 'mock-identity-id',
+      owner: 'mock-user-sub',
+      createdAt: new Date('2024-01-24T14:30:00Z').toISOString(),
+      _version: 1,
+    },
+    {
+      id: 'file-11',
+      name: 'lesson-notes.docx',
+      path: 'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,UEsDBBQAAAAIAAAAAAAAAAAAAAAAAAAAAAAKAAAAZG9jUHJvcHMvYXBwLnhtbE2OywrCMBBF9/mKkL0k1Y2I1I0iuBBE0H/IZFqDSSYkEfHvTbsQXN7LuZxZrLu+gx4eSimeMogwBiCUNpayJoOv4+58AuAj0YpapiSDN3pYL+bnWaKdJq9Om05H4hQ8B9/FiSTl7DW5YKnVxCnvKGF7ROE9h7YPIWDShzb8g2M4EKiVN5FCx5Tah0RJUhLr/8NfVtZ/AAAAUEsDBBQAAAAIAAAAAAAAAAAAAAAAAAAAAAAADwAAAGRvY1Byb3BzL2NvcmUueG1sbY/LCsIwEEX3+YqQvSStCxGpGxFcCCLoPzTTtgaTTEgi4t+bdqG4vJdzOdN1ysxXPXTGG6qUYBADBVZ4a2SdwdfxefEAIHqiK2q9opw7dLBa3Gy2qXLaGfYWAkqXXCgghRBoZVFPoDMUBY+eQwghwL0LEXyfVy5Y5vSGvIqkJNb/hw+lrP8AAABQSwMEFAAAAAgAAAAAAAAAAAAAAAAAAAAAAAoAAABfcmVscy8ucmVsc62SwQqDMBBE74X+Q8i9Jq0HEVN7K6W3UsR/iLubYjZhN6L9+0YQemnxOMwwb2ZJ5yuF1bIRbxH6RAjCgPV0rNTHMb5dEokqWQoBkRtYyQuTpaTkGJd4HjEEA6aEE6EEn0BECKHTMJqqFiMT9e3KQz3r2dBsEUqFkAF9pzGzIGKiO0VxBwpFg7YPpxL2q2LTvLr3xUj6jT8zf1NJg2qqyPXqPPK3D39QSwMEFAAAAAgAAAAAAAAAAAAAAAAAAAAAAAQAAAB3b3JkL19yZWxzL2RvY3VtZW50LnhtbC5yZWxzrZJBDoIwEEX3nqLpvhShCzE0dhsT3RniAYZ2kJrSlGkx3t4CJi7cqMvJfPm/SW+/l2rvTUQHrSooBwQKbJR1ui0guT/v9gjkSLU1qldQUAAP+/3VJlXaR+sQKESfIkMJTSSB5Nz5BBqXUBrTxwgpJoLbmMgNHK5o8FYpN+yYp5BSmv0f/hhl/QdQSwMEFAAAAAgAAAAAAAAAAAAAAAAAAAAAAAEAAAB3b3JkL2RvY3VtZW50LnhtbJWSQU/DMBBF95X4D5HvNE1aoKoSKYgDEhKCg/g58SaY2rEVO6X8e9akXTh07NTx/nt+a3u3iOd1BV7RGNnUEQwCDw1TUpZNvYn+vpfTqQfGCl4KJRuI4IVYOJ/ML+ZzJW3BdjVaiyCvI5ha2yYQBiZnlTBCW+R0U0lrsaOhqoLQSmBehsXrEnwJKRr+CSRhMBiGqhS61FXA7FdJt2oMVNDiK+P5BXHPhvL/4Q+a638AAABQSwECPwAUAAAACAAAAAAAAAAAAAAAAAAAAAAAEgAAAAAAAAAAABAA7UEAAAAAZG9jUHJvcHMvYXBwLnhtbFBLAQI/ABQAAAAIAAAAAAAAAAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAQAOdBYAAAAGRvY1Byb3BzL2NvcmUueG1sUEsBAj8AFAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAC/AQAAX3JlbHMvLnJlbHNQSwECPwAUAAAACAAAAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAQAAAAABIAAAB3b3JkL19yZWxzL2RvY3VtZW50LnhtbC5yZWxzUEsBAj8AFAAAAAgAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAEAAAAFYDAAB3b3JkL2RvY3VtZW50LnhtbFBLBQYAAAAABQAFAGEBAAAXAwAAAAA=',
+      mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      size: 3847,
+      identityId: 'mock-identity-id',
+      owner: 'mock-user-sub',
+      createdAt: new Date('2024-01-25T09:45:00Z').toISOString(),
+      _version: 1,
+    },
+    {
+      id: 'file-12',
+      name: 'reading-passage.txt',
+      path: 'data:text/plain;base64,SmFwYW5lc2UgQ3VsdHVyZSBhbmQgTGFuZ3VhZ2UKCkphcGFuZXNlIGlzIGEgRmFzY2luYXRpbmcgTGFuZ3VhZ2UKCkphcGFuZXNlIGlzIGEgbGFuZ3VhZ2Ugc3Bva2VuIGJ5IG92ZXIgMTI1IG1pbGxpb24gcGVvcGxlLCBwcmltYXJpbHkgaW4gSmFwYW4uIEl0IGlzIGEgbWVtYmVyIG9mIHRoZSBKYXBvbmljIGxhbmd1YWdlIGZhbWlseSBhbmQgaGFzIGEgdW5pcXVlIHdyaXRpbmcgc3lzdGVtIHRoYXQgY29tYmluZXMgdGhyZWUgc2NyaXB0czogaGlyYWdhbmEsIGthdGFrYW5hLCBhbmQga2FuamkuCgpIaXJhZ2FuYSBpcyB1c2VkIGZvciBuYXRpdmUgSmFwYW5lc2Ugd29yZHMgYW5kIGdyYW1tYXRpY2FsIGVsZW1lbnRzLiBLYXRha2FuYSBpcyBwcmltYXJpbHkgdXNlZCBmb3IgZm9yZWlnbiBsb2Fud29yZHMgYW5kIG9ub21hdG9wb2VpYS4gS2FuamkgYXJlIGNoYXJhY3RlcnMgYm9ycm93ZWQgZnJvbSBDaGluZXNlLCBlYWNoIHJlcHJlc2VudGluZyBhIHdvcmQgb3IgY29uY2VwdC4KClRoZSBncmFtbWF0aWNhbCBzdHJ1Y3R1cmUgb2YgSmFwYW5lc2UgaXMgcXVpdGUgZGlmZmVyZW50IGZyb20gRW5nbGlzaC4gVGhlIGJhc2ljIHNlbnRlbmNlIG9yZGVyIGlzIFN1YmplY3QtT2JqZWN0LVZlcmIsIHdoaWNoIGlzIHRoZSByZXZlcnNlIG9mIEVuZ2xpc2guIEZvciBleGFtcGxlLCAiSSBlYXQgYW4gYXBwbGUiIGluIEphcGFuZXNlIHdvdWxkIGJlICJJIGFwcGxlIGVhdCIgKOepgOOBr+OCiuOCk+OBlOOCkuOBn+OBueOBvuOBmSku',
+      mimeType: 'text/plain',
+      size: 789,
+      identityId: 'mock-identity-id',
+      owner: 'mock-user-sub',
+      createdAt: new Date('2024-01-26T11:20:00Z').toISOString(),
+      _version: 1,
+    },
   ]);
 };
 
@@ -735,7 +788,7 @@ export class DataStore {
     
     // Detect model type by checking properties
     const isGrade = model.unitID && model.data !== undefined;
-    const isSettings = model.autoAnalyzePDFs !== undefined;
+    const isSettings = model.autoAnalyzeDocuments !== undefined;
     const isUnit = model.name && model.data !== undefined && !model.unitID;
     const isFile = model.path && model.mimeType;
     const isDocument = model.filename && model.s3Key && model.status;

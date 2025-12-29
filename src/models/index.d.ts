@@ -14,7 +14,7 @@ export enum FileProtectionLevels {
   PROTECTED = "PROTECTED"
 }
 
-type EagerAnalyzePDFResult = {
+type EagerAnalyzeDocumentResult = {
   readonly success: boolean;
   readonly documentID: string;
   readonly responseId?: string | null;
@@ -22,7 +22,7 @@ type EagerAnalyzePDFResult = {
   readonly message?: string | null;
 }
 
-type LazyAnalyzePDFResult = {
+type LazyAnalyzeDocumentResult = {
   readonly success: boolean;
   readonly documentID: string;
   readonly responseId?: string | null;
@@ -30,9 +30,25 @@ type LazyAnalyzePDFResult = {
   readonly message?: string | null;
 }
 
-export declare type AnalyzePDFResult = LazyLoading extends LazyLoadingDisabled ? EagerAnalyzePDFResult : LazyAnalyzePDFResult
+export declare type AnalyzeDocumentResult = LazyLoading extends LazyLoadingDisabled ? EagerAnalyzeDocumentResult : LazyAnalyzeDocumentResult
 
-export declare const AnalyzePDFResult: (new (init: ModelInit<AnalyzePDFResult>) => AnalyzePDFResult)
+export declare const AnalyzeDocumentResult: (new (init: ModelInit<AnalyzeDocumentResult>) => AnalyzeDocumentResult)
+
+type EagerCancelDocumentAnalysisResult = {
+  readonly success: boolean;
+  readonly documentID: string;
+  readonly message?: string | null;
+}
+
+type LazyCancelDocumentAnalysisResult = {
+  readonly success: boolean;
+  readonly documentID: string;
+  readonly message?: string | null;
+}
+
+export declare type CancelDocumentAnalysisResult = LazyLoading extends LazyLoadingDisabled ? EagerCancelDocumentAnalysisResult : LazyCancelDocumentAnalysisResult
+
+export declare const CancelDocumentAnalysisResult: (new (init: ModelInit<CancelDocumentAnalysisResult>) => CancelDocumentAnalysisResult)
 
 type EagerStudentInfo = {
   readonly id: string;
@@ -582,6 +598,7 @@ type EagerParsedContent = {
   readonly summariesJSON?: string | null;
   readonly objectivesJSON?: string | null;
   readonly conceptsJSON?: string | null;
+  readonly questionsJSON?: string | null;
   readonly responseId?: string | null;
   readonly modelUsed?: string | null;
   readonly tokensUsed?: number | null;
@@ -607,6 +624,7 @@ type LazyParsedContent = {
   readonly summariesJSON?: string | null;
   readonly objectivesJSON?: string | null;
   readonly conceptsJSON?: string | null;
+  readonly questionsJSON?: string | null;
   readonly responseId?: string | null;
   readonly modelUsed?: string | null;
   readonly tokensUsed?: number | null;
@@ -694,8 +712,8 @@ type EagerSettings = {
   readonly id: string;
   readonly owner?: string | null;
   readonly identityId?: string | null;
-  readonly autoAnalyzePDFs?: boolean | null;
-  readonly pdfAnalysisModel?: string | null;
+  readonly autoAnalyzeDocuments?: boolean | null;
+  readonly documentAnalysisModel?: string | null;
   readonly editorTheme?: string | null;
   readonly editorFontSize?: number | null;
   readonly defaultAIModel?: string | null;
@@ -717,8 +735,8 @@ type LazySettings = {
   readonly id: string;
   readonly owner?: string | null;
   readonly identityId?: string | null;
-  readonly autoAnalyzePDFs?: boolean | null;
-  readonly pdfAnalysisModel?: string | null;
+  readonly autoAnalyzeDocuments?: boolean | null;
+  readonly documentAnalysisModel?: string | null;
   readonly editorTheme?: string | null;
   readonly editorFontSize?: number | null;
   readonly defaultAIModel?: string | null;

@@ -43,6 +43,11 @@ export const ACCEPTABLE_AUDIO_TYPES = [
 
 export const ACCEPTABLE_FILE_TYPES = [
     'application/pdf',
+    'text/plain',
+    'text/markdown',
+    'text/csv',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/zip',
     'application/x-rar-compressed',
     'application/x-7z-compressed',
@@ -57,7 +62,6 @@ export const ACCEPTABLE_FILE_TYPES = [
     'application/vnd.ms-powerpoint',
     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     'application/vnd.ms-word',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/vnd.oasis.opendocument.text',
     'application/vnd.oasis.opendocument.spreadsheet',
     'application/vnd.oasis.opendocument.presentation',

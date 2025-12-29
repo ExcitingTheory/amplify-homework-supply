@@ -120,7 +120,7 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
-    "analyzePdf": {
+    "analyzeDocument": {
       "build": true,
       "dependsOn": [
         {
@@ -276,27 +276,27 @@
         }
       ]
     },
-    "AMPLIFY_function_analyzePdf_deploymentBucketName": {
+    "AMPLIFY_function_analyzeDocument_deploymentBucketName": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "analyzePdf"
+          "resourceName": "analyzeDocument"
         }
       ]
     },
-    "AMPLIFY_function_analyzePdf_s3Key": {
+    "AMPLIFY_function_analyzeDocument_s3Key": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "analyzePdf"
+          "resourceName": "analyzeDocument"
         }
       ]
     },
-    "AMPLIFY_function_analyzePdf_secretsPathAmplifyAppId": {
+    "AMPLIFY_function_analyzeDocument_secretsPathAmplifyAppId": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "analyzePdf"
+          "resourceName": "analyzeDocument"
         }
       ]
     },

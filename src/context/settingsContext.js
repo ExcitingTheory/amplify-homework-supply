@@ -17,8 +17,8 @@ const SettingsProvider = ({ children }) => {
         // Create default settings if none exist
         try {
           const newSettings = await DataStore.save(new Settings({
-            autoAnalyzePDFs: true,
-            pdfAnalysisModel: 'gpt-4',
+            autoAnalyzeDocuments: true,
+            documentAnalysisModel: 'gpt-4',
             editorTheme: 'auto',
             editorFontSize: 14,
             defaultAIModel: 'gpt-4',

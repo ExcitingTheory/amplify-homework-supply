@@ -1862,6 +1862,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "questionsJSON": {
+                    "name": "questionsJSON",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "responseId": {
                     "name": "responseId",
                     "isArray": false,
@@ -2225,15 +2232,15 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "autoAnalyzePDFs": {
-                    "name": "autoAnalyzePDFs",
+                "autoAnalyzeDocuments": {
+                    "name": "autoAnalyzeDocuments",
                     "isArray": false,
                     "type": "Boolean",
                     "isRequired": false,
                     "attributes": []
                 },
-                "pdfAnalysisModel": {
-                    "name": "pdfAnalysisModel",
+                "documentAnalysisModel": {
+                    "name": "documentAnalysisModel",
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
@@ -3134,8 +3141,8 @@ export const schema = {
         }
     },
     "nonModels": {
-        "AnalyzePDFResult": {
-            "name": "AnalyzePDFResult",
+        "AnalyzeDocumentResult": {
+            "name": "AnalyzeDocumentResult",
             "fields": {
                 "success": {
                     "name": "success",
@@ -3163,6 +3170,32 @@ export const schema = {
                     "isArray": false,
                     "type": "Int",
                     "isRequired": false,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "CancelDocumentAnalysisResult": {
+            "name": "CancelDocumentAnalysisResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "documentID": {
+                    "name": "documentID",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
                     "attributes": []
                 },
                 "message": {
@@ -3221,5 +3254,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "e54f9f241ba574c13318b306845203a4"
+    "version": "bb10c4e408e14d760aacb6f801b207f3"
 };

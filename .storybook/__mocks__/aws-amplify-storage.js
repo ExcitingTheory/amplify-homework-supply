@@ -85,9 +85,21 @@ export const getUrl = async ({ key, options = {} }) => {
   return { url: { href: key || 'mock-url' } };
 };
 
-export const uploadData = async () => ({
-  result: Promise.resolve({ key: 'mock-key' }),
-});
+export const uploadData = ({ key, data, options = {} }) => {
+  console.log('[Mock Storage] uploadData called with:', { key, options });
+  
+  // Simulate the upload process
+  const mockPath = key || `mock-path-${Date.now()}`;
+  
+  return {
+    result: Promise.resolve({ 
+      key: mockPath,
+      path: mockPath
+    }),
+    state: 'SUCCESS',
+    cancel: () => console.log('[Mock Storage] Upload cancelled')
+  };
+};
 
 export const remove = async () => ({});
 

@@ -17,9 +17,9 @@ import {
 
 const client = generateClient();
 
-const analyzePDFMutation = /* GraphQL */ `
-  mutation AnalyzePDF($documentID: ID!) {
-    analyzePDF(documentID: $documentID) {
+const analyzeDocumentMutation = /* GraphQL */ `
+  mutation AnalyzeDocument($documentID: ID!) {
+    analyzeDocument(documentID: $documentID) {
       success
       documentID
       responseId
@@ -29,9 +29,9 @@ const analyzePDFMutation = /* GraphQL */ `
   }
 `;
 
-const cancelPDFAnalysisMutation = /* GraphQL */ `
-  mutation CancelPDFAnalysis($documentID: ID!) {
-    cancelPDFAnalysis(documentID: $documentID) {
+const cancelDocumentAnalysisMutation = /* GraphQL */ `
+  mutation CancelDocumentAnalysis($documentID: ID!) {
+    cancelDocumentAnalysis(documentID: $documentID) {
       success
       documentID
       message
@@ -135,15 +135,15 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
  */
 export async function analyzePDF(documentId) {
     const result = await client.graphql({
-        query: analyzePDFMutation,
+        query: analyzeDocumentMutation,
         variables: { documentID: documentId }
     });
 
-    if (result.data.analyzePDF.success) {
-        console.log('PDF analysis started:', result.data.analyzePDF);
-        return result.data.analyzePDF;
+    if (result.data.analyzeDocument.success) {
+        console.log('Document analysis started:', result.data.analyzeDocument);
+        return result.data.analyzeDocument;
     } else {
-        throw new Error(result.data.analyzePDF.message || 'Analysis failed');
+        throw new Error(result.data.analyzeDocument.message || 'Analysis failed');
     }
 }
 
@@ -154,15 +154,15 @@ export async function analyzePDF(documentId) {
  */
 export async function cancelPDFAnalysis(documentId) {
     const result = await client.graphql({
-        query: cancelPDFAnalysisMutation,
+        query: cancelDocumentAnalysisMutation,
         variables: { documentID: documentId }
     });
 
-    if (result.data.cancelPDFAnalysis.success) {
-        console.log('PDF analysis cancelled:', result.data.cancelPDFAnalysis);
-        return result.data.cancelPDFAnalysis;
+    if (result.data.cancelDocumentAnalysis.success) {
+        console.log('Document analysis cancelled:', result.data.cancelDocumentAnalysis);
+        return result.data.cancelDocumentAnalysis;
     } else {
-        throw new Error(result.data.cancelPDFAnalysis.message || 'Cancellation failed');
+        throw new Error(result.data.cancelDocumentAnalysis.message || 'Cancellation failed');
     }
 }
 

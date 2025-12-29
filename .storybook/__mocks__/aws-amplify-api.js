@@ -91,9 +91,29 @@ export const generateClient = () => ({
       };
     }
     
-    // Mock PDF analysis
-    if (query.includes('analyzePDF')) {
-      console.log('[Mock API] Analyzing PDF:', variables);
+    // Mock image verification
+    if (query.includes('verifyImage')) {
+      console.log('[Mock API] Verifying image:', variables);
+      return {
+        data: {
+          verifyImage: JSON.stringify({
+            choices: [{
+              message: {
+                content: JSON.stringify({
+                  answer: true,
+                  reason: 'Your drawing correctly shows the expected concept!',
+                  score: 0.85
+                })
+              }
+            }]
+          })
+        }
+      };
+    }
+    
+    // Mock Document analysis
+    if (query.includes('analyzeDocument')) {
+      console.log('[Mock API] Analyzing Document:', variables);
       
       // Trigger status progression simulation
       simulateDocumentAnalysis(variables.documentID);
@@ -103,20 +123,20 @@ export const generateClient = () => ({
       
       return {
         data: {
-          analyzePDF: {
+          analyzeDocument: {
             success: true,
             documentID: variables.documentID,
             responseId: `mock-response-${Date.now()}`,
             pageCount: Math.floor(Math.random() * 50) + 10,
-            message: 'PDF analysis started successfully. Watch the status badge update in real-time!'
+            message: 'Document analysis started successfully. Watch the status badge update in real-time!'
           }
         }
       };
     }
     
-    // Mock PDF analysis cancellation
-    if (query.includes('cancelPDFAnalysis')) {
-      console.log('[Mock API] Cancelling PDF analysis:', variables);
+    // Mock Document analysis cancellation
+    if (query.includes('cancelDocumentAnalysis')) {
+      console.log('[Mock API] Cancelling Document analysis:', variables);
       
       // Trigger cancellation in mock
       const { cancelDocumentAnalysis } = await import('./aws-amplify-datastore.js');
@@ -126,7 +146,7 @@ export const generateClient = () => ({
       
       return {
         data: {
-          cancelPDFAnalysis: {
+          cancelDocumentAnalysis: {
             success: true,
             documentID: variables.documentID,
             message: 'Analysis cancelled successfully'

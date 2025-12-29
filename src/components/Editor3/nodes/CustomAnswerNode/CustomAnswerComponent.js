@@ -186,9 +186,6 @@ export default function CustomAnswerComponent({
                 onChange={handleInputChange}
                 aria-label="change input method"
             >
-                {allowedInputMethods.length > 0 &&
-                <>
-                
                 <ToggleButton
                     disabled={!allowedInputMethods.includes('text')}
                     value="text"
@@ -201,16 +198,11 @@ export default function CustomAnswerComponent({
                     value="audio" aria-label="audio input">
                     Audio
                 </ToggleButton>
-                {/* <ToggleButton value="listening" aria-label="listening exercise">
-        Listening
-      </ToggleButton> */}
                 <ToggleButton
                     disabled={!allowedInputMethods.includes('writing')}
                     value="writing" aria-label="writing and drawing input">
                     Writing
                 </ToggleButton>
-                </>
-}
             </ToggleButtonGroup>
 
 
@@ -283,7 +275,7 @@ export default function CustomAnswerComponent({
                                     marginBottom: '0.5rem',
                                 }}
                                 color="textPrimary">
-                                <strong>Question:</strong> {displayPrompt}
+                                <strong>Question:</strong>&nbsp;{displayPrompt}
                             </Typography>
                             )}
                             
@@ -453,18 +445,7 @@ export default function CustomAnswerComponent({
                             >
                                 <Suspense fallback={<div>Loading...</div>}>
                                 <SketchPad
-
-// expect={dictionary[wordId]?.definition}
-// excalidrawData={{}} // pass graded data here
-//   setFeedback={(data) => {
-//     setFeedback({
-//         ...feedback,
-//         [wordId]: data,
-//     });
-// }}
-// feedback={feedback}
-// questionID={key}
-                                    excalidrawData={{}} // pass graded data here
+                                    excalidrawData={inProgress?.excalidrawData ?? {}}
                                     className={className}
                                     expect={answer}
                                     questionID={questionID}

@@ -277,8 +277,8 @@ export const chatAssistantThread = /* GraphQL */ `mutation ChatAssistantThread($
   APITypes.ChatAssistantThreadMutationVariables,
   APITypes.ChatAssistantThreadMutation
 >;
-export const analyzePDF = /* GraphQL */ `mutation AnalyzePDF($documentID: ID!) {
-  analyzePDF(documentID: $documentID) {
+export const analyzeDocument = /* GraphQL */ `mutation AnalyzeDocument($documentID: ID!) {
+  analyzeDocument(documentID: $documentID) {
     success
     documentID
     responseId
@@ -288,8 +288,20 @@ export const analyzePDF = /* GraphQL */ `mutation AnalyzePDF($documentID: ID!) {
   }
 }
 ` as GeneratedMutation<
-  APITypes.AnalyzePDFMutationVariables,
-  APITypes.AnalyzePDFMutation
+  APITypes.AnalyzeDocumentMutationVariables,
+  APITypes.AnalyzeDocumentMutation
+>;
+export const cancelDocumentAnalysis = /* GraphQL */ `mutation CancelDocumentAnalysis($documentID: ID!) {
+  cancelDocumentAnalysis(documentID: $documentID) {
+    success
+    documentID
+    message
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CancelDocumentAnalysisMutationVariables,
+  APITypes.CancelDocumentAnalysisMutation
 >;
 export const createAssistant = /* GraphQL */ `mutation CreateAssistant(
   $input: CreateAssistantInput!
@@ -2122,6 +2134,7 @@ export const createDocument = /* GraphQL */ `mutation CreateDocument(
         summariesJSON
         objectivesJSON
         conceptsJSON
+        questionsJSON
         responseId
         modelUsed
         tokensUsed
@@ -2265,6 +2278,7 @@ export const updateDocument = /* GraphQL */ `mutation UpdateDocument(
         summariesJSON
         objectivesJSON
         conceptsJSON
+        questionsJSON
         responseId
         modelUsed
         tokensUsed
@@ -2408,6 +2422,7 @@ export const deleteDocument = /* GraphQL */ `mutation DeleteDocument(
         summariesJSON
         objectivesJSON
         conceptsJSON
+        questionsJSON
         responseId
         modelUsed
         tokensUsed
@@ -2533,6 +2548,7 @@ export const createParsedContent = /* GraphQL */ `mutation CreateParsedContent(
     summariesJSON
     objectivesJSON
     conceptsJSON
+    questionsJSON
     responseId
     modelUsed
     tokensUsed
@@ -2616,6 +2632,7 @@ export const updateParsedContent = /* GraphQL */ `mutation UpdateParsedContent(
     summariesJSON
     objectivesJSON
     conceptsJSON
+    questionsJSON
     responseId
     modelUsed
     tokensUsed
@@ -2699,6 +2716,7 @@ export const deleteParsedContent = /* GraphQL */ `mutation DeleteParsedContent(
     summariesJSON
     objectivesJSON
     conceptsJSON
+    questionsJSON
     responseId
     modelUsed
     tokensUsed
@@ -3143,8 +3161,8 @@ export const createSettings = /* GraphQL */ `mutation CreateSettings(
     id
     owner
     identityId
-    autoAnalyzePDFs
-    pdfAnalysisModel
+    autoAnalyzeDocuments
+    documentAnalysisModel
     editorTheme
     editorFontSize
     defaultAIModel
@@ -3174,8 +3192,8 @@ export const updateSettings = /* GraphQL */ `mutation UpdateSettings(
     id
     owner
     identityId
-    autoAnalyzePDFs
-    pdfAnalysisModel
+    autoAnalyzeDocuments
+    documentAnalysisModel
     editorTheme
     editorFontSize
     defaultAIModel
@@ -3205,8 +3223,8 @@ export const deleteSettings = /* GraphQL */ `mutation DeleteSettings(
     id
     owner
     identityId
-    autoAnalyzePDFs
-    pdfAnalysisModel
+    autoAnalyzeDocuments
+    documentAnalysisModel
     editorTheme
     editorFontSize
     defaultAIModel

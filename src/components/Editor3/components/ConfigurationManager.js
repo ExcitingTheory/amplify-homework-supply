@@ -57,8 +57,8 @@ export default function ConfigurationManager() {
         // Create default settings if none exist
         try {
           const newSettings = await DataStore.save(new Settings({
-            autoAnalyzePDFs: true,
-            pdfAnalysisModel: 'gpt-4',
+            autoAnalyzeDocuments: true,
+            documentAnalysisModel: 'gpt-4',
           }));
           setSettings(newSettings);
         } catch (error) {
@@ -242,12 +242,12 @@ export default function ConfigurationManager() {
         }}
         control={
           <Switch
-            checked={settings?.autoAnalyzePDFs ?? true}
-            onChange={(e) => handleSettingChange('autoAnalyzePDFs', e.target.checked)}
+            checked={settings?.autoAnalyzeDocuments ?? true}
+            onChange={(e) => handleSettingChange('autoAnalyzeDocuments', e.target.checked)}
             disabled={loadingSettings}
           />
         }
-        label="Automatically analyze PDFs on upload"
+        label="Automatically analyze documents on upload"
       />
       <Typography variant="caption" display="block" color="text.secondary" sx={{ ml: 4, wordWrap: 'break-word', overflowWrap: 'break-word', maxWidth: '100%', whiteSpace: 'normal' }}>
         When enabled, PDFs will be sent to OpenAI for vocabulary extraction immediately after upload.

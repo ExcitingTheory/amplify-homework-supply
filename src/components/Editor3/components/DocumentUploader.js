@@ -36,9 +36,9 @@ const SUPPORTED_DOCUMENT_TYPES = {
     'text/csv': { ext: '.csv', label: 'CSV' },
 };
 
-const analyzePDFMutation = /* GraphQL */ `
-  mutation AnalyzePDF($documentID: ID!) {
-    analyzePDF(documentID: $documentID) {
+const analyzeDocumentMutation = /* GraphQL */ `
+  mutation AnalyzeDocument($documentID: ID!) {
+    analyzeDocument(documentID: $documentID) {
       success
       documentID
       responseId
@@ -152,7 +152,7 @@ export default function DocumentUploader({ extractionType = 'vocabulary', onUplo
             // Trigger analysis
             try {
                 await client.graphql({
-                    query: analyzePDFMutation,
+                    query: analyzeDocumentMutation,
                     variables: { documentID: documentModel.id }
                 });
 

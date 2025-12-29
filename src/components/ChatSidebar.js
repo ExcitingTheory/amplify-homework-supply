@@ -36,7 +36,7 @@ const ChatSidebar = () => {
     const chatContainerRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [uploadedFiles, setUploadedFiles] = useState([]);
-    const [pdfProcessingStatus, setPdfProcessingStatus] = useState({}); // { fileIndex: { status: 'uploading'|'uploaded'|'analyzing'|'analyzed'|'error', progress: 0-100, message: '', documentId: '' } }
+    const [documentProcessingStatus, setDocumentProcessingStatus] = useState({}); // { fileIndex: { status: 'uploading'|'uploaded'|'analyzing'|'analyzed'|'error', progress: 0-100, message: '', documentId: '' } }
     const [documentStatuses, setDocumentStatuses] = useState({}); // { documentId: { status: 'uploaded'|'extracting'|'analyzing'|'completed'|'failed' } }
     const fileInputRef = useRef(null);
     const [vocabularyReviewDialogOpen, setVocabularyReviewDialogOpen] = useState(false);
@@ -130,9 +130,9 @@ const ChatSidebar = () => {
         return () => subscription.unsubscribe();
     }, []);
     
-    // Update PDF processing status when document status changes
+    // Update document processing status when document status changes
     useEffect(() => {
-        setPdfProcessingStatus(prev => {
+        setDocumentProcessingStatus(prev => {
             const updated = { ...prev };
             let hasChanges = false;
             
@@ -217,16 +217,16 @@ const ChatSidebar = () => {
 
     const removeFile = (index) => {
         setUploadedFiles(prev => prev.filter((_, i) => i !== index));
-        setPdfProcessingStatus(prev => {
+        setDocumentProcessingStatus(prev => {
             const newStatus = { ...prev };
             delete newStatus[index];
             return newStatus;
         });
     };
     
-    // Cancel PDF processing
+    // Cancel document processing
     const cancelProcessing = async (index) => {
-        const status = pdfProcessingStatus[index];
+        const status = documentProcessingStatus[index];
         if (!status || !status.documentId) {
             console.warn('[ChatSidebar] No document ID to cancel');
             return;
@@ -235,7 +235,7 @@ const ChatSidebar = () => {
         try {
             console.log('[ChatSidebar] Cancelling analysis for document:', status.documentId);
             
-            setPdfProcessingStatus(prev => ({
+            setDocumentProcessingStatus(prev => ({
                 ...prev,
                 [index]: { 
                     ...prev[index],
@@ -245,7 +245,7 @@ const ChatSidebar = () => {
 
             await cancelPDFAnalysis(status.documentId);
             
-            setPdfProcessingStatus(prev => ({
+            setDocumentProcessingStatus(prev => ({
                 ...prev,
                 [index]: { 
                     ...prev[index],
@@ -255,7 +255,7 @@ const ChatSidebar = () => {
             }));
         } catch (error) {
             console.error('[ChatSidebar] Error cancelling analysis:', error);
-            setPdfProcessingStatus(prev => ({
+            setDocumentProcessingStatus(prev => ({
                 ...prev,
                 [index]: { 
                     ...prev[index],
@@ -281,17 +281,24 @@ const ChatSidebar = () => {
         }, 2000);
     };
 
-    // Process PDFs when they're added
-    const processPDF = async (file, index) => {
-        if (file.type !== 'application/pdf') return;
+    // Process documents when they're added
+    const processDocument = async (file, index) => {
+        if ( file.type !== 'application/pdf' ||
+            file.type !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+            file.type !== 'application/msword' ||
+            file.type !== 'text/plain' ||
+            file.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+            file.type !== 'application/vnd.ms-excel' ||
+            file.type !== 'text/csv'
+        ) return;
 
         try {
-            console.log('[ChatSidebar] Processing PDF:', file.name, { index });
+            console.log('[ChatSidebar] Processing document:', file.name, { index });
             
             // Update status to uploading
-            setPdfProcessingStatus(prev => ({
+            setDocumentProcessingStatus(prev => ({
                 ...prev,
-                [index]: { status: 'uploading', progress: 0, message: 'Uploading PDF...' }
+                [index]: { status: 'uploading', progress: 0, message: 'Uploading document...' }
             }));
 
             // Get identity ID if not already available
@@ -309,7 +316,7 @@ const ChatSidebar = () => {
                 true, // auto-analyze
                 (loaded, total) => {
                     const progress = Math.round((loaded / total) * 100);
-                    setPdfProcessingStatus(prev => ({
+                    setDocumentProcessingStatus(prev => ({
                         ...prev,
                         [index]: { 
                             status: 'uploading', 
@@ -324,38 +331,38 @@ const ChatSidebar = () => {
 
             // Update status based on result - store documentId for tracking
             if (result.analysisResult && result.analysisResult.success) {
-                setPdfProcessingStatus(prev => ({
+                setDocumentProcessingStatus(prev => ({
                     ...prev,
                     [index]: { 
                         status: 'analyzing', 
                         progress: 100, 
-                        message: 'PDF uploaded, analysis started...',
+                        message: 'Document uploaded, analysis started...',
                         documentId: result.documentModel?.id,
                     }
                 }));
             } else if (result.documentModel) {
-                setPdfProcessingStatus(prev => ({
+                setDocumentProcessingStatus(prev => ({
                     ...prev,
                     [index]: { 
                         status: 'uploaded', 
                         progress: 100, 
-                        message: 'PDF uploaded successfully',
+                        message: 'Document uploaded successfully',
                         documentId: result.documentModel?.id,
                     }
                 }));
             } else {
-                setPdfProcessingStatus(prev => ({
+                setDocumentProcessingStatus(prev => ({
                     ...prev,
                     [index]: { 
                         status: 'uploaded', 
                         progress: 100, 
-                        message: 'PDF uploaded (no document created)' 
+                        message: 'Document uploaded (no document created)' 
                     }
                 }));
             }
         } catch (error) {
-            console.error('[ChatSidebar] Error processing PDF:', error);
-            setPdfProcessingStatus(prev => ({
+            console.error('[ChatSidebar] Error processing document:', error);
+            setDocumentProcessingStatus(prev => ({
                 ...prev,
                 [index]: { 
                     status: 'error', 
@@ -366,20 +373,20 @@ const ChatSidebar = () => {
         }
     };
 
-    // Detect PDFs and offer to process them
+    // Detect documents and offer to process them
     useEffect(() => {
         uploadedFiles.forEach((file, index) => {
-            if (file.type === 'application/pdf' && !pdfProcessingStatus[index]) {
-                // Ask user if they want to process the PDF
+            if (file.type === 'application/pdf' && !documentProcessingStatus[index]) {
+                // Ask user if they want to process the document
                 const shouldProcess = window.confirm(
                     `Would you like to upload and analyze "${file.name}"? This will extract text and generate vocabulary.`
                 );
                 
                 if (shouldProcess) {
-                    processPDF(file, index);
+                    processDocument(file, index);
                 } else {
                     // Mark as declined
-                    setPdfProcessingStatus(prev => ({
+                    setDocumentProcessingStatus(prev => ({
                         ...prev,
                         [index]: { 
                             status: 'declined', 
@@ -390,7 +397,7 @@ const ChatSidebar = () => {
                 }
             }
         });
-    }, [uploadedFiles]);
+    }, [uploadedFiles, documentProcessingStatus, unit?.id, identityId]);
 
     return (
         <>
@@ -554,8 +561,8 @@ const ChatSidebar = () => {
                     {uploadedFiles.length > 0 && (
                         <Box sx={{ mb: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                             {uploadedFiles.map((file, index) => {
-                                const isPDF = file.type === 'application/pdf';
-                                const status = pdfProcessingStatus[index];
+                                const isDocument = file.type === 'application/pdf';
+                                const status = documentProcessingStatus[index];
                                 
                                 return (
                                 <Paper
@@ -566,15 +573,15 @@ const ChatSidebar = () => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: 1,
-                                        bgcolor: isPDF ? (
+                                        bgcolor: isDocument ? (
                                             status?.status === 'error' ? 'error.light' :
                                             status?.status === 'analyzed' ? 'success.light' :
                                             status?.status === 'analyzing' || status?.status === 'extracting' ? 'warning.light' :
                                             status?.status === 'cancelled' ? 'grey.200' :
                                             'grey.100'
                                         ) : 'grey.100',
-                                        border: isPDF ? '1px solid' : 'none',
-                                        borderColor: isPDF ? (
+                                        border: isDocument ? '1px solid' : 'none',
+                                        borderColor: isDocument ? (
                                             status?.status === 'error' ? 'error.main' :
                                             status?.status === 'analyzed' ? 'success.main' :
                                             status?.status === 'analyzing' || status?.status === 'extracting' ? 'warning.main' :
@@ -583,8 +590,8 @@ const ChatSidebar = () => {
                                         ) : 'transparent',
                                     }}
                                 >
-                                    {isPDF && <PictureAsPdfIcon sx={{ fontSize: 18, color: 'error.main' }} />}
-                                    {!isPDF && <AttachFileIcon sx={{ fontSize: 18 }} />}
+                                    {isDocument && <PictureAsPdfIcon sx={{ fontSize: 18, color: 'error.main' }} />}
+                                    {!isDocument && <AttachFileIcon sx={{ fontSize: 18 }} />}
                                     
                                     <Box sx={{ flex: 1 }}>
                                         <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
@@ -614,8 +621,8 @@ const ChatSidebar = () => {
                                         )}
                                     </Box>
                                     
-                                    {/* Cancel button for processing PDFs */}
-                                    {isPDF && status && ['uploading', 'analyzing', 'extracting'].includes(status.status) && (
+                                    {/* Cancel button for processing documents */}
+                                    {isDocument && status && ['uploading', 'analyzing', 'extracting'].includes(status.status) && (
                                         <IconButton
                                             size="small"
                                             onClick={() => cancelProcessing(index)}
@@ -626,8 +633,8 @@ const ChatSidebar = () => {
                                         </IconButton>
                                     )}
                                     
-                                    {/* Review Vocabulary button for completed PDFs */}
-                                    {isPDF && status && status.status === 'analyzed' && status.documentId && (
+                                    {/* Review Vocabulary button for completed documents */}
+                                    {isDocument && status && status.status === 'analyzed' && status.documentId && (
                                         <IconButton
                                             size="small"
                                             onClick={() => openVocabularyReview(status.documentId)}

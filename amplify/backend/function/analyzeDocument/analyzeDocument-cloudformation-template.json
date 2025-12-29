@@ -24,12 +24,12 @@
       "Type": "String",
       "Default": "apijapanese5GraphQLAPIEndpointOutput"
     },
+    "secretsPathAmplifyAppId": {
+      "Type": "String"
+    },
     "storagefilesBucketName": {
       "Type": "String",
       "Default": "storagefilesBucketName"
-    },
-    "secretsPathAmplifyAppId": {
-      "Type": "String"
     }
   },
   "Conditions": {
@@ -62,12 +62,12 @@
         "FunctionName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "analyzePdf",
+            "analyzeDocument",
             {
               "Fn::Join": [
                 "",
                 [
-                  "analyzePdf",
+                  "analyzeDocument",
                   "-",
                   {
                     "Ref": "env"
@@ -90,6 +90,28 @@
             },
             "API_JAPANESE5_GRAPHQLAPIENDPOINTOUTPUT": {
               "Ref": "apijapanese5GraphQLAPIEndpointOutput"
+            },
+            "OPENAI_API_KEY": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Fn::Sub": [
+                      "/amplify/${appId}/${env}/AMPLIFY_${functionName}_",
+                      {
+                        "appId": {
+                          "Ref": "secretsPathAmplifyAppId"
+                        },
+                        "env": {
+                          "Ref": "env"
+                        },
+                        "functionName": "analyzeDocument"
+                      }
+                    ]
+                  },
+                  "OPENAI_API_KEY"
+                ]
+              ]
             },
             "STORAGE_FILES_BUCKETNAME": {
               "Ref": "storagefilesBucketName"
@@ -171,28 +193,6 @@
                   }
                 ]
               ]
-            },
-            "OPENAI_API_KEY": {
-              "Fn::Join": [
-                "",
-                [
-                  {
-                    "Fn::Sub": [
-                      "/amplify/${appId}/${env}/AMPLIFY_${functionName}_",
-                      {
-                        "appId": {
-                          "Ref": "secretsPathAmplifyAppId"
-                        },
-                        "env": {
-                          "Ref": "env"
-                        },
-                        "functionName": "analyzePdf"
-                      }
-                    ]
-                  },
-                  "OPENAI_API_KEY"
-                ]
-              ]
             }
           }
         },
@@ -213,12 +213,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "amplifyhomeworksupplyLambdaRolea49e171b",
+            "amplifyhomeworksupplyLambdaRole63be4721",
             {
               "Fn::Join": [
                 "",
                 [
-                  "amplifyhomeworksupplyLambdaRolea49e171b",
+                  "amplifyhomeworksupplyLambdaRole63be4721",
                   "-",
                   {
                     "Ref": "env"
@@ -618,7 +618,7 @@
                           "env": {
                             "Ref": "env"
                           },
-                          "functionName": "analyzePdf"
+                          "functionName": "analyzeDocument"
                         }
                       ]
                     },
