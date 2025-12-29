@@ -34,6 +34,7 @@ function TabPanel(props) {
         width: '100%',
         height: 'calc(100vh - 9.5rem)',
         overflowY,
+        overflowX: 'hidden',
       }}
       {...other}
     >

@@ -99,6 +99,30 @@ type Word @model @auth(rules: [
   definition: String
   audio: [String]
   units: [Unit] @manyToMany(relationName: "UnitWord")
+  sourceDocumentID: ID
+  approved: Boolean
+  importedAt: AWSDateTime
+}
+
+type Question @model @auth(rules: [
+  { allow: private, operations: [read]},
+  { allow: groups, groups: ["Instructors", "Admins"]},
+  { allow: owner, ownerField: "owner", operations: [create, update, delete, read] },
+  { allow: public, operations: [read]}]) {
+  id: ID!
+  prompt: String!
+  answer: String
+  hint: String
+  owner: String
+  audio: [String]
+  unitID: ID @index(name: "byUnit")
+  unit: Unit @belongsTo(fields: ["unitID"])
+  sourceDocumentID: ID
+  approved: Boolean
+  importedAt: AWSDateTime
+  difficulty: String
+  questionType: String
+  metadata: AWSJSON
 }
 
 type Document @model @auth(rules: [
@@ -139,6 +163,7 @@ type ParsedContent @model @auth(rules: [
   DocumentID: ID! @index(name: "byDocument")
   Document: Document @hasMany(fields: ["DocumentID"])
   vocabularyJSON: AWSJSON # [{word, definition, context, page}]
+  questionsJSON: AWSJSON # [{prompt, answer, hint, difficulty, questionType}]
   summariesJSON: AWSJSON # [{title, content, page_range}]
   objectivesJSON: AWSJSON # [{objective, bloom_level}]
   conceptsJSON: AWSJSON # [{concept, description, related_vocabulary}]

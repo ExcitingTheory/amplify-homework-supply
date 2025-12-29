@@ -219,14 +219,27 @@ export default function ConfigurationManager() {
       display: 'flex',
       flexDirection: 'column',
       padding: '1rem',
+      width: '100%',
+      maxWidth: '100%',
+      boxSizing: 'border-box',
+      overflowX: 'hidden',
     }}
   >
     {/* PDF Analysis Settings */}
-    <Typography variant="h6" sx={{ mb: 2 }}>
+    <Typography variant="h6" sx={{ mb: 2, wordWrap: 'break-word', overflowWrap: 'break-word', maxWidth: '100%' }}>
       PDF Analysis Settings
     </Typography>
-    <Box sx={{ mb: 3 }}>
+    <Box sx={{ mb: 3, maxWidth: '100%', display: 'flex', flexDirection: 'column' }}>
       <FormControlLabel
+        sx={{ 
+          maxWidth: '100%', 
+          wordWrap: 'break-word',
+          '& .MuiFormControlLabel-label': {
+            whiteSpace: 'normal',
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word'
+          }
+        }}
         control={
           <Switch
             checked={settings?.autoAnalyzePDFs ?? true}
@@ -236,7 +249,7 @@ export default function ConfigurationManager() {
         }
         label="Automatically analyze PDFs on upload"
       />
-      <Typography variant="caption" display="block" color="text.secondary" sx={{ ml: 4 }}>
+      <Typography variant="caption" display="block" color="text.secondary" sx={{ ml: 4, wordWrap: 'break-word', overflowWrap: 'break-word', maxWidth: '100%', whiteSpace: 'normal' }}>
         When enabled, PDFs will be sent to OpenAI for vocabulary extraction immediately after upload.
       </Typography>
     </Box>
@@ -249,7 +262,6 @@ export default function ConfigurationManager() {
         position: 'relative',
         width: '100%',
         height: '100%',
-        padding: '1rem',
         // border: '1px solid black',
         // backgroundColor: 'rgb(255, 255, 255, 0.1)',
       }}
@@ -314,7 +326,10 @@ export default function ConfigurationManager() {
         // component="h3"
         sx={{
           flexGrow: 1,
-          textWrap: 'wrap',
+          wordWrap: 'break-word',
+          overflowWrap: 'break-word',
+          maxWidth: '100%',
+          whiteSpace: 'normal',
         }}
       >
         Set Featured Image
@@ -381,7 +396,10 @@ export default function ConfigurationManager() {
             // component="h3"
             sx={{
               flexGrow: 1,
-              textWrap: 'wrap',
+              wordWrap: 'break-word',
+              overflowWrap: 'break-word',
+              maxWidth: '100%',
+              whiteSpace: 'normal',
             }}
           >
             <CameraIcon

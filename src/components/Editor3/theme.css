@@ -17,11 +17,9 @@
 */
 div[data-lexical-editor="true"] {
     padding: 1rem 2rem;
-    outline: 0;
 }
 
 div.ImageNode__contentEditable {
-    outline: 0;
     padding: 0;
 }
 

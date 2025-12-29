@@ -18,6 +18,13 @@ import {
     Select,
     Modal,
     Card,
+    Tabs,
+    Tab,
+    Tooltip,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
 } from "@mui/material";
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
@@ -89,6 +96,9 @@ import ErrorIcon from '@mui/icons-material/Error';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CancelIcon from '@mui/icons-material/Cancel';
 import Chip from '@mui/material/Chip';
+import ImageIcon from '@mui/icons-material/Image';
+import AudioFileIcon from '@mui/icons-material/AudioFile';
+import FolderIcon from '@mui/icons-material/Folder';
 
 import TextareaAutosize from '@mui/material/TextareaAutosize';
 
@@ -99,6 +109,7 @@ import {
     generateImageFile,
 } from '../../../graphql/mutations';
 import { hexToRgb } from "../../../utils/hexToRgb";
+import { ImageGeneratorButton, AudioGeneratorButton } from './EnhancedGenerators';
 
 const client = generateClient();
 
@@ -706,21 +717,16 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
                             alignItems: 'center',
                         }}
                     >
-                        <canvas
-                            style={{
-                                // width: '100%',
-                                // height: '10vw',
-                                margin: 'auto'
-                            }}
-                            ref={canvasRef} />
-                        <audio
-                            onClick={doNothing}
-                            style={{
-                                backgroundColor: '#ffffff !important',
-                                // width: '100%',
-                                // margin: '1rem auto'
-                            }}
-                            ref={audioRef} src={audioSrc} controls />
+                        {audioSrc && (
+                            <AudioWaveformPlayer
+                                audioUrl={audioSrc}
+                                waveformData={previewFile?.waveformData ? JSON.parse(previewFile.waveformData) : undefined}
+                                width={600}
+                                height={120}
+                                title={previewFile?.name || 'Audio Preview'}
+                                showDuration={true}
+                            />
+                        )}
                     </Box>
 
                     <Button
@@ -802,7 +808,18 @@ export default function FileManager() {
         if (!search.trim()) return;
         
         const searchLower = search.toLowerCase();
-        const matchingFile = files.find(file => 
+        
+        // Filter files based on active tab
+        let filteredFiles = files;
+        if (generator === 'image') {
+            filteredFiles = files.filter(f => f.mimeType.includes('image'));
+        } else if (generator === 'audio') {
+            filteredFiles = files.filter(f => f.mimeType.includes('audio'));
+        } else if (generator === 'pdf') {
+            filteredFiles = files.filter(f => f.mimeType.includes('pdf'));
+        }
+        
+        const matchingFile = filteredFiles.find(file => 
             file.name.toLowerCase().includes(searchLower)
         );
         
@@ -837,7 +854,7 @@ export default function FileManager() {
 
     const [newFileFormOpen, setNewFileFormOpen] = React.useState(false);
 
-    const [generator, setGenerator] = React.useState('image');
+    const [generator, setGenerator] = React.useState('all');
     
     const [settings, setSettings] = React.useState(null);
     const [documentStatuses, setDocumentStatuses] = React.useState({});
@@ -945,7 +962,24 @@ export default function FileManager() {
     }
 
     const toggleNewFileForm = () => {
-        setNewFileFormOpen(!newFileFormOpen);
+        const newState = !newFileFormOpen;
+        setNewFileFormOpen(newState);
+        
+        // When opening, also open the form for the current tab
+        if (newState) {
+            if (generator === 'image') {
+                setNewImageFileFormOpen(true);
+            } else if (generator === 'audio') {
+                setNewAudioFileFormOpen(true);
+            } else if (generator === 'video') {
+                setNewVideoFileFormOpen(true);
+            }
+        } else {
+            // When closing, close all forms
+            setNewImageFileFormOpen(false);
+            setNewAudioFileFormOpen(false);
+            setNewVideoFileFormOpen(false);
+        }
     }
 
 
@@ -1064,6 +1098,7 @@ export default function FileManager() {
             style={{
                 position: 'relative',
                 width: '100%',
+
                 overflowY: 'auto',
                 overflowX: 'hidden',
             }}
@@ -1110,199 +1145,189 @@ export default function FileManager() {
                 sx={{
                     flexGrow: 1,
                     flexDirection: 'column',
-                    // justifyContent: 'space-between',
                     alignItems: 'flex-start',
                     margin: '0rem',
-                    padding: '0.5rem',
                 }}
             >
-                {/* <Box
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        margin: '0rem',
-                        padding: '0rem',
+                {/* Tabs for filtering files and generating content */}
+                <Tabs
+                    value={generator}
+                    onChange={(e, newValue) => {
+                        setGenerator(newValue);
+                        // Close all forms first
+                        setNewImageFileFormOpen(false);
+                        setNewAudioFileFormOpen(false);
+                        setNewVideoFileFormOpen(false);
+                        
+                        // Open the selected form if generation is active
+                        if (newFileFormOpen) {
+                            if (newValue === 'image') {
+                                setNewImageFileFormOpen(true);
+                            } else if (newValue === 'audio') {
+                                setNewAudioFileFormOpen(true);
+                            }
+                        }
+                    }}
+                    variant="scrollable"
+                    scrollButtons="auto"
+                    sx={{ 
+                        borderBottom: 1, 
+                        borderColor: 'divider', 
                         width: '100%',
+                        minHeight: 'auto',
+                        '& .MuiTab-root': {
+                            minHeight: 'auto',
+                            padding: '4px 8px',
+                            minWidth: 'auto',
+                        },
                     }}
                 >
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        File Manager
-                    </Typography>
-                </Box> */}
+                    <Tab 
+                        label={
+                            <Tooltip title="All Files">
+                                <FolderIcon fontSize="small" />
+                            </Tooltip>
+                        }
+                        value="all" 
+                    />
+                    <Tab 
+                        label={
+                            <Tooltip title="Images">
+                                <ImageIcon fontSize="small" />
+                            </Tooltip>
+                        }
+                        value="image" 
+                    />
+                    <Tab 
+                        label={
+                            <Tooltip title="Audio">
+                                <AudioFileIcon fontSize="small" />
+                            </Tooltip>
+                        }
+                        value="audio" 
+                    />
+                    <Tab 
+                        label={
+                            <Tooltip title="PDFs">
+                                <PictureAsPdfIcon fontSize="small" />
+                            </Tooltip>
+                        }
+                        value="pdf" 
+                    />
+                    <Tab 
+                        label={
+                            <Tooltip title="Upload Files">
+                                <UploadFile fontSize="small" />
+                            </Tooltip>
+                        }
+                        value="upload" 
+                    />
+                </Tabs>
 
-                <Box
-                    style={{
-                        display: 'flex',
-                        flexGrow: 1,
-                        alignItems: 'flex-start',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        padding: '1rem',
-                        width: '100%',
-                    }}
-                >
-                    <Button
-                        color="inherit"
-                        aria-label="Upload new File"
-                        onClick={() => {
-                            // toggleNewWordFormOpen();
-                        }}
-                    >
-                        <UploadFile />
-                    </Button>
-
-                    <Button
-                        aria-label="Generate new File"
-                        onClick={() => {
-                            toggleNewFileForm();
-                        }}
-                    >
-                        <AutoAwesomeIcon />
-                        Generate File
-                    </Button>
-
-                </Box>
-                {/**
-                 * dropdown to generate new file, options are image, audio and video 
-                */}
-
-                <Collapse
-                    in={newFileFormOpen}
-                    style={{
-                        width: '100%',
-                    }}
-                >
-
-                    <FormControl fullWidth
-                        style={{
-                            marginBottom: '1rem',
-                        }}
-                    >
-                        {/* <InputLabel id="select-generator-label">Age</InputLabel> */}
-                        <Select
-                            labelId="select-generator-label"
-                            id="select-generator"
-                            value={generator}
-                            onChange={(e) => {
-                                setGenerator(e.target.value);
+                {/* Tab Content */}
+                <Box sx={{ width: '100%', mt: 1 }}>
+                    {/* Upload Tab Content */}
+                    {generator === 'upload' && (
+                        <Box sx={{ p: 2, textAlign: 'center' }}>
+                            <Typography variant="body2" color="text.secondary" gutterBottom>
+                                Drag and drop files anywhere to upload
+                            </Typography>
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                startIcon={<UploadFile />}
+                                onClick={() => {
+                                    document.getElementById('file-upload-input')?.click();
+                                }}
+                                sx={{ mt: 1 }}
+                            >
+                                Choose Files
+                            </Button>
+                            <input
+                                id="file-upload-input"
+                                type="file"
+                                multiple
+                                hidden
+                                onChange={(e) => {
+                                    const files = Array.from(e.target.files || []);
+                                    setFilesToUpload(files.map(f => ({ file: f })));
+                                }}
+                            />
+                        </Box>
+                    )}
+                    
+                    {/* Search for other tabs */}
+                    {generator !== 'upload' && (
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                gap: 1,
+                                alignItems: 'center',
+                                px: 1,
                             }}
                         >
-                            <MenuItem
-                                value={'image'}
-                                onClick={() => {
-                                    // close all other forms
-                                    setNewAudioFileFormOpen(false);
-                                    setNewVideoFileFormOpen(false);
-                                    toggleNewImageFileForm();
+                            <TextField
+                                value={search}
+                                onInput={handleSearch}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handleSearchSubmit();
+                                    }
                                 }}
-                            >Image</MenuItem>
-                            <MenuItem
-                                value={'audio'}
-                                onClick={() => {
-                                    // close all other forms
-                                    setNewImageFileFormOpen(false);
-                                    setNewVideoFileFormOpen(false);
-                                    toggleNewAudioFileForm();
-                                }
-                                }
-                            >Audio</MenuItem>
-                            {/* <MenuItem
-                        value={'video'}
-                        onClick={() => {
-                            // close all other forms
-                            setNewImageFileFormOpen(false);
-                            setNewAudioFileFormOpen(false);
-                            toggleNewVideoFileForm();
-                        }
-                        }
-                    >Video</MenuItem> */}
-
-                        </Select>
-                    </FormControl>
-
-
-
-                    <NewImageFileForm
-                        open={newImageFileFormOpen}
-                        toggleNewImageFileForm={toggleNewImageFileForm}
-                    />
-
-                    <NewAudioFileForm
-                        open={newAudioFileFormOpen}
-                        toggleNewAudioFileForm={toggleNewAudioFileForm}
-                    />
-
-                    <NewVideoFileForm
-                        open={newVideoFileFormOpen}
-                        toggleNewVideoFileForm={toggleNewVideoFileForm}
-                    />
-
-                </Collapse>
-
-
-                {/* <NewFileForm
-                        open={newFileFormOpen}
-                        toggleNewWordFormOpen={toggleNewFileForm}
-                    /> */}
-
-                <Box
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '0em',
-                        margin: '0rem',
-                        width: '100%',
-                    }}
-                >
-                    <TextField
-                        value={search}
-                        onInput={handleSearch}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                handleSearchSubmit();
-                            }
-                        }}
-                        type='text'
-                        style={{
-                            width: '100%',
-                            margin: '0rem'
-                        }}
-                        label="Search"
-                    />
-
-                    {searching &&
-                        <Button aria-label="cancel searching dictionary" disabled>
-                            <CircularProgress />
-                        </Button>
-                    }
-                    {!searching &&
-                        <Button 
-                            aria-label="search files"
-                            onClick={handleSearchSubmit}
+                                size="small"
+                                fullWidth
+                                placeholder={`Search ${generator === 'all' ? 'all files' : generator === 'image' ? 'images' : generator === 'audio' ? 'audio' : 'PDFs'}...`}
+                                InputProps={{
+                                    endAdornment: (
+                                        <IconButton
+                                            size="small"
+                                            onClick={handleSearchSubmit}
+                                            disabled={searching}
+                                        >
+                                            {searching ? <CircularProgress size={20} /> : <SearchIcon />}
+                                        </IconButton>
+                                    ),
+                                }}
+                            />
+                        </Box>
+                    )}
+                    
+                    {/* Generate button for image/audio tabs */}
+                    {(generator === 'image' || generator === 'audio') && (
+                        <Button
+                            fullWidth
+                            variant="contained"
+                            aria-label="Generate new File"
+                            onClick={() => {
+                                toggleNewFileForm();
+                            }}
+                            sx={{ mt: 1, px: 1 }}
                         >
-                            <SearchIcon />
+                            <AutoAwesomeIcon sx={{ mr: 1 }} />
+                            Generate {generator === 'image' ? 'Image' : 'Audio'}
                         </Button>
-                    }
+                    )}
                 </Box>
 
-                <Box
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                    }}
-                >
-                    {/* <Button disabled><UploadFile />&nbsp;Import</Button>
-                <Button disabled><FileDownload />&nbsp;Export</Button>
-                <Button
-                    onClick={toggleNewWordFormOpen}
-                ><NewFileIcon />&nbsp;New</Button> */}
-
-                </Box>
+                {/* Generation Modals - UnifiedGenerateModal replaces old Dialog approach */}
+                {generator === 'image' && (
+                    <ImageGeneratorButton
+                        open={newFileFormOpen}
+                        onSuccess={() => {
+                            setNewFileFormOpen(false);
+                            setNewImageFileFormOpen(false);
+                        }}
+                    />
+                )}
+                {generator === 'audio' && (
+                    <AudioGeneratorButton
+                        open={newFileFormOpen}
+                        onSuccess={() => {
+                            setNewFileFormOpen(false);
+                            setNewAudioFileFormOpen(false);
+                        }}
+                    />
+                )}
 
             </Toolbar>
 
@@ -1339,10 +1364,26 @@ export default function FileManager() {
 
             <Box sx={{ minHeight: 200, minWidth: 250, overflowY: 'auto', height: 'calc(100vh - 17rem)' }}>
                 <SimpleTreeView apiRef={apiRef}>
-                    {files
-                        .filter(file => file.mimeType.includes('image'))
-                        .length > 0 && (
-                        <TreeItem itemId="images" label={`Images (${files.filter(f => f.mimeType.includes('image')).length})`}>
+                    {files.filter(file => file.mimeType.includes('image')).length > 0 && (
+                        <TreeItem 
+                            itemId="images"
+                            onClick={(e) => {
+                                if (generator !== 'all' && generator !== 'image') {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setGenerator('image');
+                                }
+                            }}
+                            label={
+                                <Box 
+                                    sx={{ 
+                                        opacity: generator !== 'all' && generator !== 'image' ? 0.5 : 1,
+                                    }}
+                                >
+                                    {`Images (${files.filter(f => f.mimeType.includes('image')).length})`}
+                                </Box>
+                            }
+                        >
                             {files
                                 .filter(file => file.mimeType.includes('image'))
                                 .map((file) => (
@@ -1394,11 +1435,26 @@ export default function FileManager() {
                         </TreeItem>
                     )}
                     
-                    {files
-                        .filter(file => file.mimeType.includes('audio'))
-                        .length > 0 && (
+                    {files.filter(file => file.mimeType.includes('audio')).length > 0 && (
                         <TreeItem
-                        itemId="audio" label={`Audio (${files.filter(f => f.mimeType.includes('audio')).length})`}>
+                            itemId="audio"
+                            onClick={(e) => {
+                                if (generator !== 'all' && generator !== 'audio') {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setGenerator('audio');
+                                }
+                            }}
+                            label={
+                                <Box 
+                                    sx={{ 
+                                        opacity: generator !== 'all' && generator !== 'audio' ? 0.5 : 1,
+                                    }}
+                                >
+                                    {`Audio (${files.filter(f => f.mimeType.includes('audio')).length})`}
+                                </Box>
+                            }
+                        >
                             {files
                                 .filter(file => file.mimeType.includes('audio'))
                                 .map((file) => (
@@ -1451,10 +1507,26 @@ export default function FileManager() {
                         </TreeItem>
                     )}
                     
-                    {files
-                        .filter(file => file.mimeType === 'application/pdf')
-                        .length > 0 && (
-                        <TreeItem itemId="pdfs" label={`PDFs (${files.filter(f => f.mimeType === 'application/pdf').length})`}>
+                    {files.filter(file => file.mimeType === 'application/pdf').length > 0 && (
+                        <TreeItem 
+                            itemId="pdfs"
+                            onClick={(e) => {
+                                if (generator !== 'all' && generator !== 'pdf') {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setGenerator('pdf');
+                                }
+                            }}
+                            label={
+                                <Box 
+                                    sx={{ 
+                                        opacity: generator !== 'all' && generator !== 'pdf' ? 0.5 : 1,
+                                    }}
+                                >
+                                    {`PDFs (${files.filter(f => f.mimeType === 'application/pdf').length})`}
+                                </Box>
+                            }
+                        >
                             {files
                                 .filter(file => file.mimeType === 'application/pdf')
                                 .map((file) => {
@@ -1597,7 +1669,7 @@ export default function FileManager() {
                         </TreeItem>
                     )}
                     
-                    {files
+                    {generator === 'all' && files
                         .filter(file => !file.mimeType.includes('image') && !file.mimeType.includes('audio') && file.mimeType !== 'application/pdf')
                         .length > 0 && (
                         <TreeItem itemId="other" label={`Other Files (${files.filter(f => !f.mimeType.includes('image') && !f.mimeType.includes('audio') && f.mimeType !== 'application/pdf').length})`}>

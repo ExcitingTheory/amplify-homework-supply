@@ -28,8 +28,6 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import UnitContext from '../../../context/unitContext';
 
-import { RecordingStudio2 } from '../../RecordingStudio2';
-
 import dynamic from "next/dynamic";
 
 const SketchPad = dynamic(
@@ -450,18 +448,14 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                     </Typography>
                 )
             )}
-            <RecordingStudio2
-                item={dictionary[wordId]}
-                word={dictionary[wordId]?.phrase}
-                requestDefinition={true}
-                feedback={feedback[key]}
-                isCorrect={isCorrect}
-                qk={key}
-                setFeedback={(data) => {
-                    setFeedback({
-                        ...feedback,
-                        [key]: data,
-                    });
+            <AudioWaveformPlayer
+                enableRecording={true}
+                gradeId={grade?.id}
+                nodeKey={`${nodeKey}-${wordId}`}
+                title={dictionary[wordId]?.phrase}
+                onRecordingComplete={(audioFile, waveformData) => {
+                    // Handle recording completion
+                    console.log('Recording complete:', audioFile, waveformData);
                 }}
             />
             </li>)

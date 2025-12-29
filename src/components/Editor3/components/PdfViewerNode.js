@@ -132,6 +132,14 @@ export class PdfViewerNode extends DecoratorNode {
         return false;
     }
 
+    isIsolated() {
+        return true;
+    }
+
+    isTopLevel() {
+        return true;
+    }
+
     getPath() {
         return this.__path;
     }

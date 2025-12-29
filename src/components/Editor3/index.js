@@ -334,6 +334,8 @@ export default function Editor() {
   const [tabValue, setTabValue] = React.useState(0);
   const [isEditable, setIsEditable] = React.useState(true);
   const { unit } = useContext(UnitContext);
+  const drawerRef = React.useRef(null);
+  const [actualDrawerWidth, setActualDrawerWidth] = React.useState(drawerWidth);
 
   const handleDrawerOpen = () => {
     setOpenTab(true);
@@ -342,6 +344,26 @@ export default function Editor() {
   const handleDrawerClose = () => {
     setOpenTab(false);
   };
+
+  // Measure drawer content width
+  React.useEffect(() => {
+    if (openTab && drawerRef.current) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          const width = entry.contentRect.width;
+          if (width > 0) {
+            setActualDrawerWidth(width);
+          }
+        }
+      });
+      
+      resizeObserver.observe(drawerRef.current);
+      
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }
+  }, [openTab]);
 
   const {
     saveEditorContent,
@@ -499,6 +521,7 @@ export default function Editor() {
                 setTabValue={setTabValue}
               />
               <Drawer
+                ref={drawerRef}
                 sx={{
                   height: 'calc(100vh - 9.5rem)',
 
@@ -533,7 +556,7 @@ export default function Editor() {
                       style={{
                         margin: '0',
                         padding: '0',
-                        paddingLeft: '40px',
+                        // paddingLeft: '40px',
                         position: 'relative',
                         // marginTop: '3.3rem',
                       }}
@@ -541,7 +564,7 @@ export default function Editor() {
                       <ContentEditable
                         style={{
                           minHeight: 'calc(100vh - 9.5rem)',
-                          maxWidth: openTab ? `calc(100vw - ${drawerWidth}px)` : `calc(100vw - 4rem)`,
+                          maxWidth: openTab ? `calc(100vw - ${actualDrawerWidth}px)` : `calc(100vw - 4rem)`,
                         }}
                       />
                     </div>
@@ -679,6 +702,7 @@ export function Workbook() {
                 setTabValue={setTabValue}
               />
               <Drawer
+                ref={drawerRef}
                 sx={{
                   height: 'calc(100vh - 9.5rem)',
 
@@ -723,7 +747,7 @@ export function Workbook() {
                       <ContentEditable
                         style={{
                           minHeight: 'calc(100vh - 9.5rem)',
-                          maxWidth: openTab ? `calc(100vw - ${drawerWidth}px)` : `calc(100vw - 4rem)`,
+                          maxWidth: openTab ? `calc(100vw - ${actualDrawerWidth}px)` : `calc(100vw - 4rem)`,
                         }}
                       />
                     </div>

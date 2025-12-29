@@ -7,8 +7,26 @@
  * @module PdfViewerComponent
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Box, IconButton, Typography, Paper, ButtonGroup } from '@mui/material';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
+import { mergeRegister } from '@lexical/utils';
+import {
+    $getNodeByKey,
+    $getSelection,
+    $isNodeSelection,
+    $createParagraphNode,
+    $insertNodes,
+    CLICK_COMMAND,
+    COMMAND_PRIORITY_LOW,
+    KEY_BACKSPACE_COMMAND,
+    KEY_DELETE_COMMAND,
+    KEY_ESCAPE_COMMAND,
+    KEY_ENTER_COMMAND,
+    KEY_ARROW_DOWN_COMMAND,
+} from 'lexical';
+import { $isPdfViewerNode } from './PdfViewerNode';
 import { 
     ZoomIn as ZoomInIcon,
     ZoomOut as ZoomOutIcon,
@@ -34,12 +52,147 @@ export default function PdfViewerComponent({
     filename,
     nodeKey 
 }) {
+    const [editor] = useLexicalComposerContext();
+    const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey);
+    const containerRef = useRef(null);
     const [pdfUrl, setPdfUrl] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [numPages, setNumPages] = useState(null);
     const [scale, setScale] = useState(1.0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Delete handler
+    const onDelete = useCallback(
+        (payload) => {
+            if (isSelected && $isNodeSelection($getSelection())) {
+                const event = payload;
+                event.preventDefault();
+                const node = $getNodeByKey(nodeKey);
+                if ($isPdfViewerNode(node)) {
+                    node.remove();
+                }
+                return true;
+            }
+            return false;
+        },
+        [isSelected, nodeKey]
+    );
+
+    // Escape handler
+    const onEscape = useCallback(
+        (payload) => {
+            if (isSelected) {
+                const event = payload;
+                event.preventDefault();
+                clearSelection();
+                return true;
+            }
+            return false;
+        },
+        [isSelected, clearSelection]
+    );
+
+    // Enter handler - insert paragraph below
+    const onEnter = useCallback(
+        (payload) => {
+            if (isSelected && $isNodeSelection($getSelection())) {
+                const event = payload;
+                event.preventDefault();
+                const node = $getNodeByKey(nodeKey);
+                if ($isPdfViewerNode(node)) {
+                    const paragraph = $createParagraphNode();
+                    node.insertAfter(paragraph);
+                    paragraph.select();
+                }
+                return true;
+            }
+            return false;
+        },
+        [isSelected, nodeKey]
+    );
+
+    // Arrow down handler - move to content below
+    const onArrowDown = useCallback(
+        (payload) => {
+            if (isSelected && $isNodeSelection($getSelection())) {
+                const event = payload;
+                event.preventDefault();
+                const node = $getNodeByKey(nodeKey);
+                if ($isPdfViewerNode(node)) {
+                    const nextSibling = node.getNextSibling();
+                    if (nextSibling) {
+                        nextSibling.selectStart();
+                    } else {
+                        // Create new paragraph if none exists
+                        const paragraph = $createParagraphNode();
+                        node.insertAfter(paragraph);
+                        paragraph.select();
+                    }
+                }
+                return true;
+            }
+            return false;
+        },
+        [isSelected, nodeKey]
+    );
+
+    // Register keyboard commands
+    useEffect(() => {
+        return mergeRegister(
+            editor.registerCommand(
+                CLICK_COMMAND,
+                (payload) => {
+                    const event = payload;
+                    if (containerRef.current && containerRef.current.contains(event.target)) {
+                        if (event.shiftKey) {
+                            setSelected(!isSelected);
+                        } else {
+                            clearSelection();
+                            setSelected(true);
+                        }
+                        return true;
+                    }
+                    return false;
+                },
+                COMMAND_PRIORITY_LOW
+            ),
+            editor.registerCommand(
+                KEY_DELETE_COMMAND,
+                onDelete,
+                COMMAND_PRIORITY_LOW
+            ),
+            editor.registerCommand(
+                KEY_BACKSPACE_COMMAND,
+                onDelete,
+                COMMAND_PRIORITY_LOW
+            ),
+            editor.registerCommand(
+                KEY_ESCAPE_COMMAND,
+                onEscape,
+                COMMAND_PRIORITY_LOW
+            ),
+            editor.registerCommand(
+                KEY_ENTER_COMMAND,
+                onEnter,
+                COMMAND_PRIORITY_LOW
+            ),
+            editor.registerCommand(
+                KEY_ARROW_DOWN_COMMAND,
+                onArrowDown,
+                COMMAND_PRIORITY_LOW
+            )
+        );
+    }, [
+        editor,
+        isSelected,
+        setSelected,
+        clearSelection,
+        onDelete,
+        onEscape,
+        onEnter,
+        onArrowDown
+    ]);
 
     // Load PDF from S3 on mount
     React.useEffect(() => {
@@ -123,10 +276,15 @@ export default function PdfViewerComponent({
 
     return (
         <Paper 
+            ref={containerRef}
             elevation={2} 
             sx={{ 
                 my: 2,
                 overflow: 'hidden',
+                outline: isSelected ? '2px solid #1976d2' : 'none',
+                outlineOffset: '2px',
+                cursor: 'pointer',
+                transition: 'outline 0.2s ease-in-out',
             }}
         >
             {/* Controls Bar */}

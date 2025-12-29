@@ -1,5 +1,5 @@
 import React from 'react';
-import { within, waitFor, screen } from 'storybook/test';
+import { within, waitFor, screen, waitForElementToBeRemoved } from 'storybook/test';
 import Editor, { Workbook } from './index';
 import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
 import { seedMockUnit } from '../../../.storybook/__mocks__/aws-amplify-datastore';
@@ -74,12 +74,12 @@ const sampleEditorState = {
   },
 };
 
-export const EmptyEditor = {
+export const EmptyEditorTextFormatting = {
   loaders: [
     async () => {
       seedMockUnit({
         id: 'empty-editor-id',
-        name: 'Empty Editor',
+        name: 'Empty Editor: Text Formatting',
         description: 'A blank editor to start creating content',
         data: null,
         _version: 1,
@@ -258,28 +258,194 @@ export const EmptyEditor = {
     const justifyAlignBtn = await screen.findByRole('menuitem', { name: /Justify Align/i });
     await userEvent.click(justifyAlignBtn);
     await userEvent.keyboard('This text is justified. It will stretch across the full width of the container, creating even edges on both sides. This is particularly useful for formal documents or publications.{Enter}{Enter}');
+  },
+};
+
+export const EmptyEditorCustomBlocks = {
+  loaders: [
+    async () => {
+      seedMockUnit({
+        id: 'empty-editor-id',
+        name: 'Empty Editor: Custom Blocks',
+        description: 'A blank editor to start creating content',
+        data: null,
+        _version: 1,
+        owner: 'mock-user-sub',
+      });
+    },
+  ],
+  render: () => <Editor />,
+  parameters: {
+    unitId: 'empty-editor-id',
+  },
+  play: async ({ canvas, userEvent }) => {
+    // Wait for editor to load
+    const editorContent = await canvas.findByRole('textbox');
+    await userEvent.click(editorContent);
 
     // Make a link by typing out the URL
-    // make a link with selected text
-    // make a youtube embed link
+    await userEvent.keyboard('{Enter}Check out https://example.com for more info.{Enter}{Enter}');
+
+    // Make a link with selected text
+    await userEvent.keyboard('Visit our website');
+    // Select the text "website"
+    await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
+    const linkButton = canvas.getByRole('button', { name: /Insert link/i });
+    await userEvent.click(linkButton);
+    // The floating link editor appears outside the canvas with title "Edit link"
+    const editLinkBtn = await screen.findByRole('button', { name: 'Edit link' });
+    await userEvent.click(editLinkBtn);
+    // Find the URL input by title "Link URL" and type the new URL
+    const linkUrlInput = await screen.findByTitle('Link URL');
+    await userEvent.clear(linkUrlInput);
+    await userEvent.type(linkUrlInput, 'https://example.com');
+    // Confirm the link with title "Confirm link"
+    const confirmLinkBtn = await screen.findByRole('button', { name: 'Confirm link' });
+    await userEvent.click(confirmLinkBtn);
+
+    // Close the link editor
+    const closePreviewBtn = await screen.getByRole('button', { name: /Close link editor/i });
+    await userEvent.click(closePreviewBtn);
+    await userEvent.click(editorContent);
+    await userEvent.keyboard('{ArrowDown} {Enter}');
+    // Make a youtube embed link
+    await userEvent.keyboard('Watch this video: https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+    // arrow back into the link and open the link editor
+    await userEvent.keyboard('{ArrowLeft}{ArrowLeft}{ArrowLeft}');
+    // click link to open floating link editor
+    userEvent.click();
+    // press youtube button
+    const youtubeBtn = await screen.findByRole('button', { name: /YouTube Embed/i });
+    await userEvent.click(youtubeBtn);
+    // confirm youtube embed
+
+
     // Insert Due Date
+    const insertMenu = canvas.getByRole('button', { name: /Insert Item Menu/i });
+    await userEvent.click(insertMenu);
+    const dueDateOption = await screen.getByRole('menuitem', { name: /Due Date/i });
+    await userEvent.click(dueDateOption);
+    // Interact with due date dialog if needed
+    const dueDateInput = await screen.getByRole('textbox', { name: /Set Unit Due Date/i });
+    await userEvent.type(dueDateInput, '2026/01/01 10:00AM');
+    const selectSection = canvas.getByRole('combobox', { name: /Select Section/i });
+    await userEvent.click(selectSection);
+    // Select first option
+    const firstSectionOption = await screen.getByRole('option', { name: /Section 1/i });
+    await userEvent.click(firstSectionOption);
+    // Confirm due date
+    const confirmDueDateBtn = await screen.getByRole('button', { name: /^Add due date to Unit$/i });
+    await userEvent.click(confirmDueDateBtn);
+    
     // Insert Timer
+    await userEvent.click(insertMenu);
+    const timerOption = await screen.getByRole('menuitem', { name: /Timer/i });
+    await userEvent.click(timerOption);
+    // Set timer duration if dialog appears
+    await userEvent.keyboard('{Enter}');
+
     // Insert Meaning Association
+    await userEvent.click(insertMenu);
+    const meaningAssocOption = await screen.getByRole('menuitem', { name: /Meaning Association/i });
+    await userEvent.click(meaningAssocOption);
+    await userEvent.keyboard('{Enter}');
+
     // Insert Short Answer: Vocabulary
+    await userEvent.click(insertMenu);
+    const vocabAnswerOption = await screen.getByRole('menuitem', { name: /Short Answer.*Vocabulary/i });
+    await userEvent.click(vocabAnswerOption);
+    await userEvent.keyboard('{Enter}');
+
     // Insert Short Answer: Custom
+    await userEvent.click(insertMenu);
+    const customAnswerOption = await screen.getByRole('menuitem', { name: /Short Answer.*Custom/i });
+    await userEvent.click(customAnswerOption);
+    await userEvent.keyboard('{Enter}');
+
     // Insert Audio Playlist
+    await userEvent.click(insertMenu);
+    const audioPlaylistOption = await screen.getByRole('menuitem', { name: /Audio Playlist/i });
+    await userEvent.click(audioPlaylistOption);
+    await userEvent.keyboard('{Enter}');
+
     // Insert Multiple Choice
+    await userEvent.click(insertMenu);
+    const multipleChoiceOption = await screen.getByRole('menuitem', { name: /Multiple Choice/i });
+    await userEvent.click(multipleChoiceOption);
+    await userEvent.keyboard('{Enter}');
+
     // Insert Layout
+    await userEvent.click(insertMenu);
+    const layoutOption = await screen.getByRole('menuitem', { name: /Layout/i });
+    await userEvent.click(layoutOption);
+    await userEvent.keyboard('{Enter}');
+
     // Insert Horizontal Rule
+    await userEvent.click(insertMenu);
+    const horizontalRuleOption = await screen.getByRole('menuitem', { name: /Horizontal Rule/i });
+    await userEvent.click(horizontalRuleOption);
+    await userEvent.keyboard('{Enter}');
+
     // Insert Table
+    await userEvent.click(insertMenu);
+    const tableOption = await screen.getByRole('menuitem', { name: /Table/i });
+    await userEvent.click(tableOption);
+    // Select table dimensions if dialog appears
+    await userEvent.keyboard('{Enter}');
 
     // Use Filemanager to insert an image
+    const fileManagerBtn = canvas.getByRole('button', { name: /File Manager/i });
+    await userEvent.click(fileManagerBtn);
+    // Navigate file manager and select image
+    const imageTab = await screen.getByRole('tab', { name: /Images/i });
+    await userEvent.click(imageTab);
+    const insertImageBtn = await screen.getByRole('button', { name: /Insert Image/i });
+    await userEvent.click(insertImageBtn);
+    await userEvent.keyboard('{Enter}');
+
     // Use Filemanager to insert audio file
+    await userEvent.click(fileManagerBtn);
+    const audioTab = await screen.getByRole('tab', { name: /Audio/i });
+    await userEvent.click(audioTab);
+    const insertAudioBtn = await screen.getByRole('button', { name: /Insert Audio/i });
+    await userEvent.click(insertAudioBtn);
+    await userEvent.keyboard('{Enter}');
+
     // Use Filemanager to generate image with AI
+    await userEvent.click(fileManagerBtn);
+    const generateImageTab = await screen.getByRole('tab', { name: /Generate.*Image/i });
+    await userEvent.click(generateImageTab);
+    const promptInput = await screen.findByPlaceholderText(/Describe the image/i);
+    await userEvent.type(promptInput, 'A beautiful sunset over mountains');
+    const generateBtn = await screen.getByRole('button', { name: /Generate/i });
+    await userEvent.click(generateBtn);
+    // Wait for generation and insert
+    await userEvent.keyboard('{Enter}');
+
     // Use Filemanager to generate audio with AI
+    await userEvent.click(fileManagerBtn);
+    const generateAudioTab = await screen.getByRole('tab', { name: /Generate.*Audio/i });
+    await userEvent.click(generateAudioTab);
+    const audioPromptInput = await screen.findByPlaceholderText(/Enter text to speak/i);
+    await userEvent.type(audioPromptInput, 'Welcome to this lesson');
+    const generateAudioBtn = await screen.getByRole('button', { name: /Generate/i });
+    await userEvent.click(generateAudioBtn);
+    await userEvent.keyboard('{Enter}');
+
     // Use Sidebar to set Featured Image
+    const sidebarBtn = canvas.getByRole('button', { name: /Sidebar/i });
+    await userEvent.click(sidebarBtn);
+    const featuredImageSection = await screen.findByText(/Featured Image/i);
+    await userEvent.click(featuredImageSection);
+    const setFeaturedBtn = await screen.getByRole('button', { name: /Set Featured Image/i });
+    await userEvent.click(setFeaturedBtn);
+    await userEvent.keyboard('{Enter}');
 
     // Open the content in preview
+    const previewBtn = canvas.getByRole('button', { name: /Preview/i });
+    await userEvent.click(previewBtn);
+    // Wait for preview to load
+    await screen.findByText(/Preview Mode/i);
     // Complete the unit exercise
 
   },

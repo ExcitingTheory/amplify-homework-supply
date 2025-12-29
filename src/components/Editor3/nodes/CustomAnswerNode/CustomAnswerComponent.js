@@ -26,7 +26,7 @@ const SketchPad = dynamic(
   },
 );
 import AudioWaveformPlayer from '../../components/AudioWaveformPlayer';
-import { RecordingStudio2 } from '../../../RecordingStudio2';
+
 import UnitContext from '../../../../context/unitContext';
 import DictionaryContext from '../../../../context/dictionaryContext';
 const client = generateClient();
@@ -433,18 +433,14 @@ export default function CustomAnswerComponent({
                                     marginBottom: '1rem',
                                 }}
                             >
-                                <RecordingStudio2
-                                    className={className}
-                                    requestDefinition={requestDefinition}
-                                    word={prompt}
-                                    item={{
-                                        id: gradeId,
-                                        phrase: requestDefinition? prompt : answer,
-                                        definition: requestDefinition? answer : prompt,
+                                <AudioWaveformPlayer
+                                    enableRecording={true}
+                                    gradeId={grade?.id}
+                                    nodeKey={`custom-answer-${questionID}`}
+                                    title={prompt || question?.prompt}
+                                    onRecordingComplete={(audioFile, waveformData) => {
+                                        console.log('Recording complete:', audioFile, waveformData);
                                     }}
-                                    questionID={questionID}
-                                    setFeedback={setFeedback}
-                                    feedback={feedback}
                                 />
                             </Box>
                             }

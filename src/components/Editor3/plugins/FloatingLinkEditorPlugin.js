@@ -367,6 +367,7 @@ function FloatingLinkEditor({
                 <>
                     <Button
                         className="link-cancel"
+                        title="Cancel link editing"
                         role="button"
                         tabIndex={0}
                         onMouseDown={(event) => event.preventDefault()}
@@ -379,6 +380,8 @@ function FloatingLinkEditor({
                     <input
                         ref={inputRef}
                         className="link-input"
+                        type="text"
+                        title="Link URL"
                         value={editedLinkUrl}
                         onChange={(event) => {
                             setEditedLinkUrl(event.target.value);
@@ -389,6 +392,7 @@ function FloatingLinkEditor({
                     />
                         <Button
                             className="link-confirm"
+                            title="Confirm link"
                             role="button"
                             tabIndex={0}
                             onMouseDown={(event) => event.preventDefault()}
@@ -403,10 +407,11 @@ function FloatingLinkEditor({
                         className="link-close"
                         role="button"
                         tabIndex={0}
-                        title="Close"
+                        title="Close link editor"
                         onMouseDown={(event) => event.preventDefault()}
                         onClick={() => {
                             setIsLink(false);
+                            setEditMode(false);
                         }}
                     >
                         <CloseIcon />
@@ -420,9 +425,9 @@ function FloatingLinkEditor({
                     {isYouTubeUrl && (
                         <Button
                             className="link-youtube"
+                            title="Convert to YouTube embed"
                             role="button"
                             tabIndex={0}
-                            title="Convert to YouTube embed"
                             onMouseDown={(event) => event.preventDefault()}
                             onClick={handleConvertToYouTube}
                         >
@@ -431,6 +436,7 @@ function FloatingLinkEditor({
                     )}
                     <Button
                         className="link-edit"
+                        title="Edit link "
                         role="button"
                         tabIndex={0}
                         onMouseDown={(event) => event.preventDefault()}
@@ -443,6 +449,7 @@ function FloatingLinkEditor({
                     </Button>
                     <Button
                         className="link-trash"
+                        title="Remove link"
                         role="button"
                         tabIndex={0}
                         onMouseDown={(event) => event.preventDefault()}

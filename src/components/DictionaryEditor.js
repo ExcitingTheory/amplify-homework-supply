@@ -13,6 +13,12 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import { FileDownload, Refresh, Search, UploadFile } from '@mui/icons-material';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Tooltip from '@mui/material/Tooltip';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import FilesContext from '../context/fileContext';
 import DictionaryContext from '../context/dictionaryContext';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -37,6 +43,8 @@ import { generateAudioFile } from '../graphql/mutations';
 
 import { generateClient } from 'aws-amplify/api';
 import { hexToRgb } from '../utils/hexToRgb';
+import DocumentUploader from './Editor3/components/DocumentUploader';
+import { SuggestedVocabulary } from './Editor3/components/SuggestedContent';
 
 const client = generateClient();
 
@@ -228,7 +236,6 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
                   style={{
                     caretColor: 'black',
                     border: 'none',
-                    outline: 'none',
                     padding: 0,
                     margin: 0,
                     display: 'inline-block',
@@ -260,7 +267,6 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
                   style={{
                     caretColor: 'black',
                     border: 'none',
-                    outline: 'none',
                     padding: 0,
                     margin: 0,
                     display: 'inline-block',
@@ -802,6 +808,9 @@ export function DictionaryEditor() {
 
   const [fileOperations, setFileOperations] = React.useState([]);
 
+  const [tabValue, setTabValue] = React.useState(0);
+  const [selectedDocumentId, setSelectedDocumentId] = React.useState(null);
+
   const {
     filteredDictionary: dictionary,
     setFilter,
@@ -811,6 +820,7 @@ export function DictionaryEditor() {
 
   const { audioFiles, refreshAudioFiles, session } = React.useContext(FilesContext);
   const { idToken, identityId } = session;
+  const { unit } = React.useContext(UnitContext);
 
   const doNothing = (e) => {
     e.preventDefault();
@@ -1074,6 +1084,40 @@ export function DictionaryEditor() {
     setNewWordFormOpen(!newWordFormOpen);
   };
 
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
+  const handleUploadComplete = (documentId) => {
+    setSelectedDocumentId(documentId);
+    setTabValue(2); // Switch to Suggestions tab
+  };
+
+  const handleImportComplete = () => {
+    setTabValue(0); // Switch back to Words tab
+  };
+
+  // TabPanel component
+  function TabPanel(props) {
+    const { children, value, index, ...other } = props;
+    return (
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`dictionary-tabpanel-${index}`}
+        aria-labelledby={`dictionary-tab-${index}`}
+        style={{ 
+          height: '100%', 
+          overflow: 'auto',
+          display: value === index ? 'block' : 'none'
+        }}
+        {...other}
+      >
+        {value === index && children}
+      </div>
+    );
+  }
+
   const handleFileClick = () => {
     console.log('clicked');
     fileInput.current.click();
@@ -1110,8 +1154,29 @@ export function DictionaryEditor() {
     <div 
       style={{
         height: 'calc(100vh - 10rem)',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs 
+          value={tabValue} 
+          onChange={handleTabChange}
+          aria-label="dictionary tabs"
+        >
+          <Tooltip title="Words">
+            <Tab icon={<MenuBookIcon />} aria-label="words" />
+          </Tooltip>
+          <Tooltip title="Upload Document">
+            <Tab icon={<UploadFileIcon />} aria-label="upload" />
+          </Tooltip>
+          <Tooltip title="Suggested Vocabulary">
+            <Tab icon={<AutoAwesomeIcon />} aria-label="suggestions" />
+          </Tooltip>
+        </Tabs>
+      </Box>
+
+      <TabPanel value={tabValue} index={0}>
         <Box
           style={{
             display: 'flex',
@@ -1125,13 +1190,8 @@ export function DictionaryEditor() {
           {_presignedUrl &&
 
             <>
-              {/* <canvas
-                ref={timelineRef}
-              /> */}
               <canvas
                 style={{
-                  // width: '100%',
-                  // height: '10vw',
                   margin: 'auto'
                 }}
                 ref={canvasRef} />
@@ -1139,8 +1199,6 @@ export function DictionaryEditor() {
                 onClick={doNothing}
                 style={{
                   backgroundColor: '#ffffff !important',
-                  // width: '100%',
-                  // margin: '1rem auto'
                 }}
                 ref={audioRef} src={audioSrc} controls />
 
@@ -1165,9 +1223,7 @@ export function DictionaryEditor() {
               width: '100%',
               margin: '0.2rem'
             }}
-            // id="outlined-basic"
             label="Search"
-            // variant="standard"
             />
 
           {searching &&
@@ -1182,17 +1238,6 @@ export function DictionaryEditor() {
               <SearchIcon />
             </Button>
           }
-          {/* <Button variant='contained'>Filter</Button> */}
-
-        </Box>
-        <Box
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}
-        >
 
         </Box>
         <Box
@@ -1208,18 +1253,12 @@ export function DictionaryEditor() {
           <Button
            onClick={toggleNewWordFormOpen}
           ><NewFileIcon/>&nbsp;New</Button>
-          {/* <Button><FiberManualRecordIcon />&nbsp;Batch</Button>
-            <Button><FileUpload />&nbsp;Batch</Button> */}
 
 
         </Box>
         <Collapse in={newWordFormOpen}>
           <Box
 
-            // onClick={(e) => {
-            //   e.preventDefault();
-            //   // e.stopPropagation();
-            // }}
             style={{
               borderBottom: '1px solid #c7c7c7',
               margin: '1rem 0'
@@ -1374,12 +1413,6 @@ export function DictionaryEditor() {
         <List
           className='dictionary-list'
           style={{
-            // width: '100%',
-            // margin: '1rem',
-            // maxHeight: '70%',
-            // display: 'flex',
-            // minHeight: '71vh',
-            // minHeight: "70%",
             overflowY: 'auto',
             overflowX: 'hidden',
           }}
@@ -1411,6 +1444,31 @@ export function DictionaryEditor() {
             />)}
 
         </List>
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={1}>
+        <DocumentUploader
+          extractionType="vocabulary"
+          unitId={unit?.id}
+          onUploadComplete={handleUploadComplete}
+        />
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={2}>
+        {selectedDocumentId ? (
+          <SuggestedVocabulary
+            documentId={selectedDocumentId}
+            unitId={unit?.id}
+            onImport={handleImportComplete}
+          />
+        ) : (
+          <Box sx={{ p: 3, textAlign: 'center' }}>
+            <Typography variant="body1" color="text.secondary">
+              Upload a document in the Upload tab to see suggested vocabulary
+            </Typography>
+          </Box>
+        )}
+      </TabPanel>
     </div>
   );
 }

@@ -829,14 +829,16 @@ export default React.memo(function CustomAnswerEditor({
                                 margin: 'auto'
                             }}
                             ref={canvasRef} />
-                        <audio
-                            onClick={doNothing}
-                            style={{
-                                backgroundColor: '#ffffff !important',
-                                // width: '100%',
-                                // margin: '1rem auto'
-                            }}
-                            ref={audioRef} src={audioSrc} controls />
+                        {audioSrc && (
+                            <AudioWaveformPlayer
+                                audioUrl={audioSrc}
+                                waveformData={undefined}
+                                width={600}
+                                height={120}
+                                title="Audio Preview"
+                                showDuration={true}
+                            />
+                        )}
                     </Box>
                     </>}
                         <TextField

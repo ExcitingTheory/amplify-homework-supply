@@ -12,6 +12,7 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { HeadingNode } from '@lexical/rich-text';
 
 import CustomAnswerPlugin, { CustomAnswerNode } from './CustomAnswerPlugin';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
   title: 'Components/CustomAnswer/Audio and Drawing',
@@ -40,12 +41,22 @@ const editorConfig = {
   nodes: [HeadingNode, CustomAnswerNode],
 };
 
-const ReadOnlyTemplate = ({ editorState }) => {
+const ReadOnlyTemplate = ({ editorState, questionIDs = [] }) => {
   const initialConfig = {
     ...editorConfig,
     editorState: editorState ? JSON.stringify(editorState) : undefined,
     editable: false
   };
+
+  // Use the preview's default unit ID
+  seedMockUnit({
+    id: 'mock-unit-id',
+    name: 'Audio Drawing Unit',
+    data: { root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 } },
+    questionIDs: questionIDs,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
@@ -117,7 +128,7 @@ const audioQuestionState = {
         version: 1,
         ids: ['audio-q1', 'audio-q2'],
         allowedInput: ['audio'],
-        promptMethod: ['prompt-text'],
+        promptMethod: ['text'],
       },
     ],
     direction: 'ltr',
@@ -160,7 +171,7 @@ const drawingQuestionState = {
         version: 1,
         ids: ['drawing-q1', 'drawing-q2'],
         allowedInput: ['writing'],
-        promptMethod: ['prompt-text'],
+        promptMethod: ['text'],
       },
     ],
     direction: 'ltr',
@@ -203,7 +214,7 @@ const multiModalQuestionState = {
         version: 1,
         ids: ['multi-q1'],
         allowedInput: ['text', 'audio', 'writing'],
-        promptMethod: ['prompt-both'],
+        promptMethod: ['text'],
       },
     ],
     direction: 'ltr',
@@ -246,7 +257,7 @@ const languageQuestionState = {
         version: 1,
         ids: ['lang-audio-q1', 'lang-audio-q2'],
         allowedInput: ['audio'],
-        promptMethod: ['prompt-audio'],
+        promptMethod: ['audio'],
       },
     ],
     direction: 'ltr',
@@ -256,7 +267,7 @@ const languageQuestionState = {
 };
 
 export const AudioOnlyQuestion = {
-  render: () => <ReadOnlyTemplate editorState={audioQuestionState} />,
+  render: () => <ReadOnlyTemplate editorState={audioQuestionState} questionIDs={['audio-q1', 'audio-q2']} />,
   parameters: {
     docs: {
       description: {
@@ -267,7 +278,7 @@ export const AudioOnlyQuestion = {
 };
 
 export const DrawingOnlyQuestion = {
-  render: () => <ReadOnlyTemplate editorState={drawingQuestionState} />,
+  render: () => <ReadOnlyTemplate editorState={drawingQuestionState} questionIDs={['drawing-q1', 'drawing-q2']} />,
   parameters: {
     docs: {
       description: {
@@ -278,7 +289,7 @@ export const DrawingOnlyQuestion = {
 };
 
 export const MultiModalQuestion = {
-  render: () => <ReadOnlyTemplate editorState={multiModalQuestionState} />,
+  render: () => <ReadOnlyTemplate editorState={multiModalQuestionState} questionIDs={['multi-q1']} />,
   parameters: {
     docs: {
       description: {
@@ -289,7 +300,7 @@ export const MultiModalQuestion = {
 };
 
 export const LanguagePronunciation = {
-  render: () => <ReadOnlyTemplate editorState={languageQuestionState} />,
+  render: () => <ReadOnlyTemplate editorState={languageQuestionState} questionIDs={['lang-audio-q1', 'lang-audio-q2']} />,
   parameters: {
     docs: {
       description: {
@@ -347,7 +358,7 @@ const FeatureShowcase = () => (
 const node = $createCustomAnswerNode(
   [questionId],
   ['audio', 'writing'], // allowed input methods
-  ['prompt-audio']      // how to present prompt
+  ['audio']             // how to present prompt
 );
 
 // Allowed Input Options:
@@ -356,10 +367,11 @@ const node = $createCustomAnswerNode(
 // - 'writing' : Drawing canvas
 
 // Prompt Method Options:
-// - 'prompt-text'       : Show text prompt
-// - 'prompt-audio'      : Play audio prompt
-// - 'prompt-both'       : Text + audio
-// - 'prompt-definition' : Show definition`}</pre>
+// - 'text'       : Show text prompt
+// - 'audio'      : Play audio prompt
+// - 'phrase'     : Show phrase (for vocabulary)
+// - 'definition' : Show definition (for vocabulary)
+// - 'pronunciation' : Show pronunciation (for vocabulary)`}</pre>
       </div>
     </section>
 
@@ -388,220 +400,6 @@ export const FeatureDocumentation = {
     docs: {
       description: {
         story: 'Complete feature documentation and configuration guide for audio and drawing question types.',
-      },
-    },
-  },
-};
-
-// Mock grade data with completed audio and drawing answers
-const mockGradeWithAnswers = {
-  id: 'grade-123',
-  owner: 'student-user',
-  identityId: 'us-east-1:abc-123',
-  data: {
-    'audio-q1': {
-      complete: true,
-      userResponse: 'bonjour',
-      audioFile: 'user-input-audio/grade-123_audio-q1_1734989234567.mp3',
-      attempts: 1,
-    },
-    'drawing-q1': {
-      complete: true,
-      drawingData: '{"elements": [], "appState": {}}',
-      imageBase64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-      attempts: 1,
-    },
-  },
-  feedback: {
-    'audio-q1': {
-      answer: true,
-      reason: 'Perfect pronunciation! Clear and accurate.',
-      transcription: 'bonjour',
-    },
-    'drawing-q1': {
-      answer: true,
-      reason: 'Great drawing! All required elements are present: roof, walls, door, and windows.',
-    },
-  },
-  files: [
-    'user-input-audio/grade-123_audio-q1_1734989234567.mp3',
-  ],
-  percentComplete: 100,
-  accuracy: 1.0,
-  complete: true,
-};
-
-// State with answered audio question
-const answeredAudioQuestionState = {
-  root: {
-    children: [
-      {
-        children: [
-          {
-            text: 'Completed Audio Exercise',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        type: 'heading',
-        version: 1,
-        tag: 'h2',
-      },
-      {
-        children: [
-          {
-            text: 'This shows how an answered audio question appears with waveform and feedback:',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        type: 'custom-answer',
-        version: 1,
-        ids: ['audio-q1'],
-        allowedInput: ['audio'],
-        promptMethod: ['prompt-text'],
-      },
-    ],
-    direction: 'ltr',
-    type: 'root',
-    version: 1,
-  },
-};
-
-// State with answered drawing question
-const answeredDrawingQuestionState = {
-  root: {
-    children: [
-      {
-        children: [
-          {
-            text: 'Completed Drawing Exercise',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        type: 'heading',
-        version: 1,
-        tag: 'h2',
-      },
-      {
-        children: [
-          {
-            text: 'This shows how an answered drawing question appears with the submitted image and feedback:',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        type: 'custom-answer',
-        version: 1,
-        ids: ['drawing-q1'],
-        allowedInput: ['writing'],
-        promptMethod: ['prompt-text'],
-      },
-    ],
-    direction: 'ltr',
-    type: 'root',
-    version: 1,
-  },
-};
-
-// Template with mock grade data
-const ReadOnlyTemplateWithGrade = ({ editorState, gradeData }) => {
-  const initialConfig = {
-    ...editorConfig,
-    editorState: editorState ? JSON.stringify(editorState) : undefined,
-    editable: false
-  };
-
-  return (
-    <UnitProvider value={{ grade: gradeData }}>
-      <DictionaryProvider>
-        <LexicalComposer initialConfig={initialConfig}>
-          <div style={{ 
-            padding: '2rem',
-            maxWidth: '900px',
-            margin: '0 auto',
-            backgroundColor: '#f5f5f5',
-            minHeight: '100vh'
-          }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              padding: '2rem',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }}>
-              <div style={{
-                marginBottom: '1.5rem',
-                padding: '1rem',
-                backgroundColor: '#e3f2fd',
-                borderRadius: '4px',
-                borderLeft: '4px solid #2196f3'
-              }}>
-                <strong>Grade Data Preview:</strong>
-                <div style={{ marginTop: '0.5rem', fontSize: '0.875rem' }}>
-                  <div>✓ Complete: {gradeData.complete ? 'Yes' : 'No'}</div>
-                  <div>✓ Accuracy: {(gradeData.accuracy * 100).toFixed(0)}%</div>
-                  <div>✓ Files: {gradeData.files?.length || 0} uploaded</div>
-                </div>
-              </div>
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable 
-                    style={{
-                      minHeight: '400px',
-                      outline: 'none',
-                      padding: '1rem'
-                    }}
-                  />
-                }
-                placeholder={null}
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <HistoryPlugin />
-              <CustomAnswerPlugin />
-            </div>
-          </div>
-        </LexicalComposer>
-      </DictionaryProvider>
-    </UnitProvider>
-  );
-};
-
-export const AnsweredAudioQuestion = {
-  render: () => <ReadOnlyTemplateWithGrade 
-    editorState={answeredAudioQuestionState} 
-    gradeData={mockGradeWithAnswers}
-  />,
-  parameters: {
-    docs: {
-      description: {
-        story: 'Shows a completed audio question with the submitted recording, waveform visualization, and AI feedback. The audio file is tracked in grade.files[] and can be played back.',
-      },
-    },
-  },
-};
-
-export const AnsweredDrawingQuestion = {
-  render: () => <ReadOnlyTemplateWithGrade 
-    editorState={answeredDrawingQuestionState} 
-    gradeData={mockGradeWithAnswers}
-  />,
-  parameters: {
-    docs: {
-      description: {
-        story: 'Shows a completed drawing question with the submitted sketch as a PNG image and AI feedback. The drawing data is stored in grade.data and can be reviewed by instructors.',
       },
     },
   },

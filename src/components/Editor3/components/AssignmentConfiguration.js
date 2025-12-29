@@ -234,6 +234,7 @@ export default function AssignmentConfiguration() {
           }}
             color='primary'
             variant='contained'
+            title='Add Timer to Unit'
             onClick={() => setOpenTimerDialog(true)}
             startIcon={<TimerIcon />}>
             Add Timer
@@ -254,6 +255,7 @@ export default function AssignmentConfiguration() {
                 autoFocus
                 id="outlined-timer"
                 label="Timer (seconds)"
+                title="Set timer in seconds"
                 type="number"
                 InputLabelProps={{
                   shrink: true,
@@ -276,7 +278,13 @@ export default function AssignmentConfiguration() {
                 }}
               
               onClick={() => setOpenTimerDialog(false)}>Cancel</Button>
-              <Button variant='contained' type="submit" color="primary" autoFocus>
+              <Button
+                variant='contained'
+                title="Set Unit Timer"
+                type="submit"
+                color="primary"
+                autoFocus
+                >
                 Ok
               </Button>
             </Box>
@@ -317,6 +325,7 @@ export default function AssignmentConfiguration() {
             hiddenLabel
             // ariaLabel='Due Date'
             required
+            label='Set Unit Due Date'
             type="datetime-local"
             defaultValue={dueDate}
 
@@ -333,6 +342,7 @@ export default function AssignmentConfiguration() {
               id="section-select-helper"
               value={section}
               label="Section"
+              title="Select Section"
               required
               // variant='contained'
               onClick={(e) => e.stopPropagation()}
@@ -373,6 +383,7 @@ export default function AssignmentConfiguration() {
             {/* <Button onClick={() => setOpenAssignmentDialog(false)}>Done</Button> */}
             <Button type="submit" autoFocus
               variant='contained'
+              title="Add due date to Unit"
               color='primary'
               style={{
                 width: '100%',

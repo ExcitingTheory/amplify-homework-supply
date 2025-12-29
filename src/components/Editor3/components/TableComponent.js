@@ -596,18 +596,20 @@ function TableCell({
           <div className={theme.tableCellResizer} data-table-resize="true" />
         </>
       )}
-      {/* {isPrimarySelected && !isEditing && (
+      {isPrimarySelected && !isEditing && (
         <div className={theme.tableCellActionButtonContainer} ref={menuRootRef}>
           <button
             className={theme.tableCellActionButton}
             onClick={(e) => {
               setShowMenu(!showMenu);
               e.stopPropagation();
-            }}>
+            }}
+            aria-label="Table cell actions"
+            title="Add/remove columns and rows">
             <i className="chevron-down" />
           </button>
         </div>
-      )} */}
+      )}
       {showMenu &&
         menuElem !== null &&
         createPortal(
@@ -973,6 +975,17 @@ export default function TableComponent({
   useEffect(() => {
     if (!isEditing && primarySelectedCellID !== null) {
       const doc = getCurrentDocument(editor);
+
+      const saveEditorToCell = (cell) => {
+        if (cell === null || cellEditor === null) return;
+        
+        const newJSON = JSON.stringify(cellEditor.getEditorState());
+        const [x, y] = cellCoordMap.get(cell.id);
+        updateTableNode((tableNode) => {
+          $addUpdateTag('history-push');
+          tableNode.updateCellJSON(x, y, newJSON);
+        });
+      };
 
       const loadContentIntoCell = (cell) => {
         if (cell === null) return;
@@ -1441,6 +1454,7 @@ export default function TableComponent({
         KEY_ENTER_COMMAND,
         (event, targetEditor) => {
           const selection = $getSelection();
+          // Enter table from outside - select first cell
           if (
             primarySelectedCellID === null &&
             !isEditing &&
@@ -1457,6 +1471,51 @@ export default function TableComponent({
             clearSelection();
             return true;
           }
+          // Inside a cell in edit mode - move to cell below
+          if (isEditing && $isRangeSelection(selection) && targetEditor === cellEditor) {
+            const [x, y] = cellCoordMap.get(primarySelectedCellID);
+            if (y < rows.length - 1) {
+              // Move to cell below
+              event.preventDefault();
+              const cell = getCell(rows, primarySelectedCellID, cellCoordMap);
+              saveEditorToCell(cell);
+              setIsEditing(false);
+              const nextCellID = rows[y + 1].cells[x].id;
+              modifySelectedCells(x, y + 1, false);
+              setTimeout(() => {
+                const nextCell = getCell(rows, nextCellID, cellCoordMap);
+                loadContentIntoCell(nextCell);
+                setIsEditing(true);
+              }, 0);
+              return true;
+            } else {
+              // Last row - exit table
+              event.preventDefault();
+              const cell = getCell(rows, primarySelectedCellID, cellCoordMap);
+              saveEditorToCell(cell);
+              setIsEditing(false);
+              setPrimarySelectedCellID(null);
+              // Insert paragraph after table
+              updateTableNode((tableNode) => {
+                const nextSibling = tableNode.getNextSibling();
+                if (!nextSibling) {
+                  const paragraph = $createParagraphNode();
+                  tableNode.insertAfter(paragraph);
+                  paragraph.select();
+                }
+              });
+              return true;
+            }
+          }
+          // Cell selected but not editing - enter edit mode
+          if (!isEditing && primarySelectedCellID !== null) {
+            event.preventDefault();
+            const cell = getCell(rows, primarySelectedCellID, cellCoordMap);
+            loadContentIntoCell(cell);
+            setIsEditing(true);
+            setSelectedCellIDs(NO_CELLS);
+            return true;
+          }
           return false;
         },
         COMMAND_PRIORITY_LOW,
@@ -1465,6 +1524,7 @@ export default function TableComponent({
         KEY_TAB_COMMAND,
         (event) => {
           const selection = $getSelection();
+          // Handle tab when cell is selected (not editing)
           if (
             !isEditing &&
             selection === null &&
@@ -1479,11 +1539,32 @@ export default function TableComponent({
               if (y !== 0) {
                 nextY = y - 1;
                 nextX = rows[nextY].cells.length - 1;
+              } else {
+                // At first cell, shift+tab exits table
+                setPrimarySelectedCellID(null);
+                updateTableNode((tableNode) => {
+                  tableNode.selectPrevious();
+                });
+                return true;
               }
             } else if (x === rows[y].cells.length - 1 && !isBackward) {
               if (y !== rows.length - 1) {
                 nextY = y + 1;
                 nextX = 0;
+              } else {
+                // At last cell, tab exits table
+                setPrimarySelectedCellID(null);
+                updateTableNode((tableNode) => {
+                  const nextSibling = tableNode.getNextSibling();
+                  if (!nextSibling) {
+                    const paragraph = $createParagraphNode();
+                    tableNode.insertAfter(paragraph);
+                    paragraph.select();
+                  } else {
+                    tableNode.selectNext();
+                  }
+                });
+                return true;
               }
             } else if (!isBackward) {
               nextX = x + 1;
@@ -1494,6 +1575,68 @@ export default function TableComponent({
             }
             if (nextX !== null && nextY !== null) {
               modifySelectedCells(nextX, nextY, false);
+              return true;
+            }
+          }
+          // Handle tab when editing cell
+          if (isEditing && primarySelectedCellID !== null) {
+            event.preventDefault();
+            const isBackward = event.shiftKey;
+            const [x, y] = cellCoordMap.get(primarySelectedCellID);
+            const cell = getCell(rows, primarySelectedCellID, cellCoordMap);
+            saveEditorToCell(cell);
+            setIsEditing(false);
+            
+            let nextX = null;
+            let nextY = null;
+            
+            if (x === 0 && isBackward) {
+              if (y !== 0) {
+                nextY = y - 1;
+                nextX = rows[nextY].cells.length - 1;
+              } else {
+                // Exit at start
+                setPrimarySelectedCellID(null);
+                updateTableNode((tableNode) => {
+                  tableNode.selectPrevious();
+                });
+                return true;
+              }
+            } else if (x === rows[y].cells.length - 1 && !isBackward) {
+              if (y !== rows.length - 1) {
+                nextY = y + 1;
+                nextX = 0;
+              } else {
+                // Exit at end
+                setPrimarySelectedCellID(null);
+                updateTableNode((tableNode) => {
+                  const nextSibling = tableNode.getNextSibling();
+                  if (!nextSibling) {
+                    const paragraph = $createParagraphNode();
+                    tableNode.insertAfter(paragraph);
+                    paragraph.select();
+                  } else {
+                    tableNode.selectNext();
+                  }
+                });
+                return true;
+              }
+            } else if (!isBackward) {
+              nextX = x + 1;
+              nextY = y;
+            } else {
+              nextX = x - 1;
+              nextY = y;
+            }
+            
+            if (nextX !== null && nextY !== null) {
+              const nextCellID = rows[nextY].cells[nextX].id;
+              modifySelectedCells(nextX, nextY, false);
+              setTimeout(() => {
+                const nextCell = getCell(rows, nextCellID, cellCoordMap);
+                loadContentIntoCell(nextCell);
+                setIsEditing(true);
+              }, 0);
               return true;
             }
           }
@@ -1515,6 +1658,14 @@ export default function TableComponent({
               if (y !== 0) {
                 modifySelectedCells(x, y - 1, extend);
                 return true;
+              } else if (!extend) {
+                // At first row, exit table upward
+                event.preventDefault();
+                setPrimarySelectedCellID(null);
+                updateTableNode((tableNode) => {
+                  tableNode.selectPrevious();
+                });
+                return true;
               }
             }
           }
@@ -1528,7 +1679,30 @@ export default function TableComponent({
               .getTopLevelElementOrThrow()
               .getPreviousSibling() === null
           ) {
+            // At beginning of cell content, move to cell above
             event.preventDefault();
+            const [x, y] = cellCoordMap.get(primarySelectedCellID);
+            if (y > 0) {
+              const cell = getCell(rows, primarySelectedCellID, cellCoordMap);
+              saveEditorToCell(cell);
+              setIsEditing(false);
+              const prevCellID = rows[y - 1].cells[x].id;
+              modifySelectedCells(x, y - 1, false);
+              setTimeout(() => {
+                const prevCell = getCell(rows, prevCellID, cellCoordMap);
+                loadContentIntoCell(prevCell);
+                setIsEditing(true);
+              }, 0);
+            } else {
+              // At first row, exit table
+              const cell = getCell(rows, primarySelectedCellID, cellCoordMap);
+              saveEditorToCell(cell);
+              setIsEditing(false);
+              setPrimarySelectedCellID(null);
+              updateTableNode((tableNode) => {
+                tableNode.selectPrevious();
+              });
+            }
             return true;
           }
           return false;
@@ -1549,6 +1723,21 @@ export default function TableComponent({
               if (y !== rows.length - 1) {
                 modifySelectedCells(x, y + 1, extend);
                 return true;
+              } else if (!extend) {
+                // At last row, exit table downward
+                event.preventDefault();
+                setPrimarySelectedCellID(null);
+                updateTableNode((tableNode) => {
+                  const nextSibling = tableNode.getNextSibling();
+                  if (!nextSibling) {
+                    const paragraph = $createParagraphNode();
+                    tableNode.insertAfter(paragraph);
+                    paragraph.select();
+                  } else {
+                    tableNode.selectNext();
+                  }
+                });
+                return true;
               }
             }
           }
@@ -1562,7 +1751,37 @@ export default function TableComponent({
               .getTopLevelElementOrThrow()
               .getNextSibling() === null
           ) {
+            // At end of cell content, move to cell below
             event.preventDefault();
+            const [x, y] = cellCoordMap.get(primarySelectedCellID);
+            if (y < rows.length - 1) {
+              const cell = getCell(rows, primarySelectedCellID, cellCoordMap);
+              saveEditorToCell(cell);
+              setIsEditing(false);
+              const nextCellID = rows[y + 1].cells[x].id;
+              modifySelectedCells(x, y + 1, false);
+              setTimeout(() => {
+                const nextCell = getCell(rows, nextCellID, cellCoordMap);
+                loadContentIntoCell(nextCell);
+                setIsEditing(true);
+              }, 0);
+            } else {
+              // At last row, exit table
+              const cell = getCell(rows, primarySelectedCellID, cellCoordMap);
+              saveEditorToCell(cell);
+              setIsEditing(false);
+              setPrimarySelectedCellID(null);
+              updateTableNode((tableNode) => {
+                const nextSibling = tableNode.getNextSibling();
+                if (!nextSibling) {
+                  const paragraph = $createParagraphNode();
+                  tableNode.insertAfter(paragraph);
+                  paragraph.select();
+                } else {
+                  tableNode.selectNext();
+                }
+              });
+            }
             return true;
           }
           return false;

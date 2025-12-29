@@ -12,8 +12,7 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { HeadingNode } from '@lexical/rich-text';
 
 import AnswerPlugin, { AnswerNode } from './AnswerPlugin';
-import { DictionaryProvider } from '../../../context/dictionaryContext';
-import { UnitProvider } from '../../../context/unitContext';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
   title: 'Components/Answer/Audio and Drawing',
@@ -42,50 +41,56 @@ const editorConfig = {
   nodes: [HeadingNode, AnswerNode],
 };
 
-const ReadOnlyTemplate = ({ editorState }) => {
+const ReadOnlyTemplate = ({ editorState, wordIDs = [] }) => {
   const initialConfig = {
     ...editorConfig,
     editorState: editorState ? JSON.stringify(editorState) : undefined,
     editable: false
   };
 
+  // Use the preview's default unit ID
+  seedMockUnit({
+    id: 'mock-unit-id',
+    name: 'Answer Audio Drawing Unit',
+    data: { root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 } },
+    wordIDs: wordIDs,
+    _version: 1,
+    owner: 'mock-user-sub',
+  });
+
   return (
-    <UnitProvider>
-      <DictionaryProvider>
-        <LexicalComposer initialConfig={initialConfig}>
-          <div style={{ 
-            padding: '2rem',
-            maxWidth: '900px',
-            margin: '0 auto',
-            backgroundColor: '#f5f5f5',
-            minHeight: '100vh'
-          }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              padding: '2rem',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }}>
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable 
-                    style={{
-                      minHeight: '400px',
-                      outline: 'none',
-                      padding: '1rem'
-                    }}
-                  />
-                }
-                placeholder={null}
-                ErrorBoundary={LexicalErrorBoundary}
+    <LexicalComposer initialConfig={initialConfig}>
+      <div style={{ 
+        padding: '2rem',
+        maxWidth: '900px',
+        margin: '0 auto',
+        backgroundColor: '#f5f5f5',
+        minHeight: '100vh'
+      }}>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          padding: '2rem',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        }}>
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable 
+                style={{
+                  minHeight: '400px',
+                  outline: 'none',
+                  padding: '1rem'
+                }}
               />
-              <HistoryPlugin />
-              <AnswerPlugin />
-            </div>
-          </div>
-        </LexicalComposer>
-      </DictionaryProvider>
-    </UnitProvider>
+            }
+            placeholder={null}
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <HistoryPlugin />
+          <AnswerPlugin />
+        </div>
+      </div>
+    </LexicalComposer>
   );
 };
 
@@ -310,7 +315,7 @@ const definitionToDrawingState = {
 };
 
 export const AudioPronunciation = {
-  render: () => <ReadOnlyTemplate editorState={audioPronunciationState} />,
+  render: () => <ReadOnlyTemplate editorState={audioPronunciationState} wordIDs={['vocab-word-1', 'vocab-word-2', 'vocab-word-3']} />,
   parameters: {
     docs: {
       description: {
@@ -321,7 +326,7 @@ export const AudioPronunciation = {
 };
 
 export const DrawingVocabulary = {
-  render: () => <ReadOnlyTemplate editorState={drawingVocabState} />,
+  render: () => <ReadOnlyTemplate editorState={drawingVocabState} wordIDs={['vocab-word-4', 'vocab-word-5']} />,
   parameters: {
     docs: {
       description: {
@@ -332,7 +337,7 @@ export const DrawingVocabulary = {
 };
 
 export const MultiModalVocabulary = {
-  render: () => <ReadOnlyTemplate editorState={multiModalVocabState} />,
+  render: () => <ReadOnlyTemplate editorState={multiModalVocabState} wordIDs={['vocab-word-1', 'vocab-word-2']} />,
   parameters: {
     docs: {
       description: {
@@ -343,7 +348,7 @@ export const MultiModalVocabulary = {
 };
 
 export const ListeningComprehension = {
-  render: () => <ReadOnlyTemplate editorState={listeningComprehensionState} />,
+  render: () => <ReadOnlyTemplate editorState={listeningComprehensionState} wordIDs={['vocab-word-3', 'vocab-word-4', 'vocab-word-5']} />,
   parameters: {
     docs: {
       description: {
@@ -354,7 +359,7 @@ export const ListeningComprehension = {
 };
 
 export const DefinitionToDrawing = {
-  render: () => <ReadOnlyTemplate editorState={definitionToDrawingState} />,
+  render: () => <ReadOnlyTemplate editorState={definitionToDrawingState} wordIDs={['vocab-word-2', 'vocab-word-4']} />,
   parameters: {
     docs: {
       description: {
@@ -513,222 +518,6 @@ export const FeatureDocumentation = {
     docs: {
       description: {
         story: 'Complete feature documentation and configuration guide for vocabulary exercises with audio and drawing input types.',
-      },
-    },
-  },
-};
-
-// Mock grade data with completed vocabulary answers
-const mockGradeWithVocabAnswers = {
-  id: 'grade-vocab-123',
-  owner: 'student-user',
-  identityId: 'us-east-1:abc-123',
-  data: {
-    'answer-node-1': {
-      complete: true,
-      userResponse: 'Hello',
-      audioFile: 'private/us-east-1:abc-123/user-submissions/grade-vocab-123/answer-node-1/1734989234567.mp3',
-      attempts: 1,
-    },
-    'answer-node-2': {
-      complete: true,
-      drawingData: '{"elements": [], "appState": {}}',
-      imageBase64: 'data:image/png;base64,iVBORw0KGgo...',
-      attempts: 1,
-    },
-  },
-  feedback: {
-    'vocab-word-1': {
-      answer: true,
-      reason: 'Perfect! "こんにちは" (konnichiwa) correctly pronounced as "hello".',
-      transcription: 'konnichiwa',
-    },
-    'vocab-word-4': {
-      answer: true,
-      reason: 'Excellent drawing! The dog illustration clearly shows the defining features.',
-    },
-  },
-  files: [
-    'private/us-east-1:abc-123/user-submissions/grade-vocab-123/answer-node-1/1734989234567.mp3',
-  ],
-  percentComplete: 100,
-  accuracy: 1.0,
-  complete: true,
-};
-
-// State with completed audio pronunciation
-const completedAudioVocabState = {
-  root: {
-    children: [
-      {
-        children: [
-          {
-            text: 'Completed Pronunciation Exercise',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        type: 'heading',
-        version: 1,
-        tag: 'h2',
-      },
-      {
-        children: [
-          {
-            text: 'This shows a completed vocabulary pronunciation with audio waveform and feedback:',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        type: 'answer',
-        version: 1,
-        wordIDs: ['vocab-word-1'],
-        requestDefinition: false,
-        allowedInput: ['audio'],
-        promptMethod: ['phrase', 'pronunciation'],
-      },
-    ],
-    direction: 'ltr',
-    type: 'root',
-    version: 1,
-  },
-};
-
-// State with completed drawing vocabulary
-const completedDrawingVocabState = {
-  root: {
-    children: [
-      {
-        children: [
-          {
-            text: 'Completed Visual Vocabulary',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        type: 'heading',
-        version: 1,
-        tag: 'h2',
-      },
-      {
-        children: [
-          {
-            text: 'This shows a completed vocabulary drawing with the submitted sketch and feedback:',
-            type: 'text',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-        type: 'paragraph',
-        version: 1,
-      },
-      {
-        type: 'answer',
-        version: 1,
-        wordIDs: ['vocab-word-4'],
-        requestDefinition: false,
-        allowedInput: ['writing'],
-        promptMethod: ['definition'],
-      },
-    ],
-    direction: 'ltr',
-    type: 'root',
-    version: 1,
-  },
-};
-
-// Template with mock grade data
-const ReadOnlyTemplateWithGrade = ({ editorState, gradeData }) => {
-  const initialConfig = {
-    ...editorConfig,
-    editorState: editorState ? JSON.stringify(editorState) : undefined,
-    editable: false
-  };
-
-  return (
-    <UnitProvider value={{ grade: gradeData }}>
-      <DictionaryProvider>
-        <LexicalComposer initialConfig={initialConfig}>
-          <div style={{ 
-            padding: '2rem',
-            maxWidth: '900px',
-            margin: '0 auto',
-            backgroundColor: '#f5f5f5',
-            minHeight: '100vh'
-          }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              padding: '2rem',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }}>
-              <div style={{
-                marginBottom: '1.5rem',
-                padding: '1rem',
-                backgroundColor: '#e3f2fd',
-                borderRadius: '4px',
-                borderLeft: '4px solid #2196f3'
-              }}>
-                <strong>Grade Data Preview:</strong>
-                <div style={{ marginTop: '0.5rem', fontSize: '0.875rem' }}>
-                  <div>✓ Complete: {gradeData.complete ? 'Yes' : 'No'}</div>
-                  <div>✓ Accuracy: {(gradeData.accuracy * 100).toFixed(0)}%</div>
-                  <div>✓ Files: {gradeData.files?.length || 0} uploaded</div>
-                </div>
-              </div>
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable 
-                    style={{
-                      minHeight: '400px',
-                      outline: 'none',
-                      padding: '1rem'
-                    }}
-                  />
-                }
-                placeholder={null}
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <HistoryPlugin />
-              <AnswerPlugin />
-            </div>
-          </div>
-        </LexicalComposer>
-      </DictionaryProvider>
-    </UnitProvider>
-  );
-};
-
-export const CompletedAudioVocabulary = {
-  render: () => <ReadOnlyTemplateWithGrade 
-    editorState={completedAudioVocabState} 
-    gradeData={mockGradeWithVocabAnswers}
-  />,
-  parameters: {
-    docs: {
-      description: {
-        story: 'Shows a completed vocabulary pronunciation exercise with the submitted audio recording, waveform visualization, and AI feedback. The word is looked up from the dictionary context.',
-      },
-    },
-  },
-};
-
-export const CompletedDrawingVocabulary = {
-  render: () => <ReadOnlyTemplateWithGrade 
-    editorState={completedDrawingVocabState} 
-    gradeData={mockGradeWithVocabAnswers}
-  />,
-  parameters: {
-    docs: {
-      description: {
-        story: 'Shows a completed vocabulary drawing exercise with the submitted sketch and AI feedback. Perfect for visual learners and testing comprehension through illustration.',
       },
     },
   },

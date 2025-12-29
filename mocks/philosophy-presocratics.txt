@@ -1,0 +1,106 @@
+Ancient Greek Philosophy: The Pre-Socratics
+
+Introduction
+
+The Pre-Socratic philosophers were ancient Greek thinkers who lived before Socrates (roughly 6th-5th centuries BCE). They were the first to attempt rational explanations of the natural world, moving away from mythological interpretations. Their inquiries laid the foundation for Western philosophy and science.
+
+Key Philosophers and Concepts
+
+Thales of Miletus (c. 624-546 BCE)
+
+Thales is often considered the first philosopher in the Western tradition. He proposed that water is the fundamental substance (arche) from which all things originate. This was revolutionary because it sought a natural explanation rather than attributing phenomena to gods.
+
+Vocabulary:
+- Arche (ἀρχή) - the fundamental principle or element
+- Monism - the belief that all things derive from a single substance
+- Natural philosophy - the study of nature and the physical universe
+
+Anaximander (c. 610-546 BCE)
+
+Anaximander, a student of Thales, introduced the concept of the "apeiron" - the boundless or infinite. He believed this indefinite substance was the source of all things. He also created one of the first maps of the known world and proposed an early theory of evolution.
+
+Vocabulary:
+- Apeiron (ἄπειρον) - the boundless, infinite, or indefinite
+- Cosmology - the study of the origin and structure of the universe
+- Rationalism - the use of reason as the basis for knowledge
+
+Heraclitus (c. 535-475 BCE)
+
+Heraclitus is famous for his doctrine that "everything flows" (panta rhei). He believed that constant change is the fundamental essence of the universe. Fire was his primary element, representing transformation. His famous saying "You cannot step into the same river twice" illustrates his philosophy of perpetual flux.
+
+Vocabulary:
+- Flux - continuous change
+- Logos (λόγος) - the rational principle governing the universe
+- Dialectic - the resolution of opposing forces
+
+Parmenides (c. 515-450 BCE)
+
+In direct contrast to Heraclitus, Parmenides argued that change is impossible and that reality is unchanging, eternal, and indivisible. He distinguished between "the way of truth" (based on reason) and "the way of opinion" (based on sensory experience). His philosophy emphasized the permanence of Being.
+
+Vocabulary:
+- Being - that which exists, reality
+- Metaphysics - the branch of philosophy dealing with the nature of reality
+- Epistemology - the study of knowledge and how we know what we know
+
+Pythagoras (c. 570-495 BCE)
+
+Pythagoras founded a religious and philosophical school in southern Italy. He believed that numbers are the fundamental reality and that mathematical relationships govern the universe. The Pythagoreans made significant contributions to mathematics, music theory, and astronomy.
+
+Vocabulary:
+- Harmony - the mathematical relationships in music and nature
+- Transmigration - the belief that souls move from one body to another after death
+- Mathematical realism - the belief that mathematical entities have real existence
+
+Empedocles (c. 494-434 BCE)
+
+Empedocles proposed that all matter consists of four fundamental elements: earth, air, fire, and water. These elements are moved by two opposing forces: Love (attraction) and Strife (repulsion). This theory influenced scientific thought for centuries.
+
+Vocabulary:
+- Elements - fundamental substances that compose all matter
+- Philotes - love or attraction
+- Neikos - strife or repulsion
+
+Anaxagoras (c. 500-428 BCE)
+
+Anaxagoras introduced the concept of "nous" (mind) as the organizing principle of the cosmos. He believed that matter is infinitely divisible and that "everything is in everything." He was the first to explain eclipses correctly and was persecuted for suggesting that the sun was a hot rock rather than a deity.
+
+Vocabulary:
+- Nous (νοῦς) - mind or intellect
+- Panspermia - the theory that the seeds of all things exist everywhere
+- Atheism - disbelief in gods (he was accused of this)
+
+Democritus (c. 460-370 BCE)
+
+Democritus developed atomic theory, proposing that the universe consists of tiny, indivisible particles called "atoms" moving through empty space (the "void"). This mechanistic view of nature was remarkably prescient, anticipating modern atomic theory by over two millennia.
+
+Vocabulary:
+- Atom (ἄτομος) - literally "uncuttable," the smallest indivisible particle
+- Void - empty space
+- Materialism - the belief that only physical matter exists
+
+Philosophical Legacy
+
+The Pre-Socratics made several lasting contributions:
+
+1. Naturalism: They sought natural rather than supernatural explanations for phenomena
+2. Rational inquiry: They used logic and observation rather than myth and tradition
+3. Fundamental questions: They asked questions about the nature of reality, change, and knowledge that still occupy philosophers today
+4. Scientific method: Their emphasis on observation and logical reasoning laid groundwork for science
+
+Influence on Later Philosophy
+
+These early thinkers profoundly influenced Socrates, Plato, and Aristotle. Plato's theory of Forms echoes Parmenides' unchanging Being. Aristotle synthesized many Pre-Socratic ideas, particularly regarding the elements and causation. Their influence extended through medieval philosophy and continues in modern science and philosophy.
+
+Study Questions
+
+1. What was revolutionary about Thales' approach to understanding nature?
+2. How do the philosophies of Heraclitus and Parmenides differ regarding change?
+3. Why was Democritus's atomic theory significant?
+4. How did the Pre-Socratics move from mythology to philosophy?
+5. What role did rationalism play in Pre-Socratic thought?
+6. Compare the concepts of arche proposed by different Pre-Socratic philosophers.
+7. How did Pythagoras's emphasis on mathematics influence later scientific thought?
+
+Conclusion
+
+The Pre-Socratic philosophers initiated the Western intellectual tradition by applying reason to understand the natural world. Though their specific theories have been superseded, their method of rational inquiry and their fundamental questions about reality, knowledge, and change remain central to philosophy and science. They transformed how humans think about the world, establishing patterns of thought that persist today.
