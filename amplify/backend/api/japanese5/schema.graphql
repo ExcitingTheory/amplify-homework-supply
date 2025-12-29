@@ -250,7 +250,9 @@ type Word @model @auth(
   pronunciation: String
   definition: String
   audio: [String]
+  waveformData: AWSJSON # Pre-calculated waveform amplitude data for phrase audio
   definitionAudio: [String]
+  definitionWaveformData: AWSJSON # Pre-calculated waveform amplitude data for definition audio
   rubyTags: String
   units: [Unit] @manyToMany(relationName: "UnitWord")
   files: [File] @manyToMany(relationName: "WordFile")

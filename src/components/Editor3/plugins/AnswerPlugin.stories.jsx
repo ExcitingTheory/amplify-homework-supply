@@ -40,7 +40,7 @@ function InsertAnswerButton() {
       wordIDs: ['word-1', 'word-2'],
       requestDefinition: 'translation',
       allowedInput: ['text'],
-      promptMethod: ['phrase'],
+      promptMethod: ['text'],
     });
   };
   
@@ -188,7 +188,7 @@ const sampleAnswerState = {
         wordIDs: ['word-5', 'word-6'],
         requestDefinition: 'translation',
         allowedInput: ['text', 'audio'],
-        promptMethod: ['phrase'],
+        promptMethod: ['text'],
       },
     ],
     direction: 'ltr',

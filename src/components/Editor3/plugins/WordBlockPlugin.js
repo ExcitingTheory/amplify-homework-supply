@@ -13,10 +13,20 @@ import {BlockWithAlignableContents} from '@lexical/react/LexicalBlockWithAlignab
 import {
 DecoratorBlockNode,
 } from '@lexical/react/LexicalDecoratorBlockNode';
+import useLexicalEditable from '@lexical/react/useLexicalEditable';
 import * as React from 'react';
-import { useEffect, useContext } from 'react';
+import { useEffect, useContext, useState, useRef } from 'react';
 
 import DictionaryContext from '../../../context/dictionaryContext';
+import { 
+  Card, 
+  CardContent, 
+  Typography, 
+  Box, 
+  Chip,
+} from '@mui/material';
+import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
+import AudioWaveformPlayer from '../components/AudioWaveformPlayer';
 
   /**
    * WordBlockComponent - Displays word information in a block.
@@ -37,20 +47,147 @@ import DictionaryContext from '../../../context/dictionaryContext';
 
     const { wordMapId: dictionary } = useContext(DictionaryContext);
     const word = dictionary[wordID];
+    const isEditable = useLexicalEditable();
+
+    if (!word) {
+      return (
+        <BlockWithAlignableContents
+          className={className}
+          format={format}
+          nodeKey={nodeKey}>
+          <Card 
+            variant="outlined" 
+            sx={{ 
+              my: 2,
+              bgcolor: '#fff3e0',
+              borderColor: '#ff9800',
+              borderWidth: 2
+            }}
+          >
+            <CardContent>
+              <Typography variant="body2" color="error">
+                Word not found: {wordID}
+              </Typography>
+            </CardContent>
+          </Card>
+        </BlockWithAlignableContents>
+      );
+    }
 
     return (
       <BlockWithAlignableContents
         className={className}
         format={format}
         nodeKey={nodeKey}>
+        <Card 
+          variant="outlined" 
+          sx={{ 
+            my: 2,
+            bgcolor: '#f5f5f5',
+            borderColor: '#1976d2',
+            borderWidth: 2,
+            borderRadius: 2,
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              boxShadow: 3,
+              borderColor: '#1565c0',
+              transform: 'translateY(-2px)'
+            }
+          }}
+        >
+          <CardContent>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+              <Box sx={{ flex: 1 }}>
+                {/* Phrase */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <Typography 
+                    variant="h4" 
+                    component="div" 
+                    sx={{ 
+                      fontWeight: 700,
+                      color: '#1976d2',
+                      fontFamily: word?.phrase?.match(/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/) 
+                        ? '"Noto Sans JP", sans-serif' 
+                        : 'inherit'
+                    }}
+                  >
+                    {word.phrase}
+                  </Typography>
+                </Box>
 
-        <>
-        ID: {wordID} <br />
-        Phrase: {word?.phrase} <br />
-        Pronunciation: {word?.pronunciation} <br />
-        Definition: {word?.phrase}
-        </>
-            
+                {/* Audio Player with Waveform */}
+                {word.audio && word.audio.length > 0 && (
+                  <Box sx={{ mb: 1.5 }}>
+                    <AudioWaveformPlayer
+                      audioUrl={word.audio[0]}
+                      waveformData={word.waveformData ? JSON.parse(word.waveformData) : undefined}
+                      width={400}
+                      height={60}
+                      title={null}
+                      enableRecording={false}
+                    />
+                  </Box>
+                )}
+
+                {/* Pronunciation */}
+                {word.pronunciation && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                    <RecordVoiceOverIcon sx={{ fontSize: 18, color: '#666' }} />
+                    <Typography 
+                      variant="body1" 
+                      sx={{ 
+                        color: '#666',
+                        fontStyle: 'italic',
+                        fontFamily: 'monospace'
+                      }}
+                    >
+                      /{word.pronunciation}/
+                    </Typography>
+                  </Box>
+                )}
+
+                {/* Definition */}
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    color: '#424242',
+                    lineHeight: 1.6,
+                    mb: 1
+                  }}
+                >
+                  {word.definition}
+                </Typography>
+
+                {/* Additional metadata */}
+                <Box sx={{ display: 'flex', gap: 0.5, mt: 2, flexWrap: 'wrap' }}>
+                  {word.partOfSpeech && (
+                    <Chip 
+                      label={word.partOfSpeech} 
+                      size="small" 
+                      color="primary" 
+                      variant="outlined"
+                    />
+                  )}
+                  {word.context && (
+                    <Chip 
+                      label={word.context} 
+                      size="small" 
+                      variant="outlined"
+                    />
+                  )}
+                  {word.level && (
+                    <Chip 
+                      label={`Level: ${word.level}`} 
+                      size="small" 
+                      color="secondary"
+                      variant="outlined"
+                    />
+                  )}
+                </Box>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
       </BlockWithAlignableContents>
     );
   }

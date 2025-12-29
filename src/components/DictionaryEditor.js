@@ -25,7 +25,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import NewFileIcon from '@mui/icons-material/NoteAdd';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Collapse } from '@mui/material';
+import { Collapse, Dialog, DialogTitle, DialogContent } from '@mui/material';
 import { DisplayOrEditDefinition } from './DisplayOrEditDefinition';
 import { DisplayOrEditPhraseAndPronunciation } from './DisplayOrEditPhraseAndPronunciation';
 
@@ -1000,8 +1000,29 @@ export function DictionaryEditor() {
       console.log('phraseHex', phraseHex);
       console.log('definitionHex', definitionHex);
       console.log('word', word);
-      console.log('file', file);
-      console.log('dataSave', dataSave);
+
+      // Extract waveform data from the generated files and update the word
+      if (file.status === 'fulfilled' && definitionFile.status === 'fulfilled' && word.status === 'fulfilled') {
+        const phraseWaveformData = file.value?.data?.generateAudioFile?.waveformData;
+        const definitionWaveformData = definitionFile.value?.data?.generateAudioFile?.waveformData;
+        
+        if (phraseWaveformData || definitionWaveformData) {
+          try {
+            await DataStore.save(
+              Word.copyOf(word.value, (updatedWord) => {
+                if (phraseWaveformData) {
+                  updatedWord.waveformData = phraseWaveformData;
+                }
+                if (definitionWaveformData) {
+                  updatedWord.definitionWaveformData = definitionWaveformData;
+                }
+              })
+            );
+          } catch (error) {
+            console.error('Error updating word with waveform data:', error);
+          }
+        }
+      }
 
       // If any errors are returned delete the word and files from S3?
 
@@ -1154,29 +1175,8 @@ export function DictionaryEditor() {
     <div 
       style={{
         height: 'calc(100vh - 10rem)',
-        display: 'flex',
-        flexDirection: 'column',
       }}
     >
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs 
-          value={tabValue} 
-          onChange={handleTabChange}
-          aria-label="dictionary tabs"
-        >
-          <Tooltip title="Words">
-            <Tab icon={<MenuBookIcon />} aria-label="words" />
-          </Tooltip>
-          <Tooltip title="Upload Document">
-            <Tab icon={<UploadFileIcon />} aria-label="upload" />
-          </Tooltip>
-          <Tooltip title="Suggested Vocabulary">
-            <Tab icon={<AutoAwesomeIcon />} aria-label="suggestions" />
-          </Tooltip>
-        </Tabs>
-      </Box>
-
-      <TabPanel value={tabValue} index={0}>
         <Box
           style={{
             display: 'flex',
@@ -1206,12 +1206,14 @@ export function DictionaryEditor() {
         </Box>
 
         <Box
-          style={{
+          sx={{
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '1rem',
+            gap: 1,
+            px: 1,
+            py: 1,
           }}
         >
           <TextField
@@ -1219,51 +1221,42 @@ export function DictionaryEditor() {
             onInput={handleSearch}
             onClick={doNothing}
             type='text'
-            style={{
-              width: '100%',
-              margin: '0.2rem'
-            }}
+            size="small"
+            fullWidth
+            placeholder="Search words..."
             label="Search"
             />
 
           {searching &&
 
-            <Button aria-label="cancel searching dictionary" onClick={doNothing} disabled>
-              <CircularProgress />
-            </Button>
+            <IconButton size="small" aria-label="cancel searching dictionary" onClick={doNothing} disabled>
+              <CircularProgress size={20} />
+            </IconButton>
 
           }
           {!searching &&
-            <Button aria-label="search dictionary" onClick={doNothing} disabled>
+            <IconButton size="small" aria-label="search dictionary" onClick={doNothing} disabled>
               <SearchIcon />
-            </Button>
+            </IconButton>
           }
-
-        </Box>
-        <Box
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <Button disabled><UploadFile />&nbsp;Import</Button>
-          <Button disabled><FileDownload />&nbsp;Export</Button>
           <Button
-           onClick={toggleNewWordFormOpen}
-          ><NewFileIcon/>&nbsp;New</Button>
-
+            onClick={toggleNewWordFormOpen}
+            variant="contained"
+            size="small"
+          >
+            <NewFileIcon fontSize="small"/>&nbsp;New
+          </Button>
 
         </Box>
-        <Collapse in={newWordFormOpen}>
-          <Box
-
-            style={{
-              borderBottom: '1px solid #c7c7c7',
-              margin: '1rem 0'
-            }}
-          >
+        
+        <Dialog 
+          open={newWordFormOpen} 
+          onClose={toggleNewWordFormOpen}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Create New Word</DialogTitle>
+          <DialogContent>
             <form onSubmit={handleCreateWord}>
 
               <div
@@ -1284,7 +1277,8 @@ export function DictionaryEditor() {
                   onChange={(e) => setNewPhrase(e.target.value)}
                   style={{
                     width: '100%',
-                    margin: '0.2rem'
+                    margin: '0.2rem',
+                    marginTop: '1rem'
                   }}
                   label="Phrase"
                   variant="outlined" />
@@ -1339,7 +1333,7 @@ export function DictionaryEditor() {
                 }}
               >
 
-                <input
+                {/* <input
                   type="file"
                   disabled
                   // disabled={fileOperations.length > 0}
@@ -1357,7 +1351,7 @@ export function DictionaryEditor() {
 
                 >
                   Upload Audio
-                </Button>
+                </Button> */}
 
                 <Button
                   
@@ -1401,8 +1395,8 @@ export function DictionaryEditor() {
               </div>
 
             </form>
-          </Box>
-        </Collapse>
+          </DialogContent>
+        </Dialog>
 
         {/* // for each word in dictionary
           // display the word, and the audio files
@@ -1444,31 +1438,6 @@ export function DictionaryEditor() {
             />)}
 
         </List>
-      </TabPanel>
-
-      <TabPanel value={tabValue} index={1}>
-        <DocumentUploader
-          extractionType="vocabulary"
-          unitId={unit?.id}
-          onUploadComplete={handleUploadComplete}
-        />
-      </TabPanel>
-
-      <TabPanel value={tabValue} index={2}>
-        {selectedDocumentId ? (
-          <SuggestedVocabulary
-            documentId={selectedDocumentId}
-            unitId={unit?.id}
-            onImport={handleImportComplete}
-          />
-        ) : (
-          <Box sx={{ p: 3, textAlign: 'center' }}>
-            <Typography variant="body1" color="text.secondary">
-              Upload a document in the Upload tab to see suggested vocabulary
-            </Typography>
-          </Box>
-        )}
-      </TabPanel>
     </div>
   );
 }

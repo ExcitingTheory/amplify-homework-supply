@@ -237,28 +237,31 @@ export default function AnswerComponent({
                 <LinearProgressWithLabel value={progress} />
             </Box>
             {!requestDefinition &&
-                ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers, setFeedback, currentInputMethod, currentPromptMethod)
+                ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey)
             }
             {requestDefinition &&
-                ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod)
+                ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey)
             }
         </div>
     );
 }
 
-function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod) {
+function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey) {
 
     console.log('ByWordList', wordIDs, feedback, answers);
     console.log('ByWordList.currentPromptMethod', currentPromptMethod);
+    console.log('ByWordList.dictionary keys:', Object.keys(dictionary));
+    console.log('ByWordList.dictionary:', dictionary);
 
     return <ol>
         {currentInputMethod === 'text' && wordIDs.map((wordId, key) => {
             const isCorrect = feedback[key]?.answer;
 
-            console.log("currentInputMethod === 'text")
-
+            console.log(`currentInputMethod === 'text' for wordId: ${wordId}`);
+            console.log(`dictionary[${wordId}]:`, dictionary[wordId]);
             console.log('audio', dictionary[wordId]?.audio);
             console.log('definitionAudio', dictionary[wordId]?.definitionAudio);
+            console.log('phrase:', dictionary[wordId]?.phrase);
             
 
             let borderStyle = '1px solid #ccc'
@@ -269,10 +272,9 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
             }
 
 
-            return (<>
+            return (<React.Fragment key={`${wordId}-${key}`}>
                 <li
-                    display='flex'
-                    key={key}>
+                    display='flex'>
                     {/**
 * Area for feedback from api call
 */}
@@ -408,7 +410,7 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                     </Button>
                     </Box>
                 </li>
-            </>
+            </React.Fragment>
             );
         })}
 
@@ -417,7 +419,7 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
 
             return(<li
                 display='flex'
-                key={key}>
+                key={`${wordId}-${key}`}>
             <Typography
                 color={isCorrect === true ? 'green' : isCorrect === false ? 'red' : 'black'}
             variant="body2" component="div" sx={{ flexGrow: 1 }}>
@@ -468,10 +470,29 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
             console.log('currentPromptMethod', currentPromptMethod)
             console.log('dictionary[wordId]?.phrase', dictionary[wordId]?.phrase);
             console.log('feedback[wordId]', feedback);
-            return (<li key={key} sx={{ flexGrow: 1 }}>
-                <Typography variant="body2" component="div" sx={{ flexGrow: 1 }}>
-                    {dictionary[wordId]?.phrase}
-                </Typography>
+            return (<li key={`${wordId}-${key}`} sx={{ flexGrow: 1 }}>
+                {/* Display prompt based on currentPromptMethod */}
+                {currentPromptMethod === 'text' && 
+                    <Typography variant="body2" component="div" sx={{ flexGrow: 1 }}>
+                        {dictionary[wordId]?.phrase}
+                    </Typography>
+                }
+                
+                {currentPromptMethod === 'audio' && (
+                    dictionary[wordId]?.audio ? (
+                        <AudioWaveformPlayer
+                            audioUrl={dictionary[wordId].audio[0]}
+                            waveformData={dictionary[wordId].waveformData ? JSON.parse(dictionary[wordId].waveformData) : undefined}
+                            width={400}
+                            height={60}
+                            title={dictionary[wordId].phrase}
+                        />
+                    ) : (
+                        <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'gray' }}>
+                            {dictionary[wordId]?.phrase} (audio not available)
+                        </Typography>
+                    )
+                )}
 
                 {isCorrect === true && <Typography variant="body2" component="div" sx={{ flexGrow: 1 }}>
                     Correct! "{feedback[wordId]?.reason || ''}"
@@ -503,7 +524,7 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
     </ol>;
 }
 
-function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers, setFeedback, currentInputMethod, currentPromptMethod) {
+function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey) {
     return <ol>
         {currentInputMethod === 'text' && wordIDs.map((wordId, key) => {
             console.log('currentPromptMethod', currentPromptMethod)
@@ -517,7 +538,7 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
             }
 
             return (
-                <li key={key} sx={{ flexGrow: 1 }}>
+                <li key={`${wordId}-${key}`} sx={{ flexGrow: 1 }}>
                     <Typography variant="body1" component="div" sx={{ flexGrow: 1 }}>
                         {JSON.stringify(feedback[key]) || ''}
                     </Typography>
@@ -607,7 +628,7 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
         })}
 
         {currentInputMethod === 'audio' && wordIDs.map((wordId, key) => {
-            return (<li key={key} sx={{ flexGrow: 1 }}>
+            return (<li key={`${wordId}-${key}`} sx={{ flexGrow: 1 }}>
 
 <Typography variant="body2" component="div" sx={{ flexGrow: 1, 
                     // red if incorrect, green if correct
@@ -618,15 +639,28 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                     {JSON.stringify(feedback[wordId]?.reason) || ''}
                 </Typography>
                 
+                {/* Display prompt based on currentPromptMethod */}
+                {currentPromptMethod === 'text' && 
+                    <Typography variant="body2" component="div" sx={{ flexGrow: 1 }}>
+                        {dictionary[wordId]?.definition}
+                    </Typography>
+                }
                 
-                <Typography variant="body2" component="div" sx={{ flexGrow: 1, 
-                    // red if incorrect, green if correct
-                    color: feedback[wordId]?.answer === true ? 'green' : feedback[wordId]?.answer === false ? 'red' : 'black', }}>
-                    {dictionary[wordId]?.definition}
-                </Typography>
-
-
-
+                {currentPromptMethod === 'audio' && (
+                    dictionary[wordId]?.definitionAudio ? (
+                        <AudioWaveformPlayer
+                            audioUrl={dictionary[wordId].definitionAudio[0]}
+                            waveformData={dictionary[wordId].definitionWaveformData ? JSON.parse(dictionary[wordId].definitionWaveformData) : undefined}
+                            width={400}
+                            height={60}
+                            title={dictionary[wordId].definition}
+                        />
+                    ) : (
+                        <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'gray' }}>
+                            {dictionary[wordId]?.definition} (audio not available)
+                        </Typography>
+                    )
+                )}
 
                 <RecordingStudio2
                     item={dictionary[wordId]}
@@ -646,10 +680,30 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
         })}
 
         {currentInputMethod === 'writing' && wordIDs.map((wordId, key) => {
-            return (<li key={key} sx={{ flexGrow: 1 }}>
-                <Typography variant="body2" component="div" sx={{ flexGrow: 1 }}>
-                    {dictionary[wordId]?.phrase}
-                </Typography>
+            return (<li key={`${wordId}-${key}`} sx={{ flexGrow: 1 }}>
+                {/* Display prompt based on currentPromptMethod */}
+                {currentPromptMethod === 'text' && 
+                    <Typography variant="body2" component="div" sx={{ flexGrow: 1 }}>
+                        {dictionary[wordId]?.definition}
+                    </Typography>
+                }
+                
+                {currentPromptMethod === 'audio' && (
+                    dictionary[wordId]?.definitionAudio ? (
+                        <AudioWaveformPlayer
+                            audioUrl={dictionary[wordId].definitionAudio[0]}
+                            waveformData={dictionary[wordId].definitionWaveformData ? JSON.parse(dictionary[wordId].definitionWaveformData) : undefined}
+                            width={400}
+                            height={60}
+                            title={dictionary[wordId].definition}
+                        />
+                    ) : (
+                        <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'gray' }}>
+                            {dictionary[wordId]?.definition} (audio not available)
+                        </Typography>
+                    )
+                )}
+                
                 <SketchPad
                     expect={dictionary[wordId]?.definition}
                     excalidrawData={{}}

@@ -91,6 +91,7 @@ import {
 } from '../../../graphql/mutations';
 import { hexToRgb } from "../../../utils/hexToRgb";
 import { ImageGeneratorButton, AudioGeneratorButton } from './EnhancedGenerators';
+import { SuggestedVocabulary, SuggestedQuestions } from './SuggestedContent';
 
 const client = generateClient();
 
@@ -850,6 +851,8 @@ export default function FileManager() {
     const [newFileFormOpen, setNewFileFormOpen] = React.useState(false);
 
     const [generator, setGenerator] = React.useState('all');
+    const [selectedDocument, setSelectedDocument] = React.useState(null);
+    const [suggestionTab, setSuggestionTab] = React.useState(0);
     
     const [settings, setSettings] = React.useState(null);
     const [documentStatuses, setDocumentStatuses] = React.useState({});
@@ -1082,58 +1085,13 @@ export default function FileManager() {
 
     return (
         <div
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            onDragLeave={(e) => {
-                console.log('drag leave');
-                e.preventDefault();
-                e.stopPropagation();
-                setIsDragging(false);
-            }}
             style={{
                 position: 'relative',
                 width: '100%',
-
                 overflowY: 'auto',
                 overflowX: 'hidden',
             }}
         >
-
-            {isDragging && (
-
-                <div
-                    onDragOver={handleDragOver}
-                    onDrop={handleDrop}
-                    onDragLeave={(e) => {
-                        console.log('onDragLeavediv');
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setIsDragging(false);
-                    }}
-
-
-                    style={{
-                        color: '#000',
-                        fontSize: '2rem',
-                        fontWeight: 'bold',
-                        textAlign: 'center',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        zIndex: 100,
-                        backgroundColor: 'rgb(255, 255, 255, 0.5)',
-                        backdropFilter: 'blur(3px)',
-                        textAlign: 'center',
-                        verticalAlign: 'middle',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}
-                > {'Upload file(s)'}
-                </div>
-            )}
             <Toolbar
                 position="fixed"
                 color="default"
@@ -1220,6 +1178,14 @@ export default function FileManager() {
                     />
                     <Tab 
                         label={
+                            <Tooltip title="Suggestions">
+                                <AutoAwesomeIcon fontSize="small" />
+                            </Tooltip>
+                        }
+                        value="suggestions" 
+                    />
+                    <Tab 
+                        label={
                             <Tooltip title="Upload Files">
                                 <UploadFile fontSize="small" />
                             </Tooltip>
@@ -1230,11 +1196,126 @@ export default function FileManager() {
 
                 {/* Tab Content */}
                 <Box sx={{ width: '100%', mt: 1 }}>
+                    {/* Suggestions Tab Content */}
+                    {generator === 'suggestions' && (
+                        <Box sx={{ width: '100%' }}>
+                            {/* Document selector */}
+                            <FormControl fullWidth sx={{ mb: 2, px: 1 }}>
+                                <InputLabel>Select Document</InputLabel>
+                                <Select
+                                    value={selectedDocument || ''}
+                                    onChange={(e) => setSelectedDocument(e.target.value)}
+                                    label="Select Document"
+                                    size="small"
+                                >
+                                    {files
+                                        .filter(file => 
+                                            file.mimeType === 'application/pdf' || 
+                                            file.mimeType === 'text/plain' ||
+                                            file.mimeType === 'text/markdown' ||
+                                            file.mimeType === 'text/csv'
+                                        )
+                                        .map((file) => {
+                                            const docStatus = documentStatuses[file.path];
+                                            return (
+                                                <MenuItem key={file.id} value={docStatus?.id}>
+                                                    {file.name}
+                                                    {docStatus?.status === 'completed' && ' ✓'}
+                                                </MenuItem>
+                                            );
+                                        })}
+                                </Select>
+                            </FormControl>
+                            
+                            {/* Show suggestions if document is selected */}
+                            {selectedDocument ? (
+                                <>
+                                    <Tabs
+                                        value={suggestionTab}
+                                        onChange={(e, newValue) => setSuggestionTab(newValue)}
+                                        variant="fullWidth"
+                                        sx={{ borderBottom: 1, borderColor: 'divider', mb: 2, px: 1 }}
+                                    >
+                                        <Tab label="Vocabulary" />
+                                        <Tab label="Questions" />
+                                    </Tabs>
+                                    
+                                    {/* Vocabulary Tab */}
+                                    {suggestionTab === 0 && (
+                                        <SuggestedVocabulary 
+                                            documentId={selectedDocument}
+                                            unitId={unit?.id}
+                                            onImport={(count) => {
+                                                console.log(`Imported ${count} vocabulary items`);
+                                            }}
+                                        />
+                                    )}
+                                    
+                                    {/* Questions Tab */}
+                                    {suggestionTab === 1 && (
+                                        <SuggestedQuestions 
+                                            documentId={selectedDocument}
+                                            unitId={unit?.id}
+                                            onImport={(count) => {
+                                                console.log(`Imported ${count} questions`);
+                                            }}
+                                        />
+                                    )}
+                                </>
+                            ) : (
+                                <Box sx={{ p: 2, textAlign: 'center' }}>
+                                    <Typography variant="body2" color="text.secondary">
+                                        Select a document to review AI-generated vocabulary and question suggestions
+                                    </Typography>
+                                </Box>
+                            )}
+                        </Box>
+                    )}
+                    
                     {/* Upload Tab Content */}
                     {generator === 'upload' && (
-                        <Box sx={{ p: 2, textAlign: 'center' }}>
+                        <Box 
+                            sx={{ p: 2, textAlign: 'center', position: 'relative' }}
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                            onDragLeave={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setIsDragging(false);
+                            }}
+                        >
+                            {isDragging && (
+                                <div
+                                    onDragOver={handleDragOver}
+                                    onDrop={handleDrop}
+                                    onDragLeave={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setIsDragging(false);
+                                    }}
+                                    style={{
+                                        color: '#000',
+                                        fontSize: '2rem',
+                                        fontWeight: 'bold',
+                                        textAlign: 'center',
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        zIndex: 100,
+                                        backgroundColor: 'rgb(255, 255, 255, 0.5)',
+                                        backdropFilter: 'blur(3px)',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    Upload file(s)
+                                </div>
+                            )}
                             <Typography variant="body2" color="text.secondary" gutterBottom>
-                                Drag and drop files anywhere to upload
+                                Drag and drop files here to upload
                             </Typography>
                             <Button
                                 fullWidth
@@ -1254,7 +1335,7 @@ export default function FileManager() {
                                 hidden
                                 onChange={(e) => {
                                     const files = Array.from(e.target.files || []);
-                                    setFilesToUpload(files.map(f => ({ file: f })));
+                                    setFilesToUpload(files.map((f, index) => ({ file: f, index })));
                                 }}
                             />
                         </Box>
@@ -1366,8 +1447,10 @@ export default function FileManager() {
             ))}
 
 
-            <Box sx={{ minHeight: 200, minWidth: 250, overflowY: 'auto', height: 'calc(100vh - 17rem)' }}>
-                <SimpleTreeView apiRef={apiRef}>
+            {/* Only show TreeView when not in suggestions or upload tabs */}
+            {generator !== 'suggestions' && generator !== 'upload' && (
+                <Box sx={{ minHeight: 200, minWidth: 250, overflowY: 'auto', height: 'calc(100vh - 17rem)' }}>
+                    <SimpleTreeView apiRef={apiRef}>
                     {files.filter(file => file.mimeType.includes('image')).length > 0 && (
                         <TreeItem 
                             itemId="images"
@@ -1773,7 +1856,8 @@ export default function FileManager() {
                         </TreeItem>
                     )}
                 </SimpleTreeView>
-            </Box>
+                </Box>
+            )}
         </div>
 
     )

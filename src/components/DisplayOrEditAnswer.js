@@ -33,6 +33,7 @@ export function DisplayOrEditAnswer({ answer, question }) {
     <>
       {!editing &&
         <Typography
+          component="div"
           sx={{
             width: '100%',
             whiteSpace: 'pre-wrap',

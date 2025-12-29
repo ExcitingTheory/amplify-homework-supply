@@ -19,7 +19,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import NewFileIcon from '@mui/icons-material/NoteAdd';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Collapse } from '@mui/material';
+import { Collapse, Dialog, DialogTitle, DialogContent } from '@mui/material';
 import { DisplayOrEditAnswer } from './DisplayOrEditAnswer';
 import { DisplayOrEditPrompt } from './DisplayOrEditPrompt';
 import { DisplayOrEditHint } from './DisplayOrEditHint';
@@ -866,12 +866,14 @@ export function QuestionEditor() {
         </Box>
 
         <Box
-          style={{
+          sx={{
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '1rem',
+            gap: 1,
+            px: 1,
+            py: 1,
           }}
         >
           <TextField
@@ -879,70 +881,42 @@ export function QuestionEditor() {
             onInput={handleSearch}
             onClick={doNothing}
             type='text'
-            style={{
-              width: '100%',
-              margin: '0.2rem'
-            }}
-            // id="outlined-basic"
+            size="small"
+            fullWidth
+            placeholder="Search questions..."
             label="Search"
-            // variant="standard"
             />
 
           {searching &&
 
-            <Button aria-label="cancel searching dictionary" onClick={doNothing} disabled>
-              <CircularProgress />
-            </Button>
+            <IconButton size="small" aria-label="cancel searching dictionary" onClick={doNothing} disabled>
+              <CircularProgress size={20} />
+            </IconButton>
 
           }
           {!searching &&
-            <Button aria-label="search dictionary" onClick={doNothing} disabled>
+            <IconButton size="small" aria-label="search dictionary" onClick={doNothing} disabled>
               <SearchIcon />
-            </Button>
+            </IconButton>
           }
-          {/* <Button variant='contained'>Filter</Button> */}
-
-        </Box>
-        <Box
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}
-        >
-
-        </Box>
-        <Box
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <Button disabled><UploadFile />&nbsp;Import</Button>
-          <Button disabled><FileDownload />&nbsp;Export</Button>
           <Button
-           onClick={toggleNewQuestionFormOpen}
-          ><NewFileIcon/>&nbsp;New</Button>
-          {/* <Button><FiberManualRecordIcon />&nbsp;Batch</Button>
-            <Button><FileUpload />&nbsp;Batch</Button> */}
-
+            onClick={toggleNewQuestionFormOpen}
+            variant="contained"
+            size="small"
+          >
+            <NewFileIcon fontSize="small"/>&nbsp;New
+          </Button>
 
         </Box>
-        <Collapse in={newQuestionFormOpen}>
-          <Box
-
-            // onClick={(e) => {
-            //   e.preventDefault();
-            //   // e.stopPropagation();
-            // }}
-            style={{
-              borderBottom: '1px solid #c7c7c7',
-              margin: '1rem 0'
-            }}
-          >
+        
+        <Dialog 
+          open={newQuestionFormOpen} 
+          onClose={toggleNewQuestionFormOpen}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Create New Question</DialogTitle>
+          <DialogContent>
             <form onSubmit={handleCreateQuestion}>
 
               <div
@@ -963,7 +937,8 @@ export function QuestionEditor() {
                   onChange={(e) => setNewPrompt(e.target.value)}
                   style={{
                     width: '100%',
-                    margin: '0.2rem'
+                    margin: '0.2rem',
+                    marginTop: '1rem'
                   }}
                   label="Prompt"
                   variant="outlined" />
@@ -1028,7 +1003,7 @@ export function QuestionEditor() {
                 }}
               >
 
-                <input
+                {/* <input
                   type="file"
                   disabled
                   // disabled={fileOperations.length > 0}
@@ -1046,7 +1021,7 @@ export function QuestionEditor() {
 
                 >
                   Upload Audio
-                </Button>
+                </Button> */}
 
                 <Button
                   
@@ -1090,8 +1065,8 @@ export function QuestionEditor() {
               </div>
 
             </form>
-          </Box>
-        </Collapse>
+          </DialogContent>
+        </Dialog>
 
         <List
           className='dictionary-list'
@@ -1123,6 +1098,7 @@ export function QuestionEditor() {
 
           {questionBank && Object.keys(questionBank).length > 0 &&
             Object.entries(questionBank).map((entry, i) => <QuestionListItem
+              key={entry[0]}
               audioFiles={audioFiles}
               entry={entry} i={i}
               setPresignedUrl={_setPresignedUrl}

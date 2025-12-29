@@ -666,8 +666,10 @@ export default React.memo(function CustomAnswerEditor({
                     clearOnBlur
                     handleHomeEndKeys
                     renderOption={(props, option) => {
-                        const phrase = `${option?.prompt} (${option?.answer}) ${option?.hint}`
-                        return <li {...props}>{phrase}</li>
+                        const { key, ...otherProps } = props;
+                        const phrase = `${option?.prompt} (${option?.answer}) ${option?.hint}`;
+                        const uniqueKey = option?.id || key;
+                        return <li key={uniqueKey} {...otherProps}>{phrase}</li>;
                     }}
                     // sx={{ width: 300 }}
                     freeSolo

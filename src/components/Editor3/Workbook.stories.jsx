@@ -328,24 +328,84 @@ const workbookWithProgressState = {
         version: 1,
         data: [
           {
-            prompt: 'What is the correct translation of \"こんにちは\"?',
-            answer: '0',
+            id: 'progress-quiz-q1',
+            answer: 'Hello',
             correct: true,
           },
           {
-            prompt: 'Which word means \"cat\"?',
-            answer: '1',
+            id: 'progress-quiz-q2',
+            answer: 'Goodbye',
+            correct: false,
+          },
+          {
+            id: 'progress-quiz-q3',
+            answer: 'Thank you',
+            correct: false,
+          },
+          {
+            id: 'progress-quiz-q4',
+            answer: 'Please',
+            correct: false,
+          },
+          {
+            id: 'progress-quiz-q5',
+            answer: '犬 (inu)',
+            correct: false,
+          },
+          {
+            id: 'progress-quiz-q6',
+            answer: '猫 (neko)',
             correct: true,
           },
           {
-            prompt: 'How do you say \"thank you\" in Japanese?',
-            answer: '2',
+            id: 'progress-quiz-q7',
+            answer: '本 (hon)',
+            correct: false,
+          },
+          {
+            id: 'progress-quiz-q8',
+            answer: '水 (mizu)',
+            correct: false,
+          },
+          {
+            id: 'progress-quiz-q9',
+            answer: 'さようなら',
+            correct: false,
+          },
+          {
+            id: 'progress-quiz-q10',
+            answer: 'こんにちは',
+            correct: false,
+          },
+          {
+            id: 'progress-quiz-q11',
+            answer: 'ありがとう',
             correct: true,
           },
           {
-            prompt: 'Select the hiragana for \"dog\":',
-            answer: '0',
+            id: 'progress-quiz-q12',
+            answer: 'すみません',
+            correct: false,
+          },
+          {
+            id: 'progress-quiz-q13',
+            answer: 'いぬ',
             correct: true,
+          },
+          {
+            id: 'progress-quiz-q14',
+            answer: 'ねこ',
+            correct: false,
+          },
+          {
+            id: 'progress-quiz-q15',
+            answer: 'ほん',
+            correct: false,
+          },
+          {
+            id: 'progress-quiz-q16',
+            answer: 'みず',
+            correct: false,
           },
         ],
       },
@@ -373,24 +433,16 @@ const workbookWithProgressState = {
         version: 1,
         key: 'custom-q-1',
         ids: ['question-1'],
-        allowedInput: {
-          text: true,
-          audio: false,
-          image: false,
-        },
-        promptMethod: ['phrase', 'pronunciation'],
+        allowedInput: ['text'],
+        promptMethod: ['text'],
       },
       {
         type: 'custom-answer',
         version: 1,
         key: 'custom-q-2',
         ids: ['question-2'],
-        allowedInput: {
-          text: true,
-          audio: true,
-          image: false,
-        },
-        promptMethod: ['definition'],
+        allowedInput: ['text', 'audio'],
+        promptMethod: ['text'],
       },
     ],
     direction: 'ltr',
@@ -404,11 +456,14 @@ const workbookWithProgressState = {
 export const WorkbookWithProgress = {
   loaders: [
     async () => {
+      const { seedMockWords } = await import('../../../.storybook/__mocks__/aws-amplify-datastore');
+      
       seedMockUnit({
         id: 'workbook-with-progress-id',
         name: 'Sample Workbook with Progress',
         description: 'This workbook shows progress tracking with partial completion',
         data: workbookWithProgressState,
+        wordIDs: ['vocab-word-1', 'vocab-word-2', 'vocab-word-3'],
         _version: 1,
         owner: 'mock-user-sub',
       });
@@ -425,6 +480,50 @@ export const WorkbookWithProgress = {
         data: {},
         _version: 1,
       });
+      
+      // Seed vocabulary words
+      seedMockWords([
+        {
+          id: 'vocab-word-1',
+          phrase: 'こんにちは',
+          pronunciation: 'kon-ni-chi-wa',
+          definition: 'Hello (Japanese)',
+          owner: 'mock-user-sub',
+          _version: 1,
+        },
+        {
+          id: 'vocab-word-2',
+          phrase: '猫',
+          pronunciation: 'neko',
+          definition: 'Cat (Japanese)',
+          owner: 'mock-user-sub',
+          _version: 1,
+        },
+        {
+          id: 'vocab-word-3',
+          phrase: 'ありがとう',
+          pronunciation: 'a-ri-ga-tou',
+          definition: 'Thank you (Japanese)',
+          owner: 'mock-user-sub',
+          _version: 1,
+        },
+        {
+          id: 'vocab-word-4',
+          phrase: '犬',
+          pronunciation: 'inu',
+          definition: 'Dog (Japanese)',
+          owner: 'mock-user-sub',
+          _version: 1,
+        },
+        {
+          id: 'vocab-word-5',
+          phrase: 'さようなら',
+          pronunciation: 'sa-you-na-ra',
+          definition: 'Goodbye (Japanese)',
+          owner: 'mock-user-sub',
+          _version: 1,
+        },
+      ]);
     },
   ],
   render: () => <Workbook />,
@@ -874,12 +973,8 @@ const kitchenSinkWorkbookState = {
         version: 1,
         wordIDs: ['vocab-word-1', 'vocab-word-2', 'vocab-word-3'],
         requestDefinition: 'translation',
-        allowedInput: {
-          text: true,
-          audio: true,
-          image: false,
-        },
-        promptMethod: ['phrase', 'pronunciation'],
+        allowedInput: ['text', 'audio'],
+        promptMethod: ['text'],
       },
       {
         children: [
@@ -921,11 +1016,10 @@ const kitchenSinkWorkbookState = {
       {
         type: 'custom-answer',
         version: 1,
-        data: {
-          wordIDs: ['vocab-word-4', 'vocab-word-5'],
-          customValidation: true,
-          multipleAnswers: true,
-        },
+        key: 'custom-q-kitchen-1',
+        ids: ['question-1', 'question-2'],
+        allowedInput: ['text', 'audio', 'writing'],
+        promptMethod: ['text', 'audio'],
       },
       {
         type: 'horizontalrule',
@@ -1035,21 +1129,83 @@ const kitchenSinkWorkbookState = {
         data: [
           {
             id: 'quiz-q1',
-            question: 'What is the translation?',
-            wordID: 'vocab-word-1',
-            type: 'multiple-choice',
+            answer: 'Hello',
+            correct: true,
           },
           {
             id: 'quiz-q2',
-            question: 'Fill in the blank',
-            wordID: 'vocab-word-2',
-            type: 'fill-blank',
+            answer: 'Goodbye',
+            correct: false,
           },
           {
             id: 'quiz-q3',
-            question: 'Match the pronunciation',
-            wordID: 'vocab-word-3',
-            type: 'matching',
+            answer: 'Thank you',
+            correct: false,
+          },
+          {
+            id: 'quiz-q4',
+            answer: 'Please',
+            correct: false,
+          },
+          {
+            id: 'quiz-q5',
+            answer: '犬 (inu)',
+            correct: false,
+          },
+          {
+            id: 'quiz-q6',
+            answer: '猫 (neko)',
+            correct: true,
+          },
+          {
+            id: 'quiz-q7',
+            answer: '本 (hon)',
+            correct: false,
+          },
+          {
+            id: 'quiz-q8',
+            answer: '水 (mizu)',
+            correct: false,
+          },
+          {
+            id: 'quiz-q9',
+            answer: 'さようなら',
+            correct: false,
+          },
+          {
+            id: 'quiz-q10',
+            answer: 'こんにちは',
+            correct: false,
+          },
+          {
+            id: 'quiz-q11',
+            answer: 'ありがとう',
+            correct: true,
+          },
+          {
+            id: 'quiz-q12',
+            answer: 'すみません',
+            correct: false,
+          },
+          {
+            id: 'quiz-q13',
+            answer: 'いぬ',
+            correct: true,
+          },
+          {
+            id: 'quiz-q14',
+            answer: 'ねこ',
+            correct: false,
+          },
+          {
+            id: 'quiz-q15',
+            answer: 'ほん',
+            correct: false,
+          },
+          {
+            id: 'quiz-q16',
+            answer: 'みず',
+            correct: false,
           },
         ],
       },
@@ -1159,7 +1315,7 @@ const kitchenSinkWorkbookState = {
       {
         type: 'playlist',
         version: 1,
-        fileIDs: ['audio-1', 'audio-2', 'audio-3'],
+        fileIDs: ['file-3', 'file-4', 'file-8'],
       },
       {
         children: [
@@ -1890,14 +2046,114 @@ const kitchenSinkWorkbookState = {
 export const KitchenSink = {
   loaders: [
     async () => {
+      const { seedMockWords, seedMockFiles, seedMockGrade } = await import('../../../.storybook/__mocks__/aws-amplify-datastore');
+      
       seedMockUnit({
         id: 'kitchen-sink-workbook-id',
         name: 'Kitchen Sink - All Workbook Blocks',
         description: 'Comprehensive workbook showing all available interactive exercise types',
         data: kitchenSinkWorkbookState,
+        wordIDs: ['vocab-word-1', 'vocab-word-2', 'vocab-word-3'],
         _version: 1,
         owner: 'mock-user-sub',
       });
+      
+      seedMockGrade({
+        id: 'grade-kitchen-sink-1',
+        unitID: 'kitchen-sink-workbook-id',
+        owner: 'mock-user-sub',
+        unitVersion: 1,
+        percentComplete: 0,
+        accuracy: 0,
+        complete: false,
+        timerStarted: false,
+        data: {},
+        _version: 1,
+      });
+      
+      // Seed vocabulary words
+      seedMockWords([
+        {
+          id: 'vocab-word-1',
+          phrase: 'こんにちは',
+          pronunciation: 'kon-ni-chi-wa',
+          definition: 'Hello (Japanese)',
+          owner: 'mock-user-sub',
+          _version: 1,
+        },
+        {
+          id: 'vocab-word-2',
+          phrase: '猫',
+          pronunciation: 'neko',
+          definition: 'Cat (Japanese)',
+          owner: 'mock-user-sub',
+          _version: 1,
+        },
+        {
+          id: 'vocab-word-3',
+          phrase: 'ありがとう',
+          pronunciation: 'a-ri-ga-tou',
+          definition: 'Thank you (Japanese)',
+          owner: 'mock-user-sub',
+          _version: 1,
+        },
+        {
+          id: 'vocab-word-4',
+          phrase: '犬',
+          pronunciation: 'inu',
+          definition: 'Dog (Japanese)',
+          owner: 'mock-user-sub',
+          _version: 1,
+        },
+        {
+          id: 'vocab-word-5',
+          phrase: 'さようなら',
+          pronunciation: 'sa-you-na-ra',
+          definition: 'Goodbye (Japanese)',
+          owner: 'mock-user-sub',
+          _version: 1,
+        },
+      ]);
+      
+      // Seed audio files for playlist
+      seedMockFiles([
+        {
+          id: 'file-3',
+          name: 'vocabulary-lesson.mp3',
+          path: 'data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAASAAAdhgAKCgoKCgoUFBQUFBQUHh4eHh4eHigolgoKCgoKChQUFBQUFBQeHh4eHh4eKCgoKCgoKDIyMjIyMjI8PDw8PDw8RkZGRkZGRlBQUFBQUFBaWlpaWlpaZGRkZGRkZG5ubm5ubm54eHh4eHh4goKCgoKCjIyMjIyMjJaWlpaWlqCgoKCgoKqqqqqqqqq0tLS0tLS0vr6+vr6+yMjIyMjI0tLS0tLS3Nzc3Nzc5ubm5ubm8PDw8PDw+vr6+vr6////AAAAAExhdmY1OC43Ni4xMDAAAAAAAAAAAAAAAAQgAAAAAAAAAAdhhmNu5wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQxDaDwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV',
+          mimeType: 'audio/mpeg',
+          size: 1048576,
+          identityId: 'mock-identity-id',
+          owner: 'mock-user-sub',
+          createdAt: new Date('2024-01-17T14:00:00Z').toISOString(),
+          waveformData: JSON.stringify([0.1,0.3,0.5,0.7,0.9,1.0,0.9,0.7,0.5,0.3,0.1,0.2,0.4,0.6,0.8,0.95,0.8,0.6,0.4,0.2]),
+          _version: 1,
+        },
+        {
+          id: 'file-4',
+          name: 'pronunciation-guide.mp3',
+          path: 'data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAASAAAdhgAKCgoKCgoUFBQUFBQUHh4eHh4eHigolgoKCgoKChQUFBQUFBQeHh4eHh4eKCgoKCgoKDIyMjIyMjI8PDw8PDw8RkZGRkZGRlBQUFBQUFBaWlpaWlpaZGRkZGRkZG5ubm5ubm54eHh4eHh4goKCgoKCjIyMjIyMjJaWlpaWlqCgoKCgoKqqqqqqqqq0tLS0tLS0vr6+vr6+yMjIyMjI0tLS0tLS3Nzc3Nzc5ubm5ubm8PDw8PDw+vr6+vr6////AAAAAExhdmY1OC43Ni4xMDAAAAAAAAAAAAAAAAQgAAAAAAAAAAdhhmNu5wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQxDaDwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV',
+          mimeType: 'audio/mpeg',
+          size: 892416,
+          identityId: 'mock-identity-id',
+          owner: 'mock-user-sub',
+          createdAt: new Date('2024-01-18T09:15:00Z').toISOString(),
+          waveformData: JSON.stringify([0.05,0.15,0.25,0.35,0.45,0.55,0.65,0.75,0.85,0.95,0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1,0.05]),
+          _version: 1,
+        },
+        {
+          id: 'file-8',
+          name: 'listening-exercise.mp3',
+          path: 'data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAASAAAdhgAKCgoKCgoUFBQUFBQUHh4eHh4eHigolgoKCgoKChQUFBQUFBQeHh4eHh4eKCgoKCgoKDIyMjIyMjI8PDw8PDw8RkZGRkZGRlBQUFBQUFBaWlpaWlpaZGRkZGRkZG5ubm5ubm54eHh4eHh4goKCgoKCjIyMjIyMjJaWlpaWlqCgoKCgoKqqqqqqqqq0tLS0tLS0vr6+vr6+yMjIyMjI0tLS0tLS3Nzc3Nzc5ubm5ubm8PDw8PDw+vr6+vr6////AAAAAExhdmY1OC43Ni4xMDAAAAAAAAAAAAAAAAQgAAAAAAAAAAdhhmNu5wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQxDaDwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV',
+          mimeType: 'audio/mpeg',
+          size: 1310720,
+          identityId: 'mock-identity-id',
+          owner: 'mock-user-sub',
+          createdAt: new Date('2024-01-22T15:10:00Z').toISOString(),
+          waveformData: JSON.stringify([0.2,0.4,0.6,0.8,0.95,0.9,0.75,0.6,0.4,0.2,0.1,0.3,0.5,0.7,0.85,0.95,0.85,0.7,0.5,0.3]),
+          _version: 1,
+        },
+      ]);
     },
   ],
   render: () => <Workbook />,

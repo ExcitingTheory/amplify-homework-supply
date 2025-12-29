@@ -45,8 +45,11 @@ export const seedMockUnit = (unitData) => {
       ...unitData,
       words: {
         toArray: async () => {
-          // Return words that match the wordIDs
-          return wordIDs.map(id => mockWords[id]).filter(Boolean);
+          // Return word relationships that match the wordIDs
+          return wordIDs.map(id => {
+            const word = mockWords[id];
+            return word ? { word: Promise.resolve(word) } : null;
+          }).filter(Boolean);
         },
       },
       files: {
@@ -54,8 +57,11 @@ export const seedMockUnit = (unitData) => {
       },
       questions: {
         toArray: async () => {
-          // Return questions that match the questionIDs
-          return questionIDs.map(id => mockQuestions[id]).filter(Boolean);
+          // Return question relationships that match the questionIDs
+          return questionIDs.map(id => {
+            const question = mockQuestions[id];
+            return question ? { question: Promise.resolve(question) } : null;
+          }).filter(Boolean);
         },
       },
     };
@@ -322,6 +328,8 @@ export const clearMockUnits = () => {
       phrase: 'こんにちは',
       pronunciation: 'kon-ni-chi-wa',
       definition: 'Hello (Japanese)',
+      audio: ['data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAASAAAdhgAKCgoKCgoUFBQUFBQUHh4eHh4eHigolgoKCgoKChQUFBQUFBQeHh4eHh4eKCgoKCgoKDIyMjIyMjI8PDw8PDw8RkZGRkZGRlBQUFBQUFBaWlpaWlpaZGRkZGRkZG5ubm5ubm54eHh4eHh4goKCgoKCjIyMjIyMjJaWlpaWlqCgoKCgoKqqqqqqqqq0tLS0tLS0vr6+vr6+yMjIyMjI0tLS0tLS3Nzc3Nzc5ubm5ubm8PDw8PDw+vr6+vr6////AAAAAExhdmY1OC43Ni4xMDAAAAAAAAAAAAAAAAQgAAAAAAAAAAdhhmNu5wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQxDaDwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV'],
+      partOfSpeech: 'greeting',
       owner: 'mock-user-sub',
       _version: 1,
     },
@@ -330,6 +338,8 @@ export const clearMockUnits = () => {
       phrase: '猫',
       pronunciation: 'neko',
       definition: 'Cat (Japanese)',
+      audio: ['data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAASAAAdhgAKCgoKCgoUFBQUFBQUHh4eHh4eHigolgoKCgoKChQUFBQUFBQeHh4eHh4eKCgoKCgoKDIyMjIyMjI8PDw8PDw8RkZGRkZGRlBQUFBQUFBaWlpaWlpaZGRkZGRkZG5ubm5ubm54eHh4eHh4goKCgoKCjIyMjIyMjJaWlpaWlqCgoKCgoKqqqqqqqqq0tLS0tLS0vr6+vr6+yMjIyMjI0tLS0tLS3Nzc3Nzc5ubm5ubm8PDw8PDw+vr6+vr6////AAAAAExhdmY1OC43Ni4xMDAAAAAAAAAAAAAAAAQgAAAAAAAAAAdhhmNu5wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQxDaDwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV'],
+      partOfSpeech: 'noun',
       owner: 'mock-user-sub',
       _version: 1,
     },
@@ -338,6 +348,8 @@ export const clearMockUnits = () => {
       phrase: 'ありがとう',
       pronunciation: 'a-ri-ga-tou',
       definition: 'Thank you (Japanese)',
+      audio: ['data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAASAAAdhgAKCgoKCgoUFBQUFBQUHh4eHh4eHigolgoKCgoKChQUFBQUFBQeHh4eHh4eKCgoKCgoKDIyMjIyMjI8PDw8PDw8RkZGRkZGRlBQUFBQUFBaWlpaWlpaZGRkZGRkZG5ubm5ubm54eHh4eHh4goKCgoKCjIyMjIyMjJaWlpaWlqCgoKCgoKqqqqqqqqq0tLS0tLS0vr6+vr6+yMjIyMjI0tLS0tLS3Nzc3Nzc5ubm5ubm8PDw8PDw+vr6+vr6////AAAAAExhdmY1OC43Ni4xMDAAAAAAAAAAAAAAAAQgAAAAAAAAAAdhhmNu5wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQxDaDwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV'],
+      partOfSpeech: 'expression',
       owner: 'mock-user-sub',
       _version: 1,
     },
@@ -387,6 +399,8 @@ export const clearMockUnits = () => {
       phrase: 'こんにちは',
       pronunciation: 'kon-ni-chi-wa',
       definition: 'Hello (Japanese)',
+      audio: ['data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAASAAAdhgAKCgoKCgoUFBQUFBQUHh4eHh4eHigolgoKCgoKChQUFBQUFBQeHh4eHh4eKCgoKCgoKDIyMjIyMjI8PDw8PDw8RkZGRkZGRlBQUFBQUFBaWlpaWlpaZGRkZGRkZG5ubm5ubm54eHh4eHh4goKCgoKCjIyMjIyMjJaWlpaWlqCgoKCgoKqqqqqqqqq0tLS0tLS0vr6+vr6+yMjIyMjI0tLS0tLS3Nzc3Nzc5ubm5ubm8PDw8PDw+vr6+vr6////AAAAAExhdmY1OC43Ni4xMDAAAAAAAAAAAAAAAAQgAAAAAAAAAAdhhmNu5wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQxDaDwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV'],
+      partOfSpeech: 'greeting',
       owner: 'mock-user-sub',
       _version: 1,
     },
@@ -395,6 +409,8 @@ export const clearMockUnits = () => {
       phrase: '猫',
       pronunciation: 'neko',
       definition: 'Cat (Japanese)',
+      audio: ['data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAASAAAdhgAKCgoKCgoUFBQUFBQUHh4eHh4eHigolgoKCgoKChQUFBQUFBQeHh4eHh4eKCgoKCgoKDIyMjIyMjI8PDw8PDw8RkZGRkZGRlBQUFBQUFBaWlpaWlpaZGRkZGRkZG5ubm5ubm54eHh4eHh4goKCgoKCjIyMjIyMjJaWlpaWlqCgoKCgoKqqqqqqqqq0tLS0tLS0vr6+vr6+yMjIyMjI0tLS0tLS3Nzc3Nzc5ubm5ubm8PDw8PDw+vr6+vr6////AAAAAExhdmY1OC43Ni4xMDAAAAAAAAAAAAAAAAQgAAAAAAAAAAdhhmNu5wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQxDaDwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV'],
+      partOfSpeech: 'noun',
       owner: 'mock-user-sub',
       _version: 1,
     },
@@ -403,6 +419,8 @@ export const clearMockUnits = () => {
       phrase: 'ありがとう',
       pronunciation: 'a-ri-ga-tou',
       definition: 'Thank you (Japanese)',
+      audio: ['data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAASAAAdhgAKCgoKCgoUFBQUFBQUHh4eHh4eHigolgoKCgoKChQUFBQUFBQeHh4eHh4eKCgoKCgoKDIyMjIyMjI8PDw8PDw8RkZGRkZGRlBQUFBQUFBaWlpaWlpaZGRkZGRkZG5ubm5ubm54eHh4eHh4goKCgoKCjIyMjIyMjJaWlpaWlqCgoKCgoKqqqqqqqqq0tLS0tLS0vr6+vr6+yMjIyMjI0tLS0tLS3Nzc3Nzc5ubm5ubm8PDw8PDw+vr6+vr6////AAAAAExhdmY1OC43Ni4xMDAAAAAAAAAAAAAAAAQgAAAAAAAAAAdhhmNu5wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQxDaDwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV'],
+      partOfSpeech: 'expression',
       owner: 'mock-user-sub',
       _version: 1,
     },
@@ -786,18 +804,56 @@ export class DataStore {
       console.log('[Mock DataStore] Generated ID:', model.id);
     }
     
-    // Detect model type by checking properties
-    const isGrade = model.unitID && model.data !== undefined;
-    const isSettings = model.autoAnalyzeDocuments !== undefined;
-    const isUnit = model.name && model.data !== undefined && !model.unitID;
+    // Detect model type by checking properties (order matters - more specific checks first!)
     const isFile = model.path && model.mimeType;
     const isDocument = model.filename && model.s3Key && model.status;
     const isParsedContent = model.documentID && model.vocabularyJSON !== undefined;
     const isWord = model.phrase && model.definition;
-    const isSection = model.name && !model.unitID && !model.data;
+    const isGrade = model.unitID && model.data !== undefined && !isFile;
+    const isSettings = model.autoAnalyzeDocuments !== undefined;
+    const isUnit = model.name && model.data !== undefined && !model.unitID && !isFile;
+    const isSection = model.name && !model.unitID && !model.data && !isFile && !model.path;
     
     // Update the mock data based on model type
-    if (isSection) {
+    if (isFile) {
+      // This is a File
+      mockFiles[model.id] = model;
+      console.log('[Mock DataStore] Saved File:', model.id, model.name);
+      
+      // If it's a document type, also create Document record
+      const documentTypes = [
+        'application/pdf',
+        'text/plain',
+        'text/markdown',
+        'text/csv',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+      
+      if (documentTypes.includes(model.mimeType)) {
+        const docId = `doc-${model.id}`;
+        mockDocuments[docId] = {
+          id: docId,
+          filename: model.name,
+          s3Key: model.path,
+          status: 'uploaded',
+          identityId: model.identityId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        console.log('[Mock DataStore] Also created Document record:', docId);
+        
+        // Notify Document subscribers
+        activeSubscriptions.Document.forEach(callback => {
+          callback({ items: Object.values(mockDocuments), isSynced: true });
+        });
+      }
+      
+      // Notify all File subscribers
+      activeSubscriptions.File.forEach(callback => {
+        callback({ items: Object.values(mockFiles), isSynced: true });
+      });
+    } else if (isSection) {
       // This is a Section
       mockSections[model.id] = model;
       console.log('[Mock DataStore] Saved Section:', model.id, model.name);
@@ -833,15 +889,6 @@ export class DataStore {
       // Notify all Document subscribers
       activeSubscriptions.Document.forEach(callback => {
         callback({ items: Object.values(mockDocuments), isSynced: true });
-      });
-    } else if (isFile) {
-      // This is a File
-      mockFiles[model.id] = model;
-      console.log('[Mock DataStore] Saved File:', model.id, model.name);
-      
-      // Notify all File subscribers
-      activeSubscriptions.File.forEach(callback => {
-        callback({ items: Object.values(mockFiles), isSynced: true });
       });
     } else if (isGrade) {
       // This is a Grade

@@ -96,7 +96,7 @@ function Answer({ data, index, answers, onQuestionReorder, onQuestionChange, onC
                     <DragIndicatorIcon />
                     <TextField
                         label={`Answer ${index + 1}`}
-                        value={data.answer}
+                        value={data.answer || ''}
                         onChange={(event) => { onQuestionChange(event, index) }}
                         fullWidth
                         inputRef={(input) => {

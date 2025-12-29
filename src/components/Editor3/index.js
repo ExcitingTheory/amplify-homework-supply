@@ -593,6 +593,8 @@ export function Workbook() {
   const theme = useTheme();
   const [openTab, setOpenTab] = React.useState(false);
   const [tabValue, setTabValue] = React.useState(0);
+  const drawerRef = React.useRef(null);
+  const [actualDrawerWidth, setActualDrawerWidth] = React.useState(drawerWidth);
 
   const handleDrawerOpen = () => {
     setOpenTab(true);
@@ -601,6 +603,26 @@ export function Workbook() {
   const handleDrawerClose = () => {
     setOpenTab(false);
   };
+
+  // Measure drawer content width
+  React.useEffect(() => {
+    if (openTab && drawerRef.current) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          const width = entry.contentRect.width;
+          if (width > 0) {
+            setActualDrawerWidth(width);
+          }
+        }
+      });
+      
+      resizeObserver.observe(drawerRef.current);
+      
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }
+  }, [openTab]);
 
   const cellEditorConfig = {
     namespace: 'LanguageEditor',
@@ -662,6 +684,8 @@ export function Workbook() {
         `}</style>
             <AutoFocusPlugin />
             <CheckListPlugin />
+            <CodeHighlightPlugin />
+            <CodeActionMenuPlugin />
             <HashtagPlugin />
             <HorizontalRulePlugin />
             <ListPlugin />

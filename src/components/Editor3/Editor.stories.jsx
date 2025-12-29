@@ -1388,14 +1388,23 @@ const kitchenSinkEditorState = {
         data: [
           {
             id: 'q1',
-            type: 'multiple-choice',
-            question: 'Select the correct translation',
-            wordID: 'word-7',
+            answer: 'Paris',
+            correct: true,
           },
           {
             id: 'q2',
-            type: 'true-false',
-            question: 'Is this correct?',
+            answer: 'London',
+            correct: false,
+          },
+          {
+            id: 'q3',
+            answer: 'Berlin',
+            correct: false,
+          },
+          {
+            id: 'q4',
+            answer: 'Madrid',
+            correct: false,
           },
         ],
       },

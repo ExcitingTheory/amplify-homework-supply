@@ -48,6 +48,55 @@ import { fromCognitoIdentityPool } from "@aws-sdk/credential-providers";
 import * as fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * Calculate waveform amplitude data from an audio buffer (Node.js version)
+ * Adapted from the frontend calculateWaveformData utility
+ * 
+ * @param {Buffer} audioBuffer - Audio buffer (MP3/WAV)
+ * @param {number} samples - Number of data points to generate (default: 600)
+ * @returns {Promise<number[]>} Array of normalized amplitude values (0-1)
+ */
+async function calculateWaveformData(audioBuffer, samples = 600) {
+    try {
+        // For Node.js, we'll use a simplified approach that analyzes the raw audio data
+        // This mimics the frontend version but works without Web Audio API
+        const blockSize = Math.floor(audioBuffer.length / samples);
+        const filteredData = [];
+        
+        // Skip MP3 headers and process audio data
+        const dataStart = audioBuffer.indexOf(Buffer.from([0xFF, 0xFB])) || 0;
+        const audioData = audioBuffer.slice(dataStart);
+        
+        // Downsample the data similar to frontend version
+        for (let i = 0; i < samples; i++) {
+            const blockStart = Math.floor((audioData.length * i) / samples);
+            const blockEnd = Math.floor((audioData.length * (i + 1)) / samples);
+            let sum = 0;
+            let count = 0;
+            
+            // Get the average amplitude for this block
+            for (let j = blockStart; j < blockEnd && j < audioData.length; j++) {
+                // Convert byte to amplitude (similar to frontend approach)
+                const value = audioData[j] > 127 ? audioData[j] - 256 : audioData[j];
+                sum += Math.abs(value);
+                count++;
+            }
+            
+            filteredData.push(count > 0 ? sum / count : 0);
+        }
+        
+        // Normalize the data to 0-1 range (same as frontend)
+        const maxAmplitude = Math.max(...filteredData, 1); // Avoid division by zero
+        const normalizedData = filteredData.map(n => n / maxAmplitude);
+        
+        return normalizedData;
+        
+    } catch (error) {
+        console.error('Error calculating waveform data:', error);
+        return null;
+    }
+}
+
 const tools = [
   {
     type: "function",
@@ -913,6 +962,10 @@ const resolvers = {
       });
 
       const buffer = Buffer.from(await mp3.arrayBuffer());
+      
+      // Calculate waveform data using the same approach as frontend
+      const waveformData = await calculateWaveformData(buffer, 600);
+      
       const hash = createHash('sha256')
       hash.update(model + voice + phrase);
       const phraseHex = hash.digest('hex');
@@ -947,6 +1000,7 @@ const resolvers = {
           generated: true,
           duration: mp3?.duration,
           size: mp3?.size,
+          waveformData: waveformData ? JSON.stringify(waveformData) : null,
           // thumbnail: '',
         }
       };
