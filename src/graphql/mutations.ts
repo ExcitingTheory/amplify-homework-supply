@@ -1833,7 +1833,9 @@ export const createWord = /* GraphQL */ `mutation CreateWord(
     pronunciation
     definition
     audio
+    waveformData
     definitionAudio
+    definitionWaveformData
     rubyTags
     units {
       items {
@@ -1910,7 +1912,9 @@ export const updateWord = /* GraphQL */ `mutation UpdateWord(
     pronunciation
     definition
     audio
+    waveformData
     definitionAudio
+    definitionWaveformData
     rubyTags
     units {
       items {
@@ -1987,7 +1991,9 @@ export const deleteWord = /* GraphQL */ `mutation DeleteWord(
     pronunciation
     definition
     audio
+    waveformData
     definitionAudio
+    definitionWaveformData
     rubyTags
     units {
       items {
@@ -3651,7 +3657,9 @@ export const createQuestionWord = /* GraphQL */ `mutation CreateQuestionWord(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -3745,7 +3753,9 @@ export const updateQuestionWord = /* GraphQL */ `mutation UpdateQuestionWord(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -3839,7 +3849,9 @@ export const deleteQuestionWord = /* GraphQL */ `mutation DeleteQuestionWord(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -4590,7 +4602,9 @@ export const createWordFile = /* GraphQL */ `mutation CreateWordFile(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -4684,7 +4698,9 @@ export const updateWordFile = /* GraphQL */ `mutation UpdateWordFile(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -4778,7 +4794,9 @@ export const deleteWordFile = /* GraphQL */ `mutation DeleteWordFile(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -4885,7 +4903,9 @@ export const createUnitWord = /* GraphQL */ `mutation CreateUnitWord(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -4992,7 +5012,9 @@ export const updateUnitWord = /* GraphQL */ `mutation UpdateUnitWord(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -5099,7 +5121,9 @@ export const deleteUnitWord = /* GraphQL */ `mutation DeleteUnitWord(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken

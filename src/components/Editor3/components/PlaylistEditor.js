@@ -120,6 +120,7 @@ export default function PlaylistEditor({
 
     // Record previous FileIDs
     const prevFileIDs = React.useRef(fileIDs);
+    const playlistRef = React.useRef(null);
 
     const [editor] = useLexicalComposerContext();
 
@@ -252,25 +253,25 @@ export default function PlaylistEditor({
                 },
                 COMMAND_PRIORITY_LOW,
             ),
-            // editor.registerCommand(
-            //     CLICK_COMMAND,
-            //     (payload) => {
-            //         const event = payload;
+            editor.registerCommand(
+                CLICK_COMMAND,
+                (payload) => {
+                    const event = payload;
 
-            //         if (event.target === imageRef.current) {
-            //             if (event.shiftKey) {
-            //                 setSelected(!isSelected);
-            //             } else {
-            //                 clearSelection();
-            //                 setSelected(true);
-            //             }
-            //             return true;
-            //         }
+                    if (playlistRef.current && (event.target === playlistRef.current || playlistRef.current.contains(event.target))) {
+                        if (event.shiftKey) {
+                            setSelected(!isSelected);
+                        } else {
+                            clearSelection();
+                            setSelected(true);
+                        }
+                        return true;
+                    }
 
-            //         return false;
-            //     },
-            //     COMMAND_PRIORITY_LOW,
-            // ),
+                    return false;
+                },
+                COMMAND_PRIORITY_LOW,
+            ),
 
             editor.registerCommand(
                 KEY_DELETE_COMMAND,
@@ -308,10 +309,18 @@ export default function PlaylistEditor({
     console.log('PlaylistEditor', fileIDs)
 
     return (
-        <div style={{
-            maxHeight: '32rem',
-            maxWidth: '72rem'
-        }}>
+        <div 
+            ref={playlistRef}
+            style={{
+                maxHeight: '32rem',
+                maxWidth: '72rem',
+                border: isSelected ? '2px solid #1976d2' : '1px solid transparent',
+                borderRadius: '4px',
+                padding: '8px',
+                cursor: 'pointer',
+                transition: 'border-color 0.2s ease'
+            }}
+        >
 
             <div style={{
                 display: 'flex',

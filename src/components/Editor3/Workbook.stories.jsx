@@ -457,6 +457,7 @@ export const WorkbookWithProgress = {
   loaders: [
     async () => {
       const { seedMockWords } = await import('../../../.storybook/__mocks__/aws-amplify-datastore');
+      const { MOCK_AUDIO_BASE64, mockWaveformData } = await import('../../../.storybook/__mocks__/media');
       
       seedMockUnit({
         id: 'workbook-with-progress-id',
@@ -488,6 +489,10 @@ export const WorkbookWithProgress = {
           phrase: 'こんにちは',
           pronunciation: 'kon-ni-chi-wa',
           definition: 'Hello (Japanese)',
+          audio: [MOCK_AUDIO_BASE64],
+          waveformData: JSON.stringify(mockWaveformData.slice(0, 20)),
+          definitionAudio: [MOCK_AUDIO_BASE64],
+          definitionWaveformData: JSON.stringify(mockWaveformData.slice(20, 40)),
           owner: 'mock-user-sub',
           _version: 1,
         },
@@ -496,6 +501,10 @@ export const WorkbookWithProgress = {
           phrase: '猫',
           pronunciation: 'neko',
           definition: 'Cat (Japanese)',
+          audio: [MOCK_AUDIO_BASE64],
+          waveformData: JSON.stringify(mockWaveformData.slice(40, 60)),
+          definitionAudio: [MOCK_AUDIO_BASE64],
+          definitionWaveformData: JSON.stringify(mockWaveformData.slice(60, 80)),
           owner: 'mock-user-sub',
           _version: 1,
         },
@@ -504,6 +513,10 @@ export const WorkbookWithProgress = {
           phrase: 'ありがとう',
           pronunciation: 'a-ri-ga-tou',
           definition: 'Thank you (Japanese)',
+          audio: [MOCK_AUDIO_BASE64],
+          waveformData: JSON.stringify(mockWaveformData.slice(80, 100)),
+          definitionAudio: [MOCK_AUDIO_BASE64],
+          definitionWaveformData: JSON.stringify(mockWaveformData.slice(100, 120)),
           owner: 'mock-user-sub',
           _version: 1,
         },
@@ -512,6 +525,10 @@ export const WorkbookWithProgress = {
           phrase: '犬',
           pronunciation: 'inu',
           definition: 'Dog (Japanese)',
+          audio: [MOCK_AUDIO_BASE64],
+          waveformData: JSON.stringify(mockWaveformData.slice(120, 140)),
+          definitionAudio: [MOCK_AUDIO_BASE64],
+          definitionWaveformData: JSON.stringify(mockWaveformData.slice(140, 160)),
           owner: 'mock-user-sub',
           _version: 1,
         },
@@ -520,6 +537,10 @@ export const WorkbookWithProgress = {
           phrase: 'さようなら',
           pronunciation: 'sa-you-na-ra',
           definition: 'Goodbye (Japanese)',
+          audio: [MOCK_AUDIO_BASE64],
+          waveformData: JSON.stringify(mockWaveformData.slice(160, 180)),
+          definitionAudio: [MOCK_AUDIO_BASE64],
+          definitionWaveformData: JSON.stringify(mockWaveformData.slice(180, 200)),
           owner: 'mock-user-sub',
           _version: 1,
         },
@@ -2115,42 +2136,45 @@ export const KitchenSink = {
         },
       ]);
       
+      // Import the proper mock audio base64 data
+      const { MOCK_AUDIO_BASE64, mockWaveformData } = await import('../../../.storybook/__mocks__/media');
+      
       // Seed audio files for playlist
       seedMockFiles([
         {
           id: 'file-3',
           name: 'vocabulary-lesson.mp3',
-          path: 'data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAASAAAdhgAKCgoKCgoUFBQUFBQUHh4eHh4eHigolgoKCgoKChQUFBQUFBQeHh4eHh4eKCgoKCgoKDIyMjIyMjI8PDw8PDw8RkZGRkZGRlBQUFBQUFBaWlpaWlpaZGRkZGRkZG5ubm5ubm54eHh4eHh4goKCgoKCjIyMjIyMjJaWlpaWlqCgoKCgoKqqqqqqqqq0tLS0tLS0vr6+vr6+yMjIyMjI0tLS0tLS3Nzc3Nzc5ubm5ubm8PDw8PDw+vr6+vr6////AAAAAExhdmY1OC43Ni4xMDAAAAAAAAAAAAAAAAQgAAAAAAAAAAdhhmNu5wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQxDaDwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV',
+          path: MOCK_AUDIO_BASE64,
           mimeType: 'audio/mpeg',
           size: 1048576,
           identityId: 'mock-identity-id',
           owner: 'mock-user-sub',
           createdAt: new Date('2024-01-17T14:00:00Z').toISOString(),
-          waveformData: JSON.stringify([0.1,0.3,0.5,0.7,0.9,1.0,0.9,0.7,0.5,0.3,0.1,0.2,0.4,0.6,0.8,0.95,0.8,0.6,0.4,0.2]),
+          waveformData: JSON.stringify(mockWaveformData),
           _version: 1,
         },
         {
           id: 'file-4',
           name: 'pronunciation-guide.mp3',
-          path: 'data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAASAAAdhgAKCgoKCgoUFBQUFBQUHh4eHh4eHigolgoKCgoKChQUFBQUFBQeHh4eHh4eKCgoKCgoKDIyMjIyMjI8PDw8PDw8RkZGRkZGRlBQUFBQUFBaWlpaWlpaZGRkZGRkZG5ubm5ubm54eHh4eHh4goKCgoKCjIyMjIyMjJaWlpaWlqCgoKCgoKqqqqqqqqq0tLS0tLS0vr6+vr6+yMjIyMjI0tLS0tLS3Nzc3Nzc5ubm5ubm8PDw8PDw+vr6+vr6////AAAAAExhdmY1OC43Ni4xMDAAAAAAAAAAAAAAAAQgAAAAAAAAAAdhhmNu5wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQxDaDwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV',
+          path: MOCK_AUDIO_BASE64,
           mimeType: 'audio/mpeg',
           size: 892416,
           identityId: 'mock-identity-id',
           owner: 'mock-user-sub',
           createdAt: new Date('2024-01-18T09:15:00Z').toISOString(),
-          waveformData: JSON.stringify([0.05,0.15,0.25,0.35,0.45,0.55,0.65,0.75,0.85,0.95,0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1,0.05]),
+          waveformData: JSON.stringify(mockWaveformData),
           _version: 1,
         },
         {
           id: 'file-8',
           name: 'listening-exercise.mp3',
-          path: 'data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAASAAAdhgAKCgoKCgoUFBQUFBQUHh4eHh4eHigolgoKCgoKChQUFBQUFBQeHh4eHh4eKCgoKCgoKDIyMjIyMjI8PDw8PDw8RkZGRkZGRlBQUFBQUFBaWlpaWlpaZGRkZGRkZG5ubm5ubm54eHh4eHh4goKCgoKCjIyMjIyMjJaWlpaWlqCgoKCgoKqqqqqqqqq0tLS0tLS0vr6+vr6+yMjIyMjI0tLS0tLS3Nzc3Nzc5ubm5ubm8PDw8PDw+vr6+vr6////AAAAAExhdmY1OC43Ni4xMDAAAAAAAAAAAAAAAAQgAAAAAAAAAAdhhmNu5wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQxDaDwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV',
+          path: MOCK_AUDIO_BASE64,
           mimeType: 'audio/mpeg',
           size: 1310720,
           identityId: 'mock-identity-id',
           owner: 'mock-user-sub',
           createdAt: new Date('2024-01-22T15:10:00Z').toISOString(),
-          waveformData: JSON.stringify([0.2,0.4,0.6,0.8,0.95,0.9,0.75,0.6,0.4,0.2,0.1,0.3,0.5,0.7,0.85,0.95,0.85,0.7,0.5,0.3]),
+          waveformData: JSON.stringify(mockWaveformData),
           _version: 1,
         },
       ]);

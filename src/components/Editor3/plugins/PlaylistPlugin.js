@@ -9,10 +9,20 @@
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $insertNodeToNearestRoot } from '@lexical/utils';
-import { COMMAND_PRIORITY_EDITOR, createCommand, DecoratorNode } from 'lexical';
+import { 
+  COMMAND_PRIORITY_EDITOR, 
+  createCommand, 
+  DecoratorNode,
+  $getSelection,
+  $isNodeSelection,
+  $getNodeByKey
+} from 'lexical';
 import { BlockWithAlignableContents } from '@lexical/react/LexicalBlockWithAlignableContents';
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useContext } from 'react';
 import { useEffect } from 'react';
+import { DataStore } from 'aws-amplify/datastore';
+import { UnitFile, File } from '../../../models';
+import UnitContext from '../../../context/unitContext';
 
 import PlaylistEditor from '../components/PlaylistEditor';
 const MediaPlayerComponent = lazy(() => import('../components/MediaPlayerComponent'));
@@ -237,6 +247,36 @@ export const INSERT_PLAYLIST_COMMAND = createCommand(
  */
 export default function PlaylistPlugin() {
   const [editor] = useLexicalComposerContext();
+  const { unit } = useContext(UnitContext);
+
+  // Helper function to create UnitFile relationship
+  const createUnitFileRelationship = async (fileId) => {
+    try {
+      if (!unit) return;
+      
+      // Check if UnitFile relationship already exists
+      const existingUnitFiles = await DataStore.query(UnitFile, (uf) => 
+        uf.and(uf => [
+          uf.unitId.eq(unit.id),
+          uf.fileId.eq(fileId)
+        ])
+      );
+      
+      if (existingUnitFiles.length === 0) {
+        const file = await DataStore.query(File, fileId);
+        if (file) {
+          await DataStore.save(
+            new UnitFile({
+              unit,
+              file,
+            })
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error creating UnitFile relationship:', error);
+    }
+  };
 
   useEffect(() => {
     if (!editor.hasNodes([PlaylistNode])) {
@@ -246,8 +286,37 @@ export default function PlaylistPlugin() {
     return editor.registerCommand(
       INSERT_PLAYLIST_COMMAND,
       (payload) => {
+        const selection = $getSelection();
+        const fileIDs = Array.isArray(payload) ? payload : [payload];
+        
+        // Check if we have a node selection with a PlaylistNode
+        if ($isNodeSelection(selection)) {
+          const nodes = selection.getNodes();
+          const playlistNode = nodes.find(node => $isPlaylistNode(node));
+          
+          if (playlistNode) {
+            // Append to existing playlist
+            fileIDs.forEach(id => {
+              if (id) {
+                playlistNode.appendId(id);
+                // Create UnitFile relationship asynchronously
+                createUnitFileRelationship(id);
+              }
+            });
+            return true;
+          }
+        }
+        
+        // No playlist selected, create new one
         const PlaylistNode = $createPlaylistNode(payload);
         $insertNodeToNearestRoot(PlaylistNode);
+        
+        // Create UnitFile relationships for new playlist asynchronously
+        fileIDs.forEach(id => {
+          if (id) {
+            createUnitFileRelationship(id);
+          }
+        });
 
         return true;
       },

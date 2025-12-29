@@ -1541,7 +1541,9 @@ export const onCreateWord = /* GraphQL */ `subscription OnCreateWord(
     pronunciation
     definition
     audio
+    waveformData
     definitionAudio
+    definitionWaveformData
     rubyTags
     units {
       items {
@@ -1618,7 +1620,9 @@ export const onUpdateWord = /* GraphQL */ `subscription OnUpdateWord(
     pronunciation
     definition
     audio
+    waveformData
     definitionAudio
+    definitionWaveformData
     rubyTags
     units {
       items {
@@ -1695,7 +1699,9 @@ export const onDeleteWord = /* GraphQL */ `subscription OnDeleteWord(
     pronunciation
     definition
     audio
+    waveformData
     definitionAudio
+    definitionWaveformData
     rubyTags
     units {
       items {
@@ -3359,7 +3365,9 @@ export const onCreateQuestionWord = /* GraphQL */ `subscription OnCreateQuestion
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -3453,7 +3461,9 @@ export const onUpdateQuestionWord = /* GraphQL */ `subscription OnUpdateQuestion
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -3547,7 +3557,9 @@ export const onDeleteQuestionWord = /* GraphQL */ `subscription OnDeleteQuestion
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -4298,7 +4310,9 @@ export const onCreateWordFile = /* GraphQL */ `subscription OnCreateWordFile(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -4392,7 +4406,9 @@ export const onUpdateWordFile = /* GraphQL */ `subscription OnUpdateWordFile(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -4486,7 +4502,9 @@ export const onDeleteWordFile = /* GraphQL */ `subscription OnDeleteWordFile(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -4593,7 +4611,9 @@ export const onCreateUnitWord = /* GraphQL */ `subscription OnCreateUnitWord(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -4700,7 +4720,9 @@ export const onUpdateUnitWord = /* GraphQL */ `subscription OnUpdateUnitWord(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -4807,7 +4829,9 @@ export const onDeleteUnitWord = /* GraphQL */ `subscription OnDeleteUnitWord(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken

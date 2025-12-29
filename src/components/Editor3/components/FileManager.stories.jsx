@@ -25,6 +25,7 @@ import { PdfViewerNode } from './PdfViewerNode';
 import ImagesPlugin from '../plugins/ImagesPlugin';
 import { ImageNode } from '../components/ImageNode';
 import { seedMockFiles, seedMockSettings } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { MOCK_AUDIO_BASE64, mockWaveformData, MOCK_IMAGE_URL_1, MOCK_IMAGE_URL_2 } from '../../../../.storybook/__mocks__/media';
 
 export default {
   title: 'Components/FileManager',
@@ -93,55 +94,44 @@ const subscribeToFileUploads = (callback) => {
 };
 
 // Mock files data
-// Generate realistic waveform data for audio files
-const generateWaveformData = (length = 100, variation = 'medium') => {
-  const waveform = [];
-  for (let i = 0; i < length; i++) {
-    const base = Math.sin(i / 10) * 0.3 + 0.5; // Sine wave base
-    const noise = variation === 'high' ? Math.random() * 0.4 : Math.random() * 0.2;
-    waveform.push(Math.max(0.1, Math.min(1, base + noise)));
-  }
-  return JSON.stringify(waveform);
-};
 
 const mockFiles = [
   {
     id: 'file-1',
     name: 'sample-audio.mp3',
-    path: 'protected/audio/sample-audio.mp3',
+    path: MOCK_AUDIO_BASE64,
     mimeType: 'audio/mpeg',
     size: 2458000,
     identityId: 'us-east-1:abc-123',
     level: 'PROTECTED',
-    waveformData: generateWaveformData(150, 'medium'),
+    waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
     createdAt: new Date().toISOString(),
   },
   {
     id: 'file-2',
-    name: 'vocabulary-image.png',
-    path: 'protected/images/vocabulary-image.png',
-    mimeType: 'image/png',
+    name: 'vocabulary-image.jpeg',
+    path: MOCK_IMAGE_URL_2,
+    mimeType: 'image/jpeg',
     size: 125000,
     identityId: 'us-east-1:abc-123',
     level: 'PROTECTED',
-    createdAt: new Date().toISOString(),
   },
   {
     id: 'file-3',
     name: 'lesson-recording.mp3',
-    path: 'protected/audio/lesson-recording.mp3',
+    path: MOCK_AUDIO_BASE64,
     mimeType: 'audio/mpeg',
     size: 4856000,
     identityId: 'us-east-1:abc-123',
     level: 'PROTECTED',
-    waveformData: generateWaveformData(200, 'high'),
+    waveformData: JSON.stringify(mockWaveformData.slice(50, 250)),
     createdAt: new Date().toISOString(),
   },
   {
     id: 'file-4',
-    name: 'diagram.png',
-    path: 'protected/images/diagram.png',
-    mimeType: 'image/png',
+    name: 'diagram.jpeg',
+    path: MOCK_IMAGE_URL_1,
+    mimeType: 'image/jpeg',
     size: 340000,
     identityId: 'us-east-1:abc-123',
     level: 'PROTECTED',
@@ -150,12 +140,12 @@ const mockFiles = [
   {
     id: 'file-5',
     name: 'pronunciation-guide.mp3',
-    path: 'protected/audio/pronunciation-guide.mp3',
+    path:MOCK_AUDIO_BASE64,
     mimeType: 'audio/mpeg',
     size: 1234000,
     identityId: 'us-east-1:abc-123',
     level: 'PROTECTED',
-    waveformData: generateWaveformData(100, 'medium'),
+    waveformData: JSON.stringify(mockWaveformData.slice(300, 400)),
     createdAt: new Date().toISOString(),
   },
   {

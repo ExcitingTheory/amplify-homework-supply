@@ -490,7 +490,9 @@ type EagerWord = {
   readonly pronunciation?: string | null;
   readonly definition?: string | null;
   readonly audio?: (string | null)[] | null;
+  readonly waveformData?: string | null;
   readonly definitionAudio?: (string | null)[] | null;
+  readonly definitionWaveformData?: string | null;
   readonly rubyTags?: string | null;
   readonly units?: (UnitWord | null)[] | null;
   readonly files?: (WordFile | null)[] | null;
@@ -511,7 +513,9 @@ type LazyWord = {
   readonly pronunciation?: string | null;
   readonly definition?: string | null;
   readonly audio?: (string | null)[] | null;
+  readonly waveformData?: string | null;
   readonly definitionAudio?: (string | null)[] | null;
+  readonly definitionWaveformData?: string | null;
   readonly rubyTags?: string | null;
   readonly units: AsyncCollection<UnitWord>;
   readonly files: AsyncCollection<WordFile>;

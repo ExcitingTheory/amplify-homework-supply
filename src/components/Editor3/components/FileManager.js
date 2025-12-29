@@ -755,14 +755,13 @@ function ListItemImage({ file }) {
                     <Box sx={{ width: '100%' }}>
                         <AudioWaveformPlayer
                             audioUrl={url}
+                            displayTitle={true}
+                            title={file.name}
                             waveformData={file.waveformData ? JSON.parse(file.waveformData) : undefined}
                             width={200}
                             height={60}
-                            showDuration={false}
+                            showDuration={true}
                         />
-                        <Typography variant="caption" noWrap sx={{ display: 'block', textAlign: 'center', mt: 0.5 }}>
-                            {file.name}
-                        </Typography>
                     </Box>
                 ) : (
                     <Box sx={{ width: '100%', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -815,9 +814,9 @@ export default function FileManager() {
         if (matchingFile) {
             // Expand the appropriate category
             if (matchingFile.mimeType.includes('image')) {
-                apiRef.current?.setItemExpansion(null, 'images', true);
+                apiRef.current?.setItemExpansion('images', true);
             } else if (matchingFile.mimeType.includes('audio')) {
-                apiRef.current?.setItemExpansion(null, 'audio', true);
+                apiRef.current?.setItemExpansion('audio', true);
             } else if (
                 matchingFile.mimeType === 'application/pdf' || 
                 matchingFile.mimeType === 'text/plain' ||
@@ -826,12 +825,12 @@ export default function FileManager() {
                 matchingFile.mimeType === 'application/msword' ||
                 matchingFile.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
             ) { 
-                apiRef.current?.setItemExpansion(null, 'document', true);
+                apiRef.current?.setItemExpansion('documents', true);
             }
             
             // Focus and scroll to the item
             setTimeout(() => {
-                apiRef.current?.focusItem(null, matchingFile.id);
+                apiRef.current?.focusItem(matchingFile.id);
                 apiRef.current?.getItemDOMElement(matchingFile.id)?.scrollIntoView({ 
                     block: 'nearest',
                     behavior: 'smooth'
@@ -1114,11 +1113,11 @@ export default function FileManager() {
                         
                         // Expand the appropriate tree section
                         if (newValue === 'image' && apiRef.current) {
-                            apiRef.current.setItemExpansion(null, 'images', true);
+                            apiRef.current.setItemExpansion('images', true);
                         } else if (newValue === 'audio' && apiRef.current) {
-                            apiRef.current.setItemExpansion(null, 'audio', true);
+                            apiRef.current.setItemExpansion('audio', true);
                         } else if (newValue === 'document' && apiRef.current) {
-                            apiRef.current.setItemExpansion(null, 'documents', true);
+                            apiRef.current.setItemExpansion('documents', true);
                         }
                         
                         // Open the selected form if generation is active
@@ -1552,21 +1551,12 @@ export default function FileManager() {
                                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, py: 1, width: '100%' }}>
                                                 <ListItemImage file={file} />
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between' }}>
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        {(file.size / 1000).toFixed(2)} KB
-                                                    </Typography>
                                                     <Box sx={{ display: 'flex', gap: 0.5 }}>
                                                         {editor && (
                                                             <IconButton
                                                                 size="small"
                                                             onClick={async (e) => {
                                                                 e.stopPropagation();
-                                                                await DataStore.save(
-                                                                    new UnitFile({
-                                                                        unit,
-                                                                        file,
-                                                                    })
-                                                                );
                                                                 editor.dispatchCommand(INSERT_PLAYLIST_COMMAND, [file.id]);
                                                             }}
                                                         >

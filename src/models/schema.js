@@ -1457,6 +1457,13 @@ export const schema = {
                     "attributes": [],
                     "isArrayNullable": true
                 },
+                "waveformData": {
+                    "name": "waveformData",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "definitionAudio": {
                     "name": "definitionAudio",
                     "isArray": true,
@@ -1464,6 +1471,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": [],
                     "isArrayNullable": true
+                },
+                "definitionWaveformData": {
+                    "name": "definitionWaveformData",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
                 },
                 "rubyTags": {
                     "name": "rubyTags",
@@ -3254,5 +3268,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "bb10c4e408e14d760aacb6f801b207f3"
+    "version": "42b90e3e7e8c8e7b34892a1ea3c87ba4"
 };

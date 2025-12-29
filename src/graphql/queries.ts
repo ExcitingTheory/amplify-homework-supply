@@ -1700,7 +1700,9 @@ export const getWord = /* GraphQL */ `query GetWord($id: ID!) {
     pronunciation
     definition
     audio
+    waveformData
     definitionAudio
+    definitionWaveformData
     rubyTags
     units {
       items {
@@ -1776,7 +1778,9 @@ export const listWords = /* GraphQL */ `query ListWords(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -1826,7 +1830,9 @@ export const syncWords = /* GraphQL */ `query SyncWords(
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -3534,7 +3540,9 @@ export const getQuestionWord = /* GraphQL */ `query GetQuestionWord($id: ID!) {
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -3610,7 +3618,9 @@ export const listQuestionWords = /* GraphQL */ `query ListQuestionWords(
         pronunciation
         definition
         audio
+        waveformData
         definitionAudio
+        definitionWaveformData
         rubyTags
         createdAt
         updatedAt
@@ -3681,7 +3691,9 @@ export const syncQuestionWords = /* GraphQL */ `query SyncQuestionWords(
         pronunciation
         definition
         audio
+        waveformData
         definitionAudio
+        definitionWaveformData
         rubyTags
         createdAt
         updatedAt
@@ -3754,7 +3766,9 @@ export const questionWordsByQuestionId = /* GraphQL */ `query QuestionWordsByQue
         pronunciation
         definition
         audio
+        waveformData
         definitionAudio
+        definitionWaveformData
         rubyTags
         createdAt
         updatedAt
@@ -3827,7 +3841,9 @@ export const questionWordsByWordId = /* GraphQL */ `query QuestionWordsByWordId(
         pronunciation
         definition
         audio
+        waveformData
         definitionAudio
+        definitionWaveformData
         rubyTags
         createdAt
         updatedAt
@@ -4748,7 +4764,9 @@ export const getWordFile = /* GraphQL */ `query GetWordFile($id: ID!) {
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -4829,7 +4847,9 @@ export const listWordFiles = /* GraphQL */ `query ListWordFiles(
         pronunciation
         definition
         audio
+        waveformData
         definitionAudio
+        definitionWaveformData
         rubyTags
         createdAt
         updatedAt
@@ -4905,7 +4925,9 @@ export const syncWordFiles = /* GraphQL */ `query SyncWordFiles(
         pronunciation
         definition
         audio
+        waveformData
         definitionAudio
+        definitionWaveformData
         rubyTags
         createdAt
         updatedAt
@@ -4983,7 +5005,9 @@ export const wordFilesByFileId = /* GraphQL */ `query WordFilesByFileId(
         pronunciation
         definition
         audio
+        waveformData
         definitionAudio
+        definitionWaveformData
         rubyTags
         createdAt
         updatedAt
@@ -5061,7 +5085,9 @@ export const wordFilesByWordId = /* GraphQL */ `query WordFilesByWordId(
         pronunciation
         definition
         audio
+        waveformData
         definitionAudio
+        definitionWaveformData
         rubyTags
         createdAt
         updatedAt
@@ -5154,7 +5180,9 @@ export const getUnitWord = /* GraphQL */ `query GetUnitWord($id: ID!) {
       pronunciation
       definition
       audio
+      waveformData
       definitionAudio
+      definitionWaveformData
       rubyTags
       units {
         nextToken
@@ -5228,7 +5256,9 @@ export const listUnitWords = /* GraphQL */ `query ListUnitWords(
         pronunciation
         definition
         audio
+        waveformData
         definitionAudio
+        definitionWaveformData
         rubyTags
         createdAt
         updatedAt
@@ -5297,7 +5327,9 @@ export const syncUnitWords = /* GraphQL */ `query SyncUnitWords(
         pronunciation
         definition
         audio
+        waveformData
         definitionAudio
+        definitionWaveformData
         rubyTags
         createdAt
         updatedAt
@@ -5368,7 +5400,9 @@ export const unitWordsByUnitId = /* GraphQL */ `query UnitWordsByUnitId(
         pronunciation
         definition
         audio
+        waveformData
         definitionAudio
+        definitionWaveformData
         rubyTags
         createdAt
         updatedAt
@@ -5439,7 +5473,9 @@ export const unitWordsByWordId = /* GraphQL */ `query UnitWordsByWordId(
         pronunciation
         definition
         audio
+        waveformData
         definitionAudio
+        definitionWaveformData
         rubyTags
         createdAt
         updatedAt

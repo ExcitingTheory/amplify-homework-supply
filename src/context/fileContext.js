@@ -13,6 +13,13 @@ const FilesContext = createContext();
 
 export const ACCEPTABLE_PLAYLIST_TYPES = [
   'audio/mp3',
+  'audio/mpeg',
+  'audio/wav',
+  'audio/ogg',
+  'audio/m4a',
+  'audio/aac',
+  'audio/webm',
+  'audio/flac',
 ];
 
 
@@ -136,7 +143,8 @@ const FilesProvider = ({ children }) => {
           const _pdfsFiltered = {}
 
           items.forEach((item) => {
-            if (ACCEPTABLE_PLAYLIST_TYPES.includes(item.mimeType)) {
+            // Include all audio files in playlist, not just specific MIME types
+            if (item.mimeType && item.mimeType.startsWith('audio/')) {
               _playlistFiltered[item.id] = item
             }
             if (item.mimeType === 'application/pdf') {

@@ -33,12 +33,14 @@ export const ACCEPTABLE_IMAGE_TYPES = [
 ];
 
 export const ACCEPTABLE_AUDIO_TYPES = [
-    // 'audio/',
-    // 'audio/mpeg',
-    // 'audio/mp4',
     'audio/mp3',
-    // 'audio/wav',
-    // 'audio/webm',
+    'audio/mpeg',
+    'audio/wav',
+    'audio/ogg',
+    'audio/m4a',
+    'audio/aac',
+    'audio/webm',
+    'audio/flac',
 ];
 
 export const ACCEPTABLE_FILE_TYPES = [

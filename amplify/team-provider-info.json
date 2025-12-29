@@ -102,7 +102,7 @@
         "openai": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/openai-4a6c554c746745444f65-build.zip"
+          "s3Key": "amplify-builds/openai-59514d4b5972646a346f-build.zip"
         },
         "japanese56739ab6b": {},
         "files": {},
