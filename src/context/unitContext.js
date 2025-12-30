@@ -8,7 +8,7 @@ import { Hub, Cache } from "aws-amplify/utils";
 
 import getCachedUrl from '../utils/getCachedUrl'
 // Provider and Consumer are connected through their "parent" context
-const UnitContext = createContext();
+const UnitContext = createContext({});
 
 export const gradedBlockTypes = [
   'quiz',
@@ -29,6 +29,7 @@ const UnitProvider = ({ children, id }) => {
   const [username, setUsername] = React.useState(null);
 
   const versionRef = useRef(0);
+  const expectedNextVersionRef = useRef(null);
   const editorStateRef = useRef();
   const editorSelectionRef = useRef();
   const unitRef = useRef({});
@@ -273,38 +274,28 @@ const UnitProvider = ({ children, id }) => {
 
     const username = session.username;
 
+    // Single subscription for all grades, filter client-side
     const subscription = DataStore.observeQuery(
       Grade,
       g => g.and(g => [
         g.owner.eq(username),
         g.unitID.eq(id),
-        g.unitVersion.eq(unitVersion),
-        g.complete.eq(false)
+        g.unitVersion.eq(unitVersion)
       ]), {
       sort: g => g.createdAt(SortDirection.DESCENDING)
     }
     ).subscribe(snapshot => {
       const { items } = snapshot;
-      // console.log('items', items)
-      const currentGrade = items[0];
       
-      // Only update if grade has actually changed
-      setGrade(prevGrade => {
-        const prevGradeStr = JSON.stringify(prevGrade);
-        const currentGradeStr = JSON.stringify(currentGrade);
-        if (prevGradeStr === currentGradeStr) {
-          return prevGrade; // Return same reference to prevent rerender
-        }
-        return currentGrade;
-      });
+      // Filter client-side
+      const incompleteGrades = items.filter(grade => !grade.complete);
+      const completedGrades = items.filter(grade => grade.complete);
       
-      // Only update username if it has changed
-      setUsername(prevUsername => {
-        if (prevUsername === username) {
-          return prevUsername;
-        }
-        return username;
-      });
+      // Handle current grade (most recent incomplete)
+      const currentGrade = incompleteGrades[0];
+      
+      setGrade(currentGrade);
+      setUsername(username);
       
       // Calculate finished questions from the current grade data
       if (currentGrade?.data) {
@@ -314,54 +305,22 @@ const UnitProvider = ({ children, id }) => {
             _finishedQuestions++;
           }
         });
-        setFinishedQuestions(prevCount => {
-          if (prevCount === _finishedQuestions) {
-            return prevCount; // Return same value to prevent rerender
-          }
-          return _finishedQuestions;
-        });
+        setFinishedQuestions(_finishedQuestions);
       } else {
-        setFinishedQuestions(prevCount => prevCount === 0 ? prevCount : 0);
+        setFinishedQuestions(0);
       }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-
-  }, [id, unitVersion, session.username]);
-
-
-  React.useEffect(() => {
-    if (!id || !unitVersion || !session.username) {
-      return
-    }
-
-    const username = session.username;
-
-    const subscription = DataStore.observeQuery(
-      Grade,
-      g => g.and(g => [
-        g.owner.eq(username),
-        g.unitID.eq(id),
-        g.unitVersion.eq(unitVersion),
-        g.complete.eq(true)
-      ]), {
-      sort: g => g.accuracy(SortDirection.DESCENDING).createdAt(SortDirection.DESCENDING),
-    }
-    ).subscribe(snapshot => {
-      const { items } = snapshot;
-      const _items = items.slice(0, 5);
       
-      // Only update if recent grades have actually changed
-      setRecentGrades(prevGrades => {
-        const prevGradesStr = JSON.stringify(prevGrades);
-        const newGradesStr = JSON.stringify(_items);
-        if (prevGradesStr === newGradesStr) {
-          return prevGrades; // Return same reference to prevent rerender
-        }
-        return _items;
-      });
+      // Handle recent grades (top 5 completed, sorted by accuracy then date)
+      const sortedCompletedGrades = completedGrades
+        .sort((a, b) => {
+          if (b.accuracy !== a.accuracy) {
+            return (b.accuracy || 0) - (a.accuracy || 0);
+          }
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        })
+        .slice(0, 5);
+      
+      setRecentGrades(sortedCompletedGrades);
     });
 
     return () => {
@@ -383,7 +342,7 @@ const UnitProvider = ({ children, id }) => {
         return;
       }
 
-      // Only update if version has changed
+      // Only update if version has actually changed
       if (versionRef.current === _newUnit?._version) {
         return;
       }
@@ -460,47 +419,15 @@ const UnitProvider = ({ children, id }) => {
         })
       }
 
-      // Update all state with comparison to prevent unnecessary rerenders
-      setUnit(prevUnit => {
-        const prevUnitStr = JSON.stringify(prevUnit);
-        const newUnitStr = JSON.stringify(_newUnit);
-        if (prevUnitStr === newUnitStr) {
-          return prevUnit;
-        }
-        unitRef.current = _newUnit;
-        unitVersionRef.current = _newUnit?._version || 0;
-        return _newUnit;
-      });
-      
-      setDictionary(prevDict => {
-        const prevDictStr = JSON.stringify(prevDict);
-        const newDictStr = JSON.stringify(_dictionary);
-        return prevDictStr === newDictStr ? prevDict : _dictionary;
-      });
-      
-      setFiles(prevFiles => {
-        const prevFilesStr = JSON.stringify(prevFiles);
-        const newFilesStr = JSON.stringify(_files);
-        return prevFilesStr === newFilesStr ? prevFiles : _files;
-      });
-      
-      setPlaylistUrls(prevUrls => {
-        const prevUrlsStr = JSON.stringify(prevUrls);
-        const newUrlsStr = JSON.stringify(_playlistUrls);
-        return prevUrlsStr === newUrlsStr ? prevUrls : _playlistUrls;
-      });
-      
-      setQuestionBank(prevBank => {
-        const prevBankStr = JSON.stringify(prevBank);
-        const newBankStr = JSON.stringify(_questionBank);
-        return prevBankStr === newBankStr ? prevBank : _questionBank;
-      });
-      
-      setRubric(prevRubric => {
-        const prevRubricStr = JSON.stringify(prevRubric);
-        const newRubricStr = JSON.stringify(_rubric);
-        return prevRubricStr === newRubricStr ? prevRubric : _rubric;
-      });
+      // Update all state - version check ensures data has changed
+      unitRef.current = _newUnit;
+      unitVersionRef.current = _newUnit?._version || 0;
+      setUnit(_newUnit);
+      setDictionary(_dictionary);
+      setFiles(_files);
+      setPlaylistUrls(_playlistUrls);
+      setQuestionBank(_questionBank);
+      setRubric(_rubric);
 
       editorStateRef.current = _newUnit?.data;
       versionRef.current = _newUnit?._version
@@ -512,35 +439,28 @@ const UnitProvider = ({ children, id }) => {
   }, [id]);
 
   const saveEditorContent = React.useCallback(async (editorContent) => {
-    const {sub} = await fetchUserAttributes();
     const currentUnit = unitRef.current;
 
-    if (!sub) return
-    if (!currentUnit?.id) return
-    if (!id) return
+    let _editorContent = editorContent ? editorContent : editorStateRef.current;
 
-    // For now prevent non owners from saving TODO: add a permission check
-    if (currentUnit?.owner !== sub) return false
-
-    let _editorContent = editorContent? editorContent : editorStateRef.current
-
-    const content = JSON.stringify(_editorContent)
-    const unitData = JSON.stringify(currentUnit?.data)
-    // console.log('saveEditorContent', content)
-    // if the content is the same as the content in the database, don't save
-    if (content === unitData) return
-    // if the version is behind the current version, don't save
-    if (versionRef.current >= currentUnit?._version) return
+    const newContent = typeof _editorContent === 'string' 
+      ? _editorContent 
+      : JSON.stringify(_editorContent);
 
     try {
+      // Optimistically update version before save
+      const predictedNextVersion = currentUnit._version + 1;
+      versionRef.current = predictedNextVersion;
+      
       await DataStore.save(
         Unit.copyOf(currentUnit, updated => {
-          updated.data = content;
+          updated.data = newContent;
         })
       );
-      console.log('saved')
     } catch (errors) {
-      console.error(errors)
+      console.error('[saveEditorContent] Save failed:', errors);
+      // Roll back version on error
+      versionRef.current = currentUnit._version;
     }
   }, [id]);
 
@@ -644,6 +564,7 @@ const UnitProvider = ({ children, id }) => {
     editorStateRef,
     editorSelectionRef,
     versionRef,
+    unitRef,
     finishedQuestions,
     showUnitComplete,
     handleBeforeUnload,

@@ -185,6 +185,13 @@ export const schema = {
                     "attributes": [],
                     "isArrayNullable": true
                 },
+                "audioWaveformData": {
+                    "name": "audioWaveformData",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "answerAudio": {
                     "name": "answerAudio",
                     "isArray": true,
@@ -192,6 +199,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": [],
                     "isArrayNullable": true
+                },
+                "answerAudioWaveformData": {
+                    "name": "answerAudioWaveformData",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
                 },
                 "generated": {
                     "name": "generated",
@@ -3268,5 +3282,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "42b90e3e7e8c8e7b34892a1ea3c87ba4"
+    "version": "87a8d8cb2bf49b7cf5e1e6fc665f9f69"
 };

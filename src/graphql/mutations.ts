@@ -401,7 +401,9 @@ export const createQuestion = /* GraphQL */ `mutation CreateQuestion(
     hint
     prompt
     audio
+    audioWaveformData
     answerAudio
+    answerAudioWaveformData
     generated
     model
     promptHex
@@ -487,7 +489,9 @@ export const updateQuestion = /* GraphQL */ `mutation UpdateQuestion(
     hint
     prompt
     audio
+    audioWaveformData
     answerAudio
+    answerAudioWaveformData
     generated
     model
     promptHex
@@ -573,7 +577,9 @@ export const deleteQuestion = /* GraphQL */ `mutation DeleteQuestion(
     hint
     prompt
     audio
+    audioWaveformData
     answerAudio
+    answerAudioWaveformData
     generated
     model
     promptHex
@@ -3273,7 +3279,9 @@ export const createQuestionUnit = /* GraphQL */ `mutation CreateQuestionUnit(
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3389,7 +3397,9 @@ export const updateQuestionUnit = /* GraphQL */ `mutation UpdateQuestionUnit(
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3505,7 +3515,9 @@ export const deleteQuestionUnit = /* GraphQL */ `mutation DeleteQuestionUnit(
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3621,7 +3633,9 @@ export const createQuestionWord = /* GraphQL */ `mutation CreateQuestionWord(
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3717,7 +3731,9 @@ export const updateQuestionWord = /* GraphQL */ `mutation UpdateQuestionWord(
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3813,7 +3829,9 @@ export const deleteQuestionWord = /* GraphQL */ `mutation DeleteQuestionWord(
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3909,7 +3927,9 @@ export const createQuestionFile = /* GraphQL */ `mutation CreateQuestionFile(
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -4012,7 +4032,9 @@ export const updateQuestionFile = /* GraphQL */ `mutation UpdateQuestionFile(
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -4115,7 +4137,9 @@ export const deleteQuestionFile = /* GraphQL */ `mutation DeleteQuestionFile(
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex

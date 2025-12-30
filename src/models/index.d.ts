@@ -135,7 +135,9 @@ type EagerQuestion = {
   readonly hint?: string | null;
   readonly prompt?: string | null;
   readonly audio?: (string | null)[] | null;
+  readonly audioWaveformData?: string | null;
   readonly answerAudio?: (string | null)[] | null;
+  readonly answerAudioWaveformData?: string | null;
   readonly generated?: boolean | null;
   readonly model?: string | null;
   readonly promptHex?: string | null;
@@ -161,7 +163,9 @@ type LazyQuestion = {
   readonly hint?: string | null;
   readonly prompt?: string | null;
   readonly audio?: (string | null)[] | null;
+  readonly audioWaveformData?: string | null;
   readonly answerAudio?: (string | null)[] | null;
+  readonly answerAudioWaveformData?: string | null;
   readonly generated?: boolean | null;
   readonly model?: string | null;
   readonly promptHex?: string | null;

@@ -255,9 +255,12 @@ export default function MediaPlayerComponent({
     console.log('nowPlayingId', nowPlayingId)
 
     return (
-        <Box style={{
-            maxWidth: '72rem'
-        }}>
+        <Box 
+            className={className}
+            style={{
+                maxWidth: '72rem'
+            }}
+        >
             <div data-vjs-player>
                 <div ref={videoRef} />
             </div>

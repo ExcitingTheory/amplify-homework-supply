@@ -63,9 +63,10 @@ function $search(
 function useQuery() {
     return useCallback((searchText) => {
         const server = new AutocompleteServer();
-        console.time('query');
+        // Disabled timing logs for performance
+        // console.time('query');
         const response = server.query(searchText);
-        console.timeEnd('query', response);
+        // console.timeEnd('query', response);
         return response;
     }, []);
 }
@@ -131,7 +132,7 @@ export default function AutocompletePlugin() {
 
                     console.log('setSuggestion(newSuggestion)', newSuggestion)
                 },
-                { tag: 'history-merge' },
+                { tag: 'discrete' }
             );
         }
 
@@ -142,18 +143,29 @@ export default function AutocompletePlugin() {
                 $clearSuggestion();
             }
         }
-        function handleUpdate() {
-            editor.update(() => {
+        function handleUpdate({ tags, editorState }) {
+            // Ignore updates from this plugin's own operations
+            if (tags && (tags.has('discrete') || tags.has('skip-save') || tags.has('historic') || tags.has('history-push') || tags.has('history-merge'))) {
+                return;
+            }
+
+            editor.getEditorState().read(() => {
                 const selection = $getSelection();
                 const [hasMatch, match] = $search(selection);
                 if (!hasMatch) {
-                    $clearSuggestion();
+                    if (autocompleteNodeKey !== null || lastMatch !== null) {
+                        editor.update(() => {
+                            $clearSuggestion();
+                        }, { tag: 'discrete' });
+                    }
                     return;
                 }
                 if (match === lastMatch) {
                     return;
                 }
-                $clearSuggestion();
+                editor.update(() => {
+                    $clearSuggestion();
+                }, { tag: 'discrete' });
                 searchPromise = query(match);
                 searchPromise.promise
                     .then((newSuggestion) => {
@@ -162,7 +174,10 @@ export default function AutocompletePlugin() {
                         }
                     })
                     .catch((e) => {
-                        console.error(e);
+                        // Only log if it's not a normal dismissal
+                        if (e !== 'Dismissed') {
+                            console.error(e);
+                        }
                     });
                 lastMatch = match;
             });
@@ -198,12 +213,12 @@ export default function AutocompletePlugin() {
                 if ($handleAutocompleteIntent()) {
                     e.preventDefault();
                 }
-            });
+            }, {tag: 'history-merge'});
         }
         function unmountSuggestion() {
             editor.update(() => {
                 $clearSuggestion();
-            });
+            }, {tag: 'history-merge'});
         }
 
         const rootElem = editor.getRootElement();

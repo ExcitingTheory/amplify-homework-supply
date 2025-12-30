@@ -271,7 +271,13 @@ function onDragStart(event) {
 }
 
 function onDragover(event) {
-    console.log('onDragover', event)
+    // Check if this is a block drag from DraggableBlockPlugin
+    const blockDragData = event.dataTransfer?.getData('application/x-lexical-drag-block');
+    if (blockDragData) {
+        // Let DraggableBlockPlugin handle block-level dragging
+        return false;
+    }
+    
     const node = getImageNodeInSelection();
     if (!node) {
         return false;
@@ -283,7 +289,13 @@ function onDragover(event) {
 }
 
 function onDrop(event, editor) {
-    console.log('onDrop', event)
+    // Check if this is a block drag from DraggableBlockPlugin
+    const blockDragData = event.dataTransfer?.getData('application/x-lexical-drag-block');
+    if (blockDragData) {
+        // Let DraggableBlockPlugin handle block-level dragging
+        return false;
+    }
+    
     const node = getImageNodeInSelection();
     if (!node) {
         return false;

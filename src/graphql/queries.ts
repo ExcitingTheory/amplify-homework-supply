@@ -257,7 +257,9 @@ export const getQuestion = /* GraphQL */ `query GetQuestion($id: ID!) {
     hint
     prompt
     audio
+    audioWaveformData
     answerAudio
+    answerAudioWaveformData
     generated
     model
     promptHex
@@ -345,7 +347,9 @@ export const listQuestions = /* GraphQL */ `query ListQuestions(
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -407,7 +411,9 @@ export const syncQuestions = /* GraphQL */ `query SyncQuestions(
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -471,7 +477,9 @@ export const questionsByByPromptHex = /* GraphQL */ `query QuestionsByByPromptHe
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3101,7 +3109,9 @@ export const getQuestionUnit = /* GraphQL */ `query GetQuestionUnit($id: ID!) {
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3214,7 +3224,9 @@ export const listQuestionUnits = /* GraphQL */ `query ListQuestionUnits(
         hint
         prompt
         audio
+        audioWaveformData
         answerAudio
+        answerAudioWaveformData
         generated
         model
         promptHex
@@ -3287,7 +3299,9 @@ export const syncQuestionUnits = /* GraphQL */ `query SyncQuestionUnits(
         hint
         prompt
         audio
+        audioWaveformData
         answerAudio
+        answerAudioWaveformData
         generated
         model
         promptHex
@@ -3362,7 +3376,9 @@ export const questionUnitsByQuestionId = /* GraphQL */ `query QuestionUnitsByQue
         hint
         prompt
         audio
+        audioWaveformData
         answerAudio
+        answerAudioWaveformData
         generated
         model
         promptHex
@@ -3437,7 +3453,9 @@ export const questionUnitsByUnitId = /* GraphQL */ `query QuestionUnitsByUnitId(
         hint
         prompt
         audio
+        audioWaveformData
         answerAudio
+        answerAudioWaveformData
         generated
         model
         promptHex
@@ -3504,7 +3522,9 @@ export const getQuestionWord = /* GraphQL */ `query GetQuestionWord($id: ID!) {
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3597,7 +3617,9 @@ export const listQuestionWords = /* GraphQL */ `query ListQuestionWords(
         hint
         prompt
         audio
+        audioWaveformData
         answerAudio
+        answerAudioWaveformData
         generated
         model
         promptHex
@@ -3670,7 +3692,9 @@ export const syncQuestionWords = /* GraphQL */ `query SyncQuestionWords(
         hint
         prompt
         audio
+        audioWaveformData
         answerAudio
+        answerAudioWaveformData
         generated
         model
         promptHex
@@ -3745,7 +3769,9 @@ export const questionWordsByQuestionId = /* GraphQL */ `query QuestionWordsByQue
         hint
         prompt
         audio
+        audioWaveformData
         answerAudio
+        answerAudioWaveformData
         generated
         model
         promptHex
@@ -3820,7 +3846,9 @@ export const questionWordsByWordId = /* GraphQL */ `query QuestionWordsByWordId(
         hint
         prompt
         audio
+        audioWaveformData
         answerAudio
+        answerAudioWaveformData
         generated
         model
         promptHex
@@ -3887,7 +3915,9 @@ export const getQuestionFile = /* GraphQL */ `query GetQuestionFile($id: ID!) {
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3987,7 +4017,9 @@ export const listQuestionFiles = /* GraphQL */ `query ListQuestionFiles(
         hint
         prompt
         audio
+        audioWaveformData
         answerAudio
+        answerAudioWaveformData
         generated
         model
         promptHex
@@ -4067,7 +4099,9 @@ export const syncQuestionFiles = /* GraphQL */ `query SyncQuestionFiles(
         hint
         prompt
         audio
+        audioWaveformData
         answerAudio
+        answerAudioWaveformData
         generated
         model
         promptHex
@@ -4149,7 +4183,9 @@ export const questionFilesByQuestionId = /* GraphQL */ `query QuestionFilesByQue
         hint
         prompt
         audio
+        audioWaveformData
         answerAudio
+        answerAudioWaveformData
         generated
         model
         promptHex
@@ -4231,7 +4267,9 @@ export const questionFilesByFileId = /* GraphQL */ `query QuestionFilesByFileId(
         hint
         prompt
         audio
+        audioWaveformData
         answerAudio
+        answerAudioWaveformData
         generated
         model
         promptHex

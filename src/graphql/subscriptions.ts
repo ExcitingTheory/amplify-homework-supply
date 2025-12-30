@@ -106,7 +106,9 @@ export const onCreateQuestion = /* GraphQL */ `subscription OnCreateQuestion(
     hint
     prompt
     audio
+    audioWaveformData
     answerAudio
+    answerAudioWaveformData
     generated
     model
     promptHex
@@ -192,7 +194,9 @@ export const onUpdateQuestion = /* GraphQL */ `subscription OnUpdateQuestion(
     hint
     prompt
     audio
+    audioWaveformData
     answerAudio
+    answerAudioWaveformData
     generated
     model
     promptHex
@@ -278,7 +282,9 @@ export const onDeleteQuestion = /* GraphQL */ `subscription OnDeleteQuestion(
     hint
     prompt
     audio
+    audioWaveformData
     answerAudio
+    answerAudioWaveformData
     generated
     model
     promptHex
@@ -2981,7 +2987,9 @@ export const onCreateQuestionUnit = /* GraphQL */ `subscription OnCreateQuestion
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3097,7 +3105,9 @@ export const onUpdateQuestionUnit = /* GraphQL */ `subscription OnUpdateQuestion
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3213,7 +3223,9 @@ export const onDeleteQuestionUnit = /* GraphQL */ `subscription OnDeleteQuestion
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3329,7 +3341,9 @@ export const onCreateQuestionWord = /* GraphQL */ `subscription OnCreateQuestion
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3425,7 +3439,9 @@ export const onUpdateQuestionWord = /* GraphQL */ `subscription OnUpdateQuestion
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3521,7 +3537,9 @@ export const onDeleteQuestionWord = /* GraphQL */ `subscription OnDeleteQuestion
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3617,7 +3635,9 @@ export const onCreateQuestionFile = /* GraphQL */ `subscription OnCreateQuestion
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3720,7 +3740,9 @@ export const onUpdateQuestionFile = /* GraphQL */ `subscription OnUpdateQuestion
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex
@@ -3823,7 +3845,9 @@ export const onDeleteQuestionFile = /* GraphQL */ `subscription OnDeleteQuestion
       hint
       prompt
       audio
+      audioWaveformData
       answerAudio
+      answerAudioWaveformData
       generated
       model
       promptHex

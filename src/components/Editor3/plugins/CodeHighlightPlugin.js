@@ -8,11 +8,12 @@
 
 import { registerCodeHighlighting, $isCodeNode } from '@lexical/code';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { $getRoot } from 'lexical';
 
 export default function CodeHighlightPlugin() {
   const [editor] = useLexicalComposerContext();
+  const timeoutRef = useRef(null);
 
   useEffect(() => {
     // Register code highlighting with default configuration
@@ -48,8 +49,8 @@ export default function CodeHighlightPlugin() {
       });
       
       // Now update DOM elements outside the read context
-      setTimeout(() => {
-        codeNodeData.forEach(({ key, textContent }) => {
+      // Remove setTimeout since this is already called from debounced context
+      codeNodeData.forEach(({ key, textContent }) => {
           const domElement = editor.getElementByKey(key);
           
           if (domElement) {
@@ -65,35 +66,58 @@ export default function CodeHighlightPlugin() {
             }
           }
         });
-      }, 0);
     };
-
-    // Trigger initial setup and on updates
     const triggerCodeHighlighting = () => {
-      editor.update(() => {
+      let needsUpdate = false;
+      
+      editor.getEditorState().read(() => {
         const root = $getRoot();
         
-        // Find all code nodes and trigger re-highlighting
+        // Check if we have code nodes that need highlighting
         const allNodes = root.getAllTextNodes();
         allNodes.forEach(textNode => {
           const parent = textNode.getParent();
           if ($isCodeNode(parent)) {
-            // Force re-highlighting by touching the node
-            parent.setLanguage(parent.getLanguage() || '');
+            needsUpdate = true;
           }
         });
       });
+      
+      // Only update if we found code nodes
+      if (needsUpdate) {
+        editor.update(() => {
+          const root = $getRoot();
+          
+          // Find all code nodes and trigger re-highlighting
+          const allNodes = root.getAllTextNodes();
+          allNodes.forEach(textNode => {
+            const parent = textNode.getParent();
+            if ($isCodeNode(parent)) {
+              // Force re-highlighting by touching the node
+              parent.setLanguage(parent.getLanguage() || '');
+            }
+          });
+        }, { tag: 'skip-save' });
+      }
       
       // Also setup line numbers
       setupCodeBlockLineNumbers();
     };
 
     // Listen for editor state changes and trigger highlighting
-    const removeUpdateListener = editor.registerUpdateListener(({ editorState }) => {
-      // Small delay to ensure DOM is updated
-      setTimeout(() => {
+    const removeUpdateListener = editor.registerUpdateListener(({ editorState, tags }) => {
+      // Ignore updates from this plugin's own operations and other non-content changes
+      if (tags && (tags.has('skip-save') || tags.has('discrete') || tags.has('historic') || tags.has('history-push') || tags.has('history-merge') || tags.has('initial-load') || tags.has('collaboration'))) {
+        return;
+      }
+
+      // Debounce to prevent excessive updates
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
         triggerCodeHighlighting();
-      }, 10);
+      }, 100);
     });
 
     // Initial setup
@@ -102,6 +126,9 @@ export default function CodeHighlightPlugin() {
     }, 100);
     
     return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       removeCodeHighlighting();
       removeUpdateListener();
     };

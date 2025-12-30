@@ -130,7 +130,6 @@ export default React.memo(function CustomAnswerEditor({
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     // const [rows, setRows] = React.useState([]);
-    const [selection, setSelection] = React.useState(null);
     const [gridSelection, setGridSelection] = React.useState([]);
     const [dialogValue, setDialogValue] = React.useState({
         prompt: '',
@@ -169,6 +168,7 @@ export default React.memo(function CustomAnswerEditor({
     const audioContextRef = React.useRef(null);
     const sourceRef = React.useRef(null);
     const analyserRef = React.useRef(null);
+    const customAnswerRef = React.useRef(null);
 
     const {
         questionBank,
@@ -479,22 +479,36 @@ export default React.memo(function CustomAnswerEditor({
         // The expected answer would be:
         // " What is Tokyo?"        
 
+        // Extract waveform data from the backend response
+        const promptWaveformData = fileGenerator?.data?.generateAudioFile?.waveformData;
 
+        // Create and save the Question model to DataStore
+        try {
+            const newQuestion = await DataStore.save(
+                new Question({
+                    prompt,
+                    answer,
+                    hint,
+                    audio: [path],
+                    audioWaveformData: promptWaveformData,
+                    answerAudio: [], // Can be populated later if answer audio is generated
+                    answerAudioWaveformData: null,
+                    owner: unit?.owner || 'system',
+                    identityId: unit?.identityId || 'system'
+                })
+            );
 
-        const _payload = {
-            id: value.length,
-            prompt,
-            answer,
-            promptAudio: [path],
-            answerAudio: [],
-            hint,
+            // Add the question ID to the custom answer node
+            addQuestionID(newQuestion.id);
+            
+            // Close the modal and reset form
+            toggleOpen(false);
+            setWorking(false);
+        } catch (error) {
+            console.error('Error creating question:', error);
+            setPreviewMessage('Error creating question');
+            setWorking(false);
         }
-
-        // save the question to the database and add the id to the custom answer node
-
-        
-        // addQuestion(_payload);
-        // setValue([...value, _payload]);
 
     };
 
@@ -523,15 +537,22 @@ export default React.memo(function CustomAnswerEditor({
     React.useEffect(() => {
         let isMounted = true;
         const unregister = mergeRegister(
-            editor.registerUpdateListener(({ editorState }) => {
-                if (isMounted) {
-                    setSelection(editorState.read(() => $getSelection()));
-                }
-            }),
             editor.registerCommand(
-                SELECTION_CHANGE_COMMAND,
-                (_, activeEditor) => {
-                    // activeEditorRef.current = activeEditor;
+                CLICK_COMMAND,
+                (payload) => {
+                    const event = payload;
+
+                    if (customAnswerRef.current && customAnswerRef.current.contains(event.target)) {
+                        event.preventDefault();
+                        if (event.shiftKey) {
+                            setSelected(!isSelected);
+                        } else {
+                            clearSelection();
+                            setSelected(true);
+                        }
+                        return true;
+                    }
+
                     return false;
                 },
                 COMMAND_PRIORITY_LOW,
@@ -561,12 +582,9 @@ export default React.memo(function CustomAnswerEditor({
     }, [
         clearSelection,
         editor,
-        // isResizing,
         isSelected,
         nodeKey,
         onDelete,
-        // onEnter,
-        // onEscape,
         setSelected,
     ]);
 
@@ -576,10 +594,17 @@ export default React.memo(function CustomAnswerEditor({
     
 
     return (
-        <div style={{
-            maxHeight: '32rem',
-            maxWidth: '72rem'
-        }}>
+        <div 
+            ref={customAnswerRef}
+            style={{
+                maxHeight: '32rem',
+                maxWidth: '72rem',
+                border: isSelected ? '2px solid #1976d2' : '1px solid transparent',
+                borderRadius: '4px',
+                padding: '8px',
+                cursor: 'pointer',
+            }}
+        >
             <Typography variant='h5'>
                 {title}
             </Typography>
@@ -624,7 +649,6 @@ export default React.memo(function CustomAnswerEditor({
                             const newQuestionId = newValue?.id;
                             if (newQuestionId) {
                                 addQuestionID(newQuestionId);
-                                setSelection(null);
                                 setValue(null);
                                 setDialogValue({
                                     prompt: '',

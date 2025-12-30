@@ -39,7 +39,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
    * @param {string} props.wordID - Dictionary word identifier
    * @returns {JSX.Element} Word block component
    */
-  function WordBlockComponent({
+  const WordBlockComponent = React.memo(function WordBlockComponent({
     className,
     format,
     nodeKey,
@@ -110,14 +110,14 @@ import getCachedUrl from '../../../utils/getCachedUrl';
           sx={{ 
             my: 2,
             bgcolor: '#f5f5f5',
-            borderColor: '#1976d2',
-            borderWidth: 2,
+            border: 'none',
             borderRadius: 2,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
             transition: 'all 0.2s ease',
-            '&:hover': {
-              boxShadow: 3,
-              borderColor: '#1565c0',
-              transform: 'translateY(-2px)'
+            userSelect: 'none',
+            cursor: 'default',
+            '& *': {
+              userSelect: 'none',
             }
           }}
         >
@@ -220,7 +220,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
         </Card>
       </BlockWithAlignableContents>
     );
-  }
+  });
   
   function convertYoutubeElement(
     domNode,

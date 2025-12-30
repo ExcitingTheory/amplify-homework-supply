@@ -19,8 +19,17 @@ import { $isQuizNode } from '../plugins/QuizPlugin';
 
 import {
     $getNodeByKey,
+    $getSelection,
+    $isNodeSelection,
+    CLICK_COMMAND,
+    COMMAND_PRIORITY_LOW,
+    KEY_BACKSPACE_COMMAND,
+    KEY_DELETE_COMMAND,
+    KEY_ESCAPE_COMMAND,
 } from 'lexical';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
+import { mergeRegister } from '@lexical/utils';
 
 
 const QuizEditor = ({
@@ -39,8 +48,37 @@ const QuizEditor = ({
     const [verifiedAnswers, setVerifiedAnswers] = useState({});
 
     const [editor] = useLexicalComposerContext();
+    const quizRef = useRef(null);
     const { grade: contextGrade, saveGrade } = useContext(UnitContext);
+    const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey);
 
+    const onDelete = React.useCallback(
+        (payload) => {
+            if (isSelected && $isNodeSelection($getSelection())) {
+                const event = payload;
+                event.preventDefault();
+                const node = $getNodeByKey(nodeKey);
+                if ($isQuizNode(node)) {
+                    node.remove();
+                }
+            }
+            return false;
+        },
+        [isSelected, nodeKey],
+    );
+
+    const onEscape = React.useCallback(
+        (payload) => {
+            if (isSelected) {
+                const event = payload;
+                event.preventDefault();
+                clearSelection();
+                return true;
+            }
+            return false;
+        },
+        [isSelected, clearSelection],
+    );
 
     const setQuestionValue = (data) => {
         editor.update(() => {
@@ -56,6 +94,55 @@ const QuizEditor = ({
     useEffect(() => {
         _setQuestionValue(data);
     }, [data]);
+
+    useEffect(() => {
+        const unregister = mergeRegister(
+            editor.registerCommand(
+                CLICK_COMMAND,
+                (payload) => {
+                    const event = payload;
+                    if (quizRef.current && quizRef.current.contains(event.target)) {
+                        event.preventDefault();
+                        if (event.shiftKey) {
+                            setSelected(!isSelected);
+                        } else {
+                            clearSelection();
+                            setSelected(true);
+                        }
+                        return true;
+                    }
+                    return false;
+                },
+                COMMAND_PRIORITY_LOW,
+            ),
+            editor.registerCommand(
+                KEY_DELETE_COMMAND,
+                onDelete,
+                COMMAND_PRIORITY_LOW,
+            ),
+            editor.registerCommand(
+                KEY_BACKSPACE_COMMAND,
+                onDelete,
+                COMMAND_PRIORITY_LOW,
+            ),
+            editor.registerCommand(
+                KEY_ESCAPE_COMMAND,
+                onEscape,
+                COMMAND_PRIORITY_LOW,
+            ),
+        );
+        return () => {
+            unregister();
+        };
+    }, [
+        clearSelection,
+        editor,
+        isSelected,
+        nodeKey,
+        onDelete,
+        onEscape,
+        setSelected,
+    ]);
 
     useEffect(() => {
         // Restore progress from UnitContext if nodeKey is provided
@@ -259,13 +346,19 @@ const QuizEditor = ({
 
 
     return (
-        <div className={className} contentEditable={false} readOnly
+        <div 
+            ref={quizRef}
+            className={className} 
+            contentEditable={false} 
+            readOnly
             style={{
                 display: 'flex',
                 flexDirection: 'column',
-                // alignItems: 'center',
                 marginBottom: '2rem',
-
+                border: isSelected ? '2px solid #1976d2' : '1px solid transparent',
+                borderRadius: '4px',
+                padding: '8px',
+                cursor: 'pointer',
             }}
         >
             <style global jsx>{`

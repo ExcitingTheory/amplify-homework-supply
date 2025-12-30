@@ -28,7 +28,7 @@ import * as React from 'react';
  * @param {string} props.videoID - YouTube video identifier
  * @returns {JSX.Element} YouTube iframe component
  */
-  function YouTubeComponent({
+  const YouTubeComponent = React.memo(function YouTubeComponent({
     className,
     format,
     nodeKey,
@@ -50,7 +50,7 @@ import * as React from 'react';
         />
       </BlockWithAlignableContents>
     );
-  }
+  });
   
   /**
    * Converts a DOM element into a YouTubeNode.

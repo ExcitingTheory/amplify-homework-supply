@@ -108,6 +108,23 @@
   text-align: right;
   min-width: 25px;
 }
+.LanguageEditorTheme__code:focus-within {
+  outline: 2px solid rgb(60, 132, 244);
+  outline-offset: 2px;
+}
+.LanguageEditorTheme__quote:focus-within {
+  outline: 2px solid rgb(60, 132, 244);
+  outline-offset: 2px;
+}
+.LanguageEditorTheme__h1:focus-within,
+.LanguageEditorTheme__h2:focus-within,
+.LanguageEditorTheme__h3:focus-within,
+.LanguageEditorTheme__h4:focus-within,
+.LanguageEditorTheme__h5:focus-within,
+.LanguageEditorTheme__h6:focus-within {
+  outline: 2px solid rgb(60, 132, 244);
+  outline-offset: 2px;
+}
 .LanguageEditorTheme__table {
   border-collapse: collapse;
   border-spacing: 0;
@@ -420,6 +437,18 @@
   user-select: none;
 }
 .LanguageEditorTheme__embedBlockFocus {
+  outline: 2px solid rgb(60, 132, 244);
+  outline-offset: 2px;
+}
+.LanguageEditorTheme__embedBlockFocus:has(.MuiCard-root) {
+  outline: 3px solid rgb(60, 132, 244);
+  outline-offset: 0px;
+  border-radius: 8px;
+}
+.LanguageEditorTheme__embedBlockFocus * {
+  user-select: none !important;
+}
+.focused {
   outline: 2px solid rgb(60, 132, 244);
 }
 .LanguageEditorTheme__layoutContaner {

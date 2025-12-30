@@ -75,7 +75,7 @@ function LazyImage({
     );
 }
 
-export default function ImageComponent({
+const ImageComponent = React.memo(function ImageComponent({
     src,
     path,
     altText,
@@ -96,7 +96,6 @@ export default function ImageComponent({
     const [isResizing, setIsResizing] = useState(false);
     //   const { isCollabActive } = useCollaborationContext();
     const [editor] = useLexicalComposerContext();
-    const [selection, setSelection] = useState(null);
     const activeEditorRef = useRef(null);
 
     // TODO: Access the FileUnit model from the UnitContext here
@@ -143,7 +142,7 @@ export default function ImageComponent({
             }
             return false;
         },
-        [caption, isSelected, showCaption],
+        [isSelected, caption, showCaption],
     );
 
     const onEscape = useCallback(
@@ -170,11 +169,6 @@ export default function ImageComponent({
     useEffect(() => {
         let isMounted = true;
         const unregister = mergeRegister(
-            editor.registerUpdateListener(({ editorState }) => {
-                if (isMounted) {
-                    setSelection(editorState.read(() => $getSelection()));
-                }
-            }),
             editor.registerCommand(
                 SELECTION_CHANGE_COMMAND,
                 (_, activeEditor) => {
@@ -293,18 +287,14 @@ export default function ImageComponent({
 
 
     
-    const draggable = isSelected && $isNodeSelection(selection) && !isResizing;
+    const draggable = false; // Disabled to allow DraggableBlockPlugin to handle block dragging
     const isFocused = isSelected || isResizing;
     return (
         <Suspense fallback={null}>
             <>
-                <div draggable={draggable}>
+                <div draggable={draggable} onDragStart={(e) => e.preventDefault()}>
                     <LazyImage
-                        className={
-                            isFocused
-                                ? `focused ${$isNodeSelection(selection) ? 'draggable' : ''}`
-                                : null
-                        }
+                        className={isFocused ? 'focused draggable' : null}
                         src={src}
                         altText={altText}
                         imageRef={imageRef}
@@ -335,7 +325,7 @@ export default function ImageComponent({
                         </LexicalNestedComposer>
                     </div>
                 )}
-                {resizable && $isNodeSelection(selection) && isFocused && (
+                {resizable && isSelected && isFocused && (
                     <ImageResizer
                         showCaption={showCaption}
                         setShowCaption={setShowCaption}
@@ -351,4 +341,6 @@ export default function ImageComponent({
             </>
         </Suspense>
     );
-}
+});
+
+export default ImageComponent;

@@ -1,9 +1,10 @@
 /**
- * @fileoverview DataPlugin - Synchronizes editor state with unit data.
+ * @fileoverview DataPlugin - Initial load and version checking.
  * @module DataPlugin
  * 
- * Loads and syncs the editor content from unit data stored in the database.
- * Prevents unnecessary re-renders by tracking data versions.
+ * Handles initial editor state load from unit data.
+ * After initial load, only checks version numbers from subscription updates.
+ * Ignores updates where version <= current version (our own saves coming back).
  */
 
 import React, { useRef } from "react";
@@ -14,19 +15,16 @@ import UnitContext from '../../../context/unitContext';
 
 export default function DataPlugin() {
 
-    const { unit, editorSelectionRef } = useContext(UnitContext);
+    const { unit, versionRef } = useContext(UnitContext);
     const [editor] = useLexicalComposerContext();
-
-    const previousData = useRef(null);
-    const unitVersionRef = useRef(null);
-    const isInitializedRef = useRef(false);
+    const hasLoadedInitialState = useRef(false);
   
     useEffect(() => {
-        // Guard: ensure unit has data with root node
         if (!unit?.data?.root) {
-            console.log('[DataPlugin] No unit data or root found');
             return;
         }
+        
+        const unitVersion = unit._version;
         
         // Parse data if it's a string, otherwise use as-is
         let parsedData;
@@ -34,7 +32,7 @@ export default function DataPlugin() {
             try {
                 parsedData = JSON.parse(unit.data);
             } catch (e) {
-                console.error('DataPlugin: Failed to parse unit.data', e);
+                console.error('[DataPlugin] Failed to parse unit.data', e);
                 return;
             }
         } else {
@@ -42,66 +40,37 @@ export default function DataPlugin() {
         }
         
         const data = JSON.stringify(parsedData);
-        const unitVersion = unit._version;
         
-        console.log('[DataPlugin] Checking unit data, version:', unitVersion, 'has data:', !!parsedData.root.children);
-        
-        // Skip if data hasn't changed
-        if (data === previousData.current && unitVersion === unitVersionRef.current) {
-            console.log('[DataPlugin] Data unchanged, skipping');
+        // INITIAL LOAD ONLY - first time seeing data with root
+        if (!hasLoadedInitialState.current) {
+            console.log('[DataPlugin] Initial load of unit data, version:', unitVersion);
+            
+            try {
+                const editorState = editor.parseEditorState(data);
+                
+                queueMicrotask(() => {
+                    editor.setEditorState(editorState, { tag: 'initial-load' });
+                });
+                
+                hasLoadedInitialState.current = true;
+                versionRef.current = unitVersion;
+            } catch (error) {
+                console.error('[DataPlugin] Error setting initial editor state', error);
+            }
             return;
         }
         
-        const currentState = editor.getEditorState();
-        const currentStateStr = JSON.stringify(currentState);
-        
-        // Skip if editor already has this state
-        if (data === currentStateStr) {
-            console.log('[DataPlugin] Editor already has this state');
-            previousData.current = data;
-            unitVersionRef.current = unitVersion;
-            isInitializedRef.current = true;
+        // AFTER INITIAL LOAD - only check versions, ignore same/older
+        if (unitVersion <= versionRef.current) {
+            console.log('[DataPlugin] Ignoring subscription update - version same or older:', unitVersion, 'current:', versionRef.current);
             return;
         }
+        
+        // Newer version from external source (another device/user)
+        console.log('[DataPlugin] Newer version detected from external source:', unitVersion, 'current:', versionRef.current);
+        // Don't apply it - just log for now
+        
+    }, [editor, unit, versionRef]);
 
-        previousData.current = data;
-        unitVersionRef.current = unitVersion;
-                
-        // Use editor.update instead of setTimeout for proper Lexical state management
-        try {
-            const _editorState = editor.parseEditorState(data);
-            
-            // Validate the editor state has content
-            const stateJSON = _editorState.toJSON();
-            const rootChildren = stateJSON?.root?.children;
-            
-            console.log('[DataPlugin] Parsed state, children count:', rootChildren?.length || 0);
-            
-            if (!rootChildren || rootChildren.length === 0) {
-                console.warn('[DataPlugin] Parsed editor state is empty, but continuing anyway');
-            }
-            
-            if (editorSelectionRef.current) {
-                _editorState.clone(editorSelectionRef.current);
-            }
-
-            console.log('[DataPlugin] Setting editor state');
-            // Use queueMicrotask to avoid flushSync warning in React 18+
-            queueMicrotask(() => {
-                editor.setEditorState(_editorState);
-                
-                // Trigger a small update to ensure code highlighting is applied
-                setTimeout(() => {
-                    editor.update(() => {
-                        // This empty update will trigger the update listeners
-                        // which will cause CodeHighlightPlugin to re-process code blocks
-                    });
-                }, 50);
-            });
-            isInitializedRef.current = true;
-        } catch (error) {
-            console.error('DataPlugin: Error setting editor state', error);
-        }
-    }, [editor, unit]);
-
+    return null;
 }

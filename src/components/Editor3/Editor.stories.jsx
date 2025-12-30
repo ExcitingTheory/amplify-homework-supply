@@ -2,7 +2,7 @@ import React from 'react';
 import { within, waitFor, screen, waitForElementToBeRemoved } from 'storybook/test';
 import Editor, { Workbook } from './index';
 import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
-import { seedMockUnit, seedMockFiles, seedMockWords } from '../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit, seedMockFiles, seedMockWords, seedMockQuestions, seedMockQuestionUnits } from '../../../.storybook/__mocks__/aws-amplify-datastore';
 const { MOCK_AUDIO_BASE64, mockWaveformData, MOCK_IMAGE_URL_1, MOCK_IMAGE_URL_2 } = await import('../../../.storybook/__mocks__/media');
 
 // Verify models are loading - this will show in console
@@ -1361,7 +1361,8 @@ const kitchenSinkEditorState = {
         version: 1,
         data: {
           prompt: 'Describe your learning experience',
-          wordIDs: [],
+          wordIDs: ['word-1', 'word-2'],
+          questionIDs: ['question-custom-1'],
         },
       },
       {
@@ -1388,22 +1389,22 @@ const kitchenSinkEditorState = {
         version: 1,
         data: [
           {
-            id: 'q1',
+            id: 'quiz-question-1',
             answer: 'Paris',
             correct: true,
           },
           {
-            id: 'q2',
+            id: 'quiz-question-2', 
             answer: 'London',
             correct: false,
           },
           {
-            id: 'q3',
-            answer: 'Berlin',
+            id: 'quiz-question-3',
+            answer: 'Berlin', 
             correct: false,
           },
           {
-            id: 'q4',
+            id: 'quiz-question-4',
             answer: 'Madrid',
             correct: false,
           },
@@ -1861,6 +1862,68 @@ export const KitchenSink = {
         },
       ]);
       
+      // Seed mock questions for quiz and custom answer blocks
+      seedMockQuestions([
+        {
+          id: 'quiz-question-1',
+          prompt: 'What is the capital of France?',
+          answer: 'Paris',
+          hint: 'Known as the City of Light',
+          audio: [MOCK_AUDIO_BASE64],
+          audioWaveformData: JSON.stringify(mockWaveformData.slice(0, 100)),
+          answerAudio: [MOCK_AUDIO_BASE64],
+          answerAudioWaveformData: JSON.stringify(mockWaveformData.slice(100, 200)),
+          owner: 'mock-user-sub',
+        },
+        {
+          id: 'quiz-question-2',
+          prompt: 'What is the capital of France?', 
+          answer: 'London',
+          hint: 'This is incorrect - not the capital of France',
+          audio: [MOCK_AUDIO_BASE64],
+          audioWaveformData: JSON.stringify(mockWaveformData.slice(50, 150)),
+          owner: 'mock-user-sub',
+        },
+        {
+          id: 'quiz-question-3',
+          prompt: 'What is the capital of France?',
+          answer: 'Berlin', 
+          hint: 'This is incorrect - this is Germany\'s capital',
+          audio: [MOCK_AUDIO_BASE64],
+          audioWaveformData: JSON.stringify(mockWaveformData.slice(75, 175)),
+          owner: 'mock-user-sub',
+        },
+        {
+          id: 'quiz-question-4',
+          prompt: 'What is the capital of France?',
+          answer: 'Madrid',
+          hint: 'This is incorrect - this is Spain\'s capital', 
+          audio: [MOCK_AUDIO_BASE64],
+          audioWaveformData: JSON.stringify(mockWaveformData.slice(125, 225)),
+          owner: 'mock-user-sub',
+        },
+        {
+          id: 'question-custom-1',
+          prompt: 'Describe your learning experience with Japanese vocabulary',
+          answer: 'Sample answer about learning Japanese words and their meanings',
+          hint: 'Think about how studying vocabulary has helped you',
+          audio: [MOCK_AUDIO_BASE64],
+          audioWaveformData: JSON.stringify(mockWaveformData.slice(200, 300)),
+          answerAudio: [MOCK_AUDIO_BASE64],
+          answerAudioWaveformData: JSON.stringify(mockWaveformData.slice(300, 400)),
+          owner: 'mock-user-sub',
+        },
+      ]);
+      
+      // Create QuestionUnit relationships
+      seedMockQuestionUnits([
+        { questionId: 'quiz-question-1', unitId: KITCHEN_SINK_ID },
+        { questionId: 'quiz-question-2', unitId: KITCHEN_SINK_ID },
+        { questionId: 'quiz-question-3', unitId: KITCHEN_SINK_ID },
+        { questionId: 'quiz-question-4', unitId: KITCHEN_SINK_ID },
+        { questionId: 'question-custom-1', unitId: KITCHEN_SINK_ID },
+      ]);
+      
       // Seed the mock DataStore with kitchen sink data
       seedMockUnit({
         id: KITCHEN_SINK_ID,
@@ -1870,6 +1933,7 @@ export const KitchenSink = {
         _version: 1,
         wordIDs: ['word-1', 'word-2', 'word-3', 'word-4', 'word-5', 'word-6'],
         fileIDs: ['audio-1', 'audio-2', 'audio-3'],
+        questionIDs: ['quiz-question-1', 'quiz-question-2', 'quiz-question-3', 'quiz-question-4', 'question-custom-1'],
         owner: 'mock-user-sub',
       });
     },

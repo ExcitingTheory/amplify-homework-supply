@@ -453,15 +453,16 @@ function useDraggableBlockMenu(
 
       const _draggableBlockElem = getBlockElement(anchorElem, editor, event);
 
-      setDraggableBlockElem(_draggableBlockElem);
+      // Only update state if the element actually changed
+      setDraggableBlockElem(prev => prev === _draggableBlockElem ? prev : _draggableBlockElem);
     }
 
     function onMouseLeave() {
       setDraggableBlockElem(null);
     }
 
-    scrollerElem?.addEventListener('mousemove', onMouseMove);
-    scrollerElem?.addEventListener('mouseleave', onMouseLeave);
+    scrollerElem?.addEventListener('mousemove', onMouseMove, { passive: true });
+    scrollerElem?.addEventListener('mouseleave', onMouseLeave, { passive: true });
 
     return () => {
       scrollerElem?.removeEventListener('mousemove', onMouseMove);
@@ -510,10 +511,7 @@ function useDraggableBlockMenu(
       }
       const {target, dataTransfer, pageY} = event;
       const dragData = dataTransfer?.getData(DRAG_DATA_FORMAT) || '';
-      const draggedNode = $getNodeByKey(dragData);
-      if (!draggedNode) {
-        return false;
-      }
+      
       if (!isHTMLElement(target)) {
         return false;
       }
@@ -521,19 +519,33 @@ function useDraggableBlockMenu(
       if (!targetBlockElem) {
         return false;
       }
-      const targetNode = $getNearestNodeFromDOMNode(targetBlockElem);
-      if (!targetNode) {
-        return false;
-      }
-      if (targetNode === draggedNode) {
-        return true;
-      }
+      
+      // Calculate position before entering editor.update()
       const targetBlockElemTop = targetBlockElem.getBoundingClientRect().top;
-      if (pageY >= targetBlockElemTop) {
-        targetNode.insertAfter(draggedNode);
-      } else {
-        targetNode.insertBefore(draggedNode);
-      }
+      const shouldInsertAfter = pageY >= targetBlockElemTop;
+      
+      // Wrap the node manipulation in editor.update() to ensure it's added to the undo stack
+      editor.update(() => {
+        const draggedNode = $getNodeByKey(dragData);
+        if (!draggedNode) {
+          return;
+        }
+        
+        const targetNode = $getNearestNodeFromDOMNode(targetBlockElem);
+        if (!targetNode) {
+          return;
+        }
+        if (targetNode === draggedNode) {
+          return;
+        }
+        
+        if (shouldInsertAfter) {
+          targetNode.insertAfter(draggedNode);
+        } else {
+          targetNode.insertBefore(draggedNode);
+        }
+      });
+      
       setDraggableBlockElem(null);
 
       return true;

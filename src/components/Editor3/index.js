@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useContext, useState, useCallback } from 'react';
+import { useContext, useState, useCallback, useRef } from 'react';
 
 import { styled, useTheme } from '@mui/material/styles';
 // import Box from '@mui/material/Box';
@@ -125,6 +125,7 @@ import TableCellResizerPlugin from './plugins/TableCellResizerPlugin';
 import AnswerPlugin from './plugins/AnswerPlugin.js';
 import { AnswerNode } from './plugins/AnswerPlugin.js';
 import CustomAnswerPlugin, { CustomAnswerNode } from './plugins/CustomAnswerPlugin.js';
+import { DataStore } from 'aws-amplify/datastore';
 
 
 export const EditorNodes = [
@@ -366,58 +367,42 @@ export default function Editor() {
   }, [openTab]);
 
   const {
+    versionRef,
     saveEditorContent,
     editorStateRef,
-    editorSelectionRef,
   } = useContext(UnitContext);
   const [floatingAnchorElem, setFloatingAnchorElem] = useState(null);
-  // const isEditable = useLexicalEditable();
-  // const _drawerWidth = 400;
-  // const drawerWidthPx = `${_drawerWidth}px}`;
-
-  // console.log('LanguageEditor.unit', unit);
-
-
-
-
-
-  const initialConfig = {
+  let initialConfig = {
     namespace: 'LanguageEditor',
-    theme: LanguageEditorTheme,
+    nodes: EditorNodes,
     onError,
-    // editorState: unit?.data,
-    // nodes: [...EditorNodes],
-    editorState: null,
-    nodes: [
-      ...EditorNodes,
-      // Don't forget to register your custom node separately!
-      // CustomListNode,
-      // {
-      //     replace: ListNode,
-      //     with: (node) => {
-      //         return new CustomListNode();
-      //     }
-      // },
-      // CustomListItemNode,
-      // {
-      //     replace: ListItemNode,
-      //     with: (node) => {
-      //         return new CustomListItemNode();
-      //     }
-      // }
-    ]
+    editable: isEditable,
   };
 
-  const onChange = async (editorState) => {
-      editorStateRef.current = editorState
-      debouncedSave()
-    };
-
-  const debouncedSave = debounce(async () => {
-        await saveEditorContent()
-        console.log("Save editor content")
-        // setIsWorking(false)
+  // Create debounced save function with stable reference
+  const debouncedSaveTimer = useRef(null);
+  const debouncedSave = useCallback(() => {
+    if (debouncedSaveTimer.current) {
+      clearTimeout(debouncedSaveTimer.current);
+    }
+    debouncedSaveTimer.current = setTimeout(() => {
+      saveEditorContent();
     }, DEBOUNCE_SAVE_DELAY_MS);
+  }, [saveEditorContent]);
+
+  const onChange = useCallback(async (editorState, editor, tags) => {
+    // Skip saves for DataPlugin updates and history operations (undo/redo)
+    if (tags && (tags.has('datastore-update') || tags.has('history-merge') || tags.has('initial-load') || 
+                 tags.has('historic') || tags.has('history-push'))) {
+      return;
+    }
+    
+    // Update local state immediately (not debounced)
+    editorStateRef.current = editorState.toJSON();
+    
+    // Debounce the save to DataStore
+    debouncedSave();
+  }, [debouncedSave, editorStateRef]);
 
   const onRef = (_floatingAnchorElem) => {
     if (_floatingAnchorElem !== null) {

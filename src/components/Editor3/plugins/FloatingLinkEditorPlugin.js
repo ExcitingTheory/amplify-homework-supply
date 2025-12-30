@@ -221,10 +221,10 @@ function FloatingLinkEditor({
             });
         };
 
-        window.addEventListener('resize', update);
+        window.addEventListener('resize', update, { passive: true });
 
         if (scrollerElem) {
-            scrollerElem.addEventListener('scroll', update);
+            scrollerElem.addEventListener('scroll', update, { passive: true });
         }
 
         return () => {

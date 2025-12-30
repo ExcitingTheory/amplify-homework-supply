@@ -684,23 +684,10 @@ export function QuestionEditor() {
         hashAnswer.update(model + voice + answer);
         const answerHex = hashAnswer.digest('hex');
 
-        const dataSave = DataStore.save(
-          new Question({
-            prompt,
-            hint,
-            answer,
-            identityId,
-            audio: [
-              `audio/${promptHex}.mp3`
-            ],
-            answerAudio: [
-              `audio/${answerHex}.mp3`
-            ]
-          })
-        );
-
-
-
+        // Generate audio file paths
+        const promptAudioPath = `audio/${promptHex}.mp3`;
+        const answerAudioPath = `audio/${answerHex}.mp3`;
+        
       const [question, file, answerFile] = await Promise.allSettled([ dataSave, fileGenerator, fileGeneratorAnswer]);
 
       console.log('file', file);
@@ -708,8 +695,23 @@ export function QuestionEditor() {
       console.log('promptHex', promptHex);
       console.log('answerHex', answerHex);
       console.log('question', question);
-      console.log('file', file);
-      console.log('dataSave', dataSave);
+      
+      // Extract waveform data from backend responses
+      const promptWaveformData = file.value?.data?.generateAudioFile?.waveformData || null;
+      const answerWaveformData = answerFile.value?.data?.generateAudioFile?.waveformData || null;
+
+        const dataSave = DataStore.save(
+          new Question({
+            prompt,
+            hint,
+            answer,
+            identityId,
+            audio: [promptAudioPath],
+            audioWaveformData: promptWaveformData,
+            answerAudio: [answerAudioPath],
+            answerAudioWaveformData: answerWaveformData
+          })
+        );
 
       // If any errors are returned delete the question and files from S3?
 

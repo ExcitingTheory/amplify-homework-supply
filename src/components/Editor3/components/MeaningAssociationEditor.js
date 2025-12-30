@@ -118,7 +118,6 @@ export default function MeaningAssociationEditor({
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     // const [rows, setRows] = React.useState([]);
-    const [selection, setSelection] = React.useState(null);
     const [gridSelection, setGridSelection] = React.useState([]);
     const [dialogValue, setDialogValue] = React.useState({
         phrase: '',
@@ -153,6 +152,8 @@ export default function MeaningAssociationEditor({
 
     const [editor] = useLexicalComposerContext();
 
+    const meaningAssociationRef = React.useRef(null);
+
     const [isSelected, setSelected, clearSelection] =
         useLexicalNodeSelection(nodeKey);
 
@@ -182,7 +183,7 @@ export default function MeaningAssociationEditor({
             }
             return false;
         },
-        [isSelected, nodeKey],
+        [isSelected, nodeKey, wordIDs],
     );
 
 
@@ -248,38 +249,31 @@ export default function MeaningAssociationEditor({
     React.useEffect(() => {
         let isMounted = true;
         const unregister = mergeRegister(
-            editor.registerUpdateListener(({ editorState }) => {
-                if (isMounted) {
-                    setSelection(editorState.read(() => $getSelection()));
-                }
-            }),
             editor.registerCommand(
-                SELECTION_CHANGE_COMMAND,
-                (_, activeEditor) => {
-                    // activeEditorRef.current = activeEditor;
+                CLICK_COMMAND,
+                (payload) => {
+                    const event = payload;
+
+                    if (meaningAssociationRef.current && meaningAssociationRef.current.contains(event.target)) {
+                        event.preventDefault();
+                        if (event.shiftKey) {
+                            setSelected(prev => !prev);
+                        } else {
+                            // Only clear selection if we're not already selected
+                            setSelected(prev => {
+                                if (!prev) {
+                                    clearSelection();
+                                }
+                                return true;
+                            });
+                        }
+                        return true;
+                    }
+
                     return false;
                 },
                 COMMAND_PRIORITY_LOW,
             ),
-            // editor.registerCommand(
-            //     CLICK_COMMAND,
-            //     (payload) => {
-            //         const event = payload;
-
-            //         if (event.target === imageRef.current) {
-            //             if (event.shiftKey) {
-            //                 setSelected(!isSelected);
-            //             } else {
-            //                 clearSelection();
-            //                 setSelected(true);
-            //             }
-            //             return true;
-            //         }
-
-            //         return false;
-            //     },
-            //     COMMAND_PRIORITY_LOW,
-            // ),
 
             editor.registerCommand(
                 KEY_DELETE_COMMAND,
@@ -315,10 +309,16 @@ export default function MeaningAssociationEditor({
     ]);
 
     return (
-        <div style={{
-            maxHeight: '32rem',
-            maxWidth: '72rem'
-        }}>
+        <div 
+            ref={meaningAssociationRef}
+            style={{
+                maxHeight: '32rem',
+                maxWidth: '72rem',
+                border: isSelected ? '2px solid #1976d2' : '1px solid transparent',
+                borderRadius: '4px',
+                padding: '8px',
+                cursor: 'pointer',
+            }}>
 
             <div style={{
                 display: 'flex',
@@ -352,7 +352,6 @@ export default function MeaningAssociationEditor({
                             const newWordID = newValue?.id;
                             if (newWordID) {
                                 addWordID(newWordID);
-                                setSelection(null);
                                 setValue(null);
                                 setDialogValue({
                                     phrase: '',
@@ -393,13 +392,16 @@ export default function MeaningAssociationEditor({
                     selectOnFocus
                     clearOnBlur
                     handleHomeEndKeys
-                    renderOption={(props, option) => {
+                    renderOption={(props, option, { index }) => {
                         let phrase = option.phrase;
                         if (option.phrase && option.pronunciation) {
                             phrase = `${option.phrase} (${option.pronunciation})`
                         }
 
-                        return <li {...props}>{phrase}</li>
+                        const { key, ...otherProps } = props;
+                        // Create a unique key using option ID if available, otherwise use phrase + index
+                        const uniqueKey = option.id || `${option.phrase}-${index}`;
+                        return <li key={uniqueKey} {...otherProps}>{phrase}</li>
                     }}
                     // sx={{ width: 300 }}
                     freeSolo

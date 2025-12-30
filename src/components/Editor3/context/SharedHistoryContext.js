@@ -2,9 +2,12 @@ import {createEmptyHistoryState} from '@lexical/react/LexicalHistoryPlugin';
 import * as React from 'react';
 import {createContext, useMemo} from 'react';
 
-const SharedHistoryContext = createContext();
+// Create context with default value
+const SharedHistoryContext = createContext({
+  historyState: createEmptyHistoryState()
+});
 
-const AutocompleteProvider = ({ children }) => {
+const SharedHistoryProvider = ({ children }) => {
   const historyContext = useMemo(
     () => ({historyState: createEmptyHistoryState()}),
     [],
@@ -20,6 +23,6 @@ const AutocompleteProvider = ({ children }) => {
   );
 }
 
-export { AutocompleteProvider };
+export { SharedHistoryProvider };
 
 export default SharedHistoryContext;

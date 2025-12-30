@@ -107,7 +107,6 @@ export default function PlaylistEditor({
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     // const [rows, setRows] = React.useState([]);
-    const [selection, setSelection] = React.useState(null);
     const [gridSelection, setGridSelection] = React.useState([]);
     const [dialogValue, setDialogValue] = React.useState({
         phrase: '',
@@ -134,24 +133,27 @@ export default function PlaylistEditor({
     const {
         myPlaylistFiles,
     } = React.useContext(FileContext);
-    const _fileOptions = Object.values(myPlaylistFiles)
+    
+    const _fileOptions = React.useMemo(() => {
+        return Object.values(myPlaylistFiles);
+    }, [myPlaylistFiles]);
 
-    console.log('PlaylistEditor', fileIDs, _fileOptions)
-
-
-    const rows = []
-    if(fileIDs){
-        fileIDs.forEach((id) => {
-            const file = myPlaylistFiles[id];
-            if (file) {
-                rows.push({
-                    id: file.id,
-                    title: file.name,
-                    size: (file.size / 100000).toFixed(2) + ' MB',
-                });
-            }
-        });
-    }
+    const rows = React.useMemo(() => {
+        const _rows = [];
+        if(fileIDs){
+            fileIDs.forEach((id) => {
+                const file = myPlaylistFiles[id];
+                if (file) {
+                    _rows.push({
+                        id: file.id,
+                        title: file.name,
+                        size: (file.size / 100000).toFixed(2) + ' MB',
+                    });
+                }
+            });
+        }
+        return _rows;
+    }, [fileIDs, myPlaylistFiles]);
 
     const onDelete = React.useCallback(
         async (payload) => {
@@ -174,7 +176,7 @@ export default function PlaylistEditor({
             }
             return false;
         },
-        [isSelected, nodeKey],
+        [nodeKey],
     );
 
 
@@ -240,19 +242,6 @@ export default function PlaylistEditor({
     React.useEffect(() => {
         let isMounted = true;
         const unregister = mergeRegister(
-            editor.registerUpdateListener(({ editorState }) => {
-                if (isMounted) {
-                    setSelection(editorState.read(() => $getSelection()));
-                }
-            }),
-            editor.registerCommand(
-                SELECTION_CHANGE_COMMAND,
-                (_, activeEditor) => {
-                    // activeEditorRef.current = activeEditor;
-                    return false;
-                },
-                COMMAND_PRIORITY_LOW,
-            ),
             editor.registerCommand(
                 CLICK_COMMAND,
                 (payload) => {
@@ -260,10 +249,15 @@ export default function PlaylistEditor({
 
                     if (playlistRef.current && (event.target === playlistRef.current || playlistRef.current.contains(event.target))) {
                         if (event.shiftKey) {
-                            setSelected(!isSelected);
+                            setSelected(prev => !prev);
                         } else {
-                            clearSelection();
-                            setSelected(true);
+                            // Only clear selection if we're not already selected
+                            setSelected(prev => {
+                                if (!prev) {
+                                    clearSelection();
+                                }
+                                return true;
+                            });
                         }
                         return true;
                     }
@@ -295,18 +289,10 @@ export default function PlaylistEditor({
             unregister();
         };
     }, [
-        clearSelection,
         editor,
-        // isResizing,
-        isSelected,
         nodeKey,
         onDelete,
-        // onEnter,
-        // onEscape,
-        setSelected,
     ]);
-
-    console.log('PlaylistEditor', fileIDs)
 
     return (
         <div 
@@ -314,11 +300,7 @@ export default function PlaylistEditor({
             style={{
                 maxHeight: '32rem',
                 maxWidth: '72rem',
-                border: isSelected ? '2px solid #1976d2' : '1px solid transparent',
-                borderRadius: '4px',
                 padding: '8px',
-                cursor: 'pointer',
-                transition: 'border-color 0.2s ease'
             }}
         >
 
@@ -354,7 +336,6 @@ export default function PlaylistEditor({
                             const newFileID = newValue?.id;
                             if (newFileID) {
                                 addFileID(newFileID);
-                                setSelection(null);
                                 setValue(null);
                                 setDialogValue({
                                     phrase: '',
@@ -388,12 +369,13 @@ export default function PlaylistEditor({
                     clearOnBlur
                     handleHomeEndKeys
                     renderOption={(props, option) => {
+                        const { key, ...otherProps } = props;
                         let phrase = option.name;
                         if (option?.name && option?.mimeType) {
                             phrase = `${option.name} (${option.mimeType})`
                         }
 
-                        return <li {...props}>{phrase}</li>
+                        return <li key={key} {...otherProps}>{phrase}</li>
                     }}
                     // sx={{ width: 300 }}
                     freeSolo

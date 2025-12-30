@@ -143,7 +143,6 @@ const AnswerEditor = React.memo(function AnswerEditor({
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     // const [rows, setRows] = React.useState([]);
-    const [selection, setSelection] = React.useState(null);
     const [gridSelection, setGridSelection] = React.useState([]);
     const [dialogValue, setDialogValue] = React.useState({
         phrase: '',
@@ -189,6 +188,8 @@ const AnswerEditor = React.memo(function AnswerEditor({
 
     const [editor] = useLexicalComposerContext();
 
+    const answerRef = React.useRef(null);
+
     const [isSelected, setSelected, clearSelection] =
         useLexicalNodeSelection(nodeKey);
 
@@ -218,7 +219,38 @@ const AnswerEditor = React.memo(function AnswerEditor({
             }
             return false;
         },
-        [isSelected, nodeKey],
+        [isSelected, nodeKey, wordIDs],
+    );
+
+    const onEnter = React.useCallback(
+        (payload) => {
+            if (isSelected && $isNodeSelection($getSelection())) {
+                const event = payload;
+                event.preventDefault();
+                // Focus on the autocomplete input when Enter is pressed
+                const autocompleteInput = document.querySelector('#add-new-word input');
+                if (autocompleteInput) {
+                    autocompleteInput.focus();
+                }
+                return true;
+            }
+            return false;
+        },
+        [isSelected],
+    );
+
+    const onEscape = React.useCallback(
+        (payload) => {
+            if (isSelected) {
+                const event = payload;
+                event.preventDefault();
+                // Clear selection when Escape is pressed
+                clearSelection();
+                return true;
+            }
+            return false;
+        },
+        [isSelected, clearSelection],
     );
 
 
@@ -311,38 +343,26 @@ const AnswerEditor = React.memo(function AnswerEditor({
     React.useEffect(() => {
         let isMounted = true;
         const unregister = mergeRegister(
-            editor.registerUpdateListener(({ editorState }) => {
-                if (isMounted) {
-                    setSelection(editorState.read(() => $getSelection()));
-                }
-            }),
             editor.registerCommand(
-                SELECTION_CHANGE_COMMAND,
-                (_, activeEditor) => {
-                    // activeEditorRef.current = activeEditor;
+                CLICK_COMMAND,
+                (payload) => {
+                    const event = payload;
+
+                    if (answerRef.current && answerRef.current.contains(event.target)) {
+                        event.preventDefault();
+                        if (event.shiftKey) {
+                            setSelected(!isSelected);
+                        } else {
+                            clearSelection();
+                            setSelected(true);
+                        }
+                        return true;
+                    }
+
                     return false;
                 },
                 COMMAND_PRIORITY_LOW,
             ),
-            // editor.registerCommand(
-            //     CLICK_COMMAND,
-            //     (payload) => {
-            //         const event = payload;
-
-            //         if (event.target === imageRef.current) {
-            //             if (event.shiftKey) {
-            //                 setSelected(!isSelected);
-            //             } else {
-            //                 clearSelection();
-            //                 setSelected(true);
-            //             }
-            //             return true;
-            //         }
-
-            //         return false;
-            //     },
-            //     COMMAND_PRIORITY_LOW,
-            // ),
 
             editor.registerCommand(
                 KEY_DELETE_COMMAND,
@@ -354,12 +374,12 @@ const AnswerEditor = React.memo(function AnswerEditor({
                 onDelete,
                 COMMAND_PRIORITY_LOW,
             ),
-            // editor.registerCommand(KEY_ENTER_COMMAND, onEnter, COMMAND_PRIORITY_LOW),
-            // editor.registerCommand(
-            //     KEY_ESCAPE_COMMAND,
-            //     onEscape,
-            //     COMMAND_PRIORITY_LOW,
-            // ),
+            editor.registerCommand(KEY_ENTER_COMMAND, onEnter, COMMAND_PRIORITY_LOW),
+            editor.registerCommand(
+                KEY_ESCAPE_COMMAND,
+                onEscape,
+                COMMAND_PRIORITY_LOW,
+            ),
         );
         return () => {
             isMounted = false;
@@ -368,22 +388,28 @@ const AnswerEditor = React.memo(function AnswerEditor({
     }, [
         clearSelection,
         editor,
-        // isResizing,
         isSelected,
         nodeKey,
         onDelete,
-        // onEnter,
-        // onEscape,
+        onEnter,
+        onEscape,
         setSelected,
     ]);
 
     
 
     return (
-        <div style={{
-            maxHeight: '32rem',
-            maxWidth: '72rem'
-        }}>
+        <div 
+            ref={answerRef}
+            style={{
+                maxHeight: '32rem',
+                maxWidth: '72rem',
+                border: isSelected ? '2px solid #1976d2' : '1px solid transparent',
+                borderRadius: '4px',
+                padding: '8px',
+                cursor: 'pointer',
+            }}
+        >
             <Typography variant='h5'>
                 {title}
             </Typography>
@@ -428,7 +454,6 @@ const AnswerEditor = React.memo(function AnswerEditor({
                             const newWordID = newValue?.id;
                             if (newWordID) {
                                 addWordID(newWordID);
-                                setSelection(null);
                                 setValue(null);
                                 setDialogValue({
                                     phrase: '',
@@ -469,13 +494,16 @@ const AnswerEditor = React.memo(function AnswerEditor({
                     selectOnFocus
                     clearOnBlur
                     handleHomeEndKeys
-                    renderOption={(props, option) => {
+                    renderOption={(props, option, { index }) => {
                         let phrase = option.phrase;
                         if (option.phrase && option.pronunciation) {
                             phrase = `${option.phrase} (${option.pronunciation})`
                         }
 
-                        return <li {...props}>{phrase}</li>
+                        const { key, ...otherProps } = props;
+                        // Create a unique key using option ID if available, otherwise use phrase + index
+                        const uniqueKey = option.id || `${option.phrase}-${index}`;
+                        return <li key={uniqueKey} {...otherProps}>{phrase}</li>
                     }}
                     // sx={{ width: 300 }}
                     freeSolo
