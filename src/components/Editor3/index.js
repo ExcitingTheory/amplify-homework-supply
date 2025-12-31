@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { useContext, useState, useCallback, useRef } from 'react';
+import { useContext, useState, useCallback, useRef, useEffect } from 'react';
 
 import { styled, useTheme } from '@mui/material/styles';
-// import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
 import IconButton from '@mui/material/IconButton';
@@ -12,7 +11,8 @@ import VerticalTabsRo from './components/VerticalTabsRo';
 import VerticalTabs from './components/VerticalTabs';
 
 import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
-import { $getRoot, $getSelection } from 'lexical';
+import { $getRoot, $getSelection, HISTORIC_TAG, HISTORY_PUSH_TAG, HISTORY_MERGE_TAG } from 'lexical';
+import { DATASTORE_UPDATE_TAG, INITIAL_LOAD_TAG } from './constants/updateTags';
 
 
 import { CodeHighlightNode, CodeNode } from '@lexical/code';
@@ -25,34 +25,27 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer';
 
 
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
-// import {CharacterLimitPlugin} from '@lexical/react/LexicalCharacterLimitPlugin';
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
-import LexicalClickableLinkPlugin from '@lexical/react/LexicalClickableLinkPlugin';
-// import {CollaborationPlugin} from '@lexical/react/LexicalCollaborationPlugin';
+import { ClickableLinkPlugin as LexicalClickableLinkPlugin } from '@lexical/react/LexicalClickableLinkPlugin';
 import { HashtagPlugin } from '@lexical/react/LexicalHashtagPlugin';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
-// import {PlainTextPlugin} from '@lexical/react/LexicalPlainTextPlugin';
 import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin';
-// import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
-// import useLexicalEditable from '@lexical/react/useLexicalEditable';
+import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
+import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
+import { TRANSFORMERS } from '@lexical/markdown';
 import {
   TableCellNode,
   TableNode,
   TableRowNode,
-} from '@lexical/table'
-
-// import {
-//   Grid,
-// } from '@mui/material';
+} from '@lexical/table';
 
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
-// import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 
 import ToolBarPlugin from './plugins/ToolBarPlugin';
 import CodeHighlightPlugin from './plugins/CodeHighlightPlugin';
@@ -60,7 +53,6 @@ import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
 
 
 import UnitContext from '../../context/unitContext';
-// import SidebarTabs from '../SidebarTabs';
 
 import AutoLinkPlugin from './plugins/AutoLinkPlugin';
 import AutoEmbedPlugin from './plugins/AutoEmbedPlugin';
@@ -110,22 +102,14 @@ import { LayoutItemNode } from './components/LayoutItemNode';
 import UnitCompletedPlugin from './plugins/UnitCompletedPlugin';
 import DraggableBlockPlugin from './plugins/DraggableBlockPlugin';
 import { DndWrapper } from '../MeaningAssociationExercise/DndWrapper.js';
-
-import { TableNode as NewTableNode } from './components/TableNode';
-import { TablePlugin } from './plugins/TablePlugin';
-
-import TableCellNodes from './components/TableCellNodes';
-import { TableContext } from './plugins/TablePlugin';
-
 import LanguageEditorTheme from './components/LanguageEditorTheme';
-import TableCellResizerPlugin from './plugins/TableCellResizerPlugin';
-
-// import AutoSave from './components/AutoSave';
+import { EditorRefPlugin } from '@lexical/react/LexicalEditorRefPlugin.js';
 
 import AnswerPlugin from './plugins/AnswerPlugin.js';
 import { AnswerNode } from './plugins/AnswerPlugin.js';
 import CustomAnswerPlugin, { CustomAnswerNode } from './plugins/CustomAnswerPlugin.js';
 import { DataStore } from 'aws-amplify/datastore';
+import { Unit } from '../../models';
 
 
 export const EditorNodes = [
@@ -142,7 +126,6 @@ export const EditorNodes = [
   TableRowNode,
   TableCellNode,
   HorizontalRuleNode,
-  // Custom Nodes
   YouTubeNode,
   WordBlockNode,
   MeaningAssociationNode,
@@ -153,105 +136,19 @@ export const EditorNodes = [
   PdfViewerNode,
   LayoutContainerNode,
   LayoutItemNode,
-  NewTableNode,
   AnswerNode,
   CustomAnswerNode,
 ];
-
-// When the editor changes, you can get notified via the
-// LexicalOnChangePlugin!
-// function onChange(editorState) {
-//   // console.log('onChange', JSON.stringify(editorState));
-//   editorState.read(() => {
-//     // Read the contents of the EditorState here.
-//     const root = $getRoot();
-//     const selection = $getSelection();
-
-//     console.log(root, selection);
-//   });
-// }
 
 // Catch any errors that occur during Lexical updates and log them
 // or throw them as needed. If you don't throw them, Lexical will
 // try to recover gracefully without losing user data.
 function onError(error) {
   console.error(error);
+  throw error;
 }
 
-
-// export const _theme = {
-//   ltr: 'ltr',
-//   rtl: 'rtl',
-//   paragraph: 'editor-paragraph',
-//   quote: 'editor-quote',
-//   heading: {
-//     h1: 'editor-heading-h1',
-//     h2: 'editor-heading-h2',
-//     h3: 'editor-heading-h3',
-//     h4: 'editor-heading-h4',
-//     h5: 'editor-heading-h5',
-//     h6: 'editor-heading-h6',
-//   },
-//   list: {
-//     nested: {
-//       listitem: 'editor-nested-listitem',
-//     },
-//     ol: 'editor-list-ol',
-//     ul: 'editor-list-ul',
-//     listitem: 'editor-listItem',
-//     listitemChecked: 'editor-listItemChecked',
-//     listitemUnchecked: 'editor-listItemUnchecked',
-//   },
-//   hashtag: 'editor-hashtag',
-//   image: 'editor-image',
-//   link: 'editor-link',
-//   text: {
-//     bold: 'editor-textBold',
-//     code: 'editor-textCode',
-//     italic: 'editor-textItalic',
-//     strikethrough: 'editor-textStrikethrough',
-//     subscript: 'editor-textSubscript',
-//     superscript: 'editor-textSuperscript',
-//     underline: 'editor-textUnderline',
-//     underlineStrikethrough: 'editor-textUnderlineStrikethrough',
-//   },
-//   code: 'editor-code',
-//   codeHighlight: {
-//     atrule: 'editor-tokenAttr',
-//     attr: 'editor-tokenAttr',
-//     boolean: 'editor-tokenProperty',
-//     builtin: 'editor-tokenSelector',
-//     cdata: 'editor-tokenComment',
-//     char: 'editor-tokenSelector',
-//     class: 'editor-tokenFunction',
-//     'class-name': 'editor-tokenFunction',
-//     comment: 'editor-tokenComment',
-//     constant: 'editor-tokenProperty',
-//     deleted: 'editor-tokenProperty',
-//     doctype: 'editor-tokenComment',
-//     entity: 'editor-tokenOperator',
-//     function: 'editor-tokenFunction',
-//     important: 'editor-tokenVariable',
-//     inserted: 'editor-tokenSelector',
-//     keyword: 'editor-tokenAttr',
-//     namespace: 'editor-tokenVariable',
-//     number: 'editor-tokenProperty',
-//     operator: 'editor-tokenOperator',
-//     prolog: 'editor-tokenComment',
-//     property: 'editor-tokenProperty',
-//     punctuation: 'editor-tokenPunctuation',
-//     regex: 'editor-tokenVariable',
-//     selector: 'editor-tokenSelector',
-//     string: 'editor-tokenSelector',
-//     symbol: 'editor-tokenProperty',
-//     tag: 'editor-tokenProperty',
-//     url: 'editor-tokenOperator',
-//     variable: 'editor-tokenVariable',
-//   },
-// };
-
-
-const DEBOUNCE_SAVE_DELAY_MS = 2000 // 2 seconds
+const DEBOUNCE_SAVE_DELAY_MS = 2000; // 2 seconds
 
 function debounce(func, timeout = DEBOUNCE_SAVE_DELAY_MS) {
   let timer;
@@ -261,8 +158,19 @@ function debounce(func, timeout = DEBOUNCE_SAVE_DELAY_MS) {
   };
 }
 
+// Custom OnChange Plugin following Lexical best practices
+// https://lexical.dev/docs/getting-started/react#saving-lexical-state
+function MyOnChangePlugin({ onChange }) {
+  const [editor] = useLexicalComposerContext();
+  useEffect(() => {
+    return editor.registerUpdateListener(({ editorState, tags }) => {
+      onChange(editorState, tags);
+    });
+  }, [editor, onChange]);
+  return null;
+}
 
-const drawerWidth = 400;
+const drawerWidth = 350;
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -279,10 +187,7 @@ const closedMixin = (theme) => ({
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: 'hidden',
-  width: `calc(${theme.spacing(7)} + 1px)`,
-  [theme.breakpoints.up('sm')]: {
-    width: `calc(${theme.spacing(8)} + 1px)`,
-  },
+  width: '2.5rem', // Match vertical tabs width exactly
 });
 
 const DrawerHeader = styled('div')(({ theme }) => ({
@@ -330,11 +235,14 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 export default function Editor() {
+  const editorRef = useRef(null); // Holds the Lexical editor instance
+  // Removed local editorStateRef - using the one from context
+  // Removed previousStateRef - version comparison in DataPlugin prevents loops
+  const { unit } = useContext(UnitContext);
   const theme = useTheme();
   const [openTab, setOpenTab] = React.useState(false);
   const [tabValue, setTabValue] = React.useState(0);
   const [isEditable, setIsEditable] = React.useState(true);
-  const { unit } = useContext(UnitContext);
   const drawerRef = React.useRef(null);
   const [actualDrawerWidth, setActualDrawerWidth] = React.useState(drawerWidth);
 
@@ -372,12 +280,20 @@ export default function Editor() {
     editorStateRef,
   } = useContext(UnitContext);
   const [floatingAnchorElem, setFloatingAnchorElem] = useState(null);
-  let initialConfig = {
-    namespace: 'LanguageEditor',
-    nodes: EditorNodes,
-    onError,
-    editable: isEditable,
-  };
+
+  // Memoize initial editor configuration to prevent remounting
+  // const initialConfig = React.useMemo(() => ({
+  //   namespace: 'LanguageEditor',
+  //   nodes: [...EditorNodes],
+  //   onError,
+  // }), []); // Empty deps - never recreate
+
+  const initialConfig = {
+  namespace: 'LanguageEditor',
+  nodes: [...EditorNodes],
+  theme: LanguageEditorTheme,
+  onError,
+};
 
   // Create debounced save function with stable reference
   const debouncedSaveTimer = useRef(null);
@@ -392,11 +308,13 @@ export default function Editor() {
 
   const onChange = useCallback(async (editorState, editor, tags) => {
     // Skip saves for DataPlugin updates and history operations (undo/redo)
-    if (tags && (tags.has('datastore-update') || tags.has('history-merge') || tags.has('initial-load') || 
-                 tags.has('historic') || tags.has('history-push'))) {
+    if (tags && (tags.has(DATASTORE_UPDATE_TAG) || tags.has(HISTORY_MERGE_TAG) || tags.has(INITIAL_LOAD_TAG) || 
+                 tags.has(HISTORIC_TAG) || tags.has(HISTORY_PUSH_TAG))) {
+      console.log('[Editor onChange] Skipping save for tag:', Array.from(tags));
       return;
     }
     
+    console.log('[Editor onChange] Saving editor state');
     // Update local state immediately (not debounced)
     editorStateRef.current = editorState.toJSON();
     
@@ -404,28 +322,20 @@ export default function Editor() {
     debouncedSave();
   }, [debouncedSave, editorStateRef]);
 
-  const onRef = (_floatingAnchorElem) => {
-    if (_floatingAnchorElem !== null) {
-      setFloatingAnchorElem(_floatingAnchorElem);
-    }
-  };
-
-
-  const cellEditorConfig = {
-    namespace: 'LanguageEditor',
-    nodes: [...TableCellNodes],
-    onError: (error) => {
-      console.log('cellEditorConfig error', error);
-      throw error;
-    },
-    theme: LanguageEditorTheme,
-  };
+  // const cellEditorConfig = {
+  //   namespace: 'LanguageEditor',
+  //   nodes: [...TableCellNodes],
+  //   onError: (error) => {
+  //     console.log('cellEditorConfig error', error);
+  //     throw error;
+  //   },
+  //   theme: LanguageEditorTheme,
+  // };
 
   return (
     <DndWrapper>
       <AutocompleteProvider>
-        <TableContext>
-          <LexicalComposer
+        <LexicalComposer
             initialConfig={initialConfig}
           >
             <style jsx global>{`
@@ -442,7 +352,8 @@ export default function Editor() {
 
             
         `}</style>
-            {/* <ToolBarPlugin /> */}
+            <ToolBarPlugin />
+            {/* MINIMAL PLUGIN SET FOR DEBUGGING */}
             <AutoFocusPlugin />
             <CheckListPlugin />
             <ClearEditorPlugin />
@@ -453,19 +364,8 @@ export default function Editor() {
             <HorizontalRulePlugin />
             <ListPlugin />
             <TabIndentationPlugin />
-            <TableCellResizerPlugin />
-            <TablePlugin cellEditorConfig={cellEditorConfig}>
-              <AutoFocusPlugin />
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable className="TableNode__contentEditable" />
-                }
-                placeholder={null}
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <ImagesPlugin captionsEnabled={false} />
-              <LinkPlugin />
-            </TablePlugin>
+            <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+            <TablePlugin />
             <AutoLinkPlugin />
             <YouTubePlugin />
             <AutoEmbedPlugin />
@@ -482,6 +382,7 @@ export default function Editor() {
             <LayoutPlugin />
             <AnswerPlugin />
             <CustomAnswerPlugin />
+            <EditorRefPlugin editorRef={editorRef} />
             {!floatingAnchorElem ? null : (
               <>
                 <FloatingLinkEditorPlugin
@@ -508,13 +409,19 @@ export default function Editor() {
               <Drawer
                 ref={drawerRef}
                 sx={{
-                  height: 'calc(100vh - 9.5rem)',
-
+                  height: '100%',
+                  '& .MuiDrawer-paper': {
+                    position: 'relative',
+                    resize: openTab ? 'horizontal' : 'none',
+                    overflow: openTab ? 'auto' : 'hidden',
+                    minWidth: openTab ? '300px' : '2.5rem',
+                    maxWidth: openTab ? '600px' : '2.5rem',
+                  }
                 }}
                 variant="permanent" open={openTab}>
                 <DrawerHeader
                   style={{
-                    minHeight: '9.5rem',
+                    height: '11rem',
                     // backgroundColor: '#fafafa',
                   }}
                 >
@@ -528,46 +435,41 @@ export default function Editor() {
                   setValue={setTabValue}
                 />
               </Drawer>
-              <Box component="main" sx={{ flexGrow: 1, padding: 0 }}>
+              <Box component="main" sx={{ 
+                flexGrow: 1, 
+                padding: 0,
+                width: openTab ? `calc(100% - ${actualDrawerWidth}px)` : 'calc(100% - 2.5rem)',
+                transition: 'width 0.3s ease',
+              }}>
                 <DrawerHeader
                   style={{
-                    minHeight: '9.5rem',
+                    height: '11rem',
                   }}
                 />
 
                 <RichTextPlugin
                   contentEditable={
-                    <div className="editor" ref={onRef}
+                    <ContentEditable
+                      className="editor"
+                      aria-placeholder="Enter some text..."
                       style={{
-                        margin: '0',
-                        padding: '0',
-                        // paddingLeft: '40px',
-                        position: 'relative',
-                        // marginTop: '3.3rem',
+                        height: 'calc(100vh - 11rem)',
+                        maxWidth: '100%',
+                        overflowY: 'auto',
+                        overflowX: 'auto',
                       }}
-                    >
-                      <ContentEditable
-                        style={{
-                          minHeight: 'calc(100vh - 9.5rem)',
-                          maxWidth: openTab ? `calc(100vw - ${actualDrawerWidth}px)` : `calc(100vw - 4rem)`,
-                        }}
-                      />
-                    </div>
+                    />
                   }
-                  placeholder=""
+                  placeholder={<div>Enter some text...</div>}
                   ErrorBoundary={LexicalErrorBoundary}
                 />
 
-
-                {/* <OnChangePlugin onChange={onChange} /> */}
-                <OnChangePlugin ignoreSelectionChange onChange={onChange} />
-
+                <MyOnChangePlugin onChange={onChange} />
 
               </Box>
             </Box>
 
           </LexicalComposer>
-        </TableContext>
       </AutocompleteProvider>
     </DndWrapper>
   );
@@ -609,18 +511,8 @@ export function Workbook() {
     }
   }, [openTab]);
 
-  const cellEditorConfig = {
-    namespace: 'LanguageEditor',
-    nodes: [...TableCellNodes],
-    onError: (error) => {
-      console.log('cellEditorConfig error', error);
-      throw error;
-    },
-    editable: false,
-    theme: LanguageEditorTheme,
-  };
-
-  const initialConfig = {
+  // Memoize config to prevent recreation on every render
+  const initialConfig = React.useMemo(() => ({
     namespace: 'LanguageEditor',
     theme: LanguageEditorTheme,
     onError,
@@ -630,31 +522,15 @@ export function Workbook() {
     editorState: null,
     nodes: [
       ...EditorNodes,
-      // Don't forget to register your custom node separately!
-      // CustomListNode,
-      // {
-      //     replace: ListNode,
-      //     with: (node) => {
-      //         return new CustomListNode();
-      //     }
-      // },
-      // CustomListItemNode,
-      // {
-      //     replace: ListItemNode,
-      //     with: (node) => {
-      //         return new CustomListItemNode();
-      //     }
-      // }
     ]
-  };
+  }), []); // Empty deps since values don't change
 
 
 
   return (
     <DndWrapper>
-      <TableContext>
-        <AutocompleteProvider>
-          <LexicalComposer
+      <AutocompleteProvider>
+        <LexicalComposer
             initialConfig={initialConfig}
           >
             <style jsx global>{`
@@ -675,15 +551,8 @@ export function Workbook() {
             <HorizontalRulePlugin />
             <ListPlugin />
             <TabIndentationPlugin />
-            <TablePlugin cellEditorConfig={cellEditorConfig}>
-              <RichTextPlugin
-                contentEditable={false}
-                placeholder={null}
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <ImagesPlugin captionsEnabled={false} />
-              <LinkPlugin />
-            </TablePlugin>
+            <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+            <TablePlugin />
             <LexicalClickableLinkPlugin />
             <YouTubePlugin />
             <WordBlockPlugin />
@@ -713,13 +582,13 @@ export function Workbook() {
               <Drawer
                 ref={drawerRef}
                 sx={{
-                  height: 'calc(100vh - 9.5rem)',
+                  height: '100%',
 
                 }}
                 variant="permanent" open={openTab}>
                 <DrawerHeader
                   style={{
-                    minHeight: '9.5rem',
+                    minHeight: '11rem',
                     // backgroundColor: '#fafafa',
                   }}
                 >
@@ -737,10 +606,15 @@ export function Workbook() {
                   setValue={setTabValue}
                 />
               </Drawer>
-              <Box component="main" sx={{ flexGrow: 1, padding: 0 }}>
+              <Box component="main" sx={{ 
+                flexGrow: 1, 
+                padding: 0,
+                width: openTab ? `calc(100% - ${actualDrawerWidth}px)` : 'calc(100% - 2.5rem)',
+                transition: 'width 0.3s ease',
+              }}>
                 <DrawerHeader
                   style={{
-                    minHeight: '9.5rem',
+                    minHeight: '11rem',
                   }}
                 />
 
@@ -750,13 +624,14 @@ export function Workbook() {
                       style={{
                         margin: '0',
                         padding: '0',
-                        // marginTop: '3.3rem',
+                        height: 'calc(100vh - 11rem)',
+                        overflowY: 'auto',
                       }}
                     >
                       <ContentEditable
                         style={{
-                          minHeight: 'calc(100vh - 9.5rem)',
-                          maxWidth: openTab ? `calc(100vw - ${actualDrawerWidth}px)` : `calc(100vw - 4rem)`,
+                          width: '100%',
+                          maxWidth: '100%',
                         }}
                       />
                     </div>
@@ -770,8 +645,7 @@ export function Workbook() {
 
           </LexicalComposer>
         </AutocompleteProvider>
-      </TableContext>
-    </DndWrapper>
-  );
+      </DndWrapper>
+    );
 }
 

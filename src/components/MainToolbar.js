@@ -220,7 +220,7 @@ export function UserMenu() {
 
   return (
     <div>
-      <Button
+      <IconButton
         id="user-button"
         color="inherit"
         aria-controls={open ? 'user-menu' : undefined}
@@ -233,7 +233,7 @@ export function UserMenu() {
          */}
         {/* <ProfileIcon />&nbsp;{username} */}
         <ProfileIcon />
-      </Button>
+      </IconButton>
       <Menu
         id="user-menu"
         anchorEl={anchorEl}
@@ -356,33 +356,29 @@ export default function MainToolbar({ children }) {
     <>
       <Toolbar
         variant="dense"
+        sx={{ minHeight: '48px' }}
       >
-        <Button
-          size="large"
+        <IconButton
           edge="start"
           color="inherit"
           aria-label="menu"
-          sx={{ mr: 2 }}
           onClick={toggleDrawer('left', true)}
         >
           <MenuIcon />
-        </Button>
+        </IconButton>
         {/* <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}> */}
         {children &&
           children
         }
         {/* </Typography> */}
-        <Button
-          size="large"
-          // edge="start"
+        <Box sx={{ flexGrow: 1 }} />
+        <IconButton
           color="inherit"
           aria-label="Add User to Section"
-          sx={{ mr: 2 }}
           onClick={() => setOpenAddStudentToSection(true)}
-        // onClick={toggleDrawer('left', true)}
         >
           <PersonAddIcon />
-        </Button>
+        </IconButton>
         {/**
          * @todo Add a button for the settings menu.
          * 

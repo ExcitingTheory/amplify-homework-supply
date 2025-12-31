@@ -107,7 +107,7 @@ export default function CodeHighlightPlugin() {
     // Listen for editor state changes and trigger highlighting
     const removeUpdateListener = editor.registerUpdateListener(({ editorState, tags }) => {
       // Ignore updates from this plugin's own operations and other non-content changes
-      if (tags && (tags.has('skip-save') || tags.has('discrete') || tags.has('historic') || tags.has('history-push') || tags.has('history-merge') || tags.has('initial-load') || tags.has('collaboration'))) {
+      if (tags && (tags.has('skip-save') || tags.has('historic') || tags.has('history-push') || tags.has('history-merge') || tags.has('initial-load') || tags.has('collaboration'))) {
         return;
       }
 

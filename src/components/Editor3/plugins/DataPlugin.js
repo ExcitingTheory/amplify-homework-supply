@@ -11,6 +11,7 @@ import React, { useRef } from "react";
 import { useEffect, useContext } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import UnitContext from '../../../context/unitContext';
+import { INITIAL_LOAD_TAG } from '../constants/updateTags';
 
 
 export default function DataPlugin() {
@@ -49,13 +50,14 @@ export default function DataPlugin() {
                 const editorState = editor.parseEditorState(data);
                 
                 queueMicrotask(() => {
-                    editor.setEditorState(editorState, { tag: 'initial-load' });
+                    editor.setEditorState(editorState, { tag: INITIAL_LOAD_TAG });
+                    
+                    // Only update version tracking after successful state set
+                    hasLoadedInitialState.current = true;
+                    versionRef.current = unitVersion;
                 });
-                
-                hasLoadedInitialState.current = true;
-                versionRef.current = unitVersion;
-            } catch (error) {
-                console.error('[DataPlugin] Error setting initial editor state', error);
+            } catch (e) {
+                console.error('[DataPlugin] Failed to parse editor state from unit data', e);
             }
             return;
         }

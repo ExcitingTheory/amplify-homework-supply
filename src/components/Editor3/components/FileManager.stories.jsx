@@ -11,7 +11,7 @@ import { userEvent, within, waitFor, expect } from 'storybook/test';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { HeadingNode } from '@lexical/rich-text';
 
@@ -221,7 +221,7 @@ const EditorTemplate = ({ files: initialFiles = mockFiles, settings = mockSettin
           <LexicalComposer initialConfig={editorConfig}>
             <div style={{ 
               display: 'flex',
-              height: '100vh',
+              height: '100%',
               backgroundColor: '#f5f5f5'
             }}>
               {/* Editor Section */}
@@ -318,7 +318,7 @@ const StandaloneTemplate = ({ files: initialFiles = mockFiles, settings = mockSe
           <div style={{ 
             padding: '2rem',
             backgroundColor: '#f5f5f5',
-            minHeight: '100vh'
+            minHeight: '100%'
           }}>
             <div style={{
               maxWidth: '500px',
@@ -326,7 +326,7 @@ const StandaloneTemplate = ({ files: initialFiles = mockFiles, settings = mockSe
               backgroundColor: 'white',
               borderRadius: '8px',
               boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              height: 'calc(100vh - 4rem)',
+              height: 'calc(100% - 4rem)',
               display: 'flex',
               flexDirection: 'column'
             }}>

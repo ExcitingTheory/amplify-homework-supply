@@ -1174,7 +1174,8 @@ export function DictionaryEditor() {
   return (
     <div 
       style={{
-        height: 'calc(100vh - 10rem)',
+        height: 'calc(100vh - 11rem)',
+        overflow: 'auto',
       }}
     >
         <Box

@@ -8,6 +8,7 @@ import { DictionaryEditor } from '../../DictionaryEditor';
 import { QuestionEditor } from '../../QuestionEditor';
 
 import ChatSidebar from '../../ChatSidebar';
+import TableOfContents from './TableOfContents';
 
 
 import DictionaryIcon from '@mui/icons-material/LibraryBooks';
@@ -15,6 +16,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import FolderIcon from '@mui/icons-material/Folder';
 import ConfigIcon from '@mui/icons-material/Settings';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
+import TocIcon from '@mui/icons-material/Toc';
 
 import FileManager from './FileManager';
 import ConfigurationManager from './ConfigurationManager';
@@ -32,9 +34,11 @@ function TabPanel(props) {
       aria-labelledby={`vertical-tab-${index}`}
       style={{
         width: '100%',
-        height: 'calc(100vh - 9.5rem)',
+        minWidth: 0,
+        height: 'calc(100vh - 11rem)',
         overflowY,
         overflowX: 'hidden',
+        // flexShrink: 1,
       }}
       {...other}
     >
@@ -69,7 +73,11 @@ export default function VerticalTabs({
   return (
     <Box
       sx={{
-        flexGrow: 1, bgcolor: 'background.paper', display: 'flex'  }}
+        flexGrow: 1, 
+        bgcolor: 'background.paper', 
+        display: 'flex',
+        flexDirection: 'row',
+      }}
     >
       <Tabs
         orientation="vertical"
@@ -80,11 +88,17 @@ export default function VerticalTabs({
         aria-label="Vertical tabs example"
         sx={{
           // position: 'sticky',
-          borderRight: 1,
+          borderLeft: 1,
           borderColor: 'divider',
           overflowY: 'hidden',
-          minWidth: '4rem',
+          minWidth: '2.5rem',
+          maxWidth: '2.5rem',
           // position: 'fixed',
+          '& .MuiTab-root': {
+            minWidth: '2.5rem',
+            maxWidth: '2.5rem',
+            padding: '8px 4px',
+          }
         }}
 
         // TabIndicatorProps={{
@@ -100,6 +114,11 @@ export default function VerticalTabs({
             setOpen(true);
           }}
           label={<EditCalendarIcon />} {...a11yProps('Assignments')} />
+        <Tab
+          onClick={() => {
+            setOpen(true);
+          }}
+          label={<TocIcon />} {...a11yProps('Table of Contents')} />
         <Tab 
           onClick={() => {
             setOpen(true);
@@ -132,19 +151,22 @@ export default function VerticalTabs({
       <TabPanel value={value} index={0} overflowY='auto'>
         <AssignmentConfiguration />
       </TabPanel>
-      <TabPanel value={value} index={1} overflowY='auto' >
+      <TabPanel value={value} index={1} overflowY='auto'>
+        <TableOfContents />
+      </TabPanel>
+      <TabPanel value={value} index={2} overflowY='auto' >
         <DictionaryEditor />
       </TabPanel>
-      <TabPanel value={value} index={2} overflowY='auto'>
+      <TabPanel value={value} index={3} overflowY='auto'>
         <QuestionEditor />
       </TabPanel>  
-      <TabPanel value={value} index={3}>
+      <TabPanel value={value} index={4}>
         <FileManager />
       </TabPanel>
-      <TabPanel value={value} index={4} overflowY='hidden'>
+      <TabPanel value={value} index={5} overflowY='hidden'>
         <ChatSidebar />
       </TabPanel>
-      <TabPanel value={value} index={5}>
+      <TabPanel value={value} index={6}>
         <ConfigurationManager />
       </TabPanel>
       {/*<TabPanel value={value} index={4}>

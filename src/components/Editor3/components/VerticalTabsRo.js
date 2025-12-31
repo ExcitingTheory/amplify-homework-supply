@@ -27,7 +27,7 @@ function TabPanel(props) {
       aria-labelledby={`vertical-tab-${index}`}
       style={{
         width: '100%',
-        height: 'calc(100vh - 9.5rem)',
+        height: 'calc(100vh - 11rem)',
         overflowY,
       }}
       {...other}

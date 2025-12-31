@@ -132,7 +132,7 @@ export default function AutocompletePlugin() {
 
                     console.log('setSuggestion(newSuggestion)', newSuggestion)
                 },
-                { tag: 'discrete' }
+                { discrete: true }
             );
         }
 
@@ -145,7 +145,7 @@ export default function AutocompletePlugin() {
         }
         function handleUpdate({ tags, editorState }) {
             // Ignore updates from this plugin's own operations
-            if (tags && (tags.has('discrete') || tags.has('skip-save') || tags.has('historic') || tags.has('history-push') || tags.has('history-merge'))) {
+            if (tags && (tags.has('skip-save') || tags.has('historic') || tags.has('history-push') || tags.has('history-merge'))) {
                 return;
             }
 
@@ -156,7 +156,7 @@ export default function AutocompletePlugin() {
                     if (autocompleteNodeKey !== null || lastMatch !== null) {
                         editor.update(() => {
                             $clearSuggestion();
-                        }, { tag: 'discrete' });
+                        }, { discrete: true });
                     }
                     return;
                 }
@@ -165,7 +165,7 @@ export default function AutocompletePlugin() {
                 }
                 editor.update(() => {
                     $clearSuggestion();
-                }, { tag: 'discrete' });
+                }, { discrete: true });
                 searchPromise = query(match);
                 searchPromise.promise
                     .then((newSuggestion) => {

@@ -16,7 +16,7 @@
 * Editor selector
 */
 div[data-lexical-editor="true"] {
-    padding: 1rem 2rem;
+    padding: 1rem;
 }
 
 div.ImageNode__contentEditable {
@@ -37,6 +37,7 @@ div.ImageNode__contentEditable {
 
 body {
     min-height: unset !important;
+    overflow: hidden;
 }
 
 ul li.editor-listItem.editor-nested-listitem {
@@ -46,8 +47,6 @@ ul li.editor-listItem.editor-nested-listitem {
 
 .MuiTabs-flexContainer.MuiTabs-flexContainerVertical > button {
     padding: 0;
-    position: relative;
-    right: 0.8rem;
 }
 
 

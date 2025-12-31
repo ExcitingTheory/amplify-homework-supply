@@ -6,7 +6,7 @@
  * the DataStore class and its methods.
  */
 
-import { BASE64_AUDIO_SAMPLE, mockWaveformData } from './media';
+import { MOCK_AUDIO_BASE64, mockWaveformData } from './media';
 
 // Mock unit storage
 const mockUnits = {};
@@ -251,6 +251,31 @@ export const seedMockWords = (wordsArray) => {
   });
 };
 
+// Helper to seed mock questions data for stories
+export const seedMockQuestions = (questionsArray) => {
+  console.log('[Mock DataStore] Seeding questions:', questionsArray.length);
+  questionsArray.forEach(question => {
+    if (question.id) {
+      mockQuestions[question.id] = {
+        ...question,
+        _version: question._version || 1,
+        createdAt: question.createdAt || new Date().toISOString(),
+        updatedAt: question.updatedAt || new Date().toISOString(),
+      };
+    }
+  });
+};
+
+// Helper to seed mock question-unit relationships
+export const seedMockQuestionUnits = (relationshipsArray) => {
+  console.log('[Mock DataStore] Seeding question-unit relationships:', relationshipsArray.length);
+  relationshipsArray.forEach(rel => {
+    // Store the relationship for mock querying
+    const key = `${rel.questionId}-${rel.unitId}`;
+    // This would be handled by the actual relationship logic in queries
+  });
+};
+
 // Helper to seed mock sections data for stories
 export const seedMockSections = (sectionsArray) => {
   console.log('[Mock DataStore] Seeding sections:', sectionsArray.length);
@@ -330,9 +355,9 @@ export const clearMockUnits = () => {
       phrase: 'こんにちは',
       pronunciation: 'kon-ni-chi-wa',
       definition: 'Hello (Japanese)',
-      audio: [BASE64_AUDIO_SAMPLE],
+      audio: [MOCK_AUDIO_BASE64],
       waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
-      definitionAudio: [BASE64_AUDIO_SAMPLE],
+      definitionAudio: [MOCK_AUDIO_BASE64],
       definitionWaveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
       partOfSpeech: 'greeting',
       owner: 'mock-user-sub',
@@ -343,9 +368,9 @@ export const clearMockUnits = () => {
       phrase: '猫',
       pronunciation: 'neko',
       definition: 'Cat (Japanese)',
-      audio: [BASE64_AUDIO_SAMPLE],
+      audio: [MOCK_AUDIO_BASE64],
       waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
-      definitionAudio: [BASE64_AUDIO_SAMPLE],
+      definitionAudio: [MOCK_AUDIO_BASE64],
       definitionWaveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
       partOfSpeech: 'noun',
       owner: 'mock-user-sub',
@@ -356,9 +381,9 @@ export const clearMockUnits = () => {
       phrase: 'ありがとう',
       pronunciation: 'a-ri-ga-tou',
       definition: 'Thank you (Japanese)',
-      audio: [BASE64_AUDIO_SAMPLE],
+      audio: [MOCK_AUDIO_BASE64],
       waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
-      definitionAudio: [BASE64_AUDIO_SAMPLE],
+      definitionAudio: [MOCK_AUDIO_BASE64],
       definitionWaveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
       partOfSpeech: 'expression',
       owner: 'mock-user-sub',
@@ -369,9 +394,9 @@ export const clearMockUnits = () => {
       phrase: '犬',
       pronunciation: 'inu',
       definition: 'Dog (Japanese)',
-      audio: [BASE64_AUDIO_SAMPLE],
+      audio: [MOCK_AUDIO_BASE64],
       waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
-      definitionAudio: [BASE64_AUDIO_SAMPLE],
+      definitionAudio: [MOCK_AUDIO_BASE64],
       definitionWaveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
       owner: 'mock-user-sub',
       _version: 1,
@@ -381,9 +406,9 @@ export const clearMockUnits = () => {
       phrase: 'さようなら',
       pronunciation: 'sa-you-na-ra',
       definition: 'Goodbye (Japanese)',
-      audio: [BASE64_AUDIO_SAMPLE],
+      audio: [MOCK_AUDIO_BASE64],
       waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
-      definitionAudio: [BASE64_AUDIO_SAMPLE],
+      definitionAudio: [MOCK_AUDIO_BASE64],
       definitionWaveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
       owner: 'mock-user-sub',
       _version: 1,
@@ -393,9 +418,9 @@ export const clearMockUnits = () => {
       phrase: '本',
       pronunciation: 'hon',
       definition: 'Book (Japanese)',
-      audio: [BASE64_AUDIO_SAMPLE],
+      audio: [MOCK_AUDIO_BASE64],
       waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
-      definitionAudio: [BASE64_AUDIO_SAMPLE],
+      definitionAudio: [MOCK_AUDIO_BASE64],
       definitionWaveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
       owner: 'mock-user-sub',
       _version: 1,
@@ -405,9 +430,9 @@ export const clearMockUnits = () => {
       phrase: '水',
       pronunciation: 'mizu',
       definition: 'Water (Japanese)',
-      audio: [BASE64_AUDIO_SAMPLE],
+      audio: [MOCK_AUDIO_BASE64],
       waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
-      definitionAudio: [BASE64_AUDIO_SAMPLE],
+      definitionAudio: [MOCK_AUDIO_BASE64],
       definitionWaveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
       owner: 'mock-user-sub',
       _version: 1,
@@ -417,9 +442,9 @@ export const clearMockUnits = () => {
       phrase: '学校',
       pronunciation: 'gak-kou',
       definition: 'School (Japanese)',
-      audio: [BASE64_AUDIO_SAMPLE],
+      audio: [MOCK_AUDIO_BASE64],
       waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
-      definitionAudio: [BASE64_AUDIO_SAMPLE],
+      definitionAudio: [MOCK_AUDIO_BASE64],
       definitionWaveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
       owner: 'mock-user-sub',
       _version: 1,
@@ -430,9 +455,9 @@ export const clearMockUnits = () => {
       phrase: 'こんにちは',
       pronunciation: 'kon-ni-chi-wa',
       definition: 'Hello (Japanese)',
-      audio: [BASE64_AUDIO_SAMPLE],
+      audio: [MOCK_AUDIO_BASE64],
       waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
-      definitionAudio: [BASE64_AUDIO_SAMPLE],
+      definitionAudio: [MOCK_AUDIO_BASE64],
       definitionWaveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
       partOfSpeech: 'greeting',
       owner: 'mock-user-sub',
@@ -443,9 +468,9 @@ export const clearMockUnits = () => {
       phrase: '猫',
       pronunciation: 'neko',
       definition: 'Cat (Japanese)',
-      audio: [BASE64_AUDIO_SAMPLE],
+      audio: [MOCK_AUDIO_BASE64],
       waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
-      definitionAudio: [BASE64_AUDIO_SAMPLE],
+      definitionAudio: [MOCK_AUDIO_BASE64],
       definitionWaveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
       partOfSpeech: 'noun',
       owner: 'mock-user-sub',
@@ -456,9 +481,9 @@ export const clearMockUnits = () => {
       phrase: 'ありがとう',
       pronunciation: 'a-ri-ga-tou',
       definition: 'Thank you (Japanese)',
-      audio: [BASE64_AUDIO_SAMPLE],
+      audio: [MOCK_AUDIO_BASE64],
       waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
-      definitionAudio: [BASE64_AUDIO_SAMPLE],
+      definitionAudio: [MOCK_AUDIO_BASE64],
       definitionWaveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
       partOfSpeech: 'expression',
       owner: 'mock-user-sub',
@@ -469,9 +494,9 @@ export const clearMockUnits = () => {
       phrase: '犬',
       pronunciation: 'inu',
       definition: 'Dog (Japanese)',
-      audio: [BASE64_AUDIO_SAMPLE],
+      audio: [MOCK_AUDIO_BASE64],
       waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
-      definitionAudio: [BASE64_AUDIO_SAMPLE],
+      definitionAudio: [MOCK_AUDIO_BASE64],
       definitionWaveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
       owner: 'mock-user-sub',
       _version: 1,
@@ -481,9 +506,9 @@ export const clearMockUnits = () => {
       phrase: 'さようなら',
       pronunciation: 'sa-you-na-ra',
       definition: 'Goodbye (Japanese)',
-      audio: [BASE64_AUDIO_SAMPLE],
+      audio: [MOCK_AUDIO_BASE64],
       waveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
-      definitionAudio: [BASE64_AUDIO_SAMPLE],
+      definitionAudio: [MOCK_AUDIO_BASE64],
       definitionWaveformData: JSON.stringify(mockWaveformData.slice(0, 150)),
       owner: 'mock-user-sub',
       _version: 1,
@@ -628,7 +653,7 @@ export const clearMockUnits = () => {
     {
       id: 'file-3',
       name: 'vocabulary-lesson.mp3',
-      path: BASE64_AUDIO_SAMPLE,
+      path: MOCK_AUDIO_BASE64,
       mimeType: 'audio/mpeg',
       size: 1048576,
       identityId: 'mock-identity-id',
@@ -640,7 +665,7 @@ export const clearMockUnits = () => {
     {
       id: 'file-4',
       name: 'pronunciation-guide.mp3',
-      path: BASE64_AUDIO_SAMPLE,
+      path: MOCK_AUDIO_BASE64,
       mimeType: 'audio/mpeg',
       size: 892416,
       identityId: 'mock-identity-id',
@@ -685,7 +710,7 @@ export const clearMockUnits = () => {
     {
       id: 'file-8',
       name: 'listening-exercise.mp3',
-      path: BASE64_AUDIO_SAMPLE,
+      path: MOCK_AUDIO_BASE64,
       mimeType: 'audio/mpeg',
       size: 1310720,
       identityId: 'mock-identity-id',
@@ -840,9 +865,8 @@ const mockData = {
 export class DataStore {
   static async save(model) {
     console.log('Mock DataStore.save called with:', model);
-    console.log('[Mock DataStore] model.data:', model.data);
-    console.log('[Mock DataStore] model.data type:', typeof model.data);
-    console.log('[Mock DataStore] model.data keys:', model.data ? Object.keys(model.data) : 'no data');
+    // Debug logging for data length only
+    console.log('[Mock DataStore] model.data length:', model.data ? model.data.length : 0);
     
     // If model doesn't have an ID, generate one
     if (!model.id) {

@@ -62,7 +62,6 @@ import {
     CAN_UNDO_COMMAND,
     COMMAND_PRIORITY_CRITICAL,
     COMMAND_PRIORITY_NORMAL,
-    DEPRECATED_$isGridSelection,
     FORMAT_ELEMENT_COMMAND,
     FORMAT_TEXT_COMMAND,
     INDENT_CONTENT_COMMAND,
@@ -72,7 +71,7 @@ import {
     SELECTION_CHANGE_COMMAND,
     UNDO_COMMAND,
 } from 'lexical';
-import { useCallback, useEffect, useState, useContext } from 'react';
+import { useCallback, useEffect, useState, useContext, useRef } from 'react';
 import * as React from 'react';
 
 import Head from 'next/head'
@@ -109,6 +108,8 @@ import CodeIcon from '@mui/icons-material/Code';
 
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
@@ -155,7 +156,7 @@ import TimerIcon from '@mui/icons-material/Timer';
 import UnitContext from '../../../context/unitContext';
 // import SectionContext from '../../../context/sectionContext';
 
-import { AutoSave } from '../components/AutoSave';
+import { Save } from '../components/Save';
 
 
 import {INSERT_LAYOUT_COMMAND} from '../plugins/LayoutPlugin';
@@ -594,7 +595,7 @@ const PreviewModal = () => {
                 <Card
                     sx={{
                         width: '100vw',
-                        height: '100vh',
+                        height: '100%',
                         overflow: 'auto',
                         position: 'relative',
                     }}
@@ -664,69 +665,73 @@ const UnitTitleDescriptionEditor = () => {
     }
 
     return (
-        <Box sx={{ flexGrow: 1, margin: '1rem' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
             <Head>
                 <title>{name}</title>
             </Head>
-            {!editName &&
-                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} onClick={(event) => {
-                    setEditName(true)
-                }}>
-                    {newName || 'Untitled Unit'}
-                </Typography>
-            }
-            {editName &&
-                <TextField
-                    size='small'
-                    variant='standard'
-                    fullWidth
-                    value={newName}
-                    placeholder='Untitled Unit'
-                    onChange={(event) => { onNameChange(event) }}
-                    inputRef={(input) => {
-                        if (input != null) {
-                            input.focus();
-                        }
-                    }}
-                    onBlur={async (event) => {
-                        event.preventDefault()
-                        await saveName(newName || 'Untitled Unit')
-                        setEditName(false)
-                        // console.log('name saved', name)
-                    }}
-                />
-            }
+            <Box sx={{ flexGrow: 1, px: 2, py: 0.5, minHeight: '2.5rem', display: 'flex', alignItems: 'center' }}>
+                {!editName &&
+                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} onClick={(event) => {
+                        setEditName(true)
+                    }}>
+                        {newName || 'Untitled Unit'}
+                    </Typography>
+                }
+                {editName &&
+                    <TextField
+                        size='small'
+                        variant='standard'
+                        fullWidth
+                        value={newName}
+                        placeholder='Untitled Unit'
+                        onChange={(event) => { onNameChange(event) }}
+                        inputRef={(input) => {
+                            if (input != null) {
+                                input.focus();
+                            }
+                        }}
+                        onBlur={async (event) => {
+                            event.preventDefault()
+                            await saveName(newName || 'Untitled Unit')
+                            setEditName(false)
+                            // console.log('name saved', name)
+                        }}
+                    />
+                }
+            </Box>
 
-            {!editDescription &&
-                <Typography variant="p" component="div" sx={{ flexGrow: 1 }} onClick={(event) => {
-                    // event.preventDefault()
-                    setEditDescription(true)
-                }}>
-                    {newDescription || 'Add Descripton'}
-                </Typography>
-            }
-            {editDescription &&
-                <TextField
-                    size='small'
-                    variant='standard'
-                    fullWidth
-                    // label={`Answer ${index + 1}`}
-                    value={newDescription}
-                    placeholder='Add Description'
-                    onChange={(event) => { onDescriptionChange(event) }}
-                    inputRef={(input) => {
-                        if (input != null) {
-                            input.focus();
-                        }
-                    }}
-                    onBlur={async (event) => {
-                        event.preventDefault()
-                        await saveDescription(newDescription || 'Add Descripton')
-                        setEditDescription(false)
-                        // console.log('description saved', description)
-                    }}
-                />
-            }
+            <Box sx={{ flexGrow: 1, px: 2, py: 0.5, minHeight: '2rem', display: 'flex', alignItems: 'center' }}>
+                {!editDescription &&
+                    <Typography variant="body2" component="div" sx={{ flexGrow: 1 }} onClick={(event) => {
+                        // event.preventDefault()
+                        setEditDescription(true)
+                    }}>
+                        {newDescription || 'Add Description'}
+                    </Typography>
+                }
+                {editDescription &&
+                    <TextField
+                        size='small'
+                        variant='standard'
+                        fullWidth
+                        // label={`Answer ${index + 1}`}
+                        value={newDescription}
+                        placeholder='Add Description'
+                        onChange={(event) => { onDescriptionChange(event) }}
+                        inputRef={(input) => {
+                            if (input != null) {
+                                input.focus();
+                            }
+                        }}
+                        onBlur={async (event) => {
+                            event.preventDefault()
+                            await saveDescription(newDescription || 'Add Description')
+                            setEditDescription(false)
+                            // console.log('description saved', description)
+                        }}
+                    />
+                }
+            </Box>
         </Box>
     )
 }
@@ -1334,8 +1339,7 @@ function BlockFormatDropDown({
         editor.update(() => {
             const selection = $getSelection();
             if (
-                $isRangeSelection(selection) ||
-                DEPRECATED_$isGridSelection(selection)
+                $isRangeSelection(selection)
             ) {
                 $setBlocksType(selection, () => $createParagraphNode());
             }
@@ -1348,8 +1352,7 @@ function BlockFormatDropDown({
             editor.update(() => {
                 const selection = $getSelection();
                 if (
-                    $isRangeSelection(selection) ||
-                    DEPRECATED_$isGridSelection(selection)
+                    $isRangeSelection(selection)
                 ) {
                     $setBlocksType(selection, () => $createHeadingNode(headingSize));
                 }
@@ -1399,8 +1402,7 @@ function BlockFormatDropDown({
             editor.update(() => {
                 const selection = $getSelection();
                 if (
-                    $isRangeSelection(selection) ||
-                    DEPRECATED_$isGridSelection(selection)
+                    $isRangeSelection(selection)
                 ) {
                     $setBlocksType(selection, () => $createQuoteNode());
                 }
@@ -1415,8 +1417,7 @@ function BlockFormatDropDown({
                 let selection = $getSelection();
 
                 if (
-                    $isRangeSelection(selection) ||
-                    DEPRECATED_$isGridSelection(selection)
+                    $isRangeSelection(selection)
                 ) {
                     if (selection.isCollapsed()) {
                         $setBlocksType(selection, () => $createCodeNode());
@@ -1467,6 +1468,7 @@ function BlockFormatDropDown({
                 id='block-format-form'
                 style={{
                     width: '10rem',
+                    minWidth: '8rem',
                     margin: '0.25rem',
                 }}
             >
@@ -1707,6 +1709,64 @@ export default function ToolarPlugin({
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [isTimerDialogOpen, setIsTimerDialogOpen] = useState(false);
     const [isDueDateDialogOpen, setIsDueDateDialogOpen] = useState(false);
+    
+    // Toolbar scroll state
+    const toolbarRef = useRef(null);
+    const [showLeftArrow, setShowLeftArrow] = useState(false);
+    const [showRightArrow, setShowRightArrow] = useState(false);
+
+    // Check toolbar overflow
+    const checkToolbarOverflow = useCallback(() => {
+        if (toolbarRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = toolbarRef.current;
+            const hasOverflow = scrollWidth > clientWidth;
+            setShowLeftArrow(hasOverflow && scrollLeft > 5);
+            setShowRightArrow(hasOverflow && scrollLeft + clientWidth < scrollWidth - 5);
+        }
+    }, []);
+
+    // Scroll toolbar smoothly
+    const scrollToolbar = useCallback((direction) => {
+        if (toolbarRef.current) {
+            const scrollAmount = 200; // pixels to scroll
+            const targetScroll = direction === 'left' 
+                ? toolbarRef.current.scrollLeft - scrollAmount
+                : toolbarRef.current.scrollLeft + scrollAmount;
+            
+            toolbarRef.current.scrollTo({
+                left: targetScroll,
+                behavior: 'smooth'
+            });
+            
+            // Check overflow after scroll completes
+            setTimeout(checkToolbarOverflow, 350);
+        }
+    }, [checkToolbarOverflow]);
+
+    // Check overflow on mount, resize, and when toolbar content changes
+    useEffect(() => {
+        const checkWithDelay = () => {
+            // Small delay to ensure toolbar is rendered
+            setTimeout(checkToolbarOverflow, 100);
+        };
+        
+        checkWithDelay();
+        window.addEventListener('resize', checkToolbarOverflow);
+        
+        // Observe toolbar content changes
+        const observer = new MutationObserver(checkToolbarOverflow);
+        if (toolbarRef.current) {
+            observer.observe(toolbarRef.current, {
+                childList: true,
+                subtree: true,
+            });
+        }
+        
+        return () => {
+            window.removeEventListener('resize', checkToolbarOverflow);
+            observer.disconnect();
+        };
+    }, [checkToolbarOverflow]);
 
     // const editorState = activeEditor.getEditorState();
     // const jsonString = JSON.stringify(editorState);
@@ -1743,7 +1803,8 @@ export default function ToolarPlugin({
             setIsSubscript(selection.hasFormat('subscript'));
             setIsSuperscript(selection.hasFormat('superscript'));
             setIsCode(selection.hasFormat('code'));
-            setIsRTL($isParentElementRTL(selection));
+            // Note: $isParentElementRTL requires active editor context, cannot be called in .read()
+            // setIsRTL($isParentElementRTL(selection));
 
             // Update links
             const node = getSelectedNode(selection);
@@ -1813,7 +1874,9 @@ export default function ToolarPlugin({
         return editor.registerCommand(
             SELECTION_CHANGE_COMMAND,
             (_payload, newEditor) => {
-                $updateToolbar();
+                newEditor.getEditorState().read(() => {
+                    $updateToolbar();
+                });
                 setActiveEditor(newEditor);
                 return false;
             },
@@ -1965,7 +2028,7 @@ export default function ToolarPlugin({
         <>
             <style global jsx>{`
             .editor-toolbar button {
-                min-width: 1rem;
+                min-width: 2.5rem;
                 padding: 0.2rem;
                 margin: 0 0.2rem;
             }
@@ -1983,33 +2046,77 @@ export default function ToolarPlugin({
                     zIndex: (theme) => theme.zIndex.drawer + 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.85)',
                     backdropFilter: 'blur(7px)',
+                    display: 'flex',
+                    flexDirection: 'column',
                 }}
             >
-                <MainToolbar>
-                    <UnitTitleDescriptionEditor />
-                </MainToolbar>
+                <MainToolbar />
+                <UnitTitleDescriptionEditor />
             </AppBar>
             <AppBar
                 position="fixed"
                 color="default"
                 sx={{
-                    overflowX: 'auto',
-                    zIndex: (theme) => theme.zIndex.drawer + 1,
-                    top: '5.5rem',
-                    paddingTop: '0.5rem',
+                    overflowX: 'visible',
                     boxShadow: 'none',
+                    zIndex: (theme) => theme.zIndex.drawer + 1,
+                    top: '8rem',
+                    paddingTop: '0',
                     borderBottom: '1px solid #e0e0e0',
                     paddingBottom: '0.25rem',
                     backgroundColor: 'rgba(255, 255, 255, 0.85)',
                     backdropFilter: 'blur(7px)',
                 }}
             >
+                {/* Left scroll arrow */}
+                {showLeftArrow && (
+                    <Button
+                        color="inherit"
+                        onClick={() => scrollToolbar('left')}
+                        sx={{
+                            position: 'absolute',
+                            left: 0,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            zIndex: 10,
+                            minWidth: '2.5rem',
+                            height: '2rem',
+                            padding: '0.2rem',
+                            borderRadius: 0,
+                            backgroundColor: '#ffffff',
+                            border: '1px solid #e0e0e0',
+                            boxShadow: '2px 0 4px rgba(0,0,0,0.1)',
+                            '&:hover': {
+                                backgroundColor: '#f5f5f5',
+                                boxShadow: '2px 0 6px rgba(0,0,0,0.15)',
+                            },
+                        }}
+                        title="Scroll toolbar left"
+                        aria-label="Scroll toolbar left"
+                    >
+                        <KeyboardArrowLeftIcon />
+                    </Button>
+                )}
+                
                 <Toolbar
+                    ref={toolbarRef}
                     className='editor-toolbar'
                     variant="dense"
                     disableGutters={true}
+                    onScroll={checkToolbarOverflow}
                     sx={{
-                        margin: 'auto'
+                        margin: 'auto',
+                        width: '100%',
+                        maxWidth: '100%',
+                        paddingLeft: '3rem',
+                        paddingRight: '3rem',
+                        overflowX: 'auto',
+                        overflowY: 'hidden',
+                        scrollbarWidth: 'none', // Firefox
+                        '&::-webkit-scrollbar': {
+                            display: 'none' // Chrome, Safari
+                        },
+                        msOverflowStyle: 'none', // IE/Edge
                     }}
                 >
                     <Button
@@ -2045,7 +2152,7 @@ export default function ToolarPlugin({
                         <RedoIcon />
                     </Button>
 
-                    <AutoSave />
+                    <Save />
 
                     <BlockFormatDropDown
                         disabled={!isEditable}
@@ -2174,6 +2281,36 @@ export default function ToolarPlugin({
                     <DeleteModal />
 
                 </Toolbar>
+                
+                {/* Right scroll arrow */}
+                {showRightArrow && (
+                    <Button
+                        color="inherit"
+                        onClick={() => scrollToolbar('right')}
+                        sx={{
+                            position: 'absolute',
+                            right: 0,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            zIndex: 10,
+                            minWidth: '2.5rem',
+                            height: '2rem',
+                            padding: '0.2rem',
+                            borderRadius: 0,
+                            backgroundColor: '#ffffff',
+                            border: '1px solid #e0e0e0',
+                            boxShadow: '-2px 0 4px rgba(0,0,0,0.1)',
+                            '&:hover': {
+                                backgroundColor: '#f5f5f5',
+                                boxShadow: '-2px 0 6px rgba(0,0,0,0.15)',
+                            },
+                        }}
+                        title="Scroll toolbar right"
+                        aria-label="Scroll toolbar right"
+                    >
+                        <KeyboardArrowRightIcon />
+                    </Button>
+                )}
             </AppBar>
         </>
 

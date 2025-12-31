@@ -100,7 +100,9 @@ type Question @model @auth(
   hint: String
   prompt: String
   audio: [String]
+  audioWaveformData: AWSJSON # Pre-calculated waveform amplitude data for question audio
   answerAudio: [String]
+  answerAudioWaveformData: AWSJSON # Pre-calculated waveform amplitude data for answer audio
   generated: Boolean
   model: String
   promptHex: String

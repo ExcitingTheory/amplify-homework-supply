@@ -13,7 +13,7 @@ import {BlockWithAlignableContents} from '@lexical/react/LexicalBlockWithAlignab
 import {
 DecoratorBlockNode,
 } from '@lexical/react/LexicalDecoratorBlockNode';
-import useLexicalEditable from '@lexical/react/useLexicalEditable';
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import * as React from 'react';
 import { useEffect, useContext, useState, useRef } from 'react';
 

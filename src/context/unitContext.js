@@ -29,12 +29,10 @@ const UnitProvider = ({ children, id }) => {
   const [username, setUsername] = React.useState(null);
 
   const versionRef = useRef(0);
-  const expectedNextVersionRef = useRef(null);
   const editorStateRef = useRef();
   const editorSelectionRef = useRef();
   const unitRef = useRef({});
   const usernameRef = useRef(null);
-  const unitVersionRef = useRef(0);
 
   // Memoize derived values to prevent recalculation on every render
   const name = React.useMemo(() => unit?.name, [unit?.name]);
@@ -421,7 +419,6 @@ const UnitProvider = ({ children, id }) => {
 
       // Update all state - version check ensures data has changed
       unitRef.current = _newUnit;
-      unitVersionRef.current = _newUnit?._version || 0;
       setUnit(_newUnit);
       setDictionary(_dictionary);
       setFiles(_files);
@@ -448,10 +445,8 @@ const UnitProvider = ({ children, id }) => {
       : JSON.stringify(_editorContent);
 
     try {
-      // Optimistically update version before save
-      const predictedNextVersion = currentUnit._version + 1;
-      versionRef.current = predictedNextVersion;
-      
+      // Save without optimistic version update
+      // Version will be updated by DataStore subscription when save completes
       await DataStore.save(
         Unit.copyOf(currentUnit, updated => {
           updated.data = newContent;
@@ -459,8 +454,6 @@ const UnitProvider = ({ children, id }) => {
       );
     } catch (errors) {
       console.error('[saveEditorContent] Save failed:', errors);
-      // Roll back version on error
-      versionRef.current = currentUnit._version;
     }
   }, [id]);
 

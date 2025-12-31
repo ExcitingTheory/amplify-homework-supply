@@ -517,7 +517,14 @@ const ChatSidebar = () => {
                             }}
                         >
                             <ChatIcon sx={{ fontSize: 48, mb: 2, opacity: 0.3 }} />
-                            <Typography variant="body2">
+                            <Typography 
+                                variant="body2"
+                                sx={{ 
+                                    wordWrap: 'break-word',
+                                    textAlign: 'center',
+                                    whiteSpace: 'normal'
+                                }}
+                            >
                                 Ask me anything about your curriculum, files, or content!
                             </Typography>
                         </Box>

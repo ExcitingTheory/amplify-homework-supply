@@ -25,6 +25,7 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
+    Autocomplete,
 } from "@mui/material";
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
@@ -1087,6 +1088,7 @@ export default function FileManager() {
             style={{
                 position: 'relative',
                 width: '100%',
+                height: 'calc(100vh - 11rem)',
                 overflowY: 'auto',
                 overflowX: 'hidden',
             }}
@@ -1199,32 +1201,40 @@ export default function FileManager() {
                     {generator === 'suggestions' && (
                         <Box sx={{ width: '100%' }}>
                             {/* Document selector */}
-                            <FormControl fullWidth sx={{ mb: 2, px: 1 }}>
-                                <InputLabel>Select Document</InputLabel>
-                                <Select
-                                    value={selectedDocument || ''}
-                                    onChange={(e) => setSelectedDocument(e.target.value)}
-                                    label="Select Document"
-                                    size="small"
-                                >
-                                    {files
-                                        .filter(file => 
-                                            file.mimeType === 'application/pdf' || 
-                                            file.mimeType === 'text/plain' ||
-                                            file.mimeType === 'text/markdown' ||
-                                            file.mimeType === 'text/csv'
-                                        )
-                                        .map((file) => {
-                                            const docStatus = documentStatuses[file.path];
-                                            return (
-                                                <MenuItem key={file.id} value={docStatus?.id}>
-                                                    {file.name}
-                                                    {docStatus?.status === 'completed' && ' ✓'}
-                                                </MenuItem>
-                                            );
-                                        })}
-                                </Select>
-                            </FormControl>
+                            <Autocomplete
+                                fullWidth
+                                size="small"
+                                options={files.filter(file => 
+                                    file.mimeType === 'application/pdf' || 
+                                    file.mimeType === 'text/plain' ||
+                                    file.mimeType === 'text/markdown' ||
+                                    file.mimeType === 'text/csv'
+                                )}
+                                getOptionLabel={(file) => {
+                                    const docStatus = documentStatuses[file.path];
+                                    return `${file.name}${docStatus?.status === 'completed' ? ' ✓' : ''}`;
+                                }}
+                                value={files.find(f => {
+                                    const docStatus = documentStatuses[f.path];
+                                    return docStatus?.id === selectedDocument;
+                                }) || null}
+                                onChange={(event, newValue) => {
+                                    if (newValue) {
+                                        const docStatus = documentStatuses[newValue.path];
+                                        setSelectedDocument(docStatus?.id);
+                                    } else {
+                                        setSelectedDocument(null);
+                                    }
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Select Document"
+                                        placeholder="Search documents..."
+                                    />
+                                )}
+                                sx={{ mb: 2, px: 1 }}
+                            />
                             
                             {/* Show suggestions if document is selected */}
                             {selectedDocument ? (
@@ -1341,7 +1351,7 @@ export default function FileManager() {
                     )}
                     
                     {/* Search for other tabs */}
-                    {generator !== 'upload' && (
+                    {generator !== 'upload' || generator !== "suggestions=" && (
                         <Box
                             sx={{
                                 display: 'flex',

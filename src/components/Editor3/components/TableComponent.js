@@ -24,6 +24,7 @@ import {
   CUT_COMMAND,
   EditorThemeClasses,
   FORMAT_TEXT_COMMAND,
+  HISTORY_PUSH_TAG,
   KEY_ARROW_DOWN_COMMAND,
   KEY_ARROW_LEFT_COMMAND,
   KEY_ARROW_RIGHT_COMMAND,
@@ -196,7 +197,7 @@ function $updateCells(
       const newJSON = JSON.stringify(cellEditor.getEditorState());
       updateTableNode((tableNode) => {
         const [x, y] = cellCoordMap.get(id);
-        $addUpdateTag('history-push');
+        $addUpdateTag(HISTORY_PUSH_TAG);
         tableNode.updateCellJSON(x, y, newJSON);
       });
     }
@@ -379,7 +380,7 @@ function TableActionMenu({
         className="item"
         onClick={() => {
           updateTableNode((tableNode) => {
-            $addUpdateTag('history-push');
+            $addUpdateTag(HISTORY_PUSH_TAG);
             tableNode.updateCellType(
               x,
               y,
@@ -448,7 +449,7 @@ function TableActionMenu({
         className="item"
         onClick={() => {
           updateTableNode((tableNode) => {
-            $addUpdateTag('history-push');
+            $addUpdateTag(HISTORY_PUSH_TAG);
             tableNode.insertRowAt(y);
           });
           onClose();
@@ -459,7 +460,7 @@ function TableActionMenu({
         className="item"
         onClick={() => {
           updateTableNode((tableNode) => {
-            $addUpdateTag('history-push');
+            $addUpdateTag(HISTORY_PUSH_TAG);
             tableNode.insertRowAt(y + 1);
           });
           onClose();
@@ -471,7 +472,7 @@ function TableActionMenu({
         className="item"
         onClick={() => {
           updateTableNode((tableNode) => {
-            $addUpdateTag('history-push');
+            $addUpdateTag(HISTORY_PUSH_TAG);
             tableNode.insertColumnAt(x);
           });
           onClose();
@@ -482,7 +483,7 @@ function TableActionMenu({
         className="item"
         onClick={() => {
           updateTableNode((tableNode) => {
-            $addUpdateTag('history-push');
+            $addUpdateTag(HISTORY_PUSH_TAG);
             tableNode.insertColumnAt(x + 1);
           });
           onClose();
@@ -495,7 +496,7 @@ function TableActionMenu({
           className="item"
           onClick={() => {
             updateTableNode((tableNode) => {
-              $addUpdateTag('history-push');
+              $addUpdateTag(HISTORY_PUSH_TAG);
               tableNode.deleteColumnAt(x);
             });
             onClose();
@@ -508,7 +509,7 @@ function TableActionMenu({
           className="item"
           onClick={() => {
             updateTableNode((tableNode) => {
-              $addUpdateTag('history-push');
+              $addUpdateTag(HISTORY_PUSH_TAG);
               tableNode.deleteRowAt(y);
             });
             onClose();
@@ -520,7 +521,7 @@ function TableActionMenu({
         className="item"
         onClick={() => {
           updateTableNode((tableNode) => {
-            $addUpdateTag('history-push');
+            $addUpdateTag(HISTORY_PUSH_TAG);
             tableNode.selectNext();
             tableNode.remove();
           });
@@ -736,14 +737,14 @@ export default function TableComponent({
 
   const addColumns = () => {
     updateTableNode((tableNode) => {
-      $addUpdateTag('history-push');
+      $addUpdateTag(HISTORY_PUSH_TAG);
       tableNode.addColumns(1);
     });
   };
 
   const addRows = () => {
     updateTableNode((tableNode) => {
-      $addUpdateTag('history-push');
+      $addUpdateTag(HISTORY_PUSH_TAG);
       tableNode.addRows(1);
     });
   };
@@ -777,7 +778,7 @@ export default function TableComponent({
         if (coords === undefined) {
           return;
         }
-        $addUpdateTag('history-push');
+        $addUpdateTag(HISTORY_PUSH_TAG);
         const [x, y] = coords;
         tableNode.updateCellJSON(x, y, json);
       });
@@ -931,7 +932,7 @@ export default function TableComponent({
         }
         updateTableNode((tableNode) => {
           const [x] = cellCoordMap.get(resizingID);
-          $addUpdateTag('history-push');
+          $addUpdateTag(HISTORY_PUSH_TAG);
           tableNode.updateColumnWidth(x, newWidth);
         });
         setResizingID(null);
@@ -982,7 +983,7 @@ export default function TableComponent({
         const newJSON = JSON.stringify(cellEditor.getEditorState());
         const [x, y] = cellCoordMap.get(cell.id);
         updateTableNode((tableNode) => {
-          $addUpdateTag('history-push');
+          $addUpdateTag(HISTORY_PUSH_TAG);
           tableNode.updateCellJSON(x, y, newJSON);
         });
       };
@@ -1068,7 +1069,7 @@ export default function TableComponent({
         setSelectedCellIDs(NO_CELLS);
       };
 
-      doc.addEventListener('dblclick', handleDblClick);
+      doc.addEventListener('dblclick', handleDblClick, { passive: true });
       doc.addEventListener('keydown', handleKeyDown);
 
       return () => {
@@ -1102,7 +1103,7 @@ export default function TableComponent({
       return true;
     } else if (isSelected) {
       updateTableNode((tableNode) => {
-        $addUpdateTag('history-push');
+        $addUpdateTag(HISTORY_PUSH_TAG);
         tableNode.selectNext();
         tableNode.remove();
       });
@@ -1239,7 +1240,7 @@ export default function TableComponent({
               const pasteRows = extractRowsFromHTML(possibleTableElement);
               updateTableNode((tableNode) => {
                 const [x, y] = cellCoordMap.get(primarySelectedCellID)
-                $addUpdateTag('history-push');
+                $addUpdateTag(HISTORY_PUSH_TAG);
                 tableNode.mergeRows(x, y, pasteRows);
               });
               return;

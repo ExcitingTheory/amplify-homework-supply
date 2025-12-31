@@ -7,14 +7,14 @@
  */
 
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import useLexicalEditable from '@lexical/react/useLexicalEditable';
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import {
   $getTableColumnIndexFromTableCellNode,
   $getTableNodeFromLexicalNodeOrThrow,
   $getTableRowIndexFromTableCellNode,
   $isTableCellNode,
   $isTableRowNode,
-  getCellFromTarget,
+  getDOMCellFromTarget,
 } from '@lexical/table';
 import {
   $getNearestNodeFromDOMNode,
@@ -102,7 +102,7 @@ function TableCellResizer({editor}) {
 
         if (targetRef.current !== target) {
           targetRef.current = target;
-          const cell = getCellFromTarget(target);
+          const cell = getDOMCellFromTarget(target);
 
           if (cell && activeCell !== cell) {
             editor.update(() => {
