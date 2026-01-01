@@ -23,7 +23,7 @@ import * as React from 'react';
  * 
  * @param {Object} props - Component props
  * @param {string} props.className - CSS class name
- * @param {string} props.format - Block format/alignment
+ * @param {string} props.format - format/alignment
  * @param {string} props.nodeKey - Lexical node key
  * @param {string} props.videoID - YouTube video identifier
  * @returns {JSX.Element} YouTube iframe component

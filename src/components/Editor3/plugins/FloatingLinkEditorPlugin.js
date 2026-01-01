@@ -137,20 +137,43 @@ function FloatingLinkEditor({
         const selection = $getSelection();
         let linkNode = null;
         
+        console.log('[FloatingLinkEditor] updateLinkEditor called, selection:', selection);
+        
         if ($isRangeSelection(selection)) {
             const node = getSelectedNode(selection);
             const parent = node.getParent();
             
-            // Check for both regular links and auto-links
-            linkNode = $isLinkNode(parent) || $isAutoLinkNode(parent) 
-                ? parent 
-                : ($isLinkNode(node) || $isAutoLinkNode(node) ? node : null);
+            console.log('[FloatingLinkEditor] node type:', node.getType(), 'parent type:', parent?.getType());
+            
+            // Check multiple ways to find a link node
+            // 1. Check if node itself is a link
+            if ($isLinkNode(node) || $isAutoLinkNode(node)) {
+                linkNode = node;
+                console.log('[FloatingLinkEditor] Found link as node itself');
+            }
+            // 2. Check if parent is a link
+            else if ($isLinkNode(parent) || $isAutoLinkNode(parent)) {
+                linkNode = parent;
+                console.log('[FloatingLinkEditor] Found link as parent');
+            }
+            // 3. Check ancestors
+            else {
+                linkNode = $findMatchingParent(node, (n) => $isLinkNode(n) || $isAutoLinkNode(n));
+                if (linkNode) {
+                    console.log('[FloatingLinkEditor] Found link in ancestors');
+                }
+            }
             
             if (linkNode) {
-                setLinkUrl(linkNode.getURL());
+                const url = linkNode.getURL();
+                console.log('[FloatingLinkEditor] Link URL:', url);
+                setLinkUrl(url);
             } else {
+                console.log('[FloatingLinkEditor] No link found');
                 setLinkUrl('');
             }
+        } else {
+            console.log('[FloatingLinkEditor] Selection is not a RangeSelection');
         }
         
         const editorElem = editorRef.current;
@@ -181,8 +204,9 @@ function FloatingLinkEditor({
             }
             
             // Fallback to native selection if we couldn't get the link element
-            if (!domRect && nativeSelection.focusNode?.parentElement) {
-                domRect = nativeSelection.focusNode.parentElement.getBoundingClientRect();
+            if (!domRect && isLink && nativeSelection.rangeCount > 0) {
+                const range = nativeSelection.getRangeAt(0);
+                domRect = range.getBoundingClientRect();
             }
             
             if (domRect && isLink) {
@@ -210,7 +234,7 @@ function FloatingLinkEditor({
         }
 
         return true;
-    }, [anchorElem, editor, drawerWidth, isLink]);
+    }, [anchorElem, editor, drawerWidth, isLink, verticalGap]);
 
     useEffect(() => {
         const scrollerElem = anchorElem.parentElement;
@@ -247,7 +271,9 @@ function FloatingLinkEditor({
             editor.registerCommand(
                 SELECTION_CHANGE_COMMAND,
                 () => {
-                    updateLinkEditor();
+                    editor.getEditorState().read(() => {
+                        updateLinkEditor();
+                    });
                     return true;
                 },
                 COMMAND_PRIORITY_LOW,
@@ -367,6 +393,7 @@ function FloatingLinkEditor({
                 <>
                     <Button
                         className="link-cancel"
+                        aria-label="Cancel link editing"
                         title="Cancel link editing"
                         role="button"
                         tabIndex={0}
@@ -392,6 +419,7 @@ function FloatingLinkEditor({
                     />
                         <Button
                             className="link-confirm"
+                            aria-label="Confirm link"
                             title="Confirm link"
                             role="button"
                             tabIndex={0}
@@ -404,6 +432,7 @@ function FloatingLinkEditor({
             ) : (
                 <>
                     <Button
+                        aria-label="Close link editor"
                         className="link-close"
                         role="button"
                         tabIndex={0}
@@ -425,6 +454,7 @@ function FloatingLinkEditor({
                     {isYouTubeUrl && (
                         <Button
                             className="link-youtube"
+                            aria-label="YouTube Embed"
                             title="Convert to YouTube embed"
                             role="button"
                             tabIndex={0}
@@ -436,7 +466,8 @@ function FloatingLinkEditor({
                     )}
                     <Button
                         className="link-edit"
-                        title="Edit link "
+                        aria-label="Edit link"
+                        title="Edit link"
                         role="button"
                         tabIndex={0}
                         onMouseDown={(event) => event.preventDefault()}
@@ -448,6 +479,7 @@ function FloatingLinkEditor({
                         <EditIcon />
                     </Button>
                     <Button
+                        aria-label="Remove link"
                         className="link-trash"
                         title="Remove link"
                         role="button"
@@ -474,22 +506,45 @@ function useFloatingLinkEditorToolbar(
     const [activeEditor, setActiveEditor] = useState(editor);
     const [isLink, setIsLink] = useState(false);
 
+    console.log('[FloatingLinkEditorPlugin] useFloatingLinkEditorToolbar initialized');
+
     const updateToolbar = useCallback(() => {
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
             const node = getSelectedNode(selection);
+            const parent = node.getParent();
+            
+            // Check if the node itself is a link
+            const isNodeLink = $isLinkNode(node) || $isAutoLinkNode(node);
+            
+            // Check if parent is a link
+            const isParentLink = $isLinkNode(parent) || $isAutoLinkNode(parent);
+            
+            // Check ancestors using $findMatchingParent
             const linkParent = $findMatchingParent(node, $isLinkNode);
             const autoLinkParent = $findMatchingParent(node, $isAutoLinkNode);
-            
-            // Also check if the node itself is a link
-            const isNodeLink = $isLinkNode(node) || $isAutoLinkNode(node);
+
+            // Debug logging
+            console.log('[FloatingLinkEditor] Selection update:', {
+                isNodeLink,
+                isParentLink,
+                hasLinkParent: linkParent != null,
+                hasAutoLinkParent: autoLinkParent != null,
+                nodeType: node.getType(),
+                parentType: parent?.getType(),
+            });
 
             // Show for both regular links and auto links
-            if (linkParent != null || autoLinkParent != null || isNodeLink) {
+            if (isNodeLink || isParentLink || linkParent != null || autoLinkParent != null) {
+                console.log('[FloatingLinkEditor] Setting isLink to TRUE');
                 setIsLink(true);
             } else {
+                console.log('[FloatingLinkEditor] Setting isLink to FALSE');
                 setIsLink(false);
             }
+        } else {
+            console.log('[FloatingLinkEditor] No RangeSelection, setting isLink to FALSE');
+            setIsLink(false);
         }
     }, []);
 
@@ -503,7 +558,9 @@ function useFloatingLinkEditorToolbar(
             editor.registerCommand(
                 SELECTION_CHANGE_COMMAND,
                 (_payload, newEditor) => {
-                    updateToolbar();
+                    newEditor.getEditorState().read(() => {
+                        updateToolbar();
+                    });
                     setActiveEditor(newEditor);
                     return false;
                 },

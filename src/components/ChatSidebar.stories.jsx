@@ -98,7 +98,12 @@ export default {
             <strong>📘 Demo Mode:</strong> AWS services (DataStore, Auth) and chat API (/api/chat) are mocked. 
             File uploads and streaming responses are simulated!
           </div>
-          <div style={{ height: '700px', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ 
+            height: '700px', 
+            display: 'flex', 
+            flexDirection: 'column',
+            overflow: 'hidden' // Let the ChatSidebar handle its own scrolling
+          }}>
             <FilesContext.Provider value={{
               files: mockFiles,
               session: mockSession,

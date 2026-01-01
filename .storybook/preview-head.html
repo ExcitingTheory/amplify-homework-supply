@@ -17,3 +17,73 @@
     }
   };
 </script>
+
+<style>
+  /* Improve Storybook scrolling behavior */
+  
+  /* Ensure Storybook canvas can scroll properly */
+  #storybook-root {
+    height: 100vh;
+    overflow: auto;
+  }
+  
+  /* For fullscreen stories, ensure proper viewport usage */
+  .sb-show-main.sb-main-fullscreen {
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+    overflow: auto;
+  }
+  
+  /* Wrapper improvements */
+  .storybook-wrapper {
+    min-height: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Improve scrollbars on webkit browsers */
+  .storybook-wrapper::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .storybook-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  .storybook-wrapper::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+  
+  .storybook-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+
+  /* Ensure Next.js page components can scroll within Storybook */
+  .storybook-wrapper > div {
+    min-height: 100%;
+    overflow: visible;
+  }
+
+  /* Fix any layout issues with Material UI components in Storybook */
+  .MuiCssBaseline-root {
+    height: auto !important;
+  }
+  
+  /* Hide any empty divs that might appear at the bottom */
+  .storybook-wrapper + div:empty {
+    display: none !important;
+  }
+  
+  /* Hide empty divs that might be siblings of the main content */
+  #storybook-root > div:empty {
+    display: none !important;
+  }
+  
+  /* Hide any trailing empty divs */
+  div:empty:last-child {
+    display: none !important;
+  }
+</style>

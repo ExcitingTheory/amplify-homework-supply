@@ -15,6 +15,10 @@ const config = {
     options: {},
   },
 
+  reactOptions: {
+    strictMode: false,
+  },
+
   docs: {
     autodocs: "tag",
   },

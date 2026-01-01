@@ -1,5 +1,5 @@
 /**
- * @fileoverview WordBlockPlugin - Displays vocabulary word information in block format.
+ * @fileoverview WordBlockPlugin - Displays vocabulary word information in a card.
  * @module WordBlockPlugin
  * 
  * Creates an interactive word block that displays a vocabulary word's phrase,

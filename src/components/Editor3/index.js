@@ -281,12 +281,11 @@ export default function Editor() {
   } = useContext(UnitContext);
   const [floatingAnchorElem, setFloatingAnchorElem] = useState(null);
 
-  // Memoize initial editor configuration to prevent remounting
-  // const initialConfig = React.useMemo(() => ({
-  //   namespace: 'LanguageEditor',
-  //   nodes: [...EditorNodes],
-  //   onError,
-  // }), []); // Empty deps - never recreate
+  const onRef = (_floatingAnchorElem) => {
+    if (_floatingAnchorElem !== null) {
+      setFloatingAnchorElem(_floatingAnchorElem);
+    }
+  };
 
   const initialConfig = {
   namespace: 'LanguageEditor',
@@ -352,7 +351,6 @@ export default function Editor() {
 
             
         `}</style>
-            <ToolBarPlugin />
             {/* MINIMAL PLUGIN SET FOR DEBUGGING */}
             <AutoFocusPlugin />
             <CheckListPlugin />
@@ -451,6 +449,7 @@ export default function Editor() {
                   contentEditable={
                     <ContentEditable
                       className="editor"
+                      ref={onRef}
                       aria-placeholder="Enter some text..."
                       style={{
                         height: 'calc(100vh - 11rem)',
@@ -607,10 +606,12 @@ export function Workbook() {
                 />
               </Drawer>
               <Box component="main" sx={{ 
-                flexGrow: 1, 
+                flexGrow: 1,
+                flexShrink: 1,
+                minWidth: 0,
+                margin: 0,
                 padding: 0,
-                width: openTab ? `calc(100% - ${actualDrawerWidth}px)` : 'calc(100% - 2.5rem)',
-                transition: 'width 0.3s ease',
+                boxSizing: 'border-box',
               }}>
                 <DrawerHeader
                   style={{

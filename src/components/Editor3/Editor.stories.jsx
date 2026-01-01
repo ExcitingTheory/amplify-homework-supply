@@ -79,7 +79,7 @@ export const EmptyEditorTextFormatting = {
   loaders: [
     async () => {
       seedMockUnit({
-        id: 'empty-editor-id',
+        id: 'empty-editor-text-formatting-id',
         name: 'Empty Editor: Text Formatting',
         description: 'A blank editor to start creating content',
         data: null,
@@ -90,7 +90,7 @@ export const EmptyEditorTextFormatting = {
   ],
   render: () => <Editor />,
   parameters: {
-    unitId: 'empty-editor-id',
+    unitId: 'empty-editor-text-formatting-id',
   },
   play: async ({ canvas, userEvent }) => {
     // Wait for editor to load
@@ -101,7 +101,9 @@ export const EmptyEditorTextFormatting = {
     await userEvent.keyboard('Heading 1');
     
     // Open Block Format dropdown and select H1
-    const blockFormatSelect = canvas.getByRole('combobox', { name: /block format/i });
+    // MUI Select renders multiple elements with role="combobox", so we select the first one
+    const blockFormatSelects = canvas.getAllByRole('combobox', { name: /block format/i });
+    const blockFormatSelect = blockFormatSelects[0];
     await userEvent.click(blockFormatSelect);
     
     // Options render in portal, use screen to find them
@@ -133,7 +135,9 @@ export const EmptyEditorTextFormatting = {
     const bulletBtn = await screen.findByRole('option', { name: /Bulleted/i });
     await userEvent.click(bulletBtn);
     await userEvent.keyboard('First list item{Enter}Second list item{Enter}');
-    const alignMenu = canvas.getByRole('button', { name: /Align/i });
+    // Multiple Align buttons may be rendered, so we select the first one
+    const alignMenus = canvas.getAllByRole('button', { name: /Align/i });
+    const alignMenu = alignMenus[0];
     await userEvent.click(alignMenu);
     const indentBtn = await screen.findByRole('menuitem', { name: /Indent/i });
     await userEvent.click(indentBtn);
@@ -177,21 +181,27 @@ export const EmptyEditorTextFormatting = {
     
     // hit enter, click bold button, type bold text, click bold button again to toggle off
     await userEvent.keyboard('{Enter}');
-    const boldButton = await canvas.getByRole('button', { name: /Bold/i });
+    // Multiple Bold buttons may be rendered, so we select the first one
+    const boldButtons = canvas.getAllByRole('button', { name: /Bold/i });
+    const boldButton = boldButtons[0];
     await userEvent.click(boldButton);
     await userEvent.keyboard('This text is bold.');
     await userEvent.click(boldButton);
 
     // Italic text
     await userEvent.keyboard('{Enter}');
-    const italicButton = await canvas.getByRole('button', { name: /Italic/i });
+    // Multiple Italic buttons may be rendered, so we select the first one
+    const italicButtons = canvas.getAllByRole('button', { name: /Italic/i });
+    const italicButton = italicButtons[0];
     await userEvent.click(italicButton);
     await userEvent.keyboard('This text is italic.');
     await userEvent.click(italicButton);
 
     // Underlined text
     await userEvent.keyboard('{Enter}');
-    const underlineButton = await canvas.getByRole('button', { name: /Underline/i });
+    // Multiple Underline buttons may be rendered, so we select the first one
+    const underlineButtons = canvas.getAllByRole('button', { name: /Underline/i });
+    const underlineButton = underlineButtons[0];
     await userEvent.click(underlineButton);
     await userEvent.keyboard('This text is underlined.');
     await userEvent.click(underlineButton);
@@ -209,7 +219,9 @@ export const EmptyEditorTextFormatting = {
     // Strikethrough text
     await userEvent.keyboard('{Enter}');
     // open Text Format dropdown
-    const textFormatSelect = canvas.getByRole('button', { name: /Formatting options for text styles/i });
+    // Multiple text format buttons may be rendered, so we select the first one
+    const textFormatSelects = canvas.getAllByRole('button', { name: /Formatting options for text styles/i });
+    const textFormatSelect = textFormatSelects[0];
     await userEvent.click(textFormatSelect);
     let strikethroughOption = await screen.findByRole('menuitem', { name: /Strikethrough/i });
     await userEvent.click(strikethroughOption);
@@ -266,7 +278,7 @@ export const EmptyEditorCustomBlocks = {
   loaders: [
     async () => {
       seedMockUnit({
-        id: 'empty-editor-id',
+        id: 'empty-editor-custom-blocksid',
         name: 'Empty Editor: Custom Blocks',
         description: 'A blank editor to start creating content',
         data: null,
@@ -277,7 +289,7 @@ export const EmptyEditorCustomBlocks = {
   ],
   render: () => <Editor />,
   parameters: {
-    unitId: 'empty-editor-id',
+    unitId: 'empty-editor-custom-blocksid',
   },
   play: async ({ canvas, userEvent }) => {
     // Wait for editor to load
@@ -291,7 +303,9 @@ export const EmptyEditorCustomBlocks = {
     await userEvent.keyboard('Visit our website');
     // Select the text "website"
     await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
-    const linkButton = canvas.getByRole('button', { name: /Insert link/i });
+    // Multiple Insert link buttons may be rendered, so we select the first one
+    const linkButtons = canvas.getAllByRole('button', { name: /Insert link/i });
+    const linkButton = linkButtons[0];
     await userEvent.click(linkButton);
     // The floating link editor appears outside the canvas with title "Edit link"
     const editLinkBtn = await screen.findByRole('button', { name: 'Edit link' });
@@ -311,25 +325,31 @@ export const EmptyEditorCustomBlocks = {
     await userEvent.keyboard('{ArrowDown} {Enter}');
     // Make a youtube embed link
     await userEvent.keyboard('Watch this video: https://www.youtube.com/watch?v=dQw4w9WgXcQ');
-    // arrow back into the link and open the link editor
-    await userEvent.keyboard('{ArrowLeft}{ArrowLeft}{ArrowLeft}');
-    // click link to open floating link editor
-    userEvent.click();
-    // press youtube button
+    // Select the URL to open the floating link editor
+    await userEvent.keyboard('{Shift>}');
+    for (let i = 0; i < 43; i++) {
+      await userEvent.keyboard('{ArrowLeft}');
+    }
+    await userEvent.keyboard('{/Shift}');
+    // Wait for floating link editor to appear and click YouTube Embed button
     const youtubeBtn = await screen.findByRole('button', { name: /YouTube Embed/i });
     await userEvent.click(youtubeBtn);
     // confirm youtube embed
 
 
     // Insert Due Date
-    const insertMenu = canvas.getByRole('button', { name: /Insert Item Menu/i });
+    // Multiple Insert Item Menu buttons may be rendered, so we select the first one
+    const insertMenus = canvas.getAllByRole('button', { name: /Insert Item Menu/i });
+    const insertMenu = insertMenus[0];
     await userEvent.click(insertMenu);
     const dueDateOption = await screen.getByRole('menuitem', { name: /Due Date/i });
     await userEvent.click(dueDateOption);
     // Interact with due date dialog if needed
     const dueDateInput = await screen.getByRole('textbox', { name: /Set Unit Due Date/i });
     await userEvent.type(dueDateInput, '2026/01/01 10:00AM');
-    const selectSection = canvas.getByRole('combobox', { name: /Select Section/i });
+    // MUI Select renders multiple elements with role="combobox", so we select the first one
+    const selectSections = canvas.getAllByRole('combobox', { name: /Select Section/i });
+    const selectSection = selectSections[0];
     await userEvent.click(selectSection);
     // Select first option
     const firstSectionOption = await screen.getByRole('option', { name: /Section 1/i });
@@ -395,7 +415,9 @@ export const EmptyEditorCustomBlocks = {
     await userEvent.keyboard('{Enter}');
 
     // Use Filemanager to insert an image
-    const fileManagerBtn = canvas.getByRole('button', { name: /File Manager/i });
+    // Multiple File Manager buttons may be rendered, so we select the first one
+    const fileManagerBtns = canvas.getAllByRole('button', { name: /File Manager/i });
+    const fileManagerBtn = fileManagerBtns[0];
     await userEvent.click(fileManagerBtn);
     // Navigate file manager and select image
     const imageTab = await screen.getByRole('tab', { name: /Images/i });
@@ -434,7 +456,9 @@ export const EmptyEditorCustomBlocks = {
     await userEvent.keyboard('{Enter}');
 
     // Use Sidebar to set Featured Image
-    const sidebarBtn = canvas.getByRole('button', { name: /Sidebar/i });
+    // Multiple Sidebar buttons may be rendered, so we select the first one
+    const sidebarBtns = canvas.getAllByRole('button', { name: /Sidebar/i });
+    const sidebarBtn = sidebarBtns[0];
     await userEvent.click(sidebarBtn);
     const featuredImageSection = await screen.findByText(/Featured Image/i);
     await userEvent.click(featuredImageSection);
@@ -443,7 +467,9 @@ export const EmptyEditorCustomBlocks = {
     await userEvent.keyboard('{Enter}');
 
     // Open the content in preview
-    const previewBtn = canvas.getByRole('button', { name: /Preview/i });
+    // Multiple Preview buttons may be rendered, so we select the first one
+    const previewBtns = canvas.getAllByRole('button', { name: /Preview/i });
+    const previewBtn = previewBtns[0];
     await userEvent.click(previewBtn);
     // Wait for preview to load
     await screen.findByText(/Preview Mode/i);

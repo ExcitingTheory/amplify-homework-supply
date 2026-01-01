@@ -34,6 +34,16 @@ const meta = {
         pathname: '/',
       },
     },
+    // Ensure viewport can scroll for long pages
+    viewport: {
+      defaultViewport: 'responsive',
+    },
+    // Add docs configuration for better rendering
+    docs: {
+      canvas: {
+        sourceState: 'shown',
+      },
+    },
   },
   tags: ['autodocs'],
 };

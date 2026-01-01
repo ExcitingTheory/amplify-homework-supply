@@ -92,6 +92,14 @@ const preview = {
     nextjs: {
       appDirectory: false,
     },
+    // Add viewport configuration for better responsive testing
+    viewport: {
+      defaultViewport: 'responsive',
+    },
+    // Configure layout settings for scrolling
+    layout: {
+      padded: false,
+    },
   },
   tags: ['autodocs'],
   decorators: [
@@ -99,20 +107,38 @@ const preview = {
       // Try to get unitId from story args or parameters
       const unitId = context?.args?.unitId || context?.parameters?.unitId || 'mock-unit-id';
       
+      // Check if this is a fullscreen layout story (like pages)
+      const isFullscreen = context?.parameters?.layout === 'fullscreen';
+      
       return (
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <AudioPlayerProvider>
-            <FilesProvider>
-              <DictionaryProvider>
-                <UnitProvider id={unitId}>
-                  <SectionProvider unitId={unitId}>
-                    <Story />
-                  </SectionProvider>
-                </UnitProvider>
-              </DictionaryProvider>
-            </FilesProvider>
-          </AudioPlayerProvider>
+          <div 
+            className="storybook-wrapper"
+            style={{
+              height: isFullscreen ? '100vh' : 'auto',
+              width: '100%',
+              overflow: isFullscreen ? 'auto' : 'visible',
+              position: 'relative',
+              // Ensure proper scrolling for fullscreen layouts
+              ...(isFullscreen && {
+                overflowX: 'auto',
+                overflowY: 'auto',
+              })
+            }}
+          >
+            <AudioPlayerProvider>
+              <FilesProvider>
+                <DictionaryProvider>
+                  <UnitProvider id={unitId}>
+                    <SectionProvider unitId={unitId}>
+                      <Story />
+                    </SectionProvider>
+                  </UnitProvider>
+                </DictionaryProvider>
+              </FilesProvider>
+            </AudioPlayerProvider>
+          </div>
         </ThemeProvider>
       );
     },
@@ -122,7 +148,7 @@ const preview = {
       // Clear previous mock data before each story
       clearMockUnits();
       console.log('[Preview] Cleared mock data for story');
-      return {};
+      return null; // Return null instead of empty object to avoid extra div
     },
   ],
 };
