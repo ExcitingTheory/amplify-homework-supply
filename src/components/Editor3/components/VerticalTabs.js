@@ -36,9 +36,7 @@ function TabPanel(props) {
         width: '100%',
         minWidth: 0,
         height: 'calc(100vh - var(--app-bar-height, 11rem))',
-        overflowY,
-        overflowX: 'hidden',
-        // flexShrink: 1,
+        overflow: overflowY === 'hidden' ? 'hidden' : 'auto',
       }}
       {...other}
     >
@@ -77,6 +75,7 @@ export default function VerticalTabs({
         bgcolor: 'background.paper', 
         display: 'flex',
         flexDirection: 'row',
+        borderRight: '1px solid #e0e0e0',
       }}
     >
       <Tabs
@@ -96,7 +95,7 @@ export default function VerticalTabs({
             margin: 0,
           },
           '& .MuiTabs-scroller': {
-            borderRight: 'none',
+            borderRight: '1px solid #e0e0e0',
             margin: 0,
           }
         }}
@@ -141,19 +140,19 @@ export default function VerticalTabs({
         <Tab label="Item Six" {...a11yProps(5)} />
         <Tab label="Item Seven" {...a11yProps(6)} /> */}
       </Tabs>
-      <TabPanel value={value} index={0} overflowY='auto'>
+      <TabPanel value={value} index={0}>
         <AssignmentConfiguration />
       </TabPanel>
-      <TabPanel value={value} index={1} overflowY='auto'>
+      <TabPanel value={value} index={1}>
         <TableOfContents />
       </TabPanel>
-      <TabPanel value={value} index={2} overflowY='auto' >
+      <TabPanel value={value} index={2} overflowY='hidden' >
         <DictionaryEditor />
       </TabPanel>
-      <TabPanel value={value} index={3} overflowY='auto'>
+      <TabPanel value={value} index={3} overflowY='hidden'>
         <QuestionEditor />
       </TabPanel>  
-      <TabPanel value={value} index={4}>
+      <TabPanel value={value} index={4} overflowY='hidden'>
         <FileManager />
       </TabPanel>
       <TabPanel value={value} index={5} overflowY='hidden'>

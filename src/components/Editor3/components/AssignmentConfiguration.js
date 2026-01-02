@@ -183,7 +183,6 @@ export default function AssignmentConfiguration() {
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
-
         }}
       >
         <Box

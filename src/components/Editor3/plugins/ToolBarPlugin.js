@@ -661,7 +661,7 @@ const UnitTitleDescriptionEditor = () => {
             </Head>
             <Box sx={{ flexGrow: 1, px: 2, py: 0.5, minHeight: '2.5rem', display: 'flex', alignItems: 'center' }}>
                 {!editName &&
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} onClick={(event) => {
+                    <Typography variant="h6" component="div" sx={{ flexGrow: 1, lineHeight: '2rem', borderBottom: '1px solid transparent', pb: '2px' }} onClick={(event) => {
                         setEditName(true)
                     }}>
                         {newName || 'Untitled Unit'}
@@ -675,6 +675,9 @@ const UnitTitleDescriptionEditor = () => {
                         value={newName}
                         placeholder='Untitled Unit'
                         onChange={(event) => { onNameChange(event) }}
+                        InputProps={{
+                            sx: { fontSize: '1.25rem', fontWeight: 400 }
+                        }}
                         inputRef={(input) => {
                             if (input != null) {
                                 input.focus();
@@ -692,7 +695,7 @@ const UnitTitleDescriptionEditor = () => {
 
             <Box sx={{ flexGrow: 1, px: 2, py: 0.5, minHeight: '2rem', display: 'flex', alignItems: 'center' }}>
                 {!editDescription &&
-                    <Typography variant="body2" component="div" sx={{ flexGrow: 1 }} onClick={(event) => {
+                    <Typography variant="body2" component="div" sx={{ flexGrow: 1, lineHeight: '1.5rem', borderBottom: '1px solid transparent', pb: '2px' }} onClick={(event) => {
                         // event.preventDefault()
                         setEditDescription(true)
                     }}>
@@ -708,6 +711,9 @@ const UnitTitleDescriptionEditor = () => {
                         value={newDescription}
                         placeholder='Add Description'
                         onChange={(event) => { onDescriptionChange(event) }}
+                        InputProps={{
+                            sx: { fontSize: '0.875rem' }
+                        }}
                         inputRef={(input) => {
                             if (input != null) {
                                 input.focus();

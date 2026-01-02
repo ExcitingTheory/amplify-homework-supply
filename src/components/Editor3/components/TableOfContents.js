@@ -90,6 +90,8 @@ export default function TableOfContents() {
                 primaryTypographyProps={{
                   variant: heading.level === 1 ? 'body1' : 'body2',
                   fontWeight: heading.level === 1 ? 600 : 400,
+                  whiteSpace: 'normal',
+                  wordWrap: 'break-word',
                 }}
               />
             </ListItemButton>

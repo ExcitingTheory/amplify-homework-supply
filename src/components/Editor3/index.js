@@ -371,6 +371,10 @@ export default function Editor() {
               border: 1px dashed #ccc;
             }
 
+            .editor:focus {
+              outline: none;
+              box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
 
             
         `}</style>
@@ -475,6 +479,7 @@ export default function Editor() {
                         maxWidth: '100%',
                         overflowY: 'auto',
                         overflowX: 'auto',
+                        outline: 'none',
                       }}
                     />
                   }
