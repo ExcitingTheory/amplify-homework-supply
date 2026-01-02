@@ -265,6 +265,12 @@ export const getQuestion = /* GraphQL */ `query GetQuestion($id: ID!) {
     promptHex
     byPromptHex
     thumbnail
+    difficulty
+    questionType
+    metadata
+    sourceDocumentID
+    approved
+    importedAt
     units {
       items {
         id
@@ -355,6 +361,12 @@ export const listQuestions = /* GraphQL */ `query ListQuestions(
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -419,6 +431,12 @@ export const syncQuestions = /* GraphQL */ `query SyncQuestions(
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -485,6 +503,12 @@ export const questionsByByPromptHex = /* GraphQL */ `query QuestionsByByPromptHe
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3117,6 +3141,12 @@ export const getQuestionUnit = /* GraphQL */ `query GetQuestionUnit($id: ID!) {
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3232,6 +3262,12 @@ export const listQuestionUnits = /* GraphQL */ `query ListQuestionUnits(
         promptHex
         byPromptHex
         thumbnail
+        difficulty
+        questionType
+        metadata
+        sourceDocumentID
+        approved
+        importedAt
         createdAt
         updatedAt
         _version
@@ -3307,6 +3343,12 @@ export const syncQuestionUnits = /* GraphQL */ `query SyncQuestionUnits(
         promptHex
         byPromptHex
         thumbnail
+        difficulty
+        questionType
+        metadata
+        sourceDocumentID
+        approved
+        importedAt
         createdAt
         updatedAt
         _version
@@ -3384,6 +3426,12 @@ export const questionUnitsByQuestionId = /* GraphQL */ `query QuestionUnitsByQue
         promptHex
         byPromptHex
         thumbnail
+        difficulty
+        questionType
+        metadata
+        sourceDocumentID
+        approved
+        importedAt
         createdAt
         updatedAt
         _version
@@ -3461,6 +3509,12 @@ export const questionUnitsByUnitId = /* GraphQL */ `query QuestionUnitsByUnitId(
         promptHex
         byPromptHex
         thumbnail
+        difficulty
+        questionType
+        metadata
+        sourceDocumentID
+        approved
+        importedAt
         createdAt
         updatedAt
         _version
@@ -3530,6 +3584,12 @@ export const getQuestionWord = /* GraphQL */ `query GetQuestionWord($id: ID!) {
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3625,6 +3685,12 @@ export const listQuestionWords = /* GraphQL */ `query ListQuestionWords(
         promptHex
         byPromptHex
         thumbnail
+        difficulty
+        questionType
+        metadata
+        sourceDocumentID
+        approved
+        importedAt
         createdAt
         updatedAt
         _version
@@ -3700,6 +3766,12 @@ export const syncQuestionWords = /* GraphQL */ `query SyncQuestionWords(
         promptHex
         byPromptHex
         thumbnail
+        difficulty
+        questionType
+        metadata
+        sourceDocumentID
+        approved
+        importedAt
         createdAt
         updatedAt
         _version
@@ -3777,6 +3849,12 @@ export const questionWordsByQuestionId = /* GraphQL */ `query QuestionWordsByQue
         promptHex
         byPromptHex
         thumbnail
+        difficulty
+        questionType
+        metadata
+        sourceDocumentID
+        approved
+        importedAt
         createdAt
         updatedAt
         _version
@@ -3854,6 +3932,12 @@ export const questionWordsByWordId = /* GraphQL */ `query QuestionWordsByWordId(
         promptHex
         byPromptHex
         thumbnail
+        difficulty
+        questionType
+        metadata
+        sourceDocumentID
+        approved
+        importedAt
         createdAt
         updatedAt
         _version
@@ -3923,6 +4007,12 @@ export const getQuestionFile = /* GraphQL */ `query GetQuestionFile($id: ID!) {
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -4025,6 +4115,12 @@ export const listQuestionFiles = /* GraphQL */ `query ListQuestionFiles(
         promptHex
         byPromptHex
         thumbnail
+        difficulty
+        questionType
+        metadata
+        sourceDocumentID
+        approved
+        importedAt
         createdAt
         updatedAt
         _version
@@ -4107,6 +4203,12 @@ export const syncQuestionFiles = /* GraphQL */ `query SyncQuestionFiles(
         promptHex
         byPromptHex
         thumbnail
+        difficulty
+        questionType
+        metadata
+        sourceDocumentID
+        approved
+        importedAt
         createdAt
         updatedAt
         _version
@@ -4191,6 +4293,12 @@ export const questionFilesByQuestionId = /* GraphQL */ `query QuestionFilesByQue
         promptHex
         byPromptHex
         thumbnail
+        difficulty
+        questionType
+        metadata
+        sourceDocumentID
+        approved
+        importedAt
         createdAt
         updatedAt
         _version
@@ -4275,6 +4383,12 @@ export const questionFilesByFileId = /* GraphQL */ `query QuestionFilesByFileId(
         promptHex
         byPromptHex
         thumbnail
+        difficulty
+        questionType
+        metadata
+        sourceDocumentID
+        approved
+        importedAt
         createdAt
         updatedAt
         _version

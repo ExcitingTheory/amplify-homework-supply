@@ -20,7 +20,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import { DataStore } from 'aws-amplify/datastore';
-import { ParsedContent, Word, Question, Document } from '../../../models';
+import { ParsedContent, Word, Question, Document, QuestionUnit } from '../../../models';
 
 /**
  * Component to display and approve suggested vocabulary from parsed documents
@@ -566,11 +566,11 @@ export function SuggestedQuestions({ documentId, unitId, onImport }) {
             });
 
             try {
-                await DataStore.save(new Question({
+                // Create the question
+                const newQuestion = await DataStore.save(new Question({
                     prompt: questionData.prompt,
                     answer: questionData.answer || '',
                     hint: questionData.hint || '',
-                    unitID: unitId,
                     sourceDocumentID: documentId,
                     approved: true,
                     importedAt: new Date().toISOString(),
@@ -578,6 +578,14 @@ export function SuggestedQuestions({ documentId, unitId, onImport }) {
                     questionType: questionData.questionType || 'comprehension',
                     metadata: JSON.stringify(questionData.metadata || {}),
                 }));
+
+                // Create QuestionUnit junction record to link question to unit
+                if (unitId) {
+                    await DataStore.save(new QuestionUnit({
+                        questionId: newQuestion.id,
+                        unitId: unitId,
+                    }));
+                }
 
                 imported++;
             } catch (error) {

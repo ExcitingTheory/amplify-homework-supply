@@ -242,6 +242,48 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "difficulty": {
+                    "name": "difficulty",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "questionType": {
+                    "name": "questionType",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "metadata": {
+                    "name": "metadata",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "sourceDocumentID": {
+                    "name": "sourceDocumentID",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "approved": {
+                    "name": "approved",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "importedAt": {
+                    "name": "importedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "units": {
                     "name": "units",
                     "isArray": true,
@@ -3282,5 +3324,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "87a8d8cb2bf49b7cf5e1e6fc665f9f69"
+    "version": "07686cc8526a5c9a193d96f0a6747975"
 };

@@ -108,6 +108,12 @@ type Question @model @auth(
   promptHex: String
   byPromptHex: String @index(name: "byPromptHex")
   thumbnail: String # The path to the thumbnail in S3
+  difficulty: String
+  questionType: String  
+  metadata: String
+  sourceDocumentID: ID
+  approved: Boolean
+  importedAt: AWSDateTime
   # many to many relationships
   units: [Unit] @manyToMany(relationName: "QuestionUnit")
   words: [Word] @manyToMany(relationName: "QuestionWord")

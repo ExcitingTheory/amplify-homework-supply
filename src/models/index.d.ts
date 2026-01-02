@@ -143,6 +143,12 @@ type EagerQuestion = {
   readonly promptHex?: string | null;
   readonly byPromptHex?: string | null;
   readonly thumbnail?: string | null;
+  readonly difficulty?: string | null;
+  readonly questionType?: string | null;
+  readonly metadata?: string | null;
+  readonly sourceDocumentID?: string | null;
+  readonly approved?: boolean | null;
+  readonly importedAt?: string | null;
   readonly units?: (QuestionUnit | null)[] | null;
   readonly words?: (QuestionWord | null)[] | null;
   readonly files?: (QuestionFile | null)[] | null;
@@ -171,6 +177,12 @@ type LazyQuestion = {
   readonly promptHex?: string | null;
   readonly byPromptHex?: string | null;
   readonly thumbnail?: string | null;
+  readonly difficulty?: string | null;
+  readonly questionType?: string | null;
+  readonly metadata?: string | null;
+  readonly sourceDocumentID?: string | null;
+  readonly approved?: boolean | null;
+  readonly importedAt?: string | null;
   readonly units: AsyncCollection<QuestionUnit>;
   readonly words: AsyncCollection<QuestionWord>;
   readonly files: AsyncCollection<QuestionFile>;

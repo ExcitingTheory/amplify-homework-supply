@@ -409,6 +409,12 @@ export const createQuestion = /* GraphQL */ `mutation CreateQuestion(
     promptHex
     byPromptHex
     thumbnail
+    difficulty
+    questionType
+    metadata
+    sourceDocumentID
+    approved
+    importedAt
     units {
       items {
         id
@@ -497,6 +503,12 @@ export const updateQuestion = /* GraphQL */ `mutation UpdateQuestion(
     promptHex
     byPromptHex
     thumbnail
+    difficulty
+    questionType
+    metadata
+    sourceDocumentID
+    approved
+    importedAt
     units {
       items {
         id
@@ -585,6 +597,12 @@ export const deleteQuestion = /* GraphQL */ `mutation DeleteQuestion(
     promptHex
     byPromptHex
     thumbnail
+    difficulty
+    questionType
+    metadata
+    sourceDocumentID
+    approved
+    importedAt
     units {
       items {
         id
@@ -3287,6 +3305,12 @@ export const createQuestionUnit = /* GraphQL */ `mutation CreateQuestionUnit(
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3405,6 +3429,12 @@ export const updateQuestionUnit = /* GraphQL */ `mutation UpdateQuestionUnit(
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3523,6 +3553,12 @@ export const deleteQuestionUnit = /* GraphQL */ `mutation DeleteQuestionUnit(
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3641,6 +3677,12 @@ export const createQuestionWord = /* GraphQL */ `mutation CreateQuestionWord(
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3739,6 +3781,12 @@ export const updateQuestionWord = /* GraphQL */ `mutation UpdateQuestionWord(
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3837,6 +3885,12 @@ export const deleteQuestionWord = /* GraphQL */ `mutation DeleteQuestionWord(
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3935,6 +3989,12 @@ export const createQuestionFile = /* GraphQL */ `mutation CreateQuestionFile(
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -4040,6 +4100,12 @@ export const updateQuestionFile = /* GraphQL */ `mutation UpdateQuestionFile(
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -4145,6 +4211,12 @@ export const deleteQuestionFile = /* GraphQL */ `mutation DeleteQuestionFile(
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt

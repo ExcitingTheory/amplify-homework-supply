@@ -114,6 +114,12 @@ export const onCreateQuestion = /* GraphQL */ `subscription OnCreateQuestion(
     promptHex
     byPromptHex
     thumbnail
+    difficulty
+    questionType
+    metadata
+    sourceDocumentID
+    approved
+    importedAt
     units {
       items {
         id
@@ -202,6 +208,12 @@ export const onUpdateQuestion = /* GraphQL */ `subscription OnUpdateQuestion(
     promptHex
     byPromptHex
     thumbnail
+    difficulty
+    questionType
+    metadata
+    sourceDocumentID
+    approved
+    importedAt
     units {
       items {
         id
@@ -290,6 +302,12 @@ export const onDeleteQuestion = /* GraphQL */ `subscription OnDeleteQuestion(
     promptHex
     byPromptHex
     thumbnail
+    difficulty
+    questionType
+    metadata
+    sourceDocumentID
+    approved
+    importedAt
     units {
       items {
         id
@@ -2995,6 +3013,12 @@ export const onCreateQuestionUnit = /* GraphQL */ `subscription OnCreateQuestion
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3113,6 +3137,12 @@ export const onUpdateQuestionUnit = /* GraphQL */ `subscription OnUpdateQuestion
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3231,6 +3261,12 @@ export const onDeleteQuestionUnit = /* GraphQL */ `subscription OnDeleteQuestion
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3349,6 +3385,12 @@ export const onCreateQuestionWord = /* GraphQL */ `subscription OnCreateQuestion
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3447,6 +3489,12 @@ export const onUpdateQuestionWord = /* GraphQL */ `subscription OnUpdateQuestion
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3545,6 +3593,12 @@ export const onDeleteQuestionWord = /* GraphQL */ `subscription OnDeleteQuestion
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3643,6 +3697,12 @@ export const onCreateQuestionFile = /* GraphQL */ `subscription OnCreateQuestion
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3748,6 +3808,12 @@ export const onUpdateQuestionFile = /* GraphQL */ `subscription OnUpdateQuestion
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
@@ -3853,6 +3919,12 @@ export const onDeleteQuestionFile = /* GraphQL */ `subscription OnDeleteQuestion
       promptHex
       byPromptHex
       thumbnail
+      difficulty
+      questionType
+      metadata
+      sourceDocumentID
+      approved
+      importedAt
       units {
         nextToken
         startedAt
