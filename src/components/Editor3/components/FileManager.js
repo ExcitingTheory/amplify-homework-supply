@@ -26,6 +26,7 @@ import {
     DialogContent,
     DialogActions,
     Autocomplete,
+    Menu,
 } from "@mui/material";
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
@@ -38,6 +39,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import UploadFile from '@mui/icons-material/UploadFile';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 import FilesContext from "../../../context/fileContext";
 import SettingsContext from "../../../context/settingsContext";
@@ -208,7 +210,7 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
 
                             console.log('fileGenerator', fileGenerator)
 
-                            
+
                             const path = fileGenerator?.data?.generateImageFile?.path;
 
                             if (path) {
@@ -271,15 +273,14 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
                         transform: 'translate(-50%, -50%)',
                         width: 400,
                         bgcolor: 'background.paper',
-                        boxShadow: 24,
-                        style: { 
+                        style: {
                             minWidth: '20vw',
                             maxWidth: '80vw',
                             minHeight: '20vw',
                             maxHeight: '80vw',
                             padding: '1rem',
 
-                         },
+                        },
                     }}
 
                 >
@@ -330,7 +331,7 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
                      * Add a button to download the image?
                      */}
 
-                     {/**
+                    {/**
                       * Add a button to share the image?
                       */}
 
@@ -609,7 +610,7 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
 
                             console.log('fileGenerator', fileGenerator)
 
-                            
+
                             const path = fileGenerator?.data?.generateAudioFile?.path;
 
                             if (path) {
@@ -671,16 +672,15 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
                         transform: 'translate(-50%, -50%)',
                         width: 400,
                         bgcolor: 'background.paper',
-                        boxShadow: 24,
                         p: 4,
-                        style: { 
+                        style: {
                             minWidth: '20vw',
                             maxWidth: '80vw',
                             minHeight: '20vw',
                             maxHeight: '80vw',
                             padding: '1rem',
 
-                         },
+                        },
                     }}
 
                 >
@@ -780,6 +780,7 @@ export default function FileManager() {
     const [editor] = useLexicalComposerContext();
     const [search, setSearch] = React.useState('');
     const [searching, setSearching] = React.useState(false);
+    const [searchMenuAnchor, setSearchMenuAnchor] = React.useState(null);
     const apiRef = useSimpleTreeViewApiRef();
 
     const handleSearch = (e) => {
@@ -788,9 +789,9 @@ export default function FileManager() {
 
     const handleSearchSubmit = () => {
         if (!search.trim()) return;
-        
+
         const searchLower = search.toLowerCase();
-        
+
         // Filter files based on active tab
         let filteredFiles = files;
         if (generator === 'image') {
@@ -798,8 +799,8 @@ export default function FileManager() {
         } else if (generator === 'audio') {
             filteredFiles = files.filter(f => f.mimeType.includes('audio'));
         } else if (generator === 'document') {
-            filteredFiles = files.filter(f => 
-                f.mimeType === 'application/pdf' || 
+            filteredFiles = files.filter(f =>
+                f.mimeType === 'application/pdf' ||
                 f.mimeType === 'text/plain' ||
                 f.mimeType === 'text/markdown' ||
                 f.mimeType === 'text/csv' ||
@@ -807,11 +808,11 @@ export default function FileManager() {
                 f.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
             );
         }
-        
-        const matchingFile = filteredFiles.find(file => 
+
+        const matchingFile = filteredFiles.find(file =>
             file.name.toLowerCase().includes(searchLower)
         );
-        
+
         if (matchingFile) {
             // Expand the appropriate category
             if (matchingFile.mimeType.includes('image')) {
@@ -819,20 +820,20 @@ export default function FileManager() {
             } else if (matchingFile.mimeType.includes('audio')) {
                 apiRef.current?.setItemExpansion('audio', true);
             } else if (
-                matchingFile.mimeType === 'application/pdf' || 
+                matchingFile.mimeType === 'application/pdf' ||
                 matchingFile.mimeType === 'text/plain' ||
                 matchingFile.mimeType === 'text/markdown' ||
                 matchingFile.mimeType === 'text/csv' ||
                 matchingFile.mimeType === 'application/msword' ||
                 matchingFile.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-            ) { 
+            ) {
                 apiRef.current?.setItemExpansion('documents', true);
             }
-            
+
             // Focus and scroll to the item
             setTimeout(() => {
                 apiRef.current?.focusItem(matchingFile.id);
-                apiRef.current?.getItemDOMElement(matchingFile.id)?.scrollIntoView({ 
+                apiRef.current?.getItemDOMElement(matchingFile.id)?.scrollIntoView({
                     block: 'nearest',
                     behavior: 'smooth'
                 });
@@ -853,13 +854,21 @@ export default function FileManager() {
     const [generator, setGenerator] = React.useState('all');
     const [selectedDocument, setSelectedDocument] = React.useState(null);
     const [suggestionTab, setSuggestionTab] = React.useState(0);
-    
+    const [expandedItems, setExpandedItems] = React.useState(['images', 'audio', 'documents']);
+
     const [settings, setSettings] = React.useState(null);
     const [documentStatuses, setDocumentStatuses] = React.useState({});
 
     const { files, session } = React.useContext(FilesContext);
     const { identityId } = session;
     const { unit } = React.useContext(UnitContext);
+
+    // Filter files based on search term
+    const filteredFiles = React.useMemo(() => {
+        if (!search.trim()) return files;
+        const searchLower = search.toLowerCase();
+        return files.filter(file => file.name.toLowerCase().includes(searchLower));
+    }, [files, search]);
 
     console.log('FilesContext.files', files);
 
@@ -881,10 +890,10 @@ export default function FileManager() {
                 }
             }
         });
-        
+
         return () => subscription.unsubscribe();
     }, []);
-    
+
     // Subscribe to Document status changes
     React.useEffect(() => {
         const subscription = DataStore.observeQuery(Document).subscribe(({ items }) => {
@@ -900,10 +909,10 @@ export default function FileManager() {
             setDocumentStatuses(statusMap);
             console.log('[FileManager] Document statuses updated:', statusMap);
         });
-        
+
         return () => subscription.unsubscribe();
     }, []);
-    
+
     // Helper function to get status display info
     const getDocumentStatusInfo = (status) => {
         const statusConfig = {
@@ -962,7 +971,7 @@ export default function FileManager() {
     const toggleNewFileForm = () => {
         const newState = !newFileFormOpen;
         setNewFileFormOpen(newState);
-        
+
         // When opening, also open the form for the current tab
         if (newState) {
             if (generator === 'image') {
@@ -1085,19 +1094,13 @@ export default function FileManager() {
 
     return (
         <>
-            <Toolbar
-                color="default"
+            {/* Sticky Header with Tabs and Search */}
+            <Box
                 sx={{
-                    flexGrow: 1,
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    margin: 0,
-                    padding: '0 !important',
                     position: 'sticky',
                     top: 0,
                     bgcolor: 'background.paper',
-                    zIndex: 1,
-                    minHeight: '0 !important',
+                    zIndex: 100,
                 }}
             >
                 {/* Tabs for filtering files and generating content */}
@@ -1109,16 +1112,19 @@ export default function FileManager() {
                         setNewImageFileFormOpen(false);
                         setNewAudioFileFormOpen(false);
                         setNewVideoFileFormOpen(false);
-                        
+
                         // Expand the appropriate tree section
-                        if (newValue === 'image' && apiRef.current) {
-                            apiRef.current.setItemExpansion('images', true);
-                        } else if (newValue === 'audio' && apiRef.current) {
-                            apiRef.current.setItemExpansion('audio', true);
-                        } else if (newValue === 'document' && apiRef.current) {
-                            apiRef.current.setItemExpansion('documents', true);
+                        if (newValue === 'image') {
+                            setExpandedItems(['images']);
+                        } else if (newValue === 'audio') {
+                            setExpandedItems(['audio']);
+                        } else if (newValue === 'document') {
+                            setExpandedItems(['documents']);
+                        } else if (newValue === 'all') {
+                            // Expand all categories when "all" is selected
+                            setExpandedItems(['images', 'audio', 'documents']);
                         }
-                        
+
                         // Open the selected form if generation is active
                         if (newFileFormOpen) {
                             if (newValue === 'image') {
@@ -1130,9 +1136,9 @@ export default function FileManager() {
                     }}
                     variant="scrollable"
                     scrollButtons="auto"
-                    sx={{ 
-                        borderBottom: 1, 
-                        borderColor: 'divider', 
+                    sx={{
+                        borderBottom: 1,
+                        borderColor: 'divider',
                         width: '100%',
                         padding: 0,
                         minHeight: 0,
@@ -1147,96 +1153,202 @@ export default function FileManager() {
                         },
                     }}
                 >
-                    <Tab 
+                    <Tab
                         label={
                             <Tooltip title="All Files">
                                 <FolderIcon fontSize="small" />
                             </Tooltip>
                         }
-                        value="all" 
+                        value="all"
                     />
-                    <Tab 
+                    <Tab
                         label={
                             <Tooltip title="Images">
                                 <ImageIcon fontSize="small" />
                             </Tooltip>
                         }
-                        value="image" 
+                        value="image"
                     />
-                    <Tab 
+                    <Tab
                         label={
                             <Tooltip title="Audio">
                                 <AudioFileIcon fontSize="small" />
                             </Tooltip>
                         }
-                        value="audio" 
+                        value="audio"
                     />
-                    <Tab 
+                    <Tab
                         label={
                             <Tooltip title="Documents">
                                 <PictureAsPdfIcon fontSize="small" />
                             </Tooltip>
                         }
-                        value="document" 
+                        value="document"
                     />
-                    <Tab 
+                    <Tab
                         label={
                             <Tooltip title="Suggestions">
                                 <AutoAwesomeIcon fontSize="small" />
                             </Tooltip>
                         }
-                        value="suggestions" 
-                    />
-                    <Tab 
-                        label={
-                            <Tooltip title="Upload Files">
-                                <UploadFile fontSize="small" />
-                            </Tooltip>
-                        }
-                        value="upload" 
+                        value="suggestions"
                     />
                 </Tabs>
 
-                {/* Tab Content */}
-                <Box sx={{ width: '100%', mt: 1, borderBottom: '1px solid #e0e0e0' }}>
-                    {/* Suggestions Tab Content */}
+                {/* Sticky Search Bar - Different content per tab */}
+                {generator !== 'suggestions' && (
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            gap: 1,
+                            px: 1,
+                            py: 1,
+                            bgcolor: 'background.paper',
+                            borderBottom: '1px solid #e0e0e0'
+                        }}
+                    >
+                        <TextField
+                            value={search}
+                            onInput={handleSearch}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    handleSearchSubmit();
+                                }
+                            }}
+                            size="small"
+                            fullWidth
+                            placeholder={`Search ${generator === 'all' ? 'all files' : generator === 'image' ? 'images' : generator === 'audio' ? 'audio' : generator === 'document' ? 'documents' : 'files'}...`}
+                            label="Search"
+                        />
+
+                        {searching && (
+                            <IconButton size="small" aria-label="searching" disabled>
+                                <CircularProgress size={20} />
+                            </IconButton>
+                        )}
+
+                        {!searching && (
+                            <>
+                                <IconButton
+                                    size="small"
+                                    aria-label="search files"
+                                    onClick={handleSearchSubmit}
+                                >
+                                    <SearchIcon />
+                                </IconButton>
+                                <IconButton
+                                    size="small"
+                                    aria-label="search options"
+                                    onClick={(e) => setSearchMenuAnchor(e.currentTarget)}
+                                >
+                                    <MoreVertIcon />
+                                </IconButton>
+                                <Menu
+                                    anchorEl={searchMenuAnchor}
+                                    open={Boolean(searchMenuAnchor)}
+                                    onClose={() => setSearchMenuAnchor(null)}
+                                >
+                                    <MenuItem onClick={() => {
+                                        setSearch('');
+                                        setSearchMenuAnchor(null);
+                                    }}>Clear Search</MenuItem>
+                                </Menu>
+                            </>
+                        )}
+
+                        {/* Tab-specific action buttons */}
+                        {generator === 'image' && (
+                            <Tooltip title="Generate Image">
+                                <IconButton
+                                    onClick={() => toggleNewFileForm()}
+                                    color="primary"
+                                    size="small"
+                                >
+                                    <AutoAwesomeIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+
+                        {generator === 'audio' && (
+                            <Tooltip title="Generate Audio">
+                                <IconButton
+                                    onClick={() => toggleNewFileForm()}
+                                    color="primary"
+                                    size="small"
+                                >
+                                    <AutoAwesomeIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+
+                        {(generator === 'all' || generator === 'document') && (
+                            <Tooltip title="Upload Files">
+                                <IconButton
+                                    onClick={() => {
+                                        document.getElementById('file-upload-input')?.click();
+                                    }}
+                                    color="primary"
+                                    size="small"
+                                >
+                                    <UploadFile fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+                    </Box>
+                )}
+            </Box>
+
+            {/* Scrollable Content Area */}
+            <Box sx={{ width: '100%' }}>
+                {/* Suggestions Tab Content */}
                     {generator === 'suggestions' && (
                         <Box sx={{ width: '100%' }}>
-                            {/* Document selector */}
-                            <Autocomplete
-                                fullWidth
-                                size="small"
-                                options={files.filter(file => 
-                                    file.mimeType === 'application/pdf' || 
-                                    file.mimeType === 'text/plain' ||
-                                    file.mimeType === 'text/markdown' ||
-                                    file.mimeType === 'text/csv'
-                                )}
-                                getOptionLabel={(file) => {
-                                    const docStatus = documentStatuses[file.path];
-                                    return `${file.name}${docStatus?.status === 'completed' ? ' ✓' : ''}`;
+                            {/* Document selector header */}
+                            <Box
+                                sx={{
+                                    px: 1,
+                                    py: 1,
+                                    bgcolor: 'background.paper',
+                                    borderBottom: '1px solid #e0e0e0'
                                 }}
-                                value={files.find(f => {
-                                    const docStatus = documentStatuses[f.path];
-                                    return docStatus?.id === selectedDocument;
-                                }) || null}
-                                onChange={(event, newValue) => {
-                                    if (newValue) {
-                                        const docStatus = documentStatuses[newValue.path];
-                                        setSelectedDocument(docStatus?.id);
-                                    } else {
-                                        setSelectedDocument(null);
-                                    }
-                                }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label="Select Document"
-                                        placeholder="Search documents..."
-                                    />
-                                )}
-                                sx={{ mb: 2, px: 1 }}
-                            />
+                            >
+                                <Autocomplete
+                                    fullWidth
+                                    size="small"
+                                    options={files.filter(file =>
+                                        file.mimeType === 'application/pdf' ||
+                                        file.mimeType === 'text/plain' ||
+                                        file.mimeType === 'text/markdown' ||
+                                        file.mimeType === 'text/csv'
+                                    )}
+                                    getOptionLabel={(file) => {
+                                        const docStatus = documentStatuses[file.path];
+                                        return `${file.name}${docStatus?.status === 'completed' ? ' ✓' : ''}`;
+                                    }}
+                                    value={files.find(f => {
+                                        const docStatus = documentStatuses[f.path];
+                                        return docStatus?.id === selectedDocument;
+                                    }) || null}
+                                    onChange={(event, newValue) => {
+                                        if (newValue) {
+                                            const docStatus = documentStatuses[newValue.path];
+                                            setSelectedDocument(docStatus?.id);
+                                        } else {
+                                            setSelectedDocument(null);
+                                        }
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Select Document"
+                                            placeholder="Search documents..."
+                                        />
+                                    )}
+                                />
+                            </Box>
                             
                             {/* Show suggestions if document is selected */}
                             {selectedDocument ? (
@@ -1245,15 +1357,15 @@ export default function FileManager() {
                                         value={suggestionTab}
                                         onChange={(e, newValue) => setSuggestionTab(newValue)}
                                         variant="fullWidth"
-                                        sx={{ borderBottom: 1, borderColor: 'divider', mb: 2, px: 1 }}
+                                        sx={{ borderBottom: 1, borderColor: 'divider', px: 1 }}
                                     >
                                         <Tab label="Vocabulary" />
                                         <Tab label="Questions" />
                                     </Tabs>
-                                    
+
                                     {/* Vocabulary Tab */}
                                     {suggestionTab === 0 && (
-                                        <SuggestedVocabulary 
+                                        <SuggestedVocabulary
                                             documentId={selectedDocument}
                                             unitId={unit?.id}
                                             onImport={(count) => {
@@ -1261,10 +1373,10 @@ export default function FileManager() {
                                             }}
                                         />
                                     )}
-                                    
+
                                     {/* Questions Tab */}
                                     {suggestionTab === 1 && (
-                                        <SuggestedQuestions 
+                                        <SuggestedQuestions
                                             documentId={selectedDocument}
                                             unitId={unit?.id}
                                             onImport={(count) => {
@@ -1275,596 +1387,485 @@ export default function FileManager() {
                                 </>
                             ) : (
                                 <Box sx={{ p: 2, textAlign: 'center' }}>
-                                    <Typography variant="body2" color="text.secondary">
+                                    <Typography 
+                                        variant="body2" 
+                                        color="text.secondary" 
+                                        sx={{ 
+                                            whiteSpace: 'normal',
+                                            wordWrap: 'break-word',
+                                            overflowWrap: 'break-word'
+                                        }}
+                                    >
                                         Select a document to review AI-generated vocabulary and question suggestions
                                     </Typography>
                                 </Box>
                             )}
                         </Box>
                     )}
-                    
-                    {/* Upload Tab Content */}
-                    {generator === 'upload' && (
-                        <Box 
-                            sx={{ p: 2, textAlign: 'center', position: 'relative' }}
-                            onDragOver={handleDragOver}
-                            onDrop={handleDrop}
-                            onDragLeave={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setIsDragging(false);
-                            }}
-                        >
-                            {isDragging && (
-                                <div
-                                    onDragOver={handleDragOver}
-                                    onDrop={handleDrop}
-                                    onDragLeave={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        setIsDragging(false);
-                                    }}
-                                    style={{
-                                        color: '#000',
-                                        fontSize: '2rem',
-                                        fontWeight: 'bold',
-                                        textAlign: 'center',
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        width: '100%',
-                                        height: '100%',
-                                        zIndex: 100,
-                                        backgroundColor: 'rgb(255, 255, 255, 0.5)',
-                                        backdropFilter: 'blur(3px)',
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    Upload file(s)
-                                </div>
-                            )}
-                            <Typography variant="body2" color="text.secondary" gutterBottom>
-                                Drag and drop files here to upload
-                            </Typography>
-                            <Button
-                                fullWidth
-                                variant="contained"
-                                startIcon={<UploadFile />}
-                                onClick={() => {
-                                    document.getElementById('file-upload-input')?.click();
-                                }}
-                                sx={{ mt: 1 }}
+
+                    {/* File Tree for all, image, audio, document tabs */}
+                    {generator !== 'suggestions' && (
+                        <Box sx={{ minHeight: 200, minWidth: 250 }}>
+                            <SimpleTreeView 
+                                apiRef={apiRef}
+                                expandedItems={expandedItems}
+                                onExpandedItemsChange={(event, itemIds) => setExpandedItems(itemIds)}
                             >
-                                Choose Files
-                            </Button>
-                            <input
-                                id="file-upload-input"
-                                type="file"
-                                multiple
-                                hidden
-                                onChange={(e) => {
-                                    const files = Array.from(e.target.files || []);
-                                    setFilesToUpload(files.map((f, index) => ({ file: f, index })));
-                                }}
-                            />
-                        </Box>
-                    )}
-                    
-                    {/* Search for other tabs */}
-                    {generator !== 'upload' || generator !== "suggestions" && (
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                gap: 1,
-                                alignItems: 'center',
-                                px: 1,
-                            }}
-                        >
-                            <TextField
-                                value={search}
-                                onInput={handleSearch}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        handleSearchSubmit();
-                                    }
-                                }}
-                                size="small"
-                                fullWidth
-                                placeholder={`Search ${generator === 'all' ? 'all files' : generator === 'image' ? 'images' : generator === 'audio' ? 'audio' : generator === 'document' ? 'documents' : 'files'}...`}
-                                InputProps={{
-                                    endAdornment: (
-                                        <IconButton
-                                            size="small"
-                                            onClick={handleSearchSubmit}
-                                            disabled={searching}
-                                        >
-                                            {searching ? <CircularProgress size={20} /> : <SearchIcon />}
-                                        </IconButton>
-                                    ),
-                                }}
-                            />
-                        </Box>
-                    )}
-                    
-                    {/* Generate button for image/audio tabs */}
-                    {(generator === 'image' || generator === 'audio') && (
-                        <Button
-                            variant="contained"
-                            aria-label="Generate new File"
-                            onClick={() => {
-                                toggleNewFileForm();
-                            }}
-                            sx={{ 
-                                mx: 1, 
-                                mb: 1,
-                            }}
-                        >
-                            <AutoAwesomeIcon sx={{ mr: 1 }} />
-                            Generate {generator === 'image' ? 'Image' : 'Audio'}
-                        </Button>
-                    )}
-                </Box>
-
-                {/* Generation Modals - UnifiedGenerateModal replaces old Dialog approach */}
-                {generator === 'image' && (
-                    <ImageGeneratorButton
-                        open={newFileFormOpen}
-                        onSuccess={() => {
-                            setNewFileFormOpen(false);
-                            setNewImageFileFormOpen(false);
-                        }}
-                    />
-                )}
-                {generator === 'audio' && (
-                    <AudioGeneratorButton
-                        open={newFileFormOpen}
-                        onSuccess={() => {
-                            setNewFileFormOpen(false);
-                            setNewAudioFileFormOpen(false);
-                        }}
-                    />
-                )}
-
-            </Toolbar>
-
-
-
-            {fileOperations.map((fileOperation) => (
-                <Box
-
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '0rem',
-                        margin: '0rem',
-                        width: '100%',
-                    }}
-                >
-                    <Typography
-                        style={{
-                            margin: '0rem',
-                            padding: '0rem',
-                        }}
-                    >{fileOperation.name}</Typography>
-                    <Typography
-                        style={{
-                            margin: '0rem',
-                            padding: '0rem',
-                        }}
-                    >{fileOperation.progress}</Typography>
-                </Box>
-            ))}
-
-
-            {/* Only show TreeView when not in suggestions or upload tabs */}
-            {generator !== 'suggestions' && generator !== 'upload' && (
-                <Box sx={{ minHeight: 200, minWidth: 250 }}>
-                    <SimpleTreeView apiRef={apiRef}>
-                    {files.filter(file => file.mimeType.includes('image')).length > 0 && (
-                        <TreeItem 
-                            itemId="images"
-                            onClick={(e) => {
-                                if (generator !== 'all' && generator !== 'image') {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setGenerator('image');
-                                }
-                            }}
-                            label={
-                                <Box 
-                                    sx={{ 
-                                        opacity: generator !== 'all' && generator !== 'image' ? 0.5 : 1,
-                                    }}
-                                >
-                                    {`Images (${files.filter(f => f.mimeType.includes('image')).length})`}
-                                </Box>
-                            }
-                        >
-                            {files
-                                .filter(file => file.mimeType.includes('image'))
-                                .map((file) => (
-                                    <TreeItem
-                                        itemId={file.id}
-                                        key={file.id}
-                                        label={
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
-                                                <ListItemImage file={file} />
-                                                <Box sx={{ flex: 1, minWidth: 0 }}>
-                                                    <Typography noWrap>{file.name}</Typography>
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        {(file.size / 1000).toFixed(2)} KB
-                                                    </Typography>
-                                                </Box>
-                                                <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                                    {editor && (
-                                                        <IconButton
-                                                            size="small"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
-                                                                    altText: file.name,
-                                                                    path: file.path,
-                                                                    identityId: file.identityId,
-                                                                });
-                                                            }}
-                                                        >
-                                                            <AddIcon />
-                                                        </IconButton>
-                                                    )}
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={async (e) => {
-                                                            e.stopPropagation();
-                                                            const confirmed = window.confirm(`Are you sure you want to delete ${file.path}?`);
-                                                            if (!confirmed) return;
-                                                            await DataStore.delete(file);
-                                                            await remove(file);
-                                                        }}
-                                                    >
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </Box>
-                                            </Box>
-                                        }
-                                    />
-                                ))}
-                        </TreeItem>
-                    )}
-                    
-                    {files.filter(file => file.mimeType.includes('audio')).length > 0 && (
-                        <TreeItem
-                            itemId="audio"
-                            onClick={(e) => {
-                                if (generator !== 'all' && generator !== 'audio') {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setGenerator('audio');
-                                }
-                            }}
-                            label={
-                                <Box 
-                                    sx={{ 
-                                        opacity: generator !== 'all' && generator !== 'audio' ? 0.5 : 1,
-                                    }}
-                                >
-                                    {`Audio (${files.filter(f => f.mimeType.includes('audio')).length})`}
-                                </Box>
-                            }
-                        >
-                            {files
-                                .filter(file => file.mimeType.includes('audio'))
-                                .map((file) => (
-                                    <TreeItem
-                                        itemId={file.id}
-                                        key={file.id}
-                                        label={
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, py: 1, width: '100%' }}>
-                                                <ListItemImage file={file} />
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between' }}>
-                                                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                                        {editor && (
-                                                            <IconButton
-                                                                size="small"
-                                                            onClick={async (e) => {
-                                                                e.stopPropagation();
-                                                                editor.dispatchCommand(INSERT_PLAYLIST_COMMAND, [file.id]);
-                                                            }}
-                                                        >
-                                                            <AddIcon />
-                                                        </IconButton>
-                                                    )}
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={async (e) => {
-                                                            e.stopPropagation();
-                                                            const confirmed = window.confirm(`Are you sure you want to delete ${file.path}?`);
-                                                            if (!confirmed) return;
-                                                            await DataStore.delete(file);
-                                                            await remove(file);
-                                                        }}
-                                                    >
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </Box>
-                                            </Box>
-                                        </Box>
-                                        }
-                                    />
-                                ))}
-                        </TreeItem>
-                    )}
-                    
-                    {files.filter(file => 
-                        file.mimeType === 'application/pdf' || 
-                        file.mimeType === 'text/plain' ||
-                        file.mimeType === 'text/markdown' ||
-                        file.mimeType === 'text/csv' ||
-                        file.mimeType === 'application/msword' ||
-                        file.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                    ).length > 0 && (
-                        <TreeItem 
-                            itemId="documents"
-                            onClick={(e) => {
-                                if (generator !== 'all' && generator !== 'document') {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setGenerator('document');
-                                }
-                            }}
-                            label={
-                                <Box 
-                                    sx={{ 
-                                        opacity: generator !== 'all' && generator !== 'document' ? 0.5 : 1,
-                                    }}
-                                >
-                                    {`Documents (${files.filter(f => 
-                                        f.mimeType === 'application/pdf' || 
-                                        f.mimeType === 'text/plain' ||
-                                        f.mimeType === 'text/markdown' ||
-                                        f.mimeType === 'text/csv' ||
-                                        f.mimeType === 'application/msword' ||
-                                        f.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                                    ).length})`}
-                                </Box>
-                            }
-                        >
-                            {files
-                                .filter(file => 
-                                    file.mimeType === 'application/pdf' || 
-                                    file.mimeType === 'text/plain' ||
-                                    file.mimeType === 'text/markdown' ||
-                                    file.mimeType === 'text/csv' ||
-                                    file.mimeType === 'application/msword' ||
-                                    file.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                                )
-                                .map((file) => {
-                                    const docStatus = documentStatuses[file.path];
-                                    const statusInfo = getDocumentStatusInfo(docStatus?.status || 'uploaded');
-                                    const isProcessing = ['extracting', 'analyzing'].includes(docStatus?.status);
-                                    
-                                    // Helper function to get appropriate icon
-                                    const getDocumentIcon = (mimeType) => {
-                                        if (mimeType === 'application/pdf') return PictureAsPdfIcon;
-                                        if (mimeType === 'text/plain') return DescriptionIcon;
-                                        if (mimeType === 'text/markdown') return ArticleIcon;
-                                        if (mimeType === 'text/csv') return TableChartIcon;
-                                        if (mimeType === 'application/msword' || 
-                                            mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-                                            return ArticleIcon;
-                                        }
-                                        return DescriptionIcon;
-                                    };
-                                    
-                                    const DocumentIcon = getDocumentIcon(file.mimeType);
-                                    
-                                    return (
-                                    <TreeItem
-                                        itemId={file.id}
-                                        key={file.id}
-                                        label={
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
-                                                <DocumentIcon 
-                                                    color={statusInfo.color} 
-                                                    sx={{ 
-                                                        animation: isProcessing ? 'pulse 2s infinite' : 'none',
-                                                        '@keyframes pulse': {
-                                                            '0%, 100%': { opacity: 1 },
-                                                            '50%': { opacity: 0.5 },
-                                                        },
-                                                    }}
-                                                />
-                                                <Box sx={{ flex: 1, minWidth: 0 }}>
-                                                    <Typography noWrap>{file.name}</Typography>
-                                                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                                        <Typography variant="caption" color="text.secondary">
-                                                            {(file.size / 1000).toFixed(2)} KB
-                                                        </Typography>
-                                                        {docStatus?.pageCount && (
-                                                            <Typography variant="caption" color="text.secondary">
-                                                                • {docStatus.pageCount} pages
-                                                            </Typography>
-                                                        )}
-                                                        <Chip 
-                                                            size="small" 
-                                                            label={statusInfo.label}
-                                                            color={statusInfo.chipColor}
-                                                            icon={statusInfo.icon}
-                                                            sx={{ height: 20, fontSize: '0.7rem' }}
-                                                        />
-                                                    </Box>
-                                                </Box>
-                                                <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                                    {/* Insert PDF into editor - always available */}
-                                                    {editor && file.mimeType === 'application/pdf' && (
-                                                        <IconButton
-                                                            size="small"
-                                                            title="Insert Document"
-                                                            onClick={async (e) => {
-                                                                e.stopPropagation();
-                                                                editor.dispatchCommand(INSERT_PDF_COMMAND, {
-                                                                    path: file.path,
-                                                                    identityId: file.identityId,
-                                                                    filename: file.name,
-                                                                });
-                                                            }}
-                                                        >
-                                                            <AddIcon />
-                                                        </IconButton>
-                                                    )}
-                                                    
-                                                    {/* Cancel button - only during processing */}
-                                                    {isProcessing && (
-                                                        <IconButton
-                                                            size="small"
-                                                            title="Cancel Analysis"
-                                                            color="warning"
-                                                            onClick={async (e) => {
-                                                                e.stopPropagation();
-                                                                try {
-                                                                    const documents = await DataStore.query(Document, (d) => d.s3Key.eq(file.path));
-                                                                    if (documents.length === 0) return;
-                                                                    
-                                                                    const client = generateClient();
-                                                                    const result = await client.graphql({
-                                                                        query: cancelPDFAnalysisMutation,
-                                                                        variables: { documentID: documents[0].id }
-                                                                    });
-                                                                    
-                                                                    if (result.data.cancelPDFAnalysis.success) {
-                                                                        alert(`Analysis cancelled for: ${file.name}`);
-                                                                    }
-                                                                } catch (error) {
-                                                                    console.error('Error cancelling analysis:', error);
-                                                                    alert('Failed to cancel: ' + error.message);
-                                                                }
-                                                            }}
-                                                        >
-                                                            <CancelIcon />
-                                                        </IconButton>
-                                                    )}
-                                                    
-                                                    {/* Analyze button - only when not processing/completed */}
-                                                    {!['completed', 'analyzing', 'extracting'].includes(docStatus?.status) && (
-                                                        <IconButton
-                                                            size="small"
-                                                            title="Analyze PDF"
-                                                            disabled={isProcessing}
-                                                            onClick={async (e) => {
-                                                                e.stopPropagation();
-                                                                try {
-                                                                    // Find the Document record for this file
-                                                                    const documents = await DataStore.query(Document, (d) => d.s3Key.eq(file.path));
-                                                                    if (documents.length === 0) {
-                                                                        alert('Document record not found. Please upload the PDF again.');
-                                                                        return;
-                                                                    }
-                                                                    
-                                                                    const result = await analyzePDF(documents[0].id);
-                                                                    alert(`PDF analysis started! Document ID: ${result.documentID}`);
-                                                                } catch (error) {
-                                                                    console.error('Error analyzing PDF:', error);
-                                                                    alert('Failed to analyze PDF: ' + error.message);
-                                                                }
-                                                            }}
-                                                        >
-                                                            <AnalyticsIcon />
-                                                        </IconButton>
-                                                    )}
-                                                    
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={async (e) => {
-                                                            e.stopPropagation();
-                                                            const confirmed = window.confirm(`Are you sure you want to delete ${file.path}?`);
-                                                            if (!confirmed) return;
-                                                            await DataStore.delete(file);
-                                                            await remove(file);
-                                                        }}
-                                                    >
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </Box>
-                                            </Box>
-                                        }
-                                    />
-                                    );
-                                })}
-                        </TreeItem>
-                    )}
-                    
-                    {generator === 'all' && files
-                        .filter(file => 
-                            !file.mimeType.includes('image') && 
-                            !file.mimeType.includes('audio') && 
-                            file.mimeType !== 'application/pdf' &&
-                            file.mimeType !== 'text/plain' &&
-                            file.mimeType !== 'text/markdown' &&
-                            file.mimeType !== 'text/csv' &&
-                            file.mimeType !== 'application/msword' &&
-                            file.mimeType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                        )
-                        .length > 0 && (
-                        <TreeItem itemId="other" label={`Other Files (${files.filter(f => 
-                            !f.mimeType.includes('image') && 
-                            !f.mimeType.includes('audio') && 
-                            f.mimeType !== 'application/pdf' &&
-                            f.mimeType !== 'text/plain' &&
-                            f.mimeType !== 'text/markdown' &&
-                            f.mimeType !== 'text/csv' &&
-                            f.mimeType !== 'application/msword' &&
-                            f.mimeType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                        ).length})`}>
-                            {files
-                                .filter(file => 
-                                    !file.mimeType.includes('image') && 
-                                    !file.mimeType.includes('audio') && 
-                                    file.mimeType !== 'application/pdf' &&
-                                    file.mimeType !== 'text/plain' &&
-                                    file.mimeType !== 'text/markdown' &&
-                                    file.mimeType !== 'text/csv' &&
-                                    file.mimeType !== 'application/msword' &&
-                                    file.mimeType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                                )
-                                .map((file) => (
-                                    <TreeItem
-                                        itemId={file.id}
-                                        key={file.id}
-                                        label={
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
-                                                <Box sx={{ flex: 1, minWidth: 0 }}>
-                                                    <Typography noWrap>{file.name}</Typography>
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        {(file.size / 1000).toFixed(2)} KB
-                                                    </Typography>
-                                                </Box>
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={async (e) => {
-                                                        e.stopPropagation();
-                                                        const confirmed = window.confirm(`Are you sure you want to delete ${file.path}?`);
-                                                        if (!confirmed) return;
-                                                        await DataStore.delete(file);
-                                                        await remove(file);
+                                    {filteredFiles.filter(file => file.mimeType.includes('image')).length > 0 && (
+                                        <TreeItem
+                                            itemId="images"
+                                            onClick={(e) => {
+                                                if (generator !== 'all' && generator !== 'image') {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setGenerator('image');
+                                                }
+                                            }}
+                                            label={
+                                                <Box
+                                                    sx={{
+                                                        opacity: generator !== 'all' && generator !== 'image' ? 0.5 : 1,
                                                     }}
                                                 >
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            </Box>
-                                        }
-                                    />
-                                ))}
-                        </TreeItem>
-                    )}
-                </SimpleTreeView>
+                                                    {`Images (${filteredFiles.filter(f => f.mimeType.includes('image')).length})`}
+                                                </Box>
+                                            }
+                                        >
+                                            {filteredFiles
+                                                .filter(file => file.mimeType.includes('image'))
+                                                .map((file) => (
+                                                    <TreeItem
+                                                        itemId={file.id}
+                                                        key={file.id}
+                                                        label={
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+                                                                <ListItemImage file={file} />
+                                                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                                                    <Typography noWrap>{file.name}</Typography>
+                                                                    <Typography variant="caption" color="text.secondary">
+                                                                        {(file.size / 1000).toFixed(2)} KB
+                                                                    </Typography>
+                                                                </Box>
+                                                                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                                    {editor && (
+                                                                        <IconButton
+                                                                            size="small"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
+                                                                                    altText: file.name,
+                                                                                    path: file.path,
+                                                                                    identityId: file.identityId,
+                                                                                });
+                                                                            }}
+                                                                        >
+                                                                            <AddIcon />
+                                                                        </IconButton>
+                                                                    )}
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        onClick={async (e) => {
+                                                                            e.stopPropagation();
+                                                                            const confirmed = window.confirm(`Are you sure you want to delete ${file.path}?`);
+                                                                            if (!confirmed) return;
+                                                                            await DataStore.delete(file);
+                                                                            await remove(file);
+                                                                        }}
+                                                                    >
+                                                                        <DeleteIcon />
+                                                                    </IconButton>
+                                                                </Box>
+                                                            </Box>
+                                                        }
+                                                    />
+                                                ))}
+                                        </TreeItem>
+                                    )}
+
+                                    {filteredFiles.filter(file => file.mimeType.includes('audio')).length > 0 && (
+                                        <TreeItem
+                                            itemId="audio"
+                                            onClick={(e) => {
+                                                if (generator !== 'all' && generator !== 'audio') {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setGenerator('audio');
+                                                }
+                                            }}
+                                            label={
+                                                <Box
+                                                    sx={{
+                                                        opacity: generator !== 'all' && generator !== 'audio' ? 0.5 : 1,
+                                                    }}
+                                                >
+                                                    {`Audio (${filteredFiles.filter(f => f.mimeType.includes('audio')).length})`}
+                                                </Box>
+                                            }
+                                        >
+                                            {filteredFiles
+                                                .filter(file => file.mimeType.includes('audio'))
+                                                .map((file) => (
+                                                    <TreeItem
+                                                        itemId={file.id}
+                                                        key={file.id}
+                                                        label={
+                                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, py: 1, width: '100%' }}>
+                                                                <ListItemImage file={file} />
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between' }}>
+                                                                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                                        {editor && (
+                                                                            <IconButton
+                                                                                size="small"
+                                                                                onClick={async (e) => {
+                                                                                    e.stopPropagation();
+                                                                                    editor.dispatchCommand(INSERT_PLAYLIST_COMMAND, [file.id]);
+                                                                                }}
+                                                                            >
+                                                                                <AddIcon />
+                                                                            </IconButton>
+                                                                        )}
+                                                                        <IconButton
+                                                                            size="small"
+                                                                            onClick={async (e) => {
+                                                                                e.stopPropagation();
+                                                                                const confirmed = window.confirm(`Are you sure you want to delete ${file.path}?`);
+                                                                                if (!confirmed) return;
+                                                                                await DataStore.delete(file);
+                                                                                await remove(file);
+                                                                            }}
+                                                                        >
+                                                                            <DeleteIcon />
+                                                                        </IconButton>
+                                                                    </Box>
+                                                                </Box>
+                                                            </Box>
+                                                        }
+                                                    />
+                                                ))}
+                                        </TreeItem>
+                                    )}
+
+                                    {filteredFiles.filter(file =>
+                                        file.mimeType === 'application/pdf' ||
+                                        file.mimeType === 'text/plain' ||
+                                        file.mimeType === 'text/markdown' ||
+                                        file.mimeType === 'text/csv' ||
+                                        file.mimeType === 'application/msword' ||
+                                        file.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                                    ).length > 0 && (
+                                            <TreeItem
+                                                itemId="documents"
+                                                onClick={(e) => {
+                                                    if (generator !== 'all' && generator !== 'document') {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        setGenerator('document');
+                                                    }
+                                                }}
+                                                label={
+                                                    <Box
+                                                        sx={{
+                                                            opacity: generator !== 'all' && generator !== 'document' ? 0.5 : 1,
+                                                        }}
+                                                    >
+                                                        {`Documents (${filteredFiles.filter(f =>
+                                                            f.mimeType === 'application/pdf' ||
+                                                            f.mimeType === 'text/plain' ||
+                                                            f.mimeType === 'text/markdown' ||
+                                                            f.mimeType === 'text/csv' ||
+                                                            f.mimeType === 'application/msword' ||
+                                                            f.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                                                        ).length})`}
+                                                    </Box>
+                                                }
+                                            >
+                                                {filteredFiles
+                                                    .filter(file =>
+                                                        file.mimeType === 'application/pdf' ||
+                                                        file.mimeType === 'text/plain' ||
+                                                        file.mimeType === 'text/markdown' ||
+                                                        file.mimeType === 'text/csv' ||
+                                                        file.mimeType === 'application/msword' ||
+                                                        file.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                                                    )
+                                                    .map((file) => {
+                                                        const docStatus = documentStatuses[file.path];
+                                                        const statusInfo = getDocumentStatusInfo(docStatus?.status || 'uploaded');
+                                                        const isProcessing = ['extracting', 'analyzing'].includes(docStatus?.status);
+
+                                                        // Helper function to get appropriate icon
+                                                        const getDocumentIcon = (mimeType) => {
+                                                            if (mimeType === 'application/pdf') return PictureAsPdfIcon;
+                                                            if (mimeType === 'text/plain') return DescriptionIcon;
+                                                            if (mimeType === 'text/markdown') return ArticleIcon;
+                                                            if (mimeType === 'text/csv') return TableChartIcon;
+                                                            if (mimeType === 'application/msword' ||
+                                                                mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                                                                return ArticleIcon;
+                                                            }
+                                                            return DescriptionIcon;
+                                                        };
+
+                                                        const DocumentIcon = getDocumentIcon(file.mimeType);
+
+                                                        return (
+                                                            <TreeItem
+                                                                itemId={file.id}
+                                                                key={file.id}
+                                                                label={
+                                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+                                                                        <DocumentIcon
+                                                                            color={statusInfo.color}
+                                                                            sx={{
+                                                                                animation: isProcessing ? 'pulse 2s infinite' : 'none',
+                                                                                '@keyframes pulse': {
+                                                                                    '0%, 100%': { opacity: 1 },
+                                                                                    '50%': { opacity: 0.5 },
+                                                                                },
+                                                                            }}
+                                                                        />
+                                                                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                                                                            <Typography noWrap>{file.name}</Typography>
+                                                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                                                                <Typography variant="caption" color="text.secondary">
+                                                                                    {(file.size / 1000).toFixed(2)} KB
+                                                                                </Typography>
+                                                                                {docStatus?.pageCount && (
+                                                                                    <Typography variant="caption" color="text.secondary">
+                                                                                        • {docStatus.pageCount} pages
+                                                                                    </Typography>
+                                                                                )}
+                                                                                <Chip
+                                                                                    size="small"
+                                                                                    label={statusInfo.label}
+                                                                                    color={statusInfo.chipColor}
+                                                                                    icon={statusInfo.icon}
+                                                                                    sx={{ height: 20, fontSize: '0.7rem' }}
+                                                                                />
+                                                                            </Box>
+                                                                        </Box>
+                                                                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                                            {/* Insert PDF into editor - always available */}
+                                                                            {editor && file.mimeType === 'application/pdf' && (
+                                                                                <IconButton
+                                                                                    size="small"
+                                                                                    title="Insert Document"
+                                                                                    onClick={async (e) => {
+                                                                                        e.stopPropagation();
+                                                                                        editor.dispatchCommand(INSERT_PDF_COMMAND, {
+                                                                                            path: file.path,
+                                                                                            identityId: file.identityId,
+                                                                                            filename: file.name,
+                                                                                        });
+                                                                                    }}
+                                                                                >
+                                                                                    <AddIcon />
+                                                                                </IconButton>
+                                                                            )}
+
+                                                                            {/* Cancel button - only during processing */}
+                                                                            {isProcessing && (
+                                                                                <IconButton
+                                                                                    size="small"
+                                                                                    title="Cancel Analysis"
+                                                                                    color="warning"
+                                                                                    onClick={async (e) => {
+                                                                                        e.stopPropagation();
+                                                                                        try {
+                                                                                            const documents = await DataStore.query(Document, (d) => d.s3Key.eq(file.path));
+                                                                                            if (documents.length === 0) return;
+
+                                                                                            const client = generateClient();
+                                                                                            const result = await client.graphql({
+                                                                                                query: cancelPDFAnalysisMutation,
+                                                                                                variables: { documentID: documents[0].id }
+                                                                                            });
+
+                                                                                            if (result.data.cancelPDFAnalysis.success) {
+                                                                                                alert(`Analysis cancelled for: ${file.name}`);
+                                                                                            }
+                                                                                        } catch (error) {
+                                                                                            console.error('Error cancelling analysis:', error);
+                                                                                            alert('Failed to cancel: ' + error.message);
+                                                                                        }
+                                                                                    }}
+                                                                                >
+                                                                                    <CancelIcon />
+                                                                                </IconButton>
+                                                                            )}
+
+                                                                            {/* Analyze button - only when not processing/completed */}
+                                                                            {!['completed', 'analyzing', 'extracting'].includes(docStatus?.status) && (
+                                                                                <IconButton
+                                                                                    size="small"
+                                                                                    title="Analyze PDF"
+                                                                                    disabled={isProcessing}
+                                                                                    onClick={async (e) => {
+                                                                                        e.stopPropagation();
+                                                                                        try {
+                                                                                            // Find the Document record for this file
+                                                                                            const documents = await DataStore.query(Document, (d) => d.s3Key.eq(file.path));
+                                                                                            if (documents.length === 0) {
+                                                                                                alert('Document record not found. Please upload the PDF again.');
+                                                                                                return;
+                                                                                            }
+
+                                                                                            const result = await analyzePDF(documents[0].id);
+                                                                                            alert(`PDF analysis started! Document ID: ${result.documentID}`);
+                                                                                        } catch (error) {
+                                                                                            console.error('Error analyzing PDF:', error);
+                                                                                            alert('Failed to analyze PDF: ' + error.message);
+                                                                                        }
+                                                                                    }}
+                                                                                >
+                                                                                    <AnalyticsIcon />
+                                                                                </IconButton>
+                                                                            )}
+
+                                                                            <IconButton
+                                                                                size="small"
+                                                                                onClick={async (e) => {
+                                                                                    e.stopPropagation();
+                                                                                    const confirmed = window.confirm(`Are you sure you want to delete ${file.path}?`);
+                                                                                    if (!confirmed) return;
+                                                                                    await DataStore.delete(file);
+                                                                                    await remove(file);
+                                                                                }}
+                                                                            >
+                                                                                <DeleteIcon />
+                                                                            </IconButton>
+                                                                        </Box>
+                                                                    </Box>
+                                                                }
+                                                            />
+                                                        );
+                                                    })}
+                                            </TreeItem>
+                                        )}
+
+                                    {generator === 'all' && filteredFiles
+                                        .filter(file =>
+                                            !file.mimeType.includes('image') &&
+                                            !file.mimeType.includes('audio') &&
+                                            file.mimeType !== 'application/pdf' &&
+                                            file.mimeType !== 'text/plain' &&
+                                            file.mimeType !== 'text/markdown' &&
+                                            file.mimeType !== 'text/csv' &&
+                                            file.mimeType !== 'application/msword' &&
+                                            file.mimeType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                                        )
+                                        .length > 0 && (
+                                            <TreeItem itemId="other" label={`Other Files (${filteredFiles.filter(f =>
+                                                !f.mimeType.includes('image') &&
+                                                !f.mimeType.includes('audio') &&
+                                                f.mimeType !== 'application/pdf' &&
+                                                f.mimeType !== 'text/plain' &&
+                                                f.mimeType !== 'text/markdown' &&
+                                                f.mimeType !== 'text/csv' &&
+                                                f.mimeType !== 'application/msword' &&
+                                                f.mimeType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                                            ).length})`}>
+                                                {filteredFiles
+                                                    .filter(file =>
+                                                        !file.mimeType.includes('image') &&
+                                                        !file.mimeType.includes('audio') &&
+                                                        file.mimeType !== 'application/pdf' &&
+                                                        file.mimeType !== 'text/plain' &&
+                                                        file.mimeType !== 'text/markdown' &&
+                                                        file.mimeType !== 'text/csv' &&
+                                                        file.mimeType !== 'application/msword' &&
+                                                        file.mimeType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                                                    )
+                                                    .map((file) => (
+                                                        <TreeItem
+                                                            itemId={file.id}
+                                                            key={file.id}
+                                                            label={
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+                                                                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                                                                        <Typography noWrap>{file.name}</Typography>
+                                                                        <Typography variant="caption" color="text.secondary">
+                                                                            {(file.size / 1000).toFixed(2)} KB
+                                                                        </Typography>
+                                                                    </Box>
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        onClick={async (e) => {
+                                                                            e.stopPropagation();
+                                                                            const confirmed = window.confirm(`Are you sure you want to delete ${file.path}?`);
+                                                                            if (!confirmed) return;
+                                                                            await DataStore.delete(file);
+                                                                            await remove(file);
+                                                                        }}
+                                                                    >
+                                                                        <DeleteIcon />
+                                                                    </IconButton>
+                                                                </Box>
+                                                            }
+                                                        />
+                                                    ))}
+                                            </TreeItem>
+                                        )}
+                                </SimpleTreeView>
+                            </Box>
+                        )}
+            </Box>
+
+            {/* Generation Modals */}
+            {generator === 'image' && (
+                <ImageGeneratorButton
+                    open={newFileFormOpen}
+                    onSuccess={() => {
+                        setNewFileFormOpen(false);
+                        setNewImageFileFormOpen(false);
+                    }}
+                />
+            )}
+            {generator === 'audio' && (
+                <AudioGeneratorButton
+                    open={newFileFormOpen}
+                    onSuccess={() => {
+                        setNewFileFormOpen(false);
+                        setNewAudioFileFormOpen(false);
+                    }}
+                />
+            )}
+
+            {/* File Upload Input */}
+            <input
+                id="file-upload-input"
+                type="file"
+                multiple
+                hidden
+                onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    setFilesToUpload(files.map((f, index) => ({ file: f, index })));
+                    setFileOperations(files.map((f) => ({ name: f.name, progress: '0%' })));
+                }}
+            />
+
+            {/* File Operations Display */}
+            {fileOperations.length > 0 && (
+                <Box sx={{ p: 1 }}>
+                    {fileOperations.map((fileOperation, index) => (
+                        <Box
+                            key={index}
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                py: 0.5,
+                            }}
+                        >
+                            <Typography variant="body2">{fileOperation.name}</Typography>
+                            <Typography variant="body2">{fileOperation.progress}</Typography>
+                        </Box>
+                    ))}
                 </Box>
             )}
         </>
-
-    )
+    );
 }
 
 

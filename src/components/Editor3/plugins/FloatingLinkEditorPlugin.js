@@ -60,9 +60,7 @@ export function setFloatingElemPositionForLinkEditor(
     verticalGap = VERTICAL_GAP,
     horizontalOffset = HORIZONTAL_OFFSET,
 ) {
-    const scrollerElem = anchorElem.parentElement;
-
-    if (targetRect === null || !scrollerElem) {
+    if (targetRect === null) {
         floatingElem.style.opacity = '0';
         floatingElem.style.display = 'none';
         floatingElem.style.visibility = 'hidden';
@@ -80,31 +78,44 @@ export function setFloatingElemPositionForLinkEditor(
 
     const floatingElemRect = floatingElem.getBoundingClientRect();
     const anchorElementRect = anchorElem.getBoundingClientRect();
-    const editorScrollerRect = scrollerElem.getBoundingClientRect();
 
-    // Start by positioning below the link
-    let top = targetRect.bottom + verticalGap;
-    let left = targetRect.left - horizontalOffset;
+    console.log('[FloatingLink Debug]', {
+        targetRect: { top: targetRect.top, bottom: targetRect.bottom, left: targetRect.left },
+        anchorElementRect: { top: anchorElementRect.top, left: anchorElementRect.left },
+        floatingElemRect: { height: floatingElemRect.height, width: floatingElemRect.width }
+    });
 
-    // Convert to relative coordinates early
-    top -= anchorElementRect.top;
-    left -= anchorElementRect.left;
+    // Calculate position relative to anchor element
+    // Both targetRect and anchorElementRect are viewport coordinates from getBoundingClientRect()
+    // Since we're using absolute positioning within a relative-positioned anchor,
+    // and both elements are in the same scroll container, the scroll is already
+    // accounted for in the viewport coordinates. We just need the difference.
+    let top = targetRect.bottom - anchorElementRect.top + verticalGap;
+    let left = targetRect.left - anchorElementRect.left;
 
-    // Calculate the relative bounds of the scroller
-    const scrollerTop = editorScrollerRect.top - anchorElementRect.top;
-    const scrollerLeft = editorScrollerRect.left - anchorElementRect.left;
-    const scrollerRight = editorScrollerRect.right - anchorElementRect.left;
-    const scrollerBottom = editorScrollerRect.bottom - anchorElementRect.top;
+    console.log('[FloatingLink Debug] Initial position:', { top, left });
 
-    // If it would go below the bottom, position it above the link instead
-    if (top + floatingElemRect.height > scrollerBottom) {
-        const targetTop = targetRect.top - anchorElementRect.top;
-        top = targetTop - floatingElemRect.height - verticalGap;
+    // Check if it would overflow viewport bottom
+    const viewportHeight = window.innerHeight;
+    if (targetRect.bottom + verticalGap + floatingElemRect.height > viewportHeight) {
+        // Position above the link instead
+        top = targetRect.top - anchorElementRect.top - floatingElemRect.height - verticalGap;
+        console.log('[FloatingLink Debug] Positioned above, new top:', top);
     }
 
-    // Clamp to container bounds
-    top = Math.max(scrollerTop, Math.min(top, scrollerBottom - floatingElemRect.height));
-    left = Math.max(scrollerLeft, Math.min(left, scrollerRight - floatingElemRect.width));
+    // Check if it would overflow viewport right
+    const viewportWidth = window.innerWidth;
+    if (targetRect.left + floatingElemRect.width > viewportWidth) {
+        left = viewportWidth - floatingElemRect.width - anchorElementRect.left - 10;
+    }
+
+    // Check if it would overflow viewport left
+    if (targetRect.left < 0) {
+        left = 10 - anchorElementRect.left;
+    }
+
+    console.log('[FloatingLink Debug] Final position:', { top, left });
+    console.log('[FloatingLink Debug] Setting styles - top:', `${top}px`, 'left:', `${left}px`);
 
     floatingElem.style.opacity = '1';
     floatingElem.style.display = 'flex';
@@ -113,7 +124,9 @@ export function setFloatingElemPositionForLinkEditor(
     floatingElem.style.border = '1px solid #333';
     floatingElem.style.outline = '1px solid #eee';
     floatingElem.style.borderRadius = '0 0 9px 9px';
-    floatingElem.style.transform = `translate(${left}px, ${top}px)`;
+    floatingElem.style.top = `${top}px`;
+    floatingElem.style.left = `${left}px`;
+    floatingElem.style.transform = 'none';
 }
 
 function FloatingLinkEditor({
@@ -129,9 +142,25 @@ function FloatingLinkEditor({
     const [editedLinkUrl, setEditedLinkUrl] = useState('');
     const [isEditMode, setEditMode] = useState(false);
     const [lastSelection, setLastSelection] = useState(null);
+    const initialScrollPos = useRef({ top: 0, left: 0 });
 
     const drawerWidth = useMemo(() => isSidebarOpen ? HORIZONTAL_OFFSET : -70, [isSidebarOpen]);
     const verticalGap = useMemo(() => VERTICAL_GAP, [])
+
+    // Store initial scroll position when link editor first appears
+    useEffect(() => {
+        if (isLink) {
+            const editorScrollElem = anchorElem.querySelector('.editor');
+            if (editorScrollElem) {
+                const scrollPos = {
+                    top: editorScrollElem.scrollTop,
+                    left: editorScrollElem.scrollLeft
+                };
+                initialScrollPos.current = scrollPos;
+                console.log('[FloatingLink] Captured initial scroll position:', scrollPos);
+            }
+        }
+    }, [isLink, anchorElem]);
 
     const updateLinkEditor = useCallback(() => {
         const selection = $getSelection();
@@ -199,16 +228,7 @@ function FloatingLinkEditor({
             }
             
             if (domRect && isLink) {
-                // Create a mutable rect object (DOMRect is read-only)
-                const adjustedRect = {
-                    top: domRect.top + 40,
-                    left: domRect.left,
-                    bottom: domRect.bottom,
-                    right: domRect.right,
-                    width: domRect.width,
-                    height: domRect.height,
-                };
-                setFloatingElemPositionForLinkEditor(adjustedRect, editorElem, anchorElem, verticalGap, drawerWidth);
+                setFloatingElemPositionForLinkEditor(domRect, editorElem, anchorElem, verticalGap, drawerWidth);
             } else {
                 setFloatingElemPositionForLinkEditor(null, editorElem, anchorElem, verticalGap, drawerWidth);
             }
@@ -224,7 +244,7 @@ function FloatingLinkEditor({
     }, [editor, isLink, anchorElem, drawerWidth, verticalGap]);
 
     useEffect(() => {
-        const scrollerElem = anchorElem.parentElement;
+        const editorElem = anchorElem.querySelector('.editor');
 
         const update = () => {
             editor.getEditorState().read(() => {
@@ -232,20 +252,44 @@ function FloatingLinkEditor({
             });
         };
 
+        const handleScroll = () => {
+            if (!editorElem) return;
+            
+            // Close the floating link editor only if scrolled more than threshold
+            const SCROLL_THRESHOLD = 100; // pixels
+            const currentScrollTop = editorElem.scrollTop;
+            const currentScrollLeft = editorElem.scrollLeft;
+            
+            const scrollDeltaY = Math.abs(currentScrollTop - initialScrollPos.current.top);
+            const scrollDeltaX = Math.abs(currentScrollLeft - initialScrollPos.current.left);
+            
+            console.log('[FloatingLink] Scroll check:', {
+                current: { top: currentScrollTop, left: currentScrollLeft },
+                initial: initialScrollPos.current,
+                delta: { y: scrollDeltaY, x: scrollDeltaX },
+                threshold: SCROLL_THRESHOLD
+            });
+            
+            if (scrollDeltaY > SCROLL_THRESHOLD || scrollDeltaX > SCROLL_THRESHOLD) {
+                console.log('[FloatingLink] Scroll threshold exceeded, closing link editor');
+                setIsLink(false);
+            }
+        };
+
         window.addEventListener('resize', update, { passive: true });
 
-        if (scrollerElem) {
-            scrollerElem.addEventListener('scroll', update, { passive: true });
+        if (editorElem) {
+            editorElem.addEventListener('scroll', handleScroll, { passive: true });
         }
 
         return () => {
             window.removeEventListener('resize', update);
 
-            if (scrollerElem) {
-                scrollerElem.removeEventListener('scroll', update);
+            if (editorElem) {
+                editorElem.removeEventListener('scroll', handleScroll);
             }
         };
-    }, [anchorElem.parentElement, editor, updateLinkEditor]);
+    }, [anchorElem, editor, updateLinkEditor, setIsLink]);
 
     useEffect(() => {
         return mergeRegister(
@@ -511,18 +555,18 @@ function useFloatingLinkEditorToolbar(
             console.log('[DEBUG] Selection node:', {
                 nodeType: node.getType(),
                 nodeText: node.getTextContent?.(),
-                parentType: parent.getType(),
+                parentType: parent?.getType(),
                 isLinkNode: $isLinkNode(node),
                 isAutoLinkNode: $isAutoLinkNode(node),
-                isParentLink: $isLinkNode(parent),
-                isParentAutoLink: $isAutoLinkNode(parent)
+                isParentLink: parent ? $isLinkNode(parent) : false,
+                isParentAutoLink: parent ? $isAutoLinkNode(parent) : false
             });
             
             // Check if the node itself is a link
             const isNodeLink = $isLinkNode(node) || $isAutoLinkNode(node);
             
-            // Check if parent is a link
-            const isParentLink = $isLinkNode(parent) || $isAutoLinkNode(parent);
+            // Check if parent is a link (only if parent exists)
+            const isParentLink = parent && ($isLinkNode(parent) || $isAutoLinkNode(parent));
             
             // Check ancestors using $findMatchingParent
             const linkParent = $findMatchingParent(node, $isLinkNode);

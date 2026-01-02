@@ -68,15 +68,17 @@ export default function PdfViewerComponent({
             if (isSelected && $isNodeSelection($getSelection())) {
                 const event = payload;
                 event.preventDefault();
-                const node = $getNodeByKey(nodeKey);
-                if ($isPdfViewerNode(node)) {
-                    node.remove();
-                }
+                editor.update(() => {
+                    const node = $getNodeByKey(nodeKey);
+                    if ($isPdfViewerNode(node)) {
+                        node.remove();
+                    }
+                });
                 return true;
             }
             return false;
         },
-        [isSelected, nodeKey]
+        [isSelected, nodeKey, editor]
     );
 
     // Escape handler
@@ -99,17 +101,19 @@ export default function PdfViewerComponent({
             if (isSelected && $isNodeSelection($getSelection())) {
                 const event = payload;
                 event.preventDefault();
-                const node = $getNodeByKey(nodeKey);
-                if ($isPdfViewerNode(node)) {
-                    const paragraph = $createParagraphNode();
-                    node.insertAfter(paragraph);
-                    paragraph.select();
-                }
+                editor.update(() => {
+                    const node = $getNodeByKey(nodeKey);
+                    if ($isPdfViewerNode(node)) {
+                        const paragraph = $createParagraphNode();
+                        node.insertAfter(paragraph);
+                        paragraph.select();
+                    }
+                });
                 return true;
             }
             return false;
         },
-        [isSelected, nodeKey]
+        [isSelected, nodeKey, editor]
     );
 
     // Arrow down handler - move to content below
@@ -118,23 +122,25 @@ export default function PdfViewerComponent({
             if (isSelected && $isNodeSelection($getSelection())) {
                 const event = payload;
                 event.preventDefault();
-                const node = $getNodeByKey(nodeKey);
-                if ($isPdfViewerNode(node)) {
-                    const nextSibling = node.getNextSibling();
-                    if (nextSibling) {
-                        nextSibling.selectStart();
-                    } else {
-                        // Create new paragraph if none exists
-                        const paragraph = $createParagraphNode();
-                        node.insertAfter(paragraph);
-                        paragraph.select();
+                editor.update(() => {
+                    const node = $getNodeByKey(nodeKey);
+                    if ($isPdfViewerNode(node)) {
+                        const nextSibling = node.getNextSibling();
+                        if (nextSibling) {
+                            nextSibling.selectStart();
+                        } else {
+                            // Create new paragraph if none exists
+                            const paragraph = $createParagraphNode();
+                            node.insertAfter(paragraph);
+                            paragraph.select();
+                        }
                     }
-                }
+                });
                 return true;
             }
             return false;
         },
-        [isSelected, nodeKey]
+        [isSelected, nodeKey, editor]
     );
 
     // Register keyboard commands

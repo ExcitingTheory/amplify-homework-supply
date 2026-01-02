@@ -142,6 +142,7 @@ import FormatColorFillIcon from '@mui/icons-material/FormatColorFill';
 import FormatColorTextIcon from '@mui/icons-material/FormatColorText';
 
 import DeleteIcon from '@mui/icons-material/Delete';
+import { forwardRef } from 'react';
 import DraftIcon from '@mui/icons-material/Drafts';
 import PublishedIcon from '@mui/icons-material/CloudUpload';
 import ArchivedIcon from '@mui/icons-material/Archive';
@@ -1680,11 +1681,11 @@ function FontDropDown({
     );
 }
 
-export default function ToolBarPlugin({
+const ToolBarPlugin = forwardRef(function ToolBarPlugin({
     open,
     setOpen,
     setTabValue,
-}) {
+}, ref) {
     const [editor] = useLexicalComposerContext();
     const [activeEditor, setActiveEditor] = useState(editor);
     const [blockType, setBlockType] =
@@ -2106,6 +2107,7 @@ export default function ToolBarPlugin({
                 background-color: #e0e0e0;
             }
             `}</style>
+            <div ref={ref}>
             <AppBar
                 ref={firstAppBarRef}
                 position="fixed"
@@ -2390,14 +2392,15 @@ export default function ToolBarPlugin({
                     </Button>
                 )}
             </AppBar>
-        </>
+
+        {/*
 
 
 
 
 
 
-        //     {blockType === 'code' ? (
+        {blockType === 'code' ? (
         //         <DropDown
         //             disabled={!isEditable}
         //             buttonClassName="toolbar-item code-language"
@@ -2603,6 +2606,10 @@ export default function ToolBarPlugin({
         //         </>
         //     )}
         //     <Divider />
-
+        */}
+            </div>
+        </>
     );
-}
+});
+
+export default ToolBarPlugin;

@@ -99,7 +99,7 @@ import UnitCompletedPlugin from './plugins/UnitCompletedPlugin';
 import DraggableBlockPlugin from './plugins/DraggableBlockPlugin';
 import { DndWrapper } from '../MeaningAssociationExercise/DndWrapper.js';
 import LanguageEditorTheme from './components/LanguageEditorTheme';
-import { EditorRefPlugin } from '@lexical/react/LexicalEditorRefPlugin.js';
+// import { EditorRefPlugin } from '@lexical/react/LexicalEditorRefPlugin.js';
 
 import AnswerPlugin from './plugins/AnswerPlugin.js';
 import { AnswerNode } from './plugins/AnswerPlugin.js';
@@ -249,7 +249,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 export default function Editor() {
-  const editorRef = useRef(null); // Holds the Lexical editor instance
+  // const editorRef = useRef(null); // Holds the Lexical editor instance
   // Removed local editorStateRef - using the one from context
   // Removed previousStateRef - version comparison in DataPlugin prevents loops
   const { unit } = useContext(UnitContext);
@@ -258,6 +258,8 @@ export default function Editor() {
   const [tabValue, setTabValue] = React.useState(0);
   const [isEditable, setIsEditable] = React.useState(true);
   const drawerRef = React.useRef(null);
+  const toolbarRef = React.useRef(null);
+  const [toolbarHeight, setToolbarHeight] = React.useState(0);
   const [actualDrawerWidth, setActualDrawerWidth] = React.useState(drawerWidth);
 
   const handleDrawerOpen = () => {
@@ -287,6 +289,23 @@ export default function Editor() {
       };
     }
   }, [openTab]);
+
+  // Measure toolbar height dynamically
+  React.useEffect(() => {
+    const measureToolbarHeight = () => {
+      if (toolbarRef.current) {
+        const height = toolbarRef.current.getBoundingClientRect().height;
+        setToolbarHeight(height);
+      }
+    };
+
+    measureToolbarHeight();
+    window.addEventListener('resize', measureToolbarHeight);
+    
+    return () => {
+      window.removeEventListener('resize', measureToolbarHeight);
+    };
+  }, []);
 
   const {
     versionRef,
@@ -400,7 +419,6 @@ export default function Editor() {
             <LayoutPlugin />
             <AnswerPlugin />
             <CustomAnswerPlugin />
-            <EditorRefPlugin editorRef={editorRef} />
             <LinkPlugin />
             <AutoLinkPlugin />
             <YouTubePlugin />
@@ -409,6 +427,7 @@ export default function Editor() {
                 <FloatingLinkEditorPlugin
                   anchorElem={floatingAnchorElem}
                   isSidebarOpen={openTab}
+                  appBarHeight={toolbarHeight}
                 />
 
                 <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
@@ -423,6 +442,7 @@ export default function Editor() {
               overflow: 'hidden',
             }}>
               <ToolBarPlugin
+                ref={toolbarRef}
                 setOpen={setOpenTab}
                 open={openTab}
                 setTabValue={setTabValue}
@@ -468,7 +488,7 @@ export default function Editor() {
                     height: 'var(--app-bar-height, 11rem)',
                   }}
                 />
-              <div ref={onRef}>
+              <div ref={onRef} style={{ position: 'relative' }}>
                 <RichTextPlugin
                   contentEditable={
                     <ContentEditable
@@ -486,9 +506,8 @@ export default function Editor() {
                   placeholder={<div>Enter some text...</div>}
                   ErrorBoundary={LexicalErrorBoundary}
                 />
-              </div>
                 <MyOnChangePlugin onChange={onChange} />
-
+              </div>
               </Box>
             </Box>
 
