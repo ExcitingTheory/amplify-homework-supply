@@ -22,7 +22,7 @@ import {
     RangeSelection,
     SELECTION_CHANGE_COMMAND,
 } from 'lexical';
-import { Dispatch, useCallback, useEffect, useRef, useState } from 'react';
+import { Dispatch, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as React from 'react';
 import { createPortal } from 'react-dom';
 
@@ -130,50 +130,39 @@ function FloatingLinkEditor({
     const [isEditMode, setEditMode] = useState(false);
     const [lastSelection, setLastSelection] = useState(null);
 
-    const drawerWidth = isSidebarOpen ? HORIZONTAL_OFFSET : -70;
-    const verticalGap = VERTICAL_GAP
+    const drawerWidth = useMemo(() => isSidebarOpen ? HORIZONTAL_OFFSET : -70, [isSidebarOpen]);
+    const verticalGap = useMemo(() => VERTICAL_GAP, [])
 
     const updateLinkEditor = useCallback(() => {
         const selection = $getSelection();
         let linkNode = null;
         
-        console.log('[FloatingLinkEditor] updateLinkEditor called, selection:', selection);
-        
         if ($isRangeSelection(selection)) {
             const node = getSelectedNode(selection);
             const parent = node.getParent();
-            
-            console.log('[FloatingLinkEditor] node type:', node.getType(), 'parent type:', parent?.getType());
             
             // Check multiple ways to find a link node
             // 1. Check if node itself is a link
             if ($isLinkNode(node) || $isAutoLinkNode(node)) {
                 linkNode = node;
-                console.log('[FloatingLinkEditor] Found link as node itself');
             }
             // 2. Check if parent is a link
             else if ($isLinkNode(parent) || $isAutoLinkNode(parent)) {
                 linkNode = parent;
-                console.log('[FloatingLinkEditor] Found link as parent');
             }
             // 3. Check ancestors
             else {
                 linkNode = $findMatchingParent(node, (n) => $isLinkNode(n) || $isAutoLinkNode(n));
-                if (linkNode) {
-                    console.log('[FloatingLinkEditor] Found link in ancestors');
-                }
             }
             
             if (linkNode) {
                 const url = linkNode.getURL();
-                console.log('[FloatingLinkEditor] Link URL:', url);
                 setLinkUrl(url);
             } else {
-                console.log('[FloatingLinkEditor] No link found');
                 setLinkUrl('');
             }
         } else {
-            console.log('[FloatingLinkEditor] Selection is not a RangeSelection');
+            setLinkUrl('');
         }
         
         const editorElem = editorRef.current;
@@ -232,9 +221,7 @@ function FloatingLinkEditor({
             setEditMode(false);
             setLinkUrl('');
         }
-
-        return true;
-    }, [anchorElem, editor, drawerWidth, isLink, verticalGap]);
+    }, [editor, isLink, anchorElem, drawerWidth, verticalGap]);
 
     useEffect(() => {
         const scrollerElem = anchorElem.parentElement;
@@ -389,108 +376,112 @@ function FloatingLinkEditor({
         }
       `}</style>
         <div ref={editorRef} className="link-editor">
-            {!isLink ? null : isEditMode ? (
+            {!isLink ? null : (
                 <>
-                    <Button
-                        className="link-cancel"
-                        aria-label="Cancel link editing"
-                        title="Cancel link editing"
-                        role="button"
-                        tabIndex={0}
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => {
-                            setEditMode(false);
-                        }}
-                    >
-                        <CloseIcon />
-                    </Button>
-                    <input
-                        ref={inputRef}
-                        className="link-input"
-                        type="text"
-                        title="Link URL"
-                        value={editedLinkUrl}
-                        onChange={(event) => {
-                            setEditedLinkUrl(event.target.value);
-                        }}
-                        onKeyDown={(event) => {
-                            monitorInputInteraction(event);
-                        }}
-                    />
-                        <Button
-                            className="link-confirm"
-                            aria-label="Confirm link"
-                            title="Confirm link"
-                            role="button"
-                            tabIndex={0}
-                            onMouseDown={(event) => event.preventDefault()}
-                            onClick={handleLinkSubmission}
-                        >
-                            <CheckIcon />
-                        </Button>
-                </>
-            ) : (
-                <>
-                    <Button
-                        aria-label="Close link editor"
-                        className="link-close"
-                        role="button"
-                        tabIndex={0}
-                        title="Close link editor"
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => {
-                            setIsLink(false);
-                            setEditMode(false);
-                        }}
-                    >
-                        <CloseIcon />
-                    </Button>
-                    <a
-                        href={sanitizeUrl(linkUrl)}
-                        target="_blank"
-                        rel="noopener noreferrer">
-                        {linkUrl}
-                    </a>
-                    {isYouTubeUrl && (
-                        <Button
-                            className="link-youtube"
-                            aria-label="YouTube Embed"
-                            title="Convert to YouTube embed"
-                            role="button"
-                            tabIndex={0}
-                            onMouseDown={(event) => event.preventDefault()}
-                            onClick={handleConvertToYouTube}
-                        >
-                            <YouTubeIcon />
-                        </Button>
+                    {isEditMode ? (
+                        <>
+                            <Button
+                                className="link-cancel"
+                                aria-label="Cancel link editing"
+                                title="Cancel link editing"
+                                role="button"
+                                tabIndex={0}
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => {
+                                    setEditMode(false);
+                                }}
+                            >
+                                <CloseIcon />
+                            </Button>
+                            <input
+                                ref={inputRef}
+                                className="link-input"
+                                type="text"
+                                title="Link URL"
+                                value={editedLinkUrl}
+                                onChange={(event) => {
+                                    setEditedLinkUrl(event.target.value);
+                                }}
+                                onKeyDown={(event) => {
+                                    monitorInputInteraction(event);
+                                }}
+                            />
+                                <Button
+                                    className="link-confirm"
+                                    aria-label="Confirm link"
+                                    title="Confirm link"
+                                    role="button"
+                                    tabIndex={0}
+                                    onMouseDown={(event) => event.preventDefault()}
+                                    onClick={handleLinkSubmission}
+                                >
+                                    <CheckIcon />
+                                </Button>
+                        </>
+                    ) : (
+                        <>
+                            <Button
+                                aria-label="Close link editor"
+                                className="link-close"
+                                role="button"
+                                tabIndex={0}
+                                title="Close link editor"
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => {
+                                    setIsLink(false);
+                                    setEditMode(false);
+                                }}
+                            >
+                                <CloseIcon />
+                            </Button>
+                            <a
+                                href={sanitizeUrl(linkUrl)}
+                                target="_blank"
+                                rel="noopener noreferrer">
+                                {linkUrl}
+                            </a>
+                            {isYouTubeUrl && (
+                                <Button
+                                    className="link-youtube"
+                                    aria-label="YouTube Embed"
+                                    title="Convert to YouTube embed"
+                                    role="button"
+                                    tabIndex={0}
+                                    onMouseDown={(event) => event.preventDefault()}
+                                    onClick={handleConvertToYouTube}
+                                >
+                                    <YouTubeIcon />
+                                </Button>
+                            )}
+                            <Button
+                                className="link-edit"
+                                aria-label="Edit link"
+                                title="Edit link"
+                                role="button"
+                                tabIndex={0}
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => {
+                                    setEditedLinkUrl(linkUrl);
+                                    setEditMode(true);
+                                }}
+                            >
+                                <EditIcon />
+                            </Button>
+                            <Button
+                                aria-label="Remove link"
+                                className="link-trash"
+                                title="Remove link"
+                                role="button"
+                                tabIndex={0}
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => {
+                                    editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+                                }}
+                            >
+                                <DeleteIcon />
+                            </Button>
+                        </>
                     )}
-                    <Button
-                        className="link-edit"
-                        aria-label="Edit link"
-                        title="Edit link"
-                        role="button"
-                        tabIndex={0}
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => {
-                            setEditedLinkUrl(linkUrl);
-                            setEditMode(true);
-                        }}
-                    >
-                        <EditIcon />
-                    </Button>
-                    <Button
-                        aria-label="Remove link"
-                        className="link-trash"
-                        title="Remove link"
-                        role="button"
-                        tabIndex={0}
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => {
-                            editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
-                        }}
-                    >
-                        <DeleteIcon />
-                    </Button>
                 </>
             )}
         </div>
@@ -506,13 +497,26 @@ function useFloatingLinkEditorToolbar(
     const [activeEditor, setActiveEditor] = useState(editor);
     const [isLink, setIsLink] = useState(false);
 
-    console.log('[FloatingLinkEditorPlugin] useFloatingLinkEditorToolbar initialized');
+    // Debug effect to track state changes
+    useEffect(() => {
+        console.log('[DEBUG] isLink state changed to:', isLink);
+    }, [isLink]);
 
     const updateToolbar = useCallback(() => {
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
             const node = getSelectedNode(selection);
             const parent = node.getParent();
+            
+            console.log('[DEBUG] Selection node:', {
+                nodeType: node.getType(),
+                nodeText: node.getTextContent?.(),
+                parentType: parent.getType(),
+                isLinkNode: $isLinkNode(node),
+                isAutoLinkNode: $isAutoLinkNode(node),
+                isParentLink: $isLinkNode(parent),
+                isParentAutoLink: $isAutoLinkNode(parent)
+            });
             
             // Check if the node itself is a link
             const isNodeLink = $isLinkNode(node) || $isAutoLinkNode(node);
@@ -524,26 +528,24 @@ function useFloatingLinkEditorToolbar(
             const linkParent = $findMatchingParent(node, $isLinkNode);
             const autoLinkParent = $findMatchingParent(node, $isAutoLinkNode);
 
-            // Debug logging
-            console.log('[FloatingLinkEditor] Selection update:', {
+            console.log('[DEBUG] Link detection result:', {
                 isNodeLink,
                 isParentLink,
                 hasLinkParent: linkParent != null,
                 hasAutoLinkParent: autoLinkParent != null,
-                nodeType: node.getType(),
-                parentType: parent?.getType(),
+                linkParentType: linkParent?.getType(),
+                autoLinkParentType: autoLinkParent?.getType()
             });
 
             // Show for both regular links and auto links
-            if (isNodeLink || isParentLink || linkParent != null || autoLinkParent != null) {
-                console.log('[FloatingLinkEditor] Setting isLink to TRUE');
-                setIsLink(true);
-            } else {
-                console.log('[FloatingLinkEditor] Setting isLink to FALSE');
-                setIsLink(false);
-            }
+            const shouldShowLink = isNodeLink || isParentLink || linkParent != null || autoLinkParent != null;
+            
+            console.log('[DEBUG] Final decision - shouldShowLink:', shouldShowLink);
+            console.log('[DEBUG] About to call setIsLink with:', shouldShowLink);
+            setIsLink(shouldShowLink);
+            console.log('[DEBUG] setIsLink called');
         } else {
-            console.log('[FloatingLinkEditor] No RangeSelection, setting isLink to FALSE');
+            console.log('[DEBUG] Not a range selection:', selection);
             setIsLink(false);
         }
     }, []);

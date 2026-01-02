@@ -9,17 +9,17 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import VerticalTabsRo from './components/VerticalTabsRo';
 import VerticalTabs from './components/VerticalTabs';
+import { HeadingNode, QuoteNode } from '@lexical/rich-text';
+import { ListNode, ListItemNode } from '@lexical/list';
+import { CodeNode, CodeHighlightNode } from '@lexical/code';
+import { LinkNode, AutoLinkNode } from '@lexical/link';
 
 import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
 import { $getRoot, $getSelection, HISTORIC_TAG, HISTORY_PUSH_TAG, HISTORY_MERGE_TAG } from 'lexical';
 import { DATASTORE_UPDATE_TAG, INITIAL_LOAD_TAG } from './constants/updateTags';
 
 
-import { CodeHighlightNode, CodeNode } from '@lexical/code';
 import { HashtagNode } from '@lexical/hashtag';
-import { AutoLinkNode, LinkNode } from '@lexical/link';
-import { ListItemNode, ListNode } from '@lexical/list';
-import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 
@@ -48,17 +48,16 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 
 import ToolBarPlugin from './plugins/ToolBarPlugin';
-import CodeHighlightPlugin from './plugins/CodeHighlightPlugin';
-import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
-
+// import CodeHighlightPlugin from './plugins/CodeHighlightPlugin';
+// import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
 
 import UnitContext from '../../context/unitContext';
 
+import FloatingLinkEditorPlugin from './plugins/FloatingLinkEditorPlugin';
+import LinkPlugin from './plugins/LinkPlugin';
 import AutoLinkPlugin from './plugins/AutoLinkPlugin';
-import AutoEmbedPlugin from './plugins/AutoEmbedPlugin';
-import YouTubePlugin, {
-  YouTubeNode,
-} from './plugins/YouTubePlugin';
+import YouTubePlugin from './plugins/YouTubePlugin';
+import { YouTubeNode } from './plugins/YouTubePlugin';
 
 import WordBlockPlugin, {
   WordBlockNode,
@@ -67,9 +66,6 @@ import WordBlockPlugin, {
 import MeaningAssociationPlugin, { MeaningAssociationNode } from './plugins/MeaningAssociationPlugin';
 
 import QuizPlugin, { QuizNode } from './plugins/QuizPlugin';
-
-import LinkPlugin from './plugins/LinkPlugin';
-import FloatingLinkEditorPlugin from './plugins/FloatingLinkEditorPlugin';
 
 import {
   Box,
@@ -117,15 +113,15 @@ export const EditorNodes = [
   ListNode,
   ListItemNode,
   QuoteNode,
-  CodeNode,
   HashtagNode,
-  CodeHighlightNode,
-  AutoLinkNode,
-  LinkNode,
   TableNode,
   TableRowNode,
   TableCellNode,
   HorizontalRuleNode,
+  CodeNode,
+  CodeHighlightNode,
+  LinkNode,
+  AutoLinkNode,
   YouTubeNode,
   WordBlockNode,
   MeaningAssociationNode,
@@ -162,11 +158,29 @@ function debounce(func, timeout = DEBOUNCE_SAVE_DELAY_MS) {
 // https://lexical.dev/docs/getting-started/react#saving-lexical-state
 function MyOnChangePlugin({ onChange }) {
   const [editor] = useLexicalComposerContext();
+  const throttledOnChange = useRef(null);
+  
+  // Create a throttled version of onChange to prevent excessive calls
+  useEffect(() => {
+    let lastCall = 0;
+    const THROTTLE_MS = 100; // Limit to max 10 calls per second
+    
+    throttledOnChange.current = (editorState, tags) => {
+      const now = Date.now();
+      if (now - lastCall >= THROTTLE_MS) {
+        lastCall = now;
+        onChange(editorState, editor, tags);
+      }
+    };
+  }, [editor, onChange]);
+  
   useEffect(() => {
     return editor.registerUpdateListener(({ editorState, tags }) => {
-      onChange(editorState, tags);
+      if (throttledOnChange.current) {
+        throttledOnChange.current(editorState, tags);
+      }
     });
-  }, [editor, onChange]);
+  }, [editor]);
   return null;
 }
 
@@ -309,11 +323,20 @@ export default function Editor() {
     // Skip saves for DataPlugin updates and history operations (undo/redo)
     if (tags && (tags.has(DATASTORE_UPDATE_TAG) || tags.has(HISTORY_MERGE_TAG) || tags.has(INITIAL_LOAD_TAG) || 
                  tags.has(HISTORIC_TAG) || tags.has(HISTORY_PUSH_TAG))) {
-      console.log('[Editor onChange] Skipping save for tag:', Array.from(tags));
       return;
     }
     
-    console.log('[Editor onChange] Saving editor state');
+    // Get the current state as JSON string for comparison
+    const newStateJSON = JSON.stringify(editorState.toJSON());
+    const currentStateJSON = JSON.stringify(editorStateRef.current);
+    
+    // Skip if the state hasn't actually changed
+    if (newStateJSON === currentStateJSON) {
+      return;
+    }
+    
+    console.log('[Editor onChange] State changed, saving');
+    
     // Update local state immediately (not debounced)
     editorStateRef.current = editorState.toJSON();
     
@@ -351,12 +374,9 @@ export default function Editor() {
 
             
         `}</style>
-            {/* MINIMAL PLUGIN SET FOR DEBUGGING */}
             <AutoFocusPlugin />
             <CheckListPlugin />
             <ClearEditorPlugin />
-            <CodeHighlightPlugin />
-            <CodeActionMenuPlugin />
             <HashtagPlugin />
             <HistoryPlugin />
             <HorizontalRulePlugin />
@@ -364,11 +384,7 @@ export default function Editor() {
             <TabIndentationPlugin />
             <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
             <TablePlugin />
-            <AutoLinkPlugin />
-            <YouTubePlugin />
-            <AutoEmbedPlugin />
             <WordBlockPlugin />
-            <LinkPlugin />
             <QuizPlugin />
             <DataPlugin />
             <MeaningAssociationPlugin />
@@ -381,6 +397,9 @@ export default function Editor() {
             <AnswerPlugin />
             <CustomAnswerPlugin />
             <EditorRefPlugin editorRef={editorRef} />
+            <LinkPlugin />
+            <AutoLinkPlugin />
+            <YouTubePlugin />
             {!floatingAnchorElem ? null : (
               <>
                 <FloatingLinkEditorPlugin
@@ -444,12 +463,11 @@ export default function Editor() {
                     height: '11rem',
                   }}
                 />
-
+              <div ref={onRef}>
                 <RichTextPlugin
                   contentEditable={
                     <ContentEditable
                       className="editor"
-                      ref={onRef}
                       aria-placeholder="Enter some text..."
                       style={{
                         height: 'calc(100vh - 11rem)',
@@ -462,7 +480,7 @@ export default function Editor() {
                   placeholder={<div>Enter some text...</div>}
                   ErrorBoundary={LexicalErrorBoundary}
                 />
-
+              </div>
                 <MyOnChangePlugin onChange={onChange} />
 
               </Box>
@@ -544,8 +562,6 @@ export function Workbook() {
         `}</style>
             <AutoFocusPlugin />
             <CheckListPlugin />
-            <CodeHighlightPlugin />
-            <CodeActionMenuPlugin />
             <HashtagPlugin />
             <HorizontalRulePlugin />
             <ListPlugin />
@@ -591,9 +607,7 @@ export function Workbook() {
                     // backgroundColor: '#fafafa',
                   }}
                 >
-                  {/* <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton> */}
+
                 </DrawerHeader>
 
                 {
