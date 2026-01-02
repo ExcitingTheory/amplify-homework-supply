@@ -1172,12 +1172,7 @@ export function DictionaryEditor() {
 
 
   return (
-    <div 
-      style={{
-        height: 'calc(100vh - 11rem)',
-        overflow: 'auto',
-      }}
-    >
+    <>
         <Box
           style={{
             display: 'flex',
@@ -1215,6 +1210,11 @@ export function DictionaryEditor() {
             gap: 1,
             px: 1,
             py: 1,
+            position: 'sticky',
+            top: 0,
+            bgcolor: 'background.paper',
+            zIndex: 1,
+            borderBottom: '1px solid #e0e0e0'
           }}
         >
           <TextField
@@ -1439,6 +1439,6 @@ export function DictionaryEditor() {
             />)}
 
         </List>
-    </div>
+    </>
   );
 }

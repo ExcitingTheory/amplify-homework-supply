@@ -146,13 +146,13 @@ export default function VerticalTabs({
       <TabPanel value={value} index={1}>
         <TableOfContents />
       </TabPanel>
-      <TabPanel value={value} index={2} overflowY='hidden' >
+      <TabPanel value={value} index={2}>
         <DictionaryEditor />
       </TabPanel>
-      <TabPanel value={value} index={3} overflowY='hidden'>
+      <TabPanel value={value} index={3}>
         <QuestionEditor />
       </TabPanel>  
-      <TabPanel value={value} index={4} overflowY='hidden'>
+      <TabPanel value={value} index={4}>
         <FileManager />
       </TabPanel>
       <TabPanel value={value} index={5} overflowY='hidden'>

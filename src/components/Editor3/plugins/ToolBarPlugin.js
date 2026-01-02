@@ -1722,8 +1722,8 @@ export default function ToolBarPlugin({
     const secondAppBarRef = useRef(null);
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(false);
-    const [firstAppBarHeight, setFirstAppBarHeight] = useState(120); // Default fallback
-    const [totalAppBarHeight, setTotalAppBarHeight] = useState(176); // Default fallback for both AppBars
+    const [firstAppBarHeight, setFirstAppBarHeight] = useState(0);
+    const [totalAppBarHeight, setTotalAppBarHeight] = useState(0);
 
     // Check toolbar overflow
     const checkToolbarOverflow = useCallback(() => {
@@ -1816,8 +1816,8 @@ export default function ToolBarPlugin({
             resizeObserver.observe(secondAppBarRef.current);
         }
         
-        // Set initial heights
-        setTimeout(calculateTotalHeight, 100);
+        // Set initial heights immediately to prevent shift
+        calculateTotalHeight();
         
         return () => {
             window.removeEventListener('resize', checkToolbarOverflow);
@@ -2133,7 +2133,9 @@ export default function ToolBarPlugin({
                     overflowX: 'visible',
                     boxShadow: 'none',
                     zIndex: (theme) => theme.zIndex.drawer + 1,
-                    top: `${firstAppBarHeight}px`,
+                    top: firstAppBarHeight > 0 ? `${firstAppBarHeight}px` : 'auto',
+                    opacity: firstAppBarHeight > 0 ? 1 : 0,
+                    transition: 'opacity 0.1s ease-in-out',
                     paddingTop: '0.25rem',
                     borderBottom: '1px solid #e0e0e0',
                     paddingBottom: '0.25rem',

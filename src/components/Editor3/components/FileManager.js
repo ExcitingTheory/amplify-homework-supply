@@ -1084,23 +1084,20 @@ export default function FileManager() {
     }
 
     return (
-        <div
-            style={{
-                position: 'relative',
-                width: '100%',
-                height: 'calc(100vh - 11rem)',
-                overflowY: 'auto',
-                overflowX: 'hidden',
-            }}
-        >
+        <>
             <Toolbar
-                position="fixed"
                 color="default"
                 sx={{
                     flexGrow: 1,
                     flexDirection: 'column',
                     alignItems: 'flex-start',
-                    margin: '0rem',
+                    margin: 0,
+                    padding: '0 !important',
+                    position: 'sticky',
+                    top: 0,
+                    bgcolor: 'background.paper',
+                    zIndex: 1,
+                    minHeight: '0 !important',
                 }}
             >
                 {/* Tabs for filtering files and generating content */}
@@ -1137,11 +1134,16 @@ export default function FileManager() {
                         borderBottom: 1, 
                         borderColor: 'divider', 
                         width: '100%',
-                        minHeight: 'auto',
+                        padding: 0,
+                        minHeight: 0,
                         '& .MuiTab-root': {
-                            minHeight: 'auto',
                             padding: '4px 8px',
-                            minWidth: 'auto',
+                            minWidth: 0,
+                            minHeight: 0,
+                            fontSize: '0.75rem',
+                        },
+                        '& .MuiTabs-flexContainer': {
+                            gap: 0,
                         },
                     }}
                 >
@@ -1196,7 +1198,7 @@ export default function FileManager() {
                 </Tabs>
 
                 {/* Tab Content */}
-                <Box sx={{ width: '100%', mt: 1 }}>
+                <Box sx={{ width: '100%', mt: 1, borderBottom: '1px solid #e0e0e0' }}>
                     {/* Suggestions Tab Content */}
                     {generator === 'suggestions' && (
                         <Box sx={{ width: '100%' }}>
@@ -1351,7 +1353,7 @@ export default function FileManager() {
                     )}
                     
                     {/* Search for other tabs */}
-                    {generator !== 'upload' || generator !== "suggestions=" && (
+                    {generator !== 'upload' || generator !== "suggestions" && (
                         <Box
                             sx={{
                                 display: 'flex',
@@ -1389,13 +1391,15 @@ export default function FileManager() {
                     {/* Generate button for image/audio tabs */}
                     {(generator === 'image' || generator === 'audio') && (
                         <Button
-                            fullWidth
                             variant="contained"
                             aria-label="Generate new File"
                             onClick={() => {
                                 toggleNewFileForm();
                             }}
-                            sx={{ mt: 1, px: 1 }}
+                            sx={{ 
+                                mx: 1, 
+                                mb: 1,
+                            }}
                         >
                             <AutoAwesomeIcon sx={{ mr: 1 }} />
                             Generate {generator === 'image' ? 'Image' : 'Audio'}
@@ -1458,7 +1462,7 @@ export default function FileManager() {
 
             {/* Only show TreeView when not in suggestions or upload tabs */}
             {generator !== 'suggestions' && generator !== 'upload' && (
-                <Box sx={{ minHeight: 200, minWidth: 250, overflowY: 'auto', height: 'calc(100vh - 17rem)' }}>
+                <Box sx={{ minHeight: 200, minWidth: 250 }}>
                     <SimpleTreeView apiRef={apiRef}>
                     {files.filter(file => file.mimeType.includes('image')).length > 0 && (
                         <TreeItem 
@@ -1858,7 +1862,7 @@ export default function FileManager() {
                 </SimpleTreeView>
                 </Box>
             )}
-        </div>
+        </>
 
     )
 }
