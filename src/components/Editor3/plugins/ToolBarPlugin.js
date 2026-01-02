@@ -183,14 +183,8 @@ import {
 
 
 import { $isAtNodeEnd } from '@lexical/selection';
-
-// Removed Google Fonts import to fix Storybook build issues (fonts.googleapis.com unreachable)
-// Import from 'next/font/google' is commented out to prevent network errors
-// Font families are defined with fallbacks instead
-
 const drawerWidth = 400;
 
-// Font family fallback definitions (replaces next/font/google)
 const notoSansJp = {
   style: { fontFamily: '"Noto Sans JP", sans-serif' }
 }
@@ -286,10 +280,6 @@ function getCodeLanguageOptions() {
 }
 
 const CODE_LANGUAGE_OPTIONS = getCodeLanguageOptions();
-
-// if morning say good morning
-// if afternoon say good afternoon
-// if evening say good evening
 
 const date = new Date();
 const hour = date.getHours();
@@ -1440,45 +1430,55 @@ function BlockFormatDropDown({
         <>
             <style global jsx>{`
         #block-format-select {
-            padding: 0.25rem 1rem 0.25rem 0.25rem;
+            padding: 0.25rem 1rem 0.25rem 0.5rem;
             height: 2rem;
         }
 
-        #block-format-select > span.icon {
-            font-size: 1.25rem;
-            margin-left: 0.25rem;
-        }
-
-        ul[aria-labelledby="block-format-select-label"] > li > span.menu-htext,
-        ul[aria-labelledby="block-format-select-label"] > li > span.text,
+        /* Hide text labels in closed select, show only icons */
         #block-format-select > span.text,
         #block-format-select > span.menu-htext {
+            display: none;
+        }
+
+        #block-format-select > span.icon {
             color: #505050;
         }
 
         #block-format-select > svg,
-        #block-format-select > span.icon,
-        #block-format-select > span.menu-htext {
+        #block-format-select > span.icon {
             position: relative;
             top: 0.25rem;
         }
 
+        /* Styles for expanded menu items - show everything */
+        ul[aria-labelledby="block-format-select-label"] li {
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        ul[aria-labelledby="block-format-select-label"] li span.text,
+        ul[aria-labelledby="block-format-select-label"] li span.menu-htext {
+            display: inline !important;
+            color: #505050 !important;
+            margin-left: 0.5rem;
+        }
+
+        ul[aria-labelledby="block-format-select-label"] li svg,
+        ul[aria-labelledby="block-format-select-label"] li span.icon {
+            color: #505050 !important;
+        }
+
         `}</style>
-            <FormControl
-                id='block-format-form'
-                style={{
-                    width: '10rem',
-                    minWidth: '8rem',
-                    margin: '0.25rem',
-                }}
+            <Box
+                id='block-format-select-box'
+                style={{ minWidth: 'auto', margin: '0.25rem' }}
             >
-                <InputLabel id="block-format-select-label">Block Format</InputLabel>
-                <Select
-                    labelId="block-format-select-label"
-                    id="block-format-select"
-                    value={blockType}
-                    label="Block Format"
-                >
+                <FormControl sx={{ minWidth: 'auto' }}>
+                    <Select
+                        labelId="block-format-select-label"
+                        id="block-format-select"
+                        value={blockType}
+                    >
 
                     <MenuItem
                         value="paragraph"
@@ -1569,6 +1569,7 @@ function BlockFormatDropDown({
                     </MenuItem>
                 </Select>
             </FormControl>
+            </Box>
         </>
     );
 }
@@ -1673,8 +1674,7 @@ function FontDropDown({
     );
 }
 
-
-export default function ToolarPlugin({
+export default function ToolBarPlugin({
     open,
     setOpen,
     setTabValue,
@@ -1712,8 +1712,12 @@ export default function ToolarPlugin({
     
     // Toolbar scroll state
     const toolbarRef = useRef(null);
+    const firstAppBarRef = useRef(null);
+    const secondAppBarRef = useRef(null);
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(false);
+    const [firstAppBarHeight, setFirstAppBarHeight] = useState(120); // Default fallback
+    const [totalAppBarHeight, setTotalAppBarHeight] = useState(176); // Default fallback for both AppBars
 
     // Check toolbar overflow
     const checkToolbarOverflow = useCallback(() => {
@@ -1743,6 +1747,36 @@ export default function ToolarPlugin({
         }
     }, [checkToolbarOverflow]);
 
+    // Throttle function to limit observer frequency
+    const throttle = useCallback((func, limit) => {
+        let inThrottle;
+        return function() {
+            const args = arguments;
+            const context = this;
+            if (!inThrottle) {
+                func.apply(context, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        }
+    }, []);
+
+    // Throttled height update function
+    const updateAppBarHeight = useCallback(throttle((firstHeight, secondHeight = 56) => {
+        setFirstAppBarHeight(firstHeight);
+        const total = firstHeight + secondHeight;
+        setTotalAppBarHeight(total);
+        // Update CSS custom property for vertical tabs positioning
+        document.documentElement.style.setProperty('--app-bar-height', `${total}px`);
+    }, 100), [throttle]);
+
+    // Calculate total height from both AppBars
+    const calculateTotalHeight = useCallback(() => {
+        const firstHeight = firstAppBarRef.current?.offsetHeight || 120;
+        const secondHeight = secondAppBarRef.current?.offsetHeight || 56;
+        updateAppBarHeight(firstHeight, secondHeight);
+    }, [updateAppBarHeight]);
+
     // Check overflow on mount, resize, and when toolbar content changes
     useEffect(() => {
         const checkWithDelay = () => {
@@ -1762,11 +1796,29 @@ export default function ToolarPlugin({
             });
         }
         
+        // Observe both AppBars height changes with throttling
+        const resizeObserver = new ResizeObserver((entries) => {
+            // Debounce multiple resize events
+            setTimeout(calculateTotalHeight, 50);
+        });
+        
+        if (firstAppBarRef.current) {
+            resizeObserver.observe(firstAppBarRef.current);
+        }
+        
+        if (secondAppBarRef.current) {
+            resizeObserver.observe(secondAppBarRef.current);
+        }
+        
+        // Set initial heights
+        setTimeout(calculateTotalHeight, 100);
+        
         return () => {
             window.removeEventListener('resize', checkToolbarOverflow);
             observer.disconnect();
+            resizeObserver.disconnect();
         };
-    }, [checkToolbarOverflow]);
+    }, [checkToolbarOverflow, calculateTotalHeight]);
 
     // const editorState = activeEditor.getEditorState();
     // const jsonString = JSON.stringify(editorState);
@@ -2029,8 +2081,19 @@ export default function ToolarPlugin({
             <style global jsx>{`
             .editor-toolbar button {
                 min-width: 2.5rem;
-                padding: 0.2rem;
-                margin: 0 0.2rem;
+                padding: 0.2rem 0.5rem;
+                margin: 0 0.1rem;
+                font-size: 0.875rem;
+                white-space: nowrap;
+            }
+
+            .editor-toolbar button .text {
+                margin-left: 0.25rem;
+            }
+
+            .editor-toolbar button:has(.text) {
+                min-width: auto;
+                padding: 0.25rem 0.75rem;
             }
 
             .editor-toolbar button.active {
@@ -2038,33 +2101,37 @@ export default function ToolarPlugin({
             }
             `}</style>
             <AppBar
+                ref={firstAppBarRef}
                 position="fixed"
                 color="default"
                 sx={{
                     overflowX: 'visible',
+                    overflowY: 'visible',
                     boxShadow: 'none',
                     zIndex: (theme) => theme.zIndex.drawer + 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.85)',
                     backdropFilter: 'blur(7px)',
                     display: 'flex',
                     flexDirection: 'column',
+                    minHeight: 'auto',
                 }}
             >
                 <MainToolbar />
                 <UnitTitleDescriptionEditor />
             </AppBar>
             <AppBar
+                ref={secondAppBarRef}
                 position="fixed"
                 color="default"
                 sx={{
                     overflowX: 'visible',
                     boxShadow: 'none',
                     zIndex: (theme) => theme.zIndex.drawer + 1,
-                    top: '8rem',
-                    paddingTop: '0',
+                    top: `${firstAppBarHeight}px`,
+                    paddingTop: '0.25rem',
                     borderBottom: '1px solid #e0e0e0',
                     paddingBottom: '0.25rem',
-                    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                    backgroundColor: 'rgba(255, 255, 255, 1)',
                     backdropFilter: 'blur(7px)',
                 }}
             >
@@ -2110,8 +2177,11 @@ export default function ToolarPlugin({
                         maxWidth: '100%',
                         paddingLeft: '3rem',
                         paddingRight: '3rem',
+                        paddingTop: '0.25rem',
+                        paddingBottom: '0.25rem',
+                        minHeight: '2.5rem',
                         overflowX: 'auto',
-                        overflowY: 'hidden',
+                        overflowY: 'visible',
                         scrollbarWidth: 'none', // Firefox
                         '&::-webkit-scrollbar': {
                             display: 'none' // Chrome, Safari

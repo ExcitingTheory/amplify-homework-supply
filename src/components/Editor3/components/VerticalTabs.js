@@ -35,7 +35,7 @@ function TabPanel(props) {
       style={{
         width: '100%',
         minWidth: 0,
-        height: 'calc(100vh - 11rem)',
+        height: 'calc(100vh - var(--app-bar-height, 11rem))',
         overflowY,
         overflowX: 'hidden',
         // flexShrink: 1,
@@ -81,32 +81,25 @@ export default function VerticalTabs({
     >
       <Tabs
         orientation="vertical"
-        // variant="scrollable"
         variant="standard"
         value={value}
         onChange={handleChange}
         aria-label="Vertical tabs example"
         sx={{
-          // position: 'sticky',
-          borderLeft: 1,
-          borderColor: 'divider',
           overflowY: 'hidden',
           minWidth: '2.5rem',
           maxWidth: '2.5rem',
-          // position: 'fixed',
           '& .MuiTab-root': {
             minWidth: '2.5rem',
             maxWidth: '2.5rem',
             padding: '8px 4px',
+            margin: 0,
+          },
+          '& .MuiTabs-scroller': {
+            borderRight: 'none',
+            margin: 0,
           }
         }}
-
-        // TabIndicatorProps={{
-        //   sx: {          
-        //      left: 0,
-        //      marginLeft: '1px',
-        //   }
-        // }}
       >
 
         <Tab

@@ -64,7 +64,7 @@ export default function TableOfContents() {
   if (headings.length === 0) {
     return (
       <Box sx={{ p: 2, textAlign: 'center' }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
           No headings found. Add headings to your document to see the table of contents.
         </Typography>
       </Box>

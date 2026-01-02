@@ -433,12 +433,13 @@ export default function Editor() {
                     overflow: openTab ? 'auto' : 'hidden',
                     minWidth: openTab ? '300px' : '2.5rem',
                     maxWidth: openTab ? '600px' : '2.5rem',
+                    borderRight: 'none',
                   }
                 }}
                 variant="permanent" open={openTab}>
                 <DrawerHeader
                   style={{
-                    height: '11rem',
+                    height: 'var(--app-bar-height, 11rem)',
                     // backgroundColor: '#fafafa',
                   }}
                 >
@@ -460,7 +461,7 @@ export default function Editor() {
               }}>
                 <DrawerHeader
                   style={{
-                    height: '11rem',
+                    height: 'var(--app-bar-height, 11rem)',
                   }}
                 />
               <div ref={onRef}>
@@ -470,7 +471,7 @@ export default function Editor() {
                       className="editor"
                       aria-placeholder="Enter some text..."
                       style={{
-                        height: 'calc(100vh - 11rem)',
+                        height: 'calc(100vh - var(--app-bar-height, 11rem))',
                         maxWidth: '100%',
                         overflowY: 'auto',
                         overflowX: 'auto',
