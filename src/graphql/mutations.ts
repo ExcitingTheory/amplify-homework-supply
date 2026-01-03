@@ -53,6 +53,53 @@ export const generateAudioFile = /* GraphQL */ `mutation GenerateAudioFile($phra
     byHex
     thumbnail
     waveformData
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
     units {
       items {
         id
@@ -143,6 +190,53 @@ export const generateImageFile = /* GraphQL */ `mutation GenerateImageFile($phra
     byHex
     thumbnail
     waveformData
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
     units {
       items {
         id
@@ -277,9 +371,10 @@ export const chatAssistantThread = /* GraphQL */ `mutation ChatAssistantThread($
   APITypes.ChatAssistantThreadMutationVariables,
   APITypes.ChatAssistantThreadMutation
 >;
-export const analyzeDocument = /* GraphQL */ `mutation AnalyzeDocument($documentID: ID!) {
-  analyzeDocument(documentID: $documentID) {
+export const analyzeDocument = /* GraphQL */ `mutation AnalyzeDocument($fileID: ID!) {
+  analyzeDocument(fileID: $fileID) {
     success
+    fileID
     documentID
     responseId
     pageCount
@@ -291,9 +386,10 @@ export const analyzeDocument = /* GraphQL */ `mutation AnalyzeDocument($document
   APITypes.AnalyzeDocumentMutationVariables,
   APITypes.AnalyzeDocumentMutation
 >;
-export const cancelDocumentAnalysis = /* GraphQL */ `mutation CancelDocumentAnalysis($documentID: ID!) {
-  cancelDocumentAnalysis(documentID: $documentID) {
+export const cancelDocumentAnalysis = /* GraphQL */ `mutation CancelDocumentAnalysis($fileID: ID!) {
+  cancelDocumentAnalysis(fileID: $fileID) {
     success
+    fileID
     documentID
     message
     __typename
@@ -410,10 +506,7 @@ export const createQuestion = /* GraphQL */ `mutation CreateQuestion(
     byPromptHex
     thumbnail
     difficulty
-    questionType
     metadata
-    sourceDocumentID
-    approved
     importedAt
     units {
       items {
@@ -454,6 +547,23 @@ export const createQuestion = /* GraphQL */ `mutation CreateQuestion(
         id
         questionId
         fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    documents {
+      items {
+        id
+        questionId
+        documentId
         createdAt
         updatedAt
         _version
@@ -504,10 +614,7 @@ export const updateQuestion = /* GraphQL */ `mutation UpdateQuestion(
     byPromptHex
     thumbnail
     difficulty
-    questionType
     metadata
-    sourceDocumentID
-    approved
     importedAt
     units {
       items {
@@ -548,6 +655,23 @@ export const updateQuestion = /* GraphQL */ `mutation UpdateQuestion(
         id
         questionId
         fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    documents {
+      items {
+        id
+        questionId
+        documentId
         createdAt
         updatedAt
         _version
@@ -598,10 +722,7 @@ export const deleteQuestion = /* GraphQL */ `mutation DeleteQuestion(
     byPromptHex
     thumbnail
     difficulty
-    questionType
     metadata
-    sourceDocumentID
-    approved
     importedAt
     units {
       items {
@@ -654,6 +775,23 @@ export const deleteQuestion = /* GraphQL */ `mutation DeleteQuestion(
       startedAt
       __typename
     }
+    documents {
+      items {
+        id
+        questionId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -689,6 +827,53 @@ export const createFile = /* GraphQL */ `mutation CreateFile(
     byHex
     thumbnail
     waveformData
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
     units {
       items {
         id
@@ -775,6 +960,53 @@ export const updateFile = /* GraphQL */ `mutation UpdateFile(
     byHex
     thumbnail
     waveformData
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
     units {
       items {
         id
@@ -861,6 +1093,53 @@ export const deleteFile = /* GraphQL */ `mutation DeleteFile(
     byHex
     thumbnail
     waveformData
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
     units {
       items {
         id
@@ -1415,24 +1694,14 @@ export const createUnit = /* GraphQL */ `mutation CreateUnit(
     documents {
       items {
         id
-        filename
-        s3Key
-        status
-        owner
-        identityId
-        learner
-        unitID
-        extractedText
-        pageCount
-        fileSize
-        mimeType
-        uploadedAt
-        metadata
+        unitId
+        documentId
         createdAt
         updatedAt
         _version
         _deleted
         _lastChangedAt
+        owner
         __typename
       }
       nextToken
@@ -1597,24 +1866,14 @@ export const updateUnit = /* GraphQL */ `mutation UpdateUnit(
     documents {
       items {
         id
-        filename
-        s3Key
-        status
-        owner
-        identityId
-        learner
-        unitID
-        extractedText
-        pageCount
-        fileSize
-        mimeType
-        uploadedAt
-        metadata
+        unitId
+        documentId
         createdAt
         updatedAt
         _version
         _deleted
         _lastChangedAt
+        owner
         __typename
       }
       nextToken
@@ -1779,24 +2038,14 @@ export const deleteUnit = /* GraphQL */ `mutation DeleteUnit(
     documents {
       items {
         id
-        filename
-        s3Key
-        status
-        owner
-        identityId
-        learner
-        unitID
-        extractedText
-        pageCount
-        fileSize
-        mimeType
-        uploadedAt
-        metadata
+        unitId
+        documentId
         createdAt
         updatedAt
         _version
         _deleted
         _lastChangedAt
+        owner
         __typename
       }
       nextToken
@@ -1861,6 +2110,7 @@ export const createWord = /* GraphQL */ `mutation CreateWord(
     definitionAudio
     definitionWaveformData
     rubyTags
+    importedAt
     units {
       items {
         id
@@ -1900,6 +2150,23 @@ export const createWord = /* GraphQL */ `mutation CreateWord(
         id
         questionId
         wordId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    documents {
+      items {
+        id
+        wordId
+        documentId
         createdAt
         updatedAt
         _version
@@ -1940,6 +2207,7 @@ export const updateWord = /* GraphQL */ `mutation UpdateWord(
     definitionAudio
     definitionWaveformData
     rubyTags
+    importedAt
     units {
       items {
         id
@@ -1979,6 +2247,23 @@ export const updateWord = /* GraphQL */ `mutation UpdateWord(
         id
         questionId
         wordId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    documents {
+      items {
+        id
+        wordId
+        documentId
         createdAt
         updatedAt
         _version
@@ -2019,6 +2304,7 @@ export const deleteWord = /* GraphQL */ `mutation DeleteWord(
     definitionAudio
     definitionWaveformData
     rubyTags
+    importedAt
     units {
       items {
         id
@@ -2070,6 +2356,23 @@ export const deleteWord = /* GraphQL */ `mutation DeleteWord(
       startedAt
       __typename
     }
+    documents {
+      items {
+        id
+        wordId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -2094,61 +2397,6 @@ export const createDocument = /* GraphQL */ `mutation CreateDocument(
     owner
     identityId
     learner
-    unitID
-    unit {
-      id
-      number
-      name
-      owner
-      description
-      data
-      status
-      timeLimitSeconds
-      assignments {
-        nextToken
-        startedAt
-        __typename
-      }
-      grades {
-        nextToken
-        startedAt
-        __typename
-      }
-      featuredImage
-      identityId
-      thumbnail
-      files {
-        nextToken
-        startedAt
-        __typename
-      }
-      words {
-        nextToken
-        startedAt
-        __typename
-      }
-      questions {
-        nextToken
-        startedAt
-        __typename
-      }
-      documents {
-        nextToken
-        startedAt
-        __typename
-      }
-      agentJobs {
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
     extractedText
     pageCount
     fileSize
@@ -2170,7 +2418,6 @@ export const createDocument = /* GraphQL */ `mutation CreateDocument(
         tokensUsed
         processingTime
         createdAt
-        approved
         importedAt
         metadata
         updatedAt
@@ -2214,6 +2461,57 @@ export const createDocument = /* GraphQL */ `mutation CreateDocument(
       __typename
     }
     metadata
+    units {
+      items {
+        id
+        unitId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    words {
+      items {
+        id
+        wordId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    questions {
+      items {
+        id
+        questionId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -2238,61 +2536,6 @@ export const updateDocument = /* GraphQL */ `mutation UpdateDocument(
     owner
     identityId
     learner
-    unitID
-    unit {
-      id
-      number
-      name
-      owner
-      description
-      data
-      status
-      timeLimitSeconds
-      assignments {
-        nextToken
-        startedAt
-        __typename
-      }
-      grades {
-        nextToken
-        startedAt
-        __typename
-      }
-      featuredImage
-      identityId
-      thumbnail
-      files {
-        nextToken
-        startedAt
-        __typename
-      }
-      words {
-        nextToken
-        startedAt
-        __typename
-      }
-      questions {
-        nextToken
-        startedAt
-        __typename
-      }
-      documents {
-        nextToken
-        startedAt
-        __typename
-      }
-      agentJobs {
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
     extractedText
     pageCount
     fileSize
@@ -2314,7 +2557,6 @@ export const updateDocument = /* GraphQL */ `mutation UpdateDocument(
         tokensUsed
         processingTime
         createdAt
-        approved
         importedAt
         metadata
         updatedAt
@@ -2358,6 +2600,57 @@ export const updateDocument = /* GraphQL */ `mutation UpdateDocument(
       __typename
     }
     metadata
+    units {
+      items {
+        id
+        unitId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    words {
+      items {
+        id
+        wordId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    questions {
+      items {
+        id
+        questionId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -2382,61 +2675,6 @@ export const deleteDocument = /* GraphQL */ `mutation DeleteDocument(
     owner
     identityId
     learner
-    unitID
-    unit {
-      id
-      number
-      name
-      owner
-      description
-      data
-      status
-      timeLimitSeconds
-      assignments {
-        nextToken
-        startedAt
-        __typename
-      }
-      grades {
-        nextToken
-        startedAt
-        __typename
-      }
-      featuredImage
-      identityId
-      thumbnail
-      files {
-        nextToken
-        startedAt
-        __typename
-      }
-      words {
-        nextToken
-        startedAt
-        __typename
-      }
-      questions {
-        nextToken
-        startedAt
-        __typename
-      }
-      documents {
-        nextToken
-        startedAt
-        __typename
-      }
-      agentJobs {
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
     extractedText
     pageCount
     fileSize
@@ -2458,7 +2696,6 @@ export const deleteDocument = /* GraphQL */ `mutation DeleteDocument(
         tokensUsed
         processingTime
         createdAt
-        approved
         importedAt
         metadata
         updatedAt
@@ -2502,6 +2739,57 @@ export const deleteDocument = /* GraphQL */ `mutation DeleteDocument(
       __typename
     }
     metadata
+    units {
+      items {
+        id
+        unitId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    words {
+      items {
+        id
+        wordId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    questions {
+      items {
+        id
+        questionId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -2531,26 +2819,6 @@ export const createParsedContent = /* GraphQL */ `mutation CreateParsedContent(
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -2567,6 +2835,21 @@ export const createParsedContent = /* GraphQL */ `mutation CreateParsedContent(
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2584,7 +2867,6 @@ export const createParsedContent = /* GraphQL */ `mutation CreateParsedContent(
     tokensUsed
     processingTime
     createdAt
-    approved
     importedAt
     metadata
     updatedAt
@@ -2615,26 +2897,6 @@ export const updateParsedContent = /* GraphQL */ `mutation UpdateParsedContent(
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -2651,6 +2913,21 @@ export const updateParsedContent = /* GraphQL */ `mutation UpdateParsedContent(
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2668,7 +2945,6 @@ export const updateParsedContent = /* GraphQL */ `mutation UpdateParsedContent(
     tokensUsed
     processingTime
     createdAt
-    approved
     importedAt
     metadata
     updatedAt
@@ -2699,26 +2975,6 @@ export const deleteParsedContent = /* GraphQL */ `mutation DeleteParsedContent(
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -2735,6 +2991,21 @@ export const deleteParsedContent = /* GraphQL */ `mutation DeleteParsedContent(
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2752,7 +3023,6 @@ export const deleteParsedContent = /* GraphQL */ `mutation DeleteParsedContent(
     tokensUsed
     processingTime
     createdAt
-    approved
     importedAt
     metadata
     updatedAt
@@ -2785,26 +3055,6 @@ export const createAgentJob = /* GraphQL */ `mutation CreateAgentJob(
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -2821,6 +3071,21 @@ export const createAgentJob = /* GraphQL */ `mutation CreateAgentJob(
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2924,26 +3189,6 @@ export const updateAgentJob = /* GraphQL */ `mutation UpdateAgentJob(
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -2960,6 +3205,21 @@ export const updateAgentJob = /* GraphQL */ `mutation UpdateAgentJob(
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -3063,26 +3323,6 @@ export const deleteAgentJob = /* GraphQL */ `mutation DeleteAgentJob(
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -3099,6 +3339,21 @@ export const deleteAgentJob = /* GraphQL */ `mutation DeleteAgentJob(
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -3306,10 +3561,7 @@ export const createQuestionUnit = /* GraphQL */ `mutation CreateQuestionUnit(
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3322,6 +3574,11 @@ export const createQuestionUnit = /* GraphQL */ `mutation CreateQuestionUnit(
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3430,10 +3687,7 @@ export const updateQuestionUnit = /* GraphQL */ `mutation UpdateQuestionUnit(
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3446,6 +3700,11 @@ export const updateQuestionUnit = /* GraphQL */ `mutation UpdateQuestionUnit(
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3554,10 +3813,7 @@ export const deleteQuestionUnit = /* GraphQL */ `mutation DeleteQuestionUnit(
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3570,6 +3826,11 @@ export const deleteQuestionUnit = /* GraphQL */ `mutation DeleteQuestionUnit(
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3678,10 +3939,7 @@ export const createQuestionWord = /* GraphQL */ `mutation CreateQuestionWord(
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3694,6 +3952,11 @@ export const createQuestionWord = /* GraphQL */ `mutation CreateQuestionWord(
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3717,6 +3980,7 @@ export const createQuestionWord = /* GraphQL */ `mutation CreateQuestionWord(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -3728,6 +3992,11 @@ export const createQuestionWord = /* GraphQL */ `mutation CreateQuestionWord(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3782,10 +4051,7 @@ export const updateQuestionWord = /* GraphQL */ `mutation UpdateQuestionWord(
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3798,6 +4064,11 @@ export const updateQuestionWord = /* GraphQL */ `mutation UpdateQuestionWord(
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3821,6 +4092,7 @@ export const updateQuestionWord = /* GraphQL */ `mutation UpdateQuestionWord(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -3832,6 +4104,11 @@ export const updateQuestionWord = /* GraphQL */ `mutation UpdateQuestionWord(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3886,10 +4163,7 @@ export const deleteQuestionWord = /* GraphQL */ `mutation DeleteQuestionWord(
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3902,6 +4176,11 @@ export const deleteQuestionWord = /* GraphQL */ `mutation DeleteQuestionWord(
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3925,6 +4204,7 @@ export const deleteQuestionWord = /* GraphQL */ `mutation DeleteQuestionWord(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -3936,6 +4216,11 @@ export const deleteQuestionWord = /* GraphQL */ `mutation DeleteQuestionWord(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3990,10 +4275,7 @@ export const createQuestionFile = /* GraphQL */ `mutation CreateQuestionFile(
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -4006,6 +4288,11 @@ export const createQuestionFile = /* GraphQL */ `mutation CreateQuestionFile(
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -4036,6 +4323,28 @@ export const createQuestionFile = /* GraphQL */ `mutation CreateQuestionFile(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4101,10 +4410,7 @@ export const updateQuestionFile = /* GraphQL */ `mutation UpdateQuestionFile(
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -4117,6 +4423,11 @@ export const updateQuestionFile = /* GraphQL */ `mutation UpdateQuestionFile(
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -4147,6 +4458,28 @@ export const updateQuestionFile = /* GraphQL */ `mutation UpdateQuestionFile(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4212,10 +4545,7 @@ export const deleteQuestionFile = /* GraphQL */ `mutation DeleteQuestionFile(
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -4228,6 +4558,11 @@ export const deleteQuestionFile = /* GraphQL */ `mutation DeleteQuestionFile(
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -4258,6 +4593,28 @@ export const deleteQuestionFile = /* GraphQL */ `mutation DeleteQuestionFile(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4293,6 +4650,360 @@ export const deleteQuestionFile = /* GraphQL */ `mutation DeleteQuestionFile(
   APITypes.DeleteQuestionFileMutationVariables,
   APITypes.DeleteQuestionFileMutation
 >;
+export const createDocumentQuestion = /* GraphQL */ `mutation CreateDocumentQuestion(
+  $input: CreateDocumentQuestionInput!
+  $condition: ModelDocumentQuestionConditionInput
+) {
+  createDocumentQuestion(input: $input, condition: $condition) {
+    id
+    questionId
+    documentId
+    question {
+      id
+      owner
+      identityId
+      answer
+      choices {
+        choice
+        correct
+        __typename
+      }
+      hint
+      prompt
+      audio
+      audioWaveformData
+      answerAudio
+      answerAudioWaveformData
+      generated
+      model
+      promptHex
+      byPromptHex
+      thumbnail
+      difficulty
+      metadata
+      importedAt
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateDocumentQuestionMutationVariables,
+  APITypes.CreateDocumentQuestionMutation
+>;
+export const updateDocumentQuestion = /* GraphQL */ `mutation UpdateDocumentQuestion(
+  $input: UpdateDocumentQuestionInput!
+  $condition: ModelDocumentQuestionConditionInput
+) {
+  updateDocumentQuestion(input: $input, condition: $condition) {
+    id
+    questionId
+    documentId
+    question {
+      id
+      owner
+      identityId
+      answer
+      choices {
+        choice
+        correct
+        __typename
+      }
+      hint
+      prompt
+      audio
+      audioWaveformData
+      answerAudio
+      answerAudioWaveformData
+      generated
+      model
+      promptHex
+      byPromptHex
+      thumbnail
+      difficulty
+      metadata
+      importedAt
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateDocumentQuestionMutationVariables,
+  APITypes.UpdateDocumentQuestionMutation
+>;
+export const deleteDocumentQuestion = /* GraphQL */ `mutation DeleteDocumentQuestion(
+  $input: DeleteDocumentQuestionInput!
+  $condition: ModelDocumentQuestionConditionInput
+) {
+  deleteDocumentQuestion(input: $input, condition: $condition) {
+    id
+    questionId
+    documentId
+    question {
+      id
+      owner
+      identityId
+      answer
+      choices {
+        choice
+        correct
+        __typename
+      }
+      hint
+      prompt
+      audio
+      audioWaveformData
+      answerAudio
+      answerAudioWaveformData
+      generated
+      model
+      promptHex
+      byPromptHex
+      thumbnail
+      difficulty
+      metadata
+      importedAt
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteDocumentQuestionMutationVariables,
+  APITypes.DeleteDocumentQuestionMutation
+>;
 export const createUnitFile = /* GraphQL */ `mutation CreateUnitFile(
   $input: CreateUnitFileInput!
   $condition: ModelUnitFileConditionInput
@@ -4320,6 +5031,28 @@ export const createUnitFile = /* GraphQL */ `mutation CreateUnitFile(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4436,6 +5169,28 @@ export const updateUnitFile = /* GraphQL */ `mutation UpdateUnitFile(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4552,6 +5307,28 @@ export const deleteUnitFile = /* GraphQL */ `mutation DeleteUnitFile(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4668,6 +5445,28 @@ export const createWordFile = /* GraphQL */ `mutation CreateWordFile(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4702,6 +5501,7 @@ export const createWordFile = /* GraphQL */ `mutation CreateWordFile(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -4713,6 +5513,11 @@ export const createWordFile = /* GraphQL */ `mutation CreateWordFile(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -4764,6 +5569,28 @@ export const updateWordFile = /* GraphQL */ `mutation UpdateWordFile(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4798,6 +5625,7 @@ export const updateWordFile = /* GraphQL */ `mutation UpdateWordFile(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -4809,6 +5637,11 @@ export const updateWordFile = /* GraphQL */ `mutation UpdateWordFile(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -4860,6 +5693,28 @@ export const deleteWordFile = /* GraphQL */ `mutation DeleteWordFile(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4894,6 +5749,7 @@ export const deleteWordFile = /* GraphQL */ `mutation DeleteWordFile(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -4905,6 +5761,11 @@ export const deleteWordFile = /* GraphQL */ `mutation DeleteWordFile(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -5003,6 +5864,7 @@ export const createUnitWord = /* GraphQL */ `mutation CreateUnitWord(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -5014,6 +5876,11 @@ export const createUnitWord = /* GraphQL */ `mutation CreateUnitWord(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -5112,6 +5979,7 @@ export const updateUnitWord = /* GraphQL */ `mutation UpdateUnitWord(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -5123,6 +5991,11 @@ export const updateUnitWord = /* GraphQL */ `mutation UpdateUnitWord(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -5221,12 +6094,139 @@ export const deleteUnitWord = /* GraphQL */ `mutation DeleteUnitWord(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteUnitWordMutationVariables,
+  APITypes.DeleteUnitWordMutation
+>;
+export const createUnitDocument = /* GraphQL */ `mutation CreateUnitDocument(
+  $input: CreateUnitDocumentInput!
+  $condition: ModelUnitDocumentConditionInput
+) {
+  createUnitDocument(input: $input, condition: $condition) {
+    id
+    unitId
+    documentId
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
         nextToken
         startedAt
         __typename
@@ -5253,6 +6253,569 @@ export const deleteUnitWord = /* GraphQL */ `mutation DeleteUnitWord(
   }
 }
 ` as GeneratedMutation<
-  APITypes.DeleteUnitWordMutationVariables,
-  APITypes.DeleteUnitWordMutation
+  APITypes.CreateUnitDocumentMutationVariables,
+  APITypes.CreateUnitDocumentMutation
+>;
+export const updateUnitDocument = /* GraphQL */ `mutation UpdateUnitDocument(
+  $input: UpdateUnitDocumentInput!
+  $condition: ModelUnitDocumentConditionInput
+) {
+  updateUnitDocument(input: $input, condition: $condition) {
+    id
+    unitId
+    documentId
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateUnitDocumentMutationVariables,
+  APITypes.UpdateUnitDocumentMutation
+>;
+export const deleteUnitDocument = /* GraphQL */ `mutation DeleteUnitDocument(
+  $input: DeleteUnitDocumentInput!
+  $condition: ModelUnitDocumentConditionInput
+) {
+  deleteUnitDocument(input: $input, condition: $condition) {
+    id
+    unitId
+    documentId
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteUnitDocumentMutationVariables,
+  APITypes.DeleteUnitDocumentMutation
+>;
+export const createDocumentWord = /* GraphQL */ `mutation CreateDocumentWord(
+  $input: CreateDocumentWordInput!
+  $condition: ModelDocumentWordConditionInput
+) {
+  createDocumentWord(input: $input, condition: $condition) {
+    id
+    wordId
+    documentId
+    word {
+      id
+      phrase
+      owner
+      identityId
+      pronunciation
+      definition
+      audio
+      waveformData
+      definitionAudio
+      definitionWaveformData
+      rubyTags
+      importedAt
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateDocumentWordMutationVariables,
+  APITypes.CreateDocumentWordMutation
+>;
+export const updateDocumentWord = /* GraphQL */ `mutation UpdateDocumentWord(
+  $input: UpdateDocumentWordInput!
+  $condition: ModelDocumentWordConditionInput
+) {
+  updateDocumentWord(input: $input, condition: $condition) {
+    id
+    wordId
+    documentId
+    word {
+      id
+      phrase
+      owner
+      identityId
+      pronunciation
+      definition
+      audio
+      waveformData
+      definitionAudio
+      definitionWaveformData
+      rubyTags
+      importedAt
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateDocumentWordMutationVariables,
+  APITypes.UpdateDocumentWordMutation
+>;
+export const deleteDocumentWord = /* GraphQL */ `mutation DeleteDocumentWord(
+  $input: DeleteDocumentWordInput!
+  $condition: ModelDocumentWordConditionInput
+) {
+  deleteDocumentWord(input: $input, condition: $condition) {
+    id
+    wordId
+    documentId
+    word {
+      id
+      phrase
+      owner
+      identityId
+      pronunciation
+      definition
+      audio
+      waveformData
+      definitionAudio
+      definitionWaveformData
+      rubyTags
+      importedAt
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteDocumentWordMutationVariables,
+  APITypes.DeleteDocumentWordMutation
 >;

@@ -31,6 +31,7 @@ const UnitProvider = ({ children, id }) => {
   const versionRef = useRef(0);
   const editorStateRef = useRef();
   const editorSelectionRef = useRef();
+  const editorRef = useRef(null);
   const unitRef = useRef({});
   const usernameRef = useRef(null);
 
@@ -62,10 +63,18 @@ const UnitProvider = ({ children, id }) => {
 
 
   const fetchCurrentUsername = React.useCallback(async () => {
-      const { sub: username } = await fetchUserAttributes();
-      isLoading.current = false
-      usernameRef.current = username;
-      setSession({username});
+      try {
+        const { sub: username } = await fetchUserAttributes();
+        isLoading.current = false
+        usernameRef.current = username;
+        setSession({username});
+      } catch (error) {
+        // Suppress benign Cognito 400 errors in development
+        if (error?.name !== 'NotAuthorizedException' && error?.statusCode !== 400) {
+          console.error('[UnitContext] Error fetching user attributes:', error);
+        }
+        isLoading.current = false;
+      }
   }, [])
 
   React.useEffect(() => {
@@ -556,6 +565,7 @@ const UnitProvider = ({ children, id }) => {
     description,
     editorStateRef,
     editorSelectionRef,
+    editorRef,
     versionRef,
     unitRef,
     finishedQuestions,

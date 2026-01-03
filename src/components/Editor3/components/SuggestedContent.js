@@ -20,7 +20,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import { DataStore } from 'aws-amplify/datastore';
-import { ParsedContent, Word, Question, Document, QuestionUnit } from '../../../models';
+import { ParsedContent, Word, Question, Document, QuestionUnit, DocumentWord, DocumentQuestion, UnitWord } from '../../../models';
 
 /**
  * Component to display and approve suggested vocabulary from parsed documents
@@ -30,6 +30,7 @@ export function SuggestedVocabulary({ documentId, unitId, onImport }) {
     const [document, setDocument] = useState(null);
     const [vocabulary, setVocabulary] = useState([]);
     const [selectedWords, setSelectedWords] = useState(new Set());
+    const [importedWords, setImportedWords] = useState(new Set()); // Track which words are already imported
     const [loading, setLoading] = useState(true);
     const [importing, setImporting] = useState(false);
     const [importProgress, setImportProgress] = useState(null);
@@ -44,15 +45,37 @@ export function SuggestedVocabulary({ documentId, unitId, onImport }) {
             setLoading(true);
             try {
                 // Load parsed content
-                const contents = await DataStore.query(ParsedContent, c => c.DocumentID.eq(documentId));
+                const contents = await DataStore.query(ParsedContent, c => c.documentID.eq(documentId));
                 if (contents.length > 0) {
                     const content = contents[0];
                     setParsedContent(content);
                     
                     // Parse vocabulary JSON
                     try {
-                        const vocabArray = content.vocabularyJSON ? JSON.parse(content.vocabularyJSON) : [];
+                        const vocabArray = content.vocabularyJSON || [];
                         setVocabulary(vocabArray);
+                        
+                        // Check which words are already imported by looking for DocumentWord links
+                        const imported = new Set();
+                        for (const item of vocabArray) {
+                            // First find words with this phrase
+                            const existingWords = await DataStore.query(Word, w => w.phrase.eq(item.word));
+                            
+                            // Then check if any are linked to this document via DocumentWord
+                            for (const word of existingWords) {
+                                const docWordLinks = await DataStore.query(DocumentWord, dw => 
+                                    dw.and(dw => [
+                                        dw.wordId.eq(word.id),
+                                        dw.documentId.eq(documentId)
+                                    ])
+                                );
+                                if (docWordLinks.length > 0) {
+                                    imported.add(item.word);
+                                    break;
+                                }
+                            }
+                        }
+                        setImportedWords(imported);
                     } catch (error) {
                         console.error('Error parsing vocabulary JSON:', error);
                     }
@@ -74,14 +97,14 @@ export function SuggestedVocabulary({ documentId, unitId, onImport }) {
 
         const subscription = DataStore.observeQuery(
             ParsedContent,
-            c => c.DocumentID.eq(documentId)
+            c => c.documentID.eq(documentId)
         ).subscribe(({ items }) => {
             if (items.length > 0) {
                 const content = items[0];
                 setParsedContent(content);
                 
                 try {
-                    const vocabArray = content.vocabularyJSON ? JSON.parse(content.vocabularyJSON) : [];
+                    const vocabArray = content.vocabularyJSON || [];
                     setVocabulary(vocabArray);
                 } catch (error) {
                     console.error('Error parsing vocabulary JSON:', error);
@@ -159,27 +182,56 @@ export function SuggestedVocabulary({ documentId, unitId, onImport }) {
             });
 
             try {
-                // Check if word already exists
-                const existingWords = await DataStore.query(Word, w => 
-                    w.phrase.eq(wordData.word)
-                );
+                // Check if word already exists from this document via DocumentWord link
+                const existingWords = await DataStore.query(Word, w => w.phrase.eq(wordData.word));
+                
+                let wordAlreadyLinked = false;
+                for (const word of existingWords) {
+                    const docWordLinks = await DataStore.query(DocumentWord, dw => 
+                        dw.and(dw => [
+                            dw.wordId.eq(word.id),
+                            dw.documentId.eq(documentId)
+                        ])
+                    );
+                    if (docWordLinks.length > 0) {
+                        wordAlreadyLinked = true;
+                        break;
+                    }
+                }
 
-                if (existingWords.length > 0) {
+                if (wordAlreadyLinked) {
                     skipped++;
                     continue;
                 }
 
                 // Create new word
-                await DataStore.save(new Word({
+                const newWord = await DataStore.save(new Word({
                     phrase: wordData.word,
                     definition: wordData.definition,
                     pronunciation: wordData.word, // Use word as pronunciation if not provided
-                    unitID: unitId,
-                    sourceDocumentID: documentId,
-                    approved: true,
                     importedAt: new Date().toISOString(),
                 }));
 
+                // Link word to document via DocumentWord
+                await DataStore.save(new DocumentWord({
+                    word: newWord,
+                    document: document
+                }));
+
+                // Link word to unit via UnitWord if unitId provided
+                if (unitId) {
+                    const { Unit } = await import('../../../models');
+                    const unit = await DataStore.query(Unit, unitId);
+                    if (unit) {
+                        await DataStore.save(new UnitWord({
+                            word: newWord,
+                            unit: unit
+                        }));
+                    }
+                }
+
+                // Add to imported set
+                setImportedWords(prev => new Set([...prev, wordData.word]));
                 imported++;
             } catch (error) {
                 console.error('Error importing word:', error);
@@ -194,19 +246,6 @@ export function SuggestedVocabulary({ documentId, unitId, onImport }) {
             errors,
             total
         });
-
-        // Mark as imported
-        if (imported > 0 && parsedContent) {
-            try {
-                await DataStore.save(
-                    ParsedContent.copyOf(parsedContent, updated => {
-                        updated.importedAt = new Date().toISOString();
-                    })
-                );
-            } catch (error) {
-                console.error('Error updating import status:', error);
-            }
-        }
 
         setImporting(false);
         setSelectedWords(new Set());
@@ -237,7 +276,7 @@ export function SuggestedVocabulary({ documentId, unitId, onImport }) {
         );
     }
 
-    const alreadyImported = !!parsedContent?.importedAt;
+    const notImportedCount = vocabulary.filter(item => !importedWords.has(item.word)).length;
 
     return (
         <Box sx={{ p: 2, width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
@@ -253,34 +292,44 @@ export function SuggestedVocabulary({ documentId, unitId, onImport }) {
                     </Typography>
                 )}
                 
-                {alreadyImported && (
-                    <Alert severity="success" sx={{ mt: 1 }}>
-                        Imported on {new Date(parsedContent.importedAt).toLocaleString()}
-                    </Alert>
-                )}
+                <Box sx={{ mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    <Chip 
+                        label={`${vocabulary.length} total words`} 
+                        size="small" 
+                        color="default"
+                    />
+                    <Chip 
+                        label={`${importedWords.size} already imported`} 
+                        size="small" 
+                        color="success"
+                    />
+                    <Chip 
+                        label={`${notImportedCount} not yet imported`} 
+                        size="small" 
+                        color="primary"
+                    />
+                </Box>
             </Box>
 
             {/* Actions */}
-            {!alreadyImported && (
-                <Box sx={{ mb: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
-                    <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={toggleAll}
-                        disabled={importing}
-                    >
-                        {selectedWords.size === vocabulary.length ? 'Deselect All' : 'Select All'}
-                    </Button>
-                    <Button
-                        variant="contained"
-                        size="small"
-                        disabled={selectedWords.size === 0 || importing}
-                        onClick={importSelected}
-                    >
-                        Import Selected ({selectedWords.size})
-                    </Button>
-                </Box>
-            )}
+            <Box sx={{ mb: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
+                <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={toggleAll}
+                    disabled={importing}
+                >
+                    {selectedWords.size === vocabulary.length ? 'Deselect All' : 'Select All'}
+                </Button>
+                <Button
+                    variant="contained"
+                    size="small"
+                    disabled={selectedWords.size === 0 || importing}
+                    onClick={importSelected}
+                >
+                    Import Selected ({selectedWords.size})
+                </Button>
+            </Box>
 
             {/* Import Progress */}
             {importProgress && (
@@ -309,6 +358,7 @@ export function SuggestedVocabulary({ documentId, unitId, onImport }) {
                 {vocabulary.map((item, index) => {
                     const isSelected = selectedWords.has(index);
                     const isEditing = editingIndex === index;
+                    const isImported = importedWords.has(item.word);
 
                     return (
                         <SuggestedWordItem
@@ -317,9 +367,9 @@ export function SuggestedVocabulary({ documentId, unitId, onImport }) {
                             index={index}
                             selected={isSelected}
                             isEditing={isEditing}
+                            isImported={isImported}
                             editForm={editForm}
                             setEditForm={setEditForm}
-                            alreadyImported={alreadyImported}
                             importing={importing}
                             onToggle={() => toggleWord(index)}
                             onEdit={() => startEdit(index)}
@@ -338,9 +388,9 @@ function SuggestedWordItem({
     index, 
     selected, 
     isEditing, 
+    isImported,
     editForm,
     setEditForm,
-    alreadyImported,
     importing,
     onToggle, 
     onEdit,
@@ -355,19 +405,22 @@ function SuggestedWordItem({
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'stretch',
-                bgcolor: selected ? 'action.selected' : 'inherit',
+                bgcolor: selected ? 'action.selected' : isImported ? 'success.50' : 'inherit',
                 '&:hover': { bgcolor: 'action.hover' },
                 borderBottom: '1px solid #eee',
+                borderLeft: isImported ? '3px solid' : 'none',
+                borderLeftColor: 'success.main',
+                py: 1,
+                px: 1,
             }}
         >
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', width: '100%' }}>
-                {!alreadyImported && (
-                    <Checkbox
-                        checked={selected}
-                        onChange={onToggle}
-                        disabled={importing}
-                    />
-                )}
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', width: '100%', gap: 0.5 }}>
+                <Checkbox
+                    checked={selected}
+                    onChange={onToggle}
+                    disabled={importing}
+                    sx={{ p: 0.5 }}
+                />
                 
                 {isEditing ? (
                     <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -411,26 +464,52 @@ function SuggestedWordItem({
                         </Box>
                     </Box>
                 ) : (
-                    <Box sx={{ flex: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Typography variant="subtitle2" fontWeight="bold">
-                                {item.word}
-                            </Typography>
-                            {!alreadyImported && (
-                                <IconButton size="small" onClick={onEdit}>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', minWidth: 0 }}>
+                                <Typography 
+                                    variant="subtitle2" 
+                                    fontWeight="bold"
+                                    sx={{
+                                        wordWrap: 'break-word',
+                                        overflowWrap: 'break-word',
+                                        whiteSpace: 'normal'
+                                    }}
+                                >
+                                    {item.word}
+                                </Typography>
+                                {isImported && (
+                                    <Chip 
+                                        label="Imported" 
+                                        size="small" 
+                                        color="success"
+                                        sx={{ height: 18, fontSize: '0.65rem', flexShrink: 0 }}
+                                    />
+                                )}
+                            </Box>
+                            {!isImported && (
+                                <IconButton size="small" onClick={onEdit} sx={{ p: 0.5, flexShrink: 0 }}>
                                     <EditIcon fontSize="small" />
                                 </IconButton>
                             )}
                         </Box>
                         
                         {!expanded && (
-                            <Typography variant="body2" color="text.secondary" noWrap>
+                            <Typography 
+                                variant="body2" 
+                                color="text.secondary" 
+                                sx={{ 
+                                    wordWrap: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    whiteSpace: 'normal'
+                                }}
+                            >
                                 {item.definition}
                             </Typography>
                         )}
                         
                         {item.page && (
-                            <Chip label={`Page ${item.page}`} size="small" sx={{ mt: 0.5 }} />
+                            <Chip label={`Page ${item.page}`} size="small" sx={{ mt: 0.5, height: 18, fontSize: '0.65rem' }} />
                         )}
                     </Box>
                 )}
@@ -438,19 +517,37 @@ function SuggestedWordItem({
                 <IconButton
                     size="small"
                     onClick={() => setExpanded(!expanded)}
-                    sx={{ ml: 1 }}
+                    sx={{ p: 0.5, flexShrink: 0 }}
                 >
                     {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                 </IconButton>
             </Box>
             
-            <Collapse in={expanded && !isEditing} sx={{ width: '100%', pl: alreadyImported ? 0 : 6, pt: 1 }}>
-                <Box sx={{ py: 1 }}>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
+            <Collapse in={expanded && !isEditing} sx={{ width: '100%', pl: 5, pt: 0.5 }}>
+                <Box sx={{ py: 0.5 }}>
+                    <Typography 
+                        variant="body2" 
+                        sx={{ 
+                            mb: 1,
+                            wordWrap: 'break-word',
+                            overflowWrap: 'break-word',
+                            whiteSpace: 'normal'
+                        }}
+                    >
                         <strong>Definition:</strong> {item.definition}
                     </Typography>
                     {item.context && (
-                        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', mb: 1 }}>
+                        <Typography 
+                            variant="body2" 
+                            color="text.secondary" 
+                            sx={{ 
+                                fontStyle: 'italic', 
+                                mb: 1,
+                                wordWrap: 'break-word',
+                                overflowWrap: 'break-word',
+                                whiteSpace: 'normal'
+                            }}
+                        >
                             <strong>Context:</strong> "{item.context}"
                         </Typography>
                     )}
@@ -468,6 +565,7 @@ export function SuggestedQuestions({ documentId, unitId, onImport }) {
     const [document, setDocument] = useState(null);
     const [questions, setQuestions] = useState([]);
     const [selectedQuestions, setSelectedQuestions] = useState(new Set());
+    const [importedQuestions, setImportedQuestions] = useState(new Set()); // Track which questions are imported
     const [loading, setLoading] = useState(true);
     const [importing, setImporting] = useState(false);
     const [importProgress, setImportProgress] = useState(null);
@@ -480,15 +578,38 @@ export function SuggestedQuestions({ documentId, unitId, onImport }) {
             setLoading(true);
             try {
                 // Load parsed content
-                const contents = await DataStore.query(ParsedContent, c => c.DocumentID.eq(documentId));
+                const contents = await DataStore.query(ParsedContent, c => c.documentID.eq(documentId));
                 if (contents.length > 0) {
                     const content = contents[0];
                     setParsedContent(content);
                     
                     // Parse questions JSON
                     try {
-                        const questionsArray = content.questionsJSON ? JSON.parse(content.questionsJSON) : [];
+                        const questionsArray = content.questionsJSON || [];
                         setQuestions(questionsArray);
+                        
+                        // Check which questions are already imported by looking for DocumentQuestion links
+                        const imported = new Set();
+                        for (let i = 0; i < questionsArray.length; i++) {
+                            const item = questionsArray[i];
+                            // First find questions with this prompt
+                            const existingQuestions = await DataStore.query(Question, q => q.prompt.eq(item.prompt));
+                            
+                            // Then check if any are linked to this document via DocumentQuestion
+                            for (const question of existingQuestions) {
+                                const docQuestionLinks = await DataStore.query(DocumentQuestion, dq => 
+                                    dq.and(dq => [
+                                        dq.questionId.eq(question.id),
+                                        dq.documentId.eq(documentId)
+                                    ])
+                                );
+                                if (docQuestionLinks.length > 0) {
+                                    imported.add(i);
+                                    break;
+                                }
+                            }
+                        }
+                        setImportedQuestions(imported);
                     } catch (error) {
                         console.error('Error parsing questions JSON:', error);
                     }
@@ -510,14 +631,14 @@ export function SuggestedQuestions({ documentId, unitId, onImport }) {
 
         const subscription = DataStore.observeQuery(
             ParsedContent,
-            c => c.DocumentID.eq(documentId)
+            c => c.documentID.eq(documentId)
         ).subscribe(({ items }) => {
             if (items.length > 0) {
                 const content = items[0];
                 setParsedContent(content);
                 
                 try {
-                    const questionsArray = content.questionsJSON ? JSON.parse(content.questionsJSON) : [];
+                    const questionsArray = content.questionsJSON || [];
                     setQuestions(questionsArray);
                 } catch (error) {
                     console.error('Error parsing questions JSON:', error);
@@ -553,6 +674,7 @@ export function SuggestedQuestions({ documentId, unitId, onImport }) {
         const selectedIndices = Array.from(selectedQuestions);
         const total = selectedIndices.length;
         let imported = 0;
+        let skipped = 0;
         let errors = 0;
 
         for (let i = 0; i < selectedIndices.length; i++) {
@@ -566,27 +688,59 @@ export function SuggestedQuestions({ documentId, unitId, onImport }) {
             });
 
             try {
+                // Check if question already exists from this document via DocumentQuestion link
+                const existingQuestions = await DataStore.query(Question, q => q.prompt.eq(questionData.prompt));
+                
+                let questionAlreadyLinked = false;
+                for (const question of existingQuestions) {
+                    const docQuestionLinks = await DataStore.query(DocumentQuestion, dq => 
+                        dq.and(dq => [
+                            dq.questionId.eq(question.id),
+                            dq.documentId.eq(documentId)
+                        ])
+                    );
+                    if (docQuestionLinks.length > 0) {
+                        questionAlreadyLinked = true;
+                        break;
+                    }
+                }
+
+                if (questionAlreadyLinked) {
+                    skipped++;
+                    continue;
+                }
+
                 // Create the question
                 const newQuestion = await DataStore.save(new Question({
                     prompt: questionData.prompt,
                     answer: questionData.answer || '',
                     hint: questionData.hint || '',
-                    sourceDocumentID: documentId,
-                    approved: true,
                     importedAt: new Date().toISOString(),
                     difficulty: questionData.difficulty || 'medium',
                     questionType: questionData.questionType || 'comprehension',
                     metadata: JSON.stringify(questionData.metadata || {}),
                 }));
 
-                // Create QuestionUnit junction record to link question to unit
+                // Link question to document via DocumentQuestion
+                await DataStore.save(new DocumentQuestion({
+                    question: newQuestion,
+                    document: document
+                }));
+
+                // Link question to unit via QuestionUnit if unitId provided
                 if (unitId) {
-                    await DataStore.save(new QuestionUnit({
-                        questionId: newQuestion.id,
-                        unitId: unitId,
-                    }));
+                    const { Unit } = await import('../../../models');
+                    const unit = await DataStore.query(Unit, unitId);
+                    if (unit) {
+                        await DataStore.save(new QuestionUnit({
+                            question: newQuestion,
+                            unit: unit
+                        }));
+                    }
                 }
 
+                // Add to imported set
+                setImportedQuestions(prev => new Set([...prev, index]));
                 imported++;
             } catch (error) {
                 console.error('Error importing question:', error);
@@ -597,6 +751,7 @@ export function SuggestedQuestions({ documentId, unitId, onImport }) {
         setImportProgress(null);
         setImportResult({
             imported,
+            skipped,
             errors,
             total
         });
@@ -630,6 +785,8 @@ export function SuggestedQuestions({ documentId, unitId, onImport }) {
         );
     }
 
+    const notImportedCount = questions.filter((_, i) => !importedQuestions.has(i)).length;
+
     return (
         <Box sx={{ p: 2, width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
             {/* Header */}
@@ -642,6 +799,24 @@ export function SuggestedQuestions({ documentId, unitId, onImport }) {
                         From: {document.filename}
                     </Typography>
                 )}
+                
+                <Box sx={{ mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    <Chip 
+                        label={`${questions.length} total questions`} 
+                        size="small" 
+                        color="default"
+                    />
+                    <Chip 
+                        label={`${importedQuestions.size} already imported`} 
+                        size="small" 
+                        color="success"
+                    />
+                    <Chip 
+                        label={`${notImportedCount} not yet imported`} 
+                        size="small" 
+                        color="primary"
+                    />
+                </Box>
             </Box>
 
             {/* Actions */}
@@ -681,92 +856,130 @@ export function SuggestedQuestions({ documentId, unitId, onImport }) {
             {importResult && (
                 <Alert severity="success" sx={{ mb: 2 }} onClose={() => setImportResult(null)}>
                     Imported {importResult.imported} questions.
+                    {importResult.skipped > 0 && ` Skipped ${importResult.skipped} duplicates.`}
                     {importResult.errors > 0 && ` ${importResult.errors} errors.`}
                 </Alert>
             )}
 
             {/* Questions List */}
             <List sx={{ width: '100%' }}>
-                {questions.map((item, index) => (
-                    <SuggestedQuestionItem
-                        key={index}
-                        item={item}
-                        index={index}
-                        selected={selectedQuestions.has(index)}
-                        importing={importing}
-                        onToggle={() => toggleQuestion(index)}
-                    />
-                ))}
+                {questions.map((item, index) => {
+                    const isImported = importedQuestions.has(index);
+                    return (
+                        <SuggestedQuestionItem
+                            key={index}
+                            item={item}
+                            index={index}
+                            selected={selectedQuestions.has(index)}
+                            isImported={isImported}
+                            importing={importing}
+                            onToggle={() => toggleQuestion(index)}
+                        />
+                    );
+                })}
             </List>
         </Box>
     );
 }
 
-function SuggestedQuestionItem({ item, index, selected, importing, onToggle }) {
+function SuggestedQuestionItem({ item, index, selected, isImported, importing, onToggle }) {
     const [expanded, setExpanded] = useState(false);
 
     return (
         <ListItem
             sx={{
                 borderBottom: '1px solid #eee',
-                backgroundColor: selected ? 'action.selected' : 'inherit',
+                backgroundColor: selected ? 'action.selected' : isImported ? 'success.50' : 'inherit',
                 flexDirection: 'column',
                 alignItems: 'flex-start',
+                borderLeft: isImported ? '3px solid' : 'none',
+                borderLeftColor: 'success.main',
+                py: 1,
+                px: 1,
             }}
         >
-            <Box sx={{ display: 'flex', width: '100%', alignItems: 'flex-start' }}>
+            <Box sx={{ display: 'flex', width: '100%', alignItems: 'flex-start', gap: 0.5 }}>
                 <Checkbox
                     checked={selected}
                     onChange={onToggle}
                     disabled={importing}
-                    sx={{ mr: 1, mt: 0.5 }}
+                    sx={{ p: 0.5 }}
                 />
-                <Box sx={{ flex: 1 }}>
-                    <ListItemText
-                        primary={item.prompt}
-                        secondary={
-                            <Box sx={{ mt: 0.5 }}>
-                                {item.difficulty && (
-                                    <Chip
-                                        label={item.difficulty}
-                                        size="small"
-                                        sx={{ mr: 0.5 }}
-                                    />
-                                )}
-                                {item.questionType && (
-                                    <Chip
-                                        label={item.questionType}
-                                        size="small"
-                                        variant="outlined"
-                                    />
-                                )}
-                            </Box>
-                        }
-                        sx={{
-                            '& .MuiListItemText-primary': {
-                                fontWeight: 'medium',
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 0.5 }}>
+                        <Typography 
+                            variant="subtitle2" 
+                            fontWeight="medium" 
+                            sx={{ 
+                                flex: 1, 
                                 wordWrap: 'break-word',
                                 overflowWrap: 'break-word',
-                            }
-                        }}
-                    />
+                                whiteSpace: 'normal'
+                            }}
+                        >
+                            {item.prompt}
+                        </Typography>
+                        {isImported && (
+                            <Chip 
+                                label="Imported" 
+                                size="small" 
+                                color="success"
+                                sx={{ height: 18, fontSize: '0.65rem', flexShrink: 0 }}
+                            />
+                        )}
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                        {item.difficulty && (
+                            <Chip
+                                label={item.difficulty}
+                                size="small"
+                                sx={{ height: 18, fontSize: '0.65rem' }}
+                            />
+                        )}
+                        {item.questionType && (
+                            <Chip
+                                label={item.questionType}
+                                size="small"
+                                variant="outlined"
+                                sx={{ height: 18, fontSize: '0.65rem' }}
+                            />
+                        )}
+                    </Box>
                 </Box>
                 <IconButton
                     size="small"
                     onClick={() => setExpanded(!expanded)}
+                    sx={{ p: 0.5, flexShrink: 0 }}
                 >
                     {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                 </IconButton>
             </Box>
-            <Collapse in={expanded} sx={{ width: '100%', pl: 6 }}>
-                <Box sx={{ py: 1 }}>
+            <Collapse in={expanded} sx={{ width: '100%', pl: 5 }}>
+                <Box sx={{ py: 0.5 }}>
                     {item.answer && (
-                        <Typography variant="body2" sx={{ mb: 1 }}>
+                        <Typography 
+                            variant="body2" 
+                            sx={{ 
+                                mb: 1,
+                                wordWrap: 'break-word',
+                                overflowWrap: 'break-word',
+                                whiteSpace: 'normal'
+                            }}
+                        >
                             <strong>Answer:</strong> {item.answer}
                         </Typography>
                     )}
                     {item.hint && (
-                        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                        <Typography 
+                            variant="body2" 
+                            color="text.secondary" 
+                            sx={{ 
+                                fontStyle: 'italic',
+                                wordWrap: 'break-word',
+                                overflowWrap: 'break-word',
+                                whiteSpace: 'normal'
+                            }}
+                        >
                             <strong>Hint:</strong> {item.hint}
                         </Typography>
                     )}

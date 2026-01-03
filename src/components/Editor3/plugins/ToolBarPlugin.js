@@ -673,7 +673,7 @@ const UnitTitleDescriptionEditor = () => {
                         size='small'
                         variant='standard'
                         fullWidth
-                        value={newName}
+                        value={newName || ''}
                         placeholder='Untitled Unit'
                         onChange={(event) => { onNameChange(event) }}
                         InputProps={{
@@ -709,7 +709,7 @@ const UnitTitleDescriptionEditor = () => {
                         variant='standard'
                         fullWidth
                         // label={`Answer ${index + 1}`}
-                        value={newDescription}
+                        value={newDescription || ''}
                         placeholder='Add Description'
                         onChange={(event) => { onDescriptionChange(event) }}
                         InputProps={{

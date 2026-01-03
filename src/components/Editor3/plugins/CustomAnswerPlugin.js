@@ -9,7 +9,7 @@
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $insertNodeToNearestRoot } from '@lexical/utils';
-import { COMMAND_PRIORITY_EDITOR, createCommand, DecoratorNode } from 'lexical';
+import { COMMAND_PRIORITY_EDITOR, createCommand, DecoratorNode, $getSelection } from 'lexical';
 import * as React from 'react';
 import { useEffect } from 'react';
 import CustomAnswerEditor from '../nodes/CustomAnswerNode/CustomAnswerEditor';
@@ -47,17 +47,21 @@ export class CustomAnswerNode extends DecoratorNode {
   __ids;
   __promptMethod;
   __allowedInput;
+  __format;
 
   static getType() {
     return 'custom-answer';
   }
 
   static clone(node) {
-    return new CustomAnswerNode(node.__ids, node.__allowedInput, node.__promptMethod ,node.__format, node.__key);
+    return new CustomAnswerNode(node.__ids, node.__allowedInput, node.__promptMethod, node.__format, node.getKey());
   }
 
   static importJSON(serializedNode) {
     const node = $createCustomAnswerNode(serializedNode.ids, serializedNode.allowedInput, serializedNode.promptMethod, serializedNode.format);
+    if (serializedNode.format !== undefined) {
+      node.setFormat(serializedNode.format);
+    }
     return node;
   }
 
@@ -68,14 +72,16 @@ export class CustomAnswerNode extends DecoratorNode {
       ids: [...this.__ids],
       promptMethod: this.__promptMethod,
       allowedInput: this.__allowedInput,
+      format: this.__format,
     };
   }
 
-  constructor(ids = [], allowedInput = [], promptMethod = [], format, key) {
-    super(format, key);
+  constructor(ids = [], allowedInput = [], promptMethod = [], format = '', key) {
+    super(key);
     this.__ids = ids;
     this.__promptMethod = promptMethod;
     this.__allowedInput = allowedInput;
+    this.__format = format;
   }
 
   exportDOM() {
@@ -117,6 +123,18 @@ export class CustomAnswerNode extends DecoratorNode {
     return false;
   }
 
+  isKeyboardSelectable() {
+    return true;
+  }
+
+  isSelectable() {
+    return true;
+  }
+
+  canBeEmpty() {
+    return true;
+  }
+
   getIds() {
     return this.__ids;
   }
@@ -154,7 +172,7 @@ export class CustomAnswerNode extends DecoratorNode {
     const writable = this.getWritable();
     writable.__ids = [...writable.__ids, question];
   }
-s
+
   setAllowedInput(allowedInput) {
     const writable = this.getWritable();
     writable.__allowedInput = allowedInput;
@@ -172,6 +190,16 @@ s
 
   getTextContent(_includeInert, _includeDirectionless) {
     return this.__ids;
+  }
+
+  setFormat(format) {
+    const self = this.getWritable();
+    self.__format = format;
+    return self;
+  }
+
+  getFormat() {
+    return this.__format;
   }
 
   decorate(_editor, config) {
@@ -254,8 +282,40 @@ export default function CustomAnswerPlugin() {
     return editor.registerCommand(
       INSERT_CUSTOM_ANSWER_BLOCK_COMMAND,
       (payload) => {
-        const customAnswerNode = $createCustomAnswerNode(payload);
-        $insertNodeToNearestRoot(customAnswerNode);
+        // Check if there's a currently selected CustomAnswerNode
+        const selection = $getSelection();
+        let selectedCustomAnswerNode = null;
+        
+        if (selection) {
+          const nodes = selection.getNodes();
+          for (const node of nodes) {
+            if ($isCustomAnswerNode(node)) {
+              selectedCustomAnswerNode = node;
+              break;
+            }
+            // Check parent nodes as well
+            let parent = node.getParent();
+            while (parent) {
+              if ($isCustomAnswerNode(parent)) {
+                selectedCustomAnswerNode = parent;
+                break;
+              }
+              parent = parent.getParent();
+            }
+            if (selectedCustomAnswerNode) break;
+          }
+        }
+        
+        if (selectedCustomAnswerNode) {
+          // Append to existing CustomAnswerNode
+          payload.forEach(id => {
+            selectedCustomAnswerNode.appendId(id);
+          });
+        } else {
+          // Create new CustomAnswerNode
+          const customAnswerNode = $createCustomAnswerNode(payload);
+          $insertNodeToNearestRoot(customAnswerNode);
+        }
 
         return true;
       },

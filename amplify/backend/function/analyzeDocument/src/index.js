@@ -25,6 +25,7 @@ import { HttpRequest } from '@aws-sdk/protocol-http';
 import { default as fetch, Request } from 'node-fetch';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
+import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 import pdfParse from 'pdf-parse';
 import mammoth from 'mammoth';
 import OpenAI from 'openai';
@@ -36,6 +37,7 @@ const { Sha256 } = crypto;
 
 const s3Client = new S3Client({ region: AWS_REGION });
 const ssmClient = new SSMClient({ region: AWS_REGION });
+const lambdaClient = new LambdaClient({ region: AWS_REGION });
 
 async function getOpenAIKey() {
   const paramName = process.env.OPENAI_API_KEY;
@@ -47,7 +49,7 @@ async function getOpenAIKey() {
   return response.Parameter.Value;
 }
 
-async function executeGraphQL(query, variables) {
+async function executeGraphQL(query, variables, retries = 3, delay = 1000) {
   const endpoint = new URL(GRAPHQL_ENDPOINT);
   const signer = new SignatureV4({
     credentials: defaultProvider(),
@@ -73,26 +75,52 @@ async function executeGraphQL(query, variables) {
   const result = await response.json();
   
   if (result.errors) {
+    // Check for conflict errors and retry
+    const isConflict = result.errors.some(err => 
+      err.errorType === 'ConflictUnhandled' || 
+      err.message?.includes('Conflict resolver rejects')
+    );
+    
+    if (isConflict && retries > 0) {
+      console.log(`Conflict detected, retrying in ${delay}ms... (${retries} retries left)`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return executeGraphQL(query, variables, retries - 1, delay * 2);
+    }
+    
     throw new Error(`GraphQL Error: ${JSON.stringify(result.errors)}`);
   }
   
   return result.data;
 }
 
-async function extractPdfText(s3Key) {
+async function getS3Object(s3Key, retries = 3, delay = 2000) {
   const command = new GetObjectCommand({
     Bucket: STORAGE_BUCKET,
     Key: s3Key,
   });
   
-  const response = await s3Client.send(command);
-  const chunks = [];
-  
-  for await (const chunk of response.Body) {
-    chunks.push(chunk);
+  try {
+    const response = await s3Client.send(command);
+    const chunks = [];
+    
+    for await (const chunk of response.Body) {
+      chunks.push(chunk);
+    }
+    
+    return Buffer.concat(chunks);
+  } catch (error) {
+    // Retry on "key does not exist" errors (S3 eventual consistency)
+    if (error.name === 'NoSuchKey' && retries > 0) {
+      console.log(`S3 file not found, retrying in ${delay}ms... (${retries} retries left)`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return getS3Object(s3Key, retries - 1, delay);
+    }
+    throw error;
   }
-  
-  const buffer = Buffer.concat(chunks);
+}
+
+async function extractPdfText(s3Key) {
+  const buffer = await getS3Object(s3Key);
   const pdfData = await pdfParse(buffer);
   
   return {
@@ -101,25 +129,80 @@ async function extractPdfText(s3Key) {
   };
 }
 
+async function updateDocumentStatus(documentID, updates) {
+  // Fetch latest version first
+  const getQuery = /* GraphQL */ `
+    query GetDocument($id: ID!) {
+      getDocument(id: $id) {
+        id
+        _version
+      }
+    }
+  `;
+  
+  const { getDocument } = await executeGraphQL(getQuery, { id: documentID });
+  
+  if (!getDocument) {
+    throw new Error(`Document ${documentID} not found for update`);
+  }
+  
+  const updateMutation = /* GraphQL */ `
+    mutation UpdateDocument($input: UpdateDocumentInput!) {
+      updateDocument(input: $input) { id _version }
+    }
+  `;
+  
+  return executeGraphQL(updateMutation, {
+    input: { 
+      id: documentID, 
+      _version: getDocument._version,
+      ...updates
+    }
+  });
+}
+
 export const handler = async (event) => {
   console.log('Event:', JSON.stringify(event, null, 2));
   
+  // Check if this is an async background invocation
+  const isAsyncInvocation = event.isAsyncInvocation === true;
+  
   try {
-    const { documentID } = event.arguments;
+    const { fileID } = event.arguments || event;
+    
+    // First, get the File record to retrieve Document ID and S3 path
+    const getFileQuery = /* GraphQL */ `
+      query GetFile($id: ID!) {
+        getFile(id: $id) {
+          id
+          path
+          documentID
+          mimeType
+          identityId
+        }
+      }
+    `;
+    
+    const { getFile } = await executeGraphQL(getFileQuery, { id: fileID });
+    
+    if (!getFile) {
+      return { success: false, fileID, message: 'File not found' };
+    }
+    
+    if (!getFile.documentID) {
+      return { success: false, fileID, message: 'File has no associated document' };
+    }
+    
+    const documentID = getFile.documentID;
+    // Construct full S3 key: protected/{identityId}/{path}
+    const s3Key = `protected/${getFile.identityId}/${getFile.path}`;
+    
+    console.log('Constructed S3 key:', s3Key);
     
     // Handle cancel request
-    if (event.field === 'cancelDocumentAnalysis') {
-      const updateMutation = /* GraphQL */ `
-        mutation UpdateDocument($input: UpdateDocumentInput!) {
-          updateDocument(input: $input) { id }
-        }
-      `;
-      
-      await executeGraphQL(updateMutation, {
-        input: { id: documentID, status: 'failed' }
-      });
-      
-      return { success: true, documentID, message: 'Analysis cancelled' };
+    if ((event.arguments && event.field === 'cancelDocumentAnalysis') || event.field === 'cancelDocumentAnalysis') {
+      await updateDocumentStatus(documentID, { status: 'failed' });
+      return { success: true, fileID, documentID, message: 'Analysis cancelled' };
     }
     
     const getDocumentQuery = /* GraphQL */ `
@@ -129,7 +212,8 @@ export const handler = async (event) => {
           filename
           s3Key
           owner
-          unitID
+          status
+          _version
         }
       }
     `;
@@ -137,62 +221,80 @@ export const handler = async (event) => {
     const { getDocument: document } = await executeGraphQL(getDocumentQuery, { id: documentID });
     
     if (!document) throw new Error(`Document not found: ${documentID}`);
+    
+    // Check if document is already being processed
+    if (document.status === 'extracting' || document.status === 'analyzing') {
+      return {
+        success: false,
+        fileID,
+        documentID,
+        message: 'Document is currently being processed. Please wait and try again.'
+      };
+    }
+    
+    // Check if document has already been completed
+    if (document.status === 'completed') {
+      return {
+        success: false,
+        fileID,
+        documentID,
+        message: 'Document has already been analyzed. Check the ParsedContent for results.'
+      };
+    }
+    
+    // Update to extracting status
+    await updateDocumentStatus(documentID, { status: 'extracting' });
+    
+    // If this is NOT an async invocation, invoke ourselves asynchronously and return immediately
+    if (!isAsyncInvocation) {
+      console.log('Invoking Lambda asynchronously for background processing');
+      
+      const invokeCommand = new InvokeCommand({
+        FunctionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
+        InvocationType: 'Event', // Async invocation
+        Payload: JSON.stringify({
+          ...event,
+          isAsyncInvocation: true,
+          arguments: event.arguments || { fileID }
+        })
+      });
+      
+      await lambdaClient.send(invokeCommand);
+      
+      return { 
+        success: true, 
+        fileID, 
+        documentID, 
+        message: 'Analysis started in background',
+        pageCount: null
+      };
+    }
+    
+    // From here on, this is the async background processing
+    console.log('Running background analysis for document:', documentID);
+    
     let text = '';
     let pageCount = 0;
-    
-    const updateMutation = /* GraphQL */ `
-      mutation UpdateDocument($input: UpdateDocumentInput!) {
-        updateDocument(input: $input) { id }
-      }
-    `;
-    
-    await executeGraphQL(updateMutation, {
-      input: { id: documentID, status: 'extracting' }
-    });
 
     // Extract text from PDF, and get page count. For other file types, implement other extraction methods. doc, docx, txt, csv, etc.
     
-    if (!document.s3Key) {
-      throw new Error(`Document ${documentID} is missing s3Key field`);
+    if (!s3Key) {
+      throw new Error(`File ${fileID} is missing path field`);
     }
     // use either document extension or mime type to determine file type
-    if (document.s3Key.toLowerCase().endsWith('.pdf')) {
-      const { text: extractedText, pageCount: extractedPageCount } = await extractPdfText(document.s3Key);
+    if (s3Key.toLowerCase().endsWith('.pdf')) {
+      const { text: extractedText, pageCount: extractedPageCount } = await extractPdfText(s3Key);
       text = extractedText;
       pageCount = extractedPageCount;
-    } else if (document.s3Key.toLowerCase().endsWith('.txt')) {
+    } else if (s3Key.toLowerCase().endsWith('.txt')) {
       // For .txt files, simple S3 getObject and read as text
-      const command = new GetObjectCommand({
-        Bucket: STORAGE_BUCKET,
-        Key: document.s3Key,
-      });
-      
-      const response = await s3Client.send(command);
-      const chunks = [];
-      
-      for await (const chunk of response.Body) {
-        chunks.push(chunk);
-      }
-      
-      const buffer = Buffer.concat(chunks);
+      const buffer = await getS3Object(s3Key);
       text = buffer.toString('utf-8');
       pageCount = Math.ceil(text.length / 2000); // Rough estimate: 2000 chars per page
       
-    } else if (document.s3Key.toLowerCase().endsWith('.docx')) {
+    } else if (s3Key.toLowerCase().endsWith('.docx')) {
       // For .docx files, use mammoth to extract text
-      const command = new GetObjectCommand({
-        Bucket: STORAGE_BUCKET,
-        Key: document.s3Key,
-      });
-      
-      const response = await s3Client.send(command);
-      const chunks = [];
-      
-      for await (const chunk of response.Body) {
-        chunks.push(chunk);
-      }
-      
-      const buffer = Buffer.concat(chunks);
+      const buffer = await getS3Object(s3Key);
       
       // Extract raw text from DOCX
       const result = await mammoth.extractRawText({ buffer });
@@ -210,38 +312,26 @@ export const handler = async (event) => {
       );
     } else if (document.s3Key.toLowerCase().endsWith('.csv')) {
       // For .csv files, simple S3 getObject and read as text
-      const command = new GetObjectCommand({
-        Bucket: STORAGE_BUCKET,
-        Key: document.s3Key,
-      });
-      
-      const response = await s3Client.send(command);
-      const chunks = [];
-      
-      for await (const chunk of response.Body) {
-        chunks.push(chunk);
-      }
-      
-      const buffer = Buffer.concat(chunks);
+      const buffer = await getS3Object(document.s3Key);
       text = buffer.toString('utf-8');
       pageCount = Math.ceil(text.length / 2000); // Rough estimate: 2000 chars per page
     } else {
       throw new Error(`Unsupported file type for document ${documentID}`);
     }
     
-    await executeGraphQL(updateMutation, {
-      input: { id: documentID, extractedText: text, pageCount, status: 'extracted' }
+    await updateDocumentStatus(documentID, { 
+      extractedText: text, 
+      pageCount, 
+      status: 'extracted' 
     });
     
     const openaiKey = await getOpenAIKey();
     const openai = new OpenAI({ apiKey: openaiKey });
     
-    await executeGraphQL(updateMutation, {
-      input: { id: documentID, status: 'analyzing' }
-    });
+    await updateDocumentStatus(documentID, { status: 'analyzing' });
     
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',
@@ -250,14 +340,15 @@ export const handler = async (event) => {
   summariesJSON: [{title, content, page_range}],
   objectivesJSON: [{objective, bloom_level}],
   conceptsJSON: [{concept, description, related_vocabulary}],
-  questionsJSON: [{question, expectedAnswer, hint, type}]
+  questionsJSON: [{prompt, answer, hint, difficulty, questionType}]
 }
 
 For questionsJSON, generate 5-10 custom answer questions that test comprehension of the material. Questions should be open-ended, requiring thoughtful responses. Include:
-- question: The question text
-- expectedAnswer: A sample correct answer (200-300 words)
+- prompt: The question text
+- answer: A sample correct answer (200-300 words)
 - hint: A helpful hint for students (optional)
-- type: "short_answer" or "essay"`
+- difficulty: "easy", "medium", or "hard"
+- questionType: "short_answer", "essay", or "comprehension"`
         },
         { role: 'user', content: `Extract from:\n\n${text.substring(0, 100000)}` }
       ],
@@ -277,9 +368,8 @@ For questionsJSON, generate 5-10 custom answer questions that test comprehension
         type: 'document_analysis',
         status: 'completed',
         documentID,
-        unitID: document.unitID,
         responseId: completion.id,
-        modelUsed: 'gpt-4',
+        modelUsed: 'gpt-4o',
         tokensUsed: completion.usage?.total_tokens,
         startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
@@ -301,33 +391,41 @@ For questionsJSON, generate 5-10 custom answer questions that test comprehension
         conceptsJSON: JSON.stringify(parsedContent.conceptsJSON || []),
         questionsJSON: JSON.stringify(parsedContent.questionsJSON || []),
         responseId: completion.id,
-        modelUsed: 'gpt-4',
+        modelUsed: 'gpt-4o',
         tokensUsed: completion.usage?.total_tokens,
       }
     });
     
-    await executeGraphQL(updateMutation, {
-      input: { id: documentID, status: 'completed' }
-    });
+    await updateDocumentStatus(documentID, { status: 'completed' });
     
-    return { success: true, documentID, responseId: completion.id, pageCount };
+    return { success: true, fileID, documentID, responseId: completion.id, pageCount };
     
   } catch (error) {
     console.error('Error:', error);
     
     // Try to update document status to failed
     try {
-      const updateMutation = /* GraphQL */ `
-        mutation UpdateDocument($input: UpdateDocumentInput!) {
-          updateDocument(input: $input) { id }
-        }
-      `;
+      const fileID = event.arguments?.fileID || event.fileID;
+      const documentID = fileID ? 
+        (await executeGraphQL(/* GraphQL */ `
+          query GetFile($id: ID!) {
+            getFile(id: $id) { documentID }
+          }
+        `, { id: fileID })).getFile?.documentID 
+        : null;
       
-      await executeGraphQL(updateMutation, {
-        input: { id: event.arguments.documentID, status: 'failed' }
-      });
+      if (documentID) {
+        await updateDocumentStatus(documentID, { status: 'failed' });
+      }
     } catch (updateError) {
       console.error('Failed to update document status:', updateError);
+    }
+    
+    // If this is an async invocation, don't throw (just log)
+    // If it's a synchronous call, throw the error
+    if (event.isAsyncInvocation) {
+      console.error('Async processing failed:', error);
+      return { success: false, error: error.message };
     }
     
     throw error;

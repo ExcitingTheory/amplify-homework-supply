@@ -122,6 +122,14 @@ export class PlaylistNode extends DecoratorNode {
     return false;
   }
 
+  isKeyboardSelectable() {
+    return true;
+  }
+
+  canBeEmpty() {
+    return true;
+  }
+
   getIds() {
     return this.__ids;
   }

@@ -352,6 +352,7 @@ export default React.memo(function CustomAnswerEditor({
                 const node = $getNodeByKey(nodeKey);
                 if ($isCustomAnswerNode(node)) {
                     node.remove();
+                    return true;
                 }
             }
             return false;

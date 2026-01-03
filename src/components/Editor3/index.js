@@ -184,6 +184,20 @@ function MyOnChangePlugin({ onChange }) {
   return null;
 }
 
+// Plugin to expose editor instance to UnitContext
+function EditorRefPlugin() {
+  const [editor] = useLexicalComposerContext();
+  const { editorRef } = useContext(UnitContext);
+  
+  useEffect(() => {
+    if (editorRef) {
+      editorRef.current = editor;
+    }
+  }, [editor, editorRef]);
+  
+  return null;
+}
+
 const drawerWidth = 350;
 
 const openedMixin = (theme) => ({
@@ -422,6 +436,7 @@ export default function Editor() {
             <LinkPlugin />
             <AutoLinkPlugin />
             <YouTubePlugin />
+            <EditorRefPlugin />
             {!floatingAnchorElem ? null : (
               <>
                 <FloatingLinkEditorPlugin

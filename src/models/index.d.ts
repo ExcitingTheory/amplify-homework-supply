@@ -16,7 +16,8 @@ export enum FileProtectionLevels {
 
 type EagerAnalyzeDocumentResult = {
   readonly success: boolean;
-  readonly documentID: string;
+  readonly fileID: string;
+  readonly documentID?: string | null;
   readonly responseId?: string | null;
   readonly pageCount?: number | null;
   readonly message?: string | null;
@@ -24,7 +25,8 @@ type EagerAnalyzeDocumentResult = {
 
 type LazyAnalyzeDocumentResult = {
   readonly success: boolean;
-  readonly documentID: string;
+  readonly fileID: string;
+  readonly documentID?: string | null;
   readonly responseId?: string | null;
   readonly pageCount?: number | null;
   readonly message?: string | null;
@@ -36,13 +38,15 @@ export declare const AnalyzeDocumentResult: (new (init: ModelInit<AnalyzeDocumen
 
 type EagerCancelDocumentAnalysisResult = {
   readonly success: boolean;
-  readonly documentID: string;
+  readonly fileID: string;
+  readonly documentID?: string | null;
   readonly message?: string | null;
 }
 
 type LazyCancelDocumentAnalysisResult = {
   readonly success: boolean;
-  readonly documentID: string;
+  readonly fileID: string;
+  readonly documentID?: string | null;
   readonly message?: string | null;
 }
 
@@ -144,14 +148,12 @@ type EagerQuestion = {
   readonly byPromptHex?: string | null;
   readonly thumbnail?: string | null;
   readonly difficulty?: string | null;
-  readonly questionType?: string | null;
   readonly metadata?: string | null;
-  readonly sourceDocumentID?: string | null;
-  readonly approved?: boolean | null;
   readonly importedAt?: string | null;
   readonly units?: (QuestionUnit | null)[] | null;
   readonly words?: (QuestionWord | null)[] | null;
   readonly files?: (QuestionFile | null)[] | null;
+  readonly documents?: (DocumentQuestion | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -178,14 +180,12 @@ type LazyQuestion = {
   readonly byPromptHex?: string | null;
   readonly thumbnail?: string | null;
   readonly difficulty?: string | null;
-  readonly questionType?: string | null;
   readonly metadata?: string | null;
-  readonly sourceDocumentID?: string | null;
-  readonly approved?: boolean | null;
   readonly importedAt?: string | null;
   readonly units: AsyncCollection<QuestionUnit>;
   readonly words: AsyncCollection<QuestionWord>;
   readonly files: AsyncCollection<QuestionFile>;
+  readonly documents: AsyncCollection<DocumentQuestion>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -219,6 +219,8 @@ type EagerFile = {
   readonly byHex?: string | null;
   readonly thumbnail?: string | null;
   readonly waveformData?: string | null;
+  readonly documentID?: string | null;
+  readonly document?: Document | null;
   readonly units?: (UnitFile | null)[] | null;
   readonly words?: (WordFile | null)[] | null;
   readonly questions?: (QuestionFile | null)[] | null;
@@ -249,6 +251,8 @@ type LazyFile = {
   readonly byHex?: string | null;
   readonly thumbnail?: string | null;
   readonly waveformData?: string | null;
+  readonly documentID?: string | null;
+  readonly document: AsyncItem<Document | undefined>;
   readonly units: AsyncCollection<UnitFile>;
   readonly words: AsyncCollection<WordFile>;
   readonly questions: AsyncCollection<QuestionFile>;
@@ -455,7 +459,7 @@ type EagerUnit = {
   readonly files?: (UnitFile | null)[] | null;
   readonly words?: (UnitWord | null)[] | null;
   readonly questions?: (QuestionUnit | null)[] | null;
-  readonly documents?: (Document | null)[] | null;
+  readonly documents?: (UnitDocument | null)[] | null;
   readonly agentJobs?: (AgentJob | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -482,7 +486,7 @@ type LazyUnit = {
   readonly files: AsyncCollection<UnitFile>;
   readonly words: AsyncCollection<UnitWord>;
   readonly questions: AsyncCollection<QuestionUnit>;
-  readonly documents: AsyncCollection<Document>;
+  readonly documents: AsyncCollection<UnitDocument>;
   readonly agentJobs: AsyncCollection<AgentJob>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
@@ -510,9 +514,11 @@ type EagerWord = {
   readonly definitionAudio?: (string | null)[] | null;
   readonly definitionWaveformData?: string | null;
   readonly rubyTags?: string | null;
+  readonly importedAt?: string | null;
   readonly units?: (UnitWord | null)[] | null;
   readonly files?: (WordFile | null)[] | null;
   readonly questions?: (QuestionWord | null)[] | null;
+  readonly documents?: (DocumentWord | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -533,9 +539,11 @@ type LazyWord = {
   readonly definitionAudio?: (string | null)[] | null;
   readonly definitionWaveformData?: string | null;
   readonly rubyTags?: string | null;
+  readonly importedAt?: string | null;
   readonly units: AsyncCollection<UnitWord>;
   readonly files: AsyncCollection<WordFile>;
   readonly questions: AsyncCollection<QuestionWord>;
+  readonly documents: AsyncCollection<DocumentWord>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -558,8 +566,6 @@ type EagerDocument = {
   readonly owner?: string | null;
   readonly identityId?: string | null;
   readonly learner?: string | null;
-  readonly unitID?: string | null;
-  readonly unit?: Unit | null;
   readonly extractedText?: string | null;
   readonly pageCount?: number | null;
   readonly fileSize?: number | null;
@@ -568,6 +574,9 @@ type EagerDocument = {
   readonly parsedContent?: (ParsedContent | null)[] | null;
   readonly agentJobs?: (AgentJob | null)[] | null;
   readonly metadata?: string | null;
+  readonly units?: (UnitDocument | null)[] | null;
+  readonly words?: (DocumentWord | null)[] | null;
+  readonly questions?: (DocumentQuestion | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -584,8 +593,6 @@ type LazyDocument = {
   readonly owner?: string | null;
   readonly identityId?: string | null;
   readonly learner?: string | null;
-  readonly unitID?: string | null;
-  readonly unit: AsyncItem<Unit | undefined>;
   readonly extractedText?: string | null;
   readonly pageCount?: number | null;
   readonly fileSize?: number | null;
@@ -594,6 +601,9 @@ type LazyDocument = {
   readonly parsedContent: AsyncCollection<ParsedContent>;
   readonly agentJobs: AsyncCollection<AgentJob>;
   readonly metadata?: string | null;
+  readonly units: AsyncCollection<UnitDocument>;
+  readonly words: AsyncCollection<DocumentWord>;
+  readonly questions: AsyncCollection<DocumentQuestion>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -624,7 +634,6 @@ type EagerParsedContent = {
   readonly tokensUsed?: number | null;
   readonly processingTime?: number | null;
   readonly createdAt?: string | null;
-  readonly approved?: boolean | null;
   readonly importedAt?: string | null;
   readonly metadata?: string | null;
   readonly updatedAt?: string | null;
@@ -650,7 +659,6 @@ type LazyParsedContent = {
   readonly tokensUsed?: number | null;
   readonly processingTime?: number | null;
   readonly createdAt?: string | null;
-  readonly approved?: boolean | null;
   readonly importedAt?: string | null;
   readonly metadata?: string | null;
   readonly updatedAt?: string | null;
@@ -878,6 +886,40 @@ export declare const QuestionFile: (new (init: ModelInit<QuestionFile>) => Quest
   copyOf(source: QuestionFile, mutator: (draft: MutableModel<QuestionFile>) => MutableModel<QuestionFile> | void): QuestionFile;
 }
 
+type EagerDocumentQuestion = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<DocumentQuestion, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly questionId?: string | null;
+  readonly documentId?: string | null;
+  readonly question: Question;
+  readonly document: Document;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyDocumentQuestion = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<DocumentQuestion, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly questionId?: string | null;
+  readonly documentId?: string | null;
+  readonly question: AsyncItem<Question>;
+  readonly document: AsyncItem<Document>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type DocumentQuestion = LazyLoading extends LazyLoadingDisabled ? EagerDocumentQuestion : LazyDocumentQuestion
+
+export declare const DocumentQuestion: (new (init: ModelInit<DocumentQuestion>) => DocumentQuestion) & {
+  copyOf(source: DocumentQuestion, mutator: (draft: MutableModel<DocumentQuestion>) => MutableModel<DocumentQuestion> | void): DocumentQuestion;
+}
+
 type EagerUnitFile = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<UnitFile, 'id'>;
@@ -978,4 +1020,72 @@ export declare type UnitWord = LazyLoading extends LazyLoadingDisabled ? EagerUn
 
 export declare const UnitWord: (new (init: ModelInit<UnitWord>) => UnitWord) & {
   copyOf(source: UnitWord, mutator: (draft: MutableModel<UnitWord>) => MutableModel<UnitWord> | void): UnitWord;
+}
+
+type EagerUnitDocument = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<UnitDocument, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly unitId?: string | null;
+  readonly documentId?: string | null;
+  readonly unit: Unit;
+  readonly document: Document;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyUnitDocument = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<UnitDocument, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly unitId?: string | null;
+  readonly documentId?: string | null;
+  readonly unit: AsyncItem<Unit>;
+  readonly document: AsyncItem<Document>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type UnitDocument = LazyLoading extends LazyLoadingDisabled ? EagerUnitDocument : LazyUnitDocument
+
+export declare const UnitDocument: (new (init: ModelInit<UnitDocument>) => UnitDocument) & {
+  copyOf(source: UnitDocument, mutator: (draft: MutableModel<UnitDocument>) => MutableModel<UnitDocument> | void): UnitDocument;
+}
+
+type EagerDocumentWord = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<DocumentWord, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly wordId?: string | null;
+  readonly documentId?: string | null;
+  readonly word: Word;
+  readonly document: Document;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyDocumentWord = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<DocumentWord, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly wordId?: string | null;
+  readonly documentId?: string | null;
+  readonly word: AsyncItem<Word>;
+  readonly document: AsyncItem<Document>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type DocumentWord = LazyLoading extends LazyLoadingDisabled ? EagerDocumentWord : LazyDocumentWord
+
+export declare const DocumentWord: (new (init: ModelInit<DocumentWord>) => DocumentWord) & {
+  copyOf(source: DocumentWord, mutator: (draft: MutableModel<DocumentWord>) => MutableModel<DocumentWord> | void): DocumentWord;
 }

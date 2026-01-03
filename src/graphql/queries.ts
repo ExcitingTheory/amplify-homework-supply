@@ -266,10 +266,7 @@ export const getQuestion = /* GraphQL */ `query GetQuestion($id: ID!) {
     byPromptHex
     thumbnail
     difficulty
-    questionType
     metadata
-    sourceDocumentID
-    approved
     importedAt
     units {
       items {
@@ -322,6 +319,23 @@ export const getQuestion = /* GraphQL */ `query GetQuestion($id: ID!) {
       startedAt
       __typename
     }
+    documents {
+      items {
+        id
+        questionId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -362,10 +376,7 @@ export const listQuestions = /* GraphQL */ `query ListQuestions(
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -378,6 +389,11 @@ export const listQuestions = /* GraphQL */ `query ListQuestions(
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -432,10 +448,7 @@ export const syncQuestions = /* GraphQL */ `query SyncQuestions(
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -448,6 +461,11 @@ export const syncQuestions = /* GraphQL */ `query SyncQuestions(
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -504,10 +522,7 @@ export const questionsByByPromptHex = /* GraphQL */ `query QuestionsByByPromptHe
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -520,6 +535,11 @@ export const questionsByByPromptHex = /* GraphQL */ `query QuestionsByByPromptHe
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -560,6 +580,53 @@ export const getFile = /* GraphQL */ `query GetFile($id: ID!) {
     byHex
     thumbnail
     waveformData
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
     units {
       items {
         id
@@ -645,6 +712,28 @@ export const listFiles = /* GraphQL */ `query ListFiles(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -704,6 +793,28 @@ export const syncFiles = /* GraphQL */ `query SyncFiles(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -765,6 +876,28 @@ export const filesByByHex = /* GraphQL */ `query FilesByByHex(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -1522,24 +1655,14 @@ export const getUnit = /* GraphQL */ `query GetUnit($id: ID!) {
     documents {
       items {
         id
-        filename
-        s3Key
-        status
-        owner
-        identityId
-        learner
-        unitID
-        extractedText
-        pageCount
-        fileSize
-        mimeType
-        uploadedAt
-        metadata
+        unitId
+        documentId
         createdAt
         updatedAt
         _version
         _deleted
         _lastChangedAt
+        owner
         __typename
       }
       nextToken
@@ -1736,6 +1859,7 @@ export const getWord = /* GraphQL */ `query GetWord($id: ID!) {
     definitionAudio
     definitionWaveformData
     rubyTags
+    importedAt
     units {
       items {
         id
@@ -1787,6 +1911,23 @@ export const getWord = /* GraphQL */ `query GetWord($id: ID!) {
       startedAt
       __typename
     }
+    documents {
+      items {
+        id
+        wordId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -1814,6 +1955,7 @@ export const listWords = /* GraphQL */ `query ListWords(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -1825,6 +1967,11 @@ export const listWords = /* GraphQL */ `query ListWords(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -1866,6 +2013,7 @@ export const syncWords = /* GraphQL */ `query SyncWords(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -1877,6 +2025,11 @@ export const syncWords = /* GraphQL */ `query SyncWords(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -1903,61 +2056,6 @@ export const getDocument = /* GraphQL */ `query GetDocument($id: ID!) {
     owner
     identityId
     learner
-    unitID
-    unit {
-      id
-      number
-      name
-      owner
-      description
-      data
-      status
-      timeLimitSeconds
-      assignments {
-        nextToken
-        startedAt
-        __typename
-      }
-      grades {
-        nextToken
-        startedAt
-        __typename
-      }
-      featuredImage
-      identityId
-      thumbnail
-      files {
-        nextToken
-        startedAt
-        __typename
-      }
-      words {
-        nextToken
-        startedAt
-        __typename
-      }
-      questions {
-        nextToken
-        startedAt
-        __typename
-      }
-      documents {
-        nextToken
-        startedAt
-        __typename
-      }
-      agentJobs {
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
     extractedText
     pageCount
     fileSize
@@ -1979,7 +2077,6 @@ export const getDocument = /* GraphQL */ `query GetDocument($id: ID!) {
         tokensUsed
         processingTime
         createdAt
-        approved
         importedAt
         metadata
         updatedAt
@@ -2023,6 +2120,57 @@ export const getDocument = /* GraphQL */ `query GetDocument($id: ID!) {
       __typename
     }
     metadata
+    units {
+      items {
+        id
+        unitId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    words {
+      items {
+        id
+        wordId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    questions {
+      items {
+        id
+        questionId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -2049,26 +2197,6 @@ export const listDocuments = /* GraphQL */ `query ListDocuments(
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -2085,6 +2213,21 @@ export const listDocuments = /* GraphQL */ `query ListDocuments(
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2121,26 +2264,6 @@ export const syncDocuments = /* GraphQL */ `query SyncDocuments(
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -2157,6 +2280,21 @@ export const syncDocuments = /* GraphQL */ `query SyncDocuments(
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2173,80 +2311,6 @@ export const syncDocuments = /* GraphQL */ `query SyncDocuments(
   APITypes.SyncDocumentsQueryVariables,
   APITypes.SyncDocumentsQuery
 >;
-export const documentsByUnitID = /* GraphQL */ `query DocumentsByUnitID(
-  $unitID: ID!
-  $sortDirection: ModelSortDirection
-  $filter: ModelDocumentFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  documentsByUnitID(
-    unitID: $unitID
-    sortDirection: $sortDirection
-    filter: $filter
-    limit: $limit
-    nextToken: $nextToken
-  ) {
-    items {
-      id
-      filename
-      s3Key
-      status
-      owner
-      identityId
-      learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
-      extractedText
-      pageCount
-      fileSize
-      mimeType
-      uploadedAt
-      parsedContent {
-        nextToken
-        startedAt
-        __typename
-      }
-      agentJobs {
-        nextToken
-        startedAt
-        __typename
-      }
-      metadata
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    nextToken
-    startedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.DocumentsByUnitIDQueryVariables,
-  APITypes.DocumentsByUnitIDQuery
->;
 export const getParsedContent = /* GraphQL */ `query GetParsedContent($id: ID!) {
   getParsedContent(id: $id) {
     id
@@ -2261,26 +2325,6 @@ export const getParsedContent = /* GraphQL */ `query GetParsedContent($id: ID!) 
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -2297,6 +2341,21 @@ export const getParsedContent = /* GraphQL */ `query GetParsedContent($id: ID!) 
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2314,7 +2373,6 @@ export const getParsedContent = /* GraphQL */ `query GetParsedContent($id: ID!) 
     tokensUsed
     processingTime
     createdAt
-    approved
     importedAt
     metadata
     updatedAt
@@ -2347,7 +2405,6 @@ export const listParsedContents = /* GraphQL */ `query ListParsedContents(
         owner
         identityId
         learner
-        unitID
         extractedText
         pageCount
         fileSize
@@ -2371,7 +2428,6 @@ export const listParsedContents = /* GraphQL */ `query ListParsedContents(
       tokensUsed
       processingTime
       createdAt
-      approved
       importedAt
       metadata
       updatedAt
@@ -2414,7 +2470,6 @@ export const syncParsedContents = /* GraphQL */ `query SyncParsedContents(
         owner
         identityId
         learner
-        unitID
         extractedText
         pageCount
         fileSize
@@ -2438,7 +2493,6 @@ export const syncParsedContents = /* GraphQL */ `query SyncParsedContents(
       tokensUsed
       processingTime
       createdAt
-      approved
       importedAt
       metadata
       updatedAt
@@ -2483,7 +2537,6 @@ export const parsedContentsByDocumentID = /* GraphQL */ `query ParsedContentsByD
         owner
         identityId
         learner
-        unitID
         extractedText
         pageCount
         fileSize
@@ -2507,7 +2560,6 @@ export const parsedContentsByDocumentID = /* GraphQL */ `query ParsedContentsByD
       tokensUsed
       processingTime
       createdAt
-      approved
       importedAt
       metadata
       updatedAt
@@ -2541,26 +2593,6 @@ export const getAgentJob = /* GraphQL */ `query GetAgentJob($id: ID!) {
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -2577,6 +2609,21 @@ export const getAgentJob = /* GraphQL */ `query GetAgentJob($id: ID!) {
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2682,7 +2729,6 @@ export const listAgentJobs = /* GraphQL */ `query ListAgentJobs(
         owner
         identityId
         learner
-        unitID
         extractedText
         pageCount
         fileSize
@@ -2769,7 +2815,6 @@ export const syncAgentJobs = /* GraphQL */ `query SyncAgentJobs(
         owner
         identityId
         learner
-        unitID
         extractedText
         pageCount
         fileSize
@@ -2858,7 +2903,6 @@ export const agentJobsByDocumentID = /* GraphQL */ `query AgentJobsByDocumentID(
         owner
         identityId
         learner
-        unitID
         extractedText
         pageCount
         fileSize
@@ -2947,7 +2991,6 @@ export const agentJobsByUnitID = /* GraphQL */ `query AgentJobsByUnitID(
         owner
         identityId
         learner
-        unitID
         extractedText
         pageCount
         fileSize
@@ -3142,10 +3185,7 @@ export const getQuestionUnit = /* GraphQL */ `query GetQuestionUnit($id: ID!) {
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3158,6 +3198,11 @@ export const getQuestionUnit = /* GraphQL */ `query GetQuestionUnit($id: ID!) {
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3263,10 +3308,7 @@ export const listQuestionUnits = /* GraphQL */ `query ListQuestionUnits(
         byPromptHex
         thumbnail
         difficulty
-        questionType
         metadata
-        sourceDocumentID
-        approved
         importedAt
         createdAt
         updatedAt
@@ -3344,10 +3386,7 @@ export const syncQuestionUnits = /* GraphQL */ `query SyncQuestionUnits(
         byPromptHex
         thumbnail
         difficulty
-        questionType
         metadata
-        sourceDocumentID
-        approved
         importedAt
         createdAt
         updatedAt
@@ -3427,10 +3466,7 @@ export const questionUnitsByQuestionId = /* GraphQL */ `query QuestionUnitsByQue
         byPromptHex
         thumbnail
         difficulty
-        questionType
         metadata
-        sourceDocumentID
-        approved
         importedAt
         createdAt
         updatedAt
@@ -3510,10 +3546,7 @@ export const questionUnitsByUnitId = /* GraphQL */ `query QuestionUnitsByUnitId(
         byPromptHex
         thumbnail
         difficulty
-        questionType
         metadata
-        sourceDocumentID
-        approved
         importedAt
         createdAt
         updatedAt
@@ -3585,10 +3618,7 @@ export const getQuestionWord = /* GraphQL */ `query GetQuestionWord($id: ID!) {
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3601,6 +3631,11 @@ export const getQuestionWord = /* GraphQL */ `query GetQuestionWord($id: ID!) {
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3624,6 +3659,7 @@ export const getQuestionWord = /* GraphQL */ `query GetQuestionWord($id: ID!) {
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -3635,6 +3671,11 @@ export const getQuestionWord = /* GraphQL */ `query GetQuestionWord($id: ID!) {
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3686,10 +3727,7 @@ export const listQuestionWords = /* GraphQL */ `query ListQuestionWords(
         byPromptHex
         thumbnail
         difficulty
-        questionType
         metadata
-        sourceDocumentID
-        approved
         importedAt
         createdAt
         updatedAt
@@ -3710,6 +3748,7 @@ export const listQuestionWords = /* GraphQL */ `query ListQuestionWords(
         definitionAudio
         definitionWaveformData
         rubyTags
+        importedAt
         createdAt
         updatedAt
         _version
@@ -3767,10 +3806,7 @@ export const syncQuestionWords = /* GraphQL */ `query SyncQuestionWords(
         byPromptHex
         thumbnail
         difficulty
-        questionType
         metadata
-        sourceDocumentID
-        approved
         importedAt
         createdAt
         updatedAt
@@ -3791,6 +3827,7 @@ export const syncQuestionWords = /* GraphQL */ `query SyncQuestionWords(
         definitionAudio
         definitionWaveformData
         rubyTags
+        importedAt
         createdAt
         updatedAt
         _version
@@ -3850,10 +3887,7 @@ export const questionWordsByQuestionId = /* GraphQL */ `query QuestionWordsByQue
         byPromptHex
         thumbnail
         difficulty
-        questionType
         metadata
-        sourceDocumentID
-        approved
         importedAt
         createdAt
         updatedAt
@@ -3874,6 +3908,7 @@ export const questionWordsByQuestionId = /* GraphQL */ `query QuestionWordsByQue
         definitionAudio
         definitionWaveformData
         rubyTags
+        importedAt
         createdAt
         updatedAt
         _version
@@ -3933,10 +3968,7 @@ export const questionWordsByWordId = /* GraphQL */ `query QuestionWordsByWordId(
         byPromptHex
         thumbnail
         difficulty
-        questionType
         metadata
-        sourceDocumentID
-        approved
         importedAt
         createdAt
         updatedAt
@@ -3957,6 +3989,7 @@ export const questionWordsByWordId = /* GraphQL */ `query QuestionWordsByWordId(
         definitionAudio
         definitionWaveformData
         rubyTags
+        importedAt
         createdAt
         updatedAt
         _version
@@ -4008,10 +4041,7 @@ export const getQuestionFile = /* GraphQL */ `query GetQuestionFile($id: ID!) {
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -4024,6 +4054,11 @@ export const getQuestionFile = /* GraphQL */ `query GetQuestionFile($id: ID!) {
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -4054,6 +4089,28 @@ export const getQuestionFile = /* GraphQL */ `query GetQuestionFile($id: ID!) {
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4116,10 +4173,7 @@ export const listQuestionFiles = /* GraphQL */ `query ListQuestionFiles(
         byPromptHex
         thumbnail
         difficulty
-        questionType
         metadata
-        sourceDocumentID
-        approved
         importedAt
         createdAt
         updatedAt
@@ -4147,6 +4201,7 @@ export const listQuestionFiles = /* GraphQL */ `query ListQuestionFiles(
         byHex
         thumbnail
         waveformData
+        documentID
         createdAt
         updatedAt
         _version
@@ -4204,10 +4259,7 @@ export const syncQuestionFiles = /* GraphQL */ `query SyncQuestionFiles(
         byPromptHex
         thumbnail
         difficulty
-        questionType
         metadata
-        sourceDocumentID
-        approved
         importedAt
         createdAt
         updatedAt
@@ -4235,6 +4287,7 @@ export const syncQuestionFiles = /* GraphQL */ `query SyncQuestionFiles(
         byHex
         thumbnail
         waveformData
+        documentID
         createdAt
         updatedAt
         _version
@@ -4294,10 +4347,7 @@ export const questionFilesByQuestionId = /* GraphQL */ `query QuestionFilesByQue
         byPromptHex
         thumbnail
         difficulty
-        questionType
         metadata
-        sourceDocumentID
-        approved
         importedAt
         createdAt
         updatedAt
@@ -4325,6 +4375,7 @@ export const questionFilesByQuestionId = /* GraphQL */ `query QuestionFilesByQue
         byHex
         thumbnail
         waveformData
+        documentID
         createdAt
         updatedAt
         _version
@@ -4384,10 +4435,7 @@ export const questionFilesByFileId = /* GraphQL */ `query QuestionFilesByFileId(
         byPromptHex
         thumbnail
         difficulty
-        questionType
         metadata
-        sourceDocumentID
-        approved
         importedAt
         createdAt
         updatedAt
@@ -4415,6 +4463,7 @@ export const questionFilesByFileId = /* GraphQL */ `query QuestionFilesByFileId(
         byHex
         thumbnail
         waveformData
+        documentID
         createdAt
         updatedAt
         _version
@@ -4438,6 +4487,439 @@ export const questionFilesByFileId = /* GraphQL */ `query QuestionFilesByFileId(
 ` as GeneratedQuery<
   APITypes.QuestionFilesByFileIdQueryVariables,
   APITypes.QuestionFilesByFileIdQuery
+>;
+export const getDocumentQuestion = /* GraphQL */ `query GetDocumentQuestion($id: ID!) {
+  getDocumentQuestion(id: $id) {
+    id
+    questionId
+    documentId
+    question {
+      id
+      owner
+      identityId
+      answer
+      choices {
+        choice
+        correct
+        __typename
+      }
+      hint
+      prompt
+      audio
+      audioWaveformData
+      answerAudio
+      answerAudioWaveformData
+      generated
+      model
+      promptHex
+      byPromptHex
+      thumbnail
+      difficulty
+      metadata
+      importedAt
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetDocumentQuestionQueryVariables,
+  APITypes.GetDocumentQuestionQuery
+>;
+export const listDocumentQuestions = /* GraphQL */ `query ListDocumentQuestions(
+  $filter: ModelDocumentQuestionFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listDocumentQuestions(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      questionId
+      documentId
+      question {
+        id
+        owner
+        identityId
+        answer
+        hint
+        prompt
+        audio
+        audioWaveformData
+        answerAudio
+        answerAudioWaveformData
+        generated
+        model
+        promptHex
+        byPromptHex
+        thumbnail
+        difficulty
+        metadata
+        importedAt
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListDocumentQuestionsQueryVariables,
+  APITypes.ListDocumentQuestionsQuery
+>;
+export const syncDocumentQuestions = /* GraphQL */ `query SyncDocumentQuestions(
+  $filter: ModelDocumentQuestionFilterInput
+  $limit: Int
+  $nextToken: String
+  $lastSync: AWSTimestamp
+) {
+  syncDocumentQuestions(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    lastSync: $lastSync
+  ) {
+    items {
+      id
+      questionId
+      documentId
+      question {
+        id
+        owner
+        identityId
+        answer
+        hint
+        prompt
+        audio
+        audioWaveformData
+        answerAudio
+        answerAudioWaveformData
+        generated
+        model
+        promptHex
+        byPromptHex
+        thumbnail
+        difficulty
+        metadata
+        importedAt
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SyncDocumentQuestionsQueryVariables,
+  APITypes.SyncDocumentQuestionsQuery
+>;
+export const documentQuestionsByQuestionId = /* GraphQL */ `query DocumentQuestionsByQuestionId(
+  $questionId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelDocumentQuestionFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  documentQuestionsByQuestionId(
+    questionId: $questionId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      questionId
+      documentId
+      question {
+        id
+        owner
+        identityId
+        answer
+        hint
+        prompt
+        audio
+        audioWaveformData
+        answerAudio
+        answerAudioWaveformData
+        generated
+        model
+        promptHex
+        byPromptHex
+        thumbnail
+        difficulty
+        metadata
+        importedAt
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.DocumentQuestionsByQuestionIdQueryVariables,
+  APITypes.DocumentQuestionsByQuestionIdQuery
+>;
+export const documentQuestionsByDocumentId = /* GraphQL */ `query DocumentQuestionsByDocumentId(
+  $documentId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelDocumentQuestionFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  documentQuestionsByDocumentId(
+    documentId: $documentId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      questionId
+      documentId
+      question {
+        id
+        owner
+        identityId
+        answer
+        hint
+        prompt
+        audio
+        audioWaveformData
+        answerAudio
+        answerAudioWaveformData
+        generated
+        model
+        promptHex
+        byPromptHex
+        thumbnail
+        difficulty
+        metadata
+        importedAt
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.DocumentQuestionsByDocumentIdQueryVariables,
+  APITypes.DocumentQuestionsByDocumentIdQuery
 >;
 export const getUnitFile = /* GraphQL */ `query GetUnitFile($id: ID!) {
   getUnitFile(id: $id) {
@@ -4463,6 +4945,28 @@ export const getUnitFile = /* GraphQL */ `query GetUnitFile($id: ID!) {
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4581,6 +5085,7 @@ export const listUnitFiles = /* GraphQL */ `query ListUnitFiles(
         byHex
         thumbnail
         waveformData
+        documentID
         createdAt
         updatedAt
         _version
@@ -4659,6 +5164,7 @@ export const syncUnitFiles = /* GraphQL */ `query SyncUnitFiles(
         byHex
         thumbnail
         waveformData
+        documentID
         createdAt
         updatedAt
         _version
@@ -4739,6 +5245,7 @@ export const unitFilesByFileId = /* GraphQL */ `query UnitFilesByFileId(
         byHex
         thumbnail
         waveformData
+        documentID
         createdAt
         updatedAt
         _version
@@ -4819,6 +5326,7 @@ export const unitFilesByUnitId = /* GraphQL */ `query UnitFilesByUnitId(
         byHex
         thumbnail
         waveformData
+        documentID
         createdAt
         updatedAt
         _version
@@ -4886,6 +5394,28 @@ export const getWordFile = /* GraphQL */ `query GetWordFile($id: ID!) {
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4920,6 +5450,7 @@ export const getWordFile = /* GraphQL */ `query GetWordFile($id: ID!) {
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -4931,6 +5462,11 @@ export const getWordFile = /* GraphQL */ `query GetWordFile($id: ID!) {
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -4984,6 +5520,7 @@ export const listWordFiles = /* GraphQL */ `query ListWordFiles(
         byHex
         thumbnail
         waveformData
+        documentID
         createdAt
         updatedAt
         _version
@@ -5003,6 +5540,7 @@ export const listWordFiles = /* GraphQL */ `query ListWordFiles(
         definitionAudio
         definitionWaveformData
         rubyTags
+        importedAt
         createdAt
         updatedAt
         _version
@@ -5062,6 +5600,7 @@ export const syncWordFiles = /* GraphQL */ `query SyncWordFiles(
         byHex
         thumbnail
         waveformData
+        documentID
         createdAt
         updatedAt
         _version
@@ -5081,6 +5620,7 @@ export const syncWordFiles = /* GraphQL */ `query SyncWordFiles(
         definitionAudio
         definitionWaveformData
         rubyTags
+        importedAt
         createdAt
         updatedAt
         _version
@@ -5142,6 +5682,7 @@ export const wordFilesByFileId = /* GraphQL */ `query WordFilesByFileId(
         byHex
         thumbnail
         waveformData
+        documentID
         createdAt
         updatedAt
         _version
@@ -5161,6 +5702,7 @@ export const wordFilesByFileId = /* GraphQL */ `query WordFilesByFileId(
         definitionAudio
         definitionWaveformData
         rubyTags
+        importedAt
         createdAt
         updatedAt
         _version
@@ -5222,6 +5764,7 @@ export const wordFilesByWordId = /* GraphQL */ `query WordFilesByWordId(
         byHex
         thumbnail
         waveformData
+        documentID
         createdAt
         updatedAt
         _version
@@ -5241,6 +5784,7 @@ export const wordFilesByWordId = /* GraphQL */ `query WordFilesByWordId(
         definitionAudio
         definitionWaveformData
         rubyTags
+        importedAt
         createdAt
         updatedAt
         _version
@@ -5336,6 +5880,7 @@ export const getUnitWord = /* GraphQL */ `query GetUnitWord($id: ID!) {
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -5347,6 +5892,11 @@ export const getUnitWord = /* GraphQL */ `query GetUnitWord($id: ID!) {
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -5412,6 +5962,7 @@ export const listUnitWords = /* GraphQL */ `query ListUnitWords(
         definitionAudio
         definitionWaveformData
         rubyTags
+        importedAt
         createdAt
         updatedAt
         _version
@@ -5483,6 +6034,7 @@ export const syncUnitWords = /* GraphQL */ `query SyncUnitWords(
         definitionAudio
         definitionWaveformData
         rubyTags
+        importedAt
         createdAt
         updatedAt
         _version
@@ -5556,6 +6108,7 @@ export const unitWordsByUnitId = /* GraphQL */ `query UnitWordsByUnitId(
         definitionAudio
         definitionWaveformData
         rubyTags
+        importedAt
         createdAt
         updatedAt
         _version
@@ -5629,6 +6182,7 @@ export const unitWordsByWordId = /* GraphQL */ `query UnitWordsByWordId(
         definitionAudio
         definitionWaveformData
         rubyTags
+        importedAt
         createdAt
         updatedAt
         _version
@@ -5652,4 +6206,810 @@ export const unitWordsByWordId = /* GraphQL */ `query UnitWordsByWordId(
 ` as GeneratedQuery<
   APITypes.UnitWordsByWordIdQueryVariables,
   APITypes.UnitWordsByWordIdQuery
+>;
+export const getUnitDocument = /* GraphQL */ `query GetUnitDocument($id: ID!) {
+  getUnitDocument(id: $id) {
+    id
+    unitId
+    documentId
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetUnitDocumentQueryVariables,
+  APITypes.GetUnitDocumentQuery
+>;
+export const listUnitDocuments = /* GraphQL */ `query ListUnitDocuments(
+  $filter: ModelUnitDocumentFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listUnitDocuments(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      unitId
+      documentId
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListUnitDocumentsQueryVariables,
+  APITypes.ListUnitDocumentsQuery
+>;
+export const syncUnitDocuments = /* GraphQL */ `query SyncUnitDocuments(
+  $filter: ModelUnitDocumentFilterInput
+  $limit: Int
+  $nextToken: String
+  $lastSync: AWSTimestamp
+) {
+  syncUnitDocuments(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    lastSync: $lastSync
+  ) {
+    items {
+      id
+      unitId
+      documentId
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SyncUnitDocumentsQueryVariables,
+  APITypes.SyncUnitDocumentsQuery
+>;
+export const unitDocumentsByUnitId = /* GraphQL */ `query UnitDocumentsByUnitId(
+  $unitId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelUnitDocumentFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  unitDocumentsByUnitId(
+    unitId: $unitId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      unitId
+      documentId
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.UnitDocumentsByUnitIdQueryVariables,
+  APITypes.UnitDocumentsByUnitIdQuery
+>;
+export const unitDocumentsByDocumentId = /* GraphQL */ `query UnitDocumentsByDocumentId(
+  $documentId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelUnitDocumentFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  unitDocumentsByDocumentId(
+    documentId: $documentId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      unitId
+      documentId
+      unit {
+        id
+        number
+        name
+        owner
+        description
+        data
+        status
+        timeLimitSeconds
+        featuredImage
+        identityId
+        thumbnail
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.UnitDocumentsByDocumentIdQueryVariables,
+  APITypes.UnitDocumentsByDocumentIdQuery
+>;
+export const getDocumentWord = /* GraphQL */ `query GetDocumentWord($id: ID!) {
+  getDocumentWord(id: $id) {
+    id
+    wordId
+    documentId
+    word {
+      id
+      phrase
+      owner
+      identityId
+      pronunciation
+      definition
+      audio
+      waveformData
+      definitionAudio
+      definitionWaveformData
+      rubyTags
+      importedAt
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetDocumentWordQueryVariables,
+  APITypes.GetDocumentWordQuery
+>;
+export const listDocumentWords = /* GraphQL */ `query ListDocumentWords(
+  $filter: ModelDocumentWordFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listDocumentWords(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      wordId
+      documentId
+      word {
+        id
+        phrase
+        owner
+        identityId
+        pronunciation
+        definition
+        audio
+        waveformData
+        definitionAudio
+        definitionWaveformData
+        rubyTags
+        importedAt
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListDocumentWordsQueryVariables,
+  APITypes.ListDocumentWordsQuery
+>;
+export const syncDocumentWords = /* GraphQL */ `query SyncDocumentWords(
+  $filter: ModelDocumentWordFilterInput
+  $limit: Int
+  $nextToken: String
+  $lastSync: AWSTimestamp
+) {
+  syncDocumentWords(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    lastSync: $lastSync
+  ) {
+    items {
+      id
+      wordId
+      documentId
+      word {
+        id
+        phrase
+        owner
+        identityId
+        pronunciation
+        definition
+        audio
+        waveformData
+        definitionAudio
+        definitionWaveformData
+        rubyTags
+        importedAt
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SyncDocumentWordsQueryVariables,
+  APITypes.SyncDocumentWordsQuery
+>;
+export const documentWordsByWordId = /* GraphQL */ `query DocumentWordsByWordId(
+  $wordId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelDocumentWordFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  documentWordsByWordId(
+    wordId: $wordId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      wordId
+      documentId
+      word {
+        id
+        phrase
+        owner
+        identityId
+        pronunciation
+        definition
+        audio
+        waveformData
+        definitionAudio
+        definitionWaveformData
+        rubyTags
+        importedAt
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.DocumentWordsByWordIdQueryVariables,
+  APITypes.DocumentWordsByWordIdQuery
+>;
+export const documentWordsByDocumentId = /* GraphQL */ `query DocumentWordsByDocumentId(
+  $documentId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelDocumentWordFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  documentWordsByDocumentId(
+    documentId: $documentId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      wordId
+      documentId
+      word {
+        id
+        phrase
+        owner
+        identityId
+        pronunciation
+        definition
+        audio
+        waveformData
+        definitionAudio
+        definitionWaveformData
+        rubyTags
+        importedAt
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.DocumentWordsByDocumentIdQueryVariables,
+  APITypes.DocumentWordsByDocumentIdQuery
 >;

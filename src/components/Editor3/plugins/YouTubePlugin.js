@@ -145,6 +145,14 @@ import * as React from 'react';
     updateDOM() {
       return false;
     }
+
+    isKeyboardSelectable() {
+      return true;
+    }
+
+    canBeEmpty() {
+      return true;
+    }
   
     getId() {
       return this.__id;

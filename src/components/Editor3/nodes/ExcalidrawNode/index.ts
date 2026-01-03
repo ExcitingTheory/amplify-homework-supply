@@ -19,8 +19,6 @@ import type {
   } from 'lexical';
   
   import {DecoratorNode} from 'lexical';
-  import * as React from 'react';
-  import {Suspense} from 'react';
   
   type Dimension = number | 'inherit';
   
@@ -179,13 +177,11 @@ import type {
       self.__height = height;
     }
   
-    decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
-      return (
-        null
-        // <Suspense fallback={null}>
-        //   <ExcalidrawComponent nodeKey={this.getKey()} data={this.__data} />
-        // </Suspense>
-      );
+    decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element | null {
+      return null;
+      // <Suspense fallback={null}>
+      //   <ExcalidrawComponent nodeKey={this.getKey()} data={this.__data} />
+      // </Suspense>
     }
   }
   

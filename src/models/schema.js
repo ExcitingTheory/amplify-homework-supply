@@ -249,31 +249,10 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "questionType": {
-                    "name": "questionType",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
                 "metadata": {
                     "name": "metadata",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "sourceDocumentID": {
-                    "name": "sourceDocumentID",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "approved": {
-                    "name": "approved",
-                    "isArray": false,
-                    "type": "Boolean",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -321,6 +300,22 @@ export const schema = {
                     "isArray": true,
                     "type": {
                         "model": "QuestionFile"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "question"
+                        ]
+                    }
+                },
+                "documents": {
+                    "name": "documents",
+                    "isArray": true,
+                    "type": {
+                        "model": "DocumentQuestion"
                     },
                     "isRequired": false,
                     "attributes": [],
@@ -527,6 +522,31 @@ export const schema = {
                     "type": "AWSJSON",
                     "isRequired": false,
                     "attributes": []
+                },
+                "documentID": {
+                    "name": "documentID",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "document": {
+                    "name": "document",
+                    "isArray": false,
+                    "type": {
+                        "model": "Document"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "HAS_ONE",
+                        "associatedWith": [
+                            "id"
+                        ],
+                        "targetNames": [
+                            "documentID"
+                        ]
+                    }
                 },
                 "units": {
                     "name": "units",
@@ -1376,7 +1396,7 @@ export const schema = {
                     "name": "documents",
                     "isArray": true,
                     "type": {
-                        "model": "Document"
+                        "model": "UnitDocument"
                     },
                     "isRequired": false,
                     "attributes": [],
@@ -1542,6 +1562,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "importedAt": {
+                    "name": "importedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "units": {
                     "name": "units",
                     "isArray": true,
@@ -1579,6 +1606,22 @@ export const schema = {
                     "isArray": true,
                     "type": {
                         "model": "QuestionWord"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "word"
+                        ]
+                    }
+                },
+                "documents": {
+                    "name": "documents",
+                    "isArray": true,
+                    "type": {
+                        "model": "DocumentWord"
                     },
                     "isRequired": false,
                     "attributes": [],
@@ -1698,28 +1741,6 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "unitID": {
-                    "name": "unitID",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "unit": {
-                    "name": "unit",
-                    "isArray": false,
-                    "type": {
-                        "model": "Unit"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "association": {
-                        "connectionType": "BELONGS_TO",
-                        "targetNames": [
-                            "unitID"
-                        ]
-                    }
-                },
                 "extractedText": {
                     "name": "extractedText",
                     "isArray": false,
@@ -1794,6 +1815,54 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "units": {
+                    "name": "units",
+                    "isArray": true,
+                    "type": {
+                        "model": "UnitDocument"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "document"
+                        ]
+                    }
+                },
+                "words": {
+                    "name": "words",
+                    "isArray": true,
+                    "type": {
+                        "model": "DocumentWord"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "document"
+                        ]
+                    }
+                },
+                "questions": {
+                    "name": "questions",
+                    "isArray": true,
+                    "type": {
+                        "model": "DocumentQuestion"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": [
+                            "document"
+                        ]
+                    }
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -1817,15 +1886,6 @@ export const schema = {
                 {
                     "type": "model",
                     "properties": {}
-                },
-                {
-                    "type": "key",
-                    "properties": {
-                        "name": "byUnit",
-                        "fields": [
-                            "unitID"
-                        ]
-                    }
                 },
                 {
                     "type": "auth",
@@ -1971,13 +2031,6 @@ export const schema = {
                     "name": "createdAt",
                     "isArray": false,
                     "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "approved": {
-                    "name": "approved",
-                    "isArray": false,
-                    "type": "Boolean",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -2807,6 +2860,163 @@ export const schema = {
                 }
             ]
         },
+        "DocumentQuestion": {
+            "name": "DocumentQuestion",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "questionId": {
+                    "name": "questionId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "documentId": {
+                    "name": "documentId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "question": {
+                    "name": "question",
+                    "isArray": false,
+                    "type": {
+                        "model": "Question"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "questionId"
+                        ]
+                    }
+                },
+                "document": {
+                    "name": "document",
+                    "isArray": false,
+                    "type": {
+                        "model": "Document"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "documentId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "DocumentQuestions",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byQuestion",
+                        "fields": [
+                            "questionId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byDocument",
+                        "fields": [
+                            "documentId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "owner",
+                                "allow": "owner",
+                                "identityClaim": "cognito:username",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            },
+                            {
+                                "groupClaim": "cognito:groups",
+                                "provider": "userPools",
+                                "allow": "groups",
+                                "groups": [
+                                    "Learners"
+                                ],
+                                "operations": [
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "owner",
+                                "allow": "owner",
+                                "identityClaim": "cognito:username",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            },
+                            {
+                                "groupClaim": "cognito:groups",
+                                "provider": "userPools",
+                                "allow": "groups",
+                                "groupsField": "learner",
+                                "operations": [
+                                    "read"
+                                ],
+                                "groupField": "groups"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
         "UnitFile": {
             "name": "UnitFile",
             "fields": {
@@ -3190,6 +3400,320 @@ export const schema = {
                     }
                 }
             ]
+        },
+        "UnitDocument": {
+            "name": "UnitDocument",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "unitId": {
+                    "name": "unitId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "documentId": {
+                    "name": "documentId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "unit": {
+                    "name": "unit",
+                    "isArray": false,
+                    "type": {
+                        "model": "Unit"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "unitId"
+                        ]
+                    }
+                },
+                "document": {
+                    "name": "document",
+                    "isArray": false,
+                    "type": {
+                        "model": "Document"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "documentId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "UnitDocuments",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byUnit",
+                        "fields": [
+                            "unitId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byDocument",
+                        "fields": [
+                            "documentId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "owner",
+                                "allow": "owner",
+                                "identityClaim": "cognito:username",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            },
+                            {
+                                "groupClaim": "cognito:groups",
+                                "provider": "userPools",
+                                "allow": "groups",
+                                "groups": [
+                                    "Learners"
+                                ],
+                                "operations": [
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "owner",
+                                "allow": "owner",
+                                "identityClaim": "cognito:username",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            },
+                            {
+                                "groupClaim": "cognito:groups",
+                                "provider": "userPools",
+                                "allow": "groups",
+                                "groupsField": "learner",
+                                "operations": [
+                                    "read"
+                                ],
+                                "groupField": "groups"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "DocumentWord": {
+            "name": "DocumentWord",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "wordId": {
+                    "name": "wordId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "documentId": {
+                    "name": "documentId",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "word": {
+                    "name": "word",
+                    "isArray": false,
+                    "type": {
+                        "model": "Word"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "wordId"
+                        ]
+                    }
+                },
+                "document": {
+                    "name": "document",
+                    "isArray": false,
+                    "type": {
+                        "model": "Document"
+                    },
+                    "isRequired": true,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "documentId"
+                        ]
+                    }
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isReadOnly": true
+                }
+            },
+            "syncable": true,
+            "pluralName": "DocumentWords",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byWord",
+                        "fields": [
+                            "wordId"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byDocument",
+                        "fields": [
+                            "documentId"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "owner",
+                                "allow": "owner",
+                                "identityClaim": "cognito:username",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            },
+                            {
+                                "groupClaim": "cognito:groups",
+                                "provider": "userPools",
+                                "allow": "groups",
+                                "groups": [
+                                    "Learners"
+                                ],
+                                "operations": [
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "owner",
+                                "allow": "owner",
+                                "identityClaim": "cognito:username",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            },
+                            {
+                                "groupClaim": "cognito:groups",
+                                "provider": "userPools",
+                                "allow": "groups",
+                                "groupsField": "learner",
+                                "operations": [
+                                    "read"
+                                ],
+                                "groupField": "groups"
+                            }
+                        ]
+                    }
+                }
+            ]
         }
     },
     "enums": {
@@ -3221,11 +3745,18 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "fileID": {
+                    "name": "fileID",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
                 "documentID": {
                     "name": "documentID",
                     "isArray": false,
                     "type": "ID",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "responseId": {
@@ -3261,11 +3792,18 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "fileID": {
+                    "name": "fileID",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
                 "documentID": {
                     "name": "documentID",
                     "isArray": false,
                     "type": "ID",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "message": {
@@ -3324,5 +3862,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "07686cc8526a5c9a193d96f0a6747975"
+    "version": "dfed38b52e8a684daeed69187a8a9669"
 };

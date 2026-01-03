@@ -25,7 +25,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import { Section, Document } from "../models";
 import UnitContext from "../context/unitContext";
-import { useChat } from 'ai/react';
+import { useChat } from '@ai-sdk/react';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { uploadAndAnalyzePDF, cancelPDFAnalysis } from '../utils/fileUploadUtils';
 import FilesContext from "../context/fileContext";

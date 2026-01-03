@@ -115,10 +115,7 @@ export const onCreateQuestion = /* GraphQL */ `subscription OnCreateQuestion(
     byPromptHex
     thumbnail
     difficulty
-    questionType
     metadata
-    sourceDocumentID
-    approved
     importedAt
     units {
       items {
@@ -159,6 +156,23 @@ export const onCreateQuestion = /* GraphQL */ `subscription OnCreateQuestion(
         id
         questionId
         fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    documents {
+      items {
+        id
+        questionId
+        documentId
         createdAt
         updatedAt
         _version
@@ -209,10 +223,7 @@ export const onUpdateQuestion = /* GraphQL */ `subscription OnUpdateQuestion(
     byPromptHex
     thumbnail
     difficulty
-    questionType
     metadata
-    sourceDocumentID
-    approved
     importedAt
     units {
       items {
@@ -253,6 +264,23 @@ export const onUpdateQuestion = /* GraphQL */ `subscription OnUpdateQuestion(
         id
         questionId
         fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    documents {
+      items {
+        id
+        questionId
+        documentId
         createdAt
         updatedAt
         _version
@@ -303,10 +331,7 @@ export const onDeleteQuestion = /* GraphQL */ `subscription OnDeleteQuestion(
     byPromptHex
     thumbnail
     difficulty
-    questionType
     metadata
-    sourceDocumentID
-    approved
     importedAt
     units {
       items {
@@ -359,6 +384,23 @@ export const onDeleteQuestion = /* GraphQL */ `subscription OnDeleteQuestion(
       startedAt
       __typename
     }
+    documents {
+      items {
+        id
+        questionId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -394,6 +436,53 @@ export const onCreateFile = /* GraphQL */ `subscription OnCreateFile(
     byHex
     thumbnail
     waveformData
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
     units {
       items {
         id
@@ -480,6 +569,53 @@ export const onUpdateFile = /* GraphQL */ `subscription OnUpdateFile(
     byHex
     thumbnail
     waveformData
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
     units {
       items {
         id
@@ -566,6 +702,53 @@ export const onDeleteFile = /* GraphQL */ `subscription OnDeleteFile(
     byHex
     thumbnail
     waveformData
+    documentID
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
     units {
       items {
         id
@@ -1123,24 +1306,14 @@ export const onCreateUnit = /* GraphQL */ `subscription OnCreateUnit(
     documents {
       items {
         id
-        filename
-        s3Key
-        status
-        owner
-        identityId
-        learner
-        unitID
-        extractedText
-        pageCount
-        fileSize
-        mimeType
-        uploadedAt
-        metadata
+        unitId
+        documentId
         createdAt
         updatedAt
         _version
         _deleted
         _lastChangedAt
+        owner
         __typename
       }
       nextToken
@@ -1305,24 +1478,14 @@ export const onUpdateUnit = /* GraphQL */ `subscription OnUpdateUnit(
     documents {
       items {
         id
-        filename
-        s3Key
-        status
-        owner
-        identityId
-        learner
-        unitID
-        extractedText
-        pageCount
-        fileSize
-        mimeType
-        uploadedAt
-        metadata
+        unitId
+        documentId
         createdAt
         updatedAt
         _version
         _deleted
         _lastChangedAt
+        owner
         __typename
       }
       nextToken
@@ -1487,24 +1650,14 @@ export const onDeleteUnit = /* GraphQL */ `subscription OnDeleteUnit(
     documents {
       items {
         id
-        filename
-        s3Key
-        status
-        owner
-        identityId
-        learner
-        unitID
-        extractedText
-        pageCount
-        fileSize
-        mimeType
-        uploadedAt
-        metadata
+        unitId
+        documentId
         createdAt
         updatedAt
         _version
         _deleted
         _lastChangedAt
+        owner
         __typename
       }
       nextToken
@@ -1569,6 +1722,7 @@ export const onCreateWord = /* GraphQL */ `subscription OnCreateWord(
     definitionAudio
     definitionWaveformData
     rubyTags
+    importedAt
     units {
       items {
         id
@@ -1608,6 +1762,23 @@ export const onCreateWord = /* GraphQL */ `subscription OnCreateWord(
         id
         questionId
         wordId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    documents {
+      items {
+        id
+        wordId
+        documentId
         createdAt
         updatedAt
         _version
@@ -1648,6 +1819,7 @@ export const onUpdateWord = /* GraphQL */ `subscription OnUpdateWord(
     definitionAudio
     definitionWaveformData
     rubyTags
+    importedAt
     units {
       items {
         id
@@ -1687,6 +1859,23 @@ export const onUpdateWord = /* GraphQL */ `subscription OnUpdateWord(
         id
         questionId
         wordId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    documents {
+      items {
+        id
+        wordId
+        documentId
         createdAt
         updatedAt
         _version
@@ -1727,6 +1916,7 @@ export const onDeleteWord = /* GraphQL */ `subscription OnDeleteWord(
     definitionAudio
     definitionWaveformData
     rubyTags
+    importedAt
     units {
       items {
         id
@@ -1778,6 +1968,23 @@ export const onDeleteWord = /* GraphQL */ `subscription OnDeleteWord(
       startedAt
       __typename
     }
+    documents {
+      items {
+        id
+        wordId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -1802,61 +2009,6 @@ export const onCreateDocument = /* GraphQL */ `subscription OnCreateDocument(
     owner
     identityId
     learner
-    unitID
-    unit {
-      id
-      number
-      name
-      owner
-      description
-      data
-      status
-      timeLimitSeconds
-      assignments {
-        nextToken
-        startedAt
-        __typename
-      }
-      grades {
-        nextToken
-        startedAt
-        __typename
-      }
-      featuredImage
-      identityId
-      thumbnail
-      files {
-        nextToken
-        startedAt
-        __typename
-      }
-      words {
-        nextToken
-        startedAt
-        __typename
-      }
-      questions {
-        nextToken
-        startedAt
-        __typename
-      }
-      documents {
-        nextToken
-        startedAt
-        __typename
-      }
-      agentJobs {
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
     extractedText
     pageCount
     fileSize
@@ -1878,7 +2030,6 @@ export const onCreateDocument = /* GraphQL */ `subscription OnCreateDocument(
         tokensUsed
         processingTime
         createdAt
-        approved
         importedAt
         metadata
         updatedAt
@@ -1922,6 +2073,57 @@ export const onCreateDocument = /* GraphQL */ `subscription OnCreateDocument(
       __typename
     }
     metadata
+    units {
+      items {
+        id
+        unitId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    words {
+      items {
+        id
+        wordId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    questions {
+      items {
+        id
+        questionId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -1946,61 +2148,6 @@ export const onUpdateDocument = /* GraphQL */ `subscription OnUpdateDocument(
     owner
     identityId
     learner
-    unitID
-    unit {
-      id
-      number
-      name
-      owner
-      description
-      data
-      status
-      timeLimitSeconds
-      assignments {
-        nextToken
-        startedAt
-        __typename
-      }
-      grades {
-        nextToken
-        startedAt
-        __typename
-      }
-      featuredImage
-      identityId
-      thumbnail
-      files {
-        nextToken
-        startedAt
-        __typename
-      }
-      words {
-        nextToken
-        startedAt
-        __typename
-      }
-      questions {
-        nextToken
-        startedAt
-        __typename
-      }
-      documents {
-        nextToken
-        startedAt
-        __typename
-      }
-      agentJobs {
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
     extractedText
     pageCount
     fileSize
@@ -2022,7 +2169,6 @@ export const onUpdateDocument = /* GraphQL */ `subscription OnUpdateDocument(
         tokensUsed
         processingTime
         createdAt
-        approved
         importedAt
         metadata
         updatedAt
@@ -2066,6 +2212,57 @@ export const onUpdateDocument = /* GraphQL */ `subscription OnUpdateDocument(
       __typename
     }
     metadata
+    units {
+      items {
+        id
+        unitId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    words {
+      items {
+        id
+        wordId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    questions {
+      items {
+        id
+        questionId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -2090,61 +2287,6 @@ export const onDeleteDocument = /* GraphQL */ `subscription OnDeleteDocument(
     owner
     identityId
     learner
-    unitID
-    unit {
-      id
-      number
-      name
-      owner
-      description
-      data
-      status
-      timeLimitSeconds
-      assignments {
-        nextToken
-        startedAt
-        __typename
-      }
-      grades {
-        nextToken
-        startedAt
-        __typename
-      }
-      featuredImage
-      identityId
-      thumbnail
-      files {
-        nextToken
-        startedAt
-        __typename
-      }
-      words {
-        nextToken
-        startedAt
-        __typename
-      }
-      questions {
-        nextToken
-        startedAt
-        __typename
-      }
-      documents {
-        nextToken
-        startedAt
-        __typename
-      }
-      agentJobs {
-        nextToken
-        startedAt
-        __typename
-      }
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
     extractedText
     pageCount
     fileSize
@@ -2166,7 +2308,6 @@ export const onDeleteDocument = /* GraphQL */ `subscription OnDeleteDocument(
         tokensUsed
         processingTime
         createdAt
-        approved
         importedAt
         metadata
         updatedAt
@@ -2210,6 +2351,57 @@ export const onDeleteDocument = /* GraphQL */ `subscription OnDeleteDocument(
       __typename
     }
     metadata
+    units {
+      items {
+        id
+        unitId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    words {
+      items {
+        id
+        wordId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    questions {
+      items {
+        id
+        questionId
+        documentId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -2239,26 +2431,6 @@ export const onCreateParsedContent = /* GraphQL */ `subscription OnCreateParsedC
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -2275,6 +2447,21 @@ export const onCreateParsedContent = /* GraphQL */ `subscription OnCreateParsedC
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2292,7 +2479,6 @@ export const onCreateParsedContent = /* GraphQL */ `subscription OnCreateParsedC
     tokensUsed
     processingTime
     createdAt
-    approved
     importedAt
     metadata
     updatedAt
@@ -2323,26 +2509,6 @@ export const onUpdateParsedContent = /* GraphQL */ `subscription OnUpdateParsedC
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -2359,6 +2525,21 @@ export const onUpdateParsedContent = /* GraphQL */ `subscription OnUpdateParsedC
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2376,7 +2557,6 @@ export const onUpdateParsedContent = /* GraphQL */ `subscription OnUpdateParsedC
     tokensUsed
     processingTime
     createdAt
-    approved
     importedAt
     metadata
     updatedAt
@@ -2407,26 +2587,6 @@ export const onDeleteParsedContent = /* GraphQL */ `subscription OnDeleteParsedC
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -2443,6 +2603,21 @@ export const onDeleteParsedContent = /* GraphQL */ `subscription OnDeleteParsedC
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2460,7 +2635,6 @@ export const onDeleteParsedContent = /* GraphQL */ `subscription OnDeleteParsedC
     tokensUsed
     processingTime
     createdAt
-    approved
     importedAt
     metadata
     updatedAt
@@ -2493,26 +2667,6 @@ export const onCreateAgentJob = /* GraphQL */ `subscription OnCreateAgentJob(
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -2529,6 +2683,21 @@ export const onCreateAgentJob = /* GraphQL */ `subscription OnCreateAgentJob(
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2632,26 +2801,6 @@ export const onUpdateAgentJob = /* GraphQL */ `subscription OnUpdateAgentJob(
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -2668,6 +2817,21 @@ export const onUpdateAgentJob = /* GraphQL */ `subscription OnUpdateAgentJob(
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -2771,26 +2935,6 @@ export const onDeleteAgentJob = /* GraphQL */ `subscription OnDeleteAgentJob(
       owner
       identityId
       learner
-      unitID
-      unit {
-        id
-        number
-        name
-        owner
-        description
-        data
-        status
-        timeLimitSeconds
-        featuredImage
-        identityId
-        thumbnail
-        createdAt
-        updatedAt
-        _version
-        _deleted
-        _lastChangedAt
-        __typename
-      }
       extractedText
       pageCount
       fileSize
@@ -2807,6 +2951,21 @@ export const onDeleteAgentJob = /* GraphQL */ `subscription OnDeleteAgentJob(
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -3014,10 +3173,7 @@ export const onCreateQuestionUnit = /* GraphQL */ `subscription OnCreateQuestion
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3030,6 +3186,11 @@ export const onCreateQuestionUnit = /* GraphQL */ `subscription OnCreateQuestion
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3138,10 +3299,7 @@ export const onUpdateQuestionUnit = /* GraphQL */ `subscription OnUpdateQuestion
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3154,6 +3312,11 @@ export const onUpdateQuestionUnit = /* GraphQL */ `subscription OnUpdateQuestion
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3262,10 +3425,7 @@ export const onDeleteQuestionUnit = /* GraphQL */ `subscription OnDeleteQuestion
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3278,6 +3438,11 @@ export const onDeleteQuestionUnit = /* GraphQL */ `subscription OnDeleteQuestion
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3386,10 +3551,7 @@ export const onCreateQuestionWord = /* GraphQL */ `subscription OnCreateQuestion
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3402,6 +3564,11 @@ export const onCreateQuestionWord = /* GraphQL */ `subscription OnCreateQuestion
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3425,6 +3592,7 @@ export const onCreateQuestionWord = /* GraphQL */ `subscription OnCreateQuestion
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -3436,6 +3604,11 @@ export const onCreateQuestionWord = /* GraphQL */ `subscription OnCreateQuestion
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3490,10 +3663,7 @@ export const onUpdateQuestionWord = /* GraphQL */ `subscription OnUpdateQuestion
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3506,6 +3676,11 @@ export const onUpdateQuestionWord = /* GraphQL */ `subscription OnUpdateQuestion
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3529,6 +3704,7 @@ export const onUpdateQuestionWord = /* GraphQL */ `subscription OnUpdateQuestion
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -3540,6 +3716,11 @@ export const onUpdateQuestionWord = /* GraphQL */ `subscription OnUpdateQuestion
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3594,10 +3775,7 @@ export const onDeleteQuestionWord = /* GraphQL */ `subscription OnDeleteQuestion
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3610,6 +3788,11 @@ export const onDeleteQuestionWord = /* GraphQL */ `subscription OnDeleteQuestion
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3633,6 +3816,7 @@ export const onDeleteQuestionWord = /* GraphQL */ `subscription OnDeleteQuestion
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -3644,6 +3828,11 @@ export const onDeleteQuestionWord = /* GraphQL */ `subscription OnDeleteQuestion
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3698,10 +3887,7 @@ export const onCreateQuestionFile = /* GraphQL */ `subscription OnCreateQuestion
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3714,6 +3900,11 @@ export const onCreateQuestionFile = /* GraphQL */ `subscription OnCreateQuestion
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3744,6 +3935,28 @@ export const onCreateQuestionFile = /* GraphQL */ `subscription OnCreateQuestion
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -3809,10 +4022,7 @@ export const onUpdateQuestionFile = /* GraphQL */ `subscription OnUpdateQuestion
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3825,6 +4035,11 @@ export const onUpdateQuestionFile = /* GraphQL */ `subscription OnUpdateQuestion
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3855,6 +4070,28 @@ export const onUpdateQuestionFile = /* GraphQL */ `subscription OnUpdateQuestion
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -3920,10 +4157,7 @@ export const onDeleteQuestionFile = /* GraphQL */ `subscription OnDeleteQuestion
       byPromptHex
       thumbnail
       difficulty
-      questionType
       metadata
-      sourceDocumentID
-      approved
       importedAt
       units {
         nextToken
@@ -3936,6 +4170,11 @@ export const onDeleteQuestionFile = /* GraphQL */ `subscription OnDeleteQuestion
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -3966,6 +4205,28 @@ export const onDeleteQuestionFile = /* GraphQL */ `subscription OnDeleteQuestion
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4001,6 +4262,360 @@ export const onDeleteQuestionFile = /* GraphQL */ `subscription OnDeleteQuestion
   APITypes.OnDeleteQuestionFileSubscriptionVariables,
   APITypes.OnDeleteQuestionFileSubscription
 >;
+export const onCreateDocumentQuestion = /* GraphQL */ `subscription OnCreateDocumentQuestion(
+  $filter: ModelSubscriptionDocumentQuestionFilterInput
+  $owner: String
+) {
+  onCreateDocumentQuestion(filter: $filter, owner: $owner) {
+    id
+    questionId
+    documentId
+    question {
+      id
+      owner
+      identityId
+      answer
+      choices {
+        choice
+        correct
+        __typename
+      }
+      hint
+      prompt
+      audio
+      audioWaveformData
+      answerAudio
+      answerAudioWaveformData
+      generated
+      model
+      promptHex
+      byPromptHex
+      thumbnail
+      difficulty
+      metadata
+      importedAt
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateDocumentQuestionSubscriptionVariables,
+  APITypes.OnCreateDocumentQuestionSubscription
+>;
+export const onUpdateDocumentQuestion = /* GraphQL */ `subscription OnUpdateDocumentQuestion(
+  $filter: ModelSubscriptionDocumentQuestionFilterInput
+  $owner: String
+) {
+  onUpdateDocumentQuestion(filter: $filter, owner: $owner) {
+    id
+    questionId
+    documentId
+    question {
+      id
+      owner
+      identityId
+      answer
+      choices {
+        choice
+        correct
+        __typename
+      }
+      hint
+      prompt
+      audio
+      audioWaveformData
+      answerAudio
+      answerAudioWaveformData
+      generated
+      model
+      promptHex
+      byPromptHex
+      thumbnail
+      difficulty
+      metadata
+      importedAt
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateDocumentQuestionSubscriptionVariables,
+  APITypes.OnUpdateDocumentQuestionSubscription
+>;
+export const onDeleteDocumentQuestion = /* GraphQL */ `subscription OnDeleteDocumentQuestion(
+  $filter: ModelSubscriptionDocumentQuestionFilterInput
+  $owner: String
+) {
+  onDeleteDocumentQuestion(filter: $filter, owner: $owner) {
+    id
+    questionId
+    documentId
+    question {
+      id
+      owner
+      identityId
+      answer
+      choices {
+        choice
+        correct
+        __typename
+      }
+      hint
+      prompt
+      audio
+      audioWaveformData
+      answerAudio
+      answerAudioWaveformData
+      generated
+      model
+      promptHex
+      byPromptHex
+      thumbnail
+      difficulty
+      metadata
+      importedAt
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteDocumentQuestionSubscriptionVariables,
+  APITypes.OnDeleteDocumentQuestionSubscription
+>;
 export const onCreateUnitFile = /* GraphQL */ `subscription OnCreateUnitFile(
   $filter: ModelSubscriptionUnitFileFilterInput
   $owner: String
@@ -4028,6 +4643,28 @@ export const onCreateUnitFile = /* GraphQL */ `subscription OnCreateUnitFile(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4144,6 +4781,28 @@ export const onUpdateUnitFile = /* GraphQL */ `subscription OnUpdateUnitFile(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4260,6 +4919,28 @@ export const onDeleteUnitFile = /* GraphQL */ `subscription OnDeleteUnitFile(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4376,6 +5057,28 @@ export const onCreateWordFile = /* GraphQL */ `subscription OnCreateWordFile(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4410,6 +5113,7 @@ export const onCreateWordFile = /* GraphQL */ `subscription OnCreateWordFile(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -4421,6 +5125,11 @@ export const onCreateWordFile = /* GraphQL */ `subscription OnCreateWordFile(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -4472,6 +5181,28 @@ export const onUpdateWordFile = /* GraphQL */ `subscription OnUpdateWordFile(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4506,6 +5237,7 @@ export const onUpdateWordFile = /* GraphQL */ `subscription OnUpdateWordFile(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -4517,6 +5249,11 @@ export const onUpdateWordFile = /* GraphQL */ `subscription OnUpdateWordFile(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -4568,6 +5305,28 @@ export const onDeleteWordFile = /* GraphQL */ `subscription OnDeleteWordFile(
       byHex
       thumbnail
       waveformData
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -4602,6 +5361,7 @@ export const onDeleteWordFile = /* GraphQL */ `subscription OnDeleteWordFile(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -4613,6 +5373,11 @@ export const onDeleteWordFile = /* GraphQL */ `subscription OnDeleteWordFile(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -4711,6 +5476,7 @@ export const onCreateUnitWord = /* GraphQL */ `subscription OnCreateUnitWord(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -4722,6 +5488,11 @@ export const onCreateUnitWord = /* GraphQL */ `subscription OnCreateUnitWord(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -4820,6 +5591,7 @@ export const onUpdateUnitWord = /* GraphQL */ `subscription OnUpdateUnitWord(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
@@ -4831,6 +5603,11 @@ export const onUpdateUnitWord = /* GraphQL */ `subscription OnUpdateUnitWord(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
         nextToken
         startedAt
         __typename
@@ -4929,12 +5706,139 @@ export const onDeleteUnitWord = /* GraphQL */ `subscription OnDeleteUnitWord(
       definitionAudio
       definitionWaveformData
       rubyTags
+      importedAt
       units {
         nextToken
         startedAt
         __typename
       }
       files {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteUnitWordSubscriptionVariables,
+  APITypes.OnDeleteUnitWordSubscription
+>;
+export const onCreateUnitDocument = /* GraphQL */ `subscription OnCreateUnitDocument(
+  $filter: ModelSubscriptionUnitDocumentFilterInput
+  $owner: String
+) {
+  onCreateUnitDocument(filter: $filter, owner: $owner) {
+    id
+    unitId
+    documentId
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
         nextToken
         startedAt
         __typename
@@ -4961,6 +5865,569 @@ export const onDeleteUnitWord = /* GraphQL */ `subscription OnDeleteUnitWord(
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteUnitWordSubscriptionVariables,
-  APITypes.OnDeleteUnitWordSubscription
+  APITypes.OnCreateUnitDocumentSubscriptionVariables,
+  APITypes.OnCreateUnitDocumentSubscription
+>;
+export const onUpdateUnitDocument = /* GraphQL */ `subscription OnUpdateUnitDocument(
+  $filter: ModelSubscriptionUnitDocumentFilterInput
+  $owner: String
+) {
+  onUpdateUnitDocument(filter: $filter, owner: $owner) {
+    id
+    unitId
+    documentId
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateUnitDocumentSubscriptionVariables,
+  APITypes.OnUpdateUnitDocumentSubscription
+>;
+export const onDeleteUnitDocument = /* GraphQL */ `subscription OnDeleteUnitDocument(
+  $filter: ModelSubscriptionUnitDocumentFilterInput
+  $owner: String
+) {
+  onDeleteUnitDocument(filter: $filter, owner: $owner) {
+    id
+    unitId
+    documentId
+    unit {
+      id
+      number
+      name
+      owner
+      description
+      data
+      status
+      timeLimitSeconds
+      assignments {
+        nextToken
+        startedAt
+        __typename
+      }
+      grades {
+        nextToken
+        startedAt
+        __typename
+      }
+      featuredImage
+      identityId
+      thumbnail
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteUnitDocumentSubscriptionVariables,
+  APITypes.OnDeleteUnitDocumentSubscription
+>;
+export const onCreateDocumentWord = /* GraphQL */ `subscription OnCreateDocumentWord(
+  $filter: ModelSubscriptionDocumentWordFilterInput
+  $owner: String
+) {
+  onCreateDocumentWord(filter: $filter, owner: $owner) {
+    id
+    wordId
+    documentId
+    word {
+      id
+      phrase
+      owner
+      identityId
+      pronunciation
+      definition
+      audio
+      waveformData
+      definitionAudio
+      definitionWaveformData
+      rubyTags
+      importedAt
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateDocumentWordSubscriptionVariables,
+  APITypes.OnCreateDocumentWordSubscription
+>;
+export const onUpdateDocumentWord = /* GraphQL */ `subscription OnUpdateDocumentWord(
+  $filter: ModelSubscriptionDocumentWordFilterInput
+  $owner: String
+) {
+  onUpdateDocumentWord(filter: $filter, owner: $owner) {
+    id
+    wordId
+    documentId
+    word {
+      id
+      phrase
+      owner
+      identityId
+      pronunciation
+      definition
+      audio
+      waveformData
+      definitionAudio
+      definitionWaveformData
+      rubyTags
+      importedAt
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateDocumentWordSubscriptionVariables,
+  APITypes.OnUpdateDocumentWordSubscription
+>;
+export const onDeleteDocumentWord = /* GraphQL */ `subscription OnDeleteDocumentWord(
+  $filter: ModelSubscriptionDocumentWordFilterInput
+  $owner: String
+) {
+  onDeleteDocumentWord(filter: $filter, owner: $owner) {
+    id
+    wordId
+    documentId
+    word {
+      id
+      phrase
+      owner
+      identityId
+      pronunciation
+      definition
+      audio
+      waveformData
+      definitionAudio
+      definitionWaveformData
+      rubyTags
+      importedAt
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      documents {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    document {
+      id
+      filename
+      s3Key
+      status
+      owner
+      identityId
+      learner
+      extractedText
+      pageCount
+      fileSize
+      mimeType
+      uploadedAt
+      parsedContent {
+        nextToken
+        startedAt
+        __typename
+      }
+      agentJobs {
+        nextToken
+        startedAt
+        __typename
+      }
+      metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteDocumentWordSubscriptionVariables,
+  APITypes.OnDeleteDocumentWordSubscription
 >;

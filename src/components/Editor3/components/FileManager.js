@@ -899,7 +899,8 @@ export default function FileManager() {
         const subscription = DataStore.observeQuery(Document).subscribe(({ items }) => {
             const statusMap = {};
             items.forEach(doc => {
-                statusMap[doc.s3Key] = {
+                // Use document ID as the key for easier lookup
+                statusMap[doc.id] = {
                     id: doc.id,
                     status: doc.status,
                     pageCount: doc.pageCount,
@@ -1027,12 +1028,18 @@ export default function FileManager() {
 
                     // If PDF and auto-analyze is enabled, trigger analysis
                     if (file.type === 'application/pdf' && settings?.autoAnalyzeDocuments && result.documentModel) {
-                        console.log('Auto-analyzing document:', result.documentModel.id);
-                        try {
-                            await analyzePDF(result.documentModel.id);
-                        } catch (error) {
-                            console.error('Auto-analysis failed:', error);
-                        }
+                        console.log('Auto-analyzing file:', result.fileModel.id);
+                        // Don't await - let analysis run in background
+                        analyzePDF(result.fileModel.id)
+                            .then(() => console.log('Auto-analysis completed'))
+                            .catch((error) => {
+                                // If already being processed, this is expected - just log as info
+                                if (error.message?.includes('currently being processed') || error.message?.includes('already been analyzed')) {
+                                    console.log('Document analysis already in progress or completed:', error.message);
+                                } else {
+                                    console.error('Auto-analysis failed:', error);
+                                }
+                            });
                     }
                 } catch (error) {
                     console.error('Error uploading file:', error);
@@ -1319,23 +1326,21 @@ export default function FileManager() {
                                     fullWidth
                                     size="small"
                                     options={files.filter(file =>
-                                        file.mimeType === 'application/pdf' ||
-                                        file.mimeType === 'text/plain' ||
-                                        file.mimeType === 'text/markdown' ||
-                                        file.mimeType === 'text/csv'
+                                        file.documentID && (
+                                            file.mimeType === 'application/pdf' ||
+                                            file.mimeType === 'text/plain' ||
+                                            file.mimeType === 'text/markdown' ||
+                                            file.mimeType === 'text/csv'
+                                        )
                                     )}
                                     getOptionLabel={(file) => {
-                                        const docStatus = documentStatuses[file.path];
+                                        const docStatus = documentStatuses[file.documentID];
                                         return `${file.name}${docStatus?.status === 'completed' ? ' ✓' : ''}`;
                                     }}
-                                    value={files.find(f => {
-                                        const docStatus = documentStatuses[f.path];
-                                        return docStatus?.id === selectedDocument;
-                                    }) || null}
+                                    value={files.find(f => f.documentID === selectedDocument) || null}
                                     onChange={(event, newValue) => {
-                                        if (newValue) {
-                                            const docStatus = documentStatuses[newValue.path];
-                                            setSelectedDocument(docStatus?.id);
+                                        if (newValue && newValue.documentID) {
+                                            setSelectedDocument(newValue.documentID);
                                         } else {
                                             setSelectedDocument(null);
                                         }
@@ -1589,7 +1594,7 @@ export default function FileManager() {
                                                         file.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
                                                     )
                                                     .map((file) => {
-                                                        const docStatus = documentStatuses[file.path];
+                                                        const docStatus = documentStatuses[file.documentID];
                                                         const statusInfo = getDocumentStatusInfo(docStatus?.status || 'uploaded');
                                                         const isProcessing = ['extracting', 'analyzing'].includes(docStatus?.status);
 
@@ -1626,7 +1631,7 @@ export default function FileManager() {
                                                                         />
                                                                         <Box sx={{ flex: 1, minWidth: 0 }}>
                                                                             <Typography noWrap>{file.name}</Typography>
-                                                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
                                                                                 <Typography variant="caption" color="text.secondary">
                                                                                     {(file.size / 1000).toFixed(2)} KB
                                                                                 </Typography>
@@ -1635,12 +1640,14 @@ export default function FileManager() {
                                                                                         • {docStatus.pageCount} pages
                                                                                     </Typography>
                                                                                 )}
+                                                                            </Box>
+                                                                            <Box sx={{ mt: 0.5 }}>
                                                                                 <Chip
                                                                                     size="small"
                                                                                     label={statusInfo.label}
                                                                                     color={statusInfo.chipColor}
                                                                                     icon={statusInfo.icon}
-                                                                                    sx={{ height: 20, fontSize: '0.7rem' }}
+                                                                                    sx={{ height: 18, fontSize: '0.65rem' }}
                                                                                 />
                                                                             </Box>
                                                                         </Box>
@@ -1694,6 +1701,22 @@ export default function FileManager() {
                                                                                 </IconButton>
                                                                             )}
 
+                                                                            {/* View suggestions button - when completed */}
+                                                                            {docStatus?.status === 'completed' && (
+                                                                                <IconButton
+                                                                                    size="small"
+                                                                                    title="View Suggestions"
+                                                                                    color="primary"
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        setGenerator('suggestions');
+                                                                                        setSelectedDocument(file.documentID);
+                                                                                    }}
+                                                                                >
+                                                                                    <AutoAwesomeIcon />
+                                                                                </IconButton>
+                                                                            )}
+
                                                                             {/* Analyze button - only when not processing/completed */}
                                                                             {!['completed', 'analyzing', 'extracting'].includes(docStatus?.status) && (
                                                                                 <IconButton
@@ -1703,18 +1726,25 @@ export default function FileManager() {
                                                                                     onClick={async (e) => {
                                                                                         e.stopPropagation();
                                                                                         try {
-                                                                                            // Find the Document record for this file
-                                                                                            const documents = await DataStore.query(Document, (d) => d.s3Key.eq(file.path));
-                                                                                            if (documents.length === 0) {
-                                                                                                alert('Document record not found. Please upload the PDF again.');
-                                                                                                return;
+                                                                                            const result = await analyzePDF(file.id);
+                                                                                            
+                                                                                            if (result.success) {
+                                                                                                alert(`PDF analysis started! File ID: ${result.fileID}`);
+                                                                                            } else {
+                                                                                                alert(result.message || 'Analysis could not be started');
                                                                                             }
-
-                                                                                            const result = await analyzePDF(documents[0].id);
-                                                                                            alert(`PDF analysis started! Document ID: ${result.documentID}`);
                                                                                         } catch (error) {
                                                                                             console.error('Error analyzing PDF:', error);
-                                                                                            alert('Failed to analyze PDF: ' + error.message);
+                                                                                            const errorMsg = error?.message || error?.toString() || 'Unknown error occurred';
+                                                                                            
+                                                                                            // Show user-friendly message for common errors
+                                                                                            if (errorMsg.includes('currently being processed')) {
+                                                                                                alert('This document is currently being analyzed. Please wait a moment and check back soon.');
+                                                                                            } else if (errorMsg.includes('already been analyzed')) {
+                                                                                                alert('This document has already been analyzed. Check the document details for the results.');
+                                                                                            } else {
+                                                                                                alert('Failed to analyze PDF: ' + errorMsg);
+                                                                                            }
                                                                                         }
                                                                                     }}
                                                                                 >

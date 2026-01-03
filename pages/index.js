@@ -24,6 +24,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import AverageIcon from '@mui/icons-material/Timeline';
 import HighIcon from '@mui/icons-material/ArrowUpward';
 import StarIcon from '@mui/icons-material/Star';
+import { FilesProvider } from "../src/context/fileContext";
 
 
 function getColor(grade = 0) {
@@ -948,7 +949,9 @@ function Index({ signOut, user }) {
 function WrappedPage() {
   return (
     <MyAuth>
-      <Index />
+      <FilesProvider>
+        <Index />
+      </FilesProvider>
     </MyAuth>
   )
 }

@@ -194,6 +194,14 @@ export class TableNode extends DecoratorNode {
     return false;
   }
 
+  isKeyboardSelectable() {
+    return true;
+  }
+
+  canBeEmpty() {
+    return true;
+  }
+
   mergeRows(startX, startY, mergeRows) {
     const self = this.getWritable();
     const rows = self.__rows;

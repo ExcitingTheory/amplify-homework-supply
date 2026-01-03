@@ -43,13 +43,21 @@ const FilesProvider = ({ children }) => {
   
   // Memoize to prevent recreating on every render
   const fetchCurrentUserAttributes = React.useCallback(async () => {
-      const {
-        identityId,
-        tokens: { idToken },
-      } = await fetchAuthSession();
-      isLoading.current = false;
-
-      setSession({ identityId, idToken });
+      try {
+        const authSession = await fetchAuthSession({ forceRefresh: false });
+        const identityId = authSession.identityId;
+        const idToken = authSession.tokens?.idToken;
+        
+        isLoading.current = false;
+        setSession({ identityId, idToken });
+      } catch (error) {
+        // Suppress benign Cognito 400 errors in development
+        if (error?.name !== 'NotAuthorizedException' && error?.statusCode !== 400) {
+          console.log('[FileContext] Error fetching auth session:', error);
+        }
+        isLoading.current = false;
+        setSession({ identityId: undefined, idToken: undefined, error });
+      }
   }, []);
 
   React.useEffect(() => {
@@ -111,6 +119,7 @@ const FilesProvider = ({ children }) => {
 
     async function fetchFiles() {
       try {
+        // Check if user is authenticated first
         const { username: myUserId, userId, signInDetails } = await getCurrentUser();
         const { identityId } = await fetchAuthSession();
 
@@ -171,6 +180,11 @@ const FilesProvider = ({ children }) => {
           });
         });
       } catch (error) {
+        // Handle authentication errors gracefully
+        if (error.name === 'UserUnAuthenticatedException' || error.message?.includes('authenticated')) {
+          console.log('[FileContext] User not authenticated, skipping file fetch');
+          return;
+        }
         console.error('Error fetching files:', error);
       }
     }

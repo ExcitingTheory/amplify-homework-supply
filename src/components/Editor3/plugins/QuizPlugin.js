@@ -111,6 +111,14 @@ export class QuizNode extends DecoratorNode {
     return false;
   }
 
+  isKeyboardSelectable() {
+    return true;
+  }
+
+  canBeEmpty() {
+    return true;
+  }
+
   getData() {
     return this.__data || [];
   }

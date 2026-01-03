@@ -9,16 +9,12 @@ import theme from '../src/theme';
 import createEmotionCache from '../src/createEmotionCache';
 import amplifyconfig from '../src/amplifyconfiguration.json';
 
-import { Amplify } from 'aws-amplify';
 import '../src/components/Editor3/theme.css';
 import '../src/components/Editor3/components/LanguageEditorTheme.css';
+import { Amplify, AWSCloudWatchProvider, Logger } from "aws-amplify";
 import { AuthModeStrategyType } from 'aws-amplify/datastore';
-import { FilesProvider } from '../src/context/fileContext';
-// import { fetchAuthSession } from 'aws-amplify/auth';
 
-// Client-side cache, shared for the whole session of the user in the browser.
-
-const clientSideEmotionCache = createEmotionCache();
+// Configure Amplify BEFORE importing components that use DataStore
 Amplify.configure({
   ...amplifyconfig,
   DataStore: {
@@ -26,9 +22,55 @@ Amplify.configure({
   },
 })
 
+// Schema version - increment this when you run amplify push with schema changes
+const SCHEMA_VERSION = '1.0.1';
+
+// Clear DataStore only when schema version changes (dynamic import to avoid premature DataStore initialization)
+if (typeof window !== 'undefined') {
+  const storedVersion = localStorage.getItem('datastore_schema_version');
+  
+  if (storedVersion !== SCHEMA_VERSION) {
+    console.log(`Schema version mismatch. Stored: ${storedVersion}, Current: ${SCHEMA_VERSION}. Clearing DataStore...`);
+    
+    // Set a flag to prevent infinite reload loops
+    const isClearing = sessionStorage.getItem('datastore_clearing');
+    
+    if (!isClearing) {
+      sessionStorage.setItem('datastore_clearing', 'true');
+      
+      import('aws-amplify/datastore').then(({ DataStore }) => {
+        DataStore.clear()
+          .then(() => {
+            localStorage.setItem('datastore_schema_version', SCHEMA_VERSION);
+            sessionStorage.removeItem('datastore_clearing');
+            console.log('DataStore cleared and version updated. Reloading...');
+            // Reload the page to reinitialize all DataStore contexts
+            window.location.reload();
+          })
+          .catch(err => {
+            console.log('Error clearing DataStore:', err);
+            sessionStorage.removeItem('datastore_clearing');
+          });
+      });
+    }
+  }
+}
+
+// Client-side cache, shared for the whole session of the user in the browser.
+
+const clientSideEmotionCache = createEmotionCache();
+
 
 // investigate:
 // remote console logging to capture errors in production
+// const logger = new Logger('CloudWatchLogger');
+// const AmazonCloudWatchLogsProvider = new AWSCloudWatchProvider({
+//   logGroupName: 'amplify-homework-supply-logs',
+//   logStreamName: `frontend-${new Date().toISOString().split('T')[0]}`, // Daily log streams
+//   region: amplifyconfig.aws_project_region,
+//   level: 'ERROR', // Log only errors
+//   logger: logger,
+// });
 // Amplify.addPluggable(new AmazonCloudWatchLogsProvider());
 
 
@@ -71,9 +113,7 @@ export default function MyApp(props) {
       <ThemeProvider theme={theme}>
         {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
         <CssBaseline />
-        <FilesProvider>
-          <Component {...pageProps} />
-        </FilesProvider>
+        <Component {...pageProps} />
       </ThemeProvider>
     </CacheProvider>
   );

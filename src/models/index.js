@@ -14,7 +14,7 @@ const FileProtectionLevels = {
   "PROTECTED": "PROTECTED"
 };
 
-const { Assistant, Question, File, ChatHistory, Section, Assignment, Grade, Unit, Word, Document, ParsedContent, AgentJob, Settings, QuestionUnit, QuestionWord, QuestionFile, UnitFile, WordFile, UnitWord, AnalyzeDocumentResult, CancelDocumentAnalysisResult, StudentInfo, Choice } = initSchema(schema);
+const { Assistant, Question, File, ChatHistory, Section, Assignment, Grade, Unit, Word, Document, ParsedContent, AgentJob, Settings, QuestionUnit, QuestionWord, QuestionFile, DocumentQuestion, UnitFile, WordFile, UnitWord, UnitDocument, DocumentWord, AnalyzeDocumentResult, CancelDocumentAnalysisResult, StudentInfo, Choice } = initSchema(schema);
 
 export {
   Assistant,
@@ -33,9 +33,12 @@ export {
   QuestionUnit,
   QuestionWord,
   QuestionFile,
+  DocumentQuestion,
   UnitFile,
   WordFile,
   UnitWord,
+  UnitDocument,
+  DocumentWord,
   PublishedStatus,
   FileProtectionLevels,
   AnalyzeDocumentResult,

@@ -7,6 +7,7 @@ import { Question } from '../models';
 
 export function DisplayOrEditAnswer({ answer, question }) {
   const [editing, setEditing] = React.useState(false);
+  const [expanded, setExpanded] = React.useState(false);
   const [newAnswer, setNewAnswer] = React.useState(answer);
 
   React.useEffect(() => {
@@ -29,6 +30,22 @@ export function DisplayOrEditAnswer({ answer, question }) {
     setNewAnswer(e.target.value);
   };
 
+  const handleToggleExpand = (e) => {
+    if (expanded) {
+      // When expanded, single click to edit
+      handleEdit(e);
+      return;
+    }
+    // When collapsed, single click to expand, double-click to edit
+    if (e.detail === 2) { // double-click to edit
+      handleEdit(e);
+    } else { // single click to expand
+      e.preventDefault();
+      e.stopPropagation();
+      setExpanded(!expanded);
+    }
+  };
+
   return (
     <>
       {!editing &&
@@ -36,9 +53,20 @@ export function DisplayOrEditAnswer({ answer, question }) {
           component="div"
           sx={{
             width: '100%',
-            whiteSpace: 'pre-wrap',
+            whiteSpace: expanded ? 'pre-wrap' : 'normal',
+            overflow: expanded ? 'visible' : 'hidden',
+            textOverflow: expanded ? 'clip' : 'ellipsis',
+            display: expanded ? 'block' : '-webkit-box',
+            WebkitLineClamp: expanded ? 'unset' : 3,
+            WebkitBoxOrient: expanded ? 'initial' : 'vertical',
+            cursor: expanded ? 'text' : 'pointer',
+            fontSize: '0.875rem',
+            color: 'text.secondary',
+            '&:hover': {
+              backgroundColor: 'action.hover',
+            },
           }}
-          onClick={handleEdit}
+          onClick={handleToggleExpand}
         >
           {answer}
         </Typography>}

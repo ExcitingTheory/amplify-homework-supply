@@ -13,13 +13,14 @@ type Mutation {
   updateAssistantEditor(assistantId: String!, additionalInstructions: String!, model: String): String @function(name: "openai-${env}")
   deleteAssistantEditor(assistantId: String!, threadId: String!): String @function(name: "openai-${env}")
   chatAssistantThread(assistantId: String!, messages: String!): String @function(name: "openai-${env}")
-  analyzeDocument(documentID: ID!): AnalyzeDocumentResult @function(name: "analyzeDocument-${env}")
-  cancelDocumentAnalysis(documentID: ID!): CancelDocumentAnalysisResult @function(name: "analyzeDocument-${env}")
+  analyzeDocument(fileID: ID!): AnalyzeDocumentResult @function(name: "analyzeDocument-${env}")
+  cancelDocumentAnalysis(fileID: ID!): CancelDocumentAnalysisResult @function(name: "analyzeDocument-${env}")
 }
 
 type AnalyzeDocumentResult {
   success: Boolean!
-  documentID: ID!
+  fileID: ID!
+  documentID: ID
   responseId: String
   pageCount: Int
   message: String
@@ -27,7 +28,8 @@ type AnalyzeDocumentResult {
 
 type CancelDocumentAnalysisResult {
   success: Boolean!
-  documentID: ID!
+  fileID: ID!
+  documentID: ID
   message: String
 }
 
@@ -109,15 +111,13 @@ type Question @model @auth(
   byPromptHex: String @index(name: "byPromptHex")
   thumbnail: String # The path to the thumbnail in S3
   difficulty: String
-  questionType: String  
   metadata: String
-  sourceDocumentID: ID
-  approved: Boolean
   importedAt: AWSDateTime
   # many to many relationships
   units: [Unit] @manyToMany(relationName: "QuestionUnit")
   words: [Word] @manyToMany(relationName: "QuestionWord")
   files: [File] @manyToMany(relationName: "QuestionFile")
+  documents: [Document] @manyToMany(relationName: "DocumentQuestion")
 }
 
 type File @model @auth(
@@ -144,6 +144,8 @@ type File @model @auth(
   byHex: String @index(name: "byHex")
   thumbnail: String # The path to the thumbnail in S3
   waveformData: AWSJSON # Pre-calculated waveform amplitude data for audio files
+  documentID: ID
+  document: Document @hasOne(fields: ["documentID"])
   # many to many relationship with units
   units: [Unit] @manyToMany(relationName: "UnitFile")
   words: [Word] @manyToMany(relationName: "WordFile")
@@ -240,7 +242,7 @@ type Unit @model  @auth(
   files: [File] @manyToMany(relationName: "UnitFile")
   words: [Word] @manyToMany(relationName: "UnitWord")
   questions: [Question] @manyToMany(relationName: "QuestionUnit")
-  documents: [Document] @hasMany(indexName: "byUnit", fields: ["id"])
+  documents: [Document] @manyToMany(relationName: "UnitDocument")
   agentJobs: [AgentJob] @hasMany(indexName: "byUnit", fields: ["id"])
   }
 
@@ -262,9 +264,11 @@ type Word @model @auth(
   definitionAudio: [String]
   definitionWaveformData: AWSJSON # Pre-calculated waveform amplitude data for definition audio
   rubyTags: String
+  importedAt: AWSDateTime
   units: [Unit] @manyToMany(relationName: "UnitWord")
   files: [File] @manyToMany(relationName: "WordFile")
   questions: [Question] @manyToMany(relationName: "QuestionWord")
+  documents: [Document] @manyToMany(relationName: "DocumentWord")
 }
 
 type Document @model @auth(rules: [
@@ -278,8 +282,6 @@ type Document @model @auth(rules: [
   owner: String
   identityId: String
   learner: String
-  unitID: ID @index(name: "byUnit")
-  unit: Unit @belongsTo(fields: ["unitID"])
   extractedText: String
   pageCount: Int
   fileSize: Int
@@ -288,6 +290,9 @@ type Document @model @auth(rules: [
   parsedContent: [ParsedContent] @hasMany(indexName: "byDocument", fields: ["id"])
   agentJobs: [AgentJob] @hasMany(indexName: "byDocument", fields: ["id"])
   metadata: AWSJSON
+  units: [Unit] @manyToMany(relationName: "UnitDocument")
+  words: [Word] @manyToMany(relationName: "DocumentWord")
+  questions: [Question] @manyToMany(relationName: "DocumentQuestion")
 }
 
 type ParsedContent @model @auth(rules: [
@@ -309,7 +314,6 @@ type ParsedContent @model @auth(rules: [
   tokensUsed: Int
   processingTime: Int
   createdAt: AWSDateTime
-  approved: Boolean
   importedAt: AWSDateTime
   metadata: AWSJSON
 }

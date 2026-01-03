@@ -12,14 +12,45 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
-import { FileDownload, Refresh, Search, UploadFile } from '@mui/icons-material';
+import { FileDownload, Refresh, Search, UploadFile, UnfoldMore as UnfoldMoreIcon, UnfoldLess as UnfoldLessIcon, ExpandMore, ExpandLess, SelectAll, Deselect, Description } from '@mui/icons-material';
 import FilesContext from '../context/fileContext';
 import QuestionContext from '../context/dictionaryContext';
 import DeleteIcon from '@mui/icons-material/Delete';
-import NewFileIcon from '@mui/icons-material/NoteAdd';
+import AddIcon from '@mui/icons-material/Add';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Collapse, Dialog, DialogTitle, DialogContent } from '@mui/material';
+import { Collapse, Dialog, DialogTitle, DialogContent, Menu, MenuItem, Checkbox, Tooltip, Divider } from '@mui/material';
+
+// Lexical imports
+import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { 
+  $getRoot, 
+  $createParagraphNode, 
+  $createTextNode,
+  ElementNode,
+  NodeKey,
+  LexicalNode,
+  SerializedElementNode,
+  Spread,
+  DOMConversionMap,
+  DOMConversionOutput,
+  EditorConfig,
+  $isTextNode,
+  $getSelection,
+  $isRangeSelection,
+  $setSelection,
+  $createRangeSelection,
+  $getNodeByKey,
+  TextFormatType
+} from 'lexical';
+import { $patchStyleText } from '@lexical/selection';
+import LanguageEditorTheme from './Editor3/components/LanguageEditorTheme';
 import { DisplayOrEditAnswer } from './DisplayOrEditAnswer';
 import { DisplayOrEditPrompt } from './DisplayOrEditPrompt';
 import { DisplayOrEditHint } from './DisplayOrEditHint';
@@ -41,7 +72,597 @@ import DictionaryContext from '../context/dictionaryContext';
 
 const client = generateClient();
 
+// Custom Field Node Types
+class QuestionFieldNode extends ElementNode {
+  __fieldType;
+  __fieldValue;
+  __questionId;
 
+  static getType() {
+    return 'question-field';
+  }
+
+  static clone(node) {
+    return new QuestionFieldNode(
+      node.__fieldType,
+      node.__fieldValue,
+      node.__questionId,
+      node.__key
+    );
+  }
+
+  constructor(fieldType, fieldValue = '', questionId, key) {
+    super(key);
+    this.__fieldType = fieldType;
+    this.__fieldValue = fieldValue;
+    this.__questionId = questionId;
+  }
+
+  getFieldType() {
+    return this.__fieldType;
+  }
+
+  getFieldValue() {
+    return this.__fieldValue;
+  }
+
+  getQuestionId() {
+    return this.__questionId;
+  }
+
+  setFieldValue(value) {
+    const writable = this.getWritable();
+    writable.__fieldValue = value;
+  }
+
+  createDOM(config) {
+    const dom = document.createElement('div');
+    dom.className = `question-field question-field-${this.__fieldType}`;
+    
+    // Apply field-specific styles
+    if (this.__fieldType === 'hint') {
+      dom.style.fontSize = '0.8125rem';
+      dom.style.fontStyle = 'italic';
+      dom.style.color = '#666';
+    } else {
+      dom.style.fontSize = '0.875rem';
+    }
+    
+    dom.style.padding = '4px 8px';
+    dom.style.minHeight = '1.2rem';
+    dom.style.border = '1px solid transparent';
+    dom.style.borderRadius = '4px';
+    dom.style.margin = '2px 0';
+    
+    return dom;
+  }
+
+  updateDOM(prevNode, dom) {
+    return false;
+  }
+
+  static importJSON(serializedNode) {
+    const { fieldType, fieldValue, questionId } = serializedNode;
+    return new QuestionFieldNode(fieldType, fieldValue, questionId);
+  }
+
+  exportJSON() {
+    return {
+      ...super.exportJSON(),
+      fieldType: this.__fieldType,
+      fieldValue: this.__fieldValue,
+      questionId: this.__questionId,
+      type: 'question-field',
+      version: 1,
+    };
+  }
+
+  getTextContent() {
+    return this.__fieldValue;
+  }
+
+  canBeEmpty() {
+    return true;
+  }
+
+  isInline() {
+    return false;
+  }
+}
+
+function $createQuestionFieldNode(fieldType, fieldValue, questionId) {
+  const node = new QuestionFieldNode(fieldType, fieldValue, questionId);
+  const textNode = $createTextNode(fieldValue || '');
+  node.append(textNode);
+  return node;
+}
+
+function $isQuestionFieldNode(node) {
+  return node instanceof QuestionFieldNode;
+}
+
+// Lexical editor configuration
+function onError(error) {
+  console.error('Lexical editor error:', error);
+}
+
+const initialConfig = {
+  namespace: 'QuestionEditor',
+  theme: {
+    ...LanguageEditorTheme,
+    questionField: {
+      prompt: 'question-field-prompt',
+      hint: 'question-field-hint',
+      answer: 'question-field-answer',
+    },
+  },
+  nodes: [QuestionFieldNode],
+  onError,
+};
+
+// Plugin to manage all question fields in a single editor
+function UnifiedQuestionPlugin({ question, fieldsToShow = ['prompt', 'hint', 'answer'], onSave, sharedHistory }) {
+  const [editor] = useLexicalComposerContext();
+  const [focusedField, setFocusedField] = React.useState(null);
+  const [isEditing, setIsEditing] = React.useState(false);
+  const saveTimeoutRef = React.useRef(null);
+  const currentVersionRef = React.useRef(null);
+  const currentQuestionIdRef = React.useRef(null);
+  const pendingChangesRef = React.useRef(false);
+  
+  // Initialize editor content when question changes
+  React.useEffect(() => {
+    if (!question || isEditing) return;
+
+    // Check if this is a different question or a newer version
+    const questionId = question.id;
+    const questionVersion = question._version;
+    
+    const isDifferentQuestion = currentQuestionIdRef.current !== questionId;
+    const isNewerVersion = questionVersion > (currentVersionRef.current + 1);
+    
+    // Only update if it's a different question or a significantly newer version
+    if (isDifferentQuestion || isNewerVersion) {
+      console.log('Updating editor content:', {
+        questionId,
+        questionVersion,
+        currentVersion: currentVersionRef.current,
+        isDifferentQuestion,
+        isNewerVersion
+      });
+      
+      editor.update(() => {
+        const root = $getRoot();
+        root.clear();
+        
+        // Create field nodes only for requested fields
+        if (fieldsToShow.includes('prompt')) {
+          const promptNode = $createQuestionFieldNode('prompt', question.prompt || '', question.id);
+          root.append(promptNode);
+        }
+        if (fieldsToShow.includes('hint')) {
+          const hintNode = $createQuestionFieldNode('hint', question.hint || '', question.id);
+          root.append(hintNode);
+        }
+        if (fieldsToShow.includes('answer')) {
+          const answerNode = $createQuestionFieldNode('answer', question.answer || '', question.id);
+          root.append(answerNode);
+        }
+      });
+      
+      // Update our version tracking
+      currentVersionRef.current = questionVersion;
+      currentQuestionIdRef.current = questionId;
+    } else {
+      console.log('Skipping editor update - version not newer:', {
+        questionId,
+        questionVersion,
+        currentVersion: currentVersionRef.current
+      });
+    }
+  }, [question, editor, isEditing, fieldsToShow]);
+  
+  // Handle field focus and data synchronization
+  React.useEffect(() => {
+    const handleNodeChange = () => {
+      if (!isEditing) return;
+      
+      editor.getEditorState().read(() => {
+        const root = $getRoot();
+        const children = root.getChildren();
+        
+        const updates = {};
+        children.forEach((child) => {
+          if ($isQuestionFieldNode(child)) {
+            const fieldType = child.getFieldType();
+            // Get text content from child text nodes, not the field node itself
+            let textContent = '';
+            const childNodes = child.getChildren();
+            childNodes.forEach((textNode) => {
+              if ($isTextNode(textNode)) {
+                textContent += textNode.getTextContent();
+              }
+            });
+            updates[fieldType] = textContent;
+          }
+        });
+        
+        // Save all field updates with optimistic version increment
+        if (Object.keys(updates).length > 0) {
+          // Increment version optimistically to prevent stale data overwrites
+          if (currentVersionRef.current !== null) {
+            currentVersionRef.current += 1;
+          }
+          onSave(updates);
+        }
+      });
+    };
+    
+    const handleFocus = () => {
+      setIsEditing(true);
+      // Clear any pending save timeout when user starts editing
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+      }
+    };
+    
+    const handleBlur = () => {
+      setIsEditing(false);
+      
+      // Save immediately on blur if there are pending changes
+      if (pendingChangesRef.current) {
+        // Clear any pending timeout
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+          saveTimeoutRef.current = null;
+        }
+        
+        // Trigger immediate save
+        handleNodeChange();
+        pendingChangesRef.current = false;
+      }
+    };
+
+    // Also set up a debounced save on content change
+    const handleContentChange = () => {
+      if (!isEditing) return;
+      
+      pendingChangesRef.current = true;
+      
+      // Clear existing timeout
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      
+      // Set new timeout to save after 800ms of inactivity
+      saveTimeoutRef.current = setTimeout(() => {
+        handleNodeChange();
+        pendingChangesRef.current = false;
+        saveTimeoutRef.current = null;
+      }, 800);
+    };
+    
+    const removeListener = editor.registerRootListener((rootElement) => {
+      if (rootElement) {
+        rootElement.addEventListener('focus', handleFocus, true);
+        rootElement.addEventListener('blur', handleBlur, true);
+        return () => {
+          rootElement.removeEventListener('focus', handleFocus, true);
+          rootElement.removeEventListener('blur', handleBlur, true);
+        };
+      }
+    });
+
+    // Register content change listener for auto-save
+    const removeUpdateListener = editor.registerUpdateListener(({editorState}) => {
+      handleContentChange();
+    });
+
+    return () => {
+      removeListener();
+      removeUpdateListener();
+      // Clear any pending save timeout when component unmounts
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [editor, isEditing, onSave]);
+  
+  return null;
+}
+
+// Shared history context for unified editing experience
+const SharedHistoryContext = React.createContext();
+
+// Unified question editor component with custom field nodes
+function UnifiedQuestionEditor({ question, searchTerm, fieldsToShow = ['prompt', 'hint', 'answer'], sx = {}, sharedHistory }) {
+  const contentEditableRef = React.useRef(null);
+  const [isEditorFocused, setIsEditorFocused] = React.useState(false);
+  
+  const handleSave = async (updates) => {
+    try {
+      console.log('Saving question updates:', updates);
+      await DataStore.save(
+        Question.copyOf(question, (updated) => {
+          Object.keys(updates).forEach(field => {
+            updated[field] = updates[field];
+          });
+        })
+      );
+      console.log('Question saved successfully');
+    } catch (error) {
+      console.error('Error saving question:', error);
+      // You might want to show a toast notification here
+    }
+  };
+
+  // Check if any field matches the search
+  const hasMatch = searchTerm && (
+    (question?.prompt && question.prompt.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (question?.hint && question.hint.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (question?.answer && question.answer.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+  
+  console.log('UnifiedQuestionEditor - searchTerm:', searchTerm, 'hasMatch:', hasMatch, 'question:', question?.prompt);
+  
+  return (
+    <Box 
+      className="unified-editor-container"
+      ref={contentEditableRef}
+      sx={{
+        border: '1px solid transparent',
+        borderRadius: 1,
+        minHeight: fieldsToShow.length > 1 ? '4rem' : '1.5rem',
+        cursor: 'text',
+        position: 'relative',
+        '&:hover': {
+          border: '1px solid',
+          borderColor: 'divider',
+        },
+        '&:focus-within': {
+          border: '1px solid',
+          borderColor: 'primary.main',
+        },
+        '& .question-field': {
+          margin: '2px 0',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          minHeight: '1.2rem',
+          '&:hover': {
+            backgroundColor: 'rgba(0, 0, 0, 0.02)',
+          },
+          '&:focus-within': {
+            backgroundColor: 'rgba(0, 0, 0, 0.05)',
+            border: '1px solid',
+            borderColor: 'primary.main',
+          },
+        },
+        '& .question-field-prompt': {
+          fontSize: '0.875rem',
+          fontWeight: 500,
+          '&::before': {
+            content: fieldsToShow.length > 1 ? '"Prompt: "' : '""',
+            fontWeight: 600,
+            color: 'text.secondary',
+            fontSize: '0.75rem',
+          },
+        },
+        '& .question-field-hint': {
+          fontSize: '0.8125rem',
+          fontStyle: 'italic',
+          color: 'text.secondary',
+          '&::before': {
+            content: '"Hint: "',
+            fontWeight: 600,
+            color: 'text.secondary',
+            fontSize: '0.75rem',
+          },
+        },
+        '& .question-field-answer': {
+          fontSize: '0.875rem',
+          '&::before': {
+            content: '"Answer: "',
+            fontWeight: 600,
+            color: 'text.secondary',
+            fontSize: '0.75rem',
+          },
+        },
+        ...sx
+      }}
+      onClick={(e) => {
+        const contentEditable = e.currentTarget.querySelector('[contenteditable="true"]');
+        if (contentEditable && !contentEditable.contains(e.target)) {
+          contentEditable.focus();
+          const range = document.caretRangeFromPoint(e.clientX, e.clientY);
+          if (range) {
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+        }
+      }}
+    >
+      <LexicalComposer initialConfig={initialConfig}>
+        <RichTextPlugin
+          contentEditable={
+            <ContentEditable
+              style={{
+                outline: 'none',
+                padding: '8px',
+                minHeight: fieldsToShow.length > 1 ? '4rem' : '1.2rem',
+                cursor: 'text',
+                width: '100%',
+              }}
+              onFocus={() => setIsEditorFocused(true)}
+              onBlur={() => setIsEditorFocused(false)}
+            />
+          }
+          placeholder={
+            <div style={{ 
+              padding: '8px', 
+              color: '#999', 
+              fontSize: '0.875rem', 
+              pointerEvents: 'none' 
+            }}>
+              {fieldsToShow.length > 1 ? 'Click to edit question fields...' : 'Question prompt...'}
+            </div>
+          }
+          ErrorBoundary={LexicalErrorBoundary}
+        />
+        <HistoryPlugin />
+        <UnifiedQuestionPlugin question={question} fieldsToShow={fieldsToShow} onSave={handleSave} sharedHistory={sharedHistory} />
+        {hasMatch && (
+          <SearchHighlightPlugin searchTerm={searchTerm} />
+        )}
+      </LexicalComposer>
+    </Box>
+  );
+}
+
+// Search highlight plugin using Lexical's native text styling
+function SearchHighlightPlugin({ searchTerm }) {
+  const [editor] = useLexicalComposerContext();
+  
+  React.useEffect(() => {
+    if (!searchTerm) {
+      // Clear all highlighting when no search term
+      editor.update(() => {
+        const root = $getRoot();
+        const textNodes = [];
+        
+        // Collect all text nodes
+        function collectTextNodes(node) {
+          if ($isTextNode(node)) {
+            textNodes.push(node);
+          } else if (node.getChildren) {
+            node.getChildren().forEach(collectTextNodes);
+          }
+        }
+        
+        root.getChildren().forEach(collectTextNodes);
+        
+        // Remove highlight formatting from all text nodes
+        textNodes.forEach(textNode => {
+          if (textNode.hasFormat('highlight')) {
+            const selection = $createRangeSelection();
+            selection.setTextNodeRange(textNode, 0, textNode, textNode.getTextContentSize());
+            $setSelection(selection);
+            selection.formatText('highlight');
+          }
+        });
+        
+        $setSelection(null);
+      });
+      return;
+    }
+    
+    // Apply highlighting when there's a search term
+    editor.update(() => {
+      const root = $getRoot();
+      const textNodes = [];
+      
+      // Collect all text nodes
+      function collectTextNodes(node) {
+        if ($isTextNode(node)) {
+          textNodes.push(node);
+        } else if (node.getChildren) {
+          node.getChildren().forEach(collectTextNodes);
+        }
+      }
+      
+      root.getChildren().forEach(collectTextNodes);
+      
+      // Clear previous highlighting first
+      textNodes.forEach(textNode => {
+        if (textNode.hasFormat('highlight')) {
+          const selection = $createRangeSelection();
+          selection.setTextNodeRange(textNode, 0, textNode, textNode.getTextContentSize());
+          $setSelection(selection);
+          selection.formatText('highlight');
+        }
+      });
+      
+      // Apply new highlighting to matching text
+      const searchRegex = new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      
+      textNodes.forEach(textNode => {
+        const text = textNode.getTextContent();
+        let match;
+        
+        while ((match = searchRegex.exec(text)) !== null) {
+          const startOffset = match.index;
+          const endOffset = match.index + match[0].length;
+          
+          const selection = $createRangeSelection();
+          selection.setTextNodeRange(textNode, startOffset, textNode, endOffset);
+          $setSelection(selection);
+          selection.formatText('highlight');
+        }
+      });
+      
+      $setSelection(null);
+    });
+    
+  }, [editor, searchTerm]);
+  
+  return null;
+}
+
+// Legacy QuestionFieldEditor for backwards compatibility during transition
+function QuestionFieldEditor({ question, field, placeholder, searchTerm, sx = {}, sharedHistory }) {
+  // For now, use the unified editor but simulate individual field behavior
+  return <UnifiedQuestionEditor question={question} searchTerm={searchTerm} sx={sx} sharedHistory={sharedHistory} />;
+}
+
+// Helper component to highlight search terms (kept for compatibility)
+function HighlightedText({ text, searchTerm }) {
+  if (!searchTerm || !text) return <>{text}</>;
+  
+  const parts = text.split(new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
+  
+  return (
+    <>
+      {parts.map((part, i) => 
+        part.toLowerCase() === searchTerm.toLowerCase() ? (
+          <Box
+            key={i}
+            component="span"
+            sx={{
+              backgroundColor: 'warning.light',
+              color: 'warning.contrastText',
+              fontWeight: 600,
+              px: 0.5,
+              borderRadius: 0.5,
+            }}
+          >
+            {part}
+          </Box>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
+}
+
+// Wrapper to add highlighting to any text content
+function HighlightWrapper({ children, text, searchTerm }) {
+  if (!searchTerm || !text || !text.toLowerCase().includes(searchTerm.toLowerCase())) {
+    return children;
+  }
+  
+  return (
+    <Box sx={{ position: 'relative' }}>
+      {children}
+      <style jsx>{`
+        :global(.MuiTypography-root) {
+          background: linear-gradient(transparent 60%, rgba(255, 235, 59, 0.3) 60%) !important;
+        }
+      `}</style>
+    </Box>
+  );
+}
 
 function getTextWidth(text) {
   const element = document.createElement('span');
@@ -67,7 +688,7 @@ const deduplicateUrls = (urls) => {
   return newArr;
 }
 
-function QuestionListItem({ entry, i, audioFiles, setPresignedUrl, identityId }) {
+function QuestionListItem({ entry, i, audioFiles, setPresignedUrl, identityId, isExpanded, onToggleExpand, isEvenRow, searchTerm, isSelected, onToggleSelect, sharedHistory }) {
   const [isDragging, setIsDragging] = React.useState(false);
   const [fileOperations, setFileOperations] = React.useState([]);
   const [audioFilesToUpload, setAudioFilesToUpload] = React.useState([]);
@@ -227,17 +848,13 @@ function QuestionListItem({ entry, i, audioFiles, setPresignedUrl, identityId })
 
   console.log('audioFiles', audioFiles);
   console.log('hint', hint);
-  const displayOrEditPrompt = <DisplayOrEditPrompt
-    prompt={prompt}
-    question={entry[1]}
-    hint={hint} />;
-  const displayOrEditHint = <DisplayOrEditHint
-    prompt={prompt}
-    question={entry[1]}
-    hint={hint} />;
-  const displayOrEditAnswer = <DisplayOrEditAnswer
-    question={entry[1]}
-    answer={answer} />;
+  
+  // Check if this question matches the search
+  const matchesSearch = searchTerm && (
+    (prompt && prompt.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (answer && answer.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (hint && hint.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
 
   const hasAudio = audioUrls.length > 0;
@@ -283,72 +900,156 @@ function QuestionListItem({ entry, i, audioFiles, setPresignedUrl, identityId })
       ContainerProps={{
         className: liClassName,
       }}
+      sx={{
+        backgroundColor: isEvenRow ? 'background.paper' : 'grey.50',
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        padding: 0,
+        margin: 0,
+        '&:hover': {
+          backgroundColor: 'action.hover',
+        },
+      }}
       key={i}>
 
-      {isDragging && (
-
-        <div
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onDragLeave={(e) => {
-            console.log('onDragLeavediv');
-            e.preventDefault();
-            e.stopPropagation();
-            setIsDragging(false);
-          }}
-
-
-          style={{
-            color: '#000',
-            fontSize: '2rem',
-            fontWeight: 'bold',
-            textAlign: 'center',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            // height: '100%',
-            zIndex: 100,
-            backgroundColor: 'rgb(255, 255, 255, 0.5)',
-            backdropFilter: 'blur(3px)',
-            textAlign: 'center',
-            verticalAlign: 'middle',
+      {/* Question Header Bar */}
+      <Box
+        sx={{
+          backgroundColor: isEvenRow ? 'grey.100' : 'grey.200',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        {/* Controls Row */}
+        <Box
+          sx={{
             display: 'flex',
-            justifyContent: 'center',
             alignItems: 'center',
-            wrap: 'wrap',
-
+            flexShrink: 1,
+            gap: 0,
+            justifyContent: 'space-between',
+            padding: 1,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            minHeight: 24,
           }}
         >
 
-          {
-            `Upload Ogg Audio for ${prompt} (${hint})`
-          }
+                    <Box sx={{ display: 'flex', gap: 0, alignItems: 'center', flexShrink: 1 }}>
 
-        </div>
-      )}
-      <ListItemText
-        style={{
-          margin: '0 1rem',
-        }}
 
-        primary={displayOrEditPrompt} secondary={displayOrEditAnswer} />
-      <ListItemSecondaryAction>
-        <IconButton
-          color='error'
-          // On click, open modal to confirm delete
-
-          onClick={(e) => {
-            // open modal
-            e.preventDefault();
-            e.stopPropagation();
-
-            confirmDeleteQuestion(entry[1])
+            <Checkbox
+              size="small"
+              checked={isSelected}
+              onChange={(e) => {
+                e.stopPropagation();
+                onToggleSelect();
+              }}
+              sx={{ p: 0.25, flexShrink: 1 }}
+            />
+            <IconButton
+              size="small"
+              title={isExpanded ? 'Collapse' : 'Expand'}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleExpand(!isExpanded);
+              }}
+              sx={{ paddingLeft: 1, flexShrink: 1 }}
+            >
+              {!isExpanded ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
+            </IconButton>
+          </Box>
+          
+          <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', flexShrink: 0 }}>
+            {hasAudio && (
+              <Typography variant="caption" color="primary.main">
+                🎵 Audio
+              </Typography>
+            )}
+          </Box>
+        </Box>
+        
+        {/* Title Row */}
+        <Box
+          sx={{
+            px: 2,
+            py: 1,
+            cursor: 'text',
           }}
-          edge="end" aria-label="delete">
-          <DeleteIcon />
-        </IconButton>
-      </ListItemSecondaryAction>
+          onClick={(e) => {
+            // Check if click was on the editor content area
+            const isEditorClick = e.target.closest('[contenteditable="true"]') || 
+                                 e.target.closest('.editor-container');
+            
+            if (!isEditorClick && !isExpanded) {
+              // Only expand if click was not on editor and not already expanded
+              onToggleExpand(!isExpanded);
+            }
+            // Don't stop propagation - allow editor to handle its own clicks
+          }}
+        >
+          <UnifiedQuestionEditor 
+            question={entry[1]} 
+            fieldsToShow={['prompt']}
+            searchTerm={searchTerm}
+            sharedHistory={sharedHistory}
+            sx={{
+              border: 'none',
+              '&:hover': { border: 'none' },
+              '&:focus-within': { border: 'none' },
+            }}
+          />
+        </Box>
+      </Box>
+
+      {/* Question Content */}
+      {isExpanded && (
+        <Box sx={{ px: 2, py: 1.5, width: '100%' }}>
+          {isDragging && (
+          <div
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onDragLeave={(e) => {
+              console.log('onDragLeavediv');
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragging(false);
+            }}
+            style={{
+              color: '#000',
+              fontSize: '2rem',
+              fontWeight: 'bold',
+              textAlign: 'center',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              zIndex: 100,
+              backgroundColor: 'rgb(255, 255, 255, 0.5)',
+              backdropFilter: 'blur(3px)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
+            {`Upload Ogg Audio for ${prompt} (${hint})`}
+          </div>
+        )}
+        
+        {/* Unified editor for all fields when expanded */}
+        {isExpanded && (
+          <Box sx={{ mb: 1 }}>
+            <UnifiedQuestionEditor 
+              question={entry[1]} 
+              fieldsToShow={['hint', 'answer']}
+              searchTerm={searchTerm}
+              sharedHistory={sharedHistory}
+            />
+          </Box>
+        )}
+      </Box>
+      )}
     </ListItem>
     
 
@@ -482,6 +1183,11 @@ export function QuestionEditor() {
 
   const [open, setOpen] = React.useState(false);
   const [isHelpOpen, setHelpOpen] = React.useState(false);
+  const [expandedItems, setExpandedItems] = React.useState(new Set());
+  const [filteredQuestionBank, setFilteredQuestionBank] = React.useState(null);
+  const [selectedItems, setSelectedItems] = React.useState(new Set());
+  const [contextMenu, setContextMenu] = React.useState(null);
+  const [sharedHistoryState, setSharedHistoryState] = React.useState(new Map());
 
   const theme = useTheme();
   const mainColor = theme.palette.primary.main;
@@ -515,6 +1221,7 @@ export function QuestionEditor() {
   } = React.useContext(DictionaryContext);
 
   const { audioFiles, refreshAudioFiles, session } = React.useContext(FilesContext);
+  const { editorRef } = React.useContext(UnitContext) || {};
   const {
     identityId,
     idToken
@@ -794,6 +1501,47 @@ export function QuestionEditor() {
     setNewQuestionFormOpen(!newQuestionFormOpen);
   };
 
+  // Filter questions based on search term
+  React.useEffect(() => {
+    if (!questionBank) {
+      setFilteredQuestionBank(null);
+      return;
+    }
+
+    if (!search || search.trim() === '') {
+      setFilteredQuestionBank(questionBank);
+      return;
+    }
+
+    const searchLower = search.toLowerCase();
+    const filtered = {};
+    const matchingIds = new Set();
+
+    Object.entries(questionBank).forEach(([key, question]) => {
+      const prompt = question.prompt || '';
+      const answer = question.answer || '';
+      const hint = question.hint || '';
+
+      if (
+        prompt.toLowerCase().includes(searchLower) ||
+        answer.toLowerCase().includes(searchLower) ||
+        hint.toLowerCase().includes(searchLower)
+      ) {
+        filtered[key] = question;
+        matchingIds.add(key);
+      }
+    });
+
+    setFilteredQuestionBank(filtered);
+    
+    // Auto-expand questions that match the search but aren't expanded
+    setExpandedItems(prev => {
+      const newSet = new Set(prev);
+      matchingIds.forEach(id => newSet.add(id));
+      return newSet;
+    });
+  }, [search, questionBank]);
+
   const handleFileClick = () => {
     console.log('clicked');
     fileInput.current.click();
@@ -826,8 +1574,99 @@ export function QuestionEditor() {
 
 
 
+  const handleBulkDelete = async () => {
+    const confirmed = window.confirm(`Are you sure you want to delete ${selectedItems.size} question(s)?`);
+    if (!confirmed) return;
+
+    try {
+      const deletePromises = Array.from(selectedItems).map(async (questionId) => {
+        const question = filteredQuestionBank[questionId];
+        if (question) {
+          await DataStore.delete(question);
+        }
+      });
+      await Promise.all(deletePromises);
+      setSelectedItems(new Set());
+      setContextMenu(null);
+    } catch (error) {
+      console.error('Error deleting questions:', error);
+    }
+  };
+
+  const handleInsertCustomAnswer = async () => {
+    const questionIds = Array.from(selectedItems);
+    
+    if (editorRef && editorRef.current) {
+      // If we have editor access, dispatch command to insert/append custom answer block
+      const { INSERT_CUSTOM_ANSWER_BLOCK_COMMAND } = await import('./Editor3/plugins/CustomAnswerPlugin');
+      
+      // Dispatch the command (plugin will handle append vs create logic)
+      editorRef.current.dispatchCommand(INSERT_CUSTOM_ANSWER_BLOCK_COMMAND, questionIds);
+      
+      setSelectedItems(new Set());
+      setContextMenu(null);
+    } else {
+      // Fallback: Just log a message if editor not available
+      console.log('Would insert/append custom answer block with question IDs:', questionIds);
+      alert(`Custom Answer block would be created/updated with ${questionIds.length} questions. Editor context not available in this view.`);
+      setSelectedItems(new Set());
+      setContextMenu(null);
+    }
+  };
+
+  const handleContextMenuClose = () => {
+    setContextMenu(null);
+  };
+
+  const handleExpandAll = () => {
+    if (filteredQuestionBank) {
+      const allIds = Object.keys(filteredQuestionBank);
+      setExpandedItems(new Set(allIds));
+    }
+  };
+
+  const handleCollapseAll = () => {
+    setExpandedItems(new Set());
+  };
+
+  const handleSelectAll = () => {
+    if (filteredQuestionBank) {
+      const allIds = Object.keys(filteredQuestionBank);
+      setSelectedItems(new Set(allIds));
+    }
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedItems(new Set());
+  };
+
   return (
     <>
+        <Menu
+          open={contextMenu !== null}
+          onClose={handleContextMenuClose}
+          anchorReference="anchorPosition"
+          anchorPosition={
+            contextMenu !== null
+              ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+              : undefined
+          }
+        >
+          <MenuItem disabled>
+            <Typography variant="caption" color="text.secondary">
+              {selectedItems.size} selected
+            </Typography>
+          </MenuItem>
+          <Divider />
+          <MenuItem onClick={handleBulkDelete}>
+            <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+            Delete Selected
+          </MenuItem>
+          <MenuItem onClick={handleInsertCustomAnswer}>
+            Add to Custom Answer Block
+          </MenuItem>
+        </Menu>
+
         <Box
           style={{
             display: 'flex',
@@ -866,12 +1705,12 @@ export function QuestionEditor() {
         <Box
           sx={{
             display: 'flex',
+            flexShrink: 1,
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
-            gap: 1,
-            px: 1,
-            py: 1,
+            gap: 0,
+            padding: 1,
             position: 'sticky',
             top: 0,
             bgcolor: 'background.paper',
@@ -879,6 +1718,39 @@ export function QuestionEditor() {
             zIndex: 1,
           }}
         >
+          {/* Left side controls */}
+          <Box sx={{ display: 'flex', gap: 0, alignItems: 'center', flexShrink: 1 }}>
+
+            <Tooltip title="Select All">
+              <Checkbox
+                size="small"
+                checked={filteredQuestionBank && Object.keys(filteredQuestionBank).length > 0 && selectedItems.size === Object.keys(filteredQuestionBank).length}
+                indeterminate={selectedItems.size > 0 && selectedItems.size < Object.keys(filteredQuestionBank || {}).length}
+                onChange={(e) => {
+                  if (selectedItems.size === Object.keys(filteredQuestionBank || {}).length) {
+                    handleDeselectAll();
+                  } else {
+                    handleSelectAll();
+                  }
+                }}
+                disabled={!filteredQuestionBank || Object.keys(filteredQuestionBank).length === 0}
+                sx={{ p: 0.25 }}
+              />
+            </Tooltip>
+
+            <Tooltip title={expandedItems.size === 0 ? "Expand All" : "Collapse All"}>
+              <IconButton
+                size="small"
+                onClick={expandedItems.size === 0 ? handleExpandAll : handleCollapseAll}
+                disabled={!filteredQuestionBank || Object.keys(filteredQuestionBank).length === 0}
+              >
+                {expandedItems.size === 0 ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
+              </IconButton>
+            </Tooltip>
+            
+
+          </Box>
+
           <TextField
             value={search}
             onInput={handleSearch}
@@ -890,25 +1762,24 @@ export function QuestionEditor() {
             label="Search"
             />
 
-          {searching &&
-
-            <IconButton size="small" aria-label="cancel searching dictionary" onClick={doNothing} disabled>
-              <CircularProgress size={20} />
+          <Tooltip title="New Question">
+            <IconButton
+              onClick={toggleNewQuestionFormOpen}
+              color="primary"
+              size="small"
+            >
+              <Description />
             </IconButton>
-
-          }
-          {!searching &&
-            <IconButton size="small" aria-label="search dictionary" onClick={doNothing} disabled>
-              <SearchIcon />
+          </Tooltip>
+          <Tooltip title="Actions">
+            <IconButton
+              onClick={(e) => setContextMenu(contextMenu ? null : { mouseX: e.clientX, mouseY: e.clientY })}
+              size="small"
+              disabled={selectedItems.size === 0}
+            >
+              <MoreVertIcon />
             </IconButton>
-          }
-          <Button
-            onClick={toggleNewQuestionFormOpen}
-            variant="contained"
-            size="small"
-          >
-            <NewFileIcon fontSize="small"/>&nbsp;New
-          </Button>
+          </Tooltip>
 
         </Box>
         
@@ -1071,17 +1942,15 @@ export function QuestionEditor() {
           </DialogContent>
         </Dialog>
 
+
+
         <List
           className='dictionary-list'
           style={{
-            // width: '100%',
-            // margin: '1rem',
-            // maxHeight: '70%',
-            // display: 'flex',
-            // minHeight: '71vh',
-            // minHeight: "70%",
             overflowY: 'auto',
             overflowX: 'hidden',
+            padding: 0,
+            margin: 0,
           }}
         >
 
@@ -1099,14 +1968,37 @@ export function QuestionEditor() {
           }
           `}</style>
 
-          {questionBank && Object.keys(questionBank).length > 0 &&
-            Object.entries(questionBank).map((entry, i) => <QuestionListItem
+          {filteredQuestionBank && Object.keys(filteredQuestionBank).length > 0 &&
+            Object.entries(filteredQuestionBank).map((entry, i) => <QuestionListItem
               key={entry[0]}
               audioFiles={audioFiles}
               entry={entry} i={i}
               setPresignedUrl={_setPresignedUrl}
               refreshAudioFiles={refreshAudioFiles}
               identityId={identityId}
+              isExpanded={expandedItems.has(entry[0])}
+              onToggleExpand={(expanded) => {
+                const newSet = new Set(expandedItems);
+                if (expanded) {
+                  newSet.add(entry[0]);
+                } else {
+                  newSet.delete(entry[0]);
+                }
+                setExpandedItems(newSet);
+              }}
+              isEvenRow={i % 2 === 0}
+              searchTerm={search}
+              isSelected={selectedItems.has(entry[0])}
+              onToggleSelect={() => {
+                const newSet = new Set(selectedItems);
+                if (newSet.has(entry[0])) {
+                  newSet.delete(entry[0]);
+                } else {
+                  newSet.add(entry[0]);
+                }
+                setSelectedItems(newSet);
+              }}
+              sharedHistory={sharedHistoryState}
             />)}
 
         </List>

@@ -170,6 +170,14 @@ export class ImageNode extends DecoratorNode {
         return false;
     }
 
+    isKeyboardSelectable() {
+        return true;
+    }
+
+    canBeEmpty() {
+        return true;
+    }
+
     getSrc() {
         return this.__src;
     }

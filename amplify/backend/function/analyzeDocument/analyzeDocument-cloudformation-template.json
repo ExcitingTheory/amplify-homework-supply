@@ -204,7 +204,7 @@
         },
         "Runtime": "nodejs22.x",
         "Layers": [],
-        "Timeout": 25
+        "Timeout": 300
       }
     },
     "LambdaExecutionRole": {
@@ -572,6 +572,16 @@
                   ]
                 }
               ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": "lambda:InvokeFunction",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "LambdaFunction",
+                  "Arn"
+                ]
+              }
             }
           ]
         }

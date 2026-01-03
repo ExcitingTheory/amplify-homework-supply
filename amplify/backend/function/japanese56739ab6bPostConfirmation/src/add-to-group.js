@@ -11,12 +11,21 @@ const cognitoIdentityServiceProvider = new CognitoIdentityProviderClient({});
  * @type {import('@types/aws-lambda').PostConfirmationTriggerHandler}
  */
 exports.handler = async (event) => {
+  // Use Learners as default group if GROUP env var is not set
+  const groupName = process.env.GROUP || 'Learners';
+  
+  // Skip group assignment if groupName is empty
+  if (!groupName || groupName.trim() === '') {
+    console.log('No group name specified, skipping group assignment');
+    return event;
+  }
+  
   const groupParams = {
-    GroupName: process.env.GROUP,
+    GroupName: groupName,
     UserPoolId: event.userPoolId,
   };
   const addUserParams = {
-    GroupName: process.env.GROUP,
+    GroupName: groupName,
     UserPoolId: event.userPoolId,
     Username: event.userName,
   };

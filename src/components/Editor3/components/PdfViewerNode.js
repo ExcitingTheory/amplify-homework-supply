@@ -132,6 +132,14 @@ export class PdfViewerNode extends DecoratorNode {
         return false;
     }
 
+    isKeyboardSelectable() {
+        return true;
+    }
+
+    canBeEmpty() {
+        return true;
+    }
+
     isIsolated() {
         return true;
     }

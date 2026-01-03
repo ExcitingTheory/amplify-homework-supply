@@ -89,11 +89,11 @@
         },
         "getStudentSubmission": {
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/getStudentSubmission-777a755552394b635a36-build.zip"
+          "s3Key": "amplify-builds/getStudentSubmission-355957696c726b347556-build.zip"
         },
         "japanese56739ab6bPostConfirmation": {
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/japanese56739ab6bPostConfirmation-53412b415a5575496c49-build.zip"
+          "s3Key": "amplify-builds/japanese56739ab6bPostConfirmation-6d2b6d726450546a446f-build.zip"
         },
         "manageSection": {
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
@@ -116,7 +116,7 @@
         "analyzeDocument": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/analyzeDocument-4434596a454b75725148-build.zip"
+          "s3Key": "amplify-builds/analyzeDocument-56394174453842754469-build.zip"
         },
         "analyzePdf": {}
       },
