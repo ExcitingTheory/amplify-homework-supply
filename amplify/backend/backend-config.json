@@ -164,6 +164,43 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "generateEmbedding": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "japanese5"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "generateEmbeddings": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "japanese5"
+        },
+        {
+          "attributes": [
+            "BucketName"
+          ],
+          "category": "storage",
+          "resourceName": "files"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "getStudentSubmission": {
       "build": true,
       "dependsOn": [
@@ -321,6 +358,54 @@
         {
           "category": "function",
           "resourceName": "editorChat"
+        }
+      ]
+    },
+    "AMPLIFY_function_generateEmbedding_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "generateEmbedding"
+        }
+      ]
+    },
+    "AMPLIFY_function_generateEmbedding_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "generateEmbedding"
+        }
+      ]
+    },
+    "AMPLIFY_function_generateEmbedding_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "generateEmbedding"
+        }
+      ]
+    },
+    "AMPLIFY_function_generateEmbeddings_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "generateEmbeddings"
+        }
+      ]
+    },
+    "AMPLIFY_function_generateEmbeddings_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "generateEmbeddings"
+        }
+      ]
+    },
+    "AMPLIFY_function_generateEmbeddings_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "generateEmbeddings"
         }
       ]
     },

@@ -116,9 +116,19 @@
         "analyzeDocument": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/analyzeDocument-56394174453842754469-build.zip"
+          "s3Key": "amplify-builds/analyzeDocument-5166425a4a5048525250-build.zip"
         },
-        "analyzePdf": {}
+        "analyzePdf": {},
+        "generateEmbeddings": {
+          "secretsPathAmplifyAppId": "d29i5pr81uhal1",
+          "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
+          "s3Key": "amplify-builds/generateEmbeddings-77325845535a4c4b674e-build.zip"
+        },
+        "generateEmbedding": {
+          "secretsPathAmplifyAppId": "d29i5pr81uhal1",
+          "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
+          "s3Key": "amplify-builds/generateEmbedding-367a38584c5678433843-build.zip"
+        }
       },
       "api": {
         "AdminQueries": {},

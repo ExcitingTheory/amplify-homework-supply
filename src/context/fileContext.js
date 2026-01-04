@@ -32,6 +32,7 @@ const FilesProvider = ({ children }) => {
   const [myPlaylistFiles, setMyPlaylistFiles] = React.useState({})
   const [myPlaylistUrls, setMyPlaylistUrls] = React.useState({})
   const [myPdfs, setMyPdfs] = React.useState({})
+  const [filesVersion, setFilesVersion] = React.useState(0);
 
   const [session, setSession] = React.useState({
     error: undefined,
@@ -176,7 +177,11 @@ const FilesProvider = ({ children }) => {
           setMyFiles(prev => {
             const prevStr = JSON.stringify(prev);
             const newStr = JSON.stringify(items);
-            return prevStr === newStr ? prev : items;
+            if (prevStr !== newStr) {
+              setFilesVersion(v => v + 1);
+              return items;
+            }
+            return prev;
           });
         });
       } catch (error) {
@@ -219,7 +224,8 @@ const FilesProvider = ({ children }) => {
     myPlaylistFiles,
     myPlaylistUrls,
     myPdfs,
-    session
+    session,
+    filesVersion
   }), [
     audioFiles,
     myFiles,
@@ -227,6 +233,7 @@ const FilesProvider = ({ children }) => {
     myPlaylistUrls,
     myPdfs,
     session,
+    filesVersion
   ]);
 
   return (

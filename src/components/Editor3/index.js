@@ -107,6 +107,9 @@ import CustomAnswerPlugin, { CustomAnswerNode } from './plugins/CustomAnswerPlug
 import { DataStore } from 'aws-amplify/datastore';
 import { Unit } from '../../models';
 
+// FileMetadata node imports
+import { FileMetadataNode } from './nodes/FileMetadataNode';
+
 
 export const EditorNodes = [
   HeadingNode,
@@ -134,6 +137,7 @@ export const EditorNodes = [
   LayoutItemNode,
   AnswerNode,
   CustomAnswerNode,
+  FileMetadataNode,
 ];
 
 // Catch any errors that occur during Lexical updates and log them
@@ -159,12 +163,12 @@ function debounce(func, timeout = DEBOUNCE_SAVE_DELAY_MS) {
 function MyOnChangePlugin({ onChange }) {
   const [editor] = useLexicalComposerContext();
   const throttledOnChange = useRef(null);
-  
+
   // Create a throttled version of onChange to prevent excessive calls
   useEffect(() => {
     let lastCall = 0;
     const THROTTLE_MS = 100; // Limit to max 10 calls per second
-    
+
     throttledOnChange.current = (editorState, tags) => {
       const now = Date.now();
       if (now - lastCall >= THROTTLE_MS) {
@@ -173,7 +177,7 @@ function MyOnChangePlugin({ onChange }) {
       }
     };
   }, [editor, onChange]);
-  
+
   useEffect(() => {
     return editor.registerUpdateListener(({ editorState, tags }) => {
       if (throttledOnChange.current) {
@@ -188,13 +192,13 @@ function MyOnChangePlugin({ onChange }) {
 function EditorRefPlugin() {
   const [editor] = useLexicalComposerContext();
   const { editorRef } = useContext(UnitContext);
-  
+
   useEffect(() => {
     if (editorRef) {
       editorRef.current = editor;
     }
   }, [editor, editorRef]);
-  
+
   return null;
 }
 
@@ -295,9 +299,9 @@ export default function Editor() {
           }
         }
       });
-      
+
       resizeObserver.observe(drawerRef.current);
-      
+
       return () => {
         resizeObserver.disconnect();
       };
@@ -315,7 +319,7 @@ export default function Editor() {
 
     measureToolbarHeight();
     window.addEventListener('resize', measureToolbarHeight);
-    
+
     return () => {
       window.removeEventListener('resize', measureToolbarHeight);
     };
@@ -335,11 +339,11 @@ export default function Editor() {
   };
 
   const initialConfig = {
-  namespace: 'LanguageEditor',
-  nodes: [...EditorNodes],
-  theme: LanguageEditorTheme,
-  onError,
-};
+    namespace: 'LanguageEditor',
+    nodes: [...EditorNodes],
+    theme: LanguageEditorTheme,
+    onError,
+  };
 
   // Create debounced save function with stable reference
   const debouncedSaveTimer = useRef(null);
@@ -354,25 +358,25 @@ export default function Editor() {
 
   const onChange = useCallback(async (editorState, editor, tags) => {
     // Skip saves for DataPlugin updates and history operations (undo/redo)
-    if (tags && (tags.has(DATASTORE_UPDATE_TAG) || tags.has(HISTORY_MERGE_TAG) || tags.has(INITIAL_LOAD_TAG) || 
-                 tags.has(HISTORIC_TAG) || tags.has(HISTORY_PUSH_TAG))) {
+    if (tags && (tags.has(DATASTORE_UPDATE_TAG) || tags.has(HISTORY_MERGE_TAG) || tags.has(INITIAL_LOAD_TAG) ||
+      tags.has(HISTORIC_TAG) || tags.has(HISTORY_PUSH_TAG))) {
       return;
     }
-    
+
     // Get the current state as JSON string for comparison
     const newStateJSON = JSON.stringify(editorState.toJSON());
     const currentStateJSON = JSON.stringify(editorStateRef.current);
-    
+
     // Skip if the state hasn't actually changed
     if (newStateJSON === currentStateJSON) {
       return;
     }
-    
+
     console.log('[Editor onChange] State changed, saving');
-    
+
     // Update local state immediately (not debounced)
     editorStateRef.current = editorState.toJSON();
-    
+
     // Debounce the save to DataStore
     debouncedSave();
   }, [debouncedSave, editorStateRef]);
@@ -391,9 +395,9 @@ export default function Editor() {
     <DndWrapper>
       <AutocompleteProvider>
         <LexicalComposer
-            initialConfig={initialConfig}
-          >
-            <style jsx global>{`
+          initialConfig={initialConfig}
+        >
+          <style jsx global>{`
             .layout-container {
               display: grid;
             }
@@ -411,98 +415,98 @@ export default function Editor() {
 
             
         `}</style>
-            <AutoFocusPlugin />
-            <CheckListPlugin />
-            <ClearEditorPlugin />
-            <HashtagPlugin />
-            <HistoryPlugin />
-            <HorizontalRulePlugin />
-            <ListPlugin />
-            <TabIndentationPlugin />
-            <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-            <TablePlugin />
-            <WordBlockPlugin />
-            <QuizPlugin />
-            <DataPlugin />
-            <MeaningAssociationPlugin />
-            <PlaylistPlugin />
-            <PdfViewerPlugin />
-            <AutocompletePlugin />
-            <DragDropPastePlugin />
-            <ImagesPlugin />
-            <LayoutPlugin />
-            <AnswerPlugin />
-            <CustomAnswerPlugin />
-            <LinkPlugin />
-            <AutoLinkPlugin />
-            <YouTubePlugin />
-            <EditorRefPlugin />
-            {!floatingAnchorElem ? null : (
-              <>
-                <FloatingLinkEditorPlugin
-                  anchorElem={floatingAnchorElem}
-                  isSidebarOpen={openTab}
-                  appBarHeight={toolbarHeight}
-                />
-
-                <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
-              </>
-            )}
-
-
-
-
-            <Box sx={{
-              display: 'flex',
-              overflow: 'hidden',
-            }}>
-              <ToolBarPlugin
-                ref={toolbarRef}
-                setOpen={setOpenTab}
-                open={openTab}
-                setTabValue={setTabValue}
+          <AutoFocusPlugin />
+          <CheckListPlugin />
+          <ClearEditorPlugin />
+          <HashtagPlugin />
+          <HistoryPlugin />
+          <HorizontalRulePlugin />
+          <ListPlugin />
+          <TabIndentationPlugin />
+          <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+          <TablePlugin />
+          <WordBlockPlugin />
+          <QuizPlugin />
+          <DataPlugin />
+          <MeaningAssociationPlugin />
+          <PlaylistPlugin />
+          <PdfViewerPlugin />
+          <AutocompletePlugin />
+          <DragDropPastePlugin />
+          <ImagesPlugin />
+          <LayoutPlugin />
+          <AnswerPlugin />
+          <CustomAnswerPlugin />
+          <LinkPlugin />
+          <AutoLinkPlugin />
+          <YouTubePlugin />
+          <EditorRefPlugin />
+          {!floatingAnchorElem ? null : (
+            <>
+              <FloatingLinkEditorPlugin
+                anchorElem={floatingAnchorElem}
+                isSidebarOpen={openTab}
+                appBarHeight={toolbarHeight}
               />
-              <Drawer
-                ref={drawerRef}
-                sx={{
-                  height: '100%',
-                  '& .MuiDrawer-paper': {
-                    position: 'relative',
-                    resize: openTab ? 'horizontal' : 'none',
-                    overflow: openTab ? 'auto' : 'hidden',
-                    minWidth: openTab ? '300px' : '2.5rem',
-                    maxWidth: openTab ? '600px' : '2.5rem',
-                    borderRight: 'none',
-                  }
+
+              <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+            </>
+          )}
+
+
+
+
+          <Box sx={{
+            display: 'flex',
+            overflow: 'hidden',
+          }}>
+            <ToolBarPlugin
+              ref={toolbarRef}
+              setOpen={setOpenTab}
+              open={openTab}
+              setTabValue={setTabValue}
+            />
+            <Drawer
+              ref={drawerRef}
+              sx={{
+                height: '100%',
+                '& .MuiDrawer-paper': {
+                  position: 'relative',
+                  resize: openTab ? 'horizontal' : 'none',
+                  overflow: openTab ? 'auto' : 'hidden',
+                  minWidth: openTab ? '300px' : '2.5rem',
+                  maxWidth: openTab ? '600px' : '2.5rem',
+                  borderRight: 'none',
+                }
+              }}
+              variant="permanent" open={openTab}>
+              <DrawerHeader
+                style={{
+                  height: 'var(--app-bar-height, 11rem)',
+                  // backgroundColor: '#fafafa',
                 }}
-                variant="permanent" open={openTab}>
-                <DrawerHeader
-                  style={{
-                    height: 'var(--app-bar-height, 11rem)',
-                    // backgroundColor: '#fafafa',
-                  }}
-                >
-                  <IconButton onClick={handleDrawerClose}>
-                    {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-                  </IconButton>
-                </DrawerHeader>
-                <VerticalTabs
-                  setOpen={setOpenTab}
-                  value={tabValue}
-                  setValue={setTabValue}
-                />
-              </Drawer>
-              <Box component="main" sx={{ 
-                flexGrow: 1, 
-                padding: 0,
-                width: openTab ? `calc(100% - ${actualDrawerWidth}px)` : 'calc(100% - 2.5rem)',
-                transition: 'width 0.3s ease',
-              }}>
-                <DrawerHeader
-                  style={{
-                    height: 'var(--app-bar-height, 11rem)',
-                  }}
-                />
+              >
+                <IconButton onClick={handleDrawerClose}>
+                  {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                </IconButton>
+              </DrawerHeader>
+              <VerticalTabs
+                setOpen={setOpenTab}
+                value={tabValue}
+                setValue={setTabValue}
+              />
+            </Drawer>
+            <Box component="main" sx={{
+              flexGrow: 1,
+              padding: 0,
+              width: openTab ? `calc(100% - ${actualDrawerWidth}px)` : 'calc(100% - 2.5rem)',
+              transition: 'width 0.3s ease',
+            }}>
+              <DrawerHeader
+                style={{
+                  height: 'var(--app-bar-height, 11rem)',
+                }}
+              />
               <div ref={onRef} style={{ position: 'relative' }}>
                 <RichTextPlugin
                   contentEditable={
@@ -523,10 +527,10 @@ export default function Editor() {
                 />
                 <MyOnChangePlugin onChange={onChange} />
               </div>
-              </Box>
             </Box>
+          </Box>
 
-          </LexicalComposer>
+        </LexicalComposer>
       </AutocompleteProvider>
     </DndWrapper>
   );
@@ -559,9 +563,9 @@ export function Workbook() {
           }
         }
       });
-      
+
       resizeObserver.observe(drawerRef.current);
-      
+
       return () => {
         resizeObserver.disconnect();
       };
@@ -588,9 +592,9 @@ export function Workbook() {
     <DndWrapper>
       <AutocompleteProvider>
         <LexicalComposer
-            initialConfig={initialConfig}
-          >
-            <style jsx global>{`
+          initialConfig={initialConfig}
+        >
+          <style jsx global>{`
           .layout-container {
             display: grid;
           }
@@ -600,107 +604,107 @@ export function Workbook() {
             padding: 0.25rem;
           }
         `}</style>
-            <AutoFocusPlugin />
-            <CheckListPlugin />
-            <HashtagPlugin />
-            <HorizontalRulePlugin />
-            <ListPlugin />
-            <TabIndentationPlugin />
-            <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-            <TablePlugin />
-            <LexicalClickableLinkPlugin />
-            <YouTubePlugin />
-            <WordBlockPlugin />
-            <QuizPlugin />
-            <DataPlugin />
-            <StoryProgressPlugin />
-            <MeaningAssociationPlugin />
-            <PlaylistPlugin />
-            <PdfViewerPlugin />
-            <ImagesPlugin />
-            <QuizPlugin />
-            <UnitCompletedPlugin />
+          <AutoFocusPlugin />
+          <CheckListPlugin />
+          <HashtagPlugin />
+          <HorizontalRulePlugin />
+          <ListPlugin />
+          <TabIndentationPlugin />
+          <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+          <TablePlugin />
+          <LexicalClickableLinkPlugin />
+          <YouTubePlugin />
+          <WordBlockPlugin />
+          <QuizPlugin />
+          <DataPlugin />
+          <StoryProgressPlugin />
+          <MeaningAssociationPlugin />
+          <PlaylistPlugin />
+          <PdfViewerPlugin />
+          <ImagesPlugin />
+          <QuizPlugin />
+          <UnitCompletedPlugin />
 
-            <Box sx={{
-              display: 'flex',
-              overflow: 'hidden',
-            }}>
+          <Box sx={{
+            display: 'flex',
+            overflow: 'hidden',
+          }}>
+
+            {
+              // Replace with read only toolbar
+            }
+            <ToolBarRoPlugin
+              setOpen={setOpenTab}
+              open={openTab}
+              setTabValue={setTabValue}
+            />
+            <Drawer
+              ref={drawerRef}
+              sx={{
+                height: '100%',
+
+              }}
+              variant="permanent" open={openTab}>
+              <DrawerHeader
+                style={{
+                  minHeight: '11rem',
+                  // backgroundColor: '#fafafa',
+                }}
+              >
+
+              </DrawerHeader>
 
               {
-                // Replace with read only toolbar
+                // Replace with read only tabs
               }
-              <ToolBarRoPlugin
+              <VerticalTabsRo
                 setOpen={setOpenTab}
-                open={openTab}
-                setTabValue={setTabValue}
+                value={tabValue}
+                setValue={setTabValue}
               />
-              <Drawer
-                ref={drawerRef}
-                sx={{
-                  height: '100%',
-
+            </Drawer>
+            <Box component="main" sx={{
+              flexGrow: 1,
+              flexShrink: 1,
+              minWidth: 0,
+              margin: 0,
+              padding: 0,
+              boxSizing: 'border-box',
+            }}>
+              <DrawerHeader
+                style={{
+                  minHeight: '11rem',
                 }}
-                variant="permanent" open={openTab}>
-                <DrawerHeader
-                  style={{
-                    minHeight: '11rem',
-                    // backgroundColor: '#fafafa',
-                  }}
-                >
+              />
 
-                </DrawerHeader>
-
-                {
-                  // Replace with read only tabs
-                }
-                <VerticalTabsRo
-                  setOpen={setOpenTab}
-                  value={tabValue}
-                  setValue={setTabValue}
-                />
-              </Drawer>
-              <Box component="main" sx={{ 
-                flexGrow: 1,
-                flexShrink: 1,
-                minWidth: 0,
-                margin: 0,
-                padding: 0,
-                boxSizing: 'border-box',
-              }}>
-                <DrawerHeader
-                  style={{
-                    minHeight: '11rem',
-                  }}
-                />
-
-                <RichTextPlugin
-                  contentEditable={
-                    <div className="editor"
+              <RichTextPlugin
+                contentEditable={
+                  <div className="editor"
+                    style={{
+                      margin: '0',
+                      padding: '0',
+                      height: 'calc(100vh - 11rem)',
+                      overflowY: 'auto',
+                    }}
+                  >
+                    <ContentEditable
                       style={{
-                        margin: '0',
-                        padding: '0',
-                        height: 'calc(100vh - 11rem)',
-                        overflowY: 'auto',
+                        width: '100%',
+                        maxWidth: '100%',
                       }}
-                    >
-                      <ContentEditable
-                        style={{
-                          width: '100%',
-                          maxWidth: '100%',
-                        }}
-                      />
-                    </div>
-                  }
-                  placeholder=""
-                  ErrorBoundary={LexicalErrorBoundary}
-                />
+                    />
+                  </div>
+                }
+                placeholder=""
+                ErrorBoundary={LexicalErrorBoundary}
+              />
 
-              </Box>
             </Box>
+          </Box>
 
-          </LexicalComposer>
-        </AutocompleteProvider>
-      </DndWrapper>
-    );
+        </LexicalComposer>
+      </AutocompleteProvider>
+    </DndWrapper>
+  );
 }
 

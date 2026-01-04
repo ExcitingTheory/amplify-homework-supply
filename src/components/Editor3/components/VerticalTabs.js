@@ -3,9 +3,10 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-
-import { DictionaryEditor } from '../../DictionaryEditor';
-import { QuestionEditor } from '../../QuestionEditor';
+import FileManager2 from '../components/FileManager2';
+import { DictionaryEditor2 } from '../../DictionaryEditor2';
+import { QuestionEditor2 } from '../../QuestionEditor2';
+import { AudioPlayerProvider } from '../context/AudioPlayerContext';
 
 import ChatSidebar from '../../ChatSidebar';
 import TableOfContents from './TableOfContents';
@@ -120,7 +121,7 @@ export default function VerticalTabs({
           onClick={() => {
             setOpen(true);
           }}
-          label={<QuestionMarkOutlined />} {...a11yProps('Questions')} />
+          label={<QuestionMarkOutlined />} {...a11yProps('Questions')} overflow="hidden" />
         <Tab
           onClick={() => {
             setOpen(true);
@@ -147,13 +148,15 @@ export default function VerticalTabs({
         <TableOfContents />
       </TabPanel>
       <TabPanel value={value} index={2}>
-        <DictionaryEditor />
+        <DictionaryEditor2 />
       </TabPanel>
       <TabPanel value={value} index={3}>
-        <QuestionEditor />
+        <QuestionEditor2 />
       </TabPanel>  
       <TabPanel value={value} index={4}>
-        <FileManager />
+        <AudioPlayerProvider>
+          <FileManager2 />
+        </AudioPlayerProvider>
       </TabPanel>
       <TabPanel value={value} index={5} overflowY='hidden'>
         <ChatSidebar />

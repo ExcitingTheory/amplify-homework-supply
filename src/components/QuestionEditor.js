@@ -20,7 +20,7 @@ import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Collapse, Dialog, DialogTitle, DialogContent, Menu, MenuItem, Checkbox, Tooltip, Divider } from '@mui/material';
+import { Collapse, Dialog, DialogTitle, DialogContent, Menu, MenuItem, Checkbox, Tooltip, Divider, Snackbar, Alert } from '@mui/material';
 
 // Lexical imports
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
@@ -425,8 +425,8 @@ function UnifiedQuestionEditor({ question, searchTerm, fieldsToShow = ['prompt',
           borderColor: 'primary.main',
         },
         '& .question-field': {
-          margin: '2px 0',
-          padding: '4px 8px',
+          margin: '0',
+          padding: '0',
           borderRadius: '4px',
           minHeight: '1.2rem',
           '&:hover': {
@@ -489,7 +489,6 @@ function UnifiedQuestionEditor({ question, searchTerm, fieldsToShow = ['prompt',
             <ContentEditable
               style={{
                 outline: 'none',
-                padding: '8px',
                 minHeight: fieldsToShow.length > 1 ? '4rem' : '1.2rem',
                 cursor: 'text',
                 width: '100%',
@@ -500,7 +499,6 @@ function UnifiedQuestionEditor({ question, searchTerm, fieldsToShow = ['prompt',
           }
           placeholder={
             <div style={{ 
-              padding: '8px', 
               color: '#999', 
               fontSize: '0.875rem', 
               pointerEvents: 'none' 
@@ -870,19 +868,25 @@ function QuestionListItem({ entry, i, audioFiles, setPresignedUrl, identityId, i
 
   const confirmDeleteQuestion = async (question) => {
     console.log('question', question);
-    // possibly nicer modal with a cancel button?
-    const confirmed = window.confirm(`Are you sure you want to delete ${question.prompt}?`);
-
-    if (!confirmed) return;
-      // for each audio file, delete it. 
-      // what if the user has multiple audio files?
-      // what if another user has audio files for this question?
-      // then delete the question
-      try {
-        await DataStore.delete(question);
-      } catch (error) {
-        console.error(error);
+    // Show confirmation dialog via Snackbar
+    setConfirmDialog({
+      open: true,
+      message: `Are you sure you want to delete "${question.prompt}"?`,
+      severity: 'warning',
+      onConfirm: async () => {
+        // for each audio file, delete it. 
+        // what if the user has multiple audio files?
+        // what if another user has audio files for this question?
+        // then delete the question
+        try {
+          await DataStore.delete(question);
+          setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+        } catch (error) {
+          console.error(error);
+          setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+        }
       }
+    });
   };
 
 
@@ -928,16 +932,13 @@ function QuestionListItem({ entry, i, audioFiles, setPresignedUrl, identityId, i
             flexShrink: 1,
             gap: 0,
             justifyContent: 'space-between',
-            padding: 1,
             borderBottom: '1px solid',
             borderColor: 'divider',
             minHeight: 24,
           }}
         >
 
-                    <Box sx={{ display: 'flex', gap: 0, alignItems: 'center', flexShrink: 1 }}>
-
-
+          <Box sx={{ display: 'flex', gap: 0, alignItems: 'center', flexShrink: 1 }}>
             <Checkbox
               size="small"
               checked={isSelected}
@@ -1076,104 +1077,6 @@ function QuestionListItem({ entry, i, audioFiles, setPresignedUrl, identityId, i
       })
     }
 
-    {audioUrls.length > 0 &&
-      <ListItem
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          padding: '1rem',
-        }}
-      >
-        {
-          audioUrls.map((u, i) => {
-            console.log('audioUrls.u', u);
-            return <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                width: '100%',
-              }}
-            >
-              <ListItemText
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                key={i} primary={`audio-file-${i+1}.mp3`} />
-                {/**
-                 * TODO: add a way to save the original file name 
-                 */}
-
-              <div
-                // onClick={}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
-                <IconButton
-                  onClick={async (e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-
-                    console.log('IconButton.u', u);
-
-                    const _url = await getCachedUrl(u, 'protected', unit?.identityId)
-
-                    setPresignedUrl(_url);
-                  }}
-                  edge="end" aria-label="play">
-                  <PlayCircleIcon
-                    color='primary' />
-                </IconButton>
-
-                <IconButton
-                  onClick={async (e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-
-                    const confirmed = window.confirm('Are you sure you want to delete this audio file?');
-
-                    if (!confirmed) return;
-
-                    // delete from s3
-                    const remove = await _remove(u, {
-                      // level: 'protected',
-                    });
-
-                    console.log('remove', remove);
-
-                    // remove from audioUrls
-                    const _audioUrls = audioUrls.filter(_u => _u !== u);
-                    
-                    try {
-                      await DataStore.save(
-                        Question.copyOf(entry[1], (question) => {
-                          question.audio = _audioUrls;
-                        })
-                      )
-                    } catch (error) {
-                      console.log('error', error);
-                    }
-
-                  }} >
-                  <DeleteIcon />
-                  </IconButton>
-
-              </div>
-            </div>
-          })
-        }
-
-      </ListItem>
-    }
-
-
   </>;
 
 }
@@ -1188,6 +1091,7 @@ export function QuestionEditor() {
   const [selectedItems, setSelectedItems] = React.useState(new Set());
   const [contextMenu, setContextMenu] = React.useState(null);
   const [sharedHistoryState, setSharedHistoryState] = React.useState(new Map());
+  const [confirmDialog, setConfirmDialog] = React.useState({ open: false, message: '', onConfirm: null, severity: 'warning' });
 
   const theme = useTheme();
   const mainColor = theme.palette.primary.main;
@@ -1575,22 +1479,28 @@ export function QuestionEditor() {
 
 
   const handleBulkDelete = async () => {
-    const confirmed = window.confirm(`Are you sure you want to delete ${selectedItems.size} question(s)?`);
-    if (!confirmed) return;
-
-    try {
-      const deletePromises = Array.from(selectedItems).map(async (questionId) => {
-        const question = filteredQuestionBank[questionId];
-        if (question) {
-          await DataStore.delete(question);
+    setConfirmDialog({
+      open: true,
+      message: `Are you sure you want to delete ${selectedItems.size} question(s)?`,
+      severity: 'error',
+      onConfirm: async () => {
+        try {
+          const deletePromises = Array.from(selectedItems).map(async (questionId) => {
+            const question = filteredQuestionBank[questionId];
+            if (question) {
+              await DataStore.delete(question);
+            }
+          });
+          await Promise.all(deletePromises);
+          setSelectedItems(new Set());
+          setContextMenu(null);
+          setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+        } catch (error) {
+          console.error('Error deleting questions:', error);
+          setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
         }
-      });
-      await Promise.all(deletePromises);
-      setSelectedItems(new Set());
-      setContextMenu(null);
-    } catch (error) {
-      console.error('Error deleting questions:', error);
-    }
+      }
+    });
   };
 
   const handleInsertCustomAnswer = async () => {
@@ -1710,7 +1620,6 @@ export function QuestionEditor() {
             justifyContent: 'space-between',
             alignItems: 'center',
             gap: 0,
-            padding: 1,
             position: 'sticky',
             top: 0,
             bgcolor: 'background.paper',
@@ -2002,6 +1911,44 @@ export function QuestionEditor() {
             />)}
 
         </List>
+        
+        {/* Confirmation Snackbar */}
+        <Snackbar
+          open={confirmDialog.open}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          sx={{ mt: 8 }}
+        >
+          <Alert
+            severity={confirmDialog.severity}
+            sx={{ width: '100%' }}
+            action={
+              <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    if (confirmDialog.onConfirm) {
+                      confirmDialog.onConfirm();
+                    }
+                  }}
+                  variant="outlined"
+                >
+                  Confirm
+                </Button>
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={() => setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' })}
+                  variant="contained"
+                >
+                  Cancel
+                </Button>
+              </Box>
+            }
+          >
+            {confirmDialog.message}
+          </Alert>
+        </Snackbar>
     </>
   );
 }

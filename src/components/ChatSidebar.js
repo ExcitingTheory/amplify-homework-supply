@@ -1,6 +1,7 @@
 // react component that renders the chat session with the user and the bot
 import React, { useState, useEffect, useRef } from "react";
 import {
+    Alert,
     TextField,
     Button,
     CircularProgress,
@@ -12,6 +13,7 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
+    Snackbar,
 } from "@mui/material";
 import { DataStore } from '@aws-amplify/datastore';
 import ChatIcon from '@mui/icons-material/Chat';
@@ -25,6 +27,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import { Section, Document } from "../models";
 import UnitContext from "../context/unitContext";
+import SectionContext from "../context/sectionContext";
 import { useChat } from '@ai-sdk/react';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { uploadAndAnalyzePDF, cancelPDFAnalysis } from '../utils/fileUploadUtils';
@@ -32,7 +35,6 @@ import FilesContext from "../context/fileContext";
 import VocabularyReview from "./VocabularyReview";
 
 const ChatSidebar = () => {
-    const [sections, setSections] = useState([]);
     const chatContainerRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -41,6 +43,7 @@ const ChatSidebar = () => {
     const fileInputRef = useRef(null);
     const [vocabularyReviewDialogOpen, setVocabularyReviewDialogOpen] = useState(false);
     const [reviewDocumentId, setReviewDocumentId] = useState(null);
+    const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: null, severity: 'info' });
 
     const {
         unit,
@@ -48,6 +51,9 @@ const ChatSidebar = () => {
         questionBank,
         dictionary,
     } = React.useContext(UnitContext);
+    
+    // Get sections from SectionContext instead of local query
+    const { sections = [] } = React.useContext(SectionContext) || {};
     
     const { session } = React.useContext(FilesContext);
     const { identityId } = session || {};
@@ -98,19 +104,8 @@ const ChatSidebar = () => {
         }
     }, [messages]);
 
-    // Fetch sections
-    useEffect(() => {
-        fetchSections();
-        async function fetchSections() {
-            const sectionData = await DataStore.query(Section);
-            setSections(sectionData);
-        }
-        const subscription = DataStore.observe(Section).subscribe(() => fetchSections());
-
-        return function cleanup() {
-            subscription.unsubscribe();
-        };
-    }, []);
+    // Note: Section data is now provided by SectionContext
+    // Removed redundant Section observer to reduce subscription overhead
     
     // Subscribe to Document status changes
     useEffect(() => {
@@ -378,23 +373,27 @@ const ChatSidebar = () => {
         uploadedFiles.forEach((file, index) => {
             if (file.type === 'application/pdf' && !documentProcessingStatus[index]) {
                 // Ask user if they want to process the document
-                const shouldProcess = window.confirm(
-                    `Would you like to upload and analyze "${file.name}"? This will extract text and generate vocabulary.`
-                );
-                
-                if (shouldProcess) {
-                    processDocument(file, index);
-                } else {
-                    // Mark as declined
-                    setDocumentProcessingStatus(prev => ({
-                        ...prev,
-                        [index]: { 
-                            status: 'declined', 
-                            progress: 0, 
-                            message: 'Analysis declined' 
-                        }
-                    }));
-                }
+                setConfirmDialog({
+                    open: true,
+                    message: `Would you like to upload and analyze "${file.name}"? This will extract text and generate vocabulary.`,
+                    severity: 'info',
+                    onConfirm: () => {
+                        processDocument(file, index);
+                        setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'info' });
+                    },
+                    onCancel: () => {
+                        // Mark as declined
+                        setDocumentProcessingStatus(prev => ({
+                            ...prev,
+                            [index]: { 
+                                status: 'declined', 
+                                progress: 0, 
+                                message: 'Analysis declined' 
+                            }
+                        }));
+                        setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'info' });
+                    }
+                });
             }
         });
     }, [uploadedFiles, documentProcessingStatus, unit?.id, identityId]);
@@ -711,7 +710,7 @@ const ChatSidebar = () => {
                         <Button
                             type="submit"
                             variant="contained"
-                            disabled={isLoading || !input.trim()}
+                            disabled={isLoading || !input?.trim()}
                             sx={{
                                 minWidth: 'auto',
                                 px: 2,
@@ -756,6 +755,50 @@ const ChatSidebar = () => {
                     )}
                 </DialogContent>
             </Dialog>
+
+            {/* Confirmation Snackbar */}
+            <Snackbar
+                open={confirmDialog.open}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                sx={{ mt: 8 }}
+            >
+                <Alert
+                    severity={confirmDialog.severity}
+                    sx={{ width: '100%' }}
+                    action={
+                        <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
+                            <Button
+                                color="inherit"
+                                size="small"
+                                onClick={() => {
+                                    if (confirmDialog.onConfirm) {
+                                        confirmDialog.onConfirm();
+                                    }
+                                }}
+                                variant="outlined"
+                            >
+                                Confirm
+                            </Button>
+                            <Button
+                                color="inherit"
+                                size="small"
+                                onClick={() => {
+                                    if (confirmDialog.onCancel) {
+                                        confirmDialog.onCancel();
+                                    } else {
+                                        setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'info' });
+                                    }
+                                }}
+                                variant="contained"
+                            >
+                                Cancel
+                            </Button>
+                        </Box>
+                    }
+                >
+                    {confirmDialog.message}
+                </Alert>
+            </Snackbar>
         </>
     );
 }

@@ -26,7 +26,7 @@ import { default as fetch, Request } from 'node-fetch';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
-import pdfParse from 'pdf-parse';
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 import mammoth from 'mammoth';
 import OpenAI from 'openai';
 
@@ -119,13 +119,131 @@ async function getS3Object(s3Key, retries = 3, delay = 2000) {
   }
 }
 
-async function extractPdfText(s3Key) {
+/**
+ * Check how much time is left in Lambda execution
+ * @returns {number} Milliseconds remaining
+ */
+function getRemainingTime(context) {
+  if (!context || !context.getRemainingTimeInMillis) {
+    return Infinity; // No context, assume unlimited time
+  }
+  return context.getRemainingTimeInMillis();
+}
+
+/**
+ * Extract text from PDF with resume capability using PDF.js
+ * @param {string} s3Key - S3 key for the PDF
+ * @param {Object} resumeState - Optional state to resume from
+ * @param {Object} context - Lambda context for timeout detection
+ * @returns {Object} { text, pageCount, isComplete, resumeState }
+ */
+async function extractPdfText(s3Key, resumeState = null, context = null) {
+  const TIMEOUT_BUFFER_MS = 30000; // Reserve 30 seconds for cleanup and re-invocation
+  const BATCH_SIZE = 10; // Process 10 pages at a time
+  
+  console.log('Loading PDF from S3...');
   const buffer = await getS3Object(s3Key);
-  const pdfData = await pdfParse(buffer);
+  
+  // Load PDF document from buffer
+  const loadingTask = pdfjsLib.getDocument({
+    data: new Uint8Array(buffer),
+    useSystemFonts: true,
+    standardFontDataUrl: null,
+    disableFontFace: true
+  });
+  
+  const pdfDocument = await loadingTask.promise;
+  const totalPages = pdfDocument.numPages;
+  
+  const startPage = resumeState?.lastProcessedPage || 0;
+  let extractedText = resumeState?.accumulatedText || '';
+  let currentPage = startPage;
+  
+  console.log(`Extracting PDF: Starting from page ${startPage + 1} of ${totalPages}`);
+  
+  // Process pages in batches
+  while (currentPage < totalPages) {
+    // Check if we're running out of time
+    const remainingTime = getRemainingTime(context);
+    if (remainingTime < TIMEOUT_BUFFER_MS) {
+      console.log(`Approaching timeout with ${remainingTime}ms remaining. Saving progress...`);
+      
+      // Clean up PDF document
+      await pdfDocument.cleanup();
+      await pdfDocument.destroy();
+      
+      return {
+        text: extractedText,
+        pageCount: totalPages,
+        isComplete: false,
+        resumeState: {
+          lastProcessedPage: currentPage,
+          accumulatedText: extractedText,
+          totalPages: totalPages
+        }
+      };
+    }
+    
+    // Process next batch of pages
+    const batchEnd = Math.min(currentPage + BATCH_SIZE, totalPages);
+    console.log(`Processing pages ${currentPage + 1} to ${batchEnd} (${batchEnd - currentPage} pages in parallel)...`);
+    
+    // Extract text for this batch - Process pages in parallel for speed
+    const pagePromises = [];
+    for (let pageNum = currentPage + 1; pageNum <= batchEnd; pageNum++) {
+      pagePromises.push(
+        (async (num) => {
+          try {
+            const page = await pdfDocument.getPage(num);
+            const textContent = await page.getTextContent();
+            
+            // Combine text items with proper spacing
+            const pageText = textContent.items
+              .map(item => item.str)
+              .join(' ')
+              .replace(/\s+/g, ' ') // Normalize whitespace
+              .trim();
+            
+            // Clean up page resources
+            page.cleanup();
+            
+            console.log(`  Page ${num}: ${pageText.length} characters`);
+            
+            return { pageNum: num, text: pageText };
+          } catch (error) {
+            console.error(`Error extracting page ${num}:`, error);
+            return { pageNum: num, text: '', error: error.message };
+          }
+        })(pageNum)
+      );
+    }
+    
+    // Wait for all pages in batch to complete
+    const batchResults = await Promise.all(pagePromises);
+    
+    // Sort by page number and concatenate text
+    batchResults
+      .sort((a, b) => a.pageNum - b.pageNum)
+      .forEach(result => {
+        if (result.text) {
+          extractedText += result.text + '\n\n';
+        }
+      });
+    
+    currentPage = batchEnd;
+  }
+  
+  // Clean up PDF document
+  await pdfDocument.cleanup();
+  await pdfDocument.destroy();
+  
+  console.log(`PDF extraction complete: ${totalPages} pages processed, ${extractedText.length} total characters`);
   
   return {
-    text: pdfData.text,
-    pageCount: pdfData.numpages,
+    text: extractedText,
+    pageCount: totalPages,
+    isComplete: true,
+    resumeState: null
   };
 }
 
@@ -136,6 +254,7 @@ async function updateDocumentStatus(documentID, updates) {
       getDocument(id: $id) {
         id
         _version
+        resumeState
       }
     }
   `;
@@ -148,7 +267,7 @@ async function updateDocumentStatus(documentID, updates) {
   
   const updateMutation = /* GraphQL */ `
     mutation UpdateDocument($input: UpdateDocumentInput!) {
-      updateDocument(input: $input) { id _version }
+      updateDocument(input: $input) { id _version resumeState }
     }
   `;
   
@@ -161,8 +280,9 @@ async function updateDocumentStatus(documentID, updates) {
   });
 }
 
-export const handler = async (event) => {
+export const handler = async (event, context) => {
   console.log('Event:', JSON.stringify(event, null, 2));
+  console.log('Remaining time at start:', getRemainingTime(context), 'ms');
   
   // Check if this is an async background invocation
   const isAsyncInvocation = event.isAsyncInvocation === true;
@@ -213,6 +333,7 @@ export const handler = async (event) => {
           s3Key
           owner
           status
+          resumeState
           _version
         }
       }
@@ -222,8 +343,20 @@ export const handler = async (event) => {
     
     if (!document) throw new Error(`Document not found: ${documentID}`);
     
-    // Check if document is already being processed
-    if (document.status === 'extracting' || document.status === 'analyzing') {
+    // Check if we're resuming from a previous timeout
+    let resumeState = null;
+    if (document.resumeState) {
+      try {
+        resumeState = JSON.parse(document.resumeState);
+        console.log('Resuming from previous state:', resumeState);
+      } catch (e) {
+        console.error('Failed to parse resumeState:', e);
+        resumeState = null;
+      }
+    }
+    
+    // Check if document is already being processed (but allow resume)
+    if (!resumeState && (document.status === 'extracting' || document.status === 'analyzing')) {
       return {
         success: false,
         fileID,
@@ -275,6 +408,8 @@ export const handler = async (event) => {
     
     let text = '';
     let pageCount = 0;
+    let extractionComplete = false;
+    let newResumeState = null;
 
     // Extract text from PDF, and get page count. For other file types, implement other extraction methods. doc, docx, txt, csv, etc.
     
@@ -283,9 +418,50 @@ export const handler = async (event) => {
     }
     // use either document extension or mime type to determine file type
     if (s3Key.toLowerCase().endsWith('.pdf')) {
-      const { text: extractedText, pageCount: extractedPageCount } = await extractPdfText(s3Key);
-      text = extractedText;
-      pageCount = extractedPageCount;
+      const result = await extractPdfText(s3Key, resumeState, context);
+      text = result.text;
+      pageCount = result.pageCount;
+      extractionComplete = result.isComplete;
+      newResumeState = result.resumeState;
+      
+      // If extraction is not complete, save state and re-invoke
+      if (!extractionComplete) {
+        console.log('PDF extraction incomplete. Saving progress and re-invoking...');
+        
+        await updateDocumentStatus(documentID, { 
+          resumeState: JSON.stringify(newResumeState),
+          status: 'extracting'
+        });
+        
+        // Re-invoke this Lambda to continue processing
+        const invokeCommand = new InvokeCommand({
+          FunctionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
+          InvocationType: 'Event', // Async invocation
+          Payload: JSON.stringify({
+            ...event,
+            isAsyncInvocation: true,
+            arguments: event.arguments || { fileID }
+          })
+        });
+        
+        await lambdaClient.send(invokeCommand);
+        
+        return { 
+          success: true, 
+          fileID, 
+          documentID, 
+          message: 'PDF extraction paused and resumed in new invocation',
+          pageCount,
+          progress: `${newResumeState.lastProcessedPage}/${newResumeState.totalPages} pages`
+        };
+      }
+      
+      // Extraction complete, clear resume state
+      console.log('PDF extraction completed successfully');
+      await updateDocumentStatus(documentID, { 
+        resumeState: null
+      });
+      
     } else if (s3Key.toLowerCase().endsWith('.txt')) {
       // For .txt files, simple S3 getObject and read as text
       const buffer = await getS3Object(s3Key);

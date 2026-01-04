@@ -2,7 +2,7 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-import * as APITypes from "../API";
+import * as APITypes from "../../amplify/backend/function/analyzeDocument/src/src/API";
 type GeneratedSubscription<InputType, OutputType> = string & {
   __generatedSubscriptionInput: InputType;
   __generatedSubscriptionOutput: OutputType;
@@ -117,6 +117,11 @@ export const onCreateQuestion = /* GraphQL */ `subscription OnCreateQuestion(
     difficulty
     metadata
     importedAt
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     units {
       items {
         id
@@ -225,6 +230,11 @@ export const onUpdateQuestion = /* GraphQL */ `subscription OnUpdateQuestion(
     difficulty
     metadata
     importedAt
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     units {
       items {
         id
@@ -333,6 +343,11 @@ export const onDeleteQuestion = /* GraphQL */ `subscription OnDeleteQuestion(
     difficulty
     metadata
     importedAt
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     units {
       items {
         id
@@ -436,6 +451,7 @@ export const onCreateFile = /* GraphQL */ `subscription OnCreateFile(
     byHex
     thumbnail
     waveformData
+    embedding
     documentID
     document {
       id
@@ -450,6 +466,13 @@ export const onCreateFile = /* GraphQL */ `subscription OnCreateFile(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -569,6 +592,7 @@ export const onUpdateFile = /* GraphQL */ `subscription OnUpdateFile(
     byHex
     thumbnail
     waveformData
+    embedding
     documentID
     document {
       id
@@ -583,6 +607,13 @@ export const onUpdateFile = /* GraphQL */ `subscription OnUpdateFile(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -702,6 +733,7 @@ export const onDeleteFile = /* GraphQL */ `subscription OnDeleteFile(
     byHex
     thumbnail
     waveformData
+    embedding
     documentID
     document {
       id
@@ -716,6 +748,13 @@ export const onDeleteFile = /* GraphQL */ `subscription OnDeleteFile(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -917,6 +956,11 @@ export const onCreateSection = /* GraphQL */ `subscription OnCreateSection(
     identityId
     thumbnail
     backgroundColor
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     createdAt
     updatedAt
     _version
@@ -965,6 +1009,11 @@ export const onUpdateSection = /* GraphQL */ `subscription OnUpdateSection(
     identityId
     thumbnail
     backgroundColor
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     createdAt
     updatedAt
     _version
@@ -1013,6 +1062,11 @@ export const onDeleteSection = /* GraphQL */ `subscription OnDeleteSection(
     identityId
     thumbnail
     backgroundColor
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     createdAt
     updatedAt
     _version
@@ -1252,6 +1306,13 @@ export const onCreateUnit = /* GraphQL */ `subscription OnCreateUnit(
     featuredImage
     identityId
     thumbnail
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
+    publishedAt
+    isDraft
     files {
       items {
         id
@@ -1424,6 +1485,13 @@ export const onUpdateUnit = /* GraphQL */ `subscription OnUpdateUnit(
     featuredImage
     identityId
     thumbnail
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
+    publishedAt
+    isDraft
     files {
       items {
         id
@@ -1596,6 +1664,13 @@ export const onDeleteUnit = /* GraphQL */ `subscription OnDeleteUnit(
     featuredImage
     identityId
     thumbnail
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
+    publishedAt
+    isDraft
     files {
       items {
         id
@@ -1723,6 +1798,11 @@ export const onCreateWord = /* GraphQL */ `subscription OnCreateWord(
     definitionWaveformData
     rubyTags
     importedAt
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     units {
       items {
         id
@@ -1820,6 +1900,11 @@ export const onUpdateWord = /* GraphQL */ `subscription OnUpdateWord(
     definitionWaveformData
     rubyTags
     importedAt
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     units {
       items {
         id
@@ -1917,6 +2002,11 @@ export const onDeleteWord = /* GraphQL */ `subscription OnDeleteWord(
     definitionWaveformData
     rubyTags
     importedAt
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     units {
       items {
         id
@@ -2014,6 +2104,13 @@ export const onCreateDocument = /* GraphQL */ `subscription OnCreateDocument(
     fileSize
     mimeType
     uploadedAt
+    resumeState
+    pageEmbeddings {
+      page
+      embedding
+      text
+      __typename
+    }
     parsedContent {
       items {
         id
@@ -2153,6 +2250,13 @@ export const onUpdateDocument = /* GraphQL */ `subscription OnUpdateDocument(
     fileSize
     mimeType
     uploadedAt
+    resumeState
+    pageEmbeddings {
+      page
+      embedding
+      text
+      __typename
+    }
     parsedContent {
       items {
         id
@@ -2292,6 +2396,13 @@ export const onDeleteDocument = /* GraphQL */ `subscription OnDeleteDocument(
     fileSize
     mimeType
     uploadedAt
+    resumeState
+    pageEmbeddings {
+      page
+      embedding
+      text
+      __typename
+    }
     parsedContent {
       items {
         id
@@ -2436,6 +2547,13 @@ export const onCreateParsedContent = /* GraphQL */ `subscription OnCreateParsedC
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -2514,6 +2632,13 @@ export const onUpdateParsedContent = /* GraphQL */ `subscription OnUpdateParsedC
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -2592,6 +2717,13 @@ export const onDeleteParsedContent = /* GraphQL */ `subscription OnDeleteParsedC
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -2672,6 +2804,13 @@ export const onCreateAgentJob = /* GraphQL */ `subscription OnCreateAgentJob(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -2728,6 +2867,13 @@ export const onCreateAgentJob = /* GraphQL */ `subscription OnCreateAgentJob(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -2806,6 +2952,13 @@ export const onUpdateAgentJob = /* GraphQL */ `subscription OnUpdateAgentJob(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -2862,6 +3015,13 @@ export const onUpdateAgentJob = /* GraphQL */ `subscription OnUpdateAgentJob(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -2940,6 +3100,13 @@ export const onDeleteAgentJob = /* GraphQL */ `subscription OnDeleteAgentJob(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -2996,6 +3163,13 @@ export const onDeleteAgentJob = /* GraphQL */ `subscription OnDeleteAgentJob(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -3175,6 +3349,11 @@ export const onCreateQuestionUnit = /* GraphQL */ `subscription OnCreateQuestion
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3224,6 +3403,13 @@ export const onCreateQuestionUnit = /* GraphQL */ `subscription OnCreateQuestion
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -3301,6 +3487,11 @@ export const onUpdateQuestionUnit = /* GraphQL */ `subscription OnUpdateQuestion
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3350,6 +3541,13 @@ export const onUpdateQuestionUnit = /* GraphQL */ `subscription OnUpdateQuestion
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -3427,6 +3625,11 @@ export const onDeleteQuestionUnit = /* GraphQL */ `subscription OnDeleteQuestion
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3476,6 +3679,13 @@ export const onDeleteQuestionUnit = /* GraphQL */ `subscription OnDeleteQuestion
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -3553,6 +3763,11 @@ export const onCreateQuestionWord = /* GraphQL */ `subscription OnCreateQuestion
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3593,6 +3808,11 @@ export const onCreateQuestionWord = /* GraphQL */ `subscription OnCreateQuestion
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3665,6 +3885,11 @@ export const onUpdateQuestionWord = /* GraphQL */ `subscription OnUpdateQuestion
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3705,6 +3930,11 @@ export const onUpdateQuestionWord = /* GraphQL */ `subscription OnUpdateQuestion
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3777,6 +4007,11 @@ export const onDeleteQuestionWord = /* GraphQL */ `subscription OnDeleteQuestion
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3817,6 +4052,11 @@ export const onDeleteQuestionWord = /* GraphQL */ `subscription OnDeleteQuestion
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3889,6 +4129,11 @@ export const onCreateQuestionFile = /* GraphQL */ `subscription OnCreateQuestion
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3935,6 +4180,7 @@ export const onCreateQuestionFile = /* GraphQL */ `subscription OnCreateQuestion
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -3949,6 +4195,7 @@ export const onCreateQuestionFile = /* GraphQL */ `subscription OnCreateQuestion
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -4024,6 +4271,11 @@ export const onUpdateQuestionFile = /* GraphQL */ `subscription OnUpdateQuestion
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4070,6 +4322,7 @@ export const onUpdateQuestionFile = /* GraphQL */ `subscription OnUpdateQuestion
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -4084,6 +4337,7 @@ export const onUpdateQuestionFile = /* GraphQL */ `subscription OnUpdateQuestion
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -4159,6 +4413,11 @@ export const onDeleteQuestionFile = /* GraphQL */ `subscription OnDeleteQuestion
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4205,6 +4464,7 @@ export const onDeleteQuestionFile = /* GraphQL */ `subscription OnDeleteQuestion
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -4219,6 +4479,7 @@ export const onDeleteQuestionFile = /* GraphQL */ `subscription OnDeleteQuestion
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -4294,6 +4555,11 @@ export const onCreateDocumentQuestion = /* GraphQL */ `subscription OnCreateDocu
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4334,6 +4600,13 @@ export const onCreateDocumentQuestion = /* GraphQL */ `subscription OnCreateDocu
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -4412,6 +4685,11 @@ export const onUpdateDocumentQuestion = /* GraphQL */ `subscription OnUpdateDocu
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4452,6 +4730,13 @@ export const onUpdateDocumentQuestion = /* GraphQL */ `subscription OnUpdateDocu
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -4530,6 +4815,11 @@ export const onDeleteDocumentQuestion = /* GraphQL */ `subscription OnDeleteDocu
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4570,6 +4860,13 @@ export const onDeleteDocumentQuestion = /* GraphQL */ `subscription OnDeleteDocu
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -4643,6 +4940,7 @@ export const onCreateUnitFile = /* GraphQL */ `subscription OnCreateUnitFile(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -4657,6 +4955,7 @@ export const onCreateUnitFile = /* GraphQL */ `subscription OnCreateUnitFile(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -4709,6 +5008,13 @@ export const onCreateUnitFile = /* GraphQL */ `subscription OnCreateUnitFile(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -4781,6 +5087,7 @@ export const onUpdateUnitFile = /* GraphQL */ `subscription OnUpdateUnitFile(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -4795,6 +5102,7 @@ export const onUpdateUnitFile = /* GraphQL */ `subscription OnUpdateUnitFile(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -4847,6 +5155,13 @@ export const onUpdateUnitFile = /* GraphQL */ `subscription OnUpdateUnitFile(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -4919,6 +5234,7 @@ export const onDeleteUnitFile = /* GraphQL */ `subscription OnDeleteUnitFile(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -4933,6 +5249,7 @@ export const onDeleteUnitFile = /* GraphQL */ `subscription OnDeleteUnitFile(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -4985,6 +5302,13 @@ export const onDeleteUnitFile = /* GraphQL */ `subscription OnDeleteUnitFile(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -5057,6 +5381,7 @@ export const onCreateWordFile = /* GraphQL */ `subscription OnCreateWordFile(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -5071,6 +5396,7 @@ export const onCreateWordFile = /* GraphQL */ `subscription OnCreateWordFile(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -5114,6 +5440,11 @@ export const onCreateWordFile = /* GraphQL */ `subscription OnCreateWordFile(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -5181,6 +5512,7 @@ export const onUpdateWordFile = /* GraphQL */ `subscription OnUpdateWordFile(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -5195,6 +5527,7 @@ export const onUpdateWordFile = /* GraphQL */ `subscription OnUpdateWordFile(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -5238,6 +5571,11 @@ export const onUpdateWordFile = /* GraphQL */ `subscription OnUpdateWordFile(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -5305,6 +5643,7 @@ export const onDeleteWordFile = /* GraphQL */ `subscription OnDeleteWordFile(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -5319,6 +5658,7 @@ export const onDeleteWordFile = /* GraphQL */ `subscription OnDeleteWordFile(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -5362,6 +5702,11 @@ export const onDeleteWordFile = /* GraphQL */ `subscription OnDeleteWordFile(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -5432,6 +5777,13 @@ export const onCreateUnitWord = /* GraphQL */ `subscription OnCreateUnitWord(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -5477,6 +5829,11 @@ export const onCreateUnitWord = /* GraphQL */ `subscription OnCreateUnitWord(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -5547,6 +5904,13 @@ export const onUpdateUnitWord = /* GraphQL */ `subscription OnUpdateUnitWord(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -5592,6 +5956,11 @@ export const onUpdateUnitWord = /* GraphQL */ `subscription OnUpdateUnitWord(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -5662,6 +6031,13 @@ export const onDeleteUnitWord = /* GraphQL */ `subscription OnDeleteUnitWord(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -5707,6 +6083,11 @@ export const onDeleteUnitWord = /* GraphQL */ `subscription OnDeleteUnitWord(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -5777,6 +6158,13 @@ export const onCreateUnitDocument = /* GraphQL */ `subscription OnCreateUnitDocu
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -5822,6 +6210,13 @@ export const onCreateUnitDocument = /* GraphQL */ `subscription OnCreateUnitDocu
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -5898,6 +6293,13 @@ export const onUpdateUnitDocument = /* GraphQL */ `subscription OnUpdateUnitDocu
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -5943,6 +6345,13 @@ export const onUpdateUnitDocument = /* GraphQL */ `subscription OnUpdateUnitDocu
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -6019,6 +6428,13 @@ export const onDeleteUnitDocument = /* GraphQL */ `subscription OnDeleteUnitDocu
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -6064,6 +6480,13 @@ export const onDeleteUnitDocument = /* GraphQL */ `subscription OnDeleteUnitDocu
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -6131,6 +6554,11 @@ export const onCreateDocumentWord = /* GraphQL */ `subscription OnCreateDocument
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -6171,6 +6599,13 @@ export const onCreateDocumentWord = /* GraphQL */ `subscription OnCreateDocument
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -6238,6 +6673,11 @@ export const onUpdateDocumentWord = /* GraphQL */ `subscription OnUpdateDocument
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -6278,6 +6718,13 @@ export const onUpdateDocumentWord = /* GraphQL */ `subscription OnUpdateDocument
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -6345,6 +6792,11 @@ export const onDeleteDocumentWord = /* GraphQL */ `subscription OnDeleteDocument
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -6385,6 +6837,13 @@ export const onDeleteDocumentWord = /* GraphQL */ `subscription OnDeleteDocument
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt

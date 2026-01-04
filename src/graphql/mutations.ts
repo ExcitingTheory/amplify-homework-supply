@@ -2,7 +2,7 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-import * as APITypes from "../API";
+import * as APITypes from "../../amplify/backend/function/analyzeDocument/src/src/API";
 type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationInput: InputType;
   __generatedMutationOutput: OutputType;
@@ -53,6 +53,7 @@ export const generateAudioFile = /* GraphQL */ `mutation GenerateAudioFile($phra
     byHex
     thumbnail
     waveformData
+    embedding
     documentID
     document {
       id
@@ -67,6 +68,13 @@ export const generateAudioFile = /* GraphQL */ `mutation GenerateAudioFile($phra
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -190,6 +198,7 @@ export const generateImageFile = /* GraphQL */ `mutation GenerateImageFile($phra
     byHex
     thumbnail
     waveformData
+    embedding
     documentID
     document {
       id
@@ -204,6 +213,13 @@ export const generateImageFile = /* GraphQL */ `mutation GenerateImageFile($phra
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -378,6 +394,7 @@ export const analyzeDocument = /* GraphQL */ `mutation AnalyzeDocument($fileID: 
     documentID
     responseId
     pageCount
+    progress
     message
     __typename
   }
@@ -398,6 +415,42 @@ export const cancelDocumentAnalysis = /* GraphQL */ `mutation CancelDocumentAnal
 ` as GeneratedMutation<
   APITypes.CancelDocumentAnalysisMutationVariables,
   APITypes.CancelDocumentAnalysisMutation
+>;
+export const generateEmbeddings = /* GraphQL */ `mutation GenerateEmbeddings($fileID: ID!) {
+  generateEmbeddings(fileID: $fileID) {
+    success
+    fileID
+    documentID
+    embeddingCount
+    message
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.GenerateEmbeddingsMutationVariables,
+  APITypes.GenerateEmbeddingsMutation
+>;
+export const generateEmbeddding = /* GraphQL */ `mutation GenerateEmbeddding(
+  $content: String!
+  $model: String
+  $dimensions: Int
+) {
+  generateEmbeddding(
+    content: $content
+    model: $model
+    dimensions: $dimensions
+  ) {
+    embedding
+    model
+    dimensions
+    tokenCount
+    error
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.GenerateEmbedddingMutationVariables,
+  APITypes.GenerateEmbedddingMutation
 >;
 export const createAssistant = /* GraphQL */ `mutation CreateAssistant(
   $input: CreateAssistantInput!
@@ -508,6 +561,11 @@ export const createQuestion = /* GraphQL */ `mutation CreateQuestion(
     difficulty
     metadata
     importedAt
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     units {
       items {
         id
@@ -616,6 +674,11 @@ export const updateQuestion = /* GraphQL */ `mutation UpdateQuestion(
     difficulty
     metadata
     importedAt
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     units {
       items {
         id
@@ -724,6 +787,11 @@ export const deleteQuestion = /* GraphQL */ `mutation DeleteQuestion(
     difficulty
     metadata
     importedAt
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     units {
       items {
         id
@@ -827,6 +895,7 @@ export const createFile = /* GraphQL */ `mutation CreateFile(
     byHex
     thumbnail
     waveformData
+    embedding
     documentID
     document {
       id
@@ -841,6 +910,13 @@ export const createFile = /* GraphQL */ `mutation CreateFile(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -960,6 +1036,7 @@ export const updateFile = /* GraphQL */ `mutation UpdateFile(
     byHex
     thumbnail
     waveformData
+    embedding
     documentID
     document {
       id
@@ -974,6 +1051,13 @@ export const updateFile = /* GraphQL */ `mutation UpdateFile(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -1093,6 +1177,7 @@ export const deleteFile = /* GraphQL */ `mutation DeleteFile(
     byHex
     thumbnail
     waveformData
+    embedding
     documentID
     document {
       id
@@ -1107,6 +1192,13 @@ export const deleteFile = /* GraphQL */ `mutation DeleteFile(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -1308,6 +1400,11 @@ export const createSection = /* GraphQL */ `mutation CreateSection(
     identityId
     thumbnail
     backgroundColor
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     createdAt
     updatedAt
     _version
@@ -1356,6 +1453,11 @@ export const updateSection = /* GraphQL */ `mutation UpdateSection(
     identityId
     thumbnail
     backgroundColor
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     createdAt
     updatedAt
     _version
@@ -1404,6 +1506,11 @@ export const deleteSection = /* GraphQL */ `mutation DeleteSection(
     identityId
     thumbnail
     backgroundColor
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     createdAt
     updatedAt
     _version
@@ -1640,6 +1747,13 @@ export const createUnit = /* GraphQL */ `mutation CreateUnit(
     featuredImage
     identityId
     thumbnail
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
+    publishedAt
+    isDraft
     files {
       items {
         id
@@ -1812,6 +1926,13 @@ export const updateUnit = /* GraphQL */ `mutation UpdateUnit(
     featuredImage
     identityId
     thumbnail
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
+    publishedAt
+    isDraft
     files {
       items {
         id
@@ -1984,6 +2105,13 @@ export const deleteUnit = /* GraphQL */ `mutation DeleteUnit(
     featuredImage
     identityId
     thumbnail
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
+    publishedAt
+    isDraft
     files {
       items {
         id
@@ -2111,6 +2239,11 @@ export const createWord = /* GraphQL */ `mutation CreateWord(
     definitionWaveformData
     rubyTags
     importedAt
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     units {
       items {
         id
@@ -2208,6 +2341,11 @@ export const updateWord = /* GraphQL */ `mutation UpdateWord(
     definitionWaveformData
     rubyTags
     importedAt
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     units {
       items {
         id
@@ -2305,6 +2443,11 @@ export const deleteWord = /* GraphQL */ `mutation DeleteWord(
     definitionWaveformData
     rubyTags
     importedAt
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     units {
       items {
         id
@@ -2402,6 +2545,13 @@ export const createDocument = /* GraphQL */ `mutation CreateDocument(
     fileSize
     mimeType
     uploadedAt
+    resumeState
+    pageEmbeddings {
+      page
+      embedding
+      text
+      __typename
+    }
     parsedContent {
       items {
         id
@@ -2541,6 +2691,13 @@ export const updateDocument = /* GraphQL */ `mutation UpdateDocument(
     fileSize
     mimeType
     uploadedAt
+    resumeState
+    pageEmbeddings {
+      page
+      embedding
+      text
+      __typename
+    }
     parsedContent {
       items {
         id
@@ -2680,6 +2837,13 @@ export const deleteDocument = /* GraphQL */ `mutation DeleteDocument(
     fileSize
     mimeType
     uploadedAt
+    resumeState
+    pageEmbeddings {
+      page
+      embedding
+      text
+      __typename
+    }
     parsedContent {
       items {
         id
@@ -2824,6 +2988,13 @@ export const createParsedContent = /* GraphQL */ `mutation CreateParsedContent(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -2902,6 +3073,13 @@ export const updateParsedContent = /* GraphQL */ `mutation UpdateParsedContent(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -2980,6 +3158,13 @@ export const deleteParsedContent = /* GraphQL */ `mutation DeleteParsedContent(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -3060,6 +3245,13 @@ export const createAgentJob = /* GraphQL */ `mutation CreateAgentJob(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -3116,6 +3308,13 @@ export const createAgentJob = /* GraphQL */ `mutation CreateAgentJob(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -3194,6 +3393,13 @@ export const updateAgentJob = /* GraphQL */ `mutation UpdateAgentJob(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -3250,6 +3456,13 @@ export const updateAgentJob = /* GraphQL */ `mutation UpdateAgentJob(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -3328,6 +3541,13 @@ export const deleteAgentJob = /* GraphQL */ `mutation DeleteAgentJob(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -3384,6 +3604,13 @@ export const deleteAgentJob = /* GraphQL */ `mutation DeleteAgentJob(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -3563,6 +3790,11 @@ export const createQuestionUnit = /* GraphQL */ `mutation CreateQuestionUnit(
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3612,6 +3844,13 @@ export const createQuestionUnit = /* GraphQL */ `mutation CreateQuestionUnit(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -3689,6 +3928,11 @@ export const updateQuestionUnit = /* GraphQL */ `mutation UpdateQuestionUnit(
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3738,6 +3982,13 @@ export const updateQuestionUnit = /* GraphQL */ `mutation UpdateQuestionUnit(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -3815,6 +4066,11 @@ export const deleteQuestionUnit = /* GraphQL */ `mutation DeleteQuestionUnit(
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3864,6 +4120,13 @@ export const deleteQuestionUnit = /* GraphQL */ `mutation DeleteQuestionUnit(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -3941,6 +4204,11 @@ export const createQuestionWord = /* GraphQL */ `mutation CreateQuestionWord(
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3981,6 +4249,11 @@ export const createQuestionWord = /* GraphQL */ `mutation CreateQuestionWord(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4053,6 +4326,11 @@ export const updateQuestionWord = /* GraphQL */ `mutation UpdateQuestionWord(
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4093,6 +4371,11 @@ export const updateQuestionWord = /* GraphQL */ `mutation UpdateQuestionWord(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4165,6 +4448,11 @@ export const deleteQuestionWord = /* GraphQL */ `mutation DeleteQuestionWord(
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4205,6 +4493,11 @@ export const deleteQuestionWord = /* GraphQL */ `mutation DeleteQuestionWord(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4277,6 +4570,11 @@ export const createQuestionFile = /* GraphQL */ `mutation CreateQuestionFile(
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4323,6 +4621,7 @@ export const createQuestionFile = /* GraphQL */ `mutation CreateQuestionFile(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -4337,6 +4636,7 @@ export const createQuestionFile = /* GraphQL */ `mutation CreateQuestionFile(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -4412,6 +4712,11 @@ export const updateQuestionFile = /* GraphQL */ `mutation UpdateQuestionFile(
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4458,6 +4763,7 @@ export const updateQuestionFile = /* GraphQL */ `mutation UpdateQuestionFile(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -4472,6 +4778,7 @@ export const updateQuestionFile = /* GraphQL */ `mutation UpdateQuestionFile(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -4547,6 +4854,11 @@ export const deleteQuestionFile = /* GraphQL */ `mutation DeleteQuestionFile(
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4593,6 +4905,7 @@ export const deleteQuestionFile = /* GraphQL */ `mutation DeleteQuestionFile(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -4607,6 +4920,7 @@ export const deleteQuestionFile = /* GraphQL */ `mutation DeleteQuestionFile(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -4682,6 +4996,11 @@ export const createDocumentQuestion = /* GraphQL */ `mutation CreateDocumentQues
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4722,6 +5041,13 @@ export const createDocumentQuestion = /* GraphQL */ `mutation CreateDocumentQues
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -4800,6 +5126,11 @@ export const updateDocumentQuestion = /* GraphQL */ `mutation UpdateDocumentQues
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4840,6 +5171,13 @@ export const updateDocumentQuestion = /* GraphQL */ `mutation UpdateDocumentQues
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -4918,6 +5256,11 @@ export const deleteDocumentQuestion = /* GraphQL */ `mutation DeleteDocumentQues
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4958,6 +5301,13 @@ export const deleteDocumentQuestion = /* GraphQL */ `mutation DeleteDocumentQues
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -5031,6 +5381,7 @@ export const createUnitFile = /* GraphQL */ `mutation CreateUnitFile(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -5045,6 +5396,7 @@ export const createUnitFile = /* GraphQL */ `mutation CreateUnitFile(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -5097,6 +5449,13 @@ export const createUnitFile = /* GraphQL */ `mutation CreateUnitFile(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -5169,6 +5528,7 @@ export const updateUnitFile = /* GraphQL */ `mutation UpdateUnitFile(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -5183,6 +5543,7 @@ export const updateUnitFile = /* GraphQL */ `mutation UpdateUnitFile(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -5235,6 +5596,13 @@ export const updateUnitFile = /* GraphQL */ `mutation UpdateUnitFile(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -5307,6 +5675,7 @@ export const deleteUnitFile = /* GraphQL */ `mutation DeleteUnitFile(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -5321,6 +5690,7 @@ export const deleteUnitFile = /* GraphQL */ `mutation DeleteUnitFile(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -5373,6 +5743,13 @@ export const deleteUnitFile = /* GraphQL */ `mutation DeleteUnitFile(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -5445,6 +5822,7 @@ export const createWordFile = /* GraphQL */ `mutation CreateWordFile(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -5459,6 +5837,7 @@ export const createWordFile = /* GraphQL */ `mutation CreateWordFile(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -5502,6 +5881,11 @@ export const createWordFile = /* GraphQL */ `mutation CreateWordFile(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -5569,6 +5953,7 @@ export const updateWordFile = /* GraphQL */ `mutation UpdateWordFile(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -5583,6 +5968,7 @@ export const updateWordFile = /* GraphQL */ `mutation UpdateWordFile(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -5626,6 +6012,11 @@ export const updateWordFile = /* GraphQL */ `mutation UpdateWordFile(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -5693,6 +6084,7 @@ export const deleteWordFile = /* GraphQL */ `mutation DeleteWordFile(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -5707,6 +6099,7 @@ export const deleteWordFile = /* GraphQL */ `mutation DeleteWordFile(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -5750,6 +6143,11 @@ export const deleteWordFile = /* GraphQL */ `mutation DeleteWordFile(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -5820,6 +6218,13 @@ export const createUnitWord = /* GraphQL */ `mutation CreateUnitWord(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -5865,6 +6270,11 @@ export const createUnitWord = /* GraphQL */ `mutation CreateUnitWord(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -5935,6 +6345,13 @@ export const updateUnitWord = /* GraphQL */ `mutation UpdateUnitWord(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -5980,6 +6397,11 @@ export const updateUnitWord = /* GraphQL */ `mutation UpdateUnitWord(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -6050,6 +6472,13 @@ export const deleteUnitWord = /* GraphQL */ `mutation DeleteUnitWord(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -6095,6 +6524,11 @@ export const deleteUnitWord = /* GraphQL */ `mutation DeleteUnitWord(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -6165,6 +6599,13 @@ export const createUnitDocument = /* GraphQL */ `mutation CreateUnitDocument(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -6210,6 +6651,13 @@ export const createUnitDocument = /* GraphQL */ `mutation CreateUnitDocument(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -6286,6 +6734,13 @@ export const updateUnitDocument = /* GraphQL */ `mutation UpdateUnitDocument(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -6331,6 +6786,13 @@ export const updateUnitDocument = /* GraphQL */ `mutation UpdateUnitDocument(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -6407,6 +6869,13 @@ export const deleteUnitDocument = /* GraphQL */ `mutation DeleteUnitDocument(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -6452,6 +6921,13 @@ export const deleteUnitDocument = /* GraphQL */ `mutation DeleteUnitDocument(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -6519,6 +6995,11 @@ export const createDocumentWord = /* GraphQL */ `mutation CreateDocumentWord(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -6559,6 +7040,13 @@ export const createDocumentWord = /* GraphQL */ `mutation CreateDocumentWord(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -6626,6 +7114,11 @@ export const updateDocumentWord = /* GraphQL */ `mutation UpdateDocumentWord(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -6666,6 +7159,13 @@ export const updateDocumentWord = /* GraphQL */ `mutation UpdateDocumentWord(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -6733,6 +7233,11 @@ export const deleteDocumentWord = /* GraphQL */ `mutation DeleteDocumentWord(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -6773,6 +7278,13 @@ export const deleteDocumentWord = /* GraphQL */ `mutation DeleteDocumentWord(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt

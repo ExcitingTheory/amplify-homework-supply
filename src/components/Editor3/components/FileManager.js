@@ -76,6 +76,7 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import ErrorIcon from '@mui/icons-material/Error';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CancelIcon from '@mui/icons-material/Cancel';
+import DownloadIcon from '@mui/icons-material/Download';
 import Chip from '@mui/material/Chip';
 import ImageIcon from '@mui/icons-material/Image';
 import AudioFileIcon from '@mui/icons-material/AudioFile';
@@ -856,7 +857,6 @@ export default function FileManager() {
     const [suggestionTab, setSuggestionTab] = React.useState(0);
     const [expandedItems, setExpandedItems] = React.useState(['images', 'audio', 'documents']);
 
-    const [settings, setSettings] = React.useState(null);
     const [documentStatuses, setDocumentStatuses] = React.useState({});
 
     const { files, session } = React.useContext(FilesContext);
@@ -872,27 +872,10 @@ export default function FileManager() {
 
     console.log('FilesContext.files', files);
 
-    // Subscribe to user settings with initial load
-    React.useEffect(() => {
-        const subscription = DataStore.observeQuery(Settings).subscribe(async ({ items }) => {
-            if (items.length > 0) {
-                setSettings(items[0]);
-            } else {
-                // Create default settings if none exist
-                try {
-                    const newSettings = await DataStore.save(new Settings({
-                        autoAnalyzeDocuments: true,
-                        documentAnalysisModel: 'gpt-4',
-                    }));
-                    setSettings(newSettings);
-                } catch (error) {
-                    console.error('Error creating settings:', error);
-                }
-            }
-        });
-
-        return () => subscription.unsubscribe();
-    }, []);
+    // Note: Settings are now provided by SettingsContext
+    // Get settings from context instead of local subscription
+    const settingsContext = React.useContext(SettingsContext);
+    const settings = settingsContext?.settings || null;
 
     // Subscribe to Document status changes
     React.useEffect(() => {
@@ -1101,7 +1084,7 @@ export default function FileManager() {
 
     return (
         <>
-            {/* Sticky Header with Tabs and Search */}
+            {/* Sticky Header with Search and Tabs */}
             <Box
                 sx={{
                     position: 'sticky',
@@ -1110,98 +1093,6 @@ export default function FileManager() {
                     zIndex: 100,
                 }}
             >
-                {/* Tabs for filtering files and generating content */}
-                <Tabs
-                    value={generator}
-                    onChange={(e, newValue) => {
-                        setGenerator(newValue);
-                        // Close all forms first
-                        setNewImageFileFormOpen(false);
-                        setNewAudioFileFormOpen(false);
-                        setNewVideoFileFormOpen(false);
-
-                        // Expand the appropriate tree section
-                        if (newValue === 'image') {
-                            setExpandedItems(['images']);
-                        } else if (newValue === 'audio') {
-                            setExpandedItems(['audio']);
-                        } else if (newValue === 'document') {
-                            setExpandedItems(['documents']);
-                        } else if (newValue === 'all') {
-                            // Expand all categories when "all" is selected
-                            setExpandedItems(['images', 'audio', 'documents']);
-                        }
-
-                        // Open the selected form if generation is active
-                        if (newFileFormOpen) {
-                            if (newValue === 'image') {
-                                setNewImageFileFormOpen(true);
-                            } else if (newValue === 'audio') {
-                                setNewAudioFileFormOpen(true);
-                            }
-                        }
-                    }}
-                    variant="scrollable"
-                    scrollButtons="auto"
-                    sx={{
-                        borderBottom: 1,
-                        borderColor: 'divider',
-                        width: '100%',
-                        padding: 0,
-                        minHeight: 0,
-                        '& .MuiTab-root': {
-                            padding: '4px 8px',
-                            minWidth: 0,
-                            minHeight: 0,
-                            fontSize: '0.75rem',
-                        },
-                        '& .MuiTabs-flexContainer': {
-                            gap: 0,
-                        },
-                    }}
-                >
-                    <Tab
-                        label={
-                            <Tooltip title="All Files">
-                                <FolderIcon fontSize="small" />
-                            </Tooltip>
-                        }
-                        value="all"
-                    />
-                    <Tab
-                        label={
-                            <Tooltip title="Images">
-                                <ImageIcon fontSize="small" />
-                            </Tooltip>
-                        }
-                        value="image"
-                    />
-                    <Tab
-                        label={
-                            <Tooltip title="Audio">
-                                <AudioFileIcon fontSize="small" />
-                            </Tooltip>
-                        }
-                        value="audio"
-                    />
-                    <Tab
-                        label={
-                            <Tooltip title="Documents">
-                                <PictureAsPdfIcon fontSize="small" />
-                            </Tooltip>
-                        }
-                        value="document"
-                    />
-                    <Tab
-                        label={
-                            <Tooltip title="Suggestions">
-                                <AutoAwesomeIcon fontSize="small" />
-                            </Tooltip>
-                        }
-                        value="suggestions"
-                    />
-                </Tabs>
-
                 {/* Sticky Search Bar - Different content per tab */}
                 {generator !== 'suggestions' && (
                     <Box
@@ -1306,6 +1197,98 @@ export default function FileManager() {
                         )}
                     </Box>
                 )}
+
+                {/* Tabs for filtering files and generating content */}
+                <Tabs
+                    value={generator}
+                    onChange={(e, newValue) => {
+                        setGenerator(newValue);
+                        // Close all forms first
+                        setNewImageFileFormOpen(false);
+                        setNewAudioFileFormOpen(false);
+                        setNewVideoFileFormOpen(false);
+
+                        // Expand the appropriate tree section
+                        if (newValue === 'image') {
+                            setExpandedItems(['images']);
+                        } else if (newValue === 'audio') {
+                            setExpandedItems(['audio']);
+                        } else if (newValue === 'document') {
+                            setExpandedItems(['documents']);
+                        } else if (newValue === 'all') {
+                            // Expand all categories when "all" is selected
+                            setExpandedItems(['images', 'audio', 'documents']);
+                        }
+
+                        // Open the selected form if generation is active
+                        if (newFileFormOpen) {
+                            if (newValue === 'image') {
+                                setNewImageFileFormOpen(true);
+                            } else if (newValue === 'audio') {
+                                setNewAudioFileFormOpen(true);
+                            }
+                        }
+                    }}
+                    variant="scrollable"
+                    scrollButtons="auto"
+                    sx={{
+                        borderBottom: 1,
+                        borderColor: 'divider',
+                        width: '100%',
+                        padding: 0,
+                        minHeight: 0,
+                        '& .MuiTab-root': {
+                            // padding: '4px 8px',
+                            minWidth: 0,
+                            minHeight: 0,
+                            fontSize: '0.75rem',
+                        },
+                        '& .MuiTabs-flexContainer': {
+                            gap: 0,
+                        },
+                    }}
+                >
+                    <Tab
+                        label={
+                            <Tooltip title="All Files">
+                                <FolderIcon fontSize="small" />
+                            </Tooltip>
+                        }
+                        value="all"
+                    />
+                    <Tab
+                        label={
+                            <Tooltip title="Images">
+                                <ImageIcon fontSize="small" />
+                            </Tooltip>
+                        }
+                        value="image"
+                    />
+                    <Tab
+                        label={
+                            <Tooltip title="Audio">
+                                <AudioFileIcon fontSize="small" />
+                            </Tooltip>
+                        }
+                        value="audio"
+                    />
+                    <Tab
+                        label={
+                            <Tooltip title="Documents">
+                                <PictureAsPdfIcon fontSize="small" />
+                            </Tooltip>
+                        }
+                        value="document"
+                    />
+                    <Tab
+                        label={
+                            <Tooltip title="Import">
+                                <DownloadIcon fontSize="small" />
+                            </Tooltip>
+                        }
+                        value="suggestions"
+                    />
+                </Tabs>
             </Box>
 
             {/* Scrollable Content Area */}
@@ -1313,61 +1296,125 @@ export default function FileManager() {
                 {/* Suggestions Tab Content */}
                     {generator === 'suggestions' && (
                         <Box sx={{ width: '100%' }}>
-                            {/* Document selector header */}
+                            {/* Document search bar */}
                             <Box
                                 sx={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    gap: 1,
                                     px: 1,
                                     py: 1,
                                     bgcolor: 'background.paper',
                                     borderBottom: '1px solid #e0e0e0'
                                 }}
                             >
-                                <Autocomplete
-                                    fullWidth
+                                <TextField
+                                    value={search}
+                                    onInput={handleSearch}
                                     size="small"
-                                    options={files.filter(file =>
+                                    fullWidth
+                                    placeholder="Search documents..."
+                                    label="Search Documents"
+                                />
+                            </Box>
+                            
+                            {/* Suggestion type tabs */}
+                            <Tabs
+                                value={suggestionTab}
+                                onChange={(e, newValue) => setSuggestionTab(newValue)}
+                                variant="fullWidth"
+                                sx={{ borderBottom: 1, borderColor: 'divider', px: 1 }}
+                            >
+                                <Tab label="Vocabulary" />
+                                <Tab label="Questions" />
+                            </Tabs>
+
+                            {/* Document list */}
+                            <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+                                {files
+                                    .filter(file =>
                                         file.documentID && (
                                             file.mimeType === 'application/pdf' ||
                                             file.mimeType === 'text/plain' ||
                                             file.mimeType === 'text/markdown' ||
                                             file.mimeType === 'text/csv'
-                                        )
-                                    )}
-                                    getOptionLabel={(file) => {
+                                        ) && (!search || file.name.toLowerCase().includes(search.toLowerCase()))
+                                    )
+                                    .map((file) => {
                                         const docStatus = documentStatuses[file.documentID];
-                                        return `${file.name}${docStatus?.status === 'completed' ? ' ✓' : ''}`;
-                                    }}
-                                    value={files.find(f => f.documentID === selectedDocument) || null}
-                                    onChange={(event, newValue) => {
-                                        if (newValue && newValue.documentID) {
-                                            setSelectedDocument(newValue.documentID);
-                                        } else {
-                                            setSelectedDocument(null);
-                                        }
-                                    }}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            label="Select Document"
-                                            placeholder="Search documents..."
-                                        />
-                                    )}
-                                />
-                            </Box>
-                            
-                            {/* Show suggestions if document is selected */}
-                            {selectedDocument ? (
-                                <>
-                                    <Tabs
-                                        value={suggestionTab}
-                                        onChange={(e, newValue) => setSuggestionTab(newValue)}
-                                        variant="fullWidth"
-                                        sx={{ borderBottom: 1, borderColor: 'divider', px: 1 }}
-                                    >
-                                        <Tab label="Vocabulary" />
-                                        <Tab label="Questions" />
-                                    </Tabs>
+                                        const statusInfo = getDocumentStatusInfo(docStatus?.status || 'uploaded');
+                                        const isSelected = selectedDocument === file.documentID;
 
+                                        return (
+                                            <ListItem
+                                                key={file.id}
+                                                button
+                                                selected={isSelected}
+                                                onClick={() => {
+                                                    setSelectedDocument(file.documentID);
+                                                }}
+                                                sx={{
+                                                    borderLeft: isSelected ? '4px solid' : '4px solid transparent',
+                                                    borderColor: isSelected ? 'primary.main' : 'transparent',
+                                                    bgcolor: isSelected ? 'action.selected' : 'transparent',
+                                                    '&:hover': {
+                                                        bgcolor: isSelected ? 'action.selected' : 'action.hover',
+                                                    },
+                                                }}
+                                            >
+                                                <ListItemAvatar>
+                                                    <PictureAsPdfIcon color={statusInfo.color} />
+                                                </ListItemAvatar>
+                                                <ListItemText
+                                                    primary={file.name}
+                                                    secondary={
+                                                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                                                            <Typography variant="caption" color="text.secondary">
+                                                                {(file.size / 1000).toFixed(2)} KB
+                                                            </Typography>
+                                                            {docStatus?.pageCount && (
+                                                                <Typography variant="caption" color="text.secondary">
+                                                                    • {docStatus.pageCount} pages
+                                                                </Typography>
+                                                            )}
+                                                            <Chip
+                                                                size="small"
+                                                                label={statusInfo.label}
+                                                                color={statusInfo.chipColor}
+                                                                icon={statusInfo.icon}
+                                                                sx={{ height: 18, fontSize: '0.65rem', ml: 0.5 }}
+                                                            />
+                                                        </Box>
+                                                    }
+                                                />
+                                            </ListItem>
+                                        );
+                                    })}
+                                {files.filter(file =>
+                                    file.documentID && (
+                                        file.mimeType === 'application/pdf' ||
+                                        file.mimeType === 'text/plain' ||
+                                        file.mimeType === 'text/markdown' ||
+                                        file.mimeType === 'text/csv'
+                                    ) && (!search || file.name.toLowerCase().includes(search.toLowerCase()))
+                                ).length === 0 && (
+                                    <ListItem>
+                                        <ListItemText
+                                            primary={
+                                                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+                                                    {search ? 'No documents match your search' : 'No documents available'}
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
+                                )}
+                            </List>
+
+                            {/* Show suggestions if document is selected */}
+                            {selectedDocument && (
+                                <>
                                     {/* Vocabulary Tab */}
                                     {suggestionTab === 0 && (
                                         <SuggestedVocabulary
@@ -1390,20 +1437,6 @@ export default function FileManager() {
                                         />
                                     )}
                                 </>
-                            ) : (
-                                <Box sx={{ p: 2, textAlign: 'center' }}>
-                                    <Typography 
-                                        variant="body2" 
-                                        color="text.secondary" 
-                                        sx={{ 
-                                            whiteSpace: 'normal',
-                                            wordWrap: 'break-word',
-                                            overflowWrap: 'break-word'
-                                        }}
-                                    >
-                                        Select a document to review AI-generated vocabulary and question suggestions
-                                    </Typography>
-                                </Box>
                             )}
                         </Box>
                     )}
@@ -1443,7 +1476,7 @@ export default function FileManager() {
                                                         itemId={file.id}
                                                         key={file.id}
                                                         label={
-                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                                 <ListItemImage file={file} />
                                                                 <Box sx={{ flex: 1, minWidth: 0 }}>
                                                                     <Typography noWrap>{file.name}</Typography>
@@ -1514,7 +1547,7 @@ export default function FileManager() {
                                                         itemId={file.id}
                                                         key={file.id}
                                                         label={
-                                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, py: 1, width: '100%' }}>
+                                                            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
                                                                 <ListItemImage file={file} />
                                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between' }}>
                                                                     <Box sx={{ display: 'flex', gap: 0.5 }}>
@@ -1618,7 +1651,7 @@ export default function FileManager() {
                                                                 itemId={file.id}
                                                                 key={file.id}
                                                                 label={
-                                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+                                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                                         <DocumentIcon
                                                                             color={statusInfo.color}
                                                                             sx={{
@@ -1631,7 +1664,7 @@ export default function FileManager() {
                                                                         />
                                                                         <Box sx={{ flex: 1, minWidth: 0 }}>
                                                                             <Typography noWrap>{file.name}</Typography>
-                                                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                                                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                                                                                 <Typography variant="caption" color="text.secondary">
                                                                                     {(file.size / 1000).toFixed(2)} KB
                                                                                 </Typography>

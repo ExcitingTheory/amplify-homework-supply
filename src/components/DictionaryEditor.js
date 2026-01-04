@@ -1158,7 +1158,7 @@ export function DictionaryEditor() {
     Object.values(files).forEach((file) => {
       _fileOperations.push({
         name: file.name,
-        progress: 0,
+        progress: `%`,
       })
 
     })

@@ -15,6 +15,20 @@ type Mutation {
   chatAssistantThread(assistantId: String!, messages: String!): String @function(name: "openai-${env}")
   analyzeDocument(fileID: ID!): AnalyzeDocumentResult @function(name: "analyzeDocument-${env}")
   cancelDocumentAnalysis(fileID: ID!): CancelDocumentAnalysisResult @function(name: "analyzeDocument-${env}")
+  generateEmbeddings(fileID: ID!): GenerateEmbeddingsResult @function(name: "generateEmbeddings-${env}")
+  generateEmbeddding(
+    content: String!
+    model: String
+    dimensions: Int
+  ): EmbeddingResult @function(name: "generateEmbedding-${env}")
+}
+
+type EmbeddingResult {
+  embedding: [Float!]!
+  model: String!
+  dimensions: Int!
+  tokenCount: Int!
+  error: String
 }
 
 type AnalyzeDocumentResult {
@@ -23,6 +37,7 @@ type AnalyzeDocumentResult {
   documentID: ID
   responseId: String
   pageCount: Int
+  progress: String
   message: String
 }
 
@@ -30,6 +45,14 @@ type CancelDocumentAnalysisResult {
   success: Boolean!
   fileID: ID!
   documentID: ID
+  message: String
+}
+
+type GenerateEmbeddingsResult {
+  success: Boolean!
+  fileID: ID!
+  documentID: ID
+  embeddingCount: Int
   message: String
 }
 
@@ -113,6 +136,11 @@ type Question @model @auth(
   difficulty: String
   metadata: String
   importedAt: AWSDateTime
+  embedding: [Float]
+  embeddingModel: String
+  embeddingDimensions: Int
+  embeddingVersion: AWSTimestamp
+  embeddingWordCount: Int
   # many to many relationships
   units: [Unit] @manyToMany(relationName: "QuestionUnit")
   words: [Word] @manyToMany(relationName: "QuestionWord")
@@ -144,6 +172,7 @@ type File @model @auth(
   byHex: String @index(name: "byHex")
   thumbnail: String # The path to the thumbnail in S3
   waveformData: AWSJSON # Pre-calculated waveform amplitude data for audio files
+  embedding: [Float] # Single embedding for non-PDF files (images, audio, etc.)
   documentID: ID
   document: Document @hasOne(fields: ["documentID"])
   # many to many relationship with units
@@ -180,6 +209,11 @@ type Section @model @auth(rules: [
   identityId: String # The identityId of the owner
   thumbnail: String
   backgroundColor: String
+  embedding: [Float]
+  embeddingModel: String
+  embeddingDimensions: Int
+  embeddingVersion: AWSTimestamp
+  embeddingWordCount: Int
 }
 
 type Assignment @model @auth(
@@ -239,6 +273,13 @@ type Unit @model  @auth(
   featuredImage: String
   identityId: String # The identityId of the owner
   thumbnail: String
+  embedding: [Float]
+  embeddingModel: String
+  embeddingDimensions: Int
+  embeddingVersion: AWSTimestamp
+  embeddingWordCount: Int  
+  publishedAt: AWSTimestamp
+  isDraft: Boolean
   files: [File] @manyToMany(relationName: "UnitFile")
   words: [Word] @manyToMany(relationName: "UnitWord")
   questions: [Question] @manyToMany(relationName: "QuestionUnit")
@@ -265,10 +306,21 @@ type Word @model @auth(
   definitionWaveformData: AWSJSON # Pre-calculated waveform amplitude data for definition audio
   rubyTags: String
   importedAt: AWSDateTime
+  embedding: [Float]
+  embeddingModel: String
+  embeddingDimensions: Int
+  embeddingVersion: AWSTimestamp
+  embeddingWordCount: Int
   units: [Unit] @manyToMany(relationName: "UnitWord")
   files: [File] @manyToMany(relationName: "WordFile")
   questions: [Question] @manyToMany(relationName: "QuestionWord")
   documents: [Document] @manyToMany(relationName: "DocumentWord")
+}
+
+type PageEmbedding {
+  page: Int!
+  embedding: [Float!]!
+  text: String
 }
 
 type Document @model @auth(rules: [
@@ -287,6 +339,8 @@ type Document @model @auth(rules: [
   fileSize: Int
   mimeType: String
   uploadedAt: AWSDateTime
+  resumeState: AWSJSON # State for resuming long-running operations (PDF extraction, analysis)
+  pageEmbeddings: [PageEmbedding] # Page-level embeddings for semantic search
   parsedContent: [ParsedContent] @hasMany(indexName: "byDocument", fields: ["id"])
   agentJobs: [AgentJob] @hasMany(indexName: "byDocument", fields: ["id"])
   metadata: AWSJSON

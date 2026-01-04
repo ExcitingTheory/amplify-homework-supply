@@ -42,6 +42,18 @@ const cancelDocumentAnalysisMutation = /* GraphQL */ `
   }
 `;
 
+const generateEmbeddingsMutation = /* GraphQL */ `
+  mutation GenerateEmbeddings($fileID: ID!) {
+    generateEmbeddings(fileID: $fileID) {
+      success
+      fileID
+      documentID
+      embeddingCount
+      message
+    }
+  }
+`;
+
 /**
  * Upload a file to S3 and create database records
  * @param {File} file - The file to upload
@@ -137,6 +149,18 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
     }
     const fileModel = await DataStore.save(new FileModel(fileData));
     console.log('Created File record:', fileModel);
+
+    // Generate embeddings for the uploaded file (non-blocking)
+    try {
+        // Fire and forget - don't wait for embeddings to complete
+        generateEmbeddings(fileModel.id).catch(error => {
+            console.warn('Failed to generate embeddings:', error);
+            // Don't throw - file upload succeeded
+        });
+    } catch (error) {
+        console.warn('Failed to start embedding generation:', error);
+        // Don't throw - file upload succeeded
+    }
         
     // If unitId provided, link document to unit using many-to-many relationship
     if (documentModel && unitId) {
@@ -246,6 +270,38 @@ export async function analyzePDF(fileId) {
         }
         
         throw new Error(error.message || 'Failed to analyze PDF - unknown error');
+    }
+}
+
+/**
+ * Generate embeddings for a file
+ * @param {string} fileId - File ID to generate embeddings for
+ * @returns {Promise<Object>} Generation result
+ */
+export async function generateEmbeddings(fileId) {
+    try {
+        const result = await client.graphql({
+            query: generateEmbeddingsMutation,
+            variables: { fileID: fileId }
+        });
+
+        if (!result.data.generateEmbeddings) {
+            if (result.errors && result.errors.length > 0) {
+                const error = result.errors[0];
+                throw new Error(error.message || 'Embedding generation failed');
+            }
+            throw new Error('Embedding generation returned no data');
+        }
+
+        if (result.data.generateEmbeddings.success) {
+            console.log('Embeddings generated:', result.data.generateEmbeddings);
+            return result.data.generateEmbeddings;
+        } else {
+            throw new Error(result.data.generateEmbeddings.message || 'Embedding generation failed');
+        }
+    } catch (error) {
+        console.error('Error generating embeddings:', error);
+        throw new Error(error.message || 'Failed to generate embeddings');
     }
 }
 

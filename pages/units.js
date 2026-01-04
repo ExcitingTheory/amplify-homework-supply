@@ -86,42 +86,22 @@ function Units() {
     const router = useRouter()
 
 
+    // Consolidated Unit observer - handles published, archived, and draft units with client-side filtering
     useEffect(() => {
-        fetchPublishedUnits()
-        async function fetchPublishedUnits() {
-            const unitData = await DataStore.query(Unit, (u) => u.status.eq('PUBLISHED'))
-            setPublishedUnits(unitData)
+        fetchAllUnits()
+        async function fetchAllUnits() {
+            const unitData = await DataStore.query(Unit)
+            
+            // Filter client-side by status
+            const published = unitData.filter(u => u.status === 'PUBLISHED')
+            const archived = unitData.filter(u => u.status === 'ARCHIVED')
+            const draft = unitData.filter(u => u.status !== 'ARCHIVED' && u.status !== 'PUBLISHED')
+            
+            setPublishedUnits(published)
+            setArchivedUnits(archived)
+            setDraftUnits(draft)
         }
-        const subscription = DataStore.observe(Unit).subscribe(() => fetchPublishedUnits())
-
-        return function cleanup() {
-            subscription.unsubscribe();
-        }
-    }, [])
-
-    useEffect(() => {
-        fetchArchivedUnits()
-        async function fetchArchivedUnits() {
-            const unitData = await DataStore.query(Unit, (u) => u.status.eq('ARCHIVED'))
-            setArchivedUnits(unitData)
-        }
-        const subscription = DataStore.observe(Unit).subscribe(() => fetchArchivedUnits())
-
-        return function cleanup() {
-            subscription.unsubscribe();
-        }
-    }, [])
-
-    useEffect(() => {
-        fetchDraftUnits()
-        async function fetchDraftUnits() {
-            const unitData = await DataStore.query(Unit, (u) => u.and(u => [
-                u.status.ne('ARCHIVED'),
-                u.status.ne('PUBLISHED')
-            ]))
-            setDraftUnits(unitData)
-        }
-        const subscription = DataStore.observe(Unit).subscribe(() => fetchDraftUnits())
+        const subscription = DataStore.observe(Unit).subscribe(() => fetchAllUnits())
 
         return function cleanup() {
             subscription.unsubscribe();

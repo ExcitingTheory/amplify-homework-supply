@@ -1,0 +1,1881 @@
+'use strict';
+import React from 'react';
+
+// Lexical imports
+import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { HistoryPlugin, createEmptyHistoryState } from '@lexical/react/LexicalHistoryPlugin';
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
+import {
+    DecoratorNode,
+    $getRoot,
+    $createParagraphNode,
+    $createTextNode,
+    createCommand,
+} from 'lexical';
+
+// MUI imports
+import {
+    Alert,
+    Box,
+    Button,
+    Checkbox,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    Divider,
+    IconButton,
+    List,
+    ListItem,
+    Menu,
+    MenuItem,
+    Snackbar,
+    TextField,
+    Tooltip,
+    Typography,
+    useTheme,
+    Tabs,
+    Tab,
+} from '@mui/material';
+import {
+    Delete as DeleteIcon,
+    Description,
+    ExpandLess,
+    ExpandMore,
+    MoreVert as MoreVertIcon,
+    Mic as MicIcon,
+    LibraryBooks as RubyIcon,
+} from '@mui/icons-material';
+import CircularProgress from '@mui/material/CircularProgress';
+import RecordingStudioEnhanced from './RecordingStudioEnhanced';
+
+// Context imports
+import DictionaryContext from '../context/dictionaryContext';
+import FilesContext from '../context/fileContext';
+import UnitContext from '../context/unitContext';
+
+// GraphQL imports
+import { generateClient } from 'aws-amplify/api';
+import { createWord, updateWord as updateWordMutation, deleteWord as deleteWordMutation } from '../graphql/mutations';
+import { DataStore } from 'aws-amplify/datastore';
+import { Word } from '../models';
+import { uploadData } from 'aws-amplify/storage';
+
+// TanStack Virtual
+import { useVirtualizer } from '@tanstack/react-virtual';
+
+const client = generateClient();
+
+// Commands for word operations
+const UPDATE_WORD_COMMAND = createCommand('UPDATE_WORD');
+const DELETE_WORD_COMMAND = createCommand('DELETE_WORD');
+const POPULATE_WORDS_COMMAND = createCommand('POPULATE_WORDS');
+
+// Helper functions
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
+const deduplicateUrls = (urls) => {
+    const set = new Set(urls);
+    return Array.from(set);
+};
+
+const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+};
+
+// Convert blob to base64 for serialization
+const blobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+};
+
+// Convert base64 to blob for deserialization
+const base64ToBlob = (base64, mimeType = 'audio/ogg') => {
+    const byteString = atob(base64.split(',')[1]);
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab], { type: mimeType });
+};
+
+// Conversion function for importing word nodes from HTML
+function convertWordElement(domNode) {
+    const wordId = domNode.getAttribute('data-lexical-word-id');
+    const phrase = domNode.getAttribute('data-lexical-word-phrase') || '';
+    const pronunciation = domNode.getAttribute('data-lexical-word-pronunciation') || '';
+    const definition = domNode.getAttribute('data-lexical-word-definition') || '';
+    const rubyTags = domNode.getAttribute('data-lexical-word-ruby-tags') || '';
+    const version = domNode.getAttribute('data-lexical-word-version') || '1';
+
+    // Parse audio keys
+    let audio = [];
+    const audioKeysAttr = domNode.getAttribute('data-lexical-audio-keys');
+    if (audioKeysAttr) {
+        try {
+            audio = JSON.parse(audioKeysAttr);
+        } catch (e) {
+            console.error('Failed to parse audio keys:', e);
+        }
+    }
+
+    // Parse audio URLs from script tag if present
+    const audioScript = domNode.querySelector('script.lexical-word-audio-data');
+    let audioData = null;
+    if (audioScript) {
+        try {
+            audioData = JSON.parse(audioScript.textContent);
+        } catch (e) {
+            console.error('Failed to parse audio data:', e);
+        }
+    }
+
+    // Create the node with imported data
+    const node = $createWordDecoratorNode(
+        wordId,
+        phrase,
+        pronunciation,
+        definition,
+        audio,
+        rubyTags,
+        parseInt(version, 10),
+        true, // isExpanded
+        false, // isSelected
+        '', // searchTerm
+        null, // sharedHistory - will be set by plugin
+        null, // onUpdate - will be set by plugin
+        null, // onDelete - will be set by plugin
+        null, // onToggleExpand - will be set by plugin
+        null, // onToggleSelect - will be set by plugin
+        null, // onOpenRubyDialog - will be set by plugin
+        {}, // audioFiles - would be populated from audioData if needed
+        '', // identityId
+        0 // index
+    );
+
+    return { node };
+}
+
+// Helper function for text width calculation
+function getTextWidth(text) {
+    const element = document.createElement('span');
+    element.style.position = 'absolute';
+    element.style.visibility = 'hidden';
+    element.style.whiteSpace = 'nowrap';
+    element.textContent = text;
+    document.body.appendChild(element);
+    const style = getComputedStyle(element);
+    const font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${style.fontFamily}`;
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    context.font = font;
+    const metrics = context.measureText(text);
+    document.body.removeChild(element);
+    return metrics.width;
+}
+
+// =============================================================================
+// RubyTagEditor - Text selection based interface (from original DictionaryEditor)
+// =============================================================================
+
+function RubyTagEditor({ inPhrase, inPronunciation, word }) {
+    const [phrase, setPhrase] = React.useState(inPhrase);
+    const [pronunciation, setPronunciation] = React.useState(inPronunciation);
+    const [selectedPhrase, setSelectedPhrase] = React.useState('');
+    const [selectedPronunciation, setSelectedPronunciation] = React.useState('');
+    const [editorOpen, setEditorOpen] = React.useState(false);
+    const [loading, setLoading] = React.useState(false);
+
+    const [selectionStart, setSelectionStart] = React.useState(null);
+    const [selectionEnd, setSelectionEnd] = React.useState(null);
+    const [rubyTags, setRubyTags] = React.useState([]);
+
+    const pronunciationWidth = getTextWidth(inPronunciation);
+    const phraseWidth = getTextWidth(inPhrase);
+    const phraseWidthDyn = getTextWidth(phrase);
+    const pronunciationWidthDyn = getTextWidth(pronunciation);
+
+    const maxPhraseWidth = Math.max(phraseWidth, pronunciationWidth);
+    const maxPhraseWidthDyn = Math.max(phraseWidthDyn, pronunciationWidthDyn);
+
+    const doNothing = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const _setRubyTags = (rubyTag) => {
+        setRubyTags([...rubyTags, rubyTag]);
+    }
+
+    const handlePhraseChange = (event) => {
+        setPhrase(event.target.value);
+    }
+
+    const handlePronunciationChange = (event) => {
+        setPronunciation(event.target.value);
+    }
+
+    const handleSelectionStart = (event) => {
+        setSelectionStart(event.target.selectionStart);
+    }
+
+    const handleSelectionEndPhrase = (event) => {
+        const selectionEnd = event.target.selectionEnd;
+        if (selectionStart !== null && selectionEnd !== selectionStart) {
+            const selectedPhrase = phrase.substring(selectionStart, selectionEnd);
+            setPhrase(phrase.replace(selectedPhrase, ''));
+            setSelectedPhrase(selectedPhrase);
+            setSelectionStart(null);
+
+            if (selectedPhrase.length > 0 && selectedPronunciation.length > 0) {
+                _setRubyTags(`${selectedPhrase}<rt>${selectedPronunciation}</rt>`);
+                setSelectedPhrase('');
+                setSelectedPronunciation('');
+            }
+        }
+    }
+
+    const handleSelectionEndPronunciation = (event) => {
+        const selectionEnd = event.target.selectionEnd;
+        if (selectionStart !== null && selectionEnd !== selectionStart) {
+            const selectedPronunciation = pronunciation.substring(selectionStart, selectionEnd);
+            setPronunciation(pronunciation.replace(selectedPronunciation, ''));
+            setSelectedPronunciation(selectedPronunciation);
+            setSelectionStart(null);
+
+            if (selectedPhrase.length > 0 && selectedPronunciation.length > 0) {
+                _setRubyTags(`${selectedPhrase}<rt>${selectedPronunciation}</rt>`);
+                setSelectedPhrase('');
+                setSelectedPronunciation('');
+            }
+        }
+    }
+
+    React.useEffect(() => {
+        if (!inPhrase && !inPronunciation) {
+            return
+        }
+
+        setPhrase(inPhrase);
+        setPronunciation(inPronunciation);
+    }, [inPhrase, inPronunciation]);
+
+    const rubyTagsString = rubyTags.join(' ');
+
+    let hideAll = false;
+
+    if (selectedPhrase === '' &&
+        phrase === '' &&
+        selectedPronunciation === '' &&
+        pronunciation === '' &&
+        selectionStart === null &&
+        selectionEnd === null &&
+        editorOpen) {
+        hideAll = true;
+    }
+
+    return (
+        <div
+            style={{
+                width: `${maxPhraseWidth + 20}px`,
+                textWrap: 'nowrap',
+            }}
+        >
+            {!editorOpen && !word?.rubyTags &&
+                <ruby
+                    onClick={() => setEditorOpen(true)}
+                    onContextMenu={doNothing}
+                >
+                    {inPhrase}
+                    <rt>{inPronunciation}</rt>
+                </ruby>
+            }
+            {!editorOpen && word?.rubyTags &&
+                <ruby
+                    onClick={() => setEditorOpen(true)}
+                    onContextMenu={doNothing}
+                    dangerouslySetInnerHTML={{ __html: word.rubyTags }}>
+                </ruby>
+            }
+            {editorOpen &&
+                <>
+                    {!hideAll &&
+                        <>
+                            <style>
+                                {`
+          input::selection {
+            background-color: yellow;
+            color: black;
+          }
+          input {
+            user-select: text;
+          }
+          .selected-text {
+            background-color: yellow;
+            color: black;
+            user-select: none;
+          }
+        `}
+                            </style>
+                            <div
+                                style={{
+                                    width: `${maxPhraseWidth + 20}px`,
+                                }}
+                            >
+                                {selectedPronunciation !== null && (
+                                    <div
+                                        style={{
+                                            backgroundColor: 'yellow',
+                                            color: 'black',
+                                            userSelect: 'none',
+                                            display: 'inline-block',
+                                        }}
+                                    >
+                                        {selectedPronunciation}
+                                    </div>
+                                )}
+                                <input
+                                    style={{
+                                        caretColor: 'black',
+                                        border: 'none',
+                                        padding: 0,
+                                        margin: 0,
+                                        display: 'inline-block',
+                                        width: `${maxPhraseWidthDyn}px`,
+                                    }}
+                                    type="text"
+                                    value={pronunciation}
+                                    onClick={doNothing}
+                                    onChange={handlePronunciationChange}
+                                    onSelect={handleSelectionStart}
+                                    onBlur={handleSelectionEndPronunciation} />
+                            </div>
+                            <div
+                                style={{
+                                    width: `${maxPhraseWidth + 20}px`,
+                                }}>
+                                {selectedPhrase !== null && (
+                                    <Typography
+                                        style={{
+                                            backgroundColor: 'yellow',
+                                            color: 'black',
+                                            userSelect: 'none',
+                                        }}
+                                    >
+                                        {selectedPhrase}
+                                    </Typography>
+                                )}
+                                <input
+                                    style={{
+                                        caretColor: 'black',
+                                        border: 'none',
+                                        padding: 0,
+                                        margin: 0,
+                                        display: 'inline-block',
+                                        width: `${maxPhraseWidthDyn}px`,
+                                    }}
+                                    type="text"
+                                    value={phrase}
+                                    onClick={doNothing}
+                                    onChange={handlePhraseChange}
+                                    onSelect={handleSelectionStart}
+                                    onBlur={handleSelectionEndPhrase} />
+                            </div>
+                        </>
+                    }
+                    <>
+                        <ruby dangerouslySetInnerHTML={{ __html: rubyTagsString }} />
+                    </>
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            width: `${maxPhraseWidth + 20}px`,
+                            flexDirection: 'column',
+                        }}
+                    >
+                        <Button
+                            size='small'
+                            color='inherit'
+                            disabled={loading}
+                            onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }}
+                        >Add</Button>
+                        <Button
+                            size='small'
+                            color='error'
+                            disabled={loading}
+                            onClick={() => {
+                                setEditorOpen(false);
+                                setRubyTags([]);
+                                setSelectedPhrase('');
+                                setSelectedPronunciation('');
+                                setSelectionStart(null);
+                                setSelectionEnd(null);
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            size='small'
+                            color='primary'
+                            disabled={loading}
+                            onClick={async () => {
+                                setLoading(true);
+
+                                await DataStore.save(Word.copyOf(word, updated => {
+                                    updated.rubyTags = rubyTagsString;
+                                }));
+
+                                setEditorOpen(false);
+                                setRubyTags([]);
+                                setSelectedPhrase('');
+                                setSelectedPronunciation('');
+                                setSelectionStart(null);
+                                setSelectionEnd(null);
+                                setLoading(false);
+                            }}
+                        >
+                            Save
+                        </Button>
+                    </div>
+
+
+                </>}
+        </div>
+    );
+}
+
+// =============================================================================
+// WordDecoratorNode - Represents a single vocabulary word in the editor
+// =============================================================================
+
+class WordDecoratorNode extends DecoratorNode {
+    __wordId;
+    __phrase;
+    __pronunciation;
+    __definition;
+    __audio;
+    __rubyTags;
+    __version;
+    __isExpanded;
+    __isSelected;
+    __searchTerm;
+    __sharedHistory;
+    __onUpdate;
+    __onDelete;
+    __onToggleExpand;
+    __onToggleSelect;
+    __onOpenRubyDialog;
+    __audioFiles;
+    __identityId;
+    __index;
+
+    static getType() {
+        return 'word-decorator';
+    }
+
+    static clone(node) {
+        return new WordDecoratorNode(
+            node.__wordId,
+            node.__phrase,
+            node.__pronunciation,
+            node.__definition,
+            node.__audio,
+            node.__rubyTags,
+            node.__version,
+            node.__isExpanded,
+            node.__isSelected,
+            node.__searchTerm,
+            node.__sharedHistory,
+            node.__onUpdate,
+            node.__onDelete,
+            node.__onToggleExpand,
+            node.__onToggleSelect,
+            node.__onOpenRubyDialog,
+            node.__audioFiles,
+            node.__identityId,
+            node.__index,
+            node.__key
+        );
+    }
+
+    constructor(
+        wordId,
+        phrase,
+        pronunciation,
+        definition,
+        audio,
+        rubyTags,
+        version,
+        isExpanded = true,
+        isSelected = false,
+        searchTerm = '',
+        sharedHistory = null,
+        onUpdate = null,
+        onDelete = null,
+        onToggleExpand = null,
+        onToggleSelect = null,
+        onOpenRubyDialog = null,
+        audioFiles = {},
+        identityId = '',
+        index = 0,
+        key
+    ) {
+        super(key);
+        this.__wordId = wordId;
+        this.__phrase = phrase;
+        this.__pronunciation = pronunciation;
+        this.__definition = definition;
+        this.__audio = audio || [];
+        this.__rubyTags = rubyTags || '';
+        this.__version = version;
+        this.__isExpanded = isExpanded;
+        this.__isSelected = isSelected;
+        this.__searchTerm = searchTerm;
+        this.__sharedHistory = sharedHistory;
+        this.__onUpdate = onUpdate;
+        this.__onDelete = onDelete;
+        this.__onToggleExpand = onToggleExpand;
+        this.__onToggleSelect = onToggleSelect;
+        this.__onOpenRubyDialog = onOpenRubyDialog;
+        this.__audioFiles = audioFiles;
+        this.__identityId = identityId;
+        this.__index = index;
+    }
+
+    static importJSON(serializedNode) {
+        const {
+            wordId,
+            phrase,
+            pronunciation,
+            definition,
+            audio,
+            rubyTags,
+            version,
+            isExpanded,
+            isSelected,
+            index,
+        } = serializedNode;
+        return $createWordDecoratorNode(
+            wordId,
+            phrase,
+            pronunciation,
+            definition,
+            audio,
+            rubyTags,
+            version,
+            isExpanded,
+            isSelected,
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            {},
+            '',
+            index
+        );
+    }
+
+    exportJSON() {
+        return {
+            type: 'word-decorator',
+            wordId: this.__wordId,
+            phrase: this.__phrase,
+            pronunciation: this.__pronunciation,
+            definition: this.__definition,
+            audio: this.__audio,
+            rubyTags: this.__rubyTags,
+            version: this.__version,
+            isExpanded: this.__isExpanded,
+            index: this.__index,
+            version: 1,
+        };
+    }
+
+    updateWord(updates) {
+        const writable = this.getWritable();
+        if (updates.phrase !== undefined) writable.__phrase = updates.phrase;
+        if (updates.pronunciation !== undefined) writable.__pronunciation = updates.pronunciation;
+        if (updates.definition !== undefined) writable.__definition = updates.definition;
+        if (updates.audio !== undefined) writable.__audio = updates.audio;
+        if (updates.rubyTags !== undefined) writable.__rubyTags = updates.rubyTags;
+        if (updates._version !== undefined) writable.__version = updates._version;
+    }
+
+    setExpanded(isExpanded) {
+        const writable = this.getWritable();
+        writable.__isExpanded = isExpanded;
+    }
+
+    setSelected(isSelected) {
+        const writable = this.getWritable();
+        writable.__isSelected = isSelected;
+    }
+
+    setSearchTerm(searchTerm) {
+        const writable = this.getWritable();
+        writable.__searchTerm = searchTerm;
+    }
+
+    createDOM(config) {
+        const div = document.createElement('div');
+        div.setAttribute('data-lexical-word-id', this.__wordId);
+        div.setAttribute('data-lexical-word-phrase', this.__phrase || '');
+        div.setAttribute('data-lexical-word-pronunciation', this.__pronunciation || '');
+        div.setAttribute('data-lexical-word-definition', this.__definition || '');
+        div.setAttribute('data-lexical-word-ruby-tags', this.__rubyTags || '');
+        div.setAttribute('data-lexical-word-version', this.__version || '1');
+
+        // Audio URLs (S3 keys)
+        if (this.__audio && this.__audio.length > 0) {
+            div.setAttribute('data-lexical-audio-keys', JSON.stringify(this.__audio));
+        }
+
+        // Store fully formed S3 URLs if available
+        if (this.__audioFiles && this.__audio && this.__audio.length > 0) {
+            const audioUrls = this.__audio.map(key => {
+                const file = this.__audioFiles[key];
+                return file ? { key, url: file.url } : null;
+            }).filter(Boolean);
+
+            if (audioUrls.length > 0) {
+                div.setAttribute('data-lexical-audio-urls', JSON.stringify(audioUrls));
+            }
+        }
+
+        return div;
+    }
+
+    // Async method to export word with audio blobs as base64
+    async exportDOMWithAudio() {
+        const element = document.createElement('div');
+        element.setAttribute('data-lexical-word-id', this.__wordId);
+        element.setAttribute('data-lexical-word-phrase', this.__phrase || '');
+        element.setAttribute('data-lexical-word-pronunciation', this.__pronunciation || '');
+        element.setAttribute('data-lexical-word-definition', this.__definition || '');
+        element.setAttribute('data-lexical-word-ruby-tags', this.__rubyTags || '');
+        element.setAttribute('data-lexical-word-version', this.__version || '1');
+
+        // Audio URLs (S3 keys)
+        if (this.__audio && this.__audio.length > 0) {
+            element.setAttribute('data-lexical-audio-keys', JSON.stringify(this.__audio));
+        }
+
+        // Store fully formed S3 URLs and base64 audio blobs
+        if (this.__audioFiles && this.__audio && this.__audio.length > 0) {
+            const audioUrls = [];
+            const audioBlobs = [];
+
+            for (const key of this.__audio) {
+                const file = this.__audioFiles[key];
+                if (file) {
+                    audioUrls.push({ key, url: file.url });
+
+                    // Convert blob to base64
+                    if (file.blob) {
+                        const base64 = await blobToBase64(file.blob);
+                        audioBlobs.push({
+                            key,
+                            base64,
+                            url: file.url,
+                        });
+                    }
+                }
+            }
+
+            if (audioUrls.length > 0) {
+                element.setAttribute('data-lexical-audio-urls', JSON.stringify(audioUrls));
+            }
+
+            if (audioBlobs.length > 0) {
+                const script = document.createElement('script');
+                script.type = 'application/json';
+                script.className = 'lexical-word-audio-data';
+                script.setAttribute('data-word-id', this.__wordId);
+                script.textContent = JSON.stringify(audioBlobs);
+                element.appendChild(script);
+            }
+        }
+
+        return { element };
+    }
+
+    exportDOM() {
+        const element = document.createElement('div');
+        element.setAttribute('data-lexical-word-id', this.__wordId);
+        element.setAttribute('data-lexical-word-phrase', this.__phrase || '');
+        element.setAttribute('data-lexical-word-pronunciation', this.__pronunciation || '');
+        element.setAttribute('data-lexical-word-definition', this.__definition || '');
+        element.setAttribute('data-lexical-word-ruby-tags', this.__rubyTags || '');
+        element.setAttribute('data-lexical-word-version', this.__version || '1');
+
+        // Audio URLs (S3 keys)
+        if (this.__audio && this.__audio.length > 0) {
+            element.setAttribute('data-lexical-audio-keys', JSON.stringify(this.__audio));
+        }
+
+        // Store fully formed S3 URLs if available
+        if (this.__audioFiles && this.__audio && this.__audio.length > 0) {
+            const audioUrls = this.__audio.map(key => {
+                const file = this.__audioFiles[key];
+                return file ? { key, url: file.url } : null;
+            }).filter(Boolean);
+
+            if (audioUrls.length > 0) {
+                element.setAttribute('data-lexical-audio-urls', JSON.stringify(audioUrls));
+            }
+        }
+
+        // Note: Audio blobs are NOT included in synchronous exportDOM
+        // Use exportDOMWithAudio() for complete serialization with base64 audio
+
+        return { element };
+    }
+
+    static importDOM() {
+        return {
+            div: (domNode) => {
+                if (!domNode.hasAttribute('data-lexical-word-id')) {
+                    return null;
+                }
+                return {
+                    conversion: convertWordElement,
+                    priority: 1,
+                };
+            },
+        };
+    }
+
+    updateDOM() {
+        return false;
+    }
+
+    decorate() {
+        return (
+            <WordRowComponent
+                wordId={this.__wordId}
+                phrase={this.__phrase}
+                pronunciation={this.__pronunciation}
+                definition={this.__definition}
+                audio={this.__audio}
+                rubyTags={this.__rubyTags}
+                version={this.__version}
+                isExpanded={this.__isExpanded}
+                isSelected={this.__isSelected}
+                searchTerm={this.__searchTerm}
+                sharedHistory={this.__sharedHistory}
+                onUpdate={this.__onUpdate}
+                onDelete={this.__onDelete}
+                onToggleExpand={this.__onToggleExpand}
+                onToggleSelect={this.__onToggleSelect}
+                onOpenRubyDialog={this.__onOpenRubyDialog}
+                audioFiles={this.__audioFiles}
+                identityId={this.__identityId}
+                index={this.__index}
+                nodeKey={this.__key}
+            />
+        );
+    }
+
+    isInline() {
+        return false;
+    }
+
+    isTopLevel() {
+        return true;
+    }
+}
+
+function $createWordDecoratorNode(
+    wordId,
+    phrase,
+    pronunciation,
+    definition,
+    audio,
+    rubyTags,
+    version,
+    isExpanded,
+    isSelected,
+    searchTerm,
+    sharedHistory,
+    onUpdate,
+    onDelete,
+    onToggleExpand,
+    onToggleSelect,
+    onOpenRubyDialog,
+    audioFiles,
+    identityId,
+    index
+) {
+    return new WordDecoratorNode(
+        wordId,
+        phrase,
+        pronunciation,
+        definition,
+        audio,
+        rubyTags,
+        version,
+        isExpanded,
+        isSelected,
+        searchTerm,
+        sharedHistory,
+        onUpdate,
+        onDelete,
+        onToggleExpand,
+        onToggleSelect,
+        onOpenRubyDialog,
+        audioFiles,
+        identityId,
+        index
+    );
+}
+
+function $isWordDecoratorNode(node) {
+    return node instanceof WordDecoratorNode;
+}
+
+// =============================================================================
+// WordRowComponent - The React component rendered by WordDecoratorNode
+// =============================================================================
+
+function WordRowComponent({
+    wordId,
+    phrase,
+    pronunciation,
+    definition,
+    audio,
+    rubyTags,
+    version,
+    isExpanded,
+    isSelected,
+    searchTerm,
+    sharedHistory,
+    onUpdate,
+    onDelete,
+    onToggleExpand,
+    onToggleSelect,
+    onOpenRubyDialog,
+    audioFiles,
+    identityId,
+    index,
+    nodeKey,
+}) {
+    const [isDragging, setIsDragging] = React.useState(false);
+    const [fileOperations, setFileOperations] = React.useState([]);
+    const [audioFilesToUpload, setAudioFilesToUpload] = React.useState([]);
+    const [recordingDialogOpen, setRecordingDialogOpen] = React.useState(false);
+    const [rubyDialogOpen, setRubyDialogOpen] = React.useState(false);
+    const { unit } = React.useContext(UnitContext);
+
+    // Get the actual word object for RubyTagEditor
+    const { filteredDictionary: dictionary } = React.useContext(DictionaryContext);
+    const word = React.useMemo(() => {
+        return dictionary ? Object.values(dictionary).find(w => w.id === wordId) : null;
+    }, [dictionary, wordId]);
+
+    const isEvenRow = index % 2 === 0;
+    const audioUrls = audio || [];
+    const hasAudio = audioUrls.length > 0;
+
+    // Handle audio file uploads
+    React.useEffect(() => {
+        const asyncFunc = async () => {
+            if (audioFilesToUpload.length === 0) return;
+
+            const _audio = [];
+            for (let i = 0; i < audioFilesToUpload.length; i++) {
+                const { file, name } = audioFilesToUpload[i];
+
+                try {
+                    const result = await uploadData({
+                        key: `audio/${identityId}/${name}`,
+                        data: file,
+                        options: {
+                            contentType: 'audio/ogg',
+                            onProgress: ({ transferredBytes, totalBytes }) => {
+                                if (totalBytes) {
+                                    const percentage = Math.round((transferredBytes / totalBytes) * 100);
+                                    setFileOperations((prev) =>
+                                        prev.map((op, idx) =>
+                                            idx === i ? { ...op, progress: `${percentage}%` } : op
+                                        )
+                                    );
+                                }
+                            },
+                        },
+                    }).result;
+
+                    _audio.push(result.key);
+                } catch (error) {
+                    console.error('Error uploading file:', error);
+                }
+            }
+
+            if (_audio.length > 0 && onUpdate) {
+                const newAudio = deduplicateUrls([...audioUrls, ..._audio]);
+                await onUpdate(wordId, { audio: newAudio }, version);
+            }
+
+            setAudioFilesToUpload([]);
+            setFileOperations([]);
+        };
+
+        asyncFunc();
+    }, [audioFilesToUpload]);
+
+    const handleDragOver = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setIsDragging(true);
+    };
+
+    const handleDrop = async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const files = Array.from(event.dataTransfer.files);
+        const _toupload = files.map((f, index) => ({
+            file: f,
+            name: `${unit.id}_${wordId}_${Date.now()}_${index}.ogg`,
+        }));
+
+        const _fileOperations = files.map((f) => ({ name: f.name, progress: '0%' }));
+
+        setAudioFilesToUpload(_toupload);
+        setFileOperations(_fileOperations);
+        setIsDragging(false);
+    };
+
+    const handleDragLeave = (e) => {
+        if (e.currentTarget === e.target) {
+            setIsDragging(false);
+        }
+    };
+
+    const confirmDeleteWord = async () => {
+        // This function is a placeholder - deletion is now handled via the passed onDelete callback
+        // which will trigger the confirmation dialog in the parent component
+        if (onDelete) {
+            await onDelete(wordId, phrase);
+        }
+    };
+
+    const matchesSearch = searchTerm && (
+        (phrase && phrase.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (pronunciation && pronunciation.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (definition && definition.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+    return (
+        <ListItem
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onDragLeave={handleDragLeave}
+            sx={{
+                backgroundColor: isEvenRow ? 'background.paper' : 'grey.50',
+                flexDirection: 'column',
+                alignItems: 'stretch',
+                padding: 0,
+                margin: 0,
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+                '&:hover': {
+                    backgroundColor: 'action.hover',
+                },
+            }}
+        >
+            {/* Header with controls */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0,
+                    justifyContent: 'space-between',
+                    padding: 1,
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    //   minHeight: 24,
+                }}
+            >
+                <Box sx={{ display: 'flex', gap: 0, alignItems: 'center' }}>
+                    <Checkbox
+                        size="small"
+                        checked={isSelected}
+                        onChange={(e) => {
+                            e.stopPropagation();
+                            if (onToggleSelect) onToggleSelect(wordId);
+                        }}
+                        sx={{ p: 0.25 }}
+                    />
+                    <IconButton
+                        size="small"
+                        title={isExpanded ? 'Collapse' : 'Expand'}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (onToggleExpand) onToggleExpand(wordId);
+                        }}
+                        sx={{ paddingLeft: 1 }}
+                    >
+                        {!isExpanded ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
+                    </IconButton>
+                </Box>
+
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    <Tooltip title="Ruby Tags">
+                        <IconButton
+                            size="small"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setRubyDialogOpen(true);
+                            }}
+                            color={rubyTags ? "secondary" : "default"}
+                        >
+                            <RubyIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="Recording Studio">
+                        <IconButton
+                            size="small"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setRecordingDialogOpen(true);
+                            }}
+                            color={hasAudio ? "primary" : "default"}
+                        >
+                            <MicIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+            </Box>
+
+            {/* Phrase field - shown when collapsed */}
+            {!isExpanded && (<>
+                <NestedWordField
+                    value={phrase}
+                    field="phrase"
+                    wordId={wordId}
+                    version={version}
+                    onSave={onUpdate}
+                    sharedHistory={sharedHistory}
+                    searchTerm={searchTerm}
+                />
+                <NestedWordField
+                    value={definition}
+                    field="definition"
+                    wordId={wordId}
+                    version={version}
+                    onSave={onUpdate}
+                    sharedHistory={sharedHistory}
+                    searchTerm={searchTerm}
+                />
+            </>)}
+
+            {/* Expanded content - Word Data */}
+            {isExpanded && (
+                <Box sx={{ width: '100%', position: 'relative' }}>
+                    {isDragging && (
+                        <Box
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                            onDragLeave={handleDragLeave}
+                            sx={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                zIndex: 100,
+                                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                                backdropFilter: 'blur(3px)',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                color: '#000',
+                                fontSize: '2rem',
+                                fontWeight: 'bold',
+                                textAlign: 'center',
+                            }}
+                        >
+                            {`Upload Ogg Audio for ${phrase} (${pronunciation})`}
+                        </Box>
+                    )}
+
+                    <NestedWordField
+                        value={phrase}
+                        field="phrase"
+                        wordId={wordId}
+                        version={version}
+                        onSave={onUpdate}
+                        sharedHistory={sharedHistory}
+                        searchTerm={searchTerm}
+                        label="Phrase: "
+                    />
+                    <NestedWordField
+                        value={pronunciation}
+                        field="pronunciation"
+                        wordId={wordId}
+                        version={version}
+                        onSave={onUpdate}
+                        sharedHistory={sharedHistory}
+                        searchTerm={searchTerm}
+                        label="Pronunciation: "
+                    />
+                    <NestedWordField
+                        value={definition}
+                        field="definition"
+                        wordId={wordId}
+                        version={version}
+                        onSave={onUpdate}
+                        sharedHistory={sharedHistory}
+                        searchTerm={searchTerm}
+                        label="Definition: "
+                    />
+                </Box>)}
+
+
+
+
+            {/* Ruby Tags Dialog */}
+            <Dialog
+                open={rubyDialogOpen}
+                onClose={() => setRubyDialogOpen(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>
+                    Ruby Tags - {phrase}
+                </DialogTitle>
+                <DialogContent>
+                    <RubyTagEditor
+                        inPhrase={phrase}
+                        inPronunciation={pronunciation}
+                        word={word}
+                    />
+                </DialogContent>
+            </Dialog>
+
+            {/* Recording Studio Dialog */}
+            <Dialog
+                open={recordingDialogOpen}
+                onClose={() => setRecordingDialogOpen(false)}
+                maxWidth="lg"
+                fullWidth
+            >
+                <DialogTitle>
+                    Recording Studio - {phrase}
+                </DialogTitle>
+                <DialogContent>
+                    <RecordingStudioEnhanced
+                        gradeId={unit?.id}
+                        nodeKey={wordId}
+                        onRecordingComplete={(audioData) => {
+                            console.log('Recording complete:', audioData);
+                            setRecordingDialogOpen(false);
+                        }}
+                        metadata={{
+                            wordId: wordId,
+                            phrase: phrase,
+                            pronunciation: pronunciation,
+                            definition: definition,
+                        }}
+                        initialTracks={[
+                            { id: 'phrase', prompt: 'Phrase', voice: 'alloy' },
+                            { id: 'pronunciation', prompt: 'Pronunciation', voice: 'shimmer' },
+                            { id: 'definition', prompt: 'Definition', voice: 'nova' },
+                        ]}
+                    />
+                </DialogContent>
+            </Dialog>
+
+            {/* Recording Studio Dialog */}
+            <Dialog
+                open={recordingDialogOpen}
+                onClose={() => setRecordingDialogOpen(false)}
+                maxWidth="lg"
+                fullWidth
+            >
+                <DialogTitle>
+                    Recording Studio - {phrase}
+                </DialogTitle>
+                <DialogContent>
+                    <RecordingStudioEnhanced
+                        gradeId={unit?.id}
+                        nodeKey={wordId}
+                        onRecordingComplete={(audioData) => {
+                            console.log('Recording complete:', audioData);
+                            setRecordingDialogOpen(false);
+                        }}
+                        metadata={{
+                            wordId: wordId,
+                            phrase: phrase,
+                            pronunciation: pronunciation,
+                            definition: definition,
+                        }}
+                        initialTracks={[
+                            { id: 'phrase', prompt: 'Phrase', voice: 'alloy' },
+                            { id: 'pronunciation', prompt: 'Pronunciation', voice: 'shimmer' },
+                            { id: 'definition', prompt: 'Definition', voice: 'nova' },
+                        ]}
+                    />
+                </DialogContent>
+            </Dialog>
+
+        </ListItem>
+    );
+}
+
+
+
+// =============================================================================
+// NestedWordField - Individual field editor with Lexical
+// =============================================================================
+
+function NestedWordField({
+    value,
+    field,
+    wordId,
+    version,
+    onSave,
+    sharedHistory,
+    searchTerm,
+    placeholder,
+    label = '',
+}) {
+    const [localValue, setLocalValue] = React.useState(value);
+    const saveTimeoutRef = React.useRef(null);
+
+    React.useEffect(() => {
+        setLocalValue(value);
+    }, [value]);
+
+    const initialConfig = {
+        namespace: `WordField-${field}-${wordId}`,
+        theme: {},
+        onError: (error) => console.error('Lexical error:', error),
+        editorState: () => {
+            const root = $getRoot();
+            root.clear();
+            const paragraph = $createParagraphNode();
+            const text = $createTextNode(value || '');
+            paragraph.append(text);
+            root.append(paragraph);
+        },
+    };
+
+    const handleChange = (editorState) => {
+        editorState.read(() => {
+            const root = $getRoot();
+            const textContent = root.getTextContent();
+            setLocalValue(textContent);
+
+            // Debounced save
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current);
+            }
+            saveTimeoutRef.current = setTimeout(() => {
+                if (onSave && textContent !== value) {
+                    onSave(wordId, { [field]: textContent }, version);
+                }
+            }, 1000);
+        });
+    };
+
+    return (
+        <Box
+            sx={{
+                padding: 0,
+                margin: 0,
+                '& .word-field-editor': {
+                    cursor: 'text',
+                    '&::before': label ? {
+                        content: `"${label}"`,
+                        fontWeight: 600,
+                        color: 'text.secondary',
+                    } : {},
+                },
+            }}
+        >
+            <LexicalComposer initialConfig={initialConfig}>
+                <RichTextPlugin
+                    contentEditable={
+                        <ContentEditable
+                            className="word-field-editor"
+                        />
+                    }
+                    placeholder={
+                        <div
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: label ? '80px' : 0,
+                                color: '#999',
+                                pointerEvents: 'none',
+                            }}
+                        >
+                            {placeholder}
+                        </div>
+                    }
+                    ErrorBoundary={LexicalErrorBoundary}
+                />
+                {sharedHistory && <HistoryPlugin externalHistoryState={sharedHistory} />}
+                <OnChangePlugin onChange={handleChange} />
+            </LexicalComposer>
+        </Box>
+    );
+}
+
+// =============================================================================
+// WordsPlugin - Manages word nodes and synchronization
+// =============================================================================
+
+function WordsPlugin({
+    dictionary,
+    searchTerm,
+    expandedItems,
+    selectedItems,
+    onToggleExpand,
+    onToggleSelect,
+    onOpenRubyDialog,
+    sharedHistory,
+    audioFiles,
+    identityId,
+    parentRef,
+    setConfirmDialog,
+    fullDictionary,
+}) {
+    const [editor] = useLexicalComposerContext();
+
+    // Setup virtualizer for performance
+    const dictionaryEntries = React.useMemo(() => {
+        return dictionary ? Object.entries(dictionary) : [];
+    }, [dictionary]);
+
+    const virtualizer = useVirtualizer({
+        count: dictionaryEntries.length,
+        getScrollElement: () => parentRef?.current,
+        estimateSize: () => 100,
+        overscan: 5,
+    });
+
+    // Update words when dictionary changes
+    React.useEffect(() => {
+        if (!dictionary) return;
+
+        editor.update(() => {
+            const root = $getRoot();
+            root.clear();
+
+            Object.entries(dictionary).forEach(([key, word], index) => {
+                const node = $createWordDecoratorNode(
+                    word.id,
+                    word.phrase,
+                    word.pronunciation,
+                    word.definition,
+                    word.audio || [],
+                    word.rubyTags || '',
+                    word._version || 1,
+                    expandedItems.has(word.id),
+                    selectedItems.has(word.id),
+                    searchTerm,
+                    sharedHistory,
+                    handleUpdateWord,
+                    handleDeleteWord,
+                    onToggleExpand,
+                    onToggleSelect,
+                    onOpenRubyDialog,
+                    audioFiles,
+                    identityId,
+                    index
+                );
+                root.append(node);
+            });
+        });
+    }, [dictionary, searchTerm, expandedItems, selectedItems, audioFiles, editor]);
+
+    const handleUpdateWord = async (wordId, updates, currentVersion) => {
+        try {
+            const word = Object.values(dictionary).find(w => w.id === wordId);
+            if (!word) return;
+
+            await DataStore.save(Word.copyOf(word, updated => {
+                Object.keys(updates).forEach(key => {
+                    updated[key] = updates[key];
+                });
+            }));
+        } catch (error) {
+            console.error('Failed to update word:', error);
+        }
+    };
+
+    const handleDeleteWord = async (wordId, phrase = '') => {
+        if (!setConfirmDialog) {
+            console.error('setConfirmDialog not available');
+            return;
+        }
+
+        // Show confirmation dialog before deleting
+        setConfirmDialog({
+            open: true,
+            message: `Delete word: "${phrase}"?`,
+            severity: 'warning',
+            onConfirm: async () => {
+                try {
+                    const word = Object.values(fullDictionary).find(w => w.id === wordId);
+                    if (!word) {
+                        console.error('Word not found:', wordId);
+                        setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                        return;
+                    }
+
+                    await DataStore.delete(word);
+                    setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                } catch (error) {
+                    console.error('Failed to delete word:', error);
+                    setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                }
+            }
+        });
+    };
+
+    return null;
+}
+
+// =============================================================================
+// Main DictionaryEditor2 Component
+// =============================================================================
+
+export function DictionaryEditor2() {
+    const [open, setOpen] = React.useState(false);
+    const [isHelpOpen, setHelpOpen] = React.useState(false);
+    const [expandedItems, setExpandedItems] = React.useState(new Set());
+    const [filteredDictionary, setFilteredDictionary] = React.useState(null);
+    const [selectedItems, setSelectedItems] = React.useState(new Set());
+    const [contextMenu, setContextMenu] = React.useState(null);
+    const [confirmDialog, setConfirmDialog] = React.useState({ open: false, message: '', onConfirm: null, severity: 'warning' });
+    const sharedHistoryState = React.useRef(createEmptyHistoryState());
+    const [search, setSearch] = React.useState('');
+    const [newPhrase, setNewPhrase] = React.useState('');
+    const [newPronunciation, setNewPronunciation] = React.useState('');
+    const [newDefinition, setNewDefinition] = React.useState('');
+    const [rubyDialogPhrase, setRubyDialogPhrase] = React.useState('');
+    const [rubyDialogPronunciation, setRubyDialogPronunciation] = React.useState('');
+    const [rubyDialogOpen, setRubyDialogOpen] = React.useState(false);
+    const [rubyDialogWord, setRubyDialogWord] = React.useState(null);
+    const [newWordFormOpen, setNewWordFormOpen] = React.useState(false);
+
+    const theme = useTheme();
+    const { filteredDictionary: dictionary } = React.useContext(DictionaryContext);
+    const { audioFiles, refreshAudioFiles, session } = React.useContext(FilesContext);
+    const { identityId } = session || {};
+    const { unit } = React.useContext(UnitContext);
+
+    const parentRef = React.useRef(null);
+
+    // Filter words based on search
+    React.useEffect(() => {
+        if (!search || !dictionary) {
+            setFilteredDictionary(dictionary);
+            return;
+        }
+
+        const filtered = {};
+        Object.entries(dictionary).forEach(([key, word]) => {
+            const matchesSearch =
+                (word.phrase && word.phrase.toLowerCase().includes(search.toLowerCase())) ||
+                (word.pronunciation && word.pronunciation.toLowerCase().includes(search.toLowerCase())) ||
+                (word.definition && word.definition.toLowerCase().includes(search.toLowerCase()));
+
+            if (matchesSearch) {
+                filtered[key] = word;
+            }
+        });
+
+        setFilteredDictionary(filtered);
+    }, [search, dictionary]);
+
+    const handleToggleExpand = (id) => {
+        setExpandedItems(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+            } else {
+                newSet.add(id);
+            }
+            return newSet;
+        });
+    };
+
+    const handleToggleSelect = (id) => {
+        setSelectedItems(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+            } else {
+                newSet.add(id);
+            }
+            return newSet;
+        });
+    };
+
+    const handleExpandAll = () => {
+        const allIds = Object.values(filteredDictionary || {}).map(w => w.id);
+        setExpandedItems(new Set(allIds));
+    };
+
+    const handleCollapseAll = () => {
+        setExpandedItems(new Set());
+    };
+
+    const handleSelectAll = () => {
+        const allIds = Object.values(filteredDictionary || {}).map(w => w.id);
+        setSelectedItems(new Set(allIds));
+    };
+
+    const handleDeselectAll = () => {
+        setSelectedItems(new Set());
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedItems.size === 0) return;
+
+        setConfirmDialog({
+            open: true,
+            message: `Delete ${selectedItems.size} selected word(s)?`,
+            severity: 'error',
+            onConfirm: async () => {
+                try {
+                    const words = Object.values(dictionary).filter(w => selectedItems.has(w.id));
+                    await Promise.all(words.map(word => DataStore.delete(word)));
+                    setSelectedItems(new Set());
+                    setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                } catch (error) {
+                    console.error('Failed to delete words:', error);
+                    setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                }
+            }
+        });
+    };
+
+    const handleContextMenuClose = () => {
+        setContextMenu(null);
+    };
+
+    const toggleNewWordFormOpen = () => {
+        setNewWordFormOpen(!newWordFormOpen);
+    };
+
+    const handleOpenRubyDialog = (wordId, phrase, pronunciation) => {
+        const word = Object.values(dictionary || {}).find(w => w.id === wordId);
+        setRubyDialogWord(word);
+        setRubyDialogPhrase(phrase);
+        setRubyDialogPronunciation(pronunciation);
+        setRubyDialogOpen(true);
+    };
+
+    const handleCloseRubyDialog = () => {
+        setRubyDialogOpen(false);
+        setRubyDialogWord(null);
+        setRubyDialogPhrase('');
+        setRubyDialogPronunciation('');
+    };
+
+    const handleCreateNewWord = async () => {
+        if (!newPhrase.trim()) return;
+
+        try {
+            await DataStore.save(
+                new Word({
+                    phrase: newPhrase,
+                    pronunciation: newPronunciation,
+                    definition: newDefinition,
+                    audio: [],
+                    identityId: identityId,
+                })
+            );
+
+            setNewPhrase('');
+            setNewPronunciation('');
+            setNewDefinition('');
+            setNewWordFormOpen(false);
+        } catch (error) {
+            console.error('Failed to create word:', error);
+        }
+    };
+
+    const debouncedSearch = React.useCallback(
+        debounce((search) => {
+            setSearch(search);
+        }, 500),
+        []
+    );
+
+    const handleSearch = (e) => {
+        debouncedSearch(e.target.value.trim());
+    };
+
+    const initialConfig = {
+        namespace: 'DictionaryEditor2',
+        theme: {},
+        nodes: [WordDecoratorNode],
+        onError: (error) => console.error('Lexical error:', error),
+    };
+
+    return (
+        <>
+            <Menu
+                open={contextMenu !== null}
+                onClose={handleContextMenuClose}
+                anchorReference="anchorPosition"
+                anchorPosition={
+                    contextMenu !== null
+                        ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+                        : undefined
+                }
+            >
+                <MenuItem disabled>
+                    <Typography variant="caption" color="text.secondary">
+                        {selectedItems.size} selected
+                    </Typography>
+                </MenuItem>
+                <Divider />
+                <MenuItem onClick={handleBulkDelete}>
+                    <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+                    Delete Selected
+                </MenuItem>
+            </Menu>
+
+            {/* Toolbar */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 1,
+                    padding: 1,
+                    position: 'sticky',
+                    top: 0,
+                    bgcolor: 'background.paper',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    zIndex: 1,
+                }}
+            >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Tooltip title="Select/Deselect All">
+                        <Checkbox
+                            size="small"
+                            checked={
+                                filteredDictionary &&
+                                Object.keys(filteredDictionary).length > 0 &&
+                                selectedItems.size === Object.keys(filteredDictionary).length
+                            }
+                            indeterminate={
+                                selectedItems.size > 0 &&
+                                selectedItems.size < Object.keys(filteredDictionary || {}).length
+                            }
+                            onChange={(e) => {
+                                if (selectedItems.size === Object.keys(filteredDictionary || {}).length) {
+                                    handleDeselectAll();
+                                } else {
+                                    handleSelectAll();
+                                }
+                            }}
+                            disabled={!filteredDictionary || Object.keys(filteredDictionary).length === 0}
+                            sx={{ p: 0.25 }}
+                        />
+                    </Tooltip>
+
+                    <Tooltip title={expandedItems.size === 0 ? 'Expand All' : 'Collapse All'}>
+                        <IconButton
+                            size="small"
+                            onClick={expandedItems.size === 0 ? handleExpandAll : handleCollapseAll}
+                            disabled={!filteredDictionary || Object.keys(filteredDictionary).length === 0}
+                        >
+                            {expandedItems.size === 0 ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+
+                <TextField
+                    defaultValue={search}
+                    onInput={handleSearch}
+                    type="text"
+                    size="small"
+                    fullWidth
+                    placeholder="Search words..."
+                    label="Search"
+                />
+
+                <Tooltip title="New Word">
+                    <IconButton onClick={toggleNewWordFormOpen} color="primary" size="small">
+                        <Description />
+                    </IconButton>
+                </Tooltip>
+
+                <Tooltip title="Actions">
+                    <IconButton
+                        onClick={(e) =>
+                            setContextMenu(contextMenu ? null : { mouseX: e.clientX, mouseY: e.clientY })
+                        }
+                        size="small"
+                        disabled={selectedItems.size === 0}
+                    >
+                        <MoreVertIcon />
+                    </IconButton>
+                </Tooltip>
+            </Box>
+
+            {/* Main editor area */}
+            <Box
+                ref={parentRef}
+                sx={{
+                    overflowY: 'auto',
+                    overflowX: 'hidden',
+                }}
+            >
+                <LexicalComposer initialConfig={initialConfig}>
+                    <RichTextPlugin
+                        contentEditable={
+                            <ContentEditable
+                                style={{
+                                    margin: 0,
+                                    padding: 0,
+                                    outline: 'none',
+                                    minHeight: '100%',
+                                }}
+                            />
+                        }
+                        placeholder={null}
+                        ErrorBoundary={LexicalErrorBoundary}
+                    />
+                    <HistoryPlugin />
+                    <WordsPlugin
+                        dictionary={filteredDictionary}
+                        searchTerm={search}
+                        expandedItems={expandedItems}
+                        selectedItems={selectedItems}
+                        onToggleExpand={handleToggleExpand}
+                        onToggleSelect={handleToggleSelect}
+                        onOpenRubyDialog={handleOpenRubyDialog}
+                        sharedHistory={sharedHistoryState.current}
+                        audioFiles={audioFiles}
+                        identityId={identityId}
+                        parentRef={parentRef}
+                        setConfirmDialog={setConfirmDialog}
+                        fullDictionary={dictionary}
+                    />
+                </LexicalComposer>
+            </Box>
+
+            {/* New word dialog */}
+            <Dialog open={newWordFormOpen} onClose={toggleNewWordFormOpen} maxWidth="sm" fullWidth>
+                <DialogTitle>Create New Word</DialogTitle>
+                <DialogContent>
+                    <form onSubmit={(e) => { e.preventDefault(); handleCreateNewWord(); }}>
+                        <TextField
+                            value={newPhrase}
+                            required
+                            onChange={(e) => setNewPhrase(e.target.value)}
+                            fullWidth
+                            margin="normal"
+                            label="Phrase"
+                            variant="outlined"
+                        />
+                        <TextField
+                            value={newPronunciation}
+                            required
+                            onChange={(e) => setNewPronunciation(e.target.value)}
+                            fullWidth
+                            margin="normal"
+                            label="Pronunciation"
+                            variant="outlined"
+                        />
+                        <TextField
+                            value={newDefinition}
+                            required
+                            onChange={(e) => setNewDefinition(e.target.value)}
+                            fullWidth
+                            margin="normal"
+                            label="Definition"
+                            variant="outlined"
+                            multiline
+                            rows={3}
+                        />
+                        <Button variant="contained" type="submit" sx={{ mt: 2 }}>
+                            Create Word
+                        </Button>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Confirmation Snackbar */}
+            <Snackbar
+                open={confirmDialog.open}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                sx={{ mt: 8 }}
+            >
+                <Alert
+                    severity={confirmDialog.severity}
+                    sx={{ width: '100%' }}
+                    action={
+                        <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
+                            <Button
+                                color="inherit"
+                                size="small"
+                                onClick={() => {
+                                    if (confirmDialog.onConfirm) {
+                                        confirmDialog.onConfirm();
+                                    }
+                                }}
+                                variant="outlined"
+                            >
+                                Confirm
+                            </Button>
+                            <Button
+                                color="inherit"
+                                size="small"
+                                onClick={() => setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' })}
+                                variant="contained"
+                            >
+                                Cancel
+                            </Button>
+                        </Box>
+                    }
+                >
+                    {confirmDialog.message}
+                </Alert>
+            </Snackbar>
+        </>
+    );
+}

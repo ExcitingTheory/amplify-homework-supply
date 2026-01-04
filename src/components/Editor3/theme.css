@@ -49,6 +49,10 @@ ul li.editor-listItem.editor-nested-listitem {
     padding: 0;
 }
 
+p {
+    margin-block-end: 1rem;
+    margin-block-start: 1rem;
+}
 
 .draggable-block-menu {
     border-radius: 4px;

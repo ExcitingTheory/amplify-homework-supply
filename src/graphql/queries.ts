@@ -2,7 +2,7 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-import * as APITypes from "../API";
+import * as APITypes from "../../amplify/backend/function/analyzeDocument/src/src/API";
 type GeneratedQuery<InputType, OutputType> = string & {
   __generatedQueryInput: InputType;
   __generatedQueryOutput: OutputType;
@@ -268,6 +268,11 @@ export const getQuestion = /* GraphQL */ `query GetQuestion($id: ID!) {
     difficulty
     metadata
     importedAt
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     units {
       items {
         id
@@ -378,6 +383,11 @@ export const listQuestions = /* GraphQL */ `query ListQuestions(
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -450,6 +460,11 @@ export const syncQuestions = /* GraphQL */ `query SyncQuestions(
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -524,6 +539,11 @@ export const questionsByByPromptHex = /* GraphQL */ `query QuestionsByByPromptHe
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -580,6 +600,7 @@ export const getFile = /* GraphQL */ `query GetFile($id: ID!) {
     byHex
     thumbnail
     waveformData
+    embedding
     documentID
     document {
       id
@@ -594,6 +615,13 @@ export const getFile = /* GraphQL */ `query GetFile($id: ID!) {
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -712,6 +740,7 @@ export const listFiles = /* GraphQL */ `query ListFiles(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -726,6 +755,7 @@ export const listFiles = /* GraphQL */ `query ListFiles(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -793,6 +823,7 @@ export const syncFiles = /* GraphQL */ `query SyncFiles(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -807,6 +838,7 @@ export const syncFiles = /* GraphQL */ `query SyncFiles(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -876,6 +908,7 @@ export const filesByByHex = /* GraphQL */ `query FilesByByHex(
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -890,6 +923,7 @@ export const filesByByHex = /* GraphQL */ `query FilesByByHex(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -1046,6 +1080,11 @@ export const getSection = /* GraphQL */ `query GetSection($id: ID!) {
     identityId
     thumbnail
     backgroundColor
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     createdAt
     updatedAt
     _version
@@ -1081,6 +1120,11 @@ export const listSections = /* GraphQL */ `query ListSections(
       identityId
       thumbnail
       backgroundColor
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       createdAt
       updatedAt
       _version
@@ -1126,6 +1170,11 @@ export const syncSections = /* GraphQL */ `query SyncSections(
       identityId
       thumbnail
       backgroundColor
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       createdAt
       updatedAt
       _version
@@ -1173,6 +1222,11 @@ export const sectionByCode = /* GraphQL */ `query SectionByCode(
       identityId
       thumbnail
       backgroundColor
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       createdAt
       updatedAt
       _version
@@ -1601,6 +1655,13 @@ export const getUnit = /* GraphQL */ `query GetUnit($id: ID!) {
     featuredImage
     identityId
     thumbnail
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
+    publishedAt
+    isDraft
     files {
       items {
         id
@@ -1736,6 +1797,13 @@ export const listUnits = /* GraphQL */ `query ListUnits(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -1808,6 +1876,13 @@ export const syncUnits = /* GraphQL */ `query SyncUnits(
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -1860,6 +1935,11 @@ export const getWord = /* GraphQL */ `query GetWord($id: ID!) {
     definitionWaveformData
     rubyTags
     importedAt
+    embedding
+    embeddingModel
+    embeddingDimensions
+    embeddingVersion
+    embeddingWordCount
     units {
       items {
         id
@@ -1956,6 +2036,11 @@ export const listWords = /* GraphQL */ `query ListWords(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -2014,6 +2099,11 @@ export const syncWords = /* GraphQL */ `query SyncWords(
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -2061,6 +2151,13 @@ export const getDocument = /* GraphQL */ `query GetDocument($id: ID!) {
     fileSize
     mimeType
     uploadedAt
+    resumeState
+    pageEmbeddings {
+      page
+      embedding
+      text
+      __typename
+    }
     parsedContent {
       items {
         id
@@ -2202,6 +2299,13 @@ export const listDocuments = /* GraphQL */ `query ListDocuments(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -2269,6 +2373,13 @@ export const syncDocuments = /* GraphQL */ `query SyncDocuments(
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -2330,6 +2441,13 @@ export const getParsedContent = /* GraphQL */ `query GetParsedContent($id: ID!) 
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -2410,6 +2528,7 @@ export const listParsedContents = /* GraphQL */ `query ListParsedContents(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -2475,6 +2594,7 @@ export const syncParsedContents = /* GraphQL */ `query SyncParsedContents(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -2542,6 +2662,7 @@ export const parsedContentsByDocumentID = /* GraphQL */ `query ParsedContentsByD
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -2598,6 +2719,13 @@ export const getAgentJob = /* GraphQL */ `query GetAgentJob($id: ID!) {
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -2654,6 +2782,13 @@ export const getAgentJob = /* GraphQL */ `query GetAgentJob($id: ID!) {
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -2734,6 +2869,7 @@ export const listAgentJobs = /* GraphQL */ `query ListAgentJobs(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -2755,6 +2891,13 @@ export const listAgentJobs = /* GraphQL */ `query ListAgentJobs(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -2820,6 +2963,7 @@ export const syncAgentJobs = /* GraphQL */ `query SyncAgentJobs(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -2841,6 +2985,13 @@ export const syncAgentJobs = /* GraphQL */ `query SyncAgentJobs(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -2908,6 +3059,7 @@ export const agentJobsByDocumentID = /* GraphQL */ `query AgentJobsByDocumentID(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -2929,6 +3081,13 @@ export const agentJobsByDocumentID = /* GraphQL */ `query AgentJobsByDocumentID(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -2996,6 +3155,7 @@ export const agentJobsByUnitID = /* GraphQL */ `query AgentJobsByUnitID(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -3017,6 +3177,13 @@ export const agentJobsByUnitID = /* GraphQL */ `query AgentJobsByUnitID(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -3187,6 +3354,11 @@ export const getQuestionUnit = /* GraphQL */ `query GetQuestionUnit($id: ID!) {
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3236,6 +3408,13 @@ export const getQuestionUnit = /* GraphQL */ `query GetQuestionUnit($id: ID!) {
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -3310,6 +3489,11 @@ export const listQuestionUnits = /* GraphQL */ `query ListQuestionUnits(
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -3329,6 +3513,13 @@ export const listQuestionUnits = /* GraphQL */ `query ListQuestionUnits(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -3388,6 +3579,11 @@ export const syncQuestionUnits = /* GraphQL */ `query SyncQuestionUnits(
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -3407,6 +3603,13 @@ export const syncQuestionUnits = /* GraphQL */ `query SyncQuestionUnits(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -3468,6 +3671,11 @@ export const questionUnitsByQuestionId = /* GraphQL */ `query QuestionUnitsByQue
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -3487,6 +3695,13 @@ export const questionUnitsByQuestionId = /* GraphQL */ `query QuestionUnitsByQue
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -3548,6 +3763,11 @@ export const questionUnitsByUnitId = /* GraphQL */ `query QuestionUnitsByUnitId(
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -3567,6 +3787,13 @@ export const questionUnitsByUnitId = /* GraphQL */ `query QuestionUnitsByUnitId(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -3620,6 +3847,11 @@ export const getQuestionWord = /* GraphQL */ `query GetQuestionWord($id: ID!) {
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3660,6 +3892,11 @@ export const getQuestionWord = /* GraphQL */ `query GetQuestionWord($id: ID!) {
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -3729,6 +3966,11 @@ export const listQuestionWords = /* GraphQL */ `query ListQuestionWords(
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -3749,6 +3991,11 @@ export const listQuestionWords = /* GraphQL */ `query ListQuestionWords(
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -3808,6 +4055,11 @@ export const syncQuestionWords = /* GraphQL */ `query SyncQuestionWords(
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -3828,6 +4080,11 @@ export const syncQuestionWords = /* GraphQL */ `query SyncQuestionWords(
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -3889,6 +4146,11 @@ export const questionWordsByQuestionId = /* GraphQL */ `query QuestionWordsByQue
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -3909,6 +4171,11 @@ export const questionWordsByQuestionId = /* GraphQL */ `query QuestionWordsByQue
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -3970,6 +4237,11 @@ export const questionWordsByWordId = /* GraphQL */ `query QuestionWordsByWordId(
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -3990,6 +4262,11 @@ export const questionWordsByWordId = /* GraphQL */ `query QuestionWordsByWordId(
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -4043,6 +4320,11 @@ export const getQuestionFile = /* GraphQL */ `query GetQuestionFile($id: ID!) {
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4089,6 +4371,7 @@ export const getQuestionFile = /* GraphQL */ `query GetQuestionFile($id: ID!) {
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -4103,6 +4386,7 @@ export const getQuestionFile = /* GraphQL */ `query GetQuestionFile($id: ID!) {
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -4175,6 +4459,11 @@ export const listQuestionFiles = /* GraphQL */ `query ListQuestionFiles(
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -4201,6 +4490,7 @@ export const listQuestionFiles = /* GraphQL */ `query ListQuestionFiles(
         byHex
         thumbnail
         waveformData
+        embedding
         documentID
         createdAt
         updatedAt
@@ -4261,6 +4551,11 @@ export const syncQuestionFiles = /* GraphQL */ `query SyncQuestionFiles(
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -4287,6 +4582,7 @@ export const syncQuestionFiles = /* GraphQL */ `query SyncQuestionFiles(
         byHex
         thumbnail
         waveformData
+        embedding
         documentID
         createdAt
         updatedAt
@@ -4349,6 +4645,11 @@ export const questionFilesByQuestionId = /* GraphQL */ `query QuestionFilesByQue
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -4375,6 +4676,7 @@ export const questionFilesByQuestionId = /* GraphQL */ `query QuestionFilesByQue
         byHex
         thumbnail
         waveformData
+        embedding
         documentID
         createdAt
         updatedAt
@@ -4437,6 +4739,11 @@ export const questionFilesByFileId = /* GraphQL */ `query QuestionFilesByFileId(
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -4463,6 +4770,7 @@ export const questionFilesByFileId = /* GraphQL */ `query QuestionFilesByFileId(
         byHex
         thumbnail
         waveformData
+        embedding
         documentID
         createdAt
         updatedAt
@@ -4517,6 +4825,11 @@ export const getDocumentQuestion = /* GraphQL */ `query GetDocumentQuestion($id:
       difficulty
       metadata
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -4557,6 +4870,13 @@ export const getDocumentQuestion = /* GraphQL */ `query GetDocumentQuestion($id:
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -4632,6 +4952,11 @@ export const listDocumentQuestions = /* GraphQL */ `query ListDocumentQuestions(
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -4652,6 +4977,7 @@ export const listDocumentQuestions = /* GraphQL */ `query ListDocumentQuestions(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -4712,6 +5038,11 @@ export const syncDocumentQuestions = /* GraphQL */ `query SyncDocumentQuestions(
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -4732,6 +5063,7 @@ export const syncDocumentQuestions = /* GraphQL */ `query SyncDocumentQuestions(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -4794,6 +5126,11 @@ export const documentQuestionsByQuestionId = /* GraphQL */ `query DocumentQuesti
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -4814,6 +5151,7 @@ export const documentQuestionsByQuestionId = /* GraphQL */ `query DocumentQuesti
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -4876,6 +5214,11 @@ export const documentQuestionsByDocumentId = /* GraphQL */ `query DocumentQuesti
         difficulty
         metadata
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -4896,6 +5239,7 @@ export const documentQuestionsByDocumentId = /* GraphQL */ `query DocumentQuesti
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -4945,6 +5289,7 @@ export const getUnitFile = /* GraphQL */ `query GetUnitFile($id: ID!) {
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -4959,6 +5304,7 @@ export const getUnitFile = /* GraphQL */ `query GetUnitFile($id: ID!) {
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -5011,6 +5357,13 @@ export const getUnitFile = /* GraphQL */ `query GetUnitFile($id: ID!) {
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -5085,6 +5438,7 @@ export const listUnitFiles = /* GraphQL */ `query ListUnitFiles(
         byHex
         thumbnail
         waveformData
+        embedding
         documentID
         createdAt
         updatedAt
@@ -5105,6 +5459,13 @@ export const listUnitFiles = /* GraphQL */ `query ListUnitFiles(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -5164,6 +5525,7 @@ export const syncUnitFiles = /* GraphQL */ `query SyncUnitFiles(
         byHex
         thumbnail
         waveformData
+        embedding
         documentID
         createdAt
         updatedAt
@@ -5184,6 +5546,13 @@ export const syncUnitFiles = /* GraphQL */ `query SyncUnitFiles(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -5245,6 +5614,7 @@ export const unitFilesByFileId = /* GraphQL */ `query UnitFilesByFileId(
         byHex
         thumbnail
         waveformData
+        embedding
         documentID
         createdAt
         updatedAt
@@ -5265,6 +5635,13 @@ export const unitFilesByFileId = /* GraphQL */ `query UnitFilesByFileId(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -5326,6 +5703,7 @@ export const unitFilesByUnitId = /* GraphQL */ `query UnitFilesByUnitId(
         byHex
         thumbnail
         waveformData
+        embedding
         documentID
         createdAt
         updatedAt
@@ -5346,6 +5724,13 @@ export const unitFilesByUnitId = /* GraphQL */ `query UnitFilesByUnitId(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -5394,6 +5779,7 @@ export const getWordFile = /* GraphQL */ `query GetWordFile($id: ID!) {
       byHex
       thumbnail
       waveformData
+      embedding
       documentID
       document {
         id
@@ -5408,6 +5794,7 @@ export const getWordFile = /* GraphQL */ `query GetWordFile($id: ID!) {
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -5451,6 +5838,11 @@ export const getWordFile = /* GraphQL */ `query GetWordFile($id: ID!) {
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -5520,6 +5912,7 @@ export const listWordFiles = /* GraphQL */ `query ListWordFiles(
         byHex
         thumbnail
         waveformData
+        embedding
         documentID
         createdAt
         updatedAt
@@ -5541,6 +5934,11 @@ export const listWordFiles = /* GraphQL */ `query ListWordFiles(
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -5600,6 +5998,7 @@ export const syncWordFiles = /* GraphQL */ `query SyncWordFiles(
         byHex
         thumbnail
         waveformData
+        embedding
         documentID
         createdAt
         updatedAt
@@ -5621,6 +6020,11 @@ export const syncWordFiles = /* GraphQL */ `query SyncWordFiles(
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -5682,6 +6086,7 @@ export const wordFilesByFileId = /* GraphQL */ `query WordFilesByFileId(
         byHex
         thumbnail
         waveformData
+        embedding
         documentID
         createdAt
         updatedAt
@@ -5703,6 +6108,11 @@ export const wordFilesByFileId = /* GraphQL */ `query WordFilesByFileId(
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -5764,6 +6174,7 @@ export const wordFilesByWordId = /* GraphQL */ `query WordFilesByWordId(
         byHex
         thumbnail
         waveformData
+        embedding
         documentID
         createdAt
         updatedAt
@@ -5785,6 +6196,11 @@ export const wordFilesByWordId = /* GraphQL */ `query WordFilesByWordId(
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -5836,6 +6252,13 @@ export const getUnitWord = /* GraphQL */ `query GetUnitWord($id: ID!) {
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -5881,6 +6304,11 @@ export const getUnitWord = /* GraphQL */ `query GetUnitWord($id: ID!) {
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -5943,6 +6371,13 @@ export const listUnitWords = /* GraphQL */ `query ListUnitWords(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -5963,6 +6398,11 @@ export const listUnitWords = /* GraphQL */ `query ListUnitWords(
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -6015,6 +6455,13 @@ export const syncUnitWords = /* GraphQL */ `query SyncUnitWords(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -6035,6 +6482,11 @@ export const syncUnitWords = /* GraphQL */ `query SyncUnitWords(
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -6089,6 +6541,13 @@ export const unitWordsByUnitId = /* GraphQL */ `query UnitWordsByUnitId(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -6109,6 +6568,11 @@ export const unitWordsByUnitId = /* GraphQL */ `query UnitWordsByUnitId(
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -6163,6 +6627,13 @@ export const unitWordsByWordId = /* GraphQL */ `query UnitWordsByWordId(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -6183,6 +6654,11 @@ export const unitWordsByWordId = /* GraphQL */ `query UnitWordsByWordId(
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -6234,6 +6710,13 @@ export const getUnitDocument = /* GraphQL */ `query GetUnitDocument($id: ID!) {
       featuredImage
       identityId
       thumbnail
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
+      publishedAt
+      isDraft
       files {
         nextToken
         startedAt
@@ -6279,6 +6762,13 @@ export const getUnitDocument = /* GraphQL */ `query GetUnitDocument($id: ID!) {
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -6347,6 +6837,13 @@ export const listUnitDocuments = /* GraphQL */ `query ListUnitDocuments(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -6367,6 +6864,7 @@ export const listUnitDocuments = /* GraphQL */ `query ListUnitDocuments(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -6420,6 +6918,13 @@ export const syncUnitDocuments = /* GraphQL */ `query SyncUnitDocuments(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -6440,6 +6945,7 @@ export const syncUnitDocuments = /* GraphQL */ `query SyncUnitDocuments(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -6495,6 +7001,13 @@ export const unitDocumentsByUnitId = /* GraphQL */ `query UnitDocumentsByUnitId(
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -6515,6 +7028,7 @@ export const unitDocumentsByUnitId = /* GraphQL */ `query UnitDocumentsByUnitId(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -6570,6 +7084,13 @@ export const unitDocumentsByDocumentId = /* GraphQL */ `query UnitDocumentsByDoc
         featuredImage
         identityId
         thumbnail
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
+        publishedAt
+        isDraft
         createdAt
         updatedAt
         _version
@@ -6590,6 +7111,7 @@ export const unitDocumentsByDocumentId = /* GraphQL */ `query UnitDocumentsByDoc
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -6633,6 +7155,11 @@ export const getDocumentWord = /* GraphQL */ `query GetDocumentWord($id: ID!) {
       definitionWaveformData
       rubyTags
       importedAt
+      embedding
+      embeddingModel
+      embeddingDimensions
+      embeddingVersion
+      embeddingWordCount
       units {
         nextToken
         startedAt
@@ -6673,6 +7200,13 @@ export const getDocumentWord = /* GraphQL */ `query GetDocumentWord($id: ID!) {
       fileSize
       mimeType
       uploadedAt
+      resumeState
+      pageEmbeddings {
+        page
+        embedding
+        text
+        __typename
+      }
       parsedContent {
         nextToken
         startedAt
@@ -6742,6 +7276,11 @@ export const listDocumentWords = /* GraphQL */ `query ListDocumentWords(
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -6762,6 +7301,7 @@ export const listDocumentWords = /* GraphQL */ `query ListDocumentWords(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -6816,6 +7356,11 @@ export const syncDocumentWords = /* GraphQL */ `query SyncDocumentWords(
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -6836,6 +7381,7 @@ export const syncDocumentWords = /* GraphQL */ `query SyncDocumentWords(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -6892,6 +7438,11 @@ export const documentWordsByWordId = /* GraphQL */ `query DocumentWordsByWordId(
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -6912,6 +7463,7 @@ export const documentWordsByWordId = /* GraphQL */ `query DocumentWordsByWordId(
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt
@@ -6968,6 +7520,11 @@ export const documentWordsByDocumentId = /* GraphQL */ `query DocumentWordsByDoc
         definitionWaveformData
         rubyTags
         importedAt
+        embedding
+        embeddingModel
+        embeddingDimensions
+        embeddingVersion
+        embeddingWordCount
         createdAt
         updatedAt
         _version
@@ -6988,6 +7545,7 @@ export const documentWordsByDocumentId = /* GraphQL */ `query DocumentWordsByDoc
         fileSize
         mimeType
         uploadedAt
+        resumeState
         metadata
         createdAt
         updatedAt

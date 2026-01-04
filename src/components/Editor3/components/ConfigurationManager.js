@@ -3,6 +3,7 @@ import { Box, Typography, Switch, FormControlLabel, Divider } from "@mui/materia
 import { DataStore } from "aws-amplify/datastore";
 import { uploadData } from "aws-amplify/storage";
 import UnitContext from "../../../context/unitContext";
+import SettingsContext from "../../../context/settingsContext";
 import { Unit, Settings } from "../../../models";
 import CameraIcon from '@mui/icons-material/Camera';
 import getCachedUrl from "../../../utils/getCachedUrl";
@@ -38,8 +39,6 @@ export default function ConfigurationManager() {
   const [filesToUpload, setFilesToUpload] = React.useState([]);
   const [fileOperations, setFileOperations] = React.useState([]);
   const [inProgress, setInProgress] = React.useState(false);
-  const [settings, setSettings] = React.useState(null);
-  const [loadingSettings, setLoadingSettings] = React.useState(true);
 
   const { unit } = React.useContext(UnitContext);
 
@@ -47,40 +46,17 @@ export default function ConfigurationManager() {
     session: { identityId }
   } = React.useContext(FilesContext);
 
-  // Subscribe to user settings with initial load
-  React.useEffect(() => {
-    const subscription = DataStore.observeQuery(Settings).subscribe(async ({ items }) => {
-      if (items.length > 0) {
-        setSettings(items[0]);
-        setLoadingSettings(false);
-      } else {
-        // Create default settings if none exist
-        try {
-          const newSettings = await DataStore.save(new Settings({
-            autoAnalyzeDocuments: true,
-            documentAnalysisModel: 'gpt-4',
-          }));
-          setSettings(newSettings);
-        } catch (error) {
-          console.error('Error creating settings:', error);
-        } finally {
-          setLoadingSettings(false);
-        }
-      }
-    });
-    
-    return () => subscription.unsubscribe();
-  }, []);
+  // Note: Settings are now provided by SettingsContext
+  // Get settings from context instead of local subscription
+  const settingsContext = React.useContext(SettingsContext);
+  const settings = settingsContext?.settings || null;
+  const loadingSettings = settingsContext?.isLoading || false;
+  const updateSettings = settingsContext?.updateSettings;
 
   const handleSettingChange = async (field, value) => {
-    if (!settings) return;
+    if (!updateSettings) return;
     try {
-      const updated = await DataStore.save(
-        Settings.copyOf(settings, (draft) => {
-          draft[field] = value;
-        })
-      );
-      setSettings(updated);
+      await updateSettings({ [field]: value });
     } catch (error) {
       console.error('Error updating settings:', error);
     }

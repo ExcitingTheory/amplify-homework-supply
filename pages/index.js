@@ -103,15 +103,16 @@ function Index({ signOut, user }) {
 
   useEffect(() => {
     // if (!id) return
-    fetchMyGrades()
-    async function fetchMyGrades() {
-      const grades = await DataStore.query(Grade, (g) =>
-        g.and(g => [
-          g.complete.eq(true),
-          g.owner.eq(user.username)]))
-      setMyGrades(grades)
+    fetchAllGrades()
+    async function fetchAllGrades() {
+      const myUserId = user.username
+      const allGrades = await DataStore.query(Grade)
 
-      console.log('fetchMyGrades', grades)
+      // Process my grades (complete only)
+      const myCompletedGrades = allGrades.filter(g => g.complete === true && g.owner === myUserId)
+      setMyGrades(myCompletedGrades)
+
+      console.log('fetchMyGrades', myCompletedGrades)
 
       // grades by assignment
       // look for the last grade for each assignment
@@ -120,7 +121,7 @@ function Index({ signOut, user }) {
 
       const gradesByUnit = {}
 
-      grades.forEach((grade) => {
+      myCompletedGrades.forEach((grade) => {
         if (!gradesByUnit[grade.unitID]) {
           gradesByUnit[grade.unitID] = {
             last: grade,
@@ -153,39 +154,31 @@ function Index({ signOut, user }) {
       console.log('gradesByUnit', gradesByUnit)
 
       setMyGradeMap(gradesByUnit)
+      
+      // Set all grades
+      setGrades(allGrades)
     }
-    const subscription = DataStore.observe(Grade).subscribe(() => fetchMyGrades())
+    const subscription = DataStore.observe(Grade).subscribe(() => fetchAllGrades())
 
     return function cleanup() {
       subscription.unsubscribe();
     }
   }, [])
 
-
+  // Consolidated Assignment observer - handles both my and others' assignments
   useEffect(() => {
-    fetchMyAssignments()
-    async function fetchMyAssignments() {
+    fetchAllAssignments()
+    async function fetchAllAssignments() {
       const myUserId = user.username
-      const assignmentData = await DataStore.query(Assignment, a => a.owner.eq(myUserId))
-      setMyAssignment(assignmentData)
-    }
-    const subscription = DataStore.observe(Assignment).subscribe(() => fetchMyAssignments())
+      const allAssignments = await DataStore.query(Assignment)
+      
+      const myAssignments = allAssignments.filter(a => a.owner === myUserId)
+      const othersAssignments = allAssignments.filter(a => a.owner !== myUserId)
 
-    return function cleanup() {
-      subscription.unsubscribe();
-    }
-  }, [units])
-
-  useEffect(() => {
-    fetchAssignments()
-    async function fetchAssignments() {
-      const myUserId = user.username
-      const assignmentData = await DataStore.query(Assignment, a => a.owner.ne(myUserId))
-      console.log('assignmentData', assignmentData)
+      console.log('assignmentData', othersAssignments)
 
       const needsGrading = []
-
-      assignmentData.forEach((assignment) => {
+      othersAssignments.forEach((assignment) => {
         const gradesForAssignment = myGradeMap[assignment?.unitID]
         console.log('gradesForAssignment', gradesForAssignment)
         if (!gradesForAssignment?.last?.accuracy) {
@@ -195,50 +188,30 @@ function Index({ signOut, user }) {
 
       console.log('needsGrading', needsGrading)
       setMyAssignmentNeedsGrading(needsGrading)
-      setAssignment(assignmentData)
+      setMyAssignment(myAssignments)
+      setAssignment(othersAssignments)
     }
-    const subscription = DataStore.observe(Assignment).subscribe(() => fetchAssignments())
+    const subscription = DataStore.observe(Assignment).subscribe(() => fetchAllAssignments())
 
     return function cleanup() {
       subscription.unsubscribe();
     }
   }, [units, JSON.stringify(myGradeMap)])
 
+  // Consolidated Section observer - handles both my and others' sections
   useEffect(() => {
-    fetchGrades()
-    async function fetchGrades() {
-      const gradeData = await DataStore.query(Grade)
-      setGrades(gradeData)
-    }
-    const subscription = DataStore.observe(Grade).subscribe(() => fetchGrades())
-
-    return function cleanup() {
-      subscription.unsubscribe();
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchSections()
-    async function fetchSections() {
+    fetchAllSections()
+    async function fetchAllSections() {
       const myUserId = user.username
-      const sectionData = await DataStore.query(Section, s => s.owner.ne(myUserId))
-      setSections(sectionData)
+      const allSections = await DataStore.query(Section)
+      
+      const mySections = allSections.filter(s => s.owner === myUserId)
+      const othersSections = allSections.filter(s => s.owner !== myUserId)
+      
+      setMySections(mySections)
+      setSections(othersSections)
     }
-    const subscription = DataStore.observe(Section).subscribe(() => fetchSections())
-
-    return function cleanup() {
-      subscription.unsubscribe();
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchMySections()
-    async function fetchMySections() {
-      const myUserId = user.username
-      const sectionData = await DataStore.query(Section, s => s.owner.eq(myUserId))
-      setMySections(sectionData)
-    }
-    const subscription = DataStore.observe(Section).subscribe(() => fetchMySections())
+    const subscription = DataStore.observe(Section).subscribe(() => fetchAllSections())
 
     return function cleanup() {
       subscription.unsubscribe();

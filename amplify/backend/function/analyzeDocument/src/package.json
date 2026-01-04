@@ -7,15 +7,16 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@aws-crypto/sha256-js": "^2.0.1",
+    "@aws-sdk/client-lambda": "^3.400.0",
+    "@aws-sdk/client-s3": "^3.400.0",
+    "@aws-sdk/client-ssm": "^3.400.0",
     "@aws-sdk/credential-provider-node": "^3.76.0",
     "@aws-sdk/protocol-http": "^3.58.0",
     "@aws-sdk/signature-v4": "^3.58.0",
-    "@aws-sdk/client-s3": "^3.400.0",
-    "@aws-sdk/client-ssm": "^3.400.0",
-    "node-fetch": "^3.2.3",
-    "pdf-parse": "^1.1.1",
     "mammoth": "^1.6.0",
-    "openai": "^4.20.0"
+    "node-fetch": "^3.2.3",
+    "openai": "^4.20.0",
+    "pdfjs-dist": "^4.0.379"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.92"

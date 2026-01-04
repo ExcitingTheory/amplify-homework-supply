@@ -6,8 +6,8 @@ import {
   Card,
 } from '@mui/material';
 import ChatSidebar from './ChatSidebar';
-import { DictionaryEditor } from './DictionaryEditor';
-import { QuestionEditor } from './QuestionEditor';
+import { DictionaryEditor2 } from './DictionaryEditor2';
+import { QuestionEditor2 } from './QuestionEditor2';
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -76,12 +76,12 @@ export default function SidebarTabs() {
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
-      <DictionaryEditor
+      <DictionaryEditor2
         insertWordBlock={() => {}}
       />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
-        <QuestionEditor />
+        <QuestionEditor2 />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
         <ChatSidebar />

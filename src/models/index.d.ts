@@ -14,12 +14,33 @@ export enum FileProtectionLevels {
   PROTECTED = "PROTECTED"
 }
 
+type EagerEmbeddingResult = {
+  readonly embedding: number[];
+  readonly model: string;
+  readonly dimensions: number;
+  readonly tokenCount: number;
+  readonly error?: string | null;
+}
+
+type LazyEmbeddingResult = {
+  readonly embedding: number[];
+  readonly model: string;
+  readonly dimensions: number;
+  readonly tokenCount: number;
+  readonly error?: string | null;
+}
+
+export declare type EmbeddingResult = LazyLoading extends LazyLoadingDisabled ? EagerEmbeddingResult : LazyEmbeddingResult
+
+export declare const EmbeddingResult: (new (init: ModelInit<EmbeddingResult>) => EmbeddingResult)
+
 type EagerAnalyzeDocumentResult = {
   readonly success: boolean;
   readonly fileID: string;
   readonly documentID?: string | null;
   readonly responseId?: string | null;
   readonly pageCount?: number | null;
+  readonly progress?: string | null;
   readonly message?: string | null;
 }
 
@@ -29,6 +50,7 @@ type LazyAnalyzeDocumentResult = {
   readonly documentID?: string | null;
   readonly responseId?: string | null;
   readonly pageCount?: number | null;
+  readonly progress?: string | null;
   readonly message?: string | null;
 }
 
@@ -53,6 +75,26 @@ type LazyCancelDocumentAnalysisResult = {
 export declare type CancelDocumentAnalysisResult = LazyLoading extends LazyLoadingDisabled ? EagerCancelDocumentAnalysisResult : LazyCancelDocumentAnalysisResult
 
 export declare const CancelDocumentAnalysisResult: (new (init: ModelInit<CancelDocumentAnalysisResult>) => CancelDocumentAnalysisResult)
+
+type EagerGenerateEmbeddingsResult = {
+  readonly success: boolean;
+  readonly fileID: string;
+  readonly documentID?: string | null;
+  readonly embeddingCount?: number | null;
+  readonly message?: string | null;
+}
+
+type LazyGenerateEmbeddingsResult = {
+  readonly success: boolean;
+  readonly fileID: string;
+  readonly documentID?: string | null;
+  readonly embeddingCount?: number | null;
+  readonly message?: string | null;
+}
+
+export declare type GenerateEmbeddingsResult = LazyLoading extends LazyLoadingDisabled ? EagerGenerateEmbeddingsResult : LazyGenerateEmbeddingsResult
+
+export declare const GenerateEmbeddingsResult: (new (init: ModelInit<GenerateEmbeddingsResult>) => GenerateEmbeddingsResult)
 
 type EagerStudentInfo = {
   readonly id: string;
@@ -83,6 +125,22 @@ type LazyChoice = {
 export declare type Choice = LazyLoading extends LazyLoadingDisabled ? EagerChoice : LazyChoice
 
 export declare const Choice: (new (init: ModelInit<Choice>) => Choice)
+
+type EagerPageEmbedding = {
+  readonly page: number;
+  readonly embedding: number[];
+  readonly text?: string | null;
+}
+
+type LazyPageEmbedding = {
+  readonly page: number;
+  readonly embedding: number[];
+  readonly text?: string | null;
+}
+
+export declare type PageEmbedding = LazyLoading extends LazyLoadingDisabled ? EagerPageEmbedding : LazyPageEmbedding
+
+export declare const PageEmbedding: (new (init: ModelInit<PageEmbedding>) => PageEmbedding)
 
 type EagerAssistant = {
   readonly [__modelMeta__]: {
@@ -150,6 +208,11 @@ type EagerQuestion = {
   readonly difficulty?: string | null;
   readonly metadata?: string | null;
   readonly importedAt?: string | null;
+  readonly embedding?: (number | null)[] | null;
+  readonly embeddingModel?: string | null;
+  readonly embeddingDimensions?: number | null;
+  readonly embeddingVersion?: number | null;
+  readonly embeddingWordCount?: number | null;
   readonly units?: (QuestionUnit | null)[] | null;
   readonly words?: (QuestionWord | null)[] | null;
   readonly files?: (QuestionFile | null)[] | null;
@@ -182,6 +245,11 @@ type LazyQuestion = {
   readonly difficulty?: string | null;
   readonly metadata?: string | null;
   readonly importedAt?: string | null;
+  readonly embedding?: (number | null)[] | null;
+  readonly embeddingModel?: string | null;
+  readonly embeddingDimensions?: number | null;
+  readonly embeddingVersion?: number | null;
+  readonly embeddingWordCount?: number | null;
   readonly units: AsyncCollection<QuestionUnit>;
   readonly words: AsyncCollection<QuestionWord>;
   readonly files: AsyncCollection<QuestionFile>;
@@ -219,6 +287,7 @@ type EagerFile = {
   readonly byHex?: string | null;
   readonly thumbnail?: string | null;
   readonly waveformData?: string | null;
+  readonly embedding?: (number | null)[] | null;
   readonly documentID?: string | null;
   readonly document?: Document | null;
   readonly units?: (UnitFile | null)[] | null;
@@ -251,6 +320,7 @@ type LazyFile = {
   readonly byHex?: string | null;
   readonly thumbnail?: string | null;
   readonly waveformData?: string | null;
+  readonly embedding?: (number | null)[] | null;
   readonly documentID?: string | null;
   readonly document: AsyncItem<Document | undefined>;
   readonly units: AsyncCollection<UnitFile>;
@@ -319,6 +389,11 @@ type EagerSection = {
   readonly identityId?: string | null;
   readonly thumbnail?: string | null;
   readonly backgroundColor?: string | null;
+  readonly embedding?: (number | null)[] | null;
+  readonly embeddingModel?: string | null;
+  readonly embeddingDimensions?: number | null;
+  readonly embeddingVersion?: number | null;
+  readonly embeddingWordCount?: number | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -340,6 +415,11 @@ type LazySection = {
   readonly identityId?: string | null;
   readonly thumbnail?: string | null;
   readonly backgroundColor?: string | null;
+  readonly embedding?: (number | null)[] | null;
+  readonly embeddingModel?: string | null;
+  readonly embeddingDimensions?: number | null;
+  readonly embeddingVersion?: number | null;
+  readonly embeddingWordCount?: number | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -456,6 +536,13 @@ type EagerUnit = {
   readonly featuredImage?: string | null;
   readonly identityId?: string | null;
   readonly thumbnail?: string | null;
+  readonly embedding?: (number | null)[] | null;
+  readonly embeddingModel?: string | null;
+  readonly embeddingDimensions?: number | null;
+  readonly embeddingVersion?: number | null;
+  readonly embeddingWordCount?: number | null;
+  readonly publishedAt?: number | null;
+  readonly isDraft?: boolean | null;
   readonly files?: (UnitFile | null)[] | null;
   readonly words?: (UnitWord | null)[] | null;
   readonly questions?: (QuestionUnit | null)[] | null;
@@ -483,6 +570,13 @@ type LazyUnit = {
   readonly featuredImage?: string | null;
   readonly identityId?: string | null;
   readonly thumbnail?: string | null;
+  readonly embedding?: (number | null)[] | null;
+  readonly embeddingModel?: string | null;
+  readonly embeddingDimensions?: number | null;
+  readonly embeddingVersion?: number | null;
+  readonly embeddingWordCount?: number | null;
+  readonly publishedAt?: number | null;
+  readonly isDraft?: boolean | null;
   readonly files: AsyncCollection<UnitFile>;
   readonly words: AsyncCollection<UnitWord>;
   readonly questions: AsyncCollection<QuestionUnit>;
@@ -515,6 +609,11 @@ type EagerWord = {
   readonly definitionWaveformData?: string | null;
   readonly rubyTags?: string | null;
   readonly importedAt?: string | null;
+  readonly embedding?: (number | null)[] | null;
+  readonly embeddingModel?: string | null;
+  readonly embeddingDimensions?: number | null;
+  readonly embeddingVersion?: number | null;
+  readonly embeddingWordCount?: number | null;
   readonly units?: (UnitWord | null)[] | null;
   readonly files?: (WordFile | null)[] | null;
   readonly questions?: (QuestionWord | null)[] | null;
@@ -540,6 +639,11 @@ type LazyWord = {
   readonly definitionWaveformData?: string | null;
   readonly rubyTags?: string | null;
   readonly importedAt?: string | null;
+  readonly embedding?: (number | null)[] | null;
+  readonly embeddingModel?: string | null;
+  readonly embeddingDimensions?: number | null;
+  readonly embeddingVersion?: number | null;
+  readonly embeddingWordCount?: number | null;
   readonly units: AsyncCollection<UnitWord>;
   readonly files: AsyncCollection<WordFile>;
   readonly questions: AsyncCollection<QuestionWord>;
@@ -571,6 +675,8 @@ type EagerDocument = {
   readonly fileSize?: number | null;
   readonly mimeType?: string | null;
   readonly uploadedAt?: string | null;
+  readonly resumeState?: string | null;
+  readonly pageEmbeddings?: (PageEmbedding | null)[] | null;
   readonly parsedContent?: (ParsedContent | null)[] | null;
   readonly agentJobs?: (AgentJob | null)[] | null;
   readonly metadata?: string | null;
@@ -598,6 +704,8 @@ type LazyDocument = {
   readonly fileSize?: number | null;
   readonly mimeType?: string | null;
   readonly uploadedAt?: string | null;
+  readonly resumeState?: string | null;
+  readonly pageEmbeddings?: (PageEmbedding | null)[] | null;
   readonly parsedContent: AsyncCollection<ParsedContent>;
   readonly agentJobs: AsyncCollection<AgentJob>;
   readonly metadata?: string | null;

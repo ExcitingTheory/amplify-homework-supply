@@ -263,6 +263,42 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "embedding": {
+                    "name": "embedding",
+                    "isArray": true,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "embeddingModel": {
+                    "name": "embeddingModel",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "embeddingDimensions": {
+                    "name": "embeddingDimensions",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "embeddingVersion": {
+                    "name": "embeddingVersion",
+                    "isArray": false,
+                    "type": "AWSTimestamp",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "embeddingWordCount": {
+                    "name": "embeddingWordCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "units": {
                     "name": "units",
                     "isArray": true,
@@ -522,6 +558,14 @@ export const schema = {
                     "type": "AWSJSON",
                     "isRequired": false,
                     "attributes": []
+                },
+                "embedding": {
+                    "name": "embedding",
+                    "isArray": true,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
                 },
                 "documentID": {
                     "name": "documentID",
@@ -857,6 +901,42 @@ export const schema = {
                     "name": "backgroundColor",
                     "isArray": false,
                     "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "embedding": {
+                    "name": "embedding",
+                    "isArray": true,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "embeddingModel": {
+                    "name": "embeddingModel",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "embeddingDimensions": {
+                    "name": "embeddingDimensions",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "embeddingVersion": {
+                    "name": "embeddingVersion",
+                    "isArray": false,
+                    "type": "AWSTimestamp",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "embeddingWordCount": {
+                    "name": "embeddingWordCount",
+                    "isArray": false,
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -1344,6 +1424,56 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "embedding": {
+                    "name": "embedding",
+                    "isArray": true,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "embeddingModel": {
+                    "name": "embeddingModel",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "embeddingDimensions": {
+                    "name": "embeddingDimensions",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "embeddingVersion": {
+                    "name": "embeddingVersion",
+                    "isArray": false,
+                    "type": "AWSTimestamp",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "embeddingWordCount": {
+                    "name": "embeddingWordCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "publishedAt": {
+                    "name": "publishedAt",
+                    "isArray": false,
+                    "type": "AWSTimestamp",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "isDraft": {
+                    "name": "isDraft",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "files": {
                     "name": "files",
                     "isArray": true,
@@ -1569,6 +1699,42 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "embedding": {
+                    "name": "embedding",
+                    "isArray": true,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "embeddingModel": {
+                    "name": "embeddingModel",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "embeddingDimensions": {
+                    "name": "embeddingDimensions",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "embeddingVersion": {
+                    "name": "embeddingVersion",
+                    "isArray": false,
+                    "type": "AWSTimestamp",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "embeddingWordCount": {
+                    "name": "embeddingWordCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "units": {
                     "name": "units",
                     "isArray": true,
@@ -1775,6 +1941,23 @@ export const schema = {
                     "type": "AWSDateTime",
                     "isRequired": false,
                     "attributes": []
+                },
+                "resumeState": {
+                    "name": "resumeState",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "pageEmbeddings": {
+                    "name": "pageEmbeddings",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "PageEmbedding"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
                 },
                 "parsedContent": {
                     "name": "parsedContent",
@@ -3735,6 +3918,47 @@ export const schema = {
         }
     },
     "nonModels": {
+        "EmbeddingResult": {
+            "name": "EmbeddingResult",
+            "fields": {
+                "embedding": {
+                    "name": "embedding",
+                    "isArray": true,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "model": {
+                    "name": "model",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "dimensions": {
+                    "name": "dimensions",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "tokenCount": {
+                    "name": "tokenCount",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
         "AnalyzeDocumentResult": {
             "name": "AnalyzeDocumentResult",
             "fields": {
@@ -3773,6 +3997,13 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "progress": {
+                    "name": "progress",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "message": {
                     "name": "message",
                     "isArray": false,
@@ -3803,6 +4034,46 @@ export const schema = {
                     "name": "documentID",
                     "isArray": false,
                     "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "message": {
+                    "name": "message",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "GenerateEmbeddingsResult": {
+            "name": "GenerateEmbeddingsResult",
+            "fields": {
+                "success": {
+                    "name": "success",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "fileID": {
+                    "name": "fileID",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "documentID": {
+                    "name": "documentID",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "embeddingCount": {
+                    "name": "embeddingCount",
+                    "isArray": false,
+                    "type": "Int",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -3859,8 +4130,35 @@ export const schema = {
                     "attributes": []
                 }
             }
+        },
+        "PageEmbedding": {
+            "name": "PageEmbedding",
+            "fields": {
+                "page": {
+                    "name": "page",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "embedding": {
+                    "name": "embedding",
+                    "isArray": true,
+                    "type": "Float",
+                    "isRequired": true,
+                    "attributes": [],
+                    "isArrayNullable": false
+                },
+                "text": {
+                    "name": "text",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "dfed38b52e8a684daeed69187a8a9669"
+    "version": "8ac17b999754a6747657bbc6e36c851b"
 };

@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "api": {
+      "japanese5": [
+        "Query",
+        "Mutation"
+      ]
+    },
+    "storage": {
+      "files": [
+        "create",
+        "read",
+        "update"
+      ],
+      "File:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "AgentJob:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "secretNames": [
+    "OPENAI_API_KEY"
+  ]
+}
