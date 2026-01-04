@@ -48,6 +48,9 @@ import {
     MoreVert as MoreVertIcon,
     Mic as MicIcon,
     LibraryBooks as RubyIcon,
+    Save as SaveIcon,
+    Close as CloseIcon,
+    Add as AddIcon,
 } from '@mui/icons-material';
 import CircularProgress from '@mui/material/CircularProgress';
 import RecordingStudioEnhanced from './RecordingStudioEnhanced';
@@ -206,20 +209,11 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
     const [pronunciation, setPronunciation] = React.useState(inPronunciation);
     const [selectedPhrase, setSelectedPhrase] = React.useState('');
     const [selectedPronunciation, setSelectedPronunciation] = React.useState('');
-    const [editorOpen, setEditorOpen] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
 
     const [selectionStart, setSelectionStart] = React.useState(null);
     const [selectionEnd, setSelectionEnd] = React.useState(null);
     const [rubyTags, setRubyTags] = React.useState([]);
-
-    const pronunciationWidth = getTextWidth(inPronunciation);
-    const phraseWidth = getTextWidth(inPhrase);
-    const phraseWidthDyn = getTextWidth(phrase);
-    const pronunciationWidthDyn = getTextWidth(pronunciation);
-
-    const maxPhraseWidth = Math.max(phraseWidth, pronunciationWidth);
-    const maxPhraseWidthDyn = Math.max(phraseWidthDyn, pronunciationWidthDyn);
 
     const doNothing = (e) => {
         e.preventDefault();
@@ -275,13 +269,16 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
     }
 
     React.useEffect(() => {
-        if (!inPhrase && !inPronunciation) {
-            return
-        }
-
-        setPhrase(inPhrase);
-        setPronunciation(inPronunciation);
-    }, [inPhrase, inPronunciation]);
+        // Reset all state when props change (dialog reopens)
+        setPhrase(inPhrase || '');
+        setPronunciation(inPronunciation || '');
+        setSelectedPhrase('');
+        setSelectedPronunciation('');
+        setSelectionStart(null);
+        setSelectionEnd(null);
+        setRubyTags([]);
+        setLoading(false);
+    }, [inPhrase, inPronunciation, word?.id]);
 
     const rubyTagsString = rubyTags.join(' ');
 
@@ -290,38 +287,37 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
     if (selectedPhrase === '' &&
         phrase === '' &&
         selectedPronunciation === '' &&
-        pronunciation === '' &&
-        selectionStart === null &&
-        selectionEnd === null &&
-        editorOpen) {
+        pronunciation === '') {
         hideAll = true;
     }
 
     return (
         <div
             style={{
-                width: `${maxPhraseWidth + 20}px`,
+                width: '100%',
                 textWrap: 'nowrap',
             }}
         >
-            {!editorOpen && !word?.rubyTags &&
-                <ruby
-                    onClick={() => setEditorOpen(true)}
-                    onContextMenu={doNothing}
-                >
-                    {inPhrase}
-                    <rt>{inPronunciation}</rt>
-                </ruby>
-            }
-            {!editorOpen && word?.rubyTags &&
-                <ruby
-                    onClick={() => setEditorOpen(true)}
-                    onContextMenu={doNothing}
-                    dangerouslySetInnerHTML={{ __html: word.rubyTags }}>
-                </ruby>
-            }
-            {editorOpen &&
-                <>
+            <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center',
+                    width: '100%',
+                    maxWidth: '900px',
+                    mx: 'auto',
+                    p: 4,
+                }}>
+                    <Alert severity="info" sx={{ mb: 4, width: '100%', whiteSpace: 'normal', wordWrap: 'break-word' }}>
+                        <Typography variant="body1" sx={{ mb: 1.5, fontSize: '1.1rem', whiteSpace: 'normal' }}>
+                            <strong>How to create ruby tags:</strong>
+                        </Typography>
+                        <Typography variant="body1" component="div" sx={{ fontSize: '1rem', lineHeight: 1.8, whiteSpace: 'normal' }}>
+                            1. Select text in the pronunciation field (top), then select the corresponding text in the phrase field (bottom)<br/>
+                            2. The selected portions will be paired and moved to the ruby tag preview<br/>
+                            3. Continue selecting pairs until both fields are empty<br/>
+                            4. Click Save to apply the ruby tags
+                        </Typography>
+                    </Alert>
                     {!hideAll &&
                         <>
                             <style>
@@ -340,11 +336,10 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
           }
         `}
                             </style>
-                            <div
-                                style={{
-                                    width: `${maxPhraseWidth + 20}px`,
-                                }}
-                            >
+                            <Box sx={{ mb: 4, width: '100%' }}>
+                                <Typography variant="body1" color="text.secondary" sx={{ mb: 1.5, display: 'block', fontSize: '1.1rem', fontWeight: 500 }}>
+                                    Pronunciation (select first):
+                                </Typography>
                                 {selectedPronunciation !== null && (
                                     <div
                                         style={{
@@ -352,6 +347,9 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
                                             color: 'black',
                                             userSelect: 'none',
                                             display: 'inline-block',
+                                            fontSize: '2.5rem',
+                                            padding: '8px',
+                                            marginBottom: '8px',
                                         }}
                                     >
                                         {selectedPronunciation}
@@ -360,11 +358,15 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
                                 <input
                                     style={{
                                         caretColor: 'black',
-                                        border: 'none',
-                                        padding: 0,
+                                        border: '3px solid #ccc',
+                                        borderRadius: '8px',
+                                        padding: '16px',
                                         margin: 0,
-                                        display: 'inline-block',
-                                        width: `${maxPhraseWidthDyn}px`,
+                                        display: 'block',
+                                        width: '100%',
+                                        fontSize: '2.5rem',
+                                        fontFamily: 'inherit',
+                                        textAlign: 'center',
                                     }}
                                     type="text"
                                     value={pronunciation}
@@ -372,17 +374,21 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
                                     onChange={handlePronunciationChange}
                                     onSelect={handleSelectionStart}
                                     onBlur={handleSelectionEndPronunciation} />
-                            </div>
-                            <div
-                                style={{
-                                    width: `${maxPhraseWidth + 20}px`,
-                                }}>
+                            </Box>
+                            <Box sx={{ mb: 4, width: '100%' }}>
+                                <Typography variant="body1" color="text.secondary" sx={{ mb: 1.5, display: 'block', fontSize: '1.1rem', fontWeight: 500 }}>
+                                    Phrase (select second):
+                                </Typography>
                                 {selectedPhrase !== null && (
                                     <Typography
                                         style={{
                                             backgroundColor: 'yellow',
                                             color: 'black',
                                             userSelect: 'none',
+                                            fontSize: '2.5rem',
+                                            padding: '8px',
+                                            marginBottom: '8px',
+                                            display: 'inline-block',
                                         }}
                                     >
                                         {selectedPhrase}
@@ -391,11 +397,15 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
                                 <input
                                     style={{
                                         caretColor: 'black',
-                                        border: 'none',
-                                        padding: 0,
+                                        border: '3px solid #ccc',
+                                        borderRadius: '8px',
+                                        padding: '16px',
                                         margin: 0,
-                                        display: 'inline-block',
-                                        width: `${maxPhraseWidthDyn}px`,
+                                        display: 'block',
+                                        width: '100%',
+                                        fontSize: '2.5rem',
+                                        fontFamily: 'inherit',
+                                        textAlign: 'center',
                                     }}
                                     type="text"
                                     value={phrase}
@@ -403,70 +413,94 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
                                     onChange={handlePhraseChange}
                                     onSelect={handleSelectionStart}
                                     onBlur={handleSelectionEndPhrase} />
-                            </div>
+                            </Box>
                         </>
                     }
-                    <>
-                        <ruby dangerouslySetInnerHTML={{ __html: rubyTagsString }} />
-                    </>
-                    <div
-                        style={{
+                    <Box sx={{ mb: 4, width: '100%' }}>
+                        <Typography variant="body1" color="text.secondary" sx={{ mb: 1.5, display: 'block', fontSize: '1.1rem', fontWeight: 500 }}>
+                            Ruby Tag Preview:
+                        </Typography>
+                        <Box sx={{ 
+                            p: 3, 
+                            border: '3px solid #e0e0e0', 
+                            borderRadius: 2, 
+                            minHeight: '120px',
+                            bgcolor: '#fafafa',
                             display: 'flex',
-                            justifyContent: 'space-between',
-                            width: `${maxPhraseWidth + 20}px`,
-                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                            <ruby 
+                                style={{ fontSize: '2.5rem' }}
+                                dangerouslySetInnerHTML={{ __html: rubyTagsString || '<em>No ruby tags yet</em>' }} 
+                            />
+                        </Box>
+                    </Box>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            gap: 2,
+                            mt: 2,
+                            justifyContent: 'center',
                         }}
                     >
-                        <Button
-                            size='small'
-                            color='inherit'
-                            disabled={loading}
-                            onClick={(event) => {
-                                event.preventDefault();
-                                event.stopPropagation();
-                            }}
-                        >Add</Button>
-                        <Button
-                            size='small'
-                            color='error'
-                            disabled={loading}
-                            onClick={() => {
-                                setEditorOpen(false);
-                                setRubyTags([]);
-                                setSelectedPhrase('');
-                                setSelectedPronunciation('');
-                                setSelectionStart(null);
-                                setSelectionEnd(null);
-                            }}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            size='small'
-                            color='primary'
-                            disabled={loading}
-                            onClick={async () => {
-                                setLoading(true);
+                        <Tooltip title="Add selection">
+                            <IconButton
+                                size='large'
+                                color='inherit'
+                                disabled={loading}
+                                onClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                }}
+                                sx={{ border: '2px solid currentColor' }}
+                            >
+                                <AddIcon fontSize="large" />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Clear and reset">
+                            <IconButton
+                                size='large'
+                                color='error'
+                                disabled={loading}
+                                onClick={() => {
+                                    setRubyTags([]);
+                                    setSelectedPhrase('');
+                                    setSelectedPronunciation('');
+                                    setSelectionStart(null);
+                                    setSelectionEnd(null);
+                                }}
+                                sx={{ border: '2px solid currentColor' }}
+                            >
+                                <CloseIcon fontSize="large" />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Save ruby tags">
+                            <IconButton
+                                size='large'
+                                color='primary'
+                                disabled={loading}
+                                onClick={async () => {
+                                    setLoading(true);
 
-                                await DataStore.save(Word.copyOf(word, updated => {
-                                    updated.rubyTags = rubyTagsString;
-                                }));
+                                    await DataStore.save(Word.copyOf(word, updated => {
+                                        updated.rubyTags = rubyTagsString;
+                                    }));
 
-                                setEditorOpen(false);
-                                setRubyTags([]);
-                                setSelectedPhrase('');
-                                setSelectedPronunciation('');
-                                setSelectionStart(null);
-                                setSelectionEnd(null);
-                                setLoading(false);
-                            }}
-                        >
-                            Save
-                        </Button>
-                    </div>
-
-
-                </>}
+                                    setRubyTags([]);
+                                    setSelectedPhrase('');
+                                    setSelectedPronunciation('');
+                                    setSelectionStart(null);
+                                    setSelectionEnd(null);
+                                    setLoading(false);
+                                }}
+                                sx={{ border: '2px solid currentColor' }}
+                            >
+                                <SaveIcon fontSize="large" />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
+                </Box>
         </div>
     );
 }
@@ -1169,7 +1203,7 @@ function WordRowComponent({
             <Dialog
                 open={rubyDialogOpen}
                 onClose={() => setRubyDialogOpen(false)}
-                maxWidth="sm"
+                maxWidth="md"
                 fullWidth
             >
                 <DialogTitle>

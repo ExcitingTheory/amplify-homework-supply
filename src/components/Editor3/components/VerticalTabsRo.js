@@ -22,8 +22,9 @@ function TabPanel(props) {
       aria-labelledby={`vertical-tab-${index}`}
       style={{
         width: '100%',
-        height: 'calc(100vh - 11rem)',
-        overflowY,
+        minWidth: 0,
+        height: 'calc(100vh - var(--app-bar-height, 11rem))',
+        overflow: overflowY === 'hidden' ? 'hidden' : 'auto',
       }}
       {...other}
     >
@@ -58,30 +59,34 @@ export default function VerticalTabsRo({
   return (
     <Box
       sx={{
-        flexGrow: 1, bgcolor: 'background.paper', display: 'flex'  }}
+        flexGrow: 1, 
+        bgcolor: 'background.paper', 
+        display: 'flex',
+        flexDirection: 'row',
+        borderRight: '1px solid #e0e0e0',
+      }}
     >
       <Tabs
         orientation="vertical"
-        // variant="scrollable"
         variant="standard"
         value={value}
         onChange={handleChange}
         aria-label="Vertical tabs example"
         sx={{
-          // position: 'sticky',
-          borderRight: 1,
-          borderColor: 'divider',
           overflowY: 'hidden',
-          minWidth: '4rem',
-          // position: 'fixed',
+          minWidth: '2.5rem',
+          maxWidth: '2.5rem',
+          '& .MuiTab-root': {
+            minWidth: '2.5rem',
+            maxWidth: '2.5rem',
+            padding: '8px 4px',
+            margin: 0,
+          },
+          '& .MuiTabs-scroller': {
+            borderRight: '1px solid #e0e0e0',
+            margin: 0,
+          }
         }}
-
-        // TabIndicatorProps={{
-        //   sx: {          
-        //      left: 0,
-        //      marginLeft: '1px',
-        //   }
-        // }}
       >
 
         <Tab
@@ -117,8 +122,10 @@ export default function VerticalTabsRo({
         {/* <Assignments /> */}
 
       </TabPanel>
-      <TabPanel value={value} index={1} overflowY='hidden' >
-      <ChatSidebar />
+      <TabPanel value={value} index={1} overflowY='hidden'>
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <ChatSidebar />
+        </Box>
       </TabPanel>
       <TabPanel value={value} index={2} overflowY='auto'>
         <ConfigurationManager />
