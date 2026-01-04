@@ -122,7 +122,7 @@
         "generateEmbeddings": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/generateEmbeddings-77325845535a4c4b674e-build.zip"
+          "s3Key": "amplify-builds/generateEmbeddings-2b554d6e455174656475-build.zip"
         },
         "generateEmbedding": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",

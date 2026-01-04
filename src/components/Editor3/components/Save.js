@@ -72,6 +72,8 @@ export function Save() {
                 autoHideDuration={3000}
                 onClose={() => setSaveMessage('')}
                 message={saveMessage}
+                style={{ zIndex: 2000000000 }}
+                sx={{ zIndex: 2000000000 }}
             />
             <Button
                 disabled={isSaving}

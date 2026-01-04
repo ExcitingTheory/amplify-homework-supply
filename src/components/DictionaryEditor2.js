@@ -1708,7 +1708,10 @@ export function DictionaryEditor2() {
                     </Typography>
                 </MenuItem>
                 <Divider />
-                <MenuItem onClick={handleBulkDelete}>
+                <MenuItem onClick={() => {
+                    handleContextMenuClose();
+                    handleBulkDelete();
+                }}>
                     <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
                     Delete Selected
                 </MenuItem>
@@ -1883,11 +1886,15 @@ export function DictionaryEditor2() {
             <Snackbar
                 open={confirmDialog.open}
                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                sx={{ mt: 8 }}
+                style={{ zIndex: 2000000000 }}
+                sx={{ 
+                    zIndex: 2000000000,
+                    mt: 8
+                }}
             >
                 <Alert
                     severity={confirmDialog.severity}
-                    sx={{ width: '100%' }}
+                    sx={{ width: '100%', zIndex: '9999 !important'  }}
                     action={
                         <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
                             <Button

@@ -105,6 +105,26 @@ export default function MyApp(props) {
    * 
    */
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
+
+  // Start DataStore once at app level
+  useEffect(() => {
+    let isStarted = false;
+    
+    const startDataStore = async () => {
+      if (typeof window !== 'undefined' && !isStarted) {
+        try {
+          const { DataStore } = await import('aws-amplify/datastore');
+          await DataStore.start();
+          isStarted = true;
+        } catch (error) {
+          console.error('[_app] Error starting DataStore:', error);
+        }
+      }
+    };
+
+    startDataStore();
+  }, []);
+
   return (
     <CacheProvider value={emotionCache}>
       <Head>

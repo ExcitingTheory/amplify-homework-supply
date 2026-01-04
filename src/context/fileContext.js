@@ -33,6 +33,8 @@ const FilesProvider = ({ children }) => {
   const [myPlaylistUrls, setMyPlaylistUrls] = React.useState({})
   const [myPdfs, setMyPdfs] = React.useState({})
   const [filesVersion, setFilesVersion] = React.useState(0);
+  const filesFetchedRef = React.useRef(false);
+  const subscriptionRef = React.useRef(null);
 
   const [session, setSession] = React.useState({
     error: undefined,
@@ -50,14 +52,22 @@ const FilesProvider = ({ children }) => {
         const idToken = authSession.tokens?.idToken;
         
         isLoading.current = false;
-        setSession({ identityId, idToken });
+        setSession(prev => {
+          // Only update if values actually changed
+          if (prev.identityId === identityId && prev.idToken === idToken && !prev.error) {
+            return prev;
+          }
+          return { identityId, idToken };
+        });
       } catch (error) {
         // Suppress benign Cognito 400 errors in development
-        if (error?.name !== 'NotAuthorizedException' && error?.statusCode !== 400) {
-          console.log('[FileContext] Error fetching auth session:', error);
-        }
         isLoading.current = false;
-        setSession({ identityId: undefined, idToken: undefined, error });
+        setSession(prev => {
+          if (prev.error === error && !prev.identityId && !prev.idToken) {
+            return prev;
+          }
+          return { identityId: undefined, idToken: undefined, error };
+        });
       }
   }, []);
 
@@ -116,7 +126,10 @@ const FilesProvider = ({ children }) => {
 
 
   React.useEffect(() => {
-    let subscription;
+    // Prevent duplicate subscriptions
+    if (filesFetchedRef.current) {
+      return;
+    }
 
     async function fetchFiles() {
       try {
@@ -124,31 +137,15 @@ const FilesProvider = ({ children }) => {
         const { username: myUserId, userId, signInDetails } = await getCurrentUser();
         const { identityId } = await fetchAuthSession();
 
-        console.log('[FileContext] User identity check:', {
-          username: myUserId,
-          userId,
-          identityId,
-          signInDetails
-        });
-
         if (!myUserId) {
           return;
         }
 
-        // Start DataStore to begin syncing
-        console.log('[FileContext] Starting DataStore...');
-        await DataStore.start();
-        console.log('[FileContext] DataStore started');
+        // Mark as fetched before subscribing
+        filesFetchedRef.current = true;
 
         // Query all files regardless of owner - we'll track by identityId for lookup
-        subscription = DataStore.observeQuery(File).subscribe(({ items, isSynced }) => {
-          console.log('[FileContext] observeQuery update:', {
-            totalFiles: items.length,
-            isSynced,
-            owners: [...new Set(items.map(f => f.owner))],
-            identityIds: [...new Set(items.map(f => f.identityId))]
-          });
-
+        subscriptionRef.current = DataStore.observeQuery(File).subscribe(({ items, isSynced }) => {
           const _playlistFiltered = {}
           const _pdfsFiltered = {}
 
@@ -162,22 +159,36 @@ const FilesProvider = ({ children }) => {
             }
           })
 
+          // Only update if different to prevent rerenders
           setMyPlaylistFiles(prev => {
-            const prevStr = JSON.stringify(prev);
-            const newStr = JSON.stringify(_playlistFiltered);
-            return prevStr === newStr ? prev : _playlistFiltered;
+            if (Object.keys(prev).length !== Object.keys(_playlistFiltered).length) {
+              return _playlistFiltered;
+            }
+            const hasChanges = Object.keys(_playlistFiltered).some(
+              key => !prev[key] || prev[key].updatedAt !== _playlistFiltered[key].updatedAt
+            );
+            return hasChanges ? _playlistFiltered : prev;
           });
           
           setMyPdfs(prev => {
-            const prevStr = JSON.stringify(prev);
-            const newStr = JSON.stringify(_pdfsFiltered);
-            return prevStr === newStr ? prev : _pdfsFiltered;
+            if (Object.keys(prev).length !== Object.keys(_pdfsFiltered).length) {
+              return _pdfsFiltered;
+            }
+            const hasChanges = Object.keys(_pdfsFiltered).some(
+              key => !prev[key] || prev[key].updatedAt !== _pdfsFiltered[key].updatedAt
+            );
+            return hasChanges ? _pdfsFiltered : prev;
           });
           
           setMyFiles(prev => {
-            const prevStr = JSON.stringify(prev);
-            const newStr = JSON.stringify(items);
-            if (prevStr !== newStr) {
+            if (prev.length !== items.length) {
+              setFilesVersion(v => v + 1);
+              return items;
+            }
+            const hasChanges = items.some((item, i) => 
+              !prev[i] || prev[i].id !== item.id || prev[i].updatedAt !== item.updatedAt
+            );
+            if (hasChanges) {
               setFilesVersion(v => v + 1);
               return items;
             }
@@ -187,7 +198,6 @@ const FilesProvider = ({ children }) => {
       } catch (error) {
         // Handle authentication errors gracefully
         if (error.name === 'UserUnAuthenticatedException' || error.message?.includes('authenticated')) {
-          console.log('[FileContext] User not authenticated, skipping file fetch');
           return;
         }
         console.error('Error fetching files:', error);
@@ -197,7 +207,8 @@ const FilesProvider = ({ children }) => {
     fetchFiles()
     
     return () => {
-      subscription?.unsubscribe();
+      subscriptionRef.current?.unsubscribe();
+      filesFetchedRef.current = false;
     };
   }, []);
 

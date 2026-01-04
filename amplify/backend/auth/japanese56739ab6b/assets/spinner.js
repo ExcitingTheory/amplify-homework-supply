@@ -26,7 +26,7 @@ var defaults = {
   rotate: 0,
   direction: 1,
   speed: 1,
-  zIndex: 2e9,
+  // zIndex: 2e9,
   className: 'spinner',
   top: '50%',
   left: '50%',
@@ -53,7 +53,7 @@ var Spinner = /** @class */ (function () {
     css(this.el, {
       position: this.opts.position,
       width: 0,
-      zIndex: this.opts.zIndex,
+      // zIndex: this.opts.zIndex,
       left: this.opts.left,
       top: this.opts.top,
       transform: 'scale(' + this.opts.scale + ')',

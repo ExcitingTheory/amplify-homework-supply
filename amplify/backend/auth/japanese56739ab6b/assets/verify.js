@@ -13,7 +13,7 @@ var opts = {
   rotate: 0, // The rotation offset
   animation: 'spinner-line-fade-quick', // The CSS animation name for the lines
   direction: 1, // 1: clockwise, -1: counterclockwise
-  zIndex: 2e9, // The z-index (defaults to 2000000000)
+  // zIndex: 2e9, // The z-index (defaults to 2000000000)
   className: 'spinner', // The CSS class to assign to the spinner
   top: '50%', // Top position relative to parent
   left: '50%', // Left position relative to parent

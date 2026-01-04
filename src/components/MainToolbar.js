@@ -337,7 +337,7 @@ export default function MainToolbar({ children }) {
     console.log('session', session)
   
     await DataStore.clear(Section);
-    await DataStore.start();
+    // DataStore will restart automatically on page reload
   
     setOpenAddStudentToSection(false)
     setIsWorking(false)
@@ -404,7 +404,7 @@ export default function MainToolbar({ children }) {
             open={state[anchor]}
             onClose={toggleDrawer(anchor, false)}
             onOpen={toggleDrawer(anchor, true)}
-            style={{ zIndex: 2000 }}
+            style={{ zIndex: 1000 }}
             ModalProps={{
               keepMounted: true, // Better open performance on mobile.
             }}

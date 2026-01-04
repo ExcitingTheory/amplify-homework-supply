@@ -102,6 +102,7 @@ function Index({ signOut, user }) {
   const [myAssignmentNeedsGrading, setMyAssignmentNeedsGrading] = React.useState([])
 
   useEffect(() => {
+    if (!user?.username) return;
     // if (!id) return
     fetchAllGrades()
     async function fetchAllGrades() {
@@ -163,10 +164,11 @@ function Index({ signOut, user }) {
     return function cleanup() {
       subscription.unsubscribe();
     }
-  }, [])
+  }, [user?.username])
 
   // Consolidated Assignment observer - handles both my and others' assignments
   useEffect(() => {
+    if (!user?.username) return;
     fetchAllAssignments()
     async function fetchAllAssignments() {
       const myUserId = user.username
@@ -196,10 +198,11 @@ function Index({ signOut, user }) {
     return function cleanup() {
       subscription.unsubscribe();
     }
-  }, [units, JSON.stringify(myGradeMap)])
+  }, [user?.username, units, JSON.stringify(myGradeMap)])
 
   // Consolidated Section observer - handles both my and others' sections
   useEffect(() => {
+    if (!user?.username) return;
     fetchAllSections()
     async function fetchAllSections() {
       const myUserId = user.username
@@ -216,7 +219,7 @@ function Index({ signOut, user }) {
     return function cleanup() {
       subscription.unsubscribe();
     }
-  }, [])
+  }, [user?.username])
 
   useEffect(() => {
     fetchUnits()

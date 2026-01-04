@@ -637,11 +637,15 @@ export default function FileMetadataComponent({
             <Snackbar
                 open={confirmDialog.open}
                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                sx={{ mt: 8 }}
+                style={{ zIndex: 2000000000 }}
+                sx={{ 
+                    zIndex: 2000000000,
+                    mt: 8
+                }}
             >
                 <Alert
                     severity={confirmDialog.severity}
-                    sx={{ width: '100%' }}
+                    sx={{ width: '100%', zIndex: '9999 !important'  }}
                     action={
                         <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
                             <Button

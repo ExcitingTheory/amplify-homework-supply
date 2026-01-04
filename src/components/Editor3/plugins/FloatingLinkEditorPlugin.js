@@ -541,26 +541,11 @@ function useFloatingLinkEditorToolbar(
     const [activeEditor, setActiveEditor] = useState(editor);
     const [isLink, setIsLink] = useState(false);
 
-    // Debug effect to track state changes
-    useEffect(() => {
-        console.log('[DEBUG] isLink state changed to:', isLink);
-    }, [isLink]);
-
     const updateToolbar = useCallback(() => {
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
             const node = getSelectedNode(selection);
             const parent = node.getParent();
-            
-            console.log('[DEBUG] Selection node:', {
-                nodeType: node.getType(),
-                nodeText: node.getTextContent?.(),
-                parentType: parent?.getType(),
-                isLinkNode: $isLinkNode(node),
-                isAutoLinkNode: $isAutoLinkNode(node),
-                isParentLink: parent ? $isLinkNode(parent) : false,
-                isParentAutoLink: parent ? $isAutoLinkNode(parent) : false
-            });
             
             // Check if the node itself is a link
             const isNodeLink = $isLinkNode(node) || $isAutoLinkNode(node);
@@ -572,24 +557,11 @@ function useFloatingLinkEditorToolbar(
             const linkParent = $findMatchingParent(node, $isLinkNode);
             const autoLinkParent = $findMatchingParent(node, $isAutoLinkNode);
 
-            console.log('[DEBUG] Link detection result:', {
-                isNodeLink,
-                isParentLink,
-                hasLinkParent: linkParent != null,
-                hasAutoLinkParent: autoLinkParent != null,
-                linkParentType: linkParent?.getType(),
-                autoLinkParentType: autoLinkParent?.getType()
-            });
-
             // Show for both regular links and auto links
             const shouldShowLink = isNodeLink || isParentLink || linkParent != null || autoLinkParent != null;
             
-            console.log('[DEBUG] Final decision - shouldShowLink:', shouldShowLink);
-            console.log('[DEBUG] About to call setIsLink with:', shouldShowLink);
             setIsLink(shouldShowLink);
-            console.log('[DEBUG] setIsLink called');
         } else {
-            console.log('[DEBUG] Not a range selection:', selection);
             setIsLink(false);
         }
     }, []);

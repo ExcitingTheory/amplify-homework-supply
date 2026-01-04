@@ -430,16 +430,12 @@ export const generateEmbeddings = /* GraphQL */ `mutation GenerateEmbeddings($fi
   APITypes.GenerateEmbeddingsMutationVariables,
   APITypes.GenerateEmbeddingsMutation
 >;
-export const generateEmbeddding = /* GraphQL */ `mutation GenerateEmbeddding(
+export const generateEmbedding = /* GraphQL */ `mutation GenerateEmbedding(
   $content: String!
   $model: String
   $dimensions: Int
 ) {
-  generateEmbeddding(
-    content: $content
-    model: $model
-    dimensions: $dimensions
-  ) {
+  generateEmbedding(content: $content, model: $model, dimensions: $dimensions) {
     embedding
     model
     dimensions
@@ -449,8 +445,8 @@ export const generateEmbeddding = /* GraphQL */ `mutation GenerateEmbeddding(
   }
 }
 ` as GeneratedMutation<
-  APITypes.GenerateEmbedddingMutationVariables,
-  APITypes.GenerateEmbedddingMutation
+  APITypes.GenerateEmbeddingMutationVariables,
+  APITypes.GenerateEmbeddingMutation
 >;
 export const createAssistant = /* GraphQL */ `mutation CreateAssistant(
   $input: CreateAssistantInput!

@@ -3258,14 +3258,14 @@ export type GenerateEmbeddingsMutation = {
   } | null,
 };
 
-export type GenerateEmbedddingMutationVariables = {
+export type GenerateEmbeddingMutationVariables = {
   content: string,
   model?: string | null,
   dimensions?: number | null,
 };
 
-export type GenerateEmbedddingMutation = {
-  generateEmbeddding?:  {
+export type GenerateEmbeddingMutation = {
+  generateEmbedding?:  {
     __typename: "EmbeddingResult",
     embedding: Array< number >,
     model: string,

@@ -15,6 +15,7 @@ import {
     ACCEPTABLE_FILE_TYPES,
     ACCEPTABLE_IMAGE_TYPES,
 } from '../components/Editor3/plugins/DragDropPastePlugin';
+import { generateEmbedding, generateEmbeddings } from '../graphql/mutations';
 
 const client = generateClient();
 
@@ -53,6 +54,68 @@ const generateEmbeddingsMutation = /* GraphQL */ `
     }
   }
 `;
+
+const generateEmbeddingMutation = /* GraphQL */ `
+  mutation GenerateEmbedding(
+    $content: String!
+    $model: String
+    $dimensions: Int
+  ) {
+    generateEmbedding(
+      content: $content
+      model: $model
+      dimensions: $dimensions
+    ) {
+      success
+      embedding
+      model
+      dimensions
+      message
+    }
+  }
+`;
+
+async function triggerEmbeddingGeneration(fileID) {
+    try {
+        const result = await client.graphql({
+            query: generateEmbeddingsMutation,
+            variables: { fileID }
+        });
+        
+        if (result.data?.generateEmbeddings?.success) {
+            console.log('[Embedding] Started background processing for file:', fileID);
+        } else {
+            console.warn('[Embedding] Failed to start:', result.data?.generateEmbeddings?.message);
+        }
+    } catch (error) {
+        console.error('[Embedding] Error starting generation:', error);
+        throw error;
+    }
+}   
+
+
+/**
+ * Internal helper: Generate embeddings for a file (non-blocking, handled by Lambda async re-invoke)
+ * @param {string} fileID - The ID of the file to generate embeddings for
+ * @returns {Promise<void>}
+ */
+async function triggerEmbeddingsGeneration(fileID) {
+    try {
+        const result = await client.graphql({
+            query: generateEmbeddingsMutation,
+            variables: { fileID }
+        });
+        
+        if (result.data?.generateEmbeddings?.success) {
+            console.log('[Embeddings] Started background processing for file:', fileID);
+        } else {
+            console.warn('[Embeddings] Failed to start:', result.data?.generateEmbeddings?.message);
+        }
+    } catch (error) {
+        console.error('[Embeddings] Error starting generation:', error);
+        throw error;
+    }
+}
 
 /**
  * Upload a file to S3 and create database records
@@ -150,17 +213,13 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
     const fileModel = await DataStore.save(new FileModel(fileData));
     console.log('Created File record:', fileModel);
 
-    // Generate embeddings for the uploaded file (non-blocking)
-    try {
-        // Fire and forget - don't wait for embeddings to complete
-        generateEmbeddings(fileModel.id).catch(error => {
-            console.warn('Failed to generate embeddings:', error);
-            // Don't throw - file upload succeeded
-        });
-    } catch (error) {
-        console.warn('Failed to start embedding generation:', error);
-        // Don't throw - file upload succeeded
-    }
+    // Generate embedding for the uploaded file (async via Lambda re-invoke pattern)
+    const embedding = await triggerEmbeddingGeneration(fileModel.id).catch(error => {
+        // Silently fail - embeddings are not critical for upload success
+        console.warn('Embedding generation failed to start:', error.message);
+    });
+
+    // add metadata to fileModel different for image/audio/pdf
         
     // If unitId provided, link document to unit using many-to-many relationship
     if (documentModel && unitId) {
@@ -216,11 +275,11 @@ async function waitForDocumentSync(documentId) {
  * @param {string} fileId - File ID to analyze
  * @returns {Promise<Object>} Analysis result
  */
-export async function analyzePDF(fileId) {
+export async function analyzePDF(fileID) {
     try {
         const result = await client.graphql({
             query: analyzeDocumentMutation,
-            variables: { fileID: fileId }
+            variables: { fileID }
         });
 
         // Check if the mutation returned null (Lambda error or conflict)
@@ -270,38 +329,6 @@ export async function analyzePDF(fileId) {
         }
         
         throw new Error(error.message || 'Failed to analyze PDF - unknown error');
-    }
-}
-
-/**
- * Generate embeddings for a file
- * @param {string} fileId - File ID to generate embeddings for
- * @returns {Promise<Object>} Generation result
- */
-export async function generateEmbeddings(fileId) {
-    try {
-        const result = await client.graphql({
-            query: generateEmbeddingsMutation,
-            variables: { fileID: fileId }
-        });
-
-        if (!result.data.generateEmbeddings) {
-            if (result.errors && result.errors.length > 0) {
-                const error = result.errors[0];
-                throw new Error(error.message || 'Embedding generation failed');
-            }
-            throw new Error('Embedding generation returned no data');
-        }
-
-        if (result.data.generateEmbeddings.success) {
-            console.log('Embeddings generated:', result.data.generateEmbeddings);
-            return result.data.generateEmbeddings;
-        } else {
-            throw new Error(result.data.generateEmbeddings.message || 'Embedding generation failed');
-        }
-    } catch (error) {
-        console.error('Error generating embeddings:', error);
-        throw new Error(error.message || 'Failed to generate embeddings');
     }
 }
 

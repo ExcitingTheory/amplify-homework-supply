@@ -31,6 +31,7 @@ import { SignatureV4 } from '@aws-sdk/signature-v4';
 import { HttpRequest } from '@aws-sdk/protocol-http';
 import { default as fetch, Request } from 'node-fetch';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 import { Readable } from 'stream';
 import pdfParse from 'pdf-parse';
 
@@ -39,6 +40,7 @@ const GRAPHQL_ENDPOINT = process.env.API_JAPANESE5_GRAPHQLAPIENDPOINTOUTPUT;
 const BUCKET_NAME = process.env.STORAGE_FILES_BUCKETNAME;
 
 const s3Client = new S3Client({ region: REGION });
+const lambdaClient = new LambdaClient({ region: REGION });
 
 // Initialize OpenAI with API key from SSM
 let openai;
@@ -57,6 +59,17 @@ async function initializeOpenAI() {
   const apiKey = Parameters[0].Value;
   openai = new OpenAI({ apiKey });
   return openai;
+}
+
+/**
+ * Check how much time is left in Lambda execution
+ * @returns {number} Milliseconds remaining
+ */
+function getRemainingTime(context) {
+  if (!context || !context.getRemainingTimeInMillis) {
+    return Infinity; // No context, assume unlimited time
+  }
+  return context.getRemainingTimeInMillis();
 }
 
 // GraphQL mutation helpers
@@ -215,8 +228,11 @@ async function processAudioFile(fileBuffer, fileName) {
   };
 }
 
-// Process PDF document (page-level embeddings)
-async function processDocumentFile(fileBuffer, documentID, pageCount) {
+// Process PDF document (page-level embeddings) with resume capability
+async function processDocumentFile(fileBuffer, documentID, pageCount, resumeState = null, context = null) {
+  const TIMEOUT_BUFFER_MS = 30000; // Reserve 30 seconds for cleanup and re-invocation
+  const BATCH_SIZE = 50; // Process embeddings in batches
+  
   // Use pdf-parse to extract text
   const pdfData = await pdfParse(fileBuffer);
   const fullText = pdfData.text;
@@ -228,7 +244,8 @@ async function processDocumentFile(fileBuffer, documentID, pageCount) {
   const numPages = Math.min(estimatedPages, pageCount || estimatedPages);
   
   const pageTexts = [];
-  const pageEmbeddings = [];
+  const accumulatedEmbeddings = resumeState?.pageEmbeddings || [];
+  const startPage = resumeState?.lastProcessedPage || 0;
   
   // Split text into page-sized chunks
   for (let i = 0; i < numPages; i++) {
@@ -237,62 +254,67 @@ async function processDocumentFile(fileBuffer, documentID, pageCount) {
     const pageText = fullText.substring(start, end).trim();
     
     if (pageText.length > 0) {
-      pageTexts.push(pageText);
+      pageTexts.push({ page: i + 1, text: pageText });
     }
   }
   
-  // Generate embeddings in batch (up to 100 at a time)
-  const batchSize = 50;
-  for (let i = 0; i < pageTexts.length; i += batchSize) {
-    const batch = pageTexts.slice(i, i + batchSize).filter(t => t.length > 0);
+  console.log(`Processing PDF embeddings: Starting from page ${startPage + 1} of ${pageTexts.length}`);
+  
+  // Generate embeddings in batch (up to 50 at a time)
+  for (let i = startPage; i < pageTexts.length; i += BATCH_SIZE) {
+    // Check if we're running out of time
+    const remainingTime = getRemainingTime(context);
+    if (remainingTime < TIMEOUT_BUFFER_MS) {
+      console.log(`Approaching timeout with ${remainingTime}ms remaining. Saving progress...`);
+      
+      return {
+        isComplete: false,
+        pageEmbeddings: accumulatedEmbeddings,
+        resumeState: {
+          lastProcessedPage: i,
+          pageEmbeddings: accumulatedEmbeddings,
+          totalPages: pageTexts.length
+        }
+      };
+    }
+    
+    const batch = pageTexts.slice(i, i + BATCH_SIZE).filter(p => p.text.length > 0);
     
     if (batch.length > 0) {
-      const batchEmbeddings = await generateEmbeddingsViaAPI(batch);
+      console.log(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1}: pages ${i + 1} to ${Math.min(i + BATCH_SIZE, pageTexts.length)}`);
+      
+      const batchTexts = batch.map(p => p.text);
+      const batchEmbeddings = await generateEmbeddingsViaAPI(batchTexts);
       
       // Map back to page numbers
-      let embeddingIdx = 0;
-      for (let j = i; j < Math.min(i + batchSize, pageTexts.length); j++) {
-        if (pageTexts[j].length > 0) {
-          pageEmbeddings.push({
-            page: j + 1,
-            embedding: batchEmbeddings[embeddingIdx],
-            text: pageTexts[j],
-          });
-          embeddingIdx++;
-        }
+      for (let j = 0; j < batch.length; j++) {
+        accumulatedEmbeddings.push({
+          page: batch[j].page,
+          embedding: batchEmbeddings[j],
+          text: batch[j].text,
+        });
       }
     }
   }
   
-  // Update Document with page embeddings
-  const updateDocumentMutation = /* GraphQL */ `
-    mutation UpdateDocument($input: UpdateDocumentInput!) {
-      updateDocument(input: $input) {
-        id
-        pageEmbeddings {
-          page
-          embedding
-          text
-        }
-      }
-    }
-  `;
+  console.log(`PDF embedding generation complete: ${accumulatedEmbeddings.length} pages processed`);
   
-  await executeGraphQLMutation(updateDocumentMutation, {
-    input: {
-      id: documentID,
-      pageEmbeddings,
-    },
-  });
-  
-  return pageEmbeddings.length;
+  return {
+    isComplete: true,
+    pageEmbeddings: accumulatedEmbeddings,
+    resumeState: null
+  };
 }
 
-export const handler = async (event) => {
+export const handler = async (event, context) => {
   console.log('Event:', JSON.stringify(event, null, 2));
+  console.log('Remaining time at start:', getRemainingTime(context), 'ms');
+  
+  // Check if this is an async background invocation
+  const isAsyncInvocation = event.isAsyncInvocation === true;
   
   try {
-    const { fileID } = event.arguments;
+    const { fileID } = event.arguments || event;
     
     // Fetch File record
     const getFileMutation = /* GraphQL */ `
@@ -332,6 +354,58 @@ export const handler = async (event) => {
       identityId: file.identityId,
       documentID: file.documentID
     });
+    
+    // For PDF documents, check if we're resuming from a previous timeout
+    let resumeState = null;
+    if (file.mimeType === 'application/pdf' && file.documentID) {
+      const getDocumentMutation = /* GraphQL */ `
+        query GetDocument($id: ID!) {
+          getDocument(id: $id) {
+            id
+            resumeState
+            _version
+          }
+        }
+      `;
+      
+      const docData = await executeGraphQLMutation(getDocumentMutation, { id: file.documentID });
+      
+      if (docData.getDocument?.resumeState) {
+        try {
+          resumeState = JSON.parse(docData.getDocument.resumeState);
+          console.log('Resuming from previous state:', resumeState);
+        } catch (e) {
+          console.error('Failed to parse resumeState:', e);
+          resumeState = null;
+        }
+      }
+    }
+    
+    // If this is NOT an async invocation, invoke ourselves asynchronously and return immediately
+    if (!isAsyncInvocation) {
+      console.log('Invoking Lambda asynchronously for background processing');
+      
+      const invokeCommand = new InvokeCommand({
+        FunctionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
+        InvocationType: 'Event', // Async invocation
+        Payload: JSON.stringify({
+          ...event,
+          isAsyncInvocation: true,
+          arguments: event.arguments || { fileID }
+        })
+      });
+      
+      await lambdaClient.send(invokeCommand);
+      
+      return { 
+        success: true, 
+        fileID, 
+        message: 'Embedding generation started in background'
+      };
+    }
+    
+    // From here on, this is the async background processing
+    console.log('Running background embedding generation for file:', fileID);
     
     let result;
     
@@ -409,14 +483,108 @@ export const handler = async (event) => {
       console.log('Constructed S3 key for PDF:', s3Key);
       const pageCount = file.document?.pageCount || 1; // Default to 1 if not set
       const fileBuffer = await downloadFileFromS3(s3Key);
-      const embeddingCount = await processDocumentFile(fileBuffer, file.documentID, pageCount);
+      const pdfResult = await processDocumentFile(fileBuffer, file.documentID, pageCount, resumeState, context);
+      
+      // If processing is not complete, save state and re-invoke
+      if (!pdfResult.isComplete) {
+        console.log('PDF embedding generation incomplete. Saving progress and re-invoking...');
+        
+        // Update Document with resume state
+        const updateDocumentMutation = /* GraphQL */ `
+          mutation UpdateDocument($input: UpdateDocumentInput!) {
+            updateDocument(input: $input) {
+              id
+              resumeState
+            }
+          }
+        `;
+        
+        // Fetch latest version first
+        const getDocMutation = /* GraphQL */ `
+          query GetDocument($id: ID!) {
+            getDocument(id: $id) {
+              id
+              _version
+            }
+          }
+        `;
+        
+        const docData = await executeGraphQLMutation(getDocMutation, { id: file.documentID });
+        
+        await executeGraphQLMutation(updateDocumentMutation, {
+          input: {
+            id: file.documentID,
+            _version: docData.getDocument._version,
+            resumeState: JSON.stringify(pdfResult.resumeState)
+          }
+        });
+        
+        // Re-invoke this Lambda to continue processing
+        const invokeCommand = new InvokeCommand({
+          FunctionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
+          InvocationType: 'Event', // Async invocation
+          Payload: JSON.stringify({
+            ...event,
+            isAsyncInvocation: true,
+            arguments: event.arguments || { fileID }
+          })
+        });
+        
+        await lambdaClient.send(invokeCommand);
+        
+        return { 
+          success: true, 
+          fileID,
+          documentID: file.documentID,
+          message: 'PDF embedding generation paused and resumed in new invocation',
+          embeddingCount: pdfResult.pageEmbeddings.length,
+          progress: `${pdfResult.resumeState.lastProcessedPage}/${pdfResult.resumeState.totalPages} pages`
+        };
+      }
+      
+      // Processing complete, update Document with embeddings and clear resume state
+      console.log('PDF embedding generation completed successfully');
+      
+      const updateDocumentMutation = /* GraphQL */ `
+        mutation UpdateDocument($input: UpdateDocumentInput!) {
+          updateDocument(input: $input) {
+            id
+            pageEmbeddings {
+              page
+              embedding
+              text
+            }
+          }
+        }
+      `;
+      
+      // Fetch latest version first
+      const getDocMutation = /* GraphQL */ `
+        query GetDocument($id: ID!) {
+          getDocument(id: $id) {
+            id
+            _version
+          }
+        }
+      `;
+      
+      const docData = await executeGraphQLMutation(getDocMutation, { id: file.documentID });
+      
+      await executeGraphQLMutation(updateDocumentMutation, {
+        input: {
+          id: file.documentID,
+          _version: docData.getDocument._version,
+          pageEmbeddings: pdfResult.pageEmbeddings,
+          resumeState: null // Clear resume state
+        }
+      });
       
       return {
         success: true,
         fileID,
         documentID: file.documentID,
-        embeddingCount,
-        message: `Generated ${embeddingCount} page embeddings successfully`,
+        embeddingCount: pdfResult.pageEmbeddings.length,
+        message: `Generated ${pdfResult.pageEmbeddings.length} page embeddings successfully`,
       };
       
     } else {
@@ -429,9 +597,63 @@ export const handler = async (event) => {
     
   } catch (error) {
     console.error('Error generating embeddings:', error);
+    
+    // Try to clear resume state on error for PDF documents
+    try {
+      const fileID = event.arguments?.fileID || event.fileID;
+      if (fileID) {
+        const getFileMutation = /* GraphQL */ `
+          query GetFile($id: ID!) {
+            getFile(id: $id) {
+              documentID
+            }
+          }
+        `;
+        const fileData = await executeGraphQLMutation(getFileMutation, { id: fileID });
+        
+        if (fileData.getFile?.documentID) {
+          const updateDocumentMutation = /* GraphQL */ `
+            mutation UpdateDocument($input: UpdateDocumentInput!) {
+              updateDocument(input: $input) {
+                id
+              }
+            }
+          `;
+          
+          const getDocMutation = /* GraphQL */ `
+            query GetDocument($id: ID!) {
+              getDocument(id: $id) {
+                id
+                _version
+              }
+            }
+          `;
+          
+          const docData = await executeGraphQLMutation(getDocMutation, { id: fileData.getFile.documentID });
+          
+          await executeGraphQLMutation(updateDocumentMutation, {
+            input: {
+              id: fileData.getFile.documentID,
+              _version: docData.getDocument._version,
+              resumeState: null
+            }
+          });
+        }
+      }
+    } catch (updateError) {
+      console.error('Failed to clear resume state:', updateError);
+    }
+    
+    // If this is an async invocation, don't throw (just log)
+    // If it's a synchronous call, throw the error
+    if (event.isAsyncInvocation) {
+      console.error('Async processing failed:', error);
+      return { success: false, error: error.message };
+    }
+    
     return {
       success: false,
-      fileID: event.arguments.fileID,
+      fileID: event.arguments?.fileID || event.fileID,
       message: `Error: ${error.message}`,
     };
   }

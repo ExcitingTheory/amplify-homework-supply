@@ -278,12 +278,12 @@ const ChatSidebar = () => {
 
     // Process documents when they're added
     const processDocument = async (file, index) => {
-        if ( file.type !== 'application/pdf' ||
-            file.type !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-            file.type !== 'application/msword' ||
-            file.type !== 'text/plain' ||
-            file.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-            file.type !== 'application/vnd.ms-excel' ||
+        if ( file.type !== 'application/pdf' &&
+            file.type !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' &&
+            file.type !== 'application/msword' &&
+            file.type !== 'text/plain' &&
+            file.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' &&
+            file.type !== 'application/vnd.ms-excel' &&
             file.type !== 'text/csv'
         ) return;
 
@@ -760,11 +760,15 @@ const ChatSidebar = () => {
             <Snackbar
                 open={confirmDialog.open}
                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                sx={{ mt: 8 }}
+                style={{ zIndex: 2000000000 }}
+                sx={{ 
+                    zIndex: 2000000000,
+                    mt: 8
+                }}
             >
                 <Alert
                     severity={confirmDialog.severity}
-                    sx={{ width: '100%' }}
+                    sx={{ width: '100%', zIndex: '9999 !important'  }}
                     action={
                         <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
                             <Button

@@ -16,7 +16,7 @@ type Mutation {
   analyzeDocument(fileID: ID!): AnalyzeDocumentResult @function(name: "analyzeDocument-${env}")
   cancelDocumentAnalysis(fileID: ID!): CancelDocumentAnalysisResult @function(name: "analyzeDocument-${env}")
   generateEmbeddings(fileID: ID!): GenerateEmbeddingsResult @function(name: "generateEmbeddings-${env}")
-  generateEmbeddding(
+  generateEmbedding(
     content: String!
     model: String
     dimensions: Int

@@ -35,9 +35,11 @@ import {
     Snackbar,
     Alert,
     Chip,
+    Portal,
 } from "@mui/material";
 import { useVirtualizer } from '@tanstack/react-virtual';
 import React from "react";
+import { useRouter } from 'next/router';
 import { isMimeType } from '@lexical/utils';
 
 import CircularProgress from '@mui/material/CircularProgress';
@@ -48,6 +50,7 @@ import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 
 import FilesContext from "../../../context/fileContext";
 import SettingsContext from "../../../context/settingsContext";
@@ -87,6 +90,7 @@ import { $createFileMetadataNode } from "../nodes/FileMetadataNode";
 
 import { UnitFile } from '../../../models';
 import UnitContext from '../../../context/unitContext';
+import { FileManagerProvider, useFileManager } from './FileManagerContext';
 import getCachedUrl from "../../../utils/getCachedUrl";
 import AudioWaveformPlayer from './AudioWaveformPlayer';
 
@@ -650,6 +654,8 @@ function ExpandedFileContent({ file, parsedContent, search, editor }) {
     const isDocument = file.mimeType === 'application/pdf' ||
         file.mimeType === 'text/plain' ||
         file.mimeType === 'text/markdown';
+
+    console.log('ExpandedFileContent render', { file, parsedContent, vocabulary, summaries, objectives, concepts, questions });
 
     return (
         <Box sx={{ p: 2, backgroundColor: 'grey.50', borderRadius: 1, mt: 1 }}>
@@ -1565,45 +1571,54 @@ function FileTypeSubheader({ label, fileType }) {
 // FileRowComponent - Renders individual file rows based on file type
 // =============================================================================
 
-function FileRowComponent({
-    file,
-    fileType,
-    isExpanded,
-    isSelected,
-    search,
-    onToggleExpand,
-    onToggleSelect,
-    onDelete,
-    onNameUpdate,
-    editor,
-    parsedContent,
-    documentStatus,
-    expandedFileContent,
-    setConfirmDialog,
-    INSERT_IMAGE_COMMAND,
-    INSERT_PLAYLIST_COMMAND,
-    analyzePDF,
-    cancelPDFAnalysis,
-    setGenerator,
-    setSelectedDocument,
-    remove,
-    index
-}) {
+function FileRowComponent({ file, fileType, index }) {
+    const [editor] = useLexicalComposerContext();
+    const {
+        search,
+        expandedItems,
+        selectedItems,
+        expandedFileContent,
+        parsedContentData,
+        documentStatuses,
+        toggleFileContentExpansion,
+        handleToggleSelect,
+        handleFileNameUpdate,
+        setConfirmDialog,
+        setGenerator,
+        setSelectedDocument,
+        remove
+    } = useFileManager();
+    
+    const isExpanded = expandedItems.has(file.id);
+    const isSelected = selectedItems.has(file.id);
+    const parsedContent = parsedContentData[file.id];
+    const documentStatus = documentStatuses[file.documentID];
+    const isContentExpanded = expandedFileContent.has(file.id);
     const isEvenRow = index % 2 === 0;
 
     // Common action buttons for all file types
     const renderActionButtons = () => (
         <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <Tooltip title="Select">
+                        <Checkbox
+                            size="small"
+                            checked={isSelected}
+                            onChange={(e) => {
+                                handleToggleSelect(file.id);
+                            }}
+                            sx={{ p: 0.25 }}
+                        />
+                    </Tooltip>
             {/* Expand/Collapse Content Button */}
             <IconButton
                 size="small"
                 onClick={(e) => {
                     e.stopPropagation();
-                    onToggleExpand(file.id);
+                    toggleFileContentExpansion(file.id);
                 }}
-                title={expandedFileContent ? 'Collapse' : 'Expand details'}
+                title={isContentExpanded ? 'Collapse' : 'Expand details'}
             >
-                {expandedFileContent ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                {isContentExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </IconButton>
 
             {/* Insert Button - varies by file type */}
@@ -1641,16 +1656,17 @@ function FileRowComponent({
                 size="small"
                 onClick={(e) => {
                     e.stopPropagation();
+                    console.log('[FileRowComponent] Delete button clicked for file:', file.name);
                     setConfirmDialog({
                         open: true,
                         message: `Are you sure you want to delete ${file.path}?`,
                         severity: 'warning',
                         onConfirm: async () => {
-                            await DataStore.delete(file);
-                            await remove(file);
+                            await deleteFileCompletely(file);
                             setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
                         }
                     });
+                    console.log('[FileRowComponent] confirmDialog state should be open now');
                 }}
                 title="Delete file"
             >
@@ -1692,7 +1708,7 @@ function FileRowComponent({
                 <FileNameField
                     value={file.name}
                     fileId={file.id}
-                    onSave={onNameUpdate}
+                    onSave={handleFileNameUpdate}
                     searchTerm={search}
                 />
             </Box>
@@ -1713,7 +1729,7 @@ function FileRowComponent({
             </Box>
 
             {/* Expanded Content */}
-            {expandedFileContent && (
+            {isContentExpanded && (
                 <ExpandedFileContent
                     file={file}
                     parsedContent={parsedContent}
@@ -1773,7 +1789,39 @@ function ListItemImage({ file }) {
 
 }
 
+/**
+ * Helper function to completely delete a file from both DataStore and S3
+ * @param {FileModel} file - The file model to delete
+ * @returns {Promise<void>}
+ */
+async function deleteFileCompletely(file) {
+    if (!file) return;
+    
+    try {
+        // Delete associated Document if it exists
+        if (file.documentID) {
+            const document = await DataStore.query(Document, file.documentID);
+            if (document) {
+                await DataStore.delete(document);
+                console.log('Deleted associated Document:', file.documentID);
+            }
+        }
+        
+        // Delete the File model from DataStore
+        await DataStore.delete(file);
+        console.log('Deleted File model:', file.id);
+        
+        // Delete from S3
+        await remove({ key: file.path });
+        console.log('Deleted S3 file:', file.path);
+    } catch (error) {
+        console.error('Error deleting file:', error);
+        throw error;
+    }
+}
+
 export default function FileManager2() {
+    const router = useRouter();
     const [editor] = useLexicalComposerContext();
     const [search, setSearch] = React.useState('');
     const [searchMode, setSearchMode] = React.useState('hybrid'); // 'keyword', 'semantic', 'hybrid'
@@ -1807,6 +1855,11 @@ export default function FileManager2() {
 
     const [contextMenu, setContextMenu] = React.useState(null);
     const [confirmDialog, setConfirmDialog] = React.useState({ open: false, message: '', onConfirm: null, severity: 'warning' });
+    
+    // Debug: Log confirmDialog state changes
+    React.useEffect(() => {
+        console.log('[FileManager2] confirmDialog state changed:', confirmDialog);
+    }, [confirmDialog]);
     const [editingFileId, setEditingFileId] = React.useState(null);
     const [expandedFileContent, setExpandedFileContent] = React.useState(new Set()); // Files with expanded content view
     const [parsedContentData, setParsedContentData] = React.useState({}); // Cache for parsed content
@@ -1961,24 +2014,56 @@ export default function FileManager2() {
     const [isDragging, setIsDragging] = React.useState(false);
     const [fileOperations, setFileOperations] = React.useState([]);
     const [filesToUpload, setFilesToUpload] = React.useState([]);
+    const uploadInProgressRef = React.useRef(false);
     const [newFileFormOpen, setNewFileFormOpen] = React.useState(false);
     const [newImageFileFormOpen, setNewImageFileFormOpen] = React.useState(false);
     const [newAudioFileFormOpen, setNewAudioFileFormOpen] = React.useState(false);
     const [newVideoFileFormOpen, setNewVideoFileFormOpen] = React.useState(false);
 
-    // Load generator tab from localStorage, default to 'all'
+    // Load generator tab from URL query or localStorage, default to 'all'
     const [generator, setGenerator] = React.useState(() => {
         if (typeof window !== 'undefined') {
+            // First check URL query parameter (using 'fileType' to avoid conflict with vertical tabs)
+            const urlFileType = router.query.fileType;
+            if (urlFileType && ['all', 'image', 'audio', 'video'].includes(urlFileType)) {
+                return urlFileType;
+            }
+            // Fallback to localStorage
             const saved = localStorage.getItem('fileManager2_activeTab');
             return saved || 'all';
         }
         return 'all';
     });
 
-    // Persist tab selection to localStorage
+    // Sync tab from URL on mount and when query changes
+    React.useEffect(() => {
+        const urlFileType = router.query.fileType;
+        if (urlFileType && ['all', 'image', 'audio', 'video'].includes(urlFileType)) {
+            setGenerator(urlFileType);
+        }
+    }, [router.query.fileType]);
+
+    // Persist tab selection to both URL and localStorage
     React.useEffect(() => {
         if (typeof window !== 'undefined') {
             localStorage.setItem('fileManager2_activeTab', generator);
+            
+            // Update URL without causing navigation (using 'fileType' to avoid conflict with vertical tabs)
+            const currentQuery = { ...router.query };
+            if (generator !== 'all') {
+                currentQuery.fileType = generator;
+            } else {
+                delete currentQuery.fileType; // Remove fileType param if it's 'all' (default)
+            }
+            
+            router.push(
+                {
+                    pathname: router.pathname,
+                    query: currentQuery,
+                },
+                undefined,
+                { shallow: true } // Shallow routing - no page reload
+            );
         }
     }, [generator]);
 
@@ -1986,6 +2071,7 @@ export default function FileManager2() {
     const [suggestionTab, setSuggestionTab] = React.useState(0);
 
     const [documentStatuses, setDocumentStatuses] = React.useState({});
+    const [documentSyncComplete, setDocumentSyncComplete] = React.useState(false);
 
     const { files, session } = React.useContext(FilesContext);
     const { identityId } = session;
@@ -2297,8 +2383,6 @@ export default function FileManager2() {
         overscan: 3,
     });
 
-    console.log('FilesContext.files', files);
-
     // Populate vector store from document page embeddings (incremental updates)
     React.useEffect(() => {
         const isInitialLoad = loadedVersions.current.size === 0;
@@ -2306,7 +2390,6 @@ export default function FileManager2() {
         if (isInitialLoad) {
             // Initial load: clear and load everything
             vectorStore.clear();
-            console.log('[VectorStore] Initial load: loading all embeddings');
         }
 
         files.forEach(file => {
@@ -2380,8 +2463,6 @@ export default function FileManager2() {
                 loadedVersions.current.delete(fileId);
             }
         });
-
-        console.log(`[VectorStore] ${isInitialLoad ? 'Loaded' : 'Updated'} ${vectorStore.items.length} embeddings`);
     }, [files, documentStatuses, fileEmbeddings, vectorStore]);
 
     // Note: Settings are now provided by SettingsContext
@@ -2391,7 +2472,6 @@ export default function FileManager2() {
 
     // Subscribe to Document status changes
     React.useEffect(() => {
-        console.log('[FileManager] Setting up Document subscription...');
         const subscription = DataStore.observeQuery(Document).subscribe(({ items, isSynced }) => {
             const statusMap = {};
             items.forEach(doc => {
@@ -2406,16 +2486,10 @@ export default function FileManager2() {
                 };
             });
             setDocumentStatuses(statusMap);
-            console.log('[FileManager] Document statuses updated:', {
-                count: items.length,
-                isSynced,
-                statusMap,
-                fileDocumentIDs: files.map(f => ({ fileId: f.id, documentID: f.documentID, path: f.path }))
-            });
+            setDocumentSyncComplete(isSynced);
         });
 
         return () => {
-            console.log('[FileManager] Cleaning up Document subscription');
             subscription.unsubscribe();
         };
     }, [files]);
@@ -2534,21 +2608,22 @@ export default function FileManager2() {
             // when files change, upload them to S3
             // and update the entry in the database
 
-            if (filesToUpload.length === 0) {
+            console.log('[FileManager2] Upload useEffect triggered. filesToUpload:', filesToUpload.length, 'uploadInProgress:', uploadInProgressRef.current);
+
+            if (filesToUpload.length === 0 || uploadInProgressRef.current) {
+                console.log('[FileManager2] Skipping upload - no files or already in progress');
                 return;
             }
+
+            uploadInProgressRef.current = true;
+
+            console.log('[FileManager2] About to start upload. filesToUpload:', filesToUpload.length, filesToUpload);
 
             const fileKeys = await Promise.allSettled(filesToUpload.map(async (fileInput, mapIndex) => {
                 const { file, index } = fileInput;
                 const progressIndex = index !== undefined ? index : mapIndex;
 
-                // const isEvenRow = index % 2 === 0;
-                const audioUrls = audio || [];
-                const hasAudio = audioUrls.length > 0;
-
-                console.log('uploading file', fileInput);
-                console.log('fileOperations', fileOperations);
-
+                console.log('[FileManager2] Uploading file:', file.name, 'identityId:', identityId, 'unitId:', unit?.id);
 
                 try {
                     // Use shared utility for file upload
@@ -2567,7 +2642,11 @@ export default function FileManager2() {
                         }
                     );
 
-                    console.log('Upload result:', result);
+                    console.log('[FileManager2] Upload result:', {
+                        fileId: result?.fileModel?.id,
+                        fileName: result?.fileModel?.name,
+                        documentId: result?.documentModel?.id
+                    });
 
                     // If PDF and auto-analyze is enabled, trigger analysis
                     if (file.type === 'application/pdf' && settings?.autoAnalyzeDocuments && result.documentModel) {
@@ -2586,13 +2665,27 @@ export default function FileManager2() {
                     }
                 } catch (error) {
                     console.error('Error uploading file:', error);
+                    return { status: 'rejected', reason: error };
                 }
             }));
 
+            // Check results and log any failures
+            const failures = fileKeys.filter(result => result.status === 'rejected');
+            if (failures.length > 0) {
+                console.error(`${failures.length} file(s) failed to upload:`, failures);
+                failures.forEach((failure, index) => {
+                    console.error(`File ${index + 1} error:`, failure.reason);
+                });
+            }
+
+            const successes = fileKeys.filter(result => result.status === 'fulfilled');
+            console.log(`[FileManager2] Upload complete. ${successes.length} succeeded, ${failures.length} failed`);
+            
             // timeout to allow for the UI to update
             setTimeout(() => {
                 setFilesToUpload([]);
                 setFileOperations([]);
+                uploadInProgressRef.current = false;
             }, 1000);
         };
 
@@ -2642,7 +2735,25 @@ export default function FileManager2() {
 
     }
 
+    // Context value for FileManagerProvider
+    const fileManagerContextValue = {
+        search,
+        expandedItems,
+        selectedItems,
+        expandedFileContent,
+        parsedContentData,
+        documentStatuses,
+        toggleFileContentExpansion,
+        handleToggleSelect,
+        handleFileNameUpdate,
+        setConfirmDialog,
+        setGenerator,
+        setSelectedDocument,
+        remove
+    };
+
     return (
+        <FileManagerProvider value={fileManagerContextValue}>
         <Box
             sx={{
                 height: '100%',
@@ -2793,30 +2904,9 @@ export default function FileManager2() {
                         : undefined
                 }
             >
-                <MenuItem
-                    onClick={() => {
-                        setConfirmDialog({
-                            open: true,
-                            message: `Delete ${selectedItems.size} selected file(s)?`,
-                            severity: 'error',
-                            onConfirm: async () => {
-                                for (const fileId of selectedItems) {
-                                    const file = files.find(f => f.id === fileId);
-                                    if (file) {
-                                        await DataStore.delete(file);
-                                        await remove(file);
-                                    }
-                                }
-                                setSelectedItems(new Set());
-                                setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
-                            }
-                        });
-                        setContextMenu(null);
-                    }}
-                >
-                    <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
-                    Delete Selected ({selectedItems.size})
-                </MenuItem>
+                {/**
+                 *  Deselect all action
+                 */}
                 <MenuItem
                     onClick={() => {
                         handleDeselectAll();
@@ -2825,125 +2915,62 @@ export default function FileManager2() {
                 >
                     Deselect All
                 </MenuItem>
-            </Menu>
 
-            {/* OLD CODE TO BE REMOVED - Keeping temporarily for reference */}
-            {/* Sticky Header with Search and Tabs */}
-            <Box
-                sx={{
-                    position: 'sticky',
-                    top: 0,
-                    bgcolor: 'background.paper',
-                    zIndex: 100,
-                    display: 'none', // Hidden - will be removed in next step
-                }}
-            >
-                {/* Sticky Search Bar - Different content per tab */}
-                {false && (
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            gap: 1,
-                            px: 1,
-                            py: 1,
-                            bgcolor: 'background.paper',
-                            borderBottom: '1px solid #e0e0e0'
-                        }}
-                    >
-                        <TextField
-                            value={search}
-                            onInput={handleSearch}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    handleSearchSubmit();
+                {/**
+                 * Delete selected files action
+                 */}
+                <MenuItem
+                    onClick={() => {
+                        setContextMenu(null);
+                        setConfirmDialog({
+                            open: true,
+                            message: `Delete ${selectedItems.size} selected file(s)?`,
+                            severity: 'error',
+                            onConfirm: async () => {
+                                for (const fileId of selectedItems) {
+                                    const file = files.find(f => f.id === fileId);
+                                    if (file) {
+                                        await deleteFileCompletely(file);
+                                    }
                                 }
-                            }}
-                            size="small"
-                            fullWidth
-                            placeholder={`Search ${generator === 'all' ? 'all files' : generator === 'image' ? 'images' : generator === 'audio' ? 'audio' : generator === 'document' ? 'documents' : 'files'}...`}
-                            label="Search"
-                        />
-
-                        {searching && (
-                            <IconButton size="small" aria-label="searching" disabled>
-                                <CircularProgress size={20} />
-                            </IconButton>
-                        )}
-
-                        {!searching && (
-                            <>
-                                <IconButton
-                                    size="small"
-                                    aria-label="search files"
-                                    onClick={handleSearchSubmit}
-                                >
-                                    <SearchIcon />
-                                </IconButton>
-                                <IconButton
-                                    size="small"
-                                    aria-label="search options"
-                                    onClick={(e) => setSearchMenuAnchor(e.currentTarget)}
-                                >
-                                    <MoreVertIcon />
-                                </IconButton>
-                                <Menu
-                                    anchorEl={searchMenuAnchor}
-                                    open={Boolean(searchMenuAnchor)}
-                                    onClose={() => setSearchMenuAnchor(null)}
-                                >
-                                    <MenuItem onClick={() => {
-                                        setSearch('');
-                                        setSearchMenuAnchor(null);
-                                    }}>Clear Search</MenuItem>
-                                </Menu>
-                            </>
-                        )}
-
-                        {/* Tab-specific action buttons */}
-                        {generator === 'image' && (
-                            <Tooltip title="Generate Image">
-                                <IconButton
-                                    onClick={() => toggleNewFileForm()}
-                                    color="primary"
-                                    size="small"
-                                >
-                                    <AutoAwesomeIcon fontSize="small" />
-                                </IconButton>
-                            </Tooltip>
-                        )}
-
-                        {generator === 'audio' && (
-                            <Tooltip title="Generate Audio">
-                                <IconButton
-                                    onClick={() => toggleNewFileForm()}
-                                    color="primary"
-                                    size="small"
-                                >
-                                    <AutoAwesomeIcon fontSize="small" />
-                                </IconButton>
-                            </Tooltip>
-                        )}
-
-                        {(generator === 'all' || generator === 'document') && (
-                            <Tooltip title="Upload Files">
-                                <IconButton
-                                    onClick={() => {
-                                        document.getElementById('file-upload-input')?.click();
-                                    }}
-                                    color="primary"
-                                    size="small"
-                                >
-                                    <UploadFile fontSize="small" />
-                                </IconButton>
-                            </Tooltip>
-                        )}
-                    </Box>
-                )}
-
-            </Box>
+                                setSelectedItems(new Set());
+                                setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                            }
+                        });
+                    }}
+                >
+                    <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+                    Delete Selected ({selectedItems.size})
+                </MenuItem>
+                
+                {/**
+                 * Rerun the document analysis pipeline for selected documents
+                 */}
+                <MenuItem
+                    onClick={() => {
+                        setContextMenu(null);
+                        selectedItems.forEach(async (fileId) => {
+                            const file = files.find(f => f.id === fileId);
+                            if (file && file.documentID) {
+                                //. check if document is a pdf
+                                if (file.mimeType == 'application/pdf') {
+                                try {
+                                    await analyzePDF(file.id, true); // force re-analysis
+                                } catch (error) {
+                                    console.error('Error re-analyzing document:', error);
+                                }
+                            } else {
+                                await triggerEmbeddingsGeneration(file.id);
+                            }
+                        }
+                        
+                        });
+                    }}
+                >
+                <AutorenewIcon fontSize="small" sx={{ mr: 1 }} />
+                    Re-analyze Selected ({selectedItems.size})
+                </MenuItem>
+            </Menu>
 
             {/* Tabs for filtering files and generating content */}
             <Tabs
@@ -3215,25 +3242,6 @@ export default function FileManager2() {
                                             <FileRowComponent
                                                 file={item.file}
                                                 fileType={item.fileType}
-                                                isExpanded={expandedItems.has(item.id)}
-                                                isSelected={selectedItems.has(item.id)}
-                                                search={search}
-                                                onToggleExpand={toggleFileContentExpansion}
-                                                onToggleSelect={handleToggleSelect}
-                                                onDelete={() => { }}
-                                                onNameUpdate={handleFileNameUpdate}
-                                                editor={editor}
-                                                parsedContent={parsedContentData[item.id]}
-                                                documentStatus={documentStatuses[item.file.documentID]}
-                                                expandedFileContent={expandedFileContent.has(item.id)}
-                                                setConfirmDialog={setConfirmDialog}
-                                                INSERT_IMAGE_COMMAND={INSERT_IMAGE_COMMAND}
-                                                INSERT_PLAYLIST_COMMAND={INSERT_PLAYLIST_COMMAND}
-                                                analyzePDF={analyzePDF}
-                                                cancelPDFAnalysis={cancelPDFAnalysis}
-                                                setGenerator={setGenerator}
-                                                setSelectedDocument={setSelectedDocument}
-                                                remove={remove}
                                                 index={virtualRow.index}
                                             />
                                         )}
@@ -3271,9 +3279,11 @@ export default function FileManager2() {
                 id="file-upload-input"
                 type="file"
                 multiple
+                accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.txt,.md,.csv,.xls,.xlsx,.ppt,.pptx"
                 hidden
                 onChange={(e) => {
                     const files = Array.from(e.target.files || []);
+                    console.log('[FileManager2] Files selected:', files.length, files.map(f => f.name));
                     setFilesToUpload(files.map((f, index) => ({ file: f, index })));
                     setFileOperations(files.map((f) => ({ name: f.name, progress: '0%' })));
                 }}
@@ -3302,21 +3312,35 @@ export default function FileManager2() {
                 )
             }
 
-            {/* Confirmation Snackbar */}
+        </Box>
+        
+        {/* Confirmation Snackbar - Rendered in Portal to escape container overflow */}
+        <Portal>
             <Snackbar
                 open={confirmDialog.open}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                sx={{ mt: 8 }}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                onClose={(event, reason) => {
+                    if (reason === 'clickaway') {
+                        return;
+                    }
+                    console.log('[Snackbar] onClose triggered');
+                }}
             >
                 <Alert
                     severity={confirmDialog.severity}
-                    sx={{ width: '100%' }}
+                    sx={{ 
+                        width: '100%',
+                        minWidth: '300px',
+                        boxShadow: 3
+                    }}
                     action={
                         <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
                             <Button
                                 color="inherit"
                                 size="small"
-                                onClick={() => {
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    console.log('[Snackbar] Confirm clicked');
                                     if (confirmDialog.onConfirm) {
                                         confirmDialog.onConfirm();
                                     }
@@ -3328,7 +3352,11 @@ export default function FileManager2() {
                             <Button
                                 color="inherit"
                                 size="small"
-                                onClick={() => setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' })}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    console.log('[Snackbar] Cancel clicked');
+                                    setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                                }}
                                 variant="contained"
                             >
                                 Cancel
@@ -3339,6 +3367,7 @@ export default function FileManager2() {
                     {confirmDialog.message}
                 </Alert>
             </Snackbar>
-        </Box>
+        </Portal>
+        </FileManagerProvider>
     );
 }
