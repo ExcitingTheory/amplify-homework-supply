@@ -19,7 +19,7 @@ import ConfigIcon from '@mui/icons-material/Settings';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import TocIcon from '@mui/icons-material/Toc';
 
-import FileManager from './FileManager';
+import FileManager from './FileManager2';
 import ConfigurationManager from './ConfigurationManager';
 import AssignmentConfiguration from './AssignmentConfiguration';
 import { QuestionMarkOutlined } from '@mui/icons-material';

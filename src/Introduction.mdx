@@ -1,0 +1,57 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Introduction" />
+
+# Homework Supply - Component Documentation
+
+Welcome to the Homework Supply component documentation. This is a comprehensive Japanese language learning platform built with Next.js, AWS Amplify Gen 1, and OpenAI.
+
+## 🏗️ Architecture
+
+**Stack**: Next.js 16 + AWS Amplify Gen 1 (GraphQL/DataStore) + Material UI + Lexical Editor + OpenAI
+
+**Database**: DynamoDB via Amplify DataStore with real-time sync
+
+**Auth**: AWS Cognito with user groups (Admins, Instructors, Learners)
+
+**Storage**: S3 for files (audio/video/PDFs), organized by protection level
+
+**AI Features**: OpenAI API (GPT-4, Whisper, TTS) via Lambda + Vercel AI SDK for streaming chat
+
+## 📚 Documentation Sections
+
+### Components
+UI components used throughout the application including editors, toolbars, chat interfaces, and more.
+
+### Editor
+The Lexical-based rich text editor with custom nodes for educational content including quizzes, vocabulary exercises, audio/video, and more.
+
+### Pages
+Full page layouts showing how components work together in complete application flows.
+
+## 🎨 Mocking Strategy
+
+All AWS services are mocked in Storybook for safe, isolated component development:
+
+- **AWS Amplify** modules (api, auth, storage, datastore, utils) are mocked via webpack aliases
+- **AI generation** (text-to-image, text-to-speech) with realistic delays
+- **File storage** and retrieval with placeholder data URLs
+- **Authentication** with mock credentials
+- **DataStore** operations with in-memory storage
+
+## 🚀 Getting Started
+
+Browse the component categories in the sidebar to explore individual components and see them in action.
+
+Each story includes:
+- **Default states** showing typical usage
+- **Interactive controls** to experiment with props
+- **Documentation** explaining the component's purpose
+- **Code examples** showing how to use the component
+
+## 📖 Additional Resources
+
+- [GitHub Repository](https://github.com/ExcitingTheory/amplify-homework-supply)
+- [Developer Onboarding Guide](/docs/ONBOARDING.md)
+- [API Documentation](/docs/API.md)
+- [TypeScript Migration Guide](/docs/TYPESCRIPT_MIGRATION.md)

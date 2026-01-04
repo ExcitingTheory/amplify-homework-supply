@@ -9,6 +9,7 @@ import React from 'react';
 import ChatSidebar from './ChatSidebar';
 import { UnitProvider } from '../context/unitContext';
 import FilesContext from '../context/fileContext';
+import { DemoBanner } from '../../.storybook/components/DemoBanner';
 
 // Mock unit data
 const mockUnit = {
@@ -79,30 +80,37 @@ export default {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: 'AI chat assistant with context awareness, streaming responses, and file attachment support. All AWS services and API calls are mocked.',
+        component: `
+AI chat assistant with context awareness, streaming responses, and file attachment support.
+
+## Features
+- **Context-Aware**: Accesses current unit, vocabulary, questions, and files
+- **Streaming Responses**: Real-time token streaming via Vercel AI SDK
+- **File Attachments**: Drag-and-drop or click to attach files to messages
+- **OpenAI Integration**: GPT-4 powered responses with unit-specific context
+- **Message History**: Persistent conversation within the session
+
+## Mocked Services
+All AWS services (DataStore, Auth, Storage) and the /api/chat endpoint are mocked in Storybook.
+        `.trim(),
       },
     },
   },
+  tags: ['autodocs'],
   decorators: [
     (Story) => {
       return (
-        <>
-          <div style={{
-            backgroundColor: '#e3f2fd',
-            padding: '0.75rem 1rem',
-            borderBottom: '2px solid #2196f3',
-            fontSize: '0.875rem',
-            fontFamily: 'system-ui, -apple-system, sans-serif',
-            color: '#0d47a1'
-          }}>
-            <strong>📘 Demo Mode:</strong> AWS services (DataStore, Auth) and chat API (/api/chat) are mocked. 
+        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <DemoBanner>
+            AWS services (DataStore, Auth, Storage) and chat API (/api/chat) are mocked. 
             File uploads and streaming responses are simulated!
-          </div>
+          </DemoBanner>
           <div style={{ 
-            height: '700px', 
+            flex: 1,
             display: 'flex', 
             flexDirection: 'column',
-            overflow: 'hidden' // Let the ChatSidebar handle its own scrolling
+            overflow: 'hidden',
+            minHeight: 0,
           }}>
             <FilesContext.Provider value={{
               files: mockFiles,
@@ -118,19 +126,27 @@ export default {
               </UnitProvider>
             </FilesContext.Provider>
           </div>
-        </>
+        </div>
       );
     },
   ],
 };
 
-export const Default = {};
+export const Default = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'Default chat sidebar with empty conversation. Start typing a message to interact with the AI assistant.',
+      },
+    },
+  },
+};
 
 export const EmptyState = {
   parameters: {
     docs: {
       description: {
-        story: 'ChatSidebar with no messages - shows the empty state with helpful prompt.',
+        story: 'Chat sidebar with no messages showing the empty state with helpful prompt suggestions.',
       },
     },
   },
@@ -140,7 +156,7 @@ export const WithDragAndDrop = {
   parameters: {
     docs: {
       description: {
-        story: 'Try dragging and dropping files onto the chat area to attach them to your message.',
+        story: 'Demonstrates file attachment functionality. Try dragging and dropping files onto the chat area to attach them to your message.',
       },
     },
   },

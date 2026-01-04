@@ -122,7 +122,7 @@ function convertQuestionElement(domNode) {
   const hint = domNode.getAttribute('data-lexical-question-hint') || '';
   const answer = domNode.getAttribute('data-lexical-question-answer') || '';
   const version = domNode.getAttribute('data-lexical-question-version') || '1';
-  
+
   // Parse audio keys
   let audio = [];
   const audioKeysAttr = domNode.getAttribute('data-lexical-audio-keys');
@@ -133,7 +133,7 @@ function convertQuestionElement(domNode) {
       console.error('Failed to parse audio keys:', e);
     }
   }
-  
+
   // Parse audio URLs from script tag if present
   const audioScript = domNode.querySelector('script.lexical-question-audio-data');
   let audioData = null;
@@ -144,7 +144,7 @@ function convertQuestionElement(domNode) {
       console.error('Failed to parse audio data:', e);
     }
   }
-  
+
   // Create the node with imported data
   const node = $createQuestionDecoratorNode(
     questionId,
@@ -165,7 +165,7 @@ function convertQuestionElement(domNode) {
     '', // identityId
     0 // index
   );
-  
+
   return { node };
 }
 
@@ -339,24 +339,24 @@ class QuestionDecoratorNode extends DecoratorNode {
     div.setAttribute('data-lexical-question-hint', this.__hint || '');
     div.setAttribute('data-lexical-question-answer', this.__answer || '');
     div.setAttribute('data-lexical-question-version', this.__version || '1');
-    
+
     // Audio URLs (S3 keys)
     if (this.__audio && this.__audio.length > 0) {
       div.setAttribute('data-lexical-audio-keys', JSON.stringify(this.__audio));
     }
-    
+
     // Store fully formed S3 URLs if available
     if (this.__audioFiles && this.__audio && this.__audio.length > 0) {
       const audioUrls = this.__audio.map(key => {
         const file = this.__audioFiles[key];
         return file ? { key, url: file.url } : null;
       }).filter(Boolean);
-      
+
       if (audioUrls.length > 0) {
         div.setAttribute('data-lexical-audio-urls', JSON.stringify(audioUrls));
       }
     }
-    
+
     return div;
   }
 
@@ -368,26 +368,26 @@ class QuestionDecoratorNode extends DecoratorNode {
     element.setAttribute('data-lexical-question-hint', this.__hint || '');
     element.setAttribute('data-lexical-question-answer', this.__answer || '');
     element.setAttribute('data-lexical-question-version', this.__version || '1');
-    
+
     // Audio URLs (S3 keys)
     if (this.__audio && this.__audio.length > 0) {
       element.setAttribute('data-lexical-audio-keys', JSON.stringify(this.__audio));
     }
-    
+
     // Store fully formed S3 URLs if available
     if (this.__audioFiles && this.__audio && this.__audio.length > 0) {
       const audioUrls = this.__audio.map(key => {
         const file = this.__audioFiles[key];
         return file ? { key, url: file.url } : null;
       }).filter(Boolean);
-      
+
       if (audioUrls.length > 0) {
         element.setAttribute('data-lexical-audio-urls', JSON.stringify(audioUrls));
       }
-      
+
       // Convert blobs to base64 and store in script tag
       const audioBlobs = [];
-      
+
       for (const key of this.__audio) {
         const file = this.__audioFiles[key];
         if (file && file.blob) {
@@ -404,7 +404,7 @@ class QuestionDecoratorNode extends DecoratorNode {
           }
         }
       }
-      
+
       if (audioBlobs.length > 0) {
         const script = document.createElement('script');
         script.type = 'application/json';
@@ -414,7 +414,7 @@ class QuestionDecoratorNode extends DecoratorNode {
         element.appendChild(script);
       }
     }
-    
+
     return { element };
   }
 
@@ -425,27 +425,27 @@ class QuestionDecoratorNode extends DecoratorNode {
     element.setAttribute('data-lexical-question-hint', this.__hint || '');
     element.setAttribute('data-lexical-question-answer', this.__answer || '');
     element.setAttribute('data-lexical-question-version', this.__version || '1');
-    
+
     // Audio URLs (S3 keys)
     if (this.__audio && this.__audio.length > 0) {
       element.setAttribute('data-lexical-audio-keys', JSON.stringify(this.__audio));
     }
-    
+
     // Store fully formed S3 URLs if available
     if (this.__audioFiles && this.__audio && this.__audio.length > 0) {
       const audioUrls = this.__audio.map(key => {
         const file = this.__audioFiles[key];
         return file ? { key, url: file.url } : null;
       }).filter(Boolean);
-      
+
       if (audioUrls.length > 0) {
         element.setAttribute('data-lexical-audio-urls', JSON.stringify(audioUrls));
       }
     }
-    
+
     // Note: Audio blobs are NOT included in synchronous exportDOM
     // Use exportDOMWithAudio() for complete serialization with base64 audio
-    
+
     return { element };
   }
 
@@ -584,7 +584,7 @@ function QuestionRowComponent({
       if (audioFilesToUpload.length === 0) return;
 
       const _fileOps = [...fileOperations];
-      
+
       for (let i = 0; i < audioFilesToUpload.length; i++) {
         const item = audioFilesToUpload[i];
         try {
@@ -603,7 +603,7 @@ function QuestionRowComponent({
           }).result;
 
           const newAudio = deduplicateUrls([...audioUrls, item.name]);
-          
+
           // Update the question with new audio
           if (onUpdate) {
             await onUpdate(questionId, { audio: newAudio }, version);
@@ -668,124 +668,124 @@ function QuestionRowComponent({
   );
 
   return (
-      <ListItem
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        onDragLeave={handleDragLeave}
+    <ListItem
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      onDragLeave={handleDragLeave}
+      sx={{
+        backgroundColor: isEvenRow ? 'background.paper' : 'grey.50',
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        padding: 0,
+        margin: 0,
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        '&:hover': {
+          backgroundColor: 'action.hover',
+        },
+      }}
+    >
+      {/* Header with controls */}
+      <Box
         sx={{
-          backgroundColor: isEvenRow ? 'background.paper' : 'grey.50',
-          flexDirection: 'column',
-          alignItems: 'stretch',
-          padding: 0,
-          margin: 0,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0,
+          justifyContent: 'space-between',
+          padding: 1,
           borderBottom: '1px solid',
           borderColor: 'divider',
-          '&:hover': {
-            backgroundColor: 'action.hover',
-          },
+          //   minHeight: 24,
         }}
       >
-          {/* Header with controls */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0,
-              justifyContent: 'space-between',
-              padding: 1,
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-            //   minHeight: 24,
+        <Box sx={{ display: 'flex', gap: 0, alignItems: 'center' }}>
+          <Checkbox
+            size="small"
+            checked={isSelected}
+            onChange={(e) => {
+              e.stopPropagation();
+              if (onToggleSelect) onToggleSelect();
             }}
+            sx={{ p: 0.25 }}
+          />
+          <IconButton
+            size="small"
+            title={isExpanded ? 'Collapse' : 'Expand'}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onToggleExpand) onToggleExpand();
+            }}
+            sx={{ paddingLeft: 1 }}
           >
-            <Box sx={{ display: 'flex', gap: 0, alignItems: 'center' }}>
-              <Checkbox
-                size="small"
-                checked={isSelected}
-                onChange={(e) => {
-                  e.stopPropagation();
-                  if (onToggleSelect) onToggleSelect();
-                }}
-                sx={{ p: 0.25 }}
-              />
-              <IconButton
-                size="small"
-                title={isExpanded ? 'Collapse' : 'Expand'}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onToggleExpand) onToggleExpand();
-                }}
-                sx={{ paddingLeft: 1 }}
-              >
-                {!isExpanded ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
-              </IconButton>
+            {!isExpanded ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
+          </IconButton>
+        </Box>
+      </Box>
+
+      {/* Prompt field with nested editor */}
+      <NestedQuestionField
+        value={prompt}
+        field="prompt"
+        questionId={questionId}
+        version={version}
+        onSave={onUpdate}
+        sharedHistory={sharedHistory}
+        searchTerm={searchTerm}
+      />
+
+      {/* Expanded content */}
+      {isExpanded && (
+        <Box sx={{ px: 1, py: 1, width: '100%', position: 'relative' }}>
+          {isDragging && (
+            <Box
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onDragLeave={handleDragLeave}
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                zIndex: 100,
+                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(3px)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                color: '#000',
+                fontSize: '2rem',
+                fontWeight: 'bold',
+                textAlign: 'center',
+              }}
+            >
+              {`Upload Ogg Audio for ${prompt} (${hint})`}
             </Box>
-          </Box>
+          )}
+          <NestedQuestionField
+            value={hint}
+            field="hint"
+            questionId={questionId}
+            version={version}
+            onSave={onUpdate}
+            sharedHistory={sharedHistory}
+            searchTerm={searchTerm}
+            label="Hint: "
+          />
 
-          {/* Prompt field with nested editor */}
-            <NestedQuestionField
-              value={prompt}
-              field="prompt"
-              questionId={questionId}
-              version={version}
-              onSave={onUpdate}
-              sharedHistory={sharedHistory}
-              searchTerm={searchTerm}
-            />
-
-        {/* Expanded content */}
-        {isExpanded && (
-          <Box sx={{ px: 1, py: 1, width: '100%', position: 'relative' }}>
-            {isDragging && (
-              <Box
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                onDragLeave={handleDragLeave}
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  zIndex: 100,
-                  backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                  backdropFilter: 'blur(3px)',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  color: '#000',
-                  fontSize: '2rem',
-                  fontWeight: 'bold',
-                  textAlign: 'center',
-                }}
-              >
-                {`Upload Ogg Audio for ${prompt} (${hint})`}
-              </Box>
-            )}
-              <NestedQuestionField
-                value={hint}
-                field="hint"
-                questionId={questionId}
-                version={version}
-                onSave={onUpdate}
-                sharedHistory={sharedHistory}
-                searchTerm={searchTerm}
-                label="Hint: "
-              />
-
-              <NestedQuestionField
-                value={answer}
-                field="answer"
-                questionId={questionId}
-                version={version}
-                onSave={onUpdate}
-                sharedHistory={sharedHistory}
-                searchTerm={searchTerm}
-                label="Answer: "
-              />
-          </Box>
-        )}
-      </ListItem>
+          <NestedQuestionField
+            value={answer}
+            field="answer"
+            questionId={questionId}
+            version={version}
+            onSave={onUpdate}
+            sharedHistory={sharedHistory}
+            searchTerm={searchTerm}
+            label="Answer: "
+          />
+        </Box>
+      )}
+    </ListItem>
   );
 }
 
@@ -858,6 +858,12 @@ function NestedQuestionField({
         padding: 0,
         '& .question-field-editor': {
           cursor: 'text',
+          // add chunky dashed border when not focused
+          border: '3px dashed',
+          borderColor: 'divider',
+          borderRadius: 1,
+          padding: 1,
+          margin: 1,
           '&::before': label ? {
             content: `"${label}"`,
             fontWeight: 600,
@@ -943,7 +949,7 @@ function QuestionsPlugin({
       root.clear();
 
       const entries = Object.entries(questionBank);
-      
+
       // Render all questions - virtualization happens at render level
       entries.forEach(([id, question], index) => {
         const node = $createQuestionDecoratorNode(
@@ -1159,7 +1165,7 @@ export function QuestionEditor2() {
   const handleCreateQuestion = async (event) => {
     event.preventDefault();
     const { unit } = React.useContext(UnitContext) || {};
-    
+
     if (!unit?.id) {
       console.error('No unit context available');
       return;
@@ -1178,7 +1184,7 @@ export function QuestionEditor2() {
           },
         },
       });
-      
+
       console.log('Question created:', result);
       setNewPrompt('');
       setNewHint('');
@@ -1317,21 +1323,21 @@ export function QuestionEditor2() {
       <Box
         ref={parentRef}
         sx={{
-            overflowY: 'auto',
-            overflowX: 'hidden',
+          overflowY: 'auto',
+          overflowX: 'hidden',
         }}
       >
         <LexicalComposer initialConfig={initialConfig}>
           <RichTextPlugin
             contentEditable={
-             <ContentEditable
+              <ContentEditable
                 style={{
-                    margin: 0,
-                    padding: 0,
-                    outline: 'none',
-                    minHeight: '100%',
+                  margin: 0,
+                  padding: 0,
+                  outline: 'none',
+                  minHeight: '100%',
                 }}
-            />
+              />
             }
             placeholder={null}
             ErrorBoundary={LexicalErrorBoundary}

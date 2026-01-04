@@ -1317,6 +1317,12 @@ function NestedWordField({
                 margin: 0,
                 '& .word-field-editor': {
                     cursor: 'text',
+                    // add chunky dashed border when not focused
+                    border: '3px dashed',
+                    borderColor: 'divider',
+                    borderRadius: 1,
+                    padding: 1,
+                    margin: 1,
                     '&::before': label ? {
                         content: `"${label}"`,
                         fontWeight: 600,

@@ -27,3 +27,61 @@ export const fetchAuthSession = async () => ({
 export const signOut = async () => {
   console.log('[Mock Auth] signOut');
 };
+
+export const signIn = async () => {
+  console.log('[Mock Auth] signIn');
+  return { isSignedIn: true };
+};
+
+export const signUp = async () => {
+  console.log('[Mock Auth] signUp');
+  return { isSignUpComplete: true };
+};
+
+export const confirmSignIn = async () => {
+  console.log('[Mock Auth] confirmSignIn');
+};
+
+export const confirmSignUp = async () => {
+  console.log('[Mock Auth] confirmSignUp');
+};
+
+export const resetPassword = async () => {
+  console.log('[Mock Auth] resetPassword');
+};
+
+export const confirmResetPassword = async () => {
+  console.log('[Mock Auth] confirmResetPassword');
+};
+
+export const updatePassword = async () => {
+  console.log('[Mock Auth] updatePassword');
+};
+
+export const updateUserAttribute = async () => {
+  console.log('[Mock Auth] updateUserAttribute');
+};
+
+export const deleteUser = async () => {
+  console.log('[Mock Auth] deleteUser');
+};
+
+export const resendSignUpCode = async () => {
+  console.log('[Mock Auth] resendSignUpCode');
+};
+
+export const sendUserAttributeVerificationCode = async () => {
+  console.log('[Mock Auth] sendUserAttributeVerificationCode');
+};
+
+export const confirmUserAttribute = async () => {
+  console.log('[Mock Auth] confirmUserAttribute');
+};
+
+export const signInWithRedirect = async () => {
+  console.log('[Mock Auth] signInWithRedirect');
+};
+
+export const autoSignIn = async () => {
+  console.log('[Mock Auth] autoSignIn');
+};

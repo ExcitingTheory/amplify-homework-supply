@@ -3,16 +3,11 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-
-import { DictionaryEditor } from '../../DictionaryEditor';
 import ChatSidebar from '../../ChatSidebar';
-
-
 import ChatIcon from '@mui/icons-material/Chat';
 import ConfigIcon from '@mui/icons-material/Settings';
 import HistoryIcon from '@mui/icons-material/History';
 
-import FileManager from './FileManager';
 import ConfigurationManager from './ConfigurationManager';
 import AssignmentConfiguration from './AssignmentConfiguration';
 

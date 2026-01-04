@@ -20,6 +20,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme } from '@mui/material/styles';
 import '../src/components/Editor3/theme.css';
 import '../src/components/Editor3/components/LanguageEditorTheme.css';
+import './storybook.css';
 
 // Import real context providers
 import { FilesProvider } from '../src/context/fileContext';
@@ -76,6 +77,23 @@ global.fetch = async (url, options) => {
 const theme = createTheme({
   palette: {
     mode: 'light',
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+  typography: {
+    fontFamily: [
+      '-apple-system',
+      'BlinkMacSystemFont',
+      '"Segoe UI"',
+      'Roboto',
+      '"Helvetica Neue"',
+      'Arial',
+      'sans-serif',
+    ].join(','),
   },
 });
 
@@ -88,6 +106,8 @@ const preview = {
         color: /(background|color)$/i,
         date: /Date$/i,
       },
+      expanded: true,
+      sort: 'requiredFirst',
     },
     nextjs: {
       appDirectory: false,
@@ -95,10 +115,41 @@ const preview = {
     // Add viewport configuration for better responsive testing
     viewport: {
       defaultViewport: 'responsive',
+      viewports: {
+        mobile: {
+          name: 'Mobile',
+          styles: { width: '375px', height: '667px' },
+          type: 'mobile',
+        },
+        tablet: {
+          name: 'Tablet',
+          styles: { width: '768px', height: '1024px' },
+          type: 'tablet',
+        },
+        desktop: {
+          name: 'Desktop',
+          styles: { width: '1280px', height: '800px' },
+          type: 'desktop',
+        },
+      },
     },
-    // Configure layout settings for scrolling
-    layout: {
-      padded: false,
+    // Configure layout settings
+    layout: 'padded',
+    // Better docs display
+    docs: {
+      toc: true,
+      source: {
+        state: 'open',
+      },
+    },
+    // Background options for testing
+    backgrounds: {
+      default: 'light',
+      values: [
+        { name: 'light', value: '#ffffff' },
+        { name: 'dark', value: '#333333' },
+        { name: 'gray', value: '#f5f5f5' },
+      ],
     },
   },
   tags: ['autodocs'],

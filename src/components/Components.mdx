@@ -1,0 +1,45 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Components/Overview" />
+
+# Components
+
+This section contains reusable UI components used throughout the Homework Supply application.
+
+## Component Categories
+
+### Core Components
+- **ChatSidebar** - AI chat assistant with context awareness and streaming responses
+- **MainToolbar** - Application navigation and user menu
+- **SafeHydrate** - Client-side only rendering wrapper
+
+### Educational Components
+- **VocabularyReview** - Review and import vocabulary from document analysis
+- **QuestionBlock** - Interactive question display and answering
+- **SortableAnswers** - Drag-and-drop answer ordering exercises
+- **MeaningAssociation** - Match words with their meanings
+
+### Media Components
+- **RecordingStudio2** - Audio recording and playback with waveform visualization
+- **AudioWaveformPlayer** - Audio playback with interactive waveform
+
+### Admin Components
+- **SectionAssigner** - Assign units to class sections with due dates
+
+## Design Principles
+
+All components follow these principles:
+
+1. **Context-Aware**: Use React Context to access shared state (Unit, Files, Dictionary, etc.)
+2. **DataStore Integration**: Leverage Amplify DataStore for real-time sync
+3. **Material UI**: Built with Material UI for consistent design
+4. **Responsive**: Work across desktop, tablet, and mobile viewports
+5. **Accessible**: Follow WCAG guidelines for keyboard navigation and screen readers
+
+## Testing in Storybook
+
+Each component story includes:
+- Mocked AWS services (auth, storage, DataStore)
+- Realistic sample data
+- Interactive controls for experimentation
+- Multiple states (loading, error, empty, populated)

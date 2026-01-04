@@ -1,0 +1,91 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Editor/Overview" />
+
+# Lexical Editor
+
+The Homework Supply editor is built on the [Lexical](https://lexical.dev/) framework, providing a powerful rich text editing experience with custom nodes designed for language learning.
+
+## Features
+
+### Standard Rich Text
+- **Headings** (H1-H4)
+- **Text Formatting** (bold, italic, underline, strikethrough, code)
+- **Lists** (bulleted, numbered, nested)
+- **Alignment** (left, center, right, justify)
+- **Links** (auto-linking, manual link creation)
+- **Tables**
+- **Code Blocks**
+- **Quotes**
+- **Horizontal Rules**
+
+### Educational Content Nodes
+
+#### Vocabulary Blocks
+- **Word Block** - Display a single vocabulary word with pronunciation, definition, and audio
+- **Meaning Association** - Interactive matching exercise for words and definitions
+- **Short Answer (Vocabulary)** - Practice writing or speaking vocabulary words
+
+#### Assessment Blocks
+- **Multiple Choice Quiz** - Question with 2-4 answer choices
+- **Short Answer (Custom)** - Custom prompt with text/audio/drawing responses
+- **Question Bank Integration** - Link to reusable question library
+
+#### Media Blocks
+- **Image** - Inline images with captions and resizing
+- **Audio Playlist** - Multiple audio files with playback controls
+- **YouTube Embed** - Embedded YouTube videos
+- **Video Player** - Self-hosted video playback
+
+#### Layout Blocks
+- **Layout Container** - Multi-column layouts with drag-and-drop columns
+- **Timer** - Countdown timer for timed exercises
+- **Due Date** - Assignment due date display
+
+## Editor Architecture
+
+### State Management
+Content is stored as JSON in the `Unit.data` field:
+```javascript
+{
+  root: {
+    children: [/* Lexical nodes */],
+    type: 'root',
+    version: 1
+  }
+}
+```
+
+### Context Integration
+The editor integrates with:
+- **UnitContext** - Access to current unit, files, questions, vocabulary
+- **FilesContext** - File upload and management
+- **DictionaryContext** - Vocabulary library
+- **AudioPlayerContext** - Global audio playback
+
+### Custom Plugins
+- **ToolbarPlugin** - Rich toolbar with formatting controls
+- **FileManagerPlugin** - Upload and insert media
+- **AutocompletePlugin** - @-mentions for vocabulary and questions
+- **MarkdownPlugin** - Markdown shortcuts (e.g., ## for headings)
+- **CodeActionMenuPlugin** - Quick actions menu
+- **YouTubePlugin** - YouTube URL detection and embedding
+
+## Grading System
+
+The editor tracks "graded blocks" for automatic scoring:
+- `quiz` - Multiple choice questions
+- `answer` - Vocabulary answer blocks
+- `custom-answer` - Custom answer blocks
+- `meaning-association` - Matching exercises
+
+Each graded block stores student responses in the `Grade.data` field with accuracy scores.
+
+## Stories
+
+Browse the Editor stories to see:
+- **Empty Editor** - Start from scratch
+- **Text Formatting** - All formatting options demonstrated
+- **Custom Blocks** - Educational nodes in action
+- **Kitchen Sink** - Every block type in one document
+- **Workbook** - Student view for completing exercises

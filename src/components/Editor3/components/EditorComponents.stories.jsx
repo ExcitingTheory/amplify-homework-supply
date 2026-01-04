@@ -2,6 +2,7 @@ import React from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { createEditor } from 'lexical';
 import { AutoLinkNode, LinkNode } from '@lexical/link';
+import { Box } from '@mui/material';
 import QuizComponent from './QuizComponent';
 import AnswerComponent from './AnswerComponent';
 import ImageComponent from './ImageComponent';
@@ -10,6 +11,7 @@ import { UnitProvider } from '../../../context/unitContext';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 import { ImageNode } from './ImageNode';
 import LanguageEditorTheme from './LanguageEditorTheme';
+import { DemoBanner } from '../../../../.storybook/components/DemoBanner';
 
 // Minimal Lexical config for components that need it
 const minimalLexicalConfig = {
@@ -28,10 +30,38 @@ const WithLexical = ({ children }) => (
 );
 
 export default {
-  title: 'Editor/Components',
+  title: 'Editor/Components/Nodes',
   parameters: {
     layout: 'padded',
+    docs: {
+      description: {
+        component: `
+Individual Lexical editor node components used for educational content.
+
+## Custom Nodes
+These components are Lexical nodes that can be inserted into the editor:
+
+- **QuizComponent**: Multiple choice questions with 2-4 answer options
+- **AnswerComponent**: Short answer inputs with text/audio/writing support
+- **ImageComponent**: Resizable images with optional captions
+- **MediaPlayerComponent**: Audio and video playback with controls
+
+All components integrate with the UnitContext for grading and data persistence.
+        `.trim(),
+      },
+    },
   },
+  tags: ['autodocs'],
+  decorators: [
+    (Story) => (
+      <Box>
+        <DemoBanner>
+          Editor components use mocked DataStore and Unit context.
+        </DemoBanner>
+        <Story />
+      </Box>
+    ),
+  ],
 };
 
 // Quiz Component Stories
@@ -59,6 +89,13 @@ export const QuizDefault = {
       </UnitProvider>
     );
   },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Basic multiple choice quiz with numeric answers. The correct answer is "4".',
+      },
+    },
+  },
 };
 
 export const QuizMultipleChoice = {
@@ -85,6 +122,13 @@ export const QuizMultipleChoice = {
       </UnitProvider>
     );
   },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Multiple choice quiz with text answers. Question: "Which planet is closest to the Sun?"',
+      },
+    },
+  },
 };
 
 // Answer Component Stories
@@ -110,6 +154,13 @@ export const AnswerInput = {
       </UnitProvider>
     );
   },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Short answer input supporting text, audio recording, and handwriting. Students can respond in multiple formats.',
+      },
+    },
+  },
 };
 
 export const AnswerWithValue = {
@@ -134,6 +185,13 @@ export const AnswerWithValue = {
         />
       </UnitProvider>
     );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Text-only answer input with a custom question prompt.',
+      },
+    },
   },
 };
 
@@ -162,6 +220,13 @@ export const ImageDefault = {
         </WithLexical>
       </UnitProvider>
     );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Basic image node with fixed dimensions (400x300).',
+      },
+    },
   },
 };
 
@@ -201,6 +266,13 @@ export const ImageWithCaption = {
       </UnitProvider>
     );
   },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Image with an editable caption field. Captions support rich text formatting.',
+      },
+    },
+  },
 };
 
 export const ImageSmall = {
@@ -228,6 +300,13 @@ export const ImageSmall = {
       </UnitProvider>
     );
   },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Small square image (200x200). Images can be any size and aspect ratio.',
+      },
+    },
+  },
 };
 
 // Media Player Component Stories
@@ -250,6 +329,13 @@ export const AudioPlayer = {
       </UnitProvider>
     );
   },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Audio player for a single audio file. Supports waveform visualization and playback controls.',
+      },
+    },
+  },
 };
 
 export const VideoPlayerComponent = {
@@ -270,5 +356,12 @@ export const VideoPlayerComponent = {
         />
       </UnitProvider>
     );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Video player for a single video file. Supports standard video controls.',
+      },
+    },
   },
 };

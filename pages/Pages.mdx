@@ -1,0 +1,119 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Pages/Overview" />
+
+# Application Pages
+
+Complete Next.js page layouts demonstrating full application workflows for students and instructors.
+
+## Page Hierarchy
+
+### Dashboard (Index)
+The home page that users see after logging in. Shows different content based on user role:
+
+**For Students**:
+- Pending assignments with due dates
+- Completed assignments with grades
+- Sections enrolled in
+
+**For Instructors**:
+- Units they've created
+- Sections they manage
+- Recent student activity
+
+### Content Management
+
+#### Units Page
+Library of all learning units:
+- **Published**: Available to all users for assignment
+- **Draft**: Work in progress (instructor-only)
+- **Archived**: Retired content
+
+Create, edit, duplicate, publish, and archive units.
+
+#### Sections Page
+Class sections and student groups:
+- Create sections with join codes
+- View student rosters
+- Assign units with due dates
+- Monitor assignment completion
+
+### Unit Editor (`/unit/[id]`)
+Full-featured Lexical editor for creating educational content:
+- Rich text with custom educational nodes
+- Vocabulary blocks and exercises
+- Quizzes and assessments
+- Media embedding (audio, video, images)
+- AI-powered content generation
+- File management
+
+### Workbook (`/workbook/[id]`)
+Student interface for completing assignments:
+- View unit content
+- Complete exercises and quizzes
+- Submit answers (text, audio, drawings)
+- View grades and feedback
+- Timed exercises with countdown
+
+### Section Detail (`/section/[id]`)
+Detailed view of a class section:
+- Student roster with join codes
+- Assignment list with due dates
+- Grade distribution and statistics
+- Featured image for section
+
+### Grades Page
+Grade management and overview:
+
+**For Students**:
+- View all grades by assignment
+- See accuracy percentages
+- Review submitted work
+
+**For Instructors**:
+- View all student grades by section
+- Filter by assignment or student
+- Export grade data
+
+### Profile Page
+User account management:
+- View/edit email
+- Change password
+- View user ID and authentication details
+- Account settings
+
+## Authentication Flow
+
+All pages are wrapped with AWS Amplify Authenticator:
+- Sign in / Sign up
+- Password reset
+- MFA support (if enabled)
+- Automatic redirect to login for protected pages
+
+## Data Synchronization
+
+Pages use AWS Amplify DataStore for real-time data sync:
+- Automatic updates when data changes
+- Offline support with sync on reconnect
+- Optimistic UI updates
+- Conflict resolution
+
+## Navigation
+
+Global navigation via MainToolbar:
+- Home (Dashboard)
+- Units
+- Sections
+- Grades
+- Profile
+- Settings
+- Help
+
+## Responsive Design
+
+All pages are responsive and work across:
+- Mobile phones (375px+)
+- Tablets (768px+)
+- Desktops (1280px+)
+
+Components use Material UI's responsive breakpoints and flexbox layouts.

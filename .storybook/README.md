@@ -1,178 +1,80 @@
-# Storybook Documentation
+# Storybook Configuration
 
-This project uses [Storybook](https://storybook.js.org/) for developing and testing UI components in isolation.
+This directory contains the Storybook configuration for the Homework Supply component documentation.
 
-## Getting Started
+## Files
 
-### Running Storybook
+### `main.js`
+Main Storybook configuration including:
+- Story file locations (`**/*.mdx`, `**/*.stories.@(js|jsx|ts|tsx)`)
+- Addons (docs, links, controls, actions)
+- Webpack configuration for:
+  - AWS Amplify mocks (DataStore, Auth, Storage, API, Utils)
+  - AI React SDK mocks
+  - Module federation for React singleton
+  - TypeScript support
+  - SWC compiler
 
-To start the Storybook development server:
+### `preview.jsx`
+Global decorators, parameters, and rendering configuration:
+- Material UI ThemeProvider wrapper
+- Context providers (Unit, Files, Dictionary, Section, AudioPlayer)
+- Mock fetch for `/api/chat` endpoint
+- Viewport configurations (mobile, tablet, desktop)
+- Background color options
+- Default layout settings
 
-```bash
-npm run storybook
-```
+### `manager.js`
+Storybook UI customization:
+- Brand theme colors
+- Typography
+- Sidebar configuration
+- Toolbar options
 
-This will start Storybook on [http://localhost:6006](http://localhost:6006).
+### `storybook.css`
+Custom CSS for Storybook UI:
+- Scrolling fixes for fullscreen stories
+- Docs page styling
+- Code block formatting
+- Story preview styling
 
-### Building Storybook
+## Mock Strategy
 
-To build a static version of Storybook for deployment:
-
-```bash
-npm run build-storybook
-```
-
-The built files will be in the `storybook-static` directory.
-
-## Available Stories
-
-### Editor Components
-
-- **Editor**: The main Lexical-based editor component
-  - Empty Editor
-  - Editor with Sample Content
-  
-- **Workbook**: Read-only view of educational content
-  - Empty Workbook
-  - Workbook with Content
-  - Workbook with Progress Tracking
-
-### Individual Components
-
-- **DisplayOrEdit Components**: Editable/display-only field components
-  - Answer
-  - Prompt
-  - Hint
-  - Definition
-  - Phrase and Pronunciation
-
-- **Editor Components**: Interactive editor elements
-  - Quiz Component (Standard and Multiple Choice)
-  - Answer Input Component
-  - Image Component
-  - Media Player Component (Audio/Video)
-
-- **Meaning Association Exercises**: Drag-and-drop learning activities
-  - Easy Exercise
-  - Hard Exercise
-  - Learn Exercise
-
-- **Video Player**: Standalone video playback component
-
-## Creating New Stories
-
-To create a story for a new component:
-
-1. Create a file named `ComponentName.stories.js` next to your component
-2. Use this template:
+All AWS services are mocked via webpack aliases in `main.js`:
 
 ```javascript
-import React from 'react';
-import YourComponent from './YourComponent';
-
-export default {
-  title: 'Category/ComponentName',
-  component: YourComponent,
-  parameters: {
-    layout: 'padded', // or 'centered', 'fullscreen'
-  },
-};
-
-export const Default = {
-  args: {
-    // Component props
-  },
-};
-
-export const AnotherVariant = {
-  render: () => (
-    <YourComponent prop1="value1" prop2="value2" />
-  ),
-};
+'aws-amplify/datastore': './__mocks__/aws-amplify-datastore.js'
+'aws-amplify/auth': './__mocks__/aws-amplify-auth.js'
+'aws-amplify/storage': './__mocks__/aws-amplify-storage.js'
+'aws-amplify/api': './__mocks__/aws-amplify-api.js'
+'aws-amplify/utils': './__mocks__/aws-amplify-utils.js'
+'ai/react': './__mocks__/ai-react.js'
 ```
 
-## Context Providers with Mocked DataStore
+Mock implementations are in `.storybook/__mocks__/` directory.
 
-For components that depend on context providers (like UnitContext), use the real providers with mocked DataStore:
-
-```javascript
-import { UnitProvider } from '../src/context/unitContext';
-import { seedMockUnit } from './__mocks__/aws-amplify-datastore';
-
-export const YourStory = {
-  render: () => {
-    const unitId = 'your-story-unit-id';
-    
-    // Seed the mock DataStore with your test data
-    seedMockUnit({
-      id: unitId,
-      name: 'Your Story Unit',
-      description: 'Test data for your story',
-      data: yourEditorState, // optional Lexical editor state
-      _version: 1,
-      owner: 'mock-user-sub', // must match mocked auth user
-    });
-    
-    return (
-      <UnitProvider id={unitId}>
-        <YourComponent />
-      </UnitProvider>
-    );
-  },
-};
-```
-
-The webpack configuration aliases AWS Amplify imports to modular mock files in the `__mocks__/` directory, which provide mock implementations of DataStore, Auth, Storage, API, and Utils. This allows stories to test real provider logic while maintaining Storybook isolation.
-
-## Storybook Addons
-
-This project includes the following Storybook addons:
-
-- **Essentials**: Controls, Actions, Viewport, Backgrounds, Toolbars, Measure, Outline
-- **Interactions**: Test component interactions
-- **Links**: Navigate between stories
-
-## Tips
-
-- Use the **Controls** panel to dynamically change component props
-- Use the **Actions** panel to see event handlers fire
-- Use the **Viewport** addon to test responsive designs
-- Press `/` to search for stories
-- Press `A` to toggle the addons panel
-- Press `D` to toggle dark mode (if configured)
-
-## Folder Structure
+## Directory Structure
 
 ```
 .storybook/
-  ├── main.js       # Storybook configuration
-  └── preview.js    # Global decorators and parameters
-
-src/
-  ├── components/
-  │   ├── *.stories.js       # Component stories
-  │   └── Editor3/
-  │       ├── *.stories.js   # Editor stories
-  │       └── mocks/         # Mock providers for testing
+├── main.js              # Main configuration
+├── preview.jsx          # Global decorators and parameters
+├── manager.js           # UI theme customization
+├── storybook.css        # Custom styles
+├── preview-head.html    # Custom <head> content
+├── components/          # Shared Storybook components
+│   └── DemoBanner.jsx   # Demo mode banner component
+└── __mocks__/           # Mock implementations
+    ├── aws-amplify-auth.js
+    ├── aws-amplify-datastore.js
+    ├── aws-amplify-storage.js
+    ├── aws-amplify-api.js
+    ├── aws-amplify-utils.js
+    ├── ai-react.js
+    ├── chat-api.js
+    ├── media.js         # Mock media data (base64 audio/images)
+    └── seedData.js      # Helper functions for seeding mock data
 ```
-
-## Troubleshooting
-
-### Components not rendering correctly
-
-If components require AWS Amplify or other backend services, make sure to:
-1. Use mock providers (see `MockUnitProvider.js`)
-2. Mock any data fetching or API calls
-3. Provide default props for all required data
-
-### Styles not loading
-
-Storybook automatically loads:
-- MUI theme (configured in `.storybook/preview.js`)
-- Editor CSS (`src/components/Editor3/theme.css`)
-- Global styles from your Next.js app
-
-If styles are missing, check the decorators in `.storybook/preview.js`.
 
 ## Learn More
 

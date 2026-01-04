@@ -26,3 +26,26 @@ export const Hub = {
     console.log('Mock Hub.dispatch called for channel:', channel, payload);
   },
 };
+
+export class ConsoleLogger {
+  constructor(name) {
+    this.name = name;
+  }
+  debug(...args) { console.log(`[Mock Logger ${this.name}] DEBUG:`, ...args); }
+  info(...args) { console.log(`[Mock Logger ${this.name}] INFO:`, ...args); }
+  warn(...args) { console.warn(`[Mock Logger ${this.name}] WARN:`, ...args); }
+  error(...args) { console.error(`[Mock Logger ${this.name}] ERROR:`, ...args); }
+}
+
+export const I18n = {
+  get: (key, options) => {
+    console.log(`[Mock I18n] Getting translation for: ${key}`);
+    return key;
+  },
+  put: (key, value) => {
+    console.log(`[Mock I18n] Setting translation ${key}: ${value}`);
+  },
+  setLanguage: (lang) => {
+    console.log(`[Mock I18n] Setting language: ${lang}`);
+  },
+};

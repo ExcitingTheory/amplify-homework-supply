@@ -23,7 +23,35 @@ export default {
   component: Editor,
   parameters: {
     layout: 'fullscreen',
+    docs: {
+      description: {
+        component: `
+Lexical-based rich text editor with custom educational content nodes.
+
+## Features
+- **Rich Text Formatting**: Headings, lists, alignment, text styles
+- **Educational Nodes**: Vocabulary, quizzes, custom questions, meaning association
+- **Media Support**: Images, audio playlists, videos, YouTube embeds
+- **Layout**: Multi-column layouts, tables
+- **AI Integration**: File manager with text-to-image and text-to-speech generation
+
+## Custom Nodes
+- Word Block - Single vocabulary display
+- Meaning Association - Interactive matching exercise
+- Short Answer (Vocabulary) - Vocabulary practice with audio/text input
+- Short Answer (Custom) - Custom prompts with flexible answer types
+- Multiple Choice Quiz - Assessment with 2-4 options
+- Audio Playlist - Multiple audio files with controls
+- YouTube Embed - Embedded YouTube videos
+- Layout Container - Multi-column responsive layouts
+
+## Grading
+The editor tracks graded blocks (quiz, answer, custom-answer, meaning-association) for automatic scoring. Student responses are stored in the Grade model with accuracy percentages.
+        `.trim(),
+      },
+    },
   },
+  tags: ['autodocs'],
 };
 
 const sampleEditorState = {

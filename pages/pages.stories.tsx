@@ -25,7 +25,7 @@ import WorkbookPage from './workbook/[id].js';
  */
 
 const meta = {
-  title: 'Pages/All Pages',
+  title: 'Pages/Application Pages',
   parameters: {
     layout: 'fullscreen',
     nextjs: {
@@ -38,10 +38,25 @@ const meta = {
     viewport: {
       defaultViewport: 'responsive',
     },
-    // Add docs configuration for better rendering
     docs: {
-      canvas: {
-        sourceState: 'shown',
+      description: {
+        component: `
+Complete Next.js page layouts demonstrating full application flows.
+
+## Page Types
+- **Dashboard**: Assignment overview and quick actions
+- **Grades**: Grade management for students and instructors  
+- **Units**: Learning unit library (published, draft, archived)
+- **Sections**: Class sections and student groups
+- **Workbook**: Student interface for completing assignments
+- **Editor**: Instructor interface for creating/editing units
+
+All pages use AWS Amplify DataStore for real-time sync and Cognito for authentication.
+        `.trim(),
+      },
+      toc: true,
+      source: {
+        state: 'open',
       },
     },
   },
