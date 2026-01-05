@@ -296,6 +296,216 @@
       "service": "Lambda"
     }
   },
+  "parameters": {
+    "AMPLIFY_function_AdminQueries65120535_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "AdminQueries65120535"
+        }
+      ]
+    },
+    "AMPLIFY_function_AdminQueries65120535_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "AdminQueries65120535"
+        }
+      ]
+    },
+    "AMPLIFY_function_analyzeDocument_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "analyzeDocument"
+        }
+      ]
+    },
+    "AMPLIFY_function_analyzeDocument_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "analyzeDocument"
+        }
+      ]
+    },
+    "AMPLIFY_function_analyzeDocument_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "analyzeDocument"
+        }
+      ]
+    },
+    "AMPLIFY_function_editorChat_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "editorChat"
+        }
+      ]
+    },
+    "AMPLIFY_function_editorChat_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "editorChat"
+        }
+      ]
+    },
+    "AMPLIFY_function_editorChat_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "editorChat"
+        }
+      ]
+    },
+    "AMPLIFY_function_generateEmbedding_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "generateEmbedding"
+        }
+      ]
+    },
+    "AMPLIFY_function_generateEmbedding_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "generateEmbedding"
+        }
+      ]
+    },
+    "AMPLIFY_function_generateEmbedding_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "generateEmbedding"
+        }
+      ]
+    },
+    "AMPLIFY_function_generateEmbeddings_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "generateEmbeddings"
+        }
+      ]
+    },
+    "AMPLIFY_function_generateEmbeddings_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "generateEmbeddings"
+        }
+      ]
+    },
+    "AMPLIFY_function_generateEmbeddings_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "generateEmbeddings"
+        }
+      ]
+    },
+    "AMPLIFY_function_getStudentSubmission_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getStudentSubmission"
+        }
+      ]
+    },
+    "AMPLIFY_function_getStudentSubmission_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getStudentSubmission"
+        }
+      ]
+    },
+    "AMPLIFY_function_japanese56739ab6bPostConfirmation_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "japanese56739ab6bPostConfirmation"
+        }
+      ]
+    },
+    "AMPLIFY_function_japanese56739ab6bPostConfirmation_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "japanese56739ab6bPostConfirmation"
+        }
+      ]
+    },
+    "AMPLIFY_function_manageSection_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "manageSection"
+        }
+      ]
+    },
+    "AMPLIFY_function_manageSection_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "manageSection"
+        }
+      ]
+    },
+    "AMPLIFY_function_openaiWebhook_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "openaiWebhook"
+        }
+      ]
+    },
+    "AMPLIFY_function_openaiWebhook_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "openaiWebhook"
+        }
+      ]
+    },
+    "AMPLIFY_function_openaiWebhook_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "openaiWebhook"
+        }
+      ]
+    },
+    "AMPLIFY_function_openai_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "openai"
+        }
+      ]
+    },
+    "AMPLIFY_function_openai_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "openai"
+        }
+      ]
+    },
+    "AMPLIFY_function_openai_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "openai"
+        }
+      ]
+    }
+  },
   "storage": {
     "files": {
       "dependsOn": [

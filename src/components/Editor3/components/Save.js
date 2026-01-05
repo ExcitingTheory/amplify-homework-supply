@@ -10,6 +10,7 @@ import {
     useContext,
 } from 'react';
 import Button from '@mui/material/Button';
+import Portal from '@mui/material/Portal';
 import UnitContext from '../../../context/unitContext';
 import SaveIcon from '@mui/icons-material/Save';
 import Snackbar from '@mui/material/Snackbar';
@@ -67,14 +68,15 @@ export function Save() {
 
     return (
         <>
-            <Snackbar
-                open={saveMessage !== ''}
-                autoHideDuration={3000}
-                onClose={() => setSaveMessage('')}
-                message={saveMessage}
-                style={{ zIndex: 2000000000 }}
-                sx={{ zIndex: 2000000000 }}
-            />
+            <Portal>
+                <Snackbar
+                    open={saveMessage !== ''}
+                    autoHideDuration={3000}
+                    onClose={() => setSaveMessage('')}
+                    message={saveMessage}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                />
+            </Portal>
             <Button
                 disabled={isSaving}
                 color='inherit'

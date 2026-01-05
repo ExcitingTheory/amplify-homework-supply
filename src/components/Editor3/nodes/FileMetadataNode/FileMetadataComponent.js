@@ -23,6 +23,7 @@ import {
     Divider,
     Checkbox,
     Tooltip,
+    Portal,
     Snackbar,
     Alert
 } from '@mui/material';
@@ -633,47 +634,57 @@ export default function FileMetadataComponent({
                 )}
             </ListItem>
             
-            {/* Confirmation Snackbar */}
-            <Snackbar
-                open={confirmDialog.open}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                style={{ zIndex: 2000000000 }}
-                sx={{ 
-                    zIndex: 2000000000,
-                    mt: 8
-                }}
+            {/* Confirmation Snackbar - Rendered in Portal to escape container overflow */}
+            <Portal>
+                <Snackbar
+                    open={confirmDialog.open}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                    onClose={(event, reason) => {
+                        if (reason === 'clickaway') {
+                            return;
+                        }
+                    }}
             >
-                <Alert
-                    severity={confirmDialog.severity}
-                    sx={{ width: '100%', zIndex: '9999 !important'  }}
-                    action={
-                        <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
-                            <Button
-                                color="inherit"
-                                size="small"
-                                onClick={() => {
-                                    if (confirmDialog.onConfirm) {
-                                        confirmDialog.onConfirm();
-                                    }
-                                }}
-                                variant="outlined"
-                            >
-                                Confirm
-                            </Button>
-                            <Button
-                                color="inherit"
-                                size="small"
-                                onClick={() => setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' })}
-                                variant="contained"
-                            >
-                                Cancel
-                            </Button>
-                        </Box>
-                    }
-                >
-                    {confirmDialog.message}
-                </Alert>
-            </Snackbar>
+                    <Alert
+                        severity={confirmDialog.severity}
+                        sx={{ 
+                            width: '100%',
+                            minWidth: '300px',
+                            boxShadow: 3
+                        }}
+                        action={
+                            <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
+                                <Button
+                                    color="inherit"
+                                    size="small"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (confirmDialog.onConfirm) {
+                                            confirmDialog.onConfirm();
+                                        }
+                                    }}
+                                    variant="outlined"
+                                >
+                                    Confirm
+                                </Button>
+                                <Button
+                                    color="inherit"
+                                    size="small"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                                    }}
+                                    variant="contained"
+                                >
+                                    Cancel
+                                </Button>
+                            </Box>
+                        }
+                    >
+                        {confirmDialog.message}
+                    </Alert>
+                </Snackbar>
+            </Portal>
         </Box>
     );
 }
