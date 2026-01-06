@@ -8,6 +8,10 @@ import { Hub, Cache } from "aws-amplify/utils";
 
 import { fetchAuthSession } from "aws-amplify/auth";
 
+// Import vector store for early initialization
+import { CourseVectorStore } from "../components/Editor3/components/FileManager2";
+import { loadEmbeddingsByDocument, loadEmbeddingsFromS3 } from "../utils/vectorStoreDB";
+
 // Provider and Consumer are connected through their "parent" context
 const FilesContext = createContext();
 
@@ -37,6 +41,11 @@ const FilesProvider = ({ children }) => {
   const filesFetchedRef = React.useRef(false);
   const subscriptionRef = React.useRef(null);
   const documentSubscriptionRef = React.useRef(null);
+  
+  // Create vector store instance - shared across entire app
+  const vectorStore = React.useRef(new CourseVectorStore()).current;
+  const [vectorStoreReady, setVectorStoreReady] = React.useState(false);
+  const loadedVersions = React.useRef(new Map()); // Track loaded document versions
 
   const [session, setSession] = React.useState({
     error: undefined,
@@ -79,6 +88,172 @@ const FilesProvider = ({ children }) => {
       fetchCurrentUserAttributes()
     }
   }, [fetchCurrentUserAttributes])
+  
+  // Early vector store initialization - load from IndexedDB on mount
+  React.useEffect(() => {
+    console.log('[FilesContext] Initializing vector store from IndexedDB');
+    
+    if (!vectorStore.loaded) {
+      vectorStore.loadFromIndexedDB().then(count => {
+        if (count > 0) {
+          console.log(`[FilesContext] Loaded ${count} cached embeddings from IndexedDB`);
+          setVectorStoreReady(true);
+        } else {
+          console.log('[FilesContext] No cached embeddings found in IndexedDB');
+          setVectorStoreReady(true);
+        }
+      }).catch(error => {
+        console.error('[FilesContext] Failed to load from IndexedDB:', error);
+        setVectorStoreReady(true);
+      });
+    }
+  }, [vectorStore]);
+  
+  // Populate vector store from files and documents
+  React.useEffect(() => {
+    if (myFiles.length === 0) return;
+    
+    const isInitialLoad = loadedVersions.current.size === 0;
+    const processingDocuments = new Set();
+    
+    console.log(`[FilesContext] Vector store population triggered`, {
+      isInitialLoad,
+      filesCount: myFiles.length,
+      currentVectorStoreSize: vectorStore.items.length,
+      documentsCount: Object.keys(documents).length
+    });
+    
+    myFiles.forEach(async (file) => {
+      const docStatus = documents[file.documentID];
+      const pageEmbeddings = docStatus?.pageEmbeddings;
+      const embeddingsS3Key = docStatus?.embeddingsS3Key;
+      const currentVersion = docStatus?._version || file._version;
+      const loadedVersion = loadedVersions.current.get(file.id);
+      
+      // Skip if already loaded and version unchanged
+      if (!isInitialLoad && loadedVersion === currentVersion) {
+        return;
+      }
+      
+      // Skip if already processing this document
+      if (file.documentID && processingDocuments.has(file.documentID)) {
+        return;
+      }
+      
+      if (file.documentID) {
+        processingDocuments.add(file.documentID);
+      }
+      
+      // Remove old entries for this file if updating
+      if (!isInitialLoad) {
+        vectorStore.items = vectorStore.items.filter(
+          item => item.metadata?.fileId !== file.id
+        );
+      }
+      
+      // Load from S3 if needed
+      if (!pageEmbeddings && embeddingsS3Key && file.documentID) {
+        const existingInMemory = vectorStore.items.filter(
+          item => item.documentId === file.documentID || item.metadata?.documentId === file.documentID
+        );
+        
+        if (existingInMemory.length > 0) {
+          console.log(`[FilesContext] Skipping S3 - ${existingInMemory.length} embeddings in memory for ${file.documentID}`);
+          loadedVersions.current.set(file.id, currentVersion);
+          return;
+        }
+        
+        try {
+          const cachedInIndexedDB = await loadEmbeddingsByDocument(file.documentID);
+          
+          if (cachedInIndexedDB && cachedInIndexedDB.length > 0) {
+            console.log(`[FilesContext] Loading ${cachedInIndexedDB.length} embeddings from IndexedDB for ${file.name}`);
+            cachedInIndexedDB.forEach(emb => vectorStore.add(emb));
+            loadedVersions.current.set(file.id, currentVersion);
+            return;
+          }
+        } catch (error) {
+          console.warn(`[FilesContext] IndexedDB check failed for ${file.documentID}:`, error);
+        }
+        
+        try {
+          console.log(`[FilesContext] Downloading embeddings from S3 for ${file.name}`);
+          await loadEmbeddingsFromS3(embeddingsS3Key, file.documentID, {
+            fileId: file.id,
+            fileName: file.name,
+            mimeType: file.mimeType,
+          });
+          
+          const cachedEmbeddings = await loadEmbeddingsByDocument(file.documentID);
+          cachedEmbeddings.forEach(emb => vectorStore.add(emb));
+          console.log(`[FilesContext] Loaded ${cachedEmbeddings.length} embeddings from S3 for ${file.name}`);
+          loadedVersions.current.set(file.id, currentVersion);
+          return;
+        } catch (error) {
+          console.error(`[FilesContext] S3 load failed for ${file.documentID}:`, error);
+        }
+      }
+      
+      // Add page embeddings from DynamoDB
+      if (pageEmbeddings && Array.isArray(pageEmbeddings) && file.documentID) {
+        console.log(`[FilesContext] Adding ${pageEmbeddings.length} page embeddings for ${file.name}`);
+        
+        pageEmbeddings.forEach(pageData => {
+          if (pageData.embedding) {
+            vectorStore.add({
+              id: `${file.id}-page-${pageData.page}`,
+              documentId: file.documentID,
+              page: pageData.page,
+              text: pageData.text || '',
+              vector: pageData.embedding,
+              metadata: {
+                fileId: file.id,
+                documentId: file.documentID,
+                page: pageData.page,
+                fileName: file.name,
+                mimeType: file.mimeType,
+              },
+            });
+          }
+        });
+        
+        // Save to IndexedDB
+        if (!isInitialLoad || !vectorStore.loaded) {
+          vectorStore.saveToIndexedDB(file.documentID, pageEmbeddings, {
+            fileId: file.id,
+            fileName: file.name,
+            mimeType: file.mimeType,
+          }).catch(error => {
+            console.error('[FilesContext] IndexedDB save failed:', error);
+          });
+        }
+      }
+      
+      // Add file-level embedding
+      if (file.embedding && !pageEmbeddings) {
+        vectorStore.add({
+          id: file.id,
+          documentId: file.documentID || file.id,
+          page: null,
+          text: file.description || file.name,
+          vector: file.embedding,
+          metadata: {
+            fileId: file.id,
+            documentId: file.documentID,
+            page: null,
+            fileName: file.name,
+            mimeType: file.mimeType,
+          },
+        });
+      }
+      
+      if (currentVersion) {
+        loadedVersions.current.set(file.id, currentVersion);
+      }
+    });
+    
+    console.log(`[FilesContext] Vector store population complete - ${vectorStore.items.length} total embeddings`);
+  }, [myFiles, documents, vectorStore]);
 
   // reload the current user attributes when the auth event is triggered
 
@@ -234,8 +409,34 @@ const FilesProvider = ({ children }) => {
           _version: doc._version, // Track version for cache invalidation
         };
       });
-      console.log('[FilesContext] Document statuses updated:', statusMap);
-      setDocuments(statusMap);
+      
+      // Only update if there are actual changes
+      setDocuments(prev => {
+        const prevKeys = Object.keys(prev);
+        const newKeys = Object.keys(statusMap);
+        
+        // Check if keys changed
+        if (prevKeys.length !== newKeys.length) {
+          console.log('[FilesContext] Document count changed:', prevKeys.length, '→', newKeys.length);
+          return statusMap;
+        }
+        
+        // Check if any values changed
+        const hasChanges = newKeys.some(key => {
+          const prevDoc = prev[key];
+          const newDoc = statusMap[key];
+          return !prevDoc || 
+                 prevDoc.status !== newDoc.status ||
+                 prevDoc._version !== newDoc._version ||
+                 prevDoc.pageCount !== newDoc.pageCount;
+        });
+        
+        if (hasChanges) {
+          console.log('[FilesContext] Document values changed');
+        }
+        
+        return hasChanges ? statusMap : prev;
+      });
     });
 
     return () => {
@@ -268,7 +469,9 @@ const FilesProvider = ({ children }) => {
     myPdfs,
     documents,
     session,
-    filesVersion
+    filesVersion,
+    vectorStore, // Stable ref, doesn't cause re-renders
+    vectorStoreReady
   }), [
     audioFiles,
     myFiles,
@@ -277,7 +480,9 @@ const FilesProvider = ({ children }) => {
     myPdfs,
     documents,
     session,
-    filesVersion
+    filesVersion,
+    // vectorStore is intentionally excluded - it's a ref and never changes
+    vectorStoreReady
   ]);
 
   return (

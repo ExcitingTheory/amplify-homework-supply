@@ -31,12 +31,15 @@ import UnitContext from "../context/unitContext";
 import SectionContext from "../context/sectionContext";
 import VectorStoreContext from "../context/vectorStoreContext";
 import { useChat } from '@ai-sdk/react';
+import { post } from 'aws-amplify/api';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { uploadAndAnalyzePDF, cancelPDFAnalysis } from '../utils/fileUploadUtils';
 import FilesContext from "../context/fileContext";
 import VocabularyReview from "./VocabularyReview";
 import { toolDefinitions, executeTool, setVectorStoreSearch } from '../utils/chatTools';
 import AIFeedbackWidget from './AIFeedbackWidget';
+import amplifyConfig from '../amplifyconfiguration.json';
+import { TextStreamChatTransport } from 'ai';
 
 const ChatSidebar = () => {
     const chatContainerRef = useRef(null);
@@ -77,42 +80,67 @@ const ChatSidebar = () => {
         };
     }, [vectorStoreCtx]);
 
-    // Use Vercel AI SDK's useChat hook with tool calling
+    // Use Vercel AI SDK's useChat hook with TextStreamChatTransport
     const chatHookResult = useChat({
-        api: '/api/chat',
-        body: {
-            context: {
-                unit: unit ? {
-                    id: unit.id,
-                    name: unit.name,
-                    description: unit.description,
-                    data: unit.data,
-                } : null,
-                files: files ? Object.values(files).map(f => ({
-                    id: f.id,
-                    name: f.name,
-                    description: f.description,
-                    mimeType: f.mimeType,
-                })) : [],
-                questionBank: questionBank ? Object.values(questionBank).map(q => ({
-                    id: q.id,
-                    prompt: q.prompt,
-                    answer: q.answer,
-                })) : [],
-                dictionary: dictionary ? Object.values(dictionary).map(d => ({
-                    id: d.id,
-                    phrase: d.phrase,
-                    definition: d.definition,
-                })) : [],
-                sections: sections.map(s => ({
-                    id: s.id,
-                    name: s.name,
-                    description: s.description,
-                })),
+        transport: new TextStreamChatTransport({
+            api: '/chat',
+            fetch: async (url, options) => {
+                console.log('[ChatSidebar] Custom fetch called');
+                
+                // Parse the request body
+                const body = options.body ? JSON.parse(options.body) : {};
+                
+                // Add context to the request
+                body.context = {
+                    unit: unit ? {
+                        id: unit.id,
+                        name: unit.name,
+                        description: unit.description,
+                        data: unit.data,
+                    } : null,
+                    files: files ? Object.values(files).map(f => ({
+                        id: f.id,
+                        name: f.name,
+                        description: f.description,
+                        mimeType: f.mimeType,
+                    })) : [],
+                    questionBank: questionBank ? Object.values(questionBank).map(q => ({
+                        id: q.id,
+                        prompt: q.prompt,
+                        answer: q.answer,
+                    })) : [],
+                    dictionary: dictionary ? Object.values(dictionary).map(d => ({
+                        id: d.id,
+                        phrase: d.phrase,
+                        definition: d.definition,
+                    })) : [],
+                    sections: sections.map(s => ({
+                        id: s.id,
+                        name: s.name,
+                        description: s.description,
+                    })),
+                };
+                
+                console.log('[ChatSidebar] Sending to Amplify:', JSON.stringify(body, null, 2));
+                
+                // Use Amplify's post which handles auth automatically
+                const restOperation = post({
+                    apiName: 'completions',
+                    path: '/chat',
+                    options: { body },
+                });
+                
+                const response = await restOperation.response;
+
+                console.log('[ChatSidebar] Received response from Amplify:', response);
+                
+                // Return response directly
+                return new Response(response.body, {
+                    status: response.statusCode,
+                    headers: response.headers,
+                });
             },
-            tools: toolDefinitions,
-            toolChoice: 'auto'
-        },
+        }),
         async onToolCall({ toolCall }) {
             console.log('[ChatSidebar] Tool call:', toolCall);
             
@@ -125,48 +153,68 @@ const ChatSidebar = () => {
             return result;
         },
         onError: (error) => {
-            console.error('Chat error:', error);
+            console.error('[ChatSidebar] Chat error:', error);
         },
     });
+    
+    // Validate hook result
+    if (!chatHookResult) {
+        console.error('[ChatSidebar] useChat returned null/undefined!');
+        return (
+            <Box sx={{ p: 2 }}>
+                <Alert severity="error">Chat initialization failed. Please refresh the page.</Alert>
+            </Box>
+        );
+    }
 
     // Debug: Log what useChat returns
     console.log('[ChatSidebar] useChat hook result:', {
         hasMessages: !!chatHookResult.messages,
-        hasInput: chatHookResult.input !== undefined,
-        hasHandleInputChange: typeof chatHookResult.handleInputChange === 'function',
-        hasHandleSubmit: typeof chatHookResult.handleSubmit === 'function',
-        hasIsLoading: chatHookResult.isLoading !== undefined,
-        allKeys: Object.keys(chatHookResult)
+        hasSendMessage: typeof chatHookResult.sendMessage === 'function',
+        hasRegenerate: typeof chatHookResult.regenerate === 'function',
+        hasError: !!chatHookResult.error,
+        status: chatHookResult.status,
+        allKeys: Object.keys(chatHookResult),
     });
 
-    // Destructure all available functions from useChat
+    // Destructure all available functions from useChat API
     const { 
-        messages, 
-        input, 
-        handleInputChange, 
-        handleSubmit, 
-        isLoading, 
-        reload, 
-        stop, 
-        addToolResult, 
-        append, 
-        submit,
-        setInput,
-        setMessages
-    } = chatHookResult;
+        messages = [], 
+        sendMessage,
+        regenerate,
+        setMessages = () => {},
+        error: chatError,
+        status = 'idle',
+        stop,
+        addToolResult,
+    } = chatHookResult || {};
+    
+    // Manage input state locally (v3 API doesn't provide this)
+    const [input, setInput] = React.useState('');
+    const [isLoading, setIsLoading] = React.useState(false);
+    
+    // Update loading state based on status
+    React.useEffect(() => {
+        setIsLoading(status === 'in_progress' || status === 'streaming');
+    }, [status]);
+    
+    // Handle input change
+    const handleInputChange = (e) => {
+        setInput(e.target.value);
+    };
 
-    // Create a unified submit function that works with different AI SDK versions
-    const submitMessage = React.useCallback((e) => {
+    // Create a unified submit function
+    const submitMessage = React.useCallback(async (e) => {
         if (e && e.preventDefault) {
             e.preventDefault();
         }
         
-        console.log('[ChatSidebar] submitMessage called, input:', input);
-        console.log('[ChatSidebar] Available functions:', {
-            handleSubmit: typeof handleSubmit,
-            submit: typeof submit,
-            append: typeof append,
-            setInput: typeof setInput
+        console.log('[ChatSidebar] submitMessage called', {
+            input,
+            inputLength: input?.length,
+            inputType: typeof input,
+            hasSendMessage: typeof sendMessage === 'function',
+            status
         });
         
         // If input is empty, don't submit
@@ -175,28 +223,24 @@ const ChatSidebar = () => {
             return;
         }
         
-        // Use append which is the standard way in @ai-sdk/react v3
-        if (typeof append === 'function') {
-            console.log('[ChatSidebar] Using append with input:', input);
-            append({ 
-                role: 'user', 
-                content: input 
-            });
-        } else if (typeof handleSubmit === 'function') {
-            console.log('[ChatSidebar] Using handleSubmit');
-            handleSubmit(e);
-        } else if (typeof submit === 'function') {
-            console.log('[ChatSidebar] Using submit');
-            submit(e);
+        // Use sendMessage from useChat
+        if (typeof sendMessage === 'function') {
+            console.log('[ChatSidebar] Using sendMessage with input:', input);
+            try {
+                // AI SDK v3: sendMessage expects an object with a text property
+                sendMessage({ text: input });
+                // Clear input after successful send
+                setInput('');
+            } catch (error) {
+                console.error('[ChatSidebar] Error sending message:', error);
+            }
         } else {
-            console.error('[ChatSidebar] No submit function available:', {
-                handleSubmit: typeof handleSubmit,
-                submit: typeof submit,
-                append: typeof append,
+            console.error('[ChatSidebar] sendMessage function not available:', {
+                sendMessage: typeof sendMessage,
                 allKeys: Object.keys(chatHookResult)
             });
         }
-    }, [input, handleSubmit, submit, append, setInput, chatHookResult]);
+    }, [input, sendMessage, status, chatHookResult]);
 
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
@@ -590,7 +634,7 @@ const ChatSidebar = () => {
                     </Box>
                     <IconButton
                         size="small"
-                        onClick={() => reload()}
+                        onClick={() => setMessages([])}
                         title="Clear chat"
                         sx={{ color: 'error.main' }}
                     >
@@ -636,7 +680,24 @@ const ChatSidebar = () => {
                             </Typography>
                         </Box>
                     )}
-                    {messages.map((message) => (
+                    {messages.map((message) => {
+                        // Extract text content from parts array
+                        const textContent = message.parts
+                            ?.filter(part => part.type === 'text')
+                            ?.map(part => part.text)
+                            ?.join('') || message.content || '';
+                        
+                        console.log('[ChatSidebar] Rendering message:', {
+                            id: message.id,
+                            role: message.role,
+                            content: message.content,
+                            textContent,
+                            contentLength: textContent?.length,
+                            hasToolInvocations: !!message.toolInvocations,
+                            allKeys: Object.keys(message),
+                        });
+                        
+                        return (
                         <div
                             key={message.id}
                             className={`chat-message ${message.role}`}
@@ -668,15 +729,15 @@ const ChatSidebar = () => {
                                     ))}
                                 </Box>
                             ) : (
-                                <pre>{message.content}</pre>
+                                <pre>{textContent}</pre>
                             )}
                             {/* Add feedback widget for assistant messages */}
-                            {message.role === 'assistant' && message.content && (
+                            {message.role === 'assistant' && textContent && (
                                 <Box className="chat-feedback">
                                     <AIFeedbackWidget
                                         contentType="CHAT_MESSAGE"
                                         messageId={message.id}
-                                        generatedContent={message.content}
+                                        generatedContent={textContent}
                                         model="gpt-4" // Update this if you track the actual model used
                                         unitId={unit?.id}
                                         sessionId={session?.sub}
@@ -689,7 +750,8 @@ const ChatSidebar = () => {
                                 </Box>
                             )}
                         </div>
-                    ))}
+                        );
+                    })}
                     {isLoading && (
                         <Box
                             sx={{

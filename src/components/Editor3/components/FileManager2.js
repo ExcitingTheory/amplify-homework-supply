@@ -174,7 +174,7 @@ const containsSearchTerm = (text, searchTerm) => {
 };
 
 // IndexedDB-backed vector store for persistent semantic search
-class CourseVectorStore {
+export class CourseVectorStore {
     constructor() {
         this.items = []; // In-memory cache for fast search
         this.loaded = false; // Track if IndexedDB data has been loaded
@@ -870,7 +870,7 @@ function MetadataEditor({ file, onUpdate, onClose }) {
     );
 }
 
-function ExpandedFileContent({ file, parsedContent, search, editor }) {
+const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, parsedContent, search, editor }) {
     const [activeTab, setActiveTab] = React.useState(0);
 
     const handleInsertIntoEditor = () => {
@@ -1173,7 +1173,7 @@ function ExpandedFileContent({ file, parsedContent, search, editor }) {
             )}
         </Box>
     );
-}
+});
 
 function NewImageFileForm({ open, toggleNewImageFileForm }) {
 
@@ -1809,7 +1809,7 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
 // Header Components for File List
 // =============================================================================
 
-function ProtectionLevelHeader({ label, totalFiles }) {
+const ProtectionLevelHeader = React.memo(function ProtectionLevelHeader({ label, totalFiles }) {
     return (
         <Box sx={{
             height: '100%',
@@ -1838,9 +1838,9 @@ function ProtectionLevelHeader({ label, totalFiles }) {
             />
         </Box>
     );
-}
+});
 
-function FileTypeSubheader({ label, fileType }) {
+const FileTypeSubheader = React.memo(function FileTypeSubheader({ label, fileType }) {
     const getIconForType = (type) => {
         switch (type) {
             case 'images': return '🖼️';
@@ -1873,13 +1873,13 @@ function FileTypeSubheader({ label, fileType }) {
             </Typography>
         </Box>
     );
-}
+});
 
 // =============================================================================
 // FileRowComponent - Renders individual file rows based on file type
 // =============================================================================
 
-function FileRowComponent({ file, fileType, index }) {
+const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, index }) {
     const [editor] = useLexicalComposerContext();
     const {
         search,
@@ -1965,6 +1965,30 @@ function FileRowComponent({ file, fileType, index }) {
             // )
 
             )}
+            
+            {/* Download Button */}
+            <IconButton
+                size="small"
+                onClick={async (e) => {
+                    e.stopPropagation();
+                    try {
+                        const url = await getCachedUrl(file.path, 'protected', file.identityId);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = file.name;
+                        link.target = '_blank';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    } catch (error) {
+                        console.error('Error downloading file:', error);
+                    }
+                }}
+                title="Download file"
+            >
+                <DownloadIcon />
+            </IconButton>
+            
             {/* Delete Button */}
             <IconButton
                 size="small"
@@ -2064,9 +2088,9 @@ function FileRowComponent({ file, fileType, index }) {
             )}
         </Box>
     );
-}
+});
 
-function ListItemImage({ file }) {
+const ListItemImage = React.memo(function ListItemImage({ file }) {
     const [url, setUrl] = React.useState(null);
 
     React.useEffect(() => {
@@ -2109,10 +2133,7 @@ function ListItemImage({ file }) {
                 )
             )}
         </>)
-
-
-
-}
+});
 
 /**
  * Helper function to completely delete a file from both DataStore and S3
@@ -2179,17 +2200,14 @@ export default function FileManager2() {
 
     const [contextMenu, setContextMenu] = React.useState(null);
     const [confirmDialog, setConfirmDialog] = React.useState({ open: false, message: '', onConfirm: null, severity: 'warning' });
-    
-    // Debug: Log confirmDialog state changes
-    React.useEffect(() => {
-        console.log('[FileManager2] confirmDialog state changed:', confirmDialog);
-    }, [confirmDialog]);
     const [editingFileId, setEditingFileId] = React.useState(null);
     const [expandedFileContent, setExpandedFileContent] = React.useState(new Set()); // Files with expanded content view
     const [parsedContentData, setParsedContentData] = React.useState({}); // Cache for parsed content
     const [semanticResults, setSemanticResults] = React.useState(null); // {fileId: {maxScore, pages: [{page, score}]}}
     const [fileEmbeddings, setFileEmbeddings] = React.useState({}); // Cache embeddings
-    const vectorStore = React.useRef(new CourseVectorStore()).current;
+    
+    // Use vector store from FilesContext (shared across entire app, initialized early)
+    const { vectorStore, vectorStoreReady } = React.useContext(FilesContext);
     const loadedVersions = React.useRef(new Map()); // Track loaded document versions
 
     const debouncedSearch = React.useRef(
@@ -2367,8 +2385,6 @@ export default function FileManager2() {
     const documentStatuses = documents || {};
     const { identityId } = session || {};
     const { unit } = React.useContext(UnitContext);
-
-    console.log('[FileManager2] Render with:', { filesCount: files?.length, session, identityId, unit });
 
     // Enhanced text search function
     const performSimpleTextSearch = React.useCallback((query) => {
@@ -2657,23 +2673,8 @@ export default function FileManager2() {
         return items;
     }, [organizedFiles, generator]);
 
-    console.log('[FileManager2] fileListItems:', fileListItems.length, 'organizedFiles:', organizedFiles, 'filteredFiles:', filteredFiles.length, 'generator:', generator);
-
     // Setup parent ref for virtualized scrolling
     const parentRef = React.useRef(null);
-    
-    // Debug: Log parent ref dimensions
-    React.useEffect(() => {
-        if (parentRef.current) {
-            const rect = parentRef.current.getBoundingClientRect();
-            console.log('[FileManager2] parentRef dimensions:', { 
-                width: rect.width, 
-                height: rect.height,
-                scrollHeight: parentRef.current.scrollHeight,
-                clientHeight: parentRef.current.clientHeight 
-            });
-        }
-    }, [fileListItems.length]);
 
     // Setup virtualizer for performance with dynamic measurement
     const virtualizer = useVirtualizer({
@@ -2694,7 +2695,12 @@ export default function FileManager2() {
         overscan: 3,
     });
 
+    // Note: Vector store initialization now happens in FilesContext on app mount
+    // FileManager2 no longer manages vector store population when using shared instance from context
+
     // Populate vector store from document page embeddings (incremental updates + IndexedDB persistence)
+    // DISABLED: Vector store is now managed by FilesContext
+    /*
     React.useEffect(() => {
         const isInitialLoad = loadedVersions.current.size === 0;
         
@@ -2740,17 +2746,8 @@ export default function FileManager2() {
             documentStatusKeys: Object.keys(documentStatuses)
         });
 
-        // Load from IndexedDB on initial mount
-        if (isInitialLoad && !vectorStore.loaded) {
-            vectorStore.loadFromIndexedDB().then(count => {
-                if (count > 0) {
-                    console.log(`[FileManager2] Loaded ${count} cached embeddings from IndexedDB`);
-                }
-            }).catch(error => {
-                console.error('[FileManager2] Failed to load from IndexedDB:', error);
-            });
-        }
-
+        // Note: IndexedDB loading now happens in early initialization effect above
+        
         files.forEach(async (file) => {
             const docStatus = documentStatuses[file.documentID];
             let pageEmbeddings = docStatus?.pageEmbeddings;
@@ -3011,8 +3008,11 @@ export default function FileManager2() {
             vectorStoreLoaded: vectorStore.loaded
         });
     }, [files, documentStatuses, fileEmbeddings]); // Removed vectorStore from deps - it's a stable reference
+    */
 
     // Load ParsedContent for all documents on mount
+    // DISABLED: Parsed content management moved to FilesContext with vector store
+    /*
     React.useEffect(() => {
         const loadAllParsedContent = async () => {
             try {
@@ -3048,8 +3048,11 @@ export default function FileManager2() {
             loadAllParsedContent();
         }
     }, [files]);
+    */
 
     // Populate vector store with parsed content text for hybrid search
+    // DISABLED: Parsed content vector store population moved to FilesContext
+    /*
     React.useEffect(() => {
         console.log('[FileManager2] Vector store effect - parsedContentData keys:', Object.keys(parsedContentData));
         Object.entries(parsedContentData).forEach(([fileId, parsedContent]) => {
@@ -3237,6 +3240,7 @@ export default function FileManager2() {
 
         console.log(`[FileManager2] Vector store now contains ${vectorStore.items.length} items (including parsed content)`);
     }, [parsedContentData, files, vectorStore]);
+    */
 
     // Note: Settings are now provided by SettingsContext
     // Get settings from context instead of local subscription
@@ -3606,7 +3610,7 @@ export default function FileManager2() {
                     alignItems: 'center',
                     px: 1,
                     py: 0.5,
-                    zIndex: 1,
+                    zIndex: 4,
                 }}
             >
                 <Box sx={{ display: 'flex', gap: 0, alignItems: 'center' }}>
@@ -3812,16 +3816,20 @@ export default function FileManager2() {
                 variant="scrollable"
                 scrollButtons="auto"
                 sx={{
+                    position: 'sticky',
+                    top: 52,
+                    bgcolor: 'background.paper',
+                    zIndex: 3,
                     borderBottom: 1,
                     borderColor: 'divider',
                     width: '100%',
                     padding: 0,
-                    minHeight: 0,
+                    minHeight: 36,
                     '& .MuiTab-root': {
-                        padding: '4px 8px',
-                        minWidth: 0,
-                        minHeight: 0,
-                        fontSize: '0.75rem',
+                        padding: '6px 12px',
+                        minWidth: 60,
+                        minHeight: 36,
+                        fontSize: '0.8rem',
                     },
                     '& .MuiTabs-flexContainer': {
                         gap: 0,
@@ -4044,7 +4052,6 @@ export default function FileManager2() {
                         }}>
                             {(() => {
                                 const virtualItems = virtualizer.getVirtualItems();
-                                console.log('[FileManager2] virtualizer.getVirtualItems():', virtualItems.length, 'totalSize:', virtualizer.getTotalSize());
                                 return virtualItems.map(virtualRow => {
                                     const item = fileListItems[virtualRow.index];
 

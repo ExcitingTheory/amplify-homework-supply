@@ -2201,16 +2201,6 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                 >
                     <Button
                         color="inherit"
-                        onClick={() => {
-                            setOpen(!open);
-                        }}
-                        title="Toggle Sidebar"
-                        aria-label="Toggle Sidebar"
-                    > {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-                    </Button>
-
-                    <Button
-                        color="inherit"
                         disabled={!canUndo || !isEditable}
                         onClick={() => {
                             activeEditor.dispatchCommand(UNDO_COMMAND, undefined);

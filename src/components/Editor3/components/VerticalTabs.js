@@ -60,14 +60,79 @@ function a11yProps(index) {
 
 export default function VerticalTabs({
   setOpen,
+  open,
   value,
   setValue,
+  setDrawerWidth,
 }) {
+  const [isResizing, setIsResizing] = React.useState(false);
+  const startXRef = React.useRef(0);
+  const startWidthRef = React.useRef(0);
+  const wasClosedRef = React.useRef(false);
 
-  const handleChange = (event, newValue) => {
-    setOpen(true);
-    setValue(newValue);
+  const handleTabClick = (newValue) => {
+    if (value === newValue && open) {
+      // Clicking the already-active tab closes the drawer
+      setOpen(false);
+    } else {
+      // Clicking a different tab opens drawer and switches to it
+      setOpen(true);
+      setValue(newValue);
+    }
   };
+
+
+
+  const handleMouseDown = (e) => {
+    setIsResizing(true);
+    startXRef.current = e.clientX;
+    wasClosedRef.current = !open;
+    
+    if (!open) {
+      // Opening from closed state
+      setOpen(true);
+      startWidthRef.current = 350; // Default width
+    } else {
+      // Store the current width from the parent's drawer ref
+      const drawerElement = e.currentTarget.closest('.MuiDrawer-root');
+      if (drawerElement) {
+        startWidthRef.current = drawerElement.offsetWidth;
+      }
+    }
+    e.preventDefault();
+  };
+
+  const handleMouseUp = () => {
+    setIsResizing(false);
+  };
+
+  const handleMouseMove = React.useCallback((e) => {
+    if (!isResizing) return;
+    
+    // Calculate the change in X position
+    const deltaX = e.clientX - startXRef.current;
+    // Moving mouse right should increase drawer width
+    const newWidth = startWidthRef.current + deltaX;
+    
+    if (newWidth < 250) {
+      // Close the drawer if dragged below minimum
+      setOpen(false);
+      setIsResizing(false);
+    } else if (newWidth <= 800 && setDrawerWidth) {
+      setDrawerWidth(newWidth);
+    }
+  }, [isResizing, setDrawerWidth, setOpen]);
+
+  React.useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isResizing, handleMouseMove]);
 
   return (
     <Box
@@ -77,13 +142,29 @@ export default function VerticalTabs({
         display: 'flex',
         flexDirection: 'row',
         borderRight: '1px solid #e0e0e0',
+        position: 'relative',
       }}
     >
+      <div
+        onMouseDown={handleMouseDown}
+        style={{
+          position: 'absolute',
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: '5px',
+          cursor: 'ew-resize',
+          backgroundColor: isResizing ? '#1976d2' : 'transparent',
+          zIndex: 1000,
+          transition: 'background-color 0.2s',
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1976d2'}
+        onMouseLeave={(e) => !isResizing && (e.currentTarget.style.backgroundColor = 'transparent')}
+      />
       <Tabs
         orientation="vertical"
         variant="standard"
         value={value}
-        onChange={handleChange}
         aria-label="Vertical tabs example"
         sx={{
           overflowY: 'hidden',
@@ -103,39 +184,25 @@ export default function VerticalTabs({
       >
 
         <Tab
-          onClick={() => {
-            setOpen(true);
-          }}
+          onClick={() => handleTabClick(0)}
           label={<EditCalendarIcon />} {...a11yProps('Assignments')} />
         <Tab
-          onClick={() => {
-            setOpen(true);
-          }}
+          onClick={() => handleTabClick(1)}
           label={<TocIcon />} {...a11yProps('Table of Contents')} />
         <Tab 
-          onClick={() => {
-            setOpen(true);
-          }}
+          onClick={() => handleTabClick(2)}
           label={<DictionaryIcon />} {...a11yProps('Dictionary')} />
         <Tab
-          onClick={() => {
-            setOpen(true);
-          }}
+          onClick={() => handleTabClick(3)}
           label={<QuestionMarkOutlined />} {...a11yProps('Questions')} overflow="hidden" />
         <Tab
-          onClick={() => {
-            setOpen(true);
-          }}
+          onClick={() => handleTabClick(4)}
           label={<FolderIcon />} {...a11yProps('Files')} />
         <Tab
-          onClick={() => {
-            setOpen(true);
-          }}
+          onClick={() => handleTabClick(5)}
           label={<ChatIcon />} {...a11yProps('AI Assistant')} />
         <Tab
-          onClick={() => {
-            setOpen(true);
-          }}
+          onClick={() => handleTabClick(6)}
           label={<ConfigIcon />} {...a11yProps('Configuration')} />
         {/* <Tab label="Item Five" {...a11yProps(4)} />
         <Tab label="Item Six" {...a11yProps(5)} />

@@ -221,17 +221,43 @@ function detectPromptInjection(message) {
   return injectionPatterns.some(pattern => pattern.test(message));
 }
 
-// POST /chat - Streaming chat endpoint
+// POST /chat - Streaming chat endpoint compatible with Vercel AI SDK TextStreamChatTransport
 app.post('/chat', async function(req, res) {
   try {
     const { messages, context } = req.body;
+    
+    console.log('[Chat] Received request with', messages?.length || 0, 'messages');
     
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: 'Invalid request: messages array is required' });
     }
 
+    // Transform AI SDK v3 parts format to OpenAI content format
+    const transformedMessages = messages.map(msg => {
+      // If message has parts array, extract text content
+      if (msg.parts && Array.isArray(msg.parts)) {
+        const textContent = msg.parts
+          .filter(part => part.type === 'text')
+          .map(part => part.text)
+          .join('');
+        
+        return {
+          role: msg.role,
+          content: textContent || '',
+        };
+      }
+      
+      // Already in OpenAI format or has content
+      return {
+        role: msg.role,
+        content: msg.content || '',
+      };
+    });
+
+    console.log('[Chat] Transformed', transformedMessages.length, 'messages');
+
     // Check last user message for prompt injection attempts
-    const lastUserMessage = messages.filter(m => m.role === 'user').pop();
+    const lastUserMessage = transformedMessages.filter(m => m.role === 'user').pop();
     if (lastUserMessage && detectPromptInjection(lastUserMessage.content)) {
       console.warn('[Chat] Potential prompt injection detected:', lastUserMessage.content.substring(0, 100));
       // Don't reject - let the system prompt handle it, but log for monitoring
@@ -239,11 +265,11 @@ app.post('/chat', async function(req, res) {
 
     const openai = await getOpenAI();
     const systemMessage = buildSystemMessage(context);
-    const allMessages = [systemMessage, ...messages];
+    const allMessages = [systemMessage, ...transformedMessages];
 
     console.log('[Chat] Creating chat completion with', allMessages.length, 'messages');
 
-    const stream = await openai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: allMessages,
       stream: true,
@@ -253,34 +279,37 @@ app.post('/chat', async function(req, res) {
       max_tokens: 2000,
     });
 
-    // Set headers for streaming
-    res.setHeader('Content-Type', 'text/event-stream');
+    // Set headers for streaming - TextStreamChatTransport expects plain text
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no'); // Disable buffering
 
-    // Stream the response
-    for await (const chunk of stream) {
+    let chunkCount = 0;
+
+    // Stream just the text content (TextStreamChatTransport expects plain text, not SSE)
+    for await (const chunk of completion) {
+      chunkCount++;
       const delta = chunk.choices[0]?.delta;
       
+      // Send only text content directly
       if (delta?.content) {
         res.write(delta.content);
       }
       
-      // Handle tool calls - send as special event
-      if (delta?.tool_calls) {
-        const toolCallData = JSON.stringify({
-          type: 'tool_call',
-          tool_calls: delta.tool_calls,
-        });
-        res.write(`\n__TOOL_CALL__:${toolCallData}`);
-      }
+      // Note: Tool calls are not supported with TextStreamChatTransport
+      // If you need tool calling, you'll need to use a different transport
     }
 
+    console.log('[Chat] Stream completed, sent', chunkCount, 'chunks');
     res.end();
   } catch (error) {
     console.error('[Chat] Error:', error);
+    console.error('[Chat] Error stack:', error.stack);
     if (!res.headersSent) {
       res.status(500).json({ error: error.message || 'Internal server error' });
+    } else {
+      res.end();
     }
   }
 });

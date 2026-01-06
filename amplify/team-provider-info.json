@@ -153,7 +153,7 @@
         "chatStream": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/chatStream-2f4a70506b4f45623430-build.zip"
+          "s3Key": "amplify-builds/chatStream-305a454c6264536e734e-build.zip"
         },
         "suggestBlocksStream": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",

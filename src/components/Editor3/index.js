@@ -206,8 +206,8 @@ function EditorRefPlugin() {
 
 const drawerWidth = 350;
 
-const openedMixin = (theme) => ({
-  width: drawerWidth,
+const openedMixin = (theme, width = drawerWidth) => ({
+  width: width,
   transition: theme.transitions.create('width', {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.enteringScreen,
@@ -251,15 +251,15 @@ const AppBar = styled(MuiAppBar, {
   }),
 }));
 
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
-    width: drawerWidth,
+const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' && prop !== 'drawerwidth' })(
+  ({ theme, open, drawerwidth }) => ({
+    width: open ? drawerwidth : '2.5rem',
     flexShrink: 0,
     whiteSpace: 'nowrap',
     boxSizing: 'border-box',
     ...(open && {
-      ...openedMixin(theme),
-      '& .MuiDrawer-paper': openedMixin(theme),
+      ...openedMixin(theme, drawerwidth),
+      '& .MuiDrawer-paper': openedMixin(theme, drawerwidth),
     }),
     ...(!open && {
       ...closedMixin(theme),
@@ -281,6 +281,8 @@ export default function Editor() {
   const toolbarRef = React.useRef(null);
   const [toolbarHeight, setToolbarHeight] = React.useState(0);
   const [actualDrawerWidth, setActualDrawerWidth] = React.useState(drawerWidth);
+  const [currentDrawerWidth, setCurrentDrawerWidth] = React.useState(drawerWidth);
+  const [isResizing, setIsResizing] = React.useState(false);
 
   const handleDrawerOpen = () => {
     setOpenTab(true);
@@ -472,16 +474,11 @@ export default function Editor() {
             />
             <Drawer
               ref={drawerRef}
+              drawerwidth={currentDrawerWidth}
               sx={{
                 height: '100%',
-                '& .MuiDrawer-paper': {
-                  position: 'relative',
-                  resize: openTab ? 'horizontal' : 'none',
-                  overflow: openTab ? 'auto' : 'hidden',
-                  minWidth: openTab ? '300px' : '2.5rem',
-                  maxWidth: openTab ? '600px' : '2.5rem',
-                  borderRight: 'none',
-                }
+                flexShrink: 0,
+                position: 'relative',
               }}
               variant="permanent" open={openTab}>
               <DrawerHeader
@@ -496,6 +493,8 @@ export default function Editor() {
               </DrawerHeader>
               <VerticalTabs
                 setOpen={setOpenTab}
+                open={openTab}
+                setDrawerWidth={setCurrentDrawerWidth}
                 value={tabValue}
                 setValue={setTabValue}
               />
@@ -547,6 +546,7 @@ export function Workbook() {
   const [tabValue, setTabValue] = React.useState(0);
   const drawerRef = React.useRef(null);
   const [actualDrawerWidth, setActualDrawerWidth] = React.useState(drawerWidth);
+  const [currentDrawerWidth, setCurrentDrawerWidth] = React.useState(drawerWidth);
 
   const handleDrawerOpen = () => {
     setOpenTab(true);
@@ -632,6 +632,7 @@ export function Workbook() {
           <Box sx={{
             display: 'flex',
             overflow: 'hidden',
+            height: 'calc(100vh - var(--app-bar-height, 11rem))',
           }}>
 
             {
@@ -644,9 +645,11 @@ export function Workbook() {
             />
             <Drawer
               ref={drawerRef}
+              drawerwidth={currentDrawerWidth}
               sx={{
                 height: '100%',
-
+                flexShrink: 0,
+                position: 'relative',
               }}
               variant="permanent" open={openTab}>
               <DrawerHeader
@@ -663,6 +666,8 @@ export function Workbook() {
               }
               <VerticalTabsRo
                 setOpen={setOpenTab}
+                open={openTab}
+                setDrawerWidth={setCurrentDrawerWidth}
                 value={tabValue}
                 setValue={setTabValue}
               />
@@ -674,6 +679,11 @@ export function Workbook() {
               margin: 0,
               padding: 0,
               boxSizing: 'border-box',
+              transition: (theme) => theme.transitions.create('margin', {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.leavingScreen,
+              }),
+              marginLeft: 0,
             }}>
               <DrawerHeader
                 style={{
