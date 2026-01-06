@@ -29,12 +29,13 @@ import RateReviewIcon from '@mui/icons-material/RateReview';
 import { Section, Document } from "../models";
 import UnitContext from "../context/unitContext";
 import SectionContext from "../context/sectionContext";
+import VectorStoreContext from "../context/vectorStoreContext";
 import { useChat } from '@ai-sdk/react';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { uploadAndAnalyzePDF, cancelPDFAnalysis } from '../utils/fileUploadUtils';
 import FilesContext from "../context/fileContext";
 import VocabularyReview from "./VocabularyReview";
-import { toolDefinitions, executeTool } from '../utils/chatTools';
+import { toolDefinitions, executeTool, setVectorStoreSearch } from '../utils/chatTools';
 import AIFeedbackWidget from './AIFeedbackWidget';
 
 const ChatSidebar = () => {
@@ -60,9 +61,24 @@ const ChatSidebar = () => {
     
     const { session } = React.useContext(FilesContext);
     const { identityId } = session || {};
+    
+    // Get vector store for semantic search
+    const vectorStoreCtx = React.useContext(VectorStoreContext);
+    
+    // Register vector store search function with chatTools
+    React.useEffect(() => {
+        if (vectorStoreCtx?.search) {
+            setVectorStoreSearch(vectorStoreCtx.search);
+            console.log('[ChatSidebar] Registered vector store search, isReady:', vectorStoreCtx.isReady);
+        }
+        
+        return () => {
+            setVectorStoreSearch(null);
+        };
+    }, [vectorStoreCtx]);
 
     // Use Vercel AI SDK's useChat hook with tool calling
-    const { messages, input, handleInputChange, handleSubmit, isLoading, reload, stop, addToolResult } = useChat({
+    const chatHookResult = useChat({
         api: '/api/chat',
         body: {
             context: {
@@ -112,6 +128,75 @@ const ChatSidebar = () => {
             console.error('Chat error:', error);
         },
     });
+
+    // Debug: Log what useChat returns
+    console.log('[ChatSidebar] useChat hook result:', {
+        hasMessages: !!chatHookResult.messages,
+        hasInput: chatHookResult.input !== undefined,
+        hasHandleInputChange: typeof chatHookResult.handleInputChange === 'function',
+        hasHandleSubmit: typeof chatHookResult.handleSubmit === 'function',
+        hasIsLoading: chatHookResult.isLoading !== undefined,
+        allKeys: Object.keys(chatHookResult)
+    });
+
+    // Destructure all available functions from useChat
+    const { 
+        messages, 
+        input, 
+        handleInputChange, 
+        handleSubmit, 
+        isLoading, 
+        reload, 
+        stop, 
+        addToolResult, 
+        append, 
+        submit,
+        setInput,
+        setMessages
+    } = chatHookResult;
+
+    // Create a unified submit function that works with different AI SDK versions
+    const submitMessage = React.useCallback((e) => {
+        if (e && e.preventDefault) {
+            e.preventDefault();
+        }
+        
+        console.log('[ChatSidebar] submitMessage called, input:', input);
+        console.log('[ChatSidebar] Available functions:', {
+            handleSubmit: typeof handleSubmit,
+            submit: typeof submit,
+            append: typeof append,
+            setInput: typeof setInput
+        });
+        
+        // If input is empty, don't submit
+        if (!input || input.trim() === '') {
+            console.log('[ChatSidebar] Empty input, not submitting');
+            return;
+        }
+        
+        // Use append which is the standard way in @ai-sdk/react v3
+        if (typeof append === 'function') {
+            console.log('[ChatSidebar] Using append with input:', input);
+            append({ 
+                role: 'user', 
+                content: input 
+            });
+        } else if (typeof handleSubmit === 'function') {
+            console.log('[ChatSidebar] Using handleSubmit');
+            handleSubmit(e);
+        } else if (typeof submit === 'function') {
+            console.log('[ChatSidebar] Using submit');
+            submit(e);
+        } else {
+            console.error('[ChatSidebar] No submit function available:', {
+                handleSubmit: typeof handleSubmit,
+                submit: typeof submit,
+                append: typeof append,
+                allKeys: Object.keys(chatHookResult)
+            });
+        }
+    }, [input, handleSubmit, submit, append, setInput, chatHookResult]);
 
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
@@ -624,7 +709,7 @@ const ChatSidebar = () => {
                 {/* Input */}
                 <Paper
                     component="form"
-                    onSubmit={handleSubmit}
+                    onSubmit={submitMessage}
                     elevation={2}
                     sx={{
                         p: 1.5,
@@ -762,7 +847,7 @@ const ChatSidebar = () => {
                             onKeyPress={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                     e.preventDefault();
-                                    handleSubmit(e);
+                                    submitMessage(e);
                                 }
                             }}
                             placeholder="Ask me anything..."
@@ -779,7 +864,7 @@ const ChatSidebar = () => {
                         <Button
                             type="submit"
                             variant="contained"
-                            disabled={isLoading || !input?.trim()}
+                            disabled={isLoading}
                             sx={{
                                 minWidth: 'auto',
                                 px: 2,

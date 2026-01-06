@@ -229,9 +229,12 @@ const FilesProvider = ({ children }) => {
           pageCount: doc.pageCount,
           extractedText: doc.extractedText,
           pageEmbeddings: doc.pageEmbeddings,
+          embeddingsS3Key: doc.embeddingsS3Key, // ← ADDED: S3 key for embeddings backup
           metadata: doc.metadata,
+          _version: doc._version, // Track version for cache invalidation
         };
       });
+      console.log('[FilesContext] Document statuses updated:', statusMap);
       setDocuments(statusMap);
     });
 

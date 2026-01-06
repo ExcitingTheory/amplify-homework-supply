@@ -7,24 +7,20 @@ import { DataStore } from 'aws-amplify/datastore';
 import { Unit, Section, Assignment, Word, Question, File as FileModel } from '../models';
 import { generateEmbedding } from '../graphql/mutations';
 import { generateClient } from 'aws-amplify/api';
+import * as EmbeddingWorker from './embeddingWorkerManager';
 
 const client = generateClient();
 
-// Cosine similarity for vector comparison
-function cosineSimilarity(vecA, vecB) {
-  if (!vecA || !vecB || vecA.length !== vecB.length) return 0;
+// Vector store instance - will be set from context
+let vectorStoreSearchFunction = null;
 
-  let dotProduct = 0;
-  let normA = 0;
-  let normB = 0;
-
-  for (let i = 0; i < vecA.length; i++) {
-    dotProduct += vecA[i] * vecB[i];
-    normA += vecA[i] * vecA[i];
-    normB += vecB[i] * vecB[i];
-  }
-
-  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+/**
+ * Set the vector store search function from context
+ * Should be called when ChatSidebar mounts with access to VectorStoreContext
+ */
+export function setVectorStoreSearch(searchFn) {
+  vectorStoreSearchFunction = searchFn;
+  console.log('[chatTools] Vector store search function registered:', !!searchFn);
 }
 
 /**
@@ -344,7 +340,107 @@ export const toolDefinitions = [
 
 export async function executeSearchContent({ query, type = 'all', limit = 10 }) {
   try {
+    console.log(`[executeSearchContent] Starting search: query="${query}", type="${type}", limit=${limit}`);
+    
+    // If vector store search is available, use it for files/documents
+    if (vectorStoreSearchFunction && (type === 'all' || type === 'files')) {
+      console.log('[executeSearchContent] Using vector store for semantic search');
+      
+      const vectorResults = await vectorStoreSearchFunction(query, {
+        topK: limit,
+        includeText: true
+      });
+      
+      if (vectorResults.success && vectorResults.results.length > 0) {
+        console.log(`[executeSearchContent] Vector store returned ${vectorResults.results.length} results`);
+        
+        // Map vector store results to search format
+        const mappedResults = vectorResults.results.map(r => ({
+          type: 'file',
+          id: r.fileId || r.documentId,
+          name: r.fileName || `Page ${r.page}`,
+          description: r.text ? r.text.substring(0, 200) + '...' : '',
+          similarity: r.similarity,
+          page: r.page,
+          documentId: r.documentId,
+          metadata: r.metadata
+        }));
+        
+        // If only searching files, return vector results
+        if (type === 'files') {
+          return {
+            success: true,
+            query,
+            method: 'vector_store',
+            results: mappedResults
+          };
+        }
+        
+        // For 'all', combine with word/question search
+        const results = [...mappedResults];
+        
+        // Add word search
+        const words = await DataStore.query(Word);
+        console.log(`[executeSearchContent] Found ${words.length} total words`);
+        
+        let keywordMatches = 0;
+        words.forEach(word => {
+          const text = `${word.phrase} ${word.pronunciation || ''} ${word.definition}`.toLowerCase();
+          if (text.includes(query.toLowerCase())) {
+            keywordMatches++;
+            results.push({
+              type: 'word',
+              id: word.id,
+              phrase: word.phrase,
+              pronunciation: word.pronunciation,
+              definition: word.definition,
+              similarity: 0.7, // Keyword match score
+            });
+          }
+        });
+        console.log(`[executeSearchContent] Words keyword matches: ${keywordMatches}`);
+        
+        // Add question search
+        const questions = await DataStore.query(Question);
+        console.log(`[executeSearchContent] Found ${questions.length} total questions`);
+        
+        keywordMatches = 0;
+        questions.forEach(question => {
+          const text = `${question.prompt} ${question.answer || ''}`.toLowerCase();
+          if (text.includes(query.toLowerCase())) {
+            keywordMatches++;
+            results.push({
+              type: 'question',
+              id: question.id,
+              prompt: question.prompt,
+              answer: question.answer,
+              similarity: 0.7,
+            });
+          }
+        });
+        console.log(`[executeSearchContent] Questions keyword matches: ${keywordMatches}`);
+        
+        // Sort by similarity and limit
+        const topResults = results
+          .sort((a, b) => b.similarity - a.similarity)
+          .slice(0, limit);
+        
+        console.log(`[executeSearchContent] Returning ${topResults.length} combined results`);
+        
+        return {
+          success: true,
+          query,
+          method: 'vector_store_hybrid',
+          results: topResults
+        };
+      }
+    }
+    
+    // Fallback to original DataStore embedding search
+    console.log('[executeSearchContent] Using DataStore embedding search (fallback)');
+    
     // Generate embedding for the query
+    console.log('[executeSearchContent] Calling generateEmbedding mutation...');
     const response = await client.graphql({
       query: /* GraphQL */ `
         mutation GenerateEmbedding($text: String!, $model: String, $dimensions: Int) {
@@ -364,98 +460,103 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
     });
 
     const queryEmbedding = response.data.generateEmbedding.embedding;
+    console.log(`[executeSearchContent] Query embedding generated: ${queryEmbedding.length} dimensions`);
+    
     const results = [];
 
     // Search Files
     if (type === 'all' || type === 'files') {
+      console.log('[executeSearchContent] Searching files...');
       const files = await DataStore.query(FileModel);
-      files.forEach(file => {
-        if (file.embedding) {
-          const fileEmbedding = JSON.parse(file.embedding);
-          const similarity = cosineSimilarity(queryEmbedding, fileEmbedding);
-          results.push({
-            type: 'file',
-            id: file.id,
-            name: file.name,
-            description: file.description,
-            mimeType: file.mimeType,
-            similarity,
-            content: file
-          });
-        }
-      });
+      console.log(`[executeSearchContent] Found ${files.length} total files`);
+      
+      const filesWithEmbeddings = files.filter(f => f.embedding);
+      console.log(`[executeSearchContent] Files with embeddings: ${filesWithEmbeddings.length}/${files.length}`);
+      
+      if (filesWithEmbeddings.length > 0) {
+        const fileResults = await EmbeddingWorker.calculateSimilarities(
+          queryEmbedding,
+          filesWithEmbeddings,
+          'file'
+        );
+        results.push(...fileResults);
+        console.log(`[executeSearchContent] Calculated ${fileResults.length} file similarities`);
+      }
     }
-
+    
     // Search Words
     if (type === 'all' || type === 'words') {
+      console.log('[executeSearchContent] Searching words...');
       const words = await DataStore.query(Word);
-      words.forEach(word => {
-        if (word.embedding) {
-          const wordEmbedding = JSON.parse(word.embedding);
-          const similarity = cosineSimilarity(queryEmbedding, wordEmbedding);
-          results.push({
-            type: 'word',
-            id: word.id,
-            phrase: word.phrase,
-            phonetic: word.phonetic,
-            definition: word.definition,
-            similarity,
-            content: word
-          });
-        } else {
-          // Fallback to keyword search
-          const text = `${word.phrase} ${word.phonetic || ''} ${word.definition}`.toLowerCase();
-          if (text.includes(query.toLowerCase())) {
-            results.push({
-              type: 'word',
-              id: word.id,
-              phrase: word.phrase,
-              phonetic: word.phonetic,
-              definition: word.definition,
-              similarity: 0.7, // Lower score for keyword match
-              content: word
-            });
-          }
-        }
-      });
+      console.log(`[executeSearchContent] Found ${words.length} total words`);
+      
+      const wordsWithEmbeddings = words.filter(w => w.embedding);
+      const wordsWithoutEmbeddings = words.filter(w => !w.embedding);
+      
+      // Calculate similarities for words with embeddings
+      if (wordsWithEmbeddings.length > 0) {
+        const wordResults = await EmbeddingWorker.calculateSimilarities(
+          queryEmbedding,
+          wordsWithEmbeddings,
+          'word'
+        );
+        results.push(...wordResults);
+      }
+      
+      // Keyword search for words without embeddings
+      if (wordsWithoutEmbeddings.length > 0) {
+        const keywordResults = await EmbeddingWorker.keywordSearch(
+          query,
+          wordsWithoutEmbeddings,
+          'word'
+        );
+        results.push(...keywordResults);
+      }
+      
+      console.log(`[executeSearchContent] Words with embeddings: ${wordsWithEmbeddings.length}/${words.length}, keyword matches: ${results.filter(r => r.type === 'word' && r.similarity === 0.7).length}`);
     }
-
+    
     // Search Questions
     if (type === 'all' || type === 'questions') {
+      console.log('[executeSearchContent] Searching questions...');
       const questions = await DataStore.query(Question);
-      questions.forEach(question => {
-        if (question.embedding) {
-          const questionEmbedding = JSON.parse(question.embedding);
-          const similarity = cosineSimilarity(queryEmbedding, questionEmbedding);
-          results.push({
-            type: 'question',
-            id: question.id,
-            prompt: question.prompt,
-            answer: question.answer,
-            similarity,
-            content: question
-          });
-        } else {
-          // Fallback to keyword search
-          const text = `${question.prompt} ${question.answer || ''}`.toLowerCase();
-          if (text.includes(query.toLowerCase())) {
-            results.push({
-              type: 'question',
-              id: question.id,
-              prompt: question.prompt,
-              answer: question.answer,
-              similarity: 0.7,
-              content: question
-            });
-          }
-        }
-      });
+      console.log(`[executeSearchContent] Found ${questions.length} total questions`);
+      
+      const questionsWithEmbeddings = questions.filter(q => q.embedding);
+      const questionsWithoutEmbeddings = questions.filter(q => !q.embedding);
+      
+      // Calculate similarities for questions with embeddings
+      if (questionsWithEmbeddings.length > 0) {
+        const questionResults = await EmbeddingWorker.calculateSimilarities(
+          queryEmbedding,
+          questionsWithEmbeddings,
+          'question'
+        );
+        results.push(...questionResults);
+      }
+      
+      // Keyword search for questions without embeddings
+      if (questionsWithoutEmbeddings.length > 0) {
+        const keywordResults = await EmbeddingWorker.keywordSearch(
+          query,
+          questionsWithoutEmbeddings,
+          'question'
+        );
+        results.push(...keywordResults);
+      }
+      
+      console.log(`[executeSearchContent] Questions with embeddings: ${questionsWithEmbeddings.length}/${questions.length}, keyword matches: ${results.filter(r => r.type === 'question' && r.similarity === 0.7).length}`);
     }
 
-    // Sort by similarity and limit
-    const topResults = results
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, limit);
+    // Sort by similarity and limit (using worker for large result sets)
+    const topResults = results.length > 100
+      ? await EmbeddingWorker.sortAndLimit(results, limit)
+      : results.sort((a, b) => b.similarity - a.similarity).slice(0, limit);
+
+    console.log(`[executeSearchContent] Returning ${topResults.length} results (from ${results.length} total matches)`);
+    topResults.slice(0, 3).forEach((r, i) => {
+      console.log(`  ${i+1}. ${r.type} - similarity: ${r.similarity.toFixed(4)}`);
+    });
 
     return {
       success: true,
@@ -470,7 +571,7 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
       }))
     };
   } catch (error) {
-    console.error('Search error:', error);
+    console.error('[executeSearchContent] Error:', error);
     return { success: false, error: error.message };
   }
 }

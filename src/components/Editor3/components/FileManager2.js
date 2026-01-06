@@ -40,6 +40,7 @@ import {
 import { useVirtualizer } from '@tanstack/react-virtual';
 import React from "react";
 import { isMimeType } from '@lexical/utils';
+import VectorStoreContext from '../../../context/vectorStoreContext';
 
 import CircularProgress from '@mui/material/CircularProgress';
 import SearchIcon from '@mui/icons-material/Search';
@@ -73,6 +74,7 @@ import {
     getEmbeddingsTimestamp,
     loadEmbeddingsFromS3 
 } from '../../../utils/vectorStoreDB';
+import * as EmbeddingWorker from '../../../utils/embeddingWorkerManager';
 
 import { FileProtectionLevels } from '../../../models';
 import { File as FileModel, Document, Settings, ParsedContent } from '../../../models';
@@ -152,23 +154,6 @@ const debounce = (func, wait) => {
     };
 };
 
-// Cosine similarity for vector comparison
-const cosineSimilarity = (vecA, vecB) => {
-    if (!vecA || !vecB || vecA.length !== vecB.length) return 0;
-
-    let dotProduct = 0;
-    let normA = 0;
-    let normB = 0;
-
-    for (let i = 0; i < vecA.length; i++) {
-        dotProduct += vecA[i] * vecB[i];
-        normA += vecA[i] * vecA[i];
-        normB += vecB[i] * vecB[i];
-    }
-
-    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
-};
-
 // Highlight text matches
 const highlightMatches = (text, searchTerm) => {
     if (!searchTerm || !text) return text;
@@ -202,6 +187,15 @@ class CourseVectorStore {
     }
 
     add(item) {
+        console.log(`[VectorStore.add] Adding embedding:`, {
+            id: item.id,
+            documentId: item.documentId,
+            page: item.page,
+            hasVector: !!item.vector,
+            vectorLength: item.vector?.length,
+            fileName: item.metadata?.fileName,
+            totalItemsAfter: this.items.length + 1
+        });
         this.items.push(item);
     }
 
@@ -261,7 +255,7 @@ class CourseVectorStore {
         }
     }
 
-    search(queryVector, filters = {}, topK = 50) {
+    async search(queryVector, filters = {}, topK = 50, queryText = '') {
         let results = this.items;
 
         // Apply metadata filters first
@@ -275,14 +269,105 @@ class CourseVectorStore {
             results = results.filter(item => item.metadata?.mimeType === filters.mimeType);
         }
 
-        // Compute similarities
-        results = results.map(item => ({
+        // Separate items with and without embeddings
+        const itemsWithEmbeddings = results.filter(item => queryVector && item.vector);
+        const itemsWithoutEmbeddings = results.filter(item => !(queryVector && item.vector));
+        
+        console.log(`[VectorStore.search] Processing ${itemsWithEmbeddings.length} items with embeddings, ${itemsWithoutEmbeddings.length} without`);
+
+        // Compute vector similarities using worker (for large batches)
+        let vectorResults = [];
+        if (itemsWithEmbeddings.length > 0) {
+            // For large datasets, use the worker to calculate similarities in parallel
+            if (itemsWithEmbeddings.length > 50) {
+                console.log('[VectorStore.search] Using worker for similarity calculations');
+                try {
+                    // Calculate similarities in the worker
+                    const similarities = await Promise.all(
+                        itemsWithEmbeddings.map(item => 
+                            EmbeddingWorker.cosineSimilarity(queryVector, item.vector)
+                        )
+                    );
+                    
+                    vectorResults = itemsWithEmbeddings.map((item, i) => ({
+                        ...item,
+                        similarity: similarities[i]
+                    }));
+                } catch (error) {
+                    console.error('[VectorStore.search] Worker error, falling back to main thread:', error);
+                    // Fallback: calculate on main thread
+                    vectorResults = await this._calculateSimilaritiesMainThread(queryVector, itemsWithEmbeddings);
+                }
+            } else {
+                // For small datasets, calculate on main thread (avoid worker overhead)
+                vectorResults = await this._calculateSimilaritiesMainThread(queryVector, itemsWithEmbeddings);
+            }
+        }
+
+        // Compute text similarities for items without embeddings
+        const textResults = itemsWithoutEmbeddings.map(item => {
+            let similarity = 0;
+            
+            if (queryText && item.text) {
+                const queryLower = queryText.toLowerCase();
+                const textLower = item.text.toLowerCase();
+                
+                // Simple text matching score
+                if (textLower.includes(queryLower)) {
+                    // Exact phrase match
+                    similarity = 0.8;
+                } else {
+                    // Word-level matching
+                    const queryWords = queryLower.split(/\s+/).filter(w => w.length > 2);
+                    const matchedWords = queryWords.filter(word => textLower.includes(word));
+                    similarity = matchedWords.length / Math.max(queryWords.length, 1) * 0.6;
+                }
+            }
+            
+            return {
+                ...item,
+                similarity
+            };
+        });
+
+        // Combine results
+        results = [...vectorResults, ...textResults];
+
+        // Filter out very low scores
+        results = results.filter(item => item.similarity > 0.1);
+
+        // Sort and return top K (use worker for large result sets)
+        if (results.length > 100) {
+            try {
+                return await EmbeddingWorker.sortAndLimit(results, topK);
+            } catch (error) {
+                console.error('[VectorStore.search] Worker sort error, falling back:', error);
+                return results.sort((a, b) => b.similarity - a.similarity).slice(0, topK);
+            }
+        } else {
+            return results.sort((a, b) => b.similarity - a.similarity).slice(0, topK);
+        }
+    }
+
+    // Fallback method: calculate similarities on main thread
+    async _calculateSimilaritiesMainThread(queryVector, items) {
+        // Inline cosine similarity for fallback
+        const cosineSimilarity = (vecA, vecB) => {
+            if (!vecA || !vecB || vecA.length !== vecB.length) return 0;
+            let dotProduct = 0, normA = 0, normB = 0;
+            for (let i = 0; i < vecA.length; i++) {
+                dotProduct += vecA[i] * vecB[i];
+                normA += vecA[i] * vecA[i];
+                normB += vecB[i] * vecB[i];
+            }
+            const denominator = Math.sqrt(normA) * Math.sqrt(normB);
+            return denominator === 0 ? 0 : dotProduct / denominator;
+        };
+
+        return items.map(item => ({
             ...item,
             similarity: cosineSimilarity(queryVector, item.vector)
         }));
-
-        // Sort and return top K
-        return results.sort((a, b) => b.similarity - a.similarity).slice(0, topK);
     }
 }
 
@@ -2612,6 +2697,48 @@ export default function FileManager2() {
     // Populate vector store from document page embeddings (incremental updates + IndexedDB persistence)
     React.useEffect(() => {
         const isInitialLoad = loadedVersions.current.size === 0;
+        
+        // Track which documents are being processed in this effect run to avoid duplicates
+        const processingDocuments = new Set();
+        
+        // Detailed logging of files and their document statuses
+        console.log(`[FileManager2] Files data:`, files.map(f => ({
+            id: f.id,
+            name: f.name,
+            documentID: f.documentID,
+            hasDocumentID: !!f.documentID,
+            mimeType: f.mimeType
+        })));
+        
+        console.log(`[FileManager2] documentStatuses object:`, documentStatuses);
+        
+        // Check each file's status in detail
+        files.forEach(f => {
+            if (f.documentID) {
+                const status = documentStatuses[f.documentID];
+                console.log(`[FileManager2] Status for file ${f.name} (docID: ${f.documentID}):`, {
+                    hasStatus: !!status,
+                    statusKeys: status ? Object.keys(status) : [],
+                    fullStatus: status,
+                    hasPageEmbeddings: !!status?.pageEmbeddings,
+                    pageEmbeddingsLength: status?.pageEmbeddings?.length,
+                    pageEmbeddingsType: typeof status?.pageEmbeddings,
+                    hasEmbeddingsS3Key: !!status?.embeddingsS3Key,
+                    embeddingsS3Key: status?.embeddingsS3Key
+                });
+            }
+        });
+        
+        console.log(`[FileManager2] Vector store population effect triggered`, {
+            isInitialLoad,
+            vectorStoreLoaded: vectorStore.loaded,
+            filesCount: files.length,
+            currentVectorStoreSize: vectorStore.items.length,
+            filesWithDocuments: files.filter(f => f.documentID).length,
+            filesWithEmbeddings: files.filter(f => documentStatuses[f.documentID]?.pageEmbeddings).length,
+            filesWithS3Keys: files.filter(f => documentStatuses[f.documentID]?.embeddingsS3Key).length,
+            documentStatusKeys: Object.keys(documentStatuses)
+        });
 
         // Load from IndexedDB on initial mount
         if (isInitialLoad && !vectorStore.loaded) {
@@ -2631,9 +2758,34 @@ export default function FileManager2() {
             const currentVersion = docStatus?._version || file._version;
             const loadedVersion = loadedVersions.current.get(file.id);
 
+            console.log(`[FileManager2] Processing file ${file.name}`, {
+                fileId: file.id,
+                documentID: file.documentID,
+                hasDocStatus: !!docStatus,
+                hasPageEmbeddings: !!pageEmbeddings,
+                pageEmbeddingsCount: pageEmbeddings?.length,
+                hasS3Key: !!embeddingsS3Key,
+                s3Key: embeddingsS3Key,
+                currentVersion,
+                loadedVersion,
+                isInitialLoad,
+                willSkip: !isInitialLoad && loadedVersion === currentVersion
+            });
+
             // Skip if already loaded and version unchanged
             if (!isInitialLoad && loadedVersion === currentVersion) {
+                console.log(`[FileManager2] Skipping file ${file.name} - already loaded with same version`);
                 return;
+            }
+            
+            // Skip if already processing this document in this effect run (prevents duplicates)
+            if (file.documentID && processingDocuments.has(file.documentID)) {
+                console.log(`[FileManager2] Skipping file ${file.name} - document ${file.documentID} already processing in this run`);
+                return;
+            }
+            
+            if (file.documentID) {
+                processingDocuments.add(file.documentID);
             }
 
             // Remove old entries for this file if updating
@@ -2643,10 +2795,54 @@ export default function FileManager2() {
                 );
             }
 
-            // If no pageEmbeddings in DynamoDB but S3 key exists, load from S3
+            // If no pageEmbeddings in DynamoDB but S3 key exists, check if we need to load from S3
             if (!pageEmbeddings && embeddingsS3Key && file.documentID) {
+                // First check if embeddings are already in memory
+                const existingInMemory = vectorStore.items.filter(
+                    item => item.documentId === file.documentID || item.metadata?.documentId === file.documentID
+                );
+                
+                if (existingInMemory.length > 0) {
+                    console.log(`[FileManager2] Skipping S3 load - ${existingInMemory.length} embeddings already in memory for document ${file.documentID}`);
+                    
+                    // Update loaded version
+                    if (currentVersion) {
+                        loadedVersions.current.set(file.id, currentVersion);
+                    }
+                    return;
+                }
+                
+                // Check if embeddings are already in IndexedDB
                 try {
-                    console.log(`[FileManager2] Loading embeddings from S3 for document ${file.documentID}`);
+                    const cachedInIndexedDB = await loadEmbeddingsByDocument(file.documentID);
+                    
+                    if (cachedInIndexedDB && cachedInIndexedDB.length > 0) {
+                        console.log(`[FileManager2] Loading ${cachedInIndexedDB.length} embeddings from IndexedDB cache for document ${file.documentID} (skipping S3)`);
+                        
+                        // Add to vector store in memory
+                        cachedInIndexedDB.forEach(emb => {
+                            vectorStore.add(emb);
+                        });
+                        
+                        // Update loaded version
+                        if (currentVersion) {
+                            loadedVersions.current.set(file.id, currentVersion);
+                        }
+                        
+                        return; // Skip S3 download
+                    }
+                } catch (error) {
+                    console.warn(`[FileManager2] Error checking IndexedDB cache for document ${file.documentID}:`, error);
+                    // Continue to S3 download on error
+                }
+                
+                // Only download from S3 if not in memory or IndexedDB
+                try {
+                    console.log(`[FileManager2] Downloading embeddings from S3 for document ${file.documentID}`, {
+                        s3Key: embeddingsS3Key,
+                        fileId: file.id,
+                        fileName: file.name
+                    });
                     
                     // Load from S3 and save to IndexedDB
                     await loadEmbeddingsFromS3(
@@ -2661,6 +2857,12 @@ export default function FileManager2() {
                     
                     // Load the newly cached embeddings from IndexedDB
                     const cachedEmbeddings = await loadEmbeddingsByDocument(file.documentID);
+                    
+                    console.log(`[FileManager2] Adding ${cachedEmbeddings.length} S3 embeddings to vector store`, {
+                        documentId: file.documentID,
+                        fileId: file.id,
+                        embeddings: cachedEmbeddings.map(e => ({ id: e.id, page: e.page, hasVector: !!e.vector }))
+                    });
                     
                     // Add to vector store in memory
                     cachedEmbeddings.forEach(emb => {
@@ -2683,9 +2885,17 @@ export default function FileManager2() {
 
             // Add page-level embeddings for PDFs (from DynamoDB)
             if (pageEmbeddings && Array.isArray(pageEmbeddings) && file.documentID) {
+                console.log(`[FileManager2] Processing ${pageEmbeddings.length} page embeddings from DynamoDB`, {
+                    documentId: file.documentID,
+                    fileId: file.id,
+                    fileName: file.name,
+                    pagesWithEmbeddings: pageEmbeddings.filter(p => p.embedding).length
+                });
+                
                 // Check if we need to update IndexedDB
                 const shouldUpdateDB = !isInitialLoad || !vectorStore.loaded;
                 
+                let addedCount = 0;
                 pageEmbeddings.forEach(pageData => {
                     if (pageData.embedding) {
                         vectorStore.add({
@@ -2702,8 +2912,11 @@ export default function FileManager2() {
                                 mimeType: file.mimeType,
                             },
                         });
+                        addedCount++;
                     }
                 });
+                
+                console.log(`[FileManager2] Added ${addedCount} page embeddings to vector store`);
 
                 // Save to IndexedDB for persistence
                 if (shouldUpdateDB) {
@@ -2724,6 +2937,14 @@ export default function FileManager2() {
             // Add file-level embedding for non-PDF files
             const fileEmbedding = file.embedding || fileEmbeddings[file.id];
             if (fileEmbedding && !pageEmbeddings) {
+                console.log(`[FileManager2] Adding file-level embedding`, {
+                    fileId: file.id,
+                    fileName: file.name,
+                    documentId: file.documentID,
+                    hasEmbedding: !!fileEmbedding,
+                    embeddingLength: fileEmbedding?.length
+                });
+                
                 vectorStore.add({
                     id: file.id,
                     documentId: file.documentID || file.id,
@@ -2740,6 +2961,16 @@ export default function FileManager2() {
                 });
             }
 
+            // Log if no embeddings were added for this file
+            if (!pageEmbeddings && !embeddingsS3Key && !fileEmbedding) {
+                console.log(`[FileManager2] No embeddings available for file ${file.name}`, {
+                    fileId: file.id,
+                    documentID: file.documentID,
+                    hasDocStatus: !!docStatus,
+                    mimeType: file.mimeType
+                });
+            }
+            
             // Update loaded version
             if (currentVersion) {
                 loadedVersions.current.set(file.id, currentVersion);
@@ -2772,7 +3003,240 @@ export default function FileManager2() {
                 });
             }
         });
-    }, [files, documentStatuses, fileEmbeddings, vectorStore]);
+        
+        // Log final state after processing
+        console.log(`[FileManager2] Vector store population complete`, {
+            totalEmbeddings: vectorStore.items.length,
+            loadedFiles: loadedVersions.current.size,
+            vectorStoreLoaded: vectorStore.loaded
+        });
+    }, [files, documentStatuses, fileEmbeddings]); // Removed vectorStore from deps - it's a stable reference
+
+    // Load ParsedContent for all documents on mount
+    React.useEffect(() => {
+        const loadAllParsedContent = async () => {
+            try {
+                const parsedContents = await DataStore.query(ParsedContent);
+                console.log('[FileManager2] Loaded ParsedContent records:', parsedContents.length);
+                
+                const newParsedContentData = {};
+                parsedContents.forEach(pc => {
+                    // Find the file with this documentID
+                    const file = files.find(f => f.documentID === pc.documentID);
+                    if (file) {
+                        newParsedContentData[file.id] = pc;
+                        console.log('[FileManager2] Mapped ParsedContent to file:', file.name, {
+                            vocabularyJSON: pc.vocabularyJSON,
+                            conceptsJSON: pc.conceptsJSON,
+                            objectivesJSON: pc.objectivesJSON,
+                            questionsJSON: pc.questionsJSON,
+                            summariesJSON: pc.summariesJSON
+                        });
+                    }
+                });
+                
+                if (Object.keys(newParsedContentData).length > 0) {
+                    setParsedContentData(newParsedContentData);
+                    console.log('[FileManager2] Set parsedContentData for', Object.keys(newParsedContentData).length, 'files');
+                }
+            } catch (error) {
+                console.error('[FileManager2] Error loading ParsedContent:', error);
+            }
+        };
+
+        if (files.length > 0) {
+            loadAllParsedContent();
+        }
+    }, [files]);
+
+    // Populate vector store with parsed content text for hybrid search
+    React.useEffect(() => {
+        console.log('[FileManager2] Vector store effect - parsedContentData keys:', Object.keys(parsedContentData));
+        Object.entries(parsedContentData).forEach(([fileId, parsedContent]) => {
+            const file = files.find(f => f.id === fileId);
+            if (!file || !parsedContent) return;
+
+            // Parse JSON strings
+            let vocabulary = [];
+            let summaries = [];
+            let objectives = [];
+            let concepts = [];
+            let questions = [];
+
+            try {
+                vocabulary = parsedContent.vocabularyJSON.length > 0 ? parsedContent.vocabularyJSON : [];
+                if (!Array.isArray(vocabulary)) vocabulary = [];
+            } catch (e) {
+                console.error('[FileManager2] Failed to parse vocabularyJSON:', e);
+            }
+
+            try {
+                summaries = parsedContent.summariesJSON.length > 0 ? parsedContent.summariesJSON : [];
+            } catch (e) {}
+
+            try {
+                objectives = parsedContent.objectivesJSON.length > 0 ? parsedContent.objectivesJSON : [];
+            } catch (e) {}
+
+            try {
+                concepts = parsedContent.conceptsJSON.length > 0 ? parsedContent.conceptsJSON : [];
+            } catch (e) {}
+
+            try {
+                questions = parsedContent.questionsJSON.length > 0 ? parsedContent.questionsJSON : [];
+            } catch (e) {}
+
+            console.log(`[FileManager2] Parsed content for ${file.name}:`, {
+                vocabulary: vocabulary.length,
+                summaries: summaries.length,
+                objectives: objectives.length,
+                concepts: concepts.length,
+                questions: questions.length
+            });
+
+            // Create searchable text entries for vocabulary
+            if (vocabulary.length > 0) {
+                vocabulary.forEach((vocab, index) => {
+                    const text = `${vocab.term || ''} ${vocab.definition || ''} ${vocab.context || ''}`.trim();
+                    if (text) {
+                        const existingItemId = `${fileId}-vocab-${index}`;
+                        const existsInStore = vectorStore.items.some(item => item.id === existingItemId);
+                        
+                        if (!existsInStore) {
+                            vectorStore.items.push({
+                                id: existingItemId,
+                                documentId: file.documentID,
+                                page: vocab.page || null,
+                                text: text,
+                                vector: null, // No embedding for parsed content (text-only search)
+                                metadata: {
+                                    fileId: file.id,
+                                    documentId: file.documentID,
+                                    fileName: file.name,
+                                    type: 'vocabulary',
+                                    term: vocab.term,
+                                },
+                            });
+                        }
+                    }
+                });
+            }
+
+            // Create searchable text entries for summaries
+            if (summaries.length > 0) {
+                summaries.forEach((summary, index) => {
+                    const text = `${summary.title || ''} ${summary.content || ''}`.trim();
+                    if (text) {
+                        const existingItemId = `${fileId}-summary-${index}`;
+                        const existsInStore = vectorStore.items.some(item => item.id === existingItemId);
+                        
+                        if (!existsInStore) {
+                            vectorStore.items.push({
+                                id: existingItemId,
+                                documentId: file.documentID,
+                                page: null,
+                                text: text,
+                                vector: null,
+                                metadata: {
+                                    fileId: file.id,
+                                    documentId: file.documentID,
+                                    fileName: file.name,
+                                    type: 'summary',
+                                    title: summary.title,
+                                },
+                            });
+                        }
+                    }
+                });
+            }
+
+            // Create searchable text entries for objectives
+            if (objectives.length > 0) {
+                objectives.forEach((objective, index) => {
+                    const text = objective.objective || '';
+                    if (text) {
+                        const existingItemId = `${fileId}-objective-${index}`;
+                        const existsInStore = vectorStore.items.some(item => item.id === existingItemId);
+                        
+                        if (!existsInStore) {
+                            vectorStore.items.push({
+                                id: existingItemId,
+                                documentId: file.documentID,
+                                page: null,
+                                text: text,
+                                vector: null,
+                                metadata: {
+                                    fileId: file.id,
+                                    documentId: file.documentID,
+                                    fileName: file.name,
+                                    type: 'objective',
+                                    bloomLevel: objective.bloom_level,
+                                },
+                            });
+                        }
+                    }
+                });
+            }
+
+            // Create searchable text entries for concepts
+            if (concepts.length > 0) {
+                concepts.forEach((concept, index) => {
+                    const text = `${concept.concept || ''} ${concept.description || ''}`.trim();
+                    if (text) {
+                        const existingItemId = `${fileId}-concept-${index}`;
+                        const existsInStore = vectorStore.items.some(item => item.id === existingItemId);
+                        
+                        if (!existsInStore) {
+                            vectorStore.items.push({
+                                id: existingItemId,
+                                documentId: file.documentID,
+                                page: null,
+                                text: text,
+                                vector: null,
+                                metadata: {
+                                    fileId: file.id,
+                                    documentId: file.documentID,
+                                    fileName: file.name,
+                                    type: 'concept',
+                                    concept: concept.concept,
+                                },
+                            });
+                        }
+                    }
+                });
+            }
+
+            // Create searchable text entries for questions
+            if (questions.length > 0) {
+                questions.forEach((question, index) => {
+                    const text = `${question.question || ''} ${question.expectedAnswer || ''} ${question.hint || ''}`.trim();
+                    if (text) {
+                        const existingItemId = `${fileId}-question-${index}`;
+                        const existsInStore = vectorStore.items.some(item => item.id === existingItemId);
+                        
+                        if (!existsInStore) {
+                            vectorStore.items.push({
+                                id: existingItemId,
+                                documentId: file.documentID,
+                                page: null,
+                                text: text,
+                                vector: null,
+                                metadata: {
+                                    fileId: file.id,
+                                    documentId: file.documentID,
+                                    fileName: file.name,
+                                    type: 'question',
+                                    questionType: question.type,
+                                },
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        console.log(`[FileManager2] Vector store now contains ${vectorStore.items.length} items (including parsed content)`);
+    }, [parsedContentData, files, vectorStore]);
 
     // Note: Settings are now provided by SettingsContext
     // Get settings from context instead of local subscription
@@ -3027,6 +3491,75 @@ export default function FileManager2() {
 
     }
 
+    // Vector store search function exposed to other components
+    const performVectorSearch = React.useCallback(async (query, options = {}) => {
+        const { topK = 10, filters = {}, includeText = true } = options;
+        
+        console.log(`[FileManager2.performVectorSearch] Query: "${query}", topK: ${topK}`);
+        
+        if (!query.trim()) {
+            return { results: [], query };
+        }
+
+        try {
+            // Generate embedding for the query
+            const response = await client.graphql({
+                query: /* GraphQL */ `
+                    mutation GenerateEmbedding($content: String!, $model: String, $dimensions: Int) {
+                        generateEmbedding(content: $content, model: $model, dimensions: $dimensions) {
+                            embedding
+                            model
+                            dimensions
+                            tokenCount
+                        }
+                    }
+                `,
+                variables: {
+                    content: query,
+                    model: 'text-embedding-3-small',
+                    dimensions: 512
+                }
+            });
+
+            const queryEmbedding = response.data.generateEmbedding.embedding;
+            console.log(`[FileManager2.performVectorSearch] Generated ${queryEmbedding.length}D embedding`);
+
+            // Search vector store (now async due to worker usage)
+            const results = await vectorStore.search(queryEmbedding, filters, topK, query);
+            console.log(`[FileManager2.performVectorSearch] Found ${results.length} results`);
+
+            return {
+                success: true,
+                query,
+                results: results.map(r => ({
+                    id: r.id,
+                    documentId: r.documentId || r.metadata?.documentId,
+                    fileId: r.metadata?.fileId,
+                    fileName: r.metadata?.fileName,
+                    page: r.page,
+                    similarity: r.similarity,
+                    text: includeText ? r.text : undefined,
+                    metadata: r.metadata
+                }))
+            };
+        } catch (error) {
+            console.error('[FileManager2.performVectorSearch] Error:', error);
+            return {
+                success: false,
+                error: error.message,
+                query,
+                results: []
+            };
+        }
+    }, [vectorStore]);
+
+    // Context value for VectorStoreContext
+    const vectorStoreContextValue = {
+        vectorStore,
+        search: performVectorSearch,
+        isReady: vectorStore.loaded && vectorStore.items.length > 0,
+    };
+
     // Context value for FileManagerProvider
     const fileManagerContextValue = {
         search,
@@ -3045,6 +3578,7 @@ export default function FileManager2() {
     };
 
     return (
+        <VectorStoreContext.Provider value={vectorStoreContextValue}>
         <FileManagerProvider value={fileManagerContextValue}>
         <Box
             sx={{
@@ -3673,5 +4207,6 @@ export default function FileManager2() {
             </Snackbar>
         </Portal>
         </FileManagerProvider>
+        </VectorStoreContext.Provider>
     );
 }

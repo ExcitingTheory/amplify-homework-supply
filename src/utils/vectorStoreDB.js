@@ -201,10 +201,45 @@ export async function loadEmbeddingsFromS3(s3Key, documentId, metadata = {}) {
   try {
     console.log(`[VectorStoreDB] Loading embeddings from S3: ${s3Key}`);
     
+    // Parse S3 key to extract access level and actual key
+    // Format: "protected/us-east-1:identity-id/files/filename.embeddings.json"
+    // or "public/files/filename.embeddings.json"
+    let accessLevel = 'public';
+    let key = s3Key;
+    let targetIdentityId;
+    
+    if (s3Key.startsWith('protected/')) {
+      accessLevel = 'protected';
+      // Extract identity ID and key: "protected/us-east-1:xxxx/files/..."
+      const parts = s3Key.substring('protected/'.length).split('/');
+      targetIdentityId = parts[0]; // "us-east-1:xxxx"
+      key = parts.slice(1).join('/'); // "files/filename.embeddings.json"
+    } else if (s3Key.startsWith('private/')) {
+      accessLevel = 'private';
+      const parts = s3Key.substring('private/'.length).split('/');
+      targetIdentityId = parts[0];
+      key = parts.slice(1).join('/');
+    } else if (s3Key.startsWith('public/')) {
+      accessLevel = 'public';
+      key = s3Key.substring('public/'.length); // Remove "public/" prefix
+    }
+    
+    console.log(`[VectorStoreDB] Parsed S3 key: accessLevel=${accessLevel}, key=${key}, targetIdentityId=${targetIdentityId}`);
+    
     // Download from S3
-    const downloadResult = await downloadData({
-      key: s3Key,
-    }).result;
+    const downloadOptions = { 
+      key,
+      options: { 
+        accessLevel 
+      } 
+    };
+    
+    // Add targetIdentityId for protected/private files
+    if (targetIdentityId) {
+      downloadOptions.options.targetIdentityId = targetIdentityId;
+    }
+    
+    const downloadResult = await downloadData(downloadOptions).result;
     
     // Get the blob and convert to ArrayBuffer
     const blob = await downloadResult.body.blob();

@@ -684,17 +684,21 @@ export function Workbook() {
               <RichTextPlugin
                 contentEditable={
                   <div className="editor"
+                    key={`editor-${actualDrawerWidth}-${openTab}`}
                     style={{
                       margin: '0',
                       padding: '0',
                       height: 'calc(100vh - 11rem)',
                       overflowY: 'auto',
+                      width: '100%',
+                      boxSizing: 'border-box',
                     }}
                   >
                     <ContentEditable
                       style={{
                         width: '100%',
                         maxWidth: '100%',
+                        boxSizing: 'border-box',
                       }}
                     />
                   </div>
