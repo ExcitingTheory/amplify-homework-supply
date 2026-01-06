@@ -30,10 +30,14 @@ import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import { SignatureV4 } from '@aws-sdk/signature-v4';
 import { HttpRequest } from '@aws-sdk/protocol-http';
 import { default as fetch, Request } from 'node-fetch';
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 import { Readable } from 'stream';
 import pdfParse from 'pdf-parse';
+import { promisify } from 'util';
+import { brotliCompress } from 'zlib';
+
+const brotliCompressAsync = promisify(brotliCompress);
 
 const REGION = process.env.REGION;
 const GRAPHQL_ENDPOINT = process.env.API_JAPANESE5_GRAPHQLAPIENDPOINTOUTPUT;
@@ -49,12 +53,17 @@ async function initializeOpenAI() {
   if (openai) return openai;
   
   const ssm = new AWS.SSM();
+  const paramName = process.env.OPENAI_API_KEY || 'OPENAI_API_KEY';
   const { Parameters } = await ssm
     .getParameters({
-      Names: ['OPENAI_API_KEY'],
+      Names: [paramName],
       WithDecryption: true,
     })
     .promise();
+  
+  if (!Parameters || Parameters.length === 0) {
+    throw new Error(`Failed to retrieve OpenAI API key from SSM parameter: ${paramName}`);
+  }
   
   const apiKey = Parameters[0].Value;
   openai = new OpenAI({ apiKey });
@@ -228,27 +237,47 @@ async function processAudioFile(fileBuffer, fileName) {
   };
 }
 
+// Upload embeddings to S3
+async function uploadEmbeddingsToS3(originalS3Key, embeddings) {
+  // Generate S3 key for embeddings (same path as file but with .embeddings.json extension)
+  const embeddingsKey = originalS3Key.replace(/\.[^.]+$/, '.embeddings.json');
+  
+  const putCommand = new PutObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: embeddingsKey,
+    Body: JSON.stringify(embeddings, null, 2),
+    ContentType: 'application/json',
+  });
+  
+  await s3Client.send(putCommand);
+  
+  console.log(`Uploaded full embeddings to S3: ${embeddingsKey}`);
+  
+  return {
+    key: embeddingsKey,
+    count: embeddings.length
+  };
+}
+
 // Process PDF document (page-level embeddings) with resume capability
-async function processDocumentFile(fileBuffer, documentID, pageCount, resumeState = null, context = null) {
+async function processDocumentFile(fileBuffer, documentID, resumeState = null, context = null) {
   const TIMEOUT_BUFFER_MS = 30000; // Reserve 30 seconds for cleanup and re-invocation
   const BATCH_SIZE = 50; // Process embeddings in batches
   
-  // Use pdf-parse to extract text
+  // Use pdf-parse to extract text and get actual page count
   const pdfData = await pdfParse(fileBuffer);
   const fullText = pdfData.text;
+  const actualPageCount = pdfData.numpages || 1; // Get real page count from PDF
   
-  // Split text into chunks by estimated page size
-  // Assume ~2000 chars per page on average
-  const charsPerPage = 2000;
-  const estimatedPages = Math.max(1, Math.ceil(fullText.length / charsPerPage));
-  const numPages = Math.min(estimatedPages, pageCount || estimatedPages);
+  // Split text into chunks by page
+  const charsPerPage = Math.ceil(fullText.length / actualPageCount);
   
   const pageTexts = [];
   const accumulatedEmbeddings = resumeState?.pageEmbeddings || [];
   const startPage = resumeState?.lastProcessedPage || 0;
   
-  // Split text into page-sized chunks
-  for (let i = 0; i < numPages; i++) {
+  // Split text into page-sized chunks based on actual page count
+  for (let i = 0; i < actualPageCount; i++) {
     const start = i * charsPerPage;
     const end = Math.min(start + charsPerPage, fullText.length);
     const pageText = fullText.substring(start, end).trim();
@@ -286,12 +315,12 @@ async function processDocumentFile(fileBuffer, documentID, pageCount, resumeStat
       const batchTexts = batch.map(p => p.text);
       const batchEmbeddings = await generateEmbeddingsViaAPI(batchTexts);
       
-      // Map back to page numbers
+      // Map back to page numbers (don't store text to save memory)
       for (let j = 0; j < batch.length; j++) {
         accumulatedEmbeddings.push({
           page: batch[j].page,
-          embedding: batchEmbeddings[j],
-          text: batch[j].text,
+          embedding: batchEmbeddings[j]
+          // text intentionally omitted to reduce memory usage
         });
       }
     }
@@ -302,6 +331,7 @@ async function processDocumentFile(fileBuffer, documentID, pageCount, resumeStat
   return {
     isComplete: true,
     pageEmbeddings: accumulatedEmbeddings,
+    pageTexts, // Return pageTexts for S3 upload with full text
     resumeState: null
   };
 }
@@ -478,12 +508,11 @@ export const handler = async (event, context) => {
       
     } else if (file.mimeType === 'application/pdf' && file.documentID) {
       // Process PDF document
-      // Use identityId + path like we do for images/audio, not the document.s3Key directly
       const s3Key = `protected/${file.identityId}/${file.path}`;
       console.log('Constructed S3 key for PDF:', s3Key);
-      const pageCount = file.document?.pageCount || 1; // Default to 1 if not set
+      
       const fileBuffer = await downloadFileFromS3(s3Key);
-      const pdfResult = await processDocumentFile(fileBuffer, file.documentID, pageCount, resumeState, context);
+      const pdfResult = await processDocumentFile(fileBuffer, file.documentID, resumeState, context);
       
       // If processing is not complete, save state and re-invoke
       if (!pdfResult.isComplete) {
@@ -494,6 +523,14 @@ export const handler = async (event, context) => {
           mutation UpdateDocument($input: UpdateDocumentInput!) {
             updateDocument(input: $input) {
               id
+              filename
+              s3Key
+              status
+              createdAt
+              updatedAt
+              _version
+              _lastChangedAt
+              _deleted
               resumeState
             }
           }
@@ -542,18 +579,76 @@ export const handler = async (event, context) => {
         };
       }
       
-      // Processing complete, update Document with embeddings and clear resume state
+      // Processing complete, analyze size and upload to S3
       console.log('PDF embedding generation completed successfully');
+      
+      // Reconstruct full embeddings with text for S3 backup (using returned pageTexts)
+      const fullEmbeddings = pdfResult.pageEmbeddings.map(emb => {
+        const pageData = pdfResult.pageTexts.find(p => p.page === emb.page);
+        return {
+          page: emb.page,
+          embedding: emb.embedding,
+          text: pageData?.text || ''
+        };
+      });
+      
+      const vectorsOnly = pdfResult.pageEmbeddings; // Already {page, embedding} without text
+      
+      const fullSize = Buffer.byteLength(JSON.stringify(fullEmbeddings), 'utf8');
+      const vectorsOnlySize = Buffer.byteLength(JSON.stringify(vectorsOnly), 'utf8');
+      const vectorsJSON = JSON.stringify(vectorsOnly);
+      
+      // Compress with brotli
+      const brotliCompressed = await brotliCompressAsync(vectorsJSON);
+      
+      console.log(`Full embeddings (with text): ${(fullSize / 1024).toFixed(1)}KB`);
+      console.log(`Vectors only (no text): ${(vectorsOnlySize / 1024).toFixed(1)}KB`);
+      console.log(`Vectors brotli compressed: ${(brotliCompressed.length / 1024).toFixed(1)}KB`);
+      console.log(`DynamoDB limit: 400KB (409600 bytes)`);
+      
+      // Determine what to store in DynamoDB
+      let pageEmbeddingsData = null;
+      let compressionMethod = 'none';
+      let storedSize = 0;
+      
+      if (vectorsOnlySize < 409600) {
+        // Store uncompressed
+        pageEmbeddingsData = vectorsOnly;
+        storedSize = vectorsOnlySize;
+        console.log('Storing uncompressed vectors in DynamoDB');
+      } else if (brotliCompressed.length < 409600) {
+        // Store brotli compressed as base64
+        pageEmbeddingsData = brotliCompressed.toString('base64');
+        compressionMethod = 'brotli';
+        storedSize = brotliCompressed.length;
+        console.log('Storing brotli compressed vectors in DynamoDB');
+      } else {
+        // Too large even compressed, only store in S3
+        console.log('Embeddings too large for DynamoDB even with brotli, storing only in S3');
+      }
+      
+      // Upload full embeddings to S3 for backup/analysis
+      const embeddingsInfo = await uploadEmbeddingsToS3(s3Key, fullEmbeddings);
+      
+      // Clear large objects to help garbage collection
+      fullEmbeddings.length = 0;
+      pdfResult.pageTexts.length = 0;
       
       const updateDocumentMutation = /* GraphQL */ `
         mutation UpdateDocument($input: UpdateDocumentInput!) {
           updateDocument(input: $input) {
             id
-            pageEmbeddings {
-              page
-              embedding
-              text
-            }
+            filename
+            s3Key
+            status
+            createdAt
+            updatedAt
+            _version
+            _lastChangedAt
+            _deleted
+            resumeState
+            metadata
+            embeddingsS3Key
           }
         }
       `;
@@ -564,26 +659,59 @@ export const handler = async (event, context) => {
           getDocument(id: $id) {
             id
             _version
+            metadata
           }
         }
       `;
       
       const docData = await executeGraphQLMutation(getDocMutation, { id: file.documentID });
       
+      // Parse existing metadata and add embeddings info
+      const existingMetadata = docData.getDocument?.metadata 
+        ? JSON.parse(docData.getDocument.metadata) 
+        : {};
+      
+      const updatedMetadata = {
+        ...existingMetadata,
+        embeddingsKey: embeddingsInfo.key,
+        embeddingsCount: pdfResult.pageEmbeddings.length,
+        embeddingsGeneratedAt: new Date().toISOString(),
+        embeddingsCompression: compressionMethod,
+        embeddingsSizes: {
+          fullSize,
+          vectorsOnlySize,
+          brotliSize: brotliCompressed.length,
+          storedSize,
+        }
+      };
+      
+      console.log('[generateEmbeddings] Saving embeddings metadata and S3 path to Document...');
       await executeGraphQLMutation(updateDocumentMutation, {
         input: {
           id: file.documentID,
           _version: docData.getDocument._version,
-          pageEmbeddings: pdfResult.pageEmbeddings,
-          resumeState: null // Clear resume state
+          metadata: JSON.stringify(updatedMetadata),
+          resumeState: null, // Clear resume state
+          pageEmbeddings: pageEmbeddingsData ? JSON.stringify(pageEmbeddingsData) : null,
+          embeddingsS3Key: embeddingsInfo.key // Save S3 path as dedicated field
         }
       });
+      console.log('[generateEmbeddings] Document updated with embeddings S3 path:', embeddingsInfo.key);
       
       return {
         success: true,
         fileID,
         documentID: file.documentID,
         embeddingCount: pdfResult.pageEmbeddings.length,
+        storedInDynamoDB: pageEmbeddingsData !== null,
+        compressionMethod,
+        s3Key: embeddingsInfo.key,
+        sizes: {
+          fullSize: `${(fullSize / 1024).toFixed(1)}KB`,
+          vectorsOnlySize: `${(vectorsOnlySize / 1024).toFixed(1)}KB`,
+          brotliSize: `${(brotliCompressed.length / 1024).toFixed(1)}KB`,
+          storedSize: `${(storedSize / 1024).toFixed(1)}KB`,
+        },
         message: `Generated ${pdfResult.pageEmbeddings.length} page embeddings successfully`,
       };
       
@@ -616,6 +744,14 @@ export const handler = async (event, context) => {
             mutation UpdateDocument($input: UpdateDocumentInput!) {
               updateDocument(input: $input) {
                 id
+                filename
+                s3Key
+                status
+                createdAt
+                updatedAt
+                _version
+                _lastChangedAt
+                _deleted
               }
             }
           `;

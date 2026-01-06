@@ -34,6 +34,8 @@ import { fetchAuthSession } from 'aws-amplify/auth';
 import { uploadAndAnalyzePDF, cancelPDFAnalysis } from '../utils/fileUploadUtils';
 import FilesContext from "../context/fileContext";
 import VocabularyReview from "./VocabularyReview";
+import { toolDefinitions, executeTool } from '../utils/chatTools';
+import AIFeedbackWidget from './AIFeedbackWidget';
 
 const ChatSidebar = () => {
     const chatContainerRef = useRef(null);
@@ -59,8 +61,8 @@ const ChatSidebar = () => {
     const { session } = React.useContext(FilesContext);
     const { identityId } = session || {};
 
-    // Use Vercel AI SDK's useChat hook
-    const { messages, input, handleInputChange, handleSubmit, isLoading, reload, stop } = useChat({
+    // Use Vercel AI SDK's useChat hook with tool calling
+    const { messages, input, handleInputChange, handleSubmit, isLoading, reload, stop, addToolResult } = useChat({
         api: '/api/chat',
         body: {
             context: {
@@ -92,6 +94,19 @@ const ChatSidebar = () => {
                     description: s.description,
                 })),
             },
+            tools: toolDefinitions,
+            toolChoice: 'auto'
+        },
+        async onToolCall({ toolCall }) {
+            console.log('[ChatSidebar] Tool call:', toolCall);
+            
+            // Execute the tool on the client side (where we have DataStore access)
+            const result = await executeTool(toolCall.toolName, toolCall.args);
+            
+            console.log('[ChatSidebar] Tool result:', result);
+            
+            // Return result to the AI
+            return result;
         },
         onError: (error) => {
             console.error('Chat error:', error);
@@ -421,6 +436,8 @@ const ChatSidebar = () => {
                     align-self: flex-start;
                     border-bottom-left-radius: 0.25rem;
                     border: 1px solid #e5e7eb;
+                    position: relative;
+                    padding-right: 3rem;
                 }
                 .chat-message pre {
                     margin: 0;
@@ -429,6 +446,11 @@ const ChatSidebar = () => {
                     font-family: inherit;
                     font-size: 0.9rem;
                     line-height: 1.5;
+                }
+                .chat-feedback {
+                    position: absolute;
+                    bottom: 0.5rem;
+                    right: 0.5rem;
                 }
             `}</style>
             
@@ -534,7 +556,53 @@ const ChatSidebar = () => {
                             key={message.id}
                             className={`chat-message ${message.role}`}
                         >
-                            <pre>{message.content}</pre>
+                            {message.toolInvocations ? (
+                                // Display tool calls
+                                <Box>
+                                    {message.toolInvocations.map((toolInvocation, idx) => (
+                                        <Box
+                                            key={idx}
+                                            sx={{
+                                                mb: 1,
+                                                p: 1,
+                                                bgcolor: 'info.light',
+                                                borderRadius: 1,
+                                                fontSize: '0.85rem'
+                                            }}
+                                        >
+                                            <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block' }}>
+                                                🔧 {toolInvocation.toolName}
+                                            </Typography>
+                                            {toolInvocation.state === 'result' && (
+                                                <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
+                                                    {toolInvocation.result.success ? '✓ Success' : '✗ Failed'}
+                                                    {toolInvocation.result.error && `: ${toolInvocation.result.error}`}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                    ))}
+                                </Box>
+                            ) : (
+                                <pre>{message.content}</pre>
+                            )}
+                            {/* Add feedback widget for assistant messages */}
+                            {message.role === 'assistant' && message.content && (
+                                <Box className="chat-feedback">
+                                    <AIFeedbackWidget
+                                        contentType="CHAT_MESSAGE"
+                                        messageId={message.id}
+                                        generatedContent={message.content}
+                                        model="gpt-4" // Update this if you track the actual model used
+                                        unitId={unit?.id}
+                                        sessionId={session?.sub}
+                                        metadata={{
+                                            role: message.role,
+                                            timestamp: new Date().toISOString(),
+                                        }}
+                                        size="small"
+                                    />
+                                </Box>
+                            )}
                         </div>
                     ))}
                     {isLoading && (

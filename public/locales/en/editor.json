@@ -1,0 +1,30 @@
+{
+  "toolbar": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "strikethrough": "Strikethrough",
+    "heading": "Heading",
+    "paragraph": "Paragraph",
+    "bullet_list": "Bullet List",
+    "numbered_list": "Numbered List",
+    "align_left": "Align Left",
+    "align_center": "Align Center",
+    "align_right": "Align Right",
+    "insert_link": "Insert Link",
+    "insert_image": "Insert Image",
+    "insert_table": "Insert Table",
+    "insert_code": "Insert Code Block"
+  },
+  "blocks": {
+    "answer": "Answer Block",
+    "quiz": "Quiz Block",
+    "custom_answer": "Custom Answer",
+    "meaning_association": "Meaning Association"
+  },
+  "placeholders": {
+    "type_here": "Type here...",
+    "enter_text": "Enter text",
+    "search_words": "Search words..."
+  }
+}

@@ -126,6 +126,9 @@ export const seedMockFiles = (filesArray) => {
           identityId: file.identityId,
           createdAt: file.createdAt,
           updatedAt: file.createdAt,
+          _version: 1,
+          _lastChangedAt: Date.now(),
+          _deleted: false,
         };
         console.log('[Mock DataStore] Created Document record for', file.mimeType, ':', docId);
       }
@@ -146,6 +149,42 @@ export const seedMockFiles = (filesArray) => {
   activeSubscriptions.Document.forEach(callback => {
     console.log('[Mock DataStore] Notifying Document subscriber with', docItems.length, 'documents');
     callback({ items: docItems, isSynced: true });
+  });
+};
+
+// Helper to seed mock document data for stories
+export const seedMockDocuments = (documentsArray) => {
+  console.log('[Mock DataStore] Seeding documents:', documentsArray.length);
+  documentsArray.forEach(doc => {
+    if (doc.id) {
+      mockDocuments[doc.id] = doc;
+    }
+  });
+  console.log('[Mock DataStore] Total documents in store:', Object.keys(mockDocuments).length);
+  
+  // Notify all Document subscribers
+  const items = Object.values(mockDocuments);
+  activeSubscriptions.Document.forEach(callback => {
+    console.log('[Mock DataStore] Notifying Document subscriber with', items.length, 'documents');
+    callback({ items, isSynced: true });
+  });
+};
+
+// Helper to seed mock parsed content data for stories
+export const seedMockParsedContent = (parsedContentArray) => {
+  console.log('[Mock DataStore] Seeding parsed content:', parsedContentArray.length);
+  parsedContentArray.forEach(content => {
+    if (content.id) {
+      mockParsedContent[content.id] = content;
+    }
+  });
+  console.log('[Mock DataStore] Total parsed content in store:', Object.keys(mockParsedContent).length);
+  
+  // Notify all ParsedContent subscribers
+  const items = Object.values(mockParsedContent);
+  activeSubscriptions.ParsedContent.forEach(callback => {
+    console.log('[Mock DataStore] Notifying ParsedContent subscriber with', items.length, 'items');
+    callback({ items, isSynced: true });
   });
 };
 

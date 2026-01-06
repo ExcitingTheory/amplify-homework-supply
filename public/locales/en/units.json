@@ -1,0 +1,12 @@
+{
+  "title": "Units",
+  "create_unit": "Create New Unit",
+  "edit_unit": "Edit Unit",
+  "delete_unit": "Delete Unit",
+  "unit_name": "Unit Name",
+  "unit_description": "Unit Description",
+  "published": "Published",
+  "draft": "Draft",
+  "assign_to_section": "Assign to Section",
+  "no_units": "No units available"
+}

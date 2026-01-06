@@ -69,7 +69,8 @@
       "StackName": "amplify-amplifyhomeworksupply-main-46f49",
       "StackId": "arn:aws:cloudformation:us-east-1:759854655984:stack/amplify-amplifyhomeworksupply-main-46f49/baa1a230-e288-11f0-b307-129f56e5e099",
       "AmplifyAppId": "d29i5pr81uhal1",
-      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-amplifyhomeworksupply-main-46f49-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-amplifyhomeworksupply-main-46f49-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-amplifyhomeworksupply-main-46f49-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
     },
     "categories": {
       "auth": {
@@ -111,28 +112,64 @@
         "openaiWebhook": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/openaiWebhook-4a63426f5a7842433744-build.zip"
+          "s3Key": "amplify-builds/openaiWebhook-63595673586e6f4b4a78-build.zip"
         },
         "analyzeDocument": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/analyzeDocument-5166425a4a5048525250-build.zip"
+          "s3Key": "amplify-builds/analyzeDocument-7a70375a637164706c36-build.zip"
         },
         "analyzePdf": {},
         "generateEmbeddings": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/generateEmbeddings-556d74327933324b352f-build.zip"
+          "s3Key": "amplify-builds/generateEmbeddings-67554d315932685a6557-build.zip"
         },
         "generateEmbedding": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
           "s3Key": "amplify-builds/generateEmbedding-367a38584c5678433843-build.zip"
+        },
+        "contentCompletion": {
+          "secretsPathAmplifyAppId": "d29i5pr81uhal1",
+          "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
+          "s3Key": "amplify-builds/contentCompletion-6e704e4c6d557366524c-build.zip"
+        },
+        "suggestBlocks": {
+          "secretsPathAmplifyAppId": "d29i5pr81uhal1",
+          "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
+          "s3Key": "amplify-builds/suggestBlocks-56734b764d4769646537-build.zip"
+        },
+        "chat": {
+          "secretsPathAmplifyAppId": "d29i5pr81uhal1",
+          "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
+          "s3Key": "amplify-builds/chat-62487446356b68563631-build.zip"
+        },
+        "contentCompletionStream": {
+          "secretsPathAmplifyAppId": "d29i5pr81uhal1",
+          "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
+          "s3Key": "amplify-builds/contentCompletionStream-6c4742677a2f5834702f-build.zip"
+        },
+        "chatStream": {
+          "secretsPathAmplifyAppId": "d29i5pr81uhal1",
+          "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
+          "s3Key": "amplify-builds/chatStream-2f4a70506b4f45623430-build.zip"
+        },
+        "suggestBlocksStream": {
+          "secretsPathAmplifyAppId": "d29i5pr81uhal1",
+          "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
+          "s3Key": "amplify-builds/suggestBlocksStream-314a67786f6a666c5451-build.zip"
+        },
+        "moderation": {
+          "secretsPathAmplifyAppId": "d29i5pr81uhal1",
+          "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
+          "s3Key": "amplify-builds/moderation-6c673762394b4b5a4177-build.zip"
         }
       },
       "api": {
         "AdminQueries": {},
-        "japanese5": {}
+        "japanese5": {},
+        "completions": {}
       },
       "storage": {
         "files": {}

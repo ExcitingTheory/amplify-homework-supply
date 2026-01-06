@@ -14,6 +14,34 @@ export enum FileProtectionLevels {
   PROTECTED = "PROTECTED"
 }
 
+export enum AiFeedbackType {
+  POSITIVE = "POSITIVE",
+  NEGATIVE = "NEGATIVE"
+}
+
+export enum AiFeedbackReason {
+  INCORRECT = "INCORRECT",
+  INCOMPLETE = "INCOMPLETE",
+  INAPPROPRIATE = "INAPPROPRIATE",
+  NOT_HELPFUL = "NOT_HELPFUL",
+  IRRELEVANT = "IRRELEVANT",
+  POOR_QUALITY = "POOR_QUALITY",
+  OTHER = "OTHER"
+}
+
+export enum AiContentType {
+  CHAT_MESSAGE = "CHAT_MESSAGE",
+  CONTENT_COMPLETION = "CONTENT_COMPLETION",
+  AUDIO_GENERATION = "AUDIO_GENERATION",
+  IMAGE_GENERATION = "IMAGE_GENERATION",
+  DOCUMENT_ANALYSIS = "DOCUMENT_ANALYSIS",
+  VOCABULARY_EXTRACTION = "VOCABULARY_EXTRACTION",
+  TRANSCRIPTION = "TRANSCRIPTION",
+  IMAGE_DESCRIPTION = "IMAGE_DESCRIPTION",
+  GRADING_FEEDBACK = "GRADING_FEEDBACK",
+  BLOCK_SUGGESTION = "BLOCK_SUGGESTION"
+}
+
 type EagerEmbeddingResult = {
   readonly embedding: number[];
   readonly model: string;
@@ -33,6 +61,26 @@ type LazyEmbeddingResult = {
 export declare type EmbeddingResult = LazyLoading extends LazyLoadingDisabled ? EagerEmbeddingResult : LazyEmbeddingResult
 
 export declare const EmbeddingResult: (new (init: ModelInit<EmbeddingResult>) => EmbeddingResult)
+
+type EagerModerationResult = {
+  readonly flagged: boolean;
+  readonly categories: string;
+  readonly categoryScores: string;
+  readonly model: string;
+  readonly error?: string | null;
+}
+
+type LazyModerationResult = {
+  readonly flagged: boolean;
+  readonly categories: string;
+  readonly categoryScores: string;
+  readonly model: string;
+  readonly error?: string | null;
+}
+
+export declare type ModerationResult = LazyLoading extends LazyLoadingDisabled ? EagerModerationResult : LazyModerationResult
+
+export declare const ModerationResult: (new (init: ModelInit<ModerationResult>) => ModerationResult)
 
 type EagerAnalyzeDocumentResult = {
   readonly success: boolean;
@@ -213,6 +261,9 @@ type EagerQuestion = {
   readonly embeddingDimensions?: number | null;
   readonly embeddingVersion?: number | null;
   readonly embeddingWordCount?: number | null;
+  readonly moderationStatus?: string | null;
+  readonly moderationFlags?: string | null;
+  readonly moderationCheckedAt?: string | null;
   readonly units?: (QuestionUnit | null)[] | null;
   readonly words?: (QuestionWord | null)[] | null;
   readonly files?: (QuestionFile | null)[] | null;
@@ -250,6 +301,9 @@ type LazyQuestion = {
   readonly embeddingDimensions?: number | null;
   readonly embeddingVersion?: number | null;
   readonly embeddingWordCount?: number | null;
+  readonly moderationStatus?: string | null;
+  readonly moderationFlags?: string | null;
+  readonly moderationCheckedAt?: string | null;
   readonly units: AsyncCollection<QuestionUnit>;
   readonly words: AsyncCollection<QuestionWord>;
   readonly files: AsyncCollection<QuestionFile>;
@@ -290,6 +344,8 @@ type EagerFile = {
   readonly embedding?: (number | null)[] | null;
   readonly documentID?: string | null;
   readonly document?: Document | null;
+  readonly parsedContentID?: string | null;
+  readonly parsedContent?: ParsedContent | null;
   readonly units?: (UnitFile | null)[] | null;
   readonly words?: (WordFile | null)[] | null;
   readonly questions?: (QuestionFile | null)[] | null;
@@ -323,6 +379,8 @@ type LazyFile = {
   readonly embedding?: (number | null)[] | null;
   readonly documentID?: string | null;
   readonly document: AsyncItem<Document | undefined>;
+  readonly parsedContentID?: string | null;
+  readonly parsedContent: AsyncItem<ParsedContent | undefined>;
   readonly units: AsyncCollection<UnitFile>;
   readonly words: AsyncCollection<WordFile>;
   readonly questions: AsyncCollection<QuestionFile>;
@@ -486,6 +544,9 @@ type EagerGrade = {
   readonly feedback?: string | null;
   readonly files?: (string | null)[] | null;
   readonly unitID?: string | null;
+  readonly moderationStatus?: string | null;
+  readonly moderationFlags?: string | null;
+  readonly moderationCheckedAt?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -508,6 +569,9 @@ type LazyGrade = {
   readonly feedback?: string | null;
   readonly files?: (string | null)[] | null;
   readonly unitID?: string | null;
+  readonly moderationStatus?: string | null;
+  readonly moderationFlags?: string | null;
+  readonly moderationCheckedAt?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -548,6 +612,9 @@ type EagerUnit = {
   readonly questions?: (QuestionUnit | null)[] | null;
   readonly documents?: (UnitDocument | null)[] | null;
   readonly agentJobs?: (AgentJob | null)[] | null;
+  readonly moderationStatus?: string | null;
+  readonly moderationFlags?: string | null;
+  readonly moderationCheckedAt?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -582,6 +649,9 @@ type LazyUnit = {
   readonly questions: AsyncCollection<QuestionUnit>;
   readonly documents: AsyncCollection<UnitDocument>;
   readonly agentJobs: AsyncCollection<AgentJob>;
+  readonly moderationStatus?: string | null;
+  readonly moderationFlags?: string | null;
+  readonly moderationCheckedAt?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -618,6 +688,9 @@ type EagerWord = {
   readonly files?: (WordFile | null)[] | null;
   readonly questions?: (QuestionWord | null)[] | null;
   readonly documents?: (DocumentWord | null)[] | null;
+  readonly moderationStatus?: string | null;
+  readonly moderationFlags?: string | null;
+  readonly moderationCheckedAt?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -648,6 +721,9 @@ type LazyWord = {
   readonly files: AsyncCollection<WordFile>;
   readonly questions: AsyncCollection<QuestionWord>;
   readonly documents: AsyncCollection<DocumentWord>;
+  readonly moderationStatus?: string | null;
+  readonly moderationFlags?: string | null;
+  readonly moderationCheckedAt?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -677,6 +753,7 @@ type EagerDocument = {
   readonly uploadedAt?: string | null;
   readonly resumeState?: string | null;
   readonly pageEmbeddings?: (PageEmbedding | null)[] | null;
+  readonly embeddingsS3Key?: string | null;
   readonly parsedContent?: (ParsedContent | null)[] | null;
   readonly agentJobs?: (AgentJob | null)[] | null;
   readonly metadata?: string | null;
@@ -706,6 +783,7 @@ type LazyDocument = {
   readonly uploadedAt?: string | null;
   readonly resumeState?: string | null;
   readonly pageEmbeddings?: (PageEmbedding | null)[] | null;
+  readonly embeddingsS3Key?: string | null;
   readonly parsedContent: AsyncCollection<ParsedContent>;
   readonly agentJobs: AsyncCollection<AgentJob>;
   readonly metadata?: string | null;
@@ -732,6 +810,8 @@ type EagerParsedContent = {
   readonly identityId?: string | null;
   readonly documentID: string;
   readonly document?: Document | null;
+  readonly fileID?: string | null;
+  readonly file?: File | null;
   readonly vocabularyJSON?: string | null;
   readonly summariesJSON?: string | null;
   readonly objectivesJSON?: string | null;
@@ -757,6 +837,8 @@ type LazyParsedContent = {
   readonly identityId?: string | null;
   readonly documentID: string;
   readonly document: AsyncItem<Document | undefined>;
+  readonly fileID?: string | null;
+  readonly file: AsyncItem<File | undefined>;
   readonly vocabularyJSON?: string | null;
   readonly summariesJSON?: string | null;
   readonly objectivesJSON?: string | null;
@@ -890,6 +972,60 @@ export declare type Settings = LazyLoading extends LazyLoadingDisabled ? EagerSe
 
 export declare const Settings: (new (init: ModelInit<Settings>) => Settings) & {
   copyOf(source: Settings, mutator: (draft: MutableModel<Settings>) => MutableModel<Settings> | void): Settings;
+}
+
+type EagerAIFeedback = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<AIFeedback, 'id'>;
+  };
+  readonly id: string;
+  readonly owner?: string | null;
+  readonly identityId?: string | null;
+  readonly contentType: AIContentType | keyof typeof AIContentType;
+  readonly feedbackType: AIFeedbackType | keyof typeof AIFeedbackType;
+  readonly reasons?: (AIFeedbackReason | null)[] | Array<keyof typeof AIFeedbackReason> | null;
+  readonly comment?: string | null;
+  readonly model?: string | null;
+  readonly prompt?: string | null;
+  readonly generatedContent?: string | null;
+  readonly unitID?: string | null;
+  readonly gradeID?: string | null;
+  readonly documentID?: string | null;
+  readonly messageId?: string | null;
+  readonly sessionId?: string | null;
+  readonly metadata?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+type LazyAIFeedback = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<AIFeedback, 'id'>;
+  };
+  readonly id: string;
+  readonly owner?: string | null;
+  readonly identityId?: string | null;
+  readonly contentType: AIContentType | keyof typeof AIContentType;
+  readonly feedbackType: AIFeedbackType | keyof typeof AIFeedbackType;
+  readonly reasons?: (AIFeedbackReason | null)[] | Array<keyof typeof AIFeedbackReason> | null;
+  readonly comment?: string | null;
+  readonly model?: string | null;
+  readonly prompt?: string | null;
+  readonly generatedContent?: string | null;
+  readonly unitID?: string | null;
+  readonly gradeID?: string | null;
+  readonly documentID?: string | null;
+  readonly messageId?: string | null;
+  readonly sessionId?: string | null;
+  readonly metadata?: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export declare type AIFeedback = LazyLoading extends LazyLoadingDisabled ? EagerAIFeedback : LazyAIFeedback
+
+export declare const AIFeedback: (new (init: ModelInit<AIFeedback>) => AIFeedback) & {
+  copyOf(source: AIFeedback, mutator: (draft: MutableModel<AIFeedback>) => MutableModel<AIFeedback> | void): AIFeedback;
 }
 
 type EagerQuestionUnit = {

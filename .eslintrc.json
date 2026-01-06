@@ -1,0 +1,156 @@
+{
+  "extends": ["next/core-web-vitals"],
+  "plugins": ["i18next"],
+  "rules": {
+    "i18next/no-literal-string": [
+      "warn",
+      {
+        "mode": "jsx-only",
+        "jsx-attributes": {
+          "exclude": [
+            "className",
+            "style",
+            "type",
+            "id",
+            "name",
+            "key",
+            "ref",
+            "href",
+            "src",
+            "alt",
+            "role",
+            "aria-label",
+            "aria-labelledby",
+            "aria-describedby",
+            "data-testid",
+            "variant",
+            "color",
+            "size",
+            "align",
+            "position",
+            "direction",
+            "spacing",
+            "component",
+            "to",
+            "icon",
+            "edge",
+            "severity",
+            "level",
+            "contentType",
+            "accept",
+            "method",
+            "target",
+            "rel",
+            "placeholder",
+            "inputMode",
+            "autoComplete",
+            "enterKeyHint",
+            "title",
+            "slot",
+            "part"
+          ]
+        },
+        "jsx-components": {
+          "exclude": [
+            "Icon",
+            "IconButton",
+            "SvgIcon",
+            "MenuItem",
+            "Option"
+          ]
+        },
+        "ignore": [
+          "^\\s*$",
+          "^[0-9]+$",
+          "^[A-Z_]+$",
+          "^[a-z-]+$",
+          "^[a-z]+[A-Z][a-zA-Z]*$",
+          "\\$\\{.*\\}",
+          "^/",
+          "^https?://",
+          "^#",
+          "^\\.",
+          "^data:",
+          "^blob:",
+          "^@",
+          "px$",
+          "%$",
+          "em$",
+          "rem$",
+          "vh$",
+          "vw$"
+        ],
+        "ignoreCallee": [
+          "console.log",
+          "console.warn",
+          "console.error",
+          "console.info",
+          "console.debug",
+          "require",
+          "require.resolve",
+          "DataStore",
+          "DataStore.query",
+          "DataStore.save",
+          "DataStore.delete",
+          "DataStore.observe",
+          "DataStore.observeQuery",
+          "JSON.stringify",
+          "JSON.parse",
+          "new Date",
+          "Date",
+          "Math",
+          "Number",
+          "parseInt",
+          "parseFloat",
+          "Boolean",
+          "String",
+          "Array",
+          "Object",
+          "Error",
+          "TypeError",
+          "Promise",
+          "setTimeout",
+          "setInterval",
+          "clearTimeout",
+          "clearInterval",
+          "fetch",
+          "URL",
+          "URLSearchParams",
+          "localStorage.getItem",
+          "localStorage.setItem",
+          "sessionStorage.getItem",
+          "sessionStorage.setItem"
+        ],
+        "ignoreProperty": [
+          "key",
+          "id",
+          "type",
+          "name",
+          "className",
+          "style",
+          "props",
+          "state",
+          "ref",
+          "displayName",
+          "propTypes",
+          "defaultProps",
+          "contextType"
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["*.stories.jsx", "*.stories.tsx", "*.test.js", "*.test.jsx", "*.test.ts", "*.test.tsx", "*.spec.js", "*.spec.jsx", "*.spec.ts", "*.spec.tsx"],
+      "rules": {
+        "i18next/no-literal-string": "off"
+      }
+    },
+    {
+      "files": ["amplify/**/*", "cypress/**/*", ".storybook/**/*"],
+      "rules": {
+        "i18next/no-literal-string": "off"
+      }
+    }
+  ]
+}

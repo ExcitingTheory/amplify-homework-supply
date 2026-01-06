@@ -2,7 +2,7 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-import * as APITypes from "../../amplify/backend/function/analyzeDocument/src/src/API";
+import * as APITypes from "../API";
 type GeneratedSubscription<InputType, OutputType> = string & {
   __generatedSubscriptionInput: InputType;
   __generatedSubscriptionOutput: OutputType;
@@ -122,6 +122,9 @@ export const onCreateQuestion = /* GraphQL */ `subscription OnCreateQuestion(
     embeddingDimensions
     embeddingVersion
     embeddingWordCount
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     units {
       items {
         id
@@ -235,6 +238,9 @@ export const onUpdateQuestion = /* GraphQL */ `subscription OnUpdateQuestion(
     embeddingDimensions
     embeddingVersion
     embeddingWordCount
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     units {
       items {
         id
@@ -348,6 +354,9 @@ export const onDeleteQuestion = /* GraphQL */ `subscription OnDeleteQuestion(
     embeddingDimensions
     embeddingVersion
     embeddingWordCount
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     units {
       items {
         id
@@ -473,6 +482,7 @@ export const onCreateFile = /* GraphQL */ `subscription OnCreateFile(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -500,6 +510,83 @@ export const onCreateFile = /* GraphQL */ `subscription OnCreateFile(
         __typename
       }
       createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    parsedContentID
+    parsedContent {
+      id
+      owner
+      identityId
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      fileID
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      vocabularyJSON
+      summariesJSON
+      objectivesJSON
+      conceptsJSON
+      questionsJSON
+      responseId
+      modelUsed
+      tokensUsed
+      processingTime
+      createdAt
+      importedAt
+      metadata
       updatedAt
       _version
       _deleted
@@ -614,6 +701,7 @@ export const onUpdateFile = /* GraphQL */ `subscription OnUpdateFile(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -641,6 +729,83 @@ export const onUpdateFile = /* GraphQL */ `subscription OnUpdateFile(
         __typename
       }
       createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    parsedContentID
+    parsedContent {
+      id
+      owner
+      identityId
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      fileID
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      vocabularyJSON
+      summariesJSON
+      objectivesJSON
+      conceptsJSON
+      questionsJSON
+      responseId
+      modelUsed
+      tokensUsed
+      processingTime
+      createdAt
+      importedAt
+      metadata
       updatedAt
       _version
       _deleted
@@ -755,6 +920,7 @@ export const onDeleteFile = /* GraphQL */ `subscription OnDeleteFile(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -782,6 +948,83 @@ export const onDeleteFile = /* GraphQL */ `subscription OnDeleteFile(
         __typename
       }
       createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    parsedContentID
+    parsedContent {
+      id
+      owner
+      identityId
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      fileID
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      vocabularyJSON
+      summariesJSON
+      objectivesJSON
+      conceptsJSON
+      questionsJSON
+      responseId
+      modelUsed
+      tokensUsed
+      processingTime
+      createdAt
+      importedAt
+      metadata
       updatedAt
       _version
       _deleted
@@ -1170,6 +1413,9 @@ export const onCreateGrade = /* GraphQL */ `subscription OnCreateGrade(
     feedback
     files
     unitID
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -1201,6 +1447,9 @@ export const onUpdateGrade = /* GraphQL */ `subscription OnUpdateGrade(
     feedback
     files
     unitID
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -1232,6 +1481,9 @@ export const onDeleteGrade = /* GraphQL */ `subscription OnDeleteGrade(
     feedback
     files
     unitID
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -1292,6 +1544,9 @@ export const onCreateUnit = /* GraphQL */ `subscription OnCreateUnit(
         feedback
         files
         unitID
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -1411,6 +1666,9 @@ export const onCreateUnit = /* GraphQL */ `subscription OnCreateUnit(
       startedAt
       __typename
     }
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -1471,6 +1729,9 @@ export const onUpdateUnit = /* GraphQL */ `subscription OnUpdateUnit(
         feedback
         files
         unitID
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -1590,6 +1851,9 @@ export const onUpdateUnit = /* GraphQL */ `subscription OnUpdateUnit(
       startedAt
       __typename
     }
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -1650,6 +1914,9 @@ export const onDeleteUnit = /* GraphQL */ `subscription OnDeleteUnit(
         feedback
         files
         unitID
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -1769,6 +2036,9 @@ export const onDeleteUnit = /* GraphQL */ `subscription OnDeleteUnit(
       startedAt
       __typename
     }
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -1871,6 +2141,9 @@ export const onCreateWord = /* GraphQL */ `subscription OnCreateWord(
       startedAt
       __typename
     }
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -1973,6 +2246,9 @@ export const onUpdateWord = /* GraphQL */ `subscription OnUpdateWord(
       startedAt
       __typename
     }
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -2075,6 +2351,9 @@ export const onDeleteWord = /* GraphQL */ `subscription OnDeleteWord(
       startedAt
       __typename
     }
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -2111,12 +2390,14 @@ export const onCreateDocument = /* GraphQL */ `subscription OnCreateDocument(
       text
       __typename
     }
+    embeddingsS3Key
     parsedContent {
       items {
         id
         owner
         identityId
         documentID
+        fileID
         vocabularyJSON
         summariesJSON
         objectivesJSON
@@ -2257,12 +2538,14 @@ export const onUpdateDocument = /* GraphQL */ `subscription OnUpdateDocument(
       text
       __typename
     }
+    embeddingsS3Key
     parsedContent {
       items {
         id
         owner
         identityId
         documentID
+        fileID
         vocabularyJSON
         summariesJSON
         objectivesJSON
@@ -2403,12 +2686,14 @@ export const onDeleteDocument = /* GraphQL */ `subscription OnDeleteDocument(
       text
       __typename
     }
+    embeddingsS3Key
     parsedContent {
       items {
         id
         owner
         identityId
         documentID
+        fileID
         vocabularyJSON
         summariesJSON
         objectivesJSON
@@ -2554,6 +2839,7 @@ export const onCreateParsedContent = /* GraphQL */ `subscription OnCreateParsedC
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -2565,6 +2851,98 @@ export const onCreateParsedContent = /* GraphQL */ `subscription OnCreateParsedC
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    fileID
+    file {
+      id
+      name
+      owner
+      identityId
+      description
+      prompt
+      model
+      variant
+      mimeType
+      level
+      path
+      duration
+      size
+      generated
+      hex
+      byHex
+      thumbnail
+      waveformData
+      embedding
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -2639,6 +3017,7 @@ export const onUpdateParsedContent = /* GraphQL */ `subscription OnUpdateParsedC
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -2650,6 +3029,98 @@ export const onUpdateParsedContent = /* GraphQL */ `subscription OnUpdateParsedC
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    fileID
+    file {
+      id
+      name
+      owner
+      identityId
+      description
+      prompt
+      model
+      variant
+      mimeType
+      level
+      path
+      duration
+      size
+      generated
+      hex
+      byHex
+      thumbnail
+      waveformData
+      embedding
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -2724,6 +3195,7 @@ export const onDeleteParsedContent = /* GraphQL */ `subscription OnDeleteParsedC
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -2735,6 +3207,98 @@ export const onDeleteParsedContent = /* GraphQL */ `subscription OnDeleteParsedC
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    fileID
+    file {
+      id
+      name
+      owner
+      identityId
+      description
+      prompt
+      model
+      variant
+      mimeType
+      level
+      path
+      duration
+      size
+      generated
+      hex
+      byHex
+      thumbnail
+      waveformData
+      embedding
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -2811,6 +3375,7 @@ export const onCreateAgentJob = /* GraphQL */ `subscription OnCreateAgentJob(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -2899,6 +3464,9 @@ export const onCreateAgentJob = /* GraphQL */ `subscription OnCreateAgentJob(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -2959,6 +3527,7 @@ export const onUpdateAgentJob = /* GraphQL */ `subscription OnUpdateAgentJob(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -3047,6 +3616,9 @@ export const onUpdateAgentJob = /* GraphQL */ `subscription OnUpdateAgentJob(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -3107,6 +3679,7 @@ export const onDeleteAgentJob = /* GraphQL */ `subscription OnDeleteAgentJob(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -3195,6 +3768,9 @@ export const onDeleteAgentJob = /* GraphQL */ `subscription OnDeleteAgentJob(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -3317,6 +3893,105 @@ export const onDeleteSettings = /* GraphQL */ `subscription OnDeleteSettings(
   APITypes.OnDeleteSettingsSubscriptionVariables,
   APITypes.OnDeleteSettingsSubscription
 >;
+export const onCreateAIFeedback = /* GraphQL */ `subscription OnCreateAIFeedback(
+  $filter: ModelSubscriptionAIFeedbackFilterInput
+  $owner: String
+) {
+  onCreateAIFeedback(filter: $filter, owner: $owner) {
+    id
+    owner
+    identityId
+    contentType
+    feedbackType
+    reasons
+    comment
+    model
+    prompt
+    generatedContent
+    unitID
+    gradeID
+    documentID
+    messageId
+    sessionId
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateAIFeedbackSubscriptionVariables,
+  APITypes.OnCreateAIFeedbackSubscription
+>;
+export const onUpdateAIFeedback = /* GraphQL */ `subscription OnUpdateAIFeedback(
+  $filter: ModelSubscriptionAIFeedbackFilterInput
+  $owner: String
+) {
+  onUpdateAIFeedback(filter: $filter, owner: $owner) {
+    id
+    owner
+    identityId
+    contentType
+    feedbackType
+    reasons
+    comment
+    model
+    prompt
+    generatedContent
+    unitID
+    gradeID
+    documentID
+    messageId
+    sessionId
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateAIFeedbackSubscriptionVariables,
+  APITypes.OnUpdateAIFeedbackSubscription
+>;
+export const onDeleteAIFeedback = /* GraphQL */ `subscription OnDeleteAIFeedback(
+  $filter: ModelSubscriptionAIFeedbackFilterInput
+  $owner: String
+) {
+  onDeleteAIFeedback(filter: $filter, owner: $owner) {
+    id
+    owner
+    identityId
+    contentType
+    feedbackType
+    reasons
+    comment
+    model
+    prompt
+    generatedContent
+    unitID
+    gradeID
+    documentID
+    messageId
+    sessionId
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteAIFeedbackSubscriptionVariables,
+  APITypes.OnDeleteAIFeedbackSubscription
+>;
 export const onCreateQuestionUnit = /* GraphQL */ `subscription OnCreateQuestionUnit(
   $filter: ModelSubscriptionQuestionUnitFilterInput
   $owner: String
@@ -3354,6 +4029,9 @@ export const onCreateQuestionUnit = /* GraphQL */ `subscription OnCreateQuestion
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -3435,6 +4113,9 @@ export const onCreateQuestionUnit = /* GraphQL */ `subscription OnCreateQuestion
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -3492,6 +4173,9 @@ export const onUpdateQuestionUnit = /* GraphQL */ `subscription OnUpdateQuestion
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -3573,6 +4257,9 @@ export const onUpdateQuestionUnit = /* GraphQL */ `subscription OnUpdateQuestion
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -3630,6 +4317,9 @@ export const onDeleteQuestionUnit = /* GraphQL */ `subscription OnDeleteQuestion
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -3711,6 +4401,9 @@ export const onDeleteQuestionUnit = /* GraphQL */ `subscription OnDeleteQuestion
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -3768,6 +4461,9 @@ export const onCreateQuestionWord = /* GraphQL */ `subscription OnCreateQuestion
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -3833,6 +4529,9 @@ export const onCreateQuestionWord = /* GraphQL */ `subscription OnCreateQuestion
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -3890,6 +4589,9 @@ export const onUpdateQuestionWord = /* GraphQL */ `subscription OnUpdateQuestion
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -3955,6 +4657,9 @@ export const onUpdateQuestionWord = /* GraphQL */ `subscription OnUpdateQuestion
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -4012,6 +4717,9 @@ export const onDeleteQuestionWord = /* GraphQL */ `subscription OnDeleteQuestion
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4077,6 +4785,9 @@ export const onDeleteQuestionWord = /* GraphQL */ `subscription OnDeleteQuestion
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -4134,6 +4845,9 @@ export const onCreateQuestionFile = /* GraphQL */ `subscription OnCreateQuestion
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4196,8 +4910,34 @@ export const onCreateQuestionFile = /* GraphQL */ `subscription OnCreateQuestion
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -4276,6 +5016,9 @@ export const onUpdateQuestionFile = /* GraphQL */ `subscription OnUpdateQuestion
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4338,8 +5081,34 @@ export const onUpdateQuestionFile = /* GraphQL */ `subscription OnUpdateQuestion
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -4418,6 +5187,9 @@ export const onDeleteQuestionFile = /* GraphQL */ `subscription OnDeleteQuestion
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4480,8 +5252,34 @@ export const onDeleteQuestionFile = /* GraphQL */ `subscription OnDeleteQuestion
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -4560,6 +5358,9 @@ export const onCreateDocumentQuestion = /* GraphQL */ `subscription OnCreateDocu
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4607,6 +5408,7 @@ export const onCreateDocumentQuestion = /* GraphQL */ `subscription OnCreateDocu
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -4690,6 +5492,9 @@ export const onUpdateDocumentQuestion = /* GraphQL */ `subscription OnUpdateDocu
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4737,6 +5542,7 @@ export const onUpdateDocumentQuestion = /* GraphQL */ `subscription OnUpdateDocu
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -4820,6 +5626,9 @@ export const onDeleteDocumentQuestion = /* GraphQL */ `subscription OnDeleteDocu
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4867,6 +5676,7 @@ export const onDeleteDocumentQuestion = /* GraphQL */ `subscription OnDeleteDocu
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -4956,8 +5766,34 @@ export const onCreateUnitFile = /* GraphQL */ `subscription OnCreateUnitFile(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -5040,6 +5876,9 @@ export const onCreateUnitFile = /* GraphQL */ `subscription OnCreateUnitFile(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -5103,8 +5942,34 @@ export const onUpdateUnitFile = /* GraphQL */ `subscription OnUpdateUnitFile(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -5187,6 +6052,9 @@ export const onUpdateUnitFile = /* GraphQL */ `subscription OnUpdateUnitFile(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -5250,8 +6118,34 @@ export const onDeleteUnitFile = /* GraphQL */ `subscription OnDeleteUnitFile(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -5334,6 +6228,9 @@ export const onDeleteUnitFile = /* GraphQL */ `subscription OnDeleteUnitFile(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -5397,8 +6294,34 @@ export const onCreateWordFile = /* GraphQL */ `subscription OnCreateWordFile(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -5465,6 +6388,9 @@ export const onCreateWordFile = /* GraphQL */ `subscription OnCreateWordFile(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -5528,8 +6454,34 @@ export const onUpdateWordFile = /* GraphQL */ `subscription OnUpdateWordFile(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -5596,6 +6548,9 @@ export const onUpdateWordFile = /* GraphQL */ `subscription OnUpdateWordFile(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -5659,8 +6614,34 @@ export const onDeleteWordFile = /* GraphQL */ `subscription OnDeleteWordFile(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -5727,6 +6708,9 @@ export const onDeleteWordFile = /* GraphQL */ `subscription OnDeleteWordFile(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -5809,6 +6793,9 @@ export const onCreateUnitWord = /* GraphQL */ `subscription OnCreateUnitWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -5854,6 +6841,9 @@ export const onCreateUnitWord = /* GraphQL */ `subscription OnCreateUnitWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -5936,6 +6926,9 @@ export const onUpdateUnitWord = /* GraphQL */ `subscription OnUpdateUnitWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -5981,6 +6974,9 @@ export const onUpdateUnitWord = /* GraphQL */ `subscription OnUpdateUnitWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6063,6 +7059,9 @@ export const onDeleteUnitWord = /* GraphQL */ `subscription OnDeleteUnitWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6108,6 +7107,9 @@ export const onDeleteUnitWord = /* GraphQL */ `subscription OnDeleteUnitWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6190,6 +7192,9 @@ export const onCreateUnitDocument = /* GraphQL */ `subscription OnCreateUnitDocu
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6217,6 +7222,7 @@ export const onCreateUnitDocument = /* GraphQL */ `subscription OnCreateUnitDocu
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -6325,6 +7331,9 @@ export const onUpdateUnitDocument = /* GraphQL */ `subscription OnUpdateUnitDocu
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6352,6 +7361,7 @@ export const onUpdateUnitDocument = /* GraphQL */ `subscription OnUpdateUnitDocu
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -6460,6 +7470,9 @@ export const onDeleteUnitDocument = /* GraphQL */ `subscription OnDeleteUnitDocu
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6487,6 +7500,7 @@ export const onDeleteUnitDocument = /* GraphQL */ `subscription OnDeleteUnitDocu
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -6579,6 +7593,9 @@ export const onCreateDocumentWord = /* GraphQL */ `subscription OnCreateDocument
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6606,6 +7623,7 @@ export const onCreateDocumentWord = /* GraphQL */ `subscription OnCreateDocument
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -6698,6 +7716,9 @@ export const onUpdateDocumentWord = /* GraphQL */ `subscription OnUpdateDocument
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6725,6 +7746,7 @@ export const onUpdateDocumentWord = /* GraphQL */ `subscription OnUpdateDocument
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -6817,6 +7839,9 @@ export const onDeleteDocumentWord = /* GraphQL */ `subscription OnDeleteDocument
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6844,6 +7869,7 @@ export const onDeleteDocumentWord = /* GraphQL */ `subscription OnDeleteDocument
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt

@@ -4,6 +4,11 @@ import Editor, { Workbook } from './index';
 import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
 import { seedMockUnit, seedMockFiles, seedMockWords, seedMockQuestions, seedMockQuestionUnits } from '../../../.storybook/__mocks__/aws-amplify-datastore';
 const { MOCK_AUDIO_BASE64, mockWaveformData, MOCK_IMAGE_URL_1, MOCK_IMAGE_URL_2 } = await import('../../../.storybook/__mocks__/media');
+const { 
+  MOCK_JAPANESE_GRAMMAR_PDF, 
+  MOCK_VOCABULARY_LIST_PDF, 
+  MOCK_LESSON_PLAN_PDF 
+} = await import('../../../.storybook/__mocks__/mockDocuments');
 
 // Verify models are loading - this will show in console
 import { Unit, Grade } from '../../models';
@@ -1806,7 +1811,7 @@ const mockFiles = [
   {
     id: 'file-6',
     name: 'japanese-grammar-guide.pdf',
-    path: 'protected/documents/japanese-grammar-guide.pdf',
+    path: MOCK_JAPANESE_GRAMMAR_PDF,
     mimeType: 'application/pdf',
     size: 2458000,
     identityId: 'us-east-1:abc-123',
@@ -1816,7 +1821,7 @@ const mockFiles = [
   {
     id: 'file-7',
     name: 'vocabulary-list-chapter-1.pdf',
-    path: 'protected/documents/vocabulary-list-chapter-1.pdf',
+    path: MOCK_VOCABULARY_LIST_PDF,
     mimeType: 'application/pdf',
     size: 458000,
     identityId: 'us-east-1:abc-123',
@@ -1826,7 +1831,7 @@ const mockFiles = [
   {
     id: 'file-8',
     name: 'lesson-plan.pdf',
-    path: 'protected/documents/lesson-plan.pdf',
+    path: MOCK_LESSON_PLAN_PDF,
     mimeType: 'application/pdf',
     size: 1234000,
     identityId: 'us-east-1:abc-123',

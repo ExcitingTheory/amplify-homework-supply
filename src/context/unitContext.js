@@ -5,6 +5,7 @@ import { fetchUserAttributes } from "aws-amplify/auth";
 import { Unit, Grade } from "../models"
 import { useRouter } from 'next/router';
 import { Hub, Cache } from "aws-amplify/utils";
+import { moderateContent, buildModerationFields } from '../utils/moderateContent';
 
 import getCachedUrl from '../utils/getCachedUrl'
 // Provider and Consumer are connected through their "parent" context
@@ -210,6 +211,17 @@ const UnitProvider = ({ children, id }) => {
     setFinishedQuestions(_finishedQuestions)
 
     try {
+      // Moderate student submission data
+      const moderationResult = await moderateContent(data);
+      const moderationFields = buildModerationFields(moderationResult);
+      
+      if (moderationResult.flagged) {
+        console.warn('[UnitContext] Student submission flagged by moderation, saving for instructor review', {
+          categories: moderationResult.categories,
+          username: session.username
+        });
+      }
+
       if (!grade) {
         const newGrade = await createGrade(unitAccuracy, unitIsComplete)
         // Use the newly created grade for the copyOf operation
@@ -219,6 +231,10 @@ const UnitProvider = ({ children, id }) => {
               updated.data = data
               updated.accuracy = unitAccuracy
               updated.complete = unitIsComplete // The entire assignment is completed
+              // Add moderation fields
+              updated.moderationStatus = moderationFields.moderationStatus;
+              updated.moderationFlags = moderationFields.moderationFlags;
+              updated.moderationCheckedAt = moderationFields.moderationCheckedAt;
             })
           );
         }
@@ -229,6 +245,10 @@ const UnitProvider = ({ children, id }) => {
             updated.data = data
             updated.accuracy = unitAccuracy
             updated.complete = unitIsComplete // The entire assignment is completed
+            // Add moderation fields
+            updated.moderationStatus = moderationFields.moderationStatus;
+            updated.moderationFlags = moderationFields.moderationFlags;
+            updated.moderationCheckedAt = moderationFields.moderationCheckedAt;
           })
         );
       } else {
@@ -241,6 +261,10 @@ const UnitProvider = ({ children, id }) => {
               updated.data = data
               updated.accuracy = unitAccuracy
               updated.complete = unitIsComplete
+              // Add moderation fields
+              updated.moderationStatus = moderationFields.moderationStatus;
+              updated.moderationFlags = moderationFields.moderationFlags;
+              updated.moderationCheckedAt = moderationFields.moderationCheckedAt;
             })
           );
         }
@@ -447,6 +471,12 @@ const UnitProvider = ({ children, id }) => {
   const saveEditorContent = React.useCallback(async (editorContent) => {
     const currentUnit = unitRef.current;
 
+    // Guard: Don't save if unit is not loaded or is invalid
+    if (!currentUnit || !currentUnit.id) {
+      console.warn('[saveEditorContent] Cannot save - unit not loaded yet');
+      return;
+    }
+
     let _editorContent = editorContent ? editorContent : editorStateRef.current;
 
     const newContent = typeof _editorContent === 'string' 
@@ -454,11 +484,25 @@ const UnitProvider = ({ children, id }) => {
       : JSON.stringify(_editorContent);
 
     try {
+      // Moderate content before saving (runs async, doesn't block)
+      const moderationResult = await moderateContent(newContent);
+      const moderationFields = buildModerationFields(moderationResult);
+      
+      if (moderationResult.flagged) {
+        console.warn('[UnitContext] Content flagged by moderation, saving anyway for instructor review', {
+          categories: moderationResult.categories
+        });
+      }
+
       // Save without optimistic version update
       // Version will be updated by DataStore subscription when save completes
       await DataStore.save(
         Unit.copyOf(currentUnit, updated => {
           updated.data = newContent;
+          // Add moderation fields
+          updated.moderationStatus = moderationFields.moderationStatus;
+          updated.moderationFlags = moderationFields.moderationFlags;
+          updated.moderationCheckedAt = moderationFields.moderationCheckedAt;
         })
       );
     } catch (errors) {

@@ -1,0 +1,10 @@
+{
+  "title": "Grades",
+  "accuracy": "Accuracy",
+  "complete": "Complete",
+  "incomplete": "Incomplete",
+  "view_grade": "View Grade",
+  "submit_grade": "Submit Grade",
+  "no_grades": "No grades available",
+  "percentage": "{{value}}%"
+}

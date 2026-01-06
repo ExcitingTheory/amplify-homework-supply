@@ -299,6 +299,27 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "moderationStatus": {
+                    "name": "moderationStatus",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "moderationFlags": {
+                    "name": "moderationFlags",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "moderationCheckedAt": {
+                    "name": "moderationCheckedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "units": {
                     "name": "units",
                     "isArray": true,
@@ -589,6 +610,31 @@ export const schema = {
                         ],
                         "targetNames": [
                             "documentID"
+                        ]
+                    }
+                },
+                "parsedContentID": {
+                    "name": "parsedContentID",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "parsedContent": {
+                    "name": "parsedContent",
+                    "isArray": false,
+                    "type": {
+                        "model": "ParsedContent"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "HAS_ONE",
+                        "associatedWith": [
+                            "id"
+                        ],
+                        "targetNames": [
+                            "parsedContentID"
                         ]
                     }
                 },
@@ -1227,6 +1273,27 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "moderationStatus": {
+                    "name": "moderationStatus",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "moderationFlags": {
+                    "name": "moderationFlags",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "moderationCheckedAt": {
+                    "name": "moderationCheckedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -1554,6 +1621,27 @@ export const schema = {
                         ]
                     }
                 },
+                "moderationStatus": {
+                    "name": "moderationStatus",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "moderationFlags": {
+                    "name": "moderationFlags",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "moderationCheckedAt": {
+                    "name": "moderationCheckedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -1799,6 +1887,27 @@ export const schema = {
                         ]
                     }
                 },
+                "moderationStatus": {
+                    "name": "moderationStatus",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "moderationFlags": {
+                    "name": "moderationFlags",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "moderationCheckedAt": {
+                    "name": "moderationCheckedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -1959,6 +2068,13 @@ export const schema = {
                     "attributes": [],
                     "isArrayNullable": true
                 },
+                "embeddingsS3Key": {
+                    "name": "embeddingsS3Key",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "parsedContent": {
                     "name": "parsedContent",
                     "isArray": true,
@@ -2090,11 +2206,12 @@ export const schema = {
                                 "groupClaim": "cognito:groups",
                                 "provider": "userPools",
                                 "allow": "groups",
-                                "groupsField": "learner",
+                                "groups": [
+                                    "Learners"
+                                ],
                                 "operations": [
                                     "read"
-                                ],
-                                "groupField": "groups"
+                                ]
                             }
                         ]
                     }
@@ -2144,6 +2261,28 @@ export const schema = {
                         "connectionType": "BELONGS_TO",
                         "targetNames": [
                             "documentID"
+                        ]
+                    }
+                },
+                "fileID": {
+                    "name": "fileID",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "file": {
+                    "name": "file",
+                    "isArray": false,
+                    "type": {
+                        "model": "File"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "association": {
+                        "connectionType": "BELONGS_TO",
+                        "targetNames": [
+                            "fileID"
                         ]
                     }
                 },
@@ -2253,6 +2392,15 @@ export const schema = {
                         "name": "byDocument",
                         "fields": [
                             "documentID"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byFile",
+                        "fields": [
+                            "fileID"
                         ]
                     }
                 },
@@ -2651,6 +2799,209 @@ export const schema = {
                                     "create",
                                     "update",
                                     "delete",
+                                    "read"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "AIFeedback": {
+            "name": "AIFeedback",
+            "fields": {
+                "id": {
+                    "name": "id",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "owner": {
+                    "name": "owner",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "identityId": {
+                    "name": "identityId",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "contentType": {
+                    "name": "contentType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "AIContentType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "feedbackType": {
+                    "name": "feedbackType",
+                    "isArray": false,
+                    "type": {
+                        "enum": "AIFeedbackType"
+                    },
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "reasons": {
+                    "name": "reasons",
+                    "isArray": true,
+                    "type": {
+                        "enum": "AIFeedbackReason"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "comment": {
+                    "name": "comment",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "model": {
+                    "name": "model",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prompt": {
+                    "name": "prompt",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "generatedContent": {
+                    "name": "generatedContent",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "unitID": {
+                    "name": "unitID",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "gradeID": {
+                    "name": "gradeID",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "documentID": {
+                    "name": "documentID",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "messageId": {
+                    "name": "messageId",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "sessionId": {
+                    "name": "sessionId",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "metadata": {
+                    "name": "metadata",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "createdAt": {
+                    "name": "createdAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "updatedAt": {
+                    "name": "updatedAt",
+                    "isArray": false,
+                    "type": "AWSDateTime",
+                    "isRequired": true,
+                    "attributes": []
+                }
+            },
+            "syncable": true,
+            "pluralName": "AIFeedbacks",
+            "attributes": [
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byUnit",
+                        "fields": [
+                            "unitID"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byGrade",
+                        "fields": [
+                            "gradeID"
+                        ]
+                    }
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byDocument",
+                        "fields": [
+                            "documentID"
+                        ]
+                    }
+                },
+                {
+                    "type": "auth",
+                    "properties": {
+                        "rules": [
+                            {
+                                "provider": "userPools",
+                                "ownerField": "owner",
+                                "allow": "owner",
+                                "identityClaim": "cognito:username",
+                                "operations": [
+                                    "create",
+                                    "update",
+                                    "delete",
+                                    "read"
+                                ]
+                            },
+                            {
+                                "groupClaim": "cognito:groups",
+                                "provider": "userPools",
+                                "allow": "groups",
+                                "groups": [
+                                    "Admins"
+                                ],
+                                "operations": [
                                     "read"
                                 ]
                             }
@@ -3168,35 +3519,6 @@ export const schema = {
                             }
                         ]
                     }
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "provider": "userPools",
-                                "ownerField": "owner",
-                                "allow": "owner",
-                                "identityClaim": "cognito:username",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            },
-                            {
-                                "groupClaim": "cognito:groups",
-                                "provider": "userPools",
-                                "allow": "groups",
-                                "groupsField": "learner",
-                                "operations": [
-                                    "read"
-                                ],
-                                "groupField": "groups"
-                            }
-                        ]
-                    }
                 }
             ]
         },
@@ -3709,35 +4031,6 @@ export const schema = {
                             }
                         ]
                     }
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "provider": "userPools",
-                                "ownerField": "owner",
-                                "allow": "owner",
-                                "identityClaim": "cognito:username",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            },
-                            {
-                                "groupClaim": "cognito:groups",
-                                "provider": "userPools",
-                                "allow": "groups",
-                                "groupsField": "learner",
-                                "operations": [
-                                    "read"
-                                ],
-                                "groupField": "groups"
-                            }
-                        ]
-                    }
                 }
             ]
         },
@@ -3866,35 +4159,6 @@ export const schema = {
                             }
                         ]
                     }
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "provider": "userPools",
-                                "ownerField": "owner",
-                                "allow": "owner",
-                                "identityClaim": "cognito:username",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            },
-                            {
-                                "groupClaim": "cognito:groups",
-                                "provider": "userPools",
-                                "allow": "groups",
-                                "groupsField": "learner",
-                                "operations": [
-                                    "read"
-                                ],
-                                "groupField": "groups"
-                            }
-                        ]
-                    }
                 }
             ]
         }
@@ -3914,6 +4178,40 @@ export const schema = {
                 "PUBLIC",
                 "PRIVATE",
                 "PROTECTED"
+            ]
+        },
+        "AIFeedbackType": {
+            "name": "AIFeedbackType",
+            "values": [
+                "POSITIVE",
+                "NEGATIVE"
+            ]
+        },
+        "AIFeedbackReason": {
+            "name": "AIFeedbackReason",
+            "values": [
+                "INCORRECT",
+                "INCOMPLETE",
+                "INAPPROPRIATE",
+                "NOT_HELPFUL",
+                "IRRELEVANT",
+                "POOR_QUALITY",
+                "OTHER"
+            ]
+        },
+        "AIContentType": {
+            "name": "AIContentType",
+            "values": [
+                "CHAT_MESSAGE",
+                "CONTENT_COMPLETION",
+                "AUDIO_GENERATION",
+                "IMAGE_GENERATION",
+                "DOCUMENT_ANALYSIS",
+                "VOCABULARY_EXTRACTION",
+                "TRANSCRIPTION",
+                "IMAGE_DESCRIPTION",
+                "GRADING_FEEDBACK",
+                "BLOCK_SUGGESTION"
             ]
         }
     },
@@ -3947,6 +4245,46 @@ export const schema = {
                     "name": "tokenCount",
                     "isArray": false,
                     "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "error": {
+                    "name": "error",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
+        "ModerationResult": {
+            "name": "ModerationResult",
+            "fields": {
+                "flagged": {
+                    "name": "flagged",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "categories": {
+                    "name": "categories",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "categoryScores": {
+                    "name": "categoryScores",
+                    "isArray": false,
+                    "type": "AWSJSON",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "model": {
+                    "name": "model",
+                    "isArray": false,
+                    "type": "String",
                     "isRequired": true,
                     "attributes": []
                 },
@@ -4160,5 +4498,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "8ac17b999754a6747657bbc6e36c851b"
+    "version": "26a1bf62ab59743e982cef0c4947b3d9"
 };

@@ -15,7 +15,7 @@ import {
     ACCEPTABLE_FILE_TYPES,
     ACCEPTABLE_IMAGE_TYPES,
 } from '../components/Editor3/plugins/DragDropPastePlugin';
-import { generateEmbedding, generateEmbeddings } from '../graphql/mutations';
+import { generateEmbedding } from '../graphql/mutations';
 
 const client = generateClient();
 
@@ -74,6 +74,37 @@ const generateEmbeddingMutation = /* GraphQL */ `
     }
   }
 `;
+
+/**
+ * Trigger embedding generation for a file
+ * @param {string} fileID - File ID to generate embeddings for
+ * @returns {Promise<Object>} Result object
+ */
+export async function generateEmbeddings(fileID) {
+    try {
+        const result = await client.graphql({
+            query: generateEmbeddingsMutation,
+            variables: { fileID }
+        });
+
+        if (result.data?.generateEmbeddings?.success) {
+            console.log('Embeddings generation started:', result.data.generateEmbeddings);
+            return result.data.generateEmbeddings;
+        } else {
+            throw new Error(result.data?.generateEmbeddings?.message || 'Embeddings generation failed');
+        }
+    } catch (error) {
+        console.error('Error in generateEmbeddings:', error);
+        
+        // Handle GraphQL errors
+        if (error.errors && error.errors.length > 0) {
+            const graphQLError = error.errors[0];
+            throw new Error(graphQLError.message || 'Failed to generate embeddings');
+        }
+        
+        throw new Error(error.message || 'Failed to generate embeddings - unknown error');
+    }
+}
 
 async function triggerEmbeddingGeneration(fileID) {
     try {

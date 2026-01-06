@@ -1,6 +1,17 @@
 /**
  * Embedding Generation Utilities
  * Handles generating embeddings for units, sections, words, and questions
+ * 
+ * CACHING:
+ * - Query embeddings are cached in memory (100 entries LRU) + localStorage (24h TTL)
+ * - Cache key: model_dimensions_normalized-text (case-insensitive, trimmed)
+ * - Reduces OpenAI API costs for repeated searches
+ * - Use clearEmbeddingCache() to manually clear cache
+ * - Set skipCache: true in options to bypass cache
+ * 
+ * USAGE:
+ * import { clearEmbeddingCache } from '@/utils/embeddingGenerator';
+ * clearEmbeddingCache(); // Clear all cached query embeddings
  */
 
 import { generateClient } from 'aws-amplify/api';
@@ -27,8 +38,163 @@ const generateEmbeddingMutation = /* GraphQL */ `
   }
 `;
 
+// In-memory cache for query embeddings
+const embeddingCache = new Map();
+const CACHE_KEY_PREFIX = 'qemb_';
+const CACHE_MAX_SIZE = 100; // LRU cache size
+const CACHE_EXPIRY_MS = 1000 * 60 * 60 * 24; // 24 hours
+
 /**
- * Generate embedding from text using backend Lambda
+ * Generate cache key from text and options
+ */
+function getCacheKey(text, model, dimensions) {
+  const normalized = text.toLowerCase().trim();
+  return `${CACHE_KEY_PREFIX}${model}_${dimensions}_${normalized}`;
+}
+
+/**
+ * Get embedding from cache (memory + localStorage)
+ */
+function getCachedEmbedding(text, model, dimensions) {
+  const key = getCacheKey(text, model, dimensions);
+  
+  // Check memory cache first
+  if (embeddingCache.has(key)) {
+    const cached = embeddingCache.get(key);
+    if (Date.now() - cached.timestamp < CACHE_EXPIRY_MS) {
+      console.log('[Embedding Cache] Memory hit:', text.substring(0, 50));
+      return cached.embedding;
+    }
+    embeddingCache.delete(key);
+  }
+  
+  // Check localStorage
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Date.now() - parsed.timestamp < CACHE_EXPIRY_MS) {
+        console.log('[Embedding Cache] LocalStorage hit:', text.substring(0, 50));
+        // Populate memory cache
+        embeddingCache.set(key, parsed);
+        return parsed.embedding;
+      }
+      localStorage.removeItem(key);
+    }
+  } catch (error) {
+    console.warn('[Embedding Cache] LocalStorage read error:', error);
+  }
+  
+  return null;
+}
+
+/**
+ * Save embedding to cache (memory + localStorage)
+ */
+function setCachedEmbedding(text, model, dimensions, embedding) {
+  const key = getCacheKey(text, model, dimensions);
+  const cached = {
+    embedding,
+    timestamp: Date.now(),
+    text: text.substring(0, 100) // Store truncated text for debugging
+  };
+  
+  // Memory cache with LRU eviction
+  if (embeddingCache.size >= CACHE_MAX_SIZE) {
+    const firstKey = embeddingCache.keys().next().value;
+    embeddingCache.delete(firstKey);
+  }
+  embeddingCache.set(key, cached);
+  
+  // LocalStorage cache
+  try {
+    localStorage.setItem(key, JSON.stringify(cached));
+  } catch (error) {
+    // Handle quota exceeded - clear old entries
+    if (error.name === 'QuotaExceededError') {
+      console.warn('[Embedding Cache] LocalStorage quota exceeded, clearing old entries');
+      clearExpiredCache();
+      try {
+        localStorage.setItem(key, JSON.stringify(cached));
+      } catch (retryError) {
+        console.warn('[Embedding Cache] Failed to cache after cleanup:', retryError);
+      }
+    }
+  }
+}
+
+/**
+ * Clear expired cache entries from localStorage
+ */
+function clearExpiredCache() {
+  const now = Date.now();
+  const keysToRemove = [];
+  
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith(CACHE_KEY_PREFIX)) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(key));
+        if (now - stored.timestamp >= CACHE_EXPIRY_MS) {
+          keysToRemove.push(key);
+        }
+      } catch (error) {
+        keysToRemove.push(key); // Remove corrupted entries
+      }
+    }
+  }
+  
+  keysToRemove.forEach(key => localStorage.removeItem(key));
+  console.log(`[Embedding Cache] Cleared ${keysToRemove.length} expired entries`);
+}
+
+/**
+ * Clear all cached embeddings
+ */
+export function clearEmbeddingCache() {
+  embeddingCache.clear();
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith(CACHE_KEY_PREFIX)) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach(key => localStorage.removeItem(key));
+  console.log('[Embedding Cache] Cleared all cached embeddings');
+}
+
+/**
+ * Get cache statistics
+ */
+export function getEmbeddingCacheStats() {
+  let localStorageCount = 0;
+  let totalSize = 0;
+  
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith(CACHE_KEY_PREFIX)) {
+      localStorageCount++;
+      try {
+        const value = localStorage.getItem(key);
+        totalSize += new Blob([value]).size;
+      } catch (error) {
+        // Ignore
+      }
+    }
+  }
+  
+  return {
+    memoryCount: embeddingCache.size,
+    localStorageCount,
+    totalSizeKB: (totalSize / 1024).toFixed(2),
+    maxSize: CACHE_MAX_SIZE,
+    expiryHours: CACHE_EXPIRY_MS / (1000 * 60 * 60)
+  };
+}
+
+/**
+ * Generate embedding from text using backend Lambda with caching
  * @param {string} text - Text to embed
  * @param {object} options - Embedding options
  * @returns {Promise<Array<number>>} Embedding vector
@@ -36,7 +202,8 @@ const generateEmbeddingMutation = /* GraphQL */ `
 async function generateEmbedding(text, options = {}) {
   const {
     model = 'text-embedding-3-small',
-    dimensions = 512
+    dimensions = 512,
+    skipCache = false // Add option to bypass cache
   } = options;
   
   if (!text || text.trim().length === 0) {
@@ -44,7 +211,16 @@ async function generateEmbedding(text, options = {}) {
     return null;
   }
   
+  // Check cache first (unless skipCache is true)
+  if (!skipCache) {
+    const cached = getCachedEmbedding(text, model, dimensions);
+    if (cached) {
+      return cached;
+    }
+  }
+  
   try {
+    console.log('[Embedding] Generating new embedding for:', text.substring(0, 50));
     const response = await client.graphql({
       query: generateEmbeddingMutation,
       variables: {
@@ -54,7 +230,12 @@ async function generateEmbedding(text, options = {}) {
       }
     });
     
-    return response.data.generateEmbedding.embedding;
+    const embedding = response.data.generateEmbedding.embedding;
+    
+    // Cache the result
+    setCachedEmbedding(text, model, dimensions, embedding);
+    
+    return embedding;
   } catch (error) {
     console.error('Error generating embedding:', error);
     throw error;

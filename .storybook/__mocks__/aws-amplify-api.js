@@ -1,9 +1,180 @@
 /**
  * Mock aws-amplify/api for Storybook
+ * Supports both GraphQL (legacy) and REST API (new)
  */
 
 import { simulateDocumentAnalysis } from './aws-amplify-datastore.js';
+import { 
+  mockContentCompletion, 
+  mockSuggestBlocks,
+  mockChat,
+} from '../../mocks/responses/index.js';
 
+/**
+ * Mock REST API post() function with streaming support
+ */
+export const post = ({ apiName, path, options }) => {
+  console.log('[Mock REST API] POST:', { apiName, path, body: options?.body });
+  
+  // Route to appropriate handler
+  if (path === '/complete') {
+    return handleContentCompletion(options?.body);
+  } else if (path === '/suggest-blocks') {
+    return handleSuggestBlocks(options?.body);
+  } else if (path === '/chat') {
+    return handleChat(options?.body);
+  }
+  
+  // Default handler
+  return {
+    response: Promise.resolve({
+      statusCode: 404,
+      body: {
+        text: () => Promise.resolve(JSON.stringify({ error: 'Not found' })),
+      },
+    }),
+  };
+};
+
+/**
+ * Handle /complete endpoint - Streaming content completion
+ */
+async function handleContentCompletion(body) {
+  const { prompt, context } = body || {};
+  
+  console.log('[Mock] Content completion request:', { prompt: prompt?.substring(0, 50) });
+  
+  // Select appropriate mock response based on prompt content
+  let completionText = mockContentCompletion.standardJapanese;
+  
+  if (prompt && prompt.length > 100) {
+    completionText = mockContentCompletion.longCompletion;
+  } else if (prompt?.includes('verb') || prompt?.includes('動詞')) {
+    completionText = mockContentCompletion.technicalContent;
+  } else if (prompt?.includes('hiragana') || prompt?.includes('ひらがな')) {
+    completionText = mockContentCompletion.withKanji;
+  }
+  
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  // Create readable stream for streaming response
+  const stream = createMockStream(completionText, 50); // 50ms chunks
+  
+  return {
+    response: Promise.resolve({
+      statusCode: 200,
+      body: stream,
+    }),
+  };
+}
+
+/**
+ * Handle /suggest-blocks endpoint - JSON response
+ */
+async function handleSuggestBlocks(body) {
+  const { unitStructure, currentContext } = body || {};
+  
+  console.log('[Mock] Block suggestions request:', { 
+    blocks: unitStructure?.length, 
+    context: currentContext?.position 
+  });
+  
+  // Select appropriate mock based on structure
+  let mockData = mockSuggestBlocks.afterHeading;
+  
+  const blockCount = unitStructure?.length || 0;
+  const lastBlock = unitStructure?.[blockCount - 1];
+  
+  if (blockCount === 0) {
+    mockData = mockSuggestBlocks.emptyLesson;
+  } else if (lastBlock?.type === 'heading') {
+    mockData = mockSuggestBlocks.afterHeading;
+  } else if (lastBlock?.type === 'paragraph' && blockCount <= 2) {
+    mockData = mockSuggestBlocks.afterExplanation;
+  } else if (lastBlock?.type === 'paragraph' && blockCount > 2) {
+    mockData = mockSuggestBlocks.afterMultipleExplanations;
+  } else if (lastBlock?.type === 'quiz') {
+    mockData = mockSuggestBlocks.afterQuiz;
+  } else if (lastBlock?.type?.includes('answer')) {
+    mockData = mockSuggestBlocks.afterPractice;
+  } else if (blockCount > 5) {
+    mockData = mockSuggestBlocks.complexLesson;
+  }
+  
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 600));
+  
+  return {
+    response: Promise.resolve({
+      statusCode: 200,
+      body: {
+        text: () => Promise.resolve(JSON.stringify(mockData)),
+      },
+    }),
+  };
+}
+
+/**
+ * Handle /chat endpoint - Streaming chat
+ */
+async function handleChat(body) {
+  const { messages } = body || {};
+  
+  console.log('[Mock] Chat request:', { 
+    messageCount: messages?.length,
+    lastMessage: messages?.[messages?.length - 1]?.content?.substring(0, 50)
+  });
+  
+  const lastMessage = messages?.[messages?.length - 1];
+  let response = mockChat.standardResponse;
+  
+  if (lastMessage?.content?.toLowerCase().includes('help')) {
+    response = mockChat.helpWithUnit;
+  } else if (lastMessage?.content?.toLowerCase().includes('vocabulary')) {
+    response = mockChat.vocabularyAssistance;
+  } else if (lastMessage?.content?.toLowerCase().includes('question')) {
+    response = mockChat.questionGeneration;
+  }
+  
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 400));
+  
+  const stream = createMockStream(response, 30);
+  
+  return {
+    response: Promise.resolve({
+      statusCode: 200,
+      body: stream,
+    }),
+  };
+}
+
+/**
+ * Create a mock ReadableStream that chunks text
+ */
+function createMockStream(text, chunkDelay = 50) {
+  const encoder = new TextEncoder();
+  let position = 0;
+  const chunkSize = 10; // characters per chunk
+  
+  return new ReadableStream({
+    async start(controller) {
+      while (position < text.length) {
+        await new Promise(resolve => setTimeout(resolve, chunkDelay));
+        
+        const chunk = text.substring(position, position + chunkSize);
+        controller.enqueue(encoder.encode(chunk));
+        position += chunkSize;
+      }
+      controller.close();
+    },
+  });
+}
+
+/**
+ * Legacy GraphQL support for existing components
+ */
 export const generateClient = () => ({
   graphql: async ({ query, variables }) => {
     console.log('Mock GraphQL call:', { query, variables });

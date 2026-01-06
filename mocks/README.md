@@ -2,7 +2,41 @@
 
 This directory contains sample educational documents for testing the DocumentUploader and vocabulary/question extraction features.
 
-## Available Documents
+## 🎭 Storybook Base64 Mock Documents
+
+For Storybook component testing, use the pre-encoded base64 PDFs from `/.storybook/__mocks__/mockDocuments.js`:
+
+```javascript
+import { 
+  MOCK_JAPANESE_GRAMMAR_PDF,
+  MOCK_VOCABULARY_LIST_PDF,
+  MOCK_LESSON_PLAN_PDF,
+  MOCK_DIAGRAM_IMAGE_BASE64,
+  createMockPDF // Helper to create custom PDFs
+} from '../../.storybook/__mocks__/mockDocuments';
+
+// Use in Storybook story loaders
+seedMockFiles([
+  {
+    id: 'file-1',
+    name: 'grammar-guide.pdf',
+    path: MOCK_JAPANESE_GRAMMAR_PDF, // ✅ Base64 data URL
+    mimeType: 'application/pdf',
+    size: 2458000,
+  }
+]);
+
+// Or create a custom mock PDF on the fly
+const customPDF = createMockPDF('Chapter Title', 'Sample lesson content');
+```
+
+**Why base64?** Base64 data URLs work in isolated Storybook environments without requiring S3 access or external files. This enables:
+- ✅ Self-contained stories
+- ✅ Offline component development
+- ✅ Consistent test data
+- ✅ File preview/download testing in FileManager components
+
+## 📄 Available Test Documents
 
 ### 1. japanese-lesson-photosynthesis.txt
 - **Language**: Japanese with English translations

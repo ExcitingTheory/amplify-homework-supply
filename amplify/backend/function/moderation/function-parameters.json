@@ -1,0 +1,47 @@
+{
+  "permissions": {
+    "api": {
+      "japanese5": [
+        "Query"
+      ]
+    },
+    "storage": {
+      "files": [
+        "read",
+        "update"
+      ],
+      "Question:@model(appsync)": [
+        "read",
+        "update"
+      ],
+      "File:@model(appsync)": [
+        "read",
+        "update"
+      ],
+      "Grade:@model(appsync)": [
+        "read",
+        "update"
+      ],
+      "Unit:@model(appsync)": [
+        "read",
+        "update"
+      ],
+      "Word:@model(appsync)": [
+        "read",
+        "update"
+      ],
+      "Document:@model(appsync)": [
+        "read",
+        "update"
+      ],
+      "ParsedContent:@model(appsync)": [
+        "read",
+        "update"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "secretNames": [
+    "OPENAI_API_KEY"
+  ]
+}

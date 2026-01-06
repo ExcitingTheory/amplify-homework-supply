@@ -1,0 +1,18 @@
+{
+  "generic": "An error occurred",
+  "network": "Network error. Please check your connection.",
+  "auth": {
+    "invalid_credentials": "Invalid username or password",
+    "session_expired": "Your session has expired. Please sign in again."
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalid_email": "Invalid email address",
+    "password_mismatch": "Passwords do not match"
+  },
+  "file": {
+    "upload_failed": "File upload failed",
+    "invalid_type": "Invalid file type",
+    "too_large": "File is too large"
+  }
+}

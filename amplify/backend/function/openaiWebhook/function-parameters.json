@@ -5,6 +5,28 @@
         "Query",
         "Mutation"
       ]
+    },
+    "storage": {
+      "files": [
+        "create",
+        "read",
+        "update"
+      ],
+      "File:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "Document:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ],
+      "ParsedContent:@model(appsync)": [
+        "create",
+        "read",
+        "update"
+      ]
     }
   },
   "lambdaLayers": [],

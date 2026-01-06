@@ -22,6 +22,72 @@
       "providerPlugin": "awscloudformation",
       "service": "API Gateway"
     },
+    "completions": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "chatStream"
+        },
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "japanese56739ab6b"
+        },
+        {
+          "attributes": [
+            "LearnersGroupRole"
+          ],
+          "category": "auth",
+          "resourceName": "userPoolGroups"
+        },
+        {
+          "attributes": [
+            "InstructorsGroupRole"
+          ],
+          "category": "auth",
+          "resourceName": "userPoolGroups"
+        },
+        {
+          "attributes": [
+            "AdminsGroupRole"
+          ],
+          "category": "auth",
+          "resourceName": "userPoolGroups"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "contentCompletionStream"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "suggestBlocksStream"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "openaiWebhook"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    },
     "japanese5": {
       "dependsOn": [
         {
@@ -121,6 +187,94 @@
       "service": "Lambda"
     },
     "analyzeDocument": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "japanese5"
+        },
+        {
+          "attributes": [
+            "BucketName"
+          ],
+          "category": "storage",
+          "resourceName": "files"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "chat": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "japanese5"
+        },
+        {
+          "attributes": [
+            "BucketName"
+          ],
+          "category": "storage",
+          "resourceName": "files"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "chatStream": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "japanese5"
+        },
+        {
+          "attributes": [
+            "BucketName"
+          ],
+          "category": "storage",
+          "resourceName": "files"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "contentCompletion": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "japanese5"
+        },
+        {
+          "attributes": [
+            "BucketName"
+          ],
+          "category": "storage",
+          "resourceName": "files"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "contentCompletionStream": {
       "build": true,
       "dependsOn": [
         {
@@ -251,6 +405,28 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "moderation": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "japanese5"
+        },
+        {
+          "attributes": [
+            "BucketName"
+          ],
+          "category": "storage",
+          "resourceName": "files"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "openai": {
       "build": true,
       "dependsOn": [
@@ -290,6 +466,50 @@
           ],
           "category": "api",
           "resourceName": "japanese5"
+        },
+        {
+          "attributes": [
+            "BucketName"
+          ],
+          "category": "storage",
+          "resourceName": "files"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "suggestBlocks": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "japanese5"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "suggestBlocksStream": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput"
+          ],
+          "category": "api",
+          "resourceName": "japanese5"
+        },
+        {
+          "attributes": [
+            "BucketName"
+          ],
+          "category": "storage",
+          "resourceName": "files"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -334,6 +554,102 @@
         {
           "category": "function",
           "resourceName": "analyzeDocument"
+        }
+      ]
+    },
+    "AMPLIFY_function_chatStream_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "chatStream"
+        }
+      ]
+    },
+    "AMPLIFY_function_chatStream_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "chatStream"
+        }
+      ]
+    },
+    "AMPLIFY_function_chatStream_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "chatStream"
+        }
+      ]
+    },
+    "AMPLIFY_function_chat_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "chat"
+        }
+      ]
+    },
+    "AMPLIFY_function_chat_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "chat"
+        }
+      ]
+    },
+    "AMPLIFY_function_chat_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "chat"
+        }
+      ]
+    },
+    "AMPLIFY_function_contentCompletionStream_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "contentCompletionStream"
+        }
+      ]
+    },
+    "AMPLIFY_function_contentCompletionStream_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "contentCompletionStream"
+        }
+      ]
+    },
+    "AMPLIFY_function_contentCompletionStream_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "contentCompletionStream"
+        }
+      ]
+    },
+    "AMPLIFY_function_contentCompletion_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "contentCompletion"
+        }
+      ]
+    },
+    "AMPLIFY_function_contentCompletion_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "contentCompletion"
+        }
+      ]
+    },
+    "AMPLIFY_function_contentCompletion_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "contentCompletion"
         }
       ]
     },
@@ -457,6 +773,30 @@
         }
       ]
     },
+    "AMPLIFY_function_moderation_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "moderation"
+        }
+      ]
+    },
+    "AMPLIFY_function_moderation_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "moderation"
+        }
+      ]
+    },
+    "AMPLIFY_function_moderation_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "moderation"
+        }
+      ]
+    },
     "AMPLIFY_function_openaiWebhook_deploymentBucketName": {
       "usedBy": [
         {
@@ -502,6 +842,54 @@
         {
           "category": "function",
           "resourceName": "openai"
+        }
+      ]
+    },
+    "AMPLIFY_function_suggestBlocksStream_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "suggestBlocksStream"
+        }
+      ]
+    },
+    "AMPLIFY_function_suggestBlocksStream_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "suggestBlocksStream"
+        }
+      ]
+    },
+    "AMPLIFY_function_suggestBlocksStream_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "suggestBlocksStream"
+        }
+      ]
+    },
+    "AMPLIFY_function_suggestBlocks_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "suggestBlocks"
+        }
+      ]
+    },
+    "AMPLIFY_function_suggestBlocks_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "suggestBlocks"
+        }
+      ]
+    },
+    "AMPLIFY_function_suggestBlocks_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "suggestBlocks"
         }
       ]
     }

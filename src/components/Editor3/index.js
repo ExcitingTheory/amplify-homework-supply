@@ -104,6 +104,8 @@ import LanguageEditorTheme from './components/LanguageEditorTheme';
 import AnswerPlugin from './plugins/AnswerPlugin.js';
 import { AnswerNode } from './plugins/AnswerPlugin.js';
 import CustomAnswerPlugin, { CustomAnswerNode } from './plugins/CustomAnswerPlugin.js';
+import BlockSuggestionPlugin from './plugins/BlockSuggestionPlugin.js';
+import AIContentCompletionPlugin from './plugins/AIContentCompletionPlugin.js';
 import { DataStore } from 'aws-amplify/datastore';
 import { Unit } from '../../models';
 
@@ -437,6 +439,8 @@ export default function Editor() {
           <LayoutPlugin />
           <AnswerPlugin />
           <CustomAnswerPlugin />
+          <BlockSuggestionPlugin useAI={true} />
+          <AIContentCompletionPlugin />
           <LinkPlugin />
           <AutoLinkPlugin />
           <YouTubePlugin />

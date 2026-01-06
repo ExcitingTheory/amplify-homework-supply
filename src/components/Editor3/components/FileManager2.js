@@ -39,7 +39,6 @@ import {
 } from "@mui/material";
 import { useVirtualizer } from '@tanstack/react-virtual';
 import React from "react";
-import { useRouter } from 'next/router';
 import { isMimeType } from '@lexical/utils';
 
 import CircularProgress from '@mui/material/CircularProgress';
@@ -51,7 +50,12 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
-
+import EditIcon from '@mui/icons-material/Edit';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import QuizIcon from '@mui/icons-material/Quiz';
+import SummarizeIcon from '@mui/icons-material/Summarize';
+import FlagIcon from '@mui/icons-material/Flag';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import FilesContext from "../../../context/fileContext";
 import SettingsContext from "../../../context/settingsContext";
 
@@ -60,7 +64,15 @@ import { uploadData, remove } from 'aws-amplify/storage';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import { calculateWaveformData } from '../../../utils/calculateWaveformData';
-import { uploadFile, uploadAndAnalyzePDF, analyzePDF, cancelPDFAnalysis } from '../../../utils/fileUploadUtils';
+import { uploadFile, uploadAndAnalyzePDF, analyzePDF, cancelPDFAnalysis, generateEmbeddings } from '../../../utils/fileUploadUtils';
+import { 
+    saveEmbeddings, 
+    loadAllEmbeddings, 
+    loadEmbeddingsByDocument, 
+    deleteEmbeddings,
+    getEmbeddingsTimestamp,
+    loadEmbeddingsFromS3 
+} from '../../../utils/vectorStoreDB';
 
 import { FileProtectionLevels } from '../../../models';
 import { File as FileModel, Document, Settings, ParsedContent } from '../../../models';
@@ -123,6 +135,7 @@ import {
 import { hexToRgb } from "../../../utils/hexToRgb";
 import { ImageGeneratorButton, AudioGeneratorButton } from './EnhancedGenerators';
 import { SuggestedVocabulary, SuggestedQuestions } from './SuggestedContent';
+import RecordingStudio3 from "../../RecordingStudio3";
 
 const client = generateClient();
 
@@ -175,18 +188,77 @@ const containsSearchTerm = (text, searchTerm) => {
     return text.toLowerCase().includes(searchTerm.toLowerCase());
 };
 
-// Simple in-memory vector store for fast semantic search
+// IndexedDB-backed vector store for persistent semantic search
 class CourseVectorStore {
     constructor() {
-        this.items = []; // {id, text, vector, metadata: {fileId, documentId, page, fileName, mimeType}}
+        this.items = []; // In-memory cache for fast search
+        this.loaded = false; // Track if IndexedDB data has been loaded
+        this.loadPromise = null; // Prevent duplicate loads
     }
 
-    clear() {
+    async clear() {
         this.items = [];
+        this.loaded = false;
     }
 
     add(item) {
         this.items.push(item);
+    }
+
+    /**
+     * Load all embeddings from IndexedDB into memory
+     * @returns {Promise<number>} Number of embeddings loaded
+     */
+    async loadFromIndexedDB() {
+        if (this.loadPromise) {
+            return this.loadPromise;
+        }
+        
+        this.loadPromise = (async () => {
+            try {
+                const embeddings = await loadAllEmbeddings();
+                this.items = embeddings;
+                this.loaded = true;
+                console.log(`[VectorStore] Loaded ${embeddings.length} embeddings from IndexedDB`);
+                return embeddings.length;
+            } catch (error) {
+                console.error('[VectorStore] Failed to load from IndexedDB:', error);
+                this.loaded = false;
+                return 0;
+            } finally {
+                this.loadPromise = null;
+            }
+        })();
+        
+        return this.loadPromise;
+    }
+
+    /**
+     * Save document embeddings to IndexedDB
+     * @param {string} documentId 
+     * @param {Array} embeddings - Array of {page, embedding} objects
+     * @param {Object} metadata - File metadata
+     */
+    async saveToIndexedDB(documentId, embeddings, metadata) {
+        try {
+            await saveEmbeddings(documentId, embeddings, metadata);
+        } catch (error) {
+            console.error('[VectorStore] Failed to save to IndexedDB:', error);
+        }
+    }
+
+    /**
+     * Delete document embeddings from IndexedDB
+     * @param {string} documentId 
+     */
+    async deleteFromIndexedDB(documentId) {
+        try {
+            await deleteEmbeddings(documentId);
+            // Also remove from in-memory cache
+            this.items = this.items.filter(item => item.documentId !== documentId);
+        } catch (error) {
+            console.error('[VectorStore] Failed to delete from IndexedDB:', error);
+        }
     }
 
     search(queryVector, filters = {}, topK = 50) {
@@ -194,13 +266,13 @@ class CourseVectorStore {
 
         // Apply metadata filters first
         if (filters.fileId) {
-            results = results.filter(item => item.metadata.fileId === filters.fileId);
+            results = results.filter(item => item.metadata?.fileId === filters.fileId);
         }
         if (filters.documentId) {
-            results = results.filter(item => item.metadata.documentId === filters.documentId);
+            results = results.filter(item => item.metadata?.documentId === filters.documentId || item.documentId === filters.documentId);
         }
         if (filters.mimeType) {
-            results = results.filter(item => item.metadata.mimeType === filters.mimeType);
+            results = results.filter(item => item.metadata?.mimeType === filters.mimeType);
         }
 
         // Compute similarities
@@ -572,6 +644,147 @@ function FileNameField({ value, fileId, onSave, searchTerm }) {
 // ExpandedFileContent - Display extracted content from embeddings and analysis
 // =============================================================================
 
+// Metadata Editor Component for editing file properties
+function MetadataEditor({ file, onUpdate, onClose }) {
+    const [editing, setEditing] = React.useState(false);
+    const [formData, setFormData] = React.useState({
+        name: file.name || '',
+        description: file.description || '',
+        prompt: file.prompt || '',
+        model: file.model || '',
+        variant: file.variant || '',
+    });
+
+    const handleSave = async () => {
+        try {
+            const updatedFile = await DataStore.save(
+                FileModel.copyOf(file, updated => {
+                    updated.name = formData.name;
+                    updated.description = formData.description;
+                    updated.prompt = formData.prompt;
+                    updated.model = formData.model;
+                    updated.variant = formData.variant;
+                })
+            );
+            onUpdate?.(updatedFile);
+            setEditing(false);
+        } catch (error) {
+            console.error('Error updating file:', error);
+        }
+    };
+
+    return (
+        <Box sx={{ p: 2, backgroundColor: 'grey.50', borderRadius: 1, mt: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6">File Metadata</Typography>
+                {!editing && (
+                    <IconButton size="small" onClick={() => setEditing(true)}>
+                        <EditIcon />
+                    </IconButton>
+                )}
+            </Box>
+
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                    label="Name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    disabled={!editing}
+                    size="small"
+                    fullWidth
+                />
+                <TextField
+                    label="Description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    disabled={!editing}
+                    multiline
+                    rows={2}
+                    size="small"
+                    fullWidth
+                />
+                <TextField
+                    label="Prompt (for AI-generated files)"
+                    value={formData.prompt}
+                    onChange={(e) => setFormData({ ...formData, prompt: e.target.value })}
+                    disabled={!editing}
+                    multiline
+                    rows={2}
+                    size="small"
+                    fullWidth
+                />
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                    <TextField
+                        label="Model"
+                        value={formData.model}
+                        onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                        disabled={!editing}
+                        size="small"
+                        sx={{ flex: 1 }}
+                    />
+                    <TextField
+                        label="Variant"
+                        value={formData.variant}
+                        onChange={(e) => setFormData({ ...formData, variant: e.target.value })}
+                        disabled={!editing}
+                        size="small"
+                        sx={{ flex: 1 }}
+                    />
+                </Box>
+
+                {/* File info (read-only) */}
+                <Box sx={{ pt: 2, borderTop: 1, borderColor: 'divider' }}>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                        <strong>Type:</strong> {file.mimeType}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                        <strong>Size:</strong> {file.size ? `${(file.size / 1000).toFixed(2)} KB` : 'Unknown'}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                        <strong>Path:</strong> {file.path}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                        <strong>Protection Level:</strong> {file.level || 'UNSET'}
+                    </Typography>
+                    {file.createdAt && (
+                        <Typography variant="caption" color="text.secondary" display="block">
+                            <strong>Created:</strong> {new Date(file.createdAt).toLocaleString()}
+                        </Typography>
+                    )}
+                </Box>
+
+                {editing && (
+                    <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', pt: 1 }}>
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={() => {
+                                setFormData({
+                                    name: file.name || '',
+                                    description: file.description || '',
+                                    prompt: file.prompt || '',
+                                    model: file.model || '',
+                                    variant: file.variant || '',
+                                });
+                                setEditing(false);
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="contained"
+                            size="small"
+                            onClick={handleSave}
+                        >
+                            Save
+                        </Button>
+                    </Box>
+                )}
+            </Box>
+        </Box>
+    );
+}
+
 function ExpandedFileContent({ file, parsedContent, search, editor }) {
     const [activeTab, setActiveTab] = React.useState(0);
 
@@ -606,46 +819,7 @@ function ExpandedFileContent({ file, parsedContent, search, editor }) {
     })() : null;
 
     // Parse JSON content for documents
-    const vocabulary = parsedContent?.vocabularyJSON ? (() => {
-        try {
-            return JSON.parse(parsedContent.vocabularyJSON);
-        } catch (e) {
-            return [];
-        }
-    })() : [];
-
-    const summaries = parsedContent?.summariesJSON ? (() => {
-        try {
-            return JSON.parse(parsedContent.summariesJSON);
-        } catch (e) {
-            return [];
-        }
-    })() : [];
-
-    const objectives = parsedContent?.objectivesJSON ? (() => {
-        try {
-            return JSON.parse(parsedContent.objectivesJSON);
-        } catch (e) {
-            return [];
-        }
-    })() : [];
-
-    const concepts = parsedContent?.conceptsJSON ? (() => {
-        try {
-            return JSON.parse(parsedContent.conceptsJSON);
-        } catch (e) {
-            return [];
-        }
-    })() : [];
-
-    const questions = parsedContent?.questionsJSON ? (() => {
-        try {
-            return JSON.parse(parsedContent.questionsJSON);
-        } catch (e) {
-            return [];
-        }
-    })() : [];
-
+   
     const highlightText = (text) => {
         if (!search || !text) return text;
         return highlightMatches(text, search);
@@ -655,7 +829,7 @@ function ExpandedFileContent({ file, parsedContent, search, editor }) {
         file.mimeType === 'text/plain' ||
         file.mimeType === 'text/markdown';
 
-    console.log('ExpandedFileContent render', { file, parsedContent, vocabulary, summaries, objectives, concepts, questions });
+    console.log('ExpandedFileContent render', { file, parsedContent });
 
     return (
         <Box sx={{ p: 2, backgroundColor: 'grey.50', borderRadius: 1, mt: 1 }}>
@@ -693,6 +867,8 @@ function ExpandedFileContent({ file, parsedContent, search, editor }) {
                 <Box sx={{ position: 'relative', zIndex: 1 }}>
                     <Tabs 
                         value={activeTab} 
+                        scrollButtons="auto"
+                        variant="scrollable"
                         onChange={(e, newValue) => setActiveTab(newValue)}
                         sx={{ 
                             position: 'relative', 
@@ -701,158 +877,205 @@ function ExpandedFileContent({ file, parsedContent, search, editor }) {
                             borderRadius: '4px 4px 0 0'
                         }}
                     >
-                        <Tab label={`Vocabulary (${vocabulary.length})`} />
-                        <Tab label={`Summaries (${summaries.length})`} />
-                        <Tab label={`Objectives (${objectives.length})`} />
-                        <Tab label={`Concepts (${concepts.length})`} />
-                        <Tab label={`Questions (${questions.length})`} />
+                        <Tab 
+                            icon={<MenuBookIcon />} 
+                            label={`(${parsedContent.vocabularyJSON.length})`}
+                            iconPosition="start"
+                        />
+                        <Tab 
+                            icon={<QuizIcon />} 
+                            label={`(${parsedContent.questionsJSON.length})`}
+                            iconPosition="start"
+                        />
+                        <Tab 
+                            icon={<SummarizeIcon />} 
+                            label={`(${parsedContent.summariesJSON.length})`}
+                            iconPosition="start"
+                        />
+                        <Tab 
+                            icon={<FlagIcon />} 
+                            label={`(${parsedContent.objectivesJSON.length})`}
+                            iconPosition="start"
+                        />
+                        <Tab 
+                            icon={<LightbulbIcon />} 
+                            label={`(${parsedContent.conceptsJSON.length})`}
+                            iconPosition="start"
+                        />
                     </Tabs>
 
-                    {/* Vocabulary Tab */}
-                    {activeTab === 0 && vocabulary.length > 0 && (
+                    {/* Vocabulary Tab with SuggestedVocabulary */}
+                    {activeTab === 0 && (
                         <Box sx={{ mt: 2 }}>
-                            {vocabulary.map((item, index) => (
-                                <Box key={index} sx={{ mb: 2, p: 1, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-                                    <Typography variant="subtitle2" color="primary">
-                                        {highlightText(item.word)}
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ mb: 1 }}>
-                                        {highlightText(item.definition)}
-                                    </Typography>
-                                    {item.context && (
-                                        <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                                            Context: {highlightText(item.context)}
-                                        </Typography>
-                                    )}
-                                    {item.page && (
-                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                                            Page {item.page}
-                                        </Typography>
-                                    )}
-                                </Box>
-                            ))}
+                            {parsedContent.vocabularyJSON.length > 0 ? (
+                                <>
+                                    <Alert severity="info" sx={{ mb: 2 }}>
+                                        Review and import vocabulary from the document
+                                    </Alert>
+                                    <SuggestedVocabulary
+                                        documentId={file.documentID}
+                                        fileId={file.id}
+                                        unitId={editor?.__unit?.id}
+                                        enableInlineEditing={true}
+                                        onImport={(count) => {
+                                            console.log(`Imported ${count} vocabulary words`);
+                                        }}
+                                    />
+                                </>
+                            ) : (
+                                <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
+                                    No vocabulary extracted
+                                </Typography>
+                            )}
+                        </Box>
+                    )}
+
+                    {/* Questions Tab with SuggestedQuestions */}
+                    {activeTab === 1 && (
+                        <Box sx={{ mt: 2 }}>
+                            {parsedContent.questionsJSON.length > 0 ? (
+                                <>
+                                    <Alert severity="info" sx={{ mb: 2 }}>
+                                        Review and import questions from the document
+                                    </Alert>
+                                    <SuggestedQuestions
+                                        documentId={file.documentID}
+                                        fileId={file.id}
+                                        unitId={editor?.__unit?.id}
+                                        enableInlineEditing={true}
+                                        onImport={(count) => {
+                                            console.log(`Imported ${count} questions`);
+                                        }}
+                                    />
+                                </>
+                            ) : (
+                                <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
+                                    No questions extracted
+                                </Typography>
+                            )}
                         </Box>
                     )}
 
                     {/* Summaries Tab */}
-                    {activeTab === 1 && summaries.length > 0 && (
+                    {activeTab === 2 && (
                         <Box sx={{ mt: 2 }}>
-                            {summaries.map((item, index) => (
-                                <Box key={index} sx={{ mb: 2, p: 1, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-                                    <Typography variant="subtitle2" color="primary">
-                                        {highlightText(item.title)}
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ mb: 1 }}>
-                                        {highlightText(item.content)}
-                                    </Typography>
-                                    {item.page_range && (
-                                        <Typography variant="caption" color="text.secondary">
-                                            Pages: {item.page_range}
+                            {parsedContent.summariesJSON.length > 0 ? (
+                                parsedContent.summariesJSON.map((item, index) => (
+                                    <Box 
+                                        key={index} 
+                                        sx={{ 
+                                            mb: 2, 
+                                            p: 2, 
+                                            border: 2, 
+                                            borderColor: 'primary.main',
+                                            borderRadius: 1,
+                                            backgroundColor: 'primary.light',
+                                            opacity: 0.9
+                                        }}
+                                    >
+                                        <Typography variant="subtitle2" color="primary.dark" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                            {highlightText(item.title)}
                                         </Typography>
-                                    )}
-                                </Box>
-                            ))}
+                                        <Typography variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                                            {highlightText(item.content)}
+                                        </Typography>
+                                        {item.page_range && (
+                                            <Chip 
+                                                label={`Pages: ${item.page_range}`}
+                                                size="small"
+                                                color="primary"
+                                                variant="outlined"
+                                            />
+                                        )}
+                                    </Box>
+                                ))
+                            ) : (
+                                <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
+                                    No summaries extracted
+                                </Typography>
+                            )}
                         </Box>
                     )}
 
                     {/* Objectives Tab */}
-                    {activeTab === 2 && objectives.length > 0 && (
+                    {activeTab === 3 && (
                         <Box sx={{ mt: 2 }}>
-                            {objectives.map((item, index) => (
-                                <Box key={index} sx={{ mb: 2, p: 1, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-                                    <Typography variant="body2" sx={{ mb: 1 }}>
-                                        {highlightText(item.objective)}
-                                    </Typography>
-                                    {item.bloom_level && (
-                                        <Chip
-                                            label={item.bloom_level}
-                                            size="small"
-                                            color="secondary"
-                                            sx={{ fontSize: '0.7rem' }}
-                                        />
-                                    )}
-                                </Box>
-                            ))}
+                            {parsedContent.objectivesJSON.length > 0 ? (
+                                parsedContent.objectivesJSON.map((item, index) => (
+                                    <Box 
+                                        key={index} 
+                                        sx={{ 
+                                            mb: 2, 
+                                            p: 2, 
+                                            border: 2, 
+                                            borderColor: 'secondary.main',
+                                            borderRadius: 1,
+                                            backgroundColor: 'secondary.light',
+                                            opacity: 0.9
+                                        }}
+                                    >
+                                        <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                                            {highlightText(item.objective)}
+                                        </Typography>
+                                        {item.bloom_level && (
+                                            <Chip
+                                                label={`Bloom Level: ${item.bloom_level}`}
+                                                size="small"
+                                                color="secondary"
+                                                sx={{ fontSize: '0.75rem', fontWeight: 600 }}
+                                            />
+                                        )}
+                                    </Box>
+                                ))
+                            ) : (
+                                <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
+                                    No objectives extracted
+                                </Typography>
+                            )}
                         </Box>
                     )}
 
                     {/* Concepts Tab */}
-                    {activeTab === 3 && concepts.length > 0 && (
+                    {activeTab === 4 && (
                         <Box sx={{ mt: 2 }}>
-                            {concepts.map((item, index) => (
-                                <Box key={index} sx={{ mb: 2, p: 1, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-                                    <Typography variant="subtitle2" color="primary">
-                                        {highlightText(item.concept)}
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ mb: 1 }}>
-                                        {highlightText(item.description)}
-                                    </Typography>
-                                    {item.related_vocabulary && (
-                                        <Typography variant="caption" color="text.secondary">
-                                            Related: {highlightText(item.related_vocabulary)}
+                            {parsedContent.conceptsJSON.length > 0 ? (
+                                parsedContent.conceptsJSON.map((item, index) => (
+                                    <Box 
+                                        key={index} 
+                                        sx={{ 
+                                            mb: 2, 
+                                            p: 2, 
+                                            border: 2, 
+                                            borderColor: 'success.main',
+                                            borderRadius: 1,
+                                            backgroundColor: 'success.light',
+                                            opacity: 0.9
+                                        }}
+                                    >
+                                        <Typography variant="subtitle2" color="success.dark" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                            {highlightText(item.concept)}
                                         </Typography>
-                                    )}
-                                </Box>
-                            ))}
-                        </Box>
-                    )}
-
-                    {/* Questions Tab */}
-                    {activeTab === 4 && questions.length > 0 && (
-                        <Box sx={{ mt: 2 }}>
-                            {questions.map((item, index) => (
-                                <Box key={index} sx={{ mb: 2, p: 1, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-                                    <Typography variant="subtitle2" color="primary">
-                                        {highlightText(item.question)}
-                                    </Typography>
-                                    {item.expectedAnswer && (
                                         <Typography variant="body2" sx={{ mb: 1 }}>
-                                            <strong>Answer:</strong> {highlightText(item.expectedAnswer)}
+                                            {highlightText(item.description)}
                                         </Typography>
-                                    )}
-                                    {item.hint && (
-                                        <Typography variant="body2" sx={{ mb: 1, fontStyle: 'italic' }}>
-                                            <strong>Hint:</strong> {highlightText(item.hint)}
-                                        </Typography>
-                                    )}
-                                    {item.type && (
-                                        <Chip
-                                            label={item.type}
-                                            size="small"
-                                            color="primary"
-                                            sx={{ fontSize: '0.7rem' }}
-                                        />
-                                    )}
-                                </Box>
-                            ))}
+                                        {item.related_vocabulary && (
+                                            <Box sx={{ mt: 1 }}>
+                                                <Chip
+                                                    label={`Related: ${highlightText(item.related_vocabulary)}`}
+                                                    size="small"
+                                                    color="success"
+                                                    variant="outlined"
+                                                />
+                                            </Box>
+                                        )}
+                                    </Box>
+                                ))
+                            ) : (
+                                <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
+                                    No concepts extracted
+                                </Typography>
+                            )}
                         </Box>
-                    )}
-
-                    {/* Empty states */}
-                    {activeTab === 0 && vocabulary.length === 0 && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
-                            No vocabulary extracted
-                        </Typography>
-                    )}
-                    {activeTab === 1 && summaries.length === 0 && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
-                            No summaries extracted
-                        </Typography>
-                    )}
-                    {activeTab === 2 && objectives.length === 0 && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
-                            No objectives extracted
-                        </Typography>
-                    )}
-                    {activeTab === 3 && concepts.length === 0 && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
-                            No concepts extracted
-                        </Typography>
-                    )}
-                    {activeTab === 4 && questions.length === 0 && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
-                            No questions extracted
-                        </Typography>
                     )}
                 </Box>
             )}
@@ -1649,8 +1872,14 @@ function FileRowComponent({ file, fileType, index }) {
                 >
                     <AddIcon />
                 </IconButton>
-            )}
+            //     (isContentExpanded ?? <RecordingStudio3
+            //         file={file}
+            //         open={isContentExpanded}
+            //         onClose={() => toggleFileContentExpansion(file.id)}
+            //     />
+            // )
 
+            )}
             {/* Delete Button */}
             <IconButton
                 size="small"
@@ -1730,12 +1959,23 @@ function FileRowComponent({ file, fileType, index }) {
 
             {/* Expanded Content */}
             {isContentExpanded && (
-                <ExpandedFileContent
-                    file={file}
-                    parsedContent={parsedContent}
-                    search={search}
-                    editor={editor}
-                />
+                <>
+                    {/* Metadata Editor for all files */}
+                    <MetadataEditor
+                        file={file}
+                        onUpdate={(updatedFile) => {
+                            console.log('File metadata updated:', updatedFile);
+                        }}
+                    />
+                    
+                    {/* Parsed Content for documents or analysis results */}
+                    <ExpandedFileContent
+                        file={file}
+                        parsedContent={parsedContent}
+                        search={search}
+                        editor={editor}
+                    />
+                </>
             )}
         </Box>
     );
@@ -1821,7 +2061,6 @@ async function deleteFileCompletely(file) {
 }
 
 export default function FileManager2() {
-    const router = useRouter();
     const [editor] = useLexicalComposerContext();
     const [search, setSearch] = React.useState('');
     const [searchMode, setSearchMode] = React.useState('hybrid'); // 'keyword', 'semantic', 'hybrid'
@@ -2020,62 +2259,31 @@ export default function FileManager2() {
     const [newAudioFileFormOpen, setNewAudioFileFormOpen] = React.useState(false);
     const [newVideoFileFormOpen, setNewVideoFileFormOpen] = React.useState(false);
 
-    // Load generator tab from URL query or localStorage, default to 'all'
+    // Load generator tab from localStorage, default to 'all'
     const [generator, setGenerator] = React.useState(() => {
         if (typeof window !== 'undefined') {
-            // First check URL query parameter (using 'fileType' to avoid conflict with vertical tabs)
-            const urlFileType = router.query.fileType;
-            if (urlFileType && ['all', 'image', 'audio', 'video'].includes(urlFileType)) {
-                return urlFileType;
-            }
-            // Fallback to localStorage
             const saved = localStorage.getItem('fileManager2_activeTab');
             return saved || 'all';
         }
         return 'all';
     });
 
-    // Sync tab from URL on mount and when query changes
-    React.useEffect(() => {
-        const urlFileType = router.query.fileType;
-        if (urlFileType && ['all', 'image', 'audio', 'video'].includes(urlFileType)) {
-            setGenerator(urlFileType);
-        }
-    }, [router.query.fileType]);
-
-    // Persist tab selection to both URL and localStorage
+    // Persist tab selection to localStorage
     React.useEffect(() => {
         if (typeof window !== 'undefined') {
             localStorage.setItem('fileManager2_activeTab', generator);
-            
-            // Update URL without causing navigation (using 'fileType' to avoid conflict with vertical tabs)
-            const currentQuery = { ...router.query };
-            if (generator !== 'all') {
-                currentQuery.fileType = generator;
-            } else {
-                delete currentQuery.fileType; // Remove fileType param if it's 'all' (default)
-            }
-            
-            router.push(
-                {
-                    pathname: router.pathname,
-                    query: currentQuery,
-                },
-                undefined,
-                { shallow: true } // Shallow routing - no page reload
-            );
         }
     }, [generator]);
 
     const [selectedDocument, setSelectedDocument] = React.useState(null);
     const [suggestionTab, setSuggestionTab] = React.useState(0);
 
-    const [documentStatuses, setDocumentStatuses] = React.useState({});
-    const [documentSyncComplete, setDocumentSyncComplete] = React.useState(false);
-
-    const { files, session } = React.useContext(FilesContext);
-    const { identityId } = session;
+    const { files, documents, session } = React.useContext(FilesContext);
+    const documentStatuses = documents || {};
+    const { identityId } = session || {};
     const { unit } = React.useContext(UnitContext);
+
+    console.log('[FileManager2] Render with:', { filesCount: files?.length, session, identityId, unit });
 
     // Enhanced text search function
     const performSimpleTextSearch = React.useCallback((query) => {
@@ -2364,10 +2572,25 @@ export default function FileManager2() {
         return items;
     }, [organizedFiles, generator]);
 
+    console.log('[FileManager2] fileListItems:', fileListItems.length, 'organizedFiles:', organizedFiles, 'filteredFiles:', filteredFiles.length, 'generator:', generator);
+
     // Setup parent ref for virtualized scrolling
     const parentRef = React.useRef(null);
+    
+    // Debug: Log parent ref dimensions
+    React.useEffect(() => {
+        if (parentRef.current) {
+            const rect = parentRef.current.getBoundingClientRect();
+            console.log('[FileManager2] parentRef dimensions:', { 
+                width: rect.width, 
+                height: rect.height,
+                scrollHeight: parentRef.current.scrollHeight,
+                clientHeight: parentRef.current.clientHeight 
+            });
+        }
+    }, [fileListItems.length]);
 
-    // Setup virtualizer for performance
+    // Setup virtualizer for performance with dynamic measurement
     const virtualizer = useVirtualizer({
         count: fileListItems.length,
         getScrollElement: () => parentRef?.current,
@@ -2375,26 +2598,36 @@ export default function FileManager2() {
             const item = fileListItems[index];
             if (item.type === 'protection-header') return 48;
             if (item.type === 'filetype-subheader') return 36;
-            // File rows: base height + expanded content if applicable
-            const baseHeight = 140;
-            const expandedHeight = expandedFileContent.has(item.id) ? 400 : 0;
-            return baseHeight + expandedHeight;
+            // File rows: initial estimate, will be replaced by actual measurements
+            return 140;
+        },
+        // Enable dynamic measurement with ResizeObserver
+        measureElement: (element) => {
+            // Return actual height of the rendered element
+            return element?.getBoundingClientRect().height ?? 140;
         },
         overscan: 3,
     });
 
-    // Populate vector store from document page embeddings (incremental updates)
+    // Populate vector store from document page embeddings (incremental updates + IndexedDB persistence)
     React.useEffect(() => {
         const isInitialLoad = loadedVersions.current.size === 0;
 
-        if (isInitialLoad) {
-            // Initial load: clear and load everything
-            vectorStore.clear();
+        // Load from IndexedDB on initial mount
+        if (isInitialLoad && !vectorStore.loaded) {
+            vectorStore.loadFromIndexedDB().then(count => {
+                if (count > 0) {
+                    console.log(`[FileManager2] Loaded ${count} cached embeddings from IndexedDB`);
+                }
+            }).catch(error => {
+                console.error('[FileManager2] Failed to load from IndexedDB:', error);
+            });
         }
 
-        files.forEach(file => {
+        files.forEach(async (file) => {
             const docStatus = documentStatuses[file.documentID];
-            const pageEmbeddings = docStatus?.pageEmbeddings;
+            let pageEmbeddings = docStatus?.pageEmbeddings;
+            const embeddingsS3Key = docStatus?.embeddingsS3Key;
             const currentVersion = docStatus?._version || file._version;
             const loadedVersion = loadedVersions.current.get(file.id);
 
@@ -2406,17 +2639,60 @@ export default function FileManager2() {
             // Remove old entries for this file if updating
             if (!isInitialLoad) {
                 vectorStore.items = vectorStore.items.filter(
-                    item => item.metadata.fileId !== file.id
+                    item => item.metadata?.fileId !== file.id
                 );
             }
 
-            // Add page-level embeddings
-            if (pageEmbeddings && Array.isArray(pageEmbeddings)) {
+            // If no pageEmbeddings in DynamoDB but S3 key exists, load from S3
+            if (!pageEmbeddings && embeddingsS3Key && file.documentID) {
+                try {
+                    console.log(`[FileManager2] Loading embeddings from S3 for document ${file.documentID}`);
+                    
+                    // Load from S3 and save to IndexedDB
+                    await loadEmbeddingsFromS3(
+                        embeddingsS3Key,
+                        file.documentID,
+                        {
+                            fileId: file.id,
+                            fileName: file.name,
+                            mimeType: file.mimeType,
+                        }
+                    );
+                    
+                    // Load the newly cached embeddings from IndexedDB
+                    const cachedEmbeddings = await loadEmbeddingsByDocument(file.documentID);
+                    
+                    // Add to vector store in memory
+                    cachedEmbeddings.forEach(emb => {
+                        vectorStore.add(emb);
+                    });
+                    
+                    console.log(`[FileManager2] Loaded ${cachedEmbeddings.length} embeddings from S3`);
+                    
+                    // Update loaded version
+                    if (currentVersion) {
+                        loadedVersions.current.set(file.id, currentVersion);
+                    }
+                    
+                    return; // Skip normal processing
+                } catch (error) {
+                    console.error(`[FileManager2] Failed to load S3 embeddings for ${file.documentID}:`, error);
+                    // Continue with normal flow in case of error
+                }
+            }
+
+            // Add page-level embeddings for PDFs (from DynamoDB)
+            if (pageEmbeddings && Array.isArray(pageEmbeddings) && file.documentID) {
+                // Check if we need to update IndexedDB
+                const shouldUpdateDB = !isInitialLoad || !vectorStore.loaded;
+                
                 pageEmbeddings.forEach(pageData => {
                     if (pageData.embedding) {
                         vectorStore.add({
                             id: `${file.id}-page-${pageData.page}`,
-                            text: pageData.text,
+                            documentId: file.documentID,
+                            page: pageData.page,
+                            text: pageData.text || '',
                             vector: pageData.embedding,
                             metadata: {
                                 fileId: file.id,
@@ -2428,6 +2704,21 @@ export default function FileManager2() {
                         });
                     }
                 });
+
+                // Save to IndexedDB for persistence
+                if (shouldUpdateDB) {
+                    vectorStore.saveToIndexedDB(
+                        file.documentID,
+                        pageEmbeddings,
+                        {
+                            fileId: file.id,
+                            fileName: file.name,
+                            mimeType: file.mimeType,
+                        }
+                    ).catch(error => {
+                        console.error('[FileManager2] Failed to save embeddings to IndexedDB:', error);
+                    });
+                }
             }
 
             // Add file-level embedding for non-PDF files
@@ -2435,6 +2726,8 @@ export default function FileManager2() {
             if (fileEmbedding && !pageEmbeddings) {
                 vectorStore.add({
                     id: file.id,
+                    documentId: file.documentID || file.id,
+                    page: null,
                     text: file.description || file.name,
                     vector: fileEmbedding,
                     metadata: {
@@ -2453,14 +2746,30 @@ export default function FileManager2() {
             }
         });
 
-        // Remove embeddings for deleted files
+        // Remove embeddings for deleted files (both from memory and IndexedDB)
         const currentFileIds = new Set(files.map(f => f.id));
+        const currentDocIds = new Set(files.filter(f => f.documentID).map(f => f.documentID));
+        
         loadedVersions.current.forEach((version, fileId) => {
             if (!currentFileIds.has(fileId)) {
+                // Find the documentId for this file before deletion
+                const itemsToDelete = vectorStore.items.filter(item => item.metadata?.fileId === fileId);
+                const documentIds = new Set(itemsToDelete.map(item => item.documentId).filter(Boolean));
+                
+                // Remove from memory
                 vectorStore.items = vectorStore.items.filter(
-                    item => item.metadata.fileId !== fileId
+                    item => item.metadata?.fileId !== fileId
                 );
                 loadedVersions.current.delete(fileId);
+                
+                // Remove from IndexedDB
+                documentIds.forEach(docId => {
+                    if (!currentDocIds.has(docId)) {
+                        vectorStore.deleteFromIndexedDB(docId).catch(error => {
+                            console.error(`[FileManager2] Failed to delete embeddings for doc ${docId}:`, error);
+                        });
+                    }
+                });
             }
         });
     }, [files, documentStatuses, fileEmbeddings, vectorStore]);
@@ -2469,30 +2778,6 @@ export default function FileManager2() {
     // Get settings from context instead of local subscription
     const settingsContext = React.useContext(SettingsContext);
     const settings = settingsContext?.settings || null;
-
-    // Subscribe to Document status changes
-    React.useEffect(() => {
-        const subscription = DataStore.observeQuery(Document).subscribe(({ items, isSynced }) => {
-            const statusMap = {};
-            items.forEach(doc => {
-                // Use document ID as the key for easier lookup
-                statusMap[doc.id] = {
-                    id: doc.id,
-                    s3Key: doc.s3Key, // Add s3Key for debugging
-                    status: doc.status,
-                    pageCount: doc.pageCount,
-                    extractedText: doc.extractedText,
-                    pageEmbeddings: doc.pageEmbeddings, // Array of { page, embedding, text }
-                };
-            });
-            setDocumentStatuses(statusMap);
-            setDocumentSyncComplete(isSynced);
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, [files]);
 
     // Periodic cleanup of old sessionStorage drafts (run every 5 minutes)
     React.useEffect(() => {
@@ -2648,18 +2933,25 @@ export default function FileManager2() {
                         documentId: result?.documentModel?.id
                     });
 
-                    // If PDF and auto-analyze is enabled, trigger analysis
+                    // If PDF and auto-analyze is enabled, trigger both analysis and embeddings in parallel
                     if (file.type === 'application/pdf' && settings?.autoAnalyzeDocuments && result.documentModel) {
-                        console.log('Auto-analyzing file:', result.fileModel.id);
-                        // Don't await - let analysis run in background
-                        analyzePDF(result.fileModel.id)
-                            .then(() => console.log('Auto-analysis completed'))
+                        console.log('Auto-analyzing and generating embeddings for file:', result.fileModel.id);
+                        
+                        // Run both in parallel - don't await
+                        Promise.all([
+                            analyzePDF(result.fileModel.id),
+                            generateEmbeddings(result.fileModel.id)
+                        ])
+                            .then(([analysisResult, embeddingsResult]) => {
+                                console.log('Auto-analysis completed:', analysisResult);
+                                console.log('Embeddings generation completed:', embeddingsResult);
+                            })
                             .catch((error) => {
                                 // If already being processed, this is expected - just log as info
                                 if (error.message?.includes('currently being processed') || error.message?.includes('already been analyzed')) {
-                                    console.log('Document analysis already in progress or completed:', error.message);
+                                    console.log('Document processing already in progress or completed:', error.message);
                                 } else {
-                                    console.error('Auto-analysis failed:', error);
+                                    console.error('Auto-processing failed:', error);
                                 }
                             });
                     }
@@ -2757,6 +3049,7 @@ export default function FileManager2() {
         <Box
             sx={{
                 height: '100%',
+                minHeight: 0,
                 display: 'flex',
                 flexDirection: 'column',
                 border: isDragging ? '2px dashed #1976d2' : '2px dashed transparent',
@@ -2955,12 +3248,16 @@ export default function FileManager2() {
                                 //. check if document is a pdf
                                 if (file.mimeType == 'application/pdf') {
                                 try {
+                                    console.log('[FileManager2] Re-analyzing PDF:', file.name);
                                     await analyzePDF(file.id, true); // force re-analysis
+                                    console.log('[FileManager2] Re-generating embeddings for:', file.name);
+                                    await generateEmbeddings(file.id);
                                 } catch (error) {
                                     console.error('Error re-analyzing document:', error);
                                 }
                             } else {
-                                await triggerEmbeddingsGeneration(file.id);
+                                console.log('[FileManager2] Re-generating embeddings for:', file.name);
+                                await generateEmbeddings(file.id);
                             }
                         }
                         
@@ -3190,6 +3487,8 @@ export default function FileManager2() {
                     <Box
                         ref={parentRef}
                         sx={{
+                            flex: 1,
+                            minHeight: 0,
                             overflow: 'auto',
                             position: 'relative'
                         }}
@@ -3209,21 +3508,25 @@ export default function FileManager2() {
                             width: '100%',
                             position: 'relative'
                         }}>
-                            {virtualizer.getVirtualItems().map(virtualRow => {
-                                const item = fileListItems[virtualRow.index];
+                            {(() => {
+                                const virtualItems = virtualizer.getVirtualItems();
+                                console.log('[FileManager2] virtualizer.getVirtualItems():', virtualItems.length, 'totalSize:', virtualizer.getTotalSize());
+                                return virtualItems.map(virtualRow => {
+                                    const item = fileListItems[virtualRow.index];
 
-                                return (
-                                    <div
-                                        key={virtualRow.key}
-                                        style={{
-                                            position: 'absolute',
-                                            top: 0,
-                                            left: 0,
-                                            width: '100%',
-                                            height: `${virtualRow.size}px`,
-                                            transform: `translateY(${virtualRow.start}px)`
-                                        }}
-                                    >
+                                    return (
+                                        <div
+                                            key={virtualRow.key}
+                                            data-index={virtualRow.index}
+                                            ref={virtualizer.measureElement}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                transform: `translateY(${virtualRow.start}px)`
+                                            }}
+                                        >
                                         {item.type === 'protection-header' && (
                                             <ProtectionLevelHeader
                                                 label={item.label}
@@ -3247,7 +3550,8 @@ export default function FileManager2() {
                                         )}
                                     </div>
                                 );
-                            })}
+                            });
+                            })()}
                         </div>
                     </Box>
                 )}

@@ -2,7 +2,7 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-import * as APITypes from "../../amplify/backend/function/analyzeDocument/src/src/API";
+import * as APITypes from "../API";
 type GeneratedQuery<InputType, OutputType> = string & {
   __generatedQueryInput: InputType;
   __generatedQueryOutput: OutputType;
@@ -273,6 +273,9 @@ export const getQuestion = /* GraphQL */ `query GetQuestion($id: ID!) {
     embeddingDimensions
     embeddingVersion
     embeddingWordCount
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     units {
       items {
         id
@@ -388,6 +391,9 @@ export const listQuestions = /* GraphQL */ `query ListQuestions(
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -465,6 +471,9 @@ export const syncQuestions = /* GraphQL */ `query SyncQuestions(
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -544,6 +553,9 @@ export const questionsByByPromptHex = /* GraphQL */ `query QuestionsByByPromptHe
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -622,6 +634,7 @@ export const getFile = /* GraphQL */ `query GetFile($id: ID!) {
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -649,6 +662,83 @@ export const getFile = /* GraphQL */ `query GetFile($id: ID!) {
         __typename
       }
       createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    parsedContentID
+    parsedContent {
+      id
+      owner
+      identityId
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      fileID
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      vocabularyJSON
+      summariesJSON
+      objectivesJSON
+      conceptsJSON
+      questionsJSON
+      responseId
+      modelUsed
+      tokensUsed
+      processingTime
+      createdAt
+      importedAt
+      metadata
       updatedAt
       _version
       _deleted
@@ -756,8 +846,34 @@ export const listFiles = /* GraphQL */ `query ListFiles(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -839,8 +955,34 @@ export const syncFiles = /* GraphQL */ `query SyncFiles(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -924,8 +1066,34 @@ export const filesByByHex = /* GraphQL */ `query FilesByByHex(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -1421,6 +1589,9 @@ export const getGrade = /* GraphQL */ `query GetGrade($id: ID!) {
     feedback
     files
     unitID
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -1450,6 +1621,9 @@ export const listGrades = /* GraphQL */ `query ListGrades(
       feedback
       files
       unitID
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -1492,6 +1666,9 @@ export const syncGrades = /* GraphQL */ `query SyncGrades(
       feedback
       files
       unitID
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -1536,6 +1713,9 @@ export const gradesByInstructor = /* GraphQL */ `query GradesByInstructor(
       feedback
       files
       unitID
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -1580,6 +1760,9 @@ export const gradesByUnitID = /* GraphQL */ `query GradesByUnitID(
       feedback
       files
       unitID
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -1641,6 +1824,9 @@ export const getUnit = /* GraphQL */ `query GetUnit($id: ID!) {
         feedback
         files
         unitID
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -1760,6 +1946,9 @@ export const getUnit = /* GraphQL */ `query GetUnit($id: ID!) {
       startedAt
       __typename
     }
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -1829,6 +2018,9 @@ export const listUnits = /* GraphQL */ `query ListUnits(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -1908,6 +2100,9 @@ export const syncUnits = /* GraphQL */ `query SyncUnits(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -2008,6 +2203,9 @@ export const getWord = /* GraphQL */ `query GetWord($id: ID!) {
       startedAt
       __typename
     }
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -2061,6 +2259,9 @@ export const listWords = /* GraphQL */ `query ListWords(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -2124,6 +2325,9 @@ export const syncWords = /* GraphQL */ `query SyncWords(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -2158,12 +2362,14 @@ export const getDocument = /* GraphQL */ `query GetDocument($id: ID!) {
       text
       __typename
     }
+    embeddingsS3Key
     parsedContent {
       items {
         id
         owner
         identityId
         documentID
+        fileID
         vocabularyJSON
         summariesJSON
         objectivesJSON
@@ -2306,6 +2512,7 @@ export const listDocuments = /* GraphQL */ `query ListDocuments(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -2380,6 +2587,7 @@ export const syncDocuments = /* GraphQL */ `query SyncDocuments(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -2448,6 +2656,7 @@ export const getParsedContent = /* GraphQL */ `query GetParsedContent($id: ID!) 
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -2459,6 +2668,98 @@ export const getParsedContent = /* GraphQL */ `query GetParsedContent($id: ID!) 
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    fileID
+    file {
+      id
+      name
+      owner
+      identityId
+      description
+      prompt
+      model
+      variant
+      mimeType
+      level
+      path
+      duration
+      size
+      generated
+      hex
+      byHex
+      thumbnail
+      waveformData
+      embedding
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -2529,7 +2830,38 @@ export const listParsedContents = /* GraphQL */ `query ListParsedContents(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      fileID
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
         createdAt
         updatedAt
         _version
@@ -2595,7 +2927,38 @@ export const syncParsedContents = /* GraphQL */ `query SyncParsedContents(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      fileID
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
         createdAt
         updatedAt
         _version
@@ -2663,7 +3026,38 @@ export const parsedContentsByDocumentID = /* GraphQL */ `query ParsedContentsByD
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      fileID
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
         createdAt
         updatedAt
         _version
@@ -2698,6 +3092,105 @@ export const parsedContentsByDocumentID = /* GraphQL */ `query ParsedContentsByD
   APITypes.ParsedContentsByDocumentIDQueryVariables,
   APITypes.ParsedContentsByDocumentIDQuery
 >;
+export const parsedContentsByFileID = /* GraphQL */ `query ParsedContentsByFileID(
+  $fileID: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelParsedContentFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  parsedContentsByFileID(
+    fileID: $fileID
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      owner
+      identityId
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      fileID
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      vocabularyJSON
+      summariesJSON
+      objectivesJSON
+      conceptsJSON
+      questionsJSON
+      responseId
+      modelUsed
+      tokensUsed
+      processingTime
+      createdAt
+      importedAt
+      metadata
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ParsedContentsByFileIDQueryVariables,
+  APITypes.ParsedContentsByFileIDQuery
+>;
 export const getAgentJob = /* GraphQL */ `query GetAgentJob($id: ID!) {
   getAgentJob(id: $id) {
     id
@@ -2726,6 +3219,7 @@ export const getAgentJob = /* GraphQL */ `query GetAgentJob($id: ID!) {
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -2814,6 +3308,9 @@ export const getAgentJob = /* GraphQL */ `query GetAgentJob($id: ID!) {
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -2870,6 +3367,7 @@ export const listAgentJobs = /* GraphQL */ `query ListAgentJobs(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt
@@ -2898,6 +3396,9 @@ export const listAgentJobs = /* GraphQL */ `query ListAgentJobs(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -2964,6 +3465,7 @@ export const syncAgentJobs = /* GraphQL */ `query SyncAgentJobs(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt
@@ -2992,6 +3494,9 @@ export const syncAgentJobs = /* GraphQL */ `query SyncAgentJobs(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -3060,6 +3565,7 @@ export const agentJobsByDocumentID = /* GraphQL */ `query AgentJobsByDocumentID(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt
@@ -3088,6 +3594,9 @@ export const agentJobsByDocumentID = /* GraphQL */ `query AgentJobsByDocumentID(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -3156,6 +3665,7 @@ export const agentJobsByUnitID = /* GraphQL */ `query AgentJobsByUnitID(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt
@@ -3184,6 +3694,9 @@ export const agentJobsByUnitID = /* GraphQL */ `query AgentJobsByUnitID(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -3325,6 +3838,261 @@ export const syncSettings = /* GraphQL */ `query SyncSettings(
   APITypes.SyncSettingsQueryVariables,
   APITypes.SyncSettingsQuery
 >;
+export const getAIFeedback = /* GraphQL */ `query GetAIFeedback($id: ID!) {
+  getAIFeedback(id: $id) {
+    id
+    owner
+    identityId
+    contentType
+    feedbackType
+    reasons
+    comment
+    model
+    prompt
+    generatedContent
+    unitID
+    gradeID
+    documentID
+    messageId
+    sessionId
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetAIFeedbackQueryVariables,
+  APITypes.GetAIFeedbackQuery
+>;
+export const listAIFeedbacks = /* GraphQL */ `query ListAIFeedbacks(
+  $filter: ModelAIFeedbackFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listAIFeedbacks(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      owner
+      identityId
+      contentType
+      feedbackType
+      reasons
+      comment
+      model
+      prompt
+      generatedContent
+      unitID
+      gradeID
+      documentID
+      messageId
+      sessionId
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListAIFeedbacksQueryVariables,
+  APITypes.ListAIFeedbacksQuery
+>;
+export const syncAIFeedbacks = /* GraphQL */ `query SyncAIFeedbacks(
+  $filter: ModelAIFeedbackFilterInput
+  $limit: Int
+  $nextToken: String
+  $lastSync: AWSTimestamp
+) {
+  syncAIFeedbacks(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    lastSync: $lastSync
+  ) {
+    items {
+      id
+      owner
+      identityId
+      contentType
+      feedbackType
+      reasons
+      comment
+      model
+      prompt
+      generatedContent
+      unitID
+      gradeID
+      documentID
+      messageId
+      sessionId
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SyncAIFeedbacksQueryVariables,
+  APITypes.SyncAIFeedbacksQuery
+>;
+export const aIFeedbacksByUnitID = /* GraphQL */ `query AIFeedbacksByUnitID(
+  $unitID: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelAIFeedbackFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  aIFeedbacksByUnitID(
+    unitID: $unitID
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      owner
+      identityId
+      contentType
+      feedbackType
+      reasons
+      comment
+      model
+      prompt
+      generatedContent
+      unitID
+      gradeID
+      documentID
+      messageId
+      sessionId
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.AIFeedbacksByUnitIDQueryVariables,
+  APITypes.AIFeedbacksByUnitIDQuery
+>;
+export const aIFeedbacksByGradeID = /* GraphQL */ `query AIFeedbacksByGradeID(
+  $gradeID: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelAIFeedbackFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  aIFeedbacksByGradeID(
+    gradeID: $gradeID
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      owner
+      identityId
+      contentType
+      feedbackType
+      reasons
+      comment
+      model
+      prompt
+      generatedContent
+      unitID
+      gradeID
+      documentID
+      messageId
+      sessionId
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.AIFeedbacksByGradeIDQueryVariables,
+  APITypes.AIFeedbacksByGradeIDQuery
+>;
+export const aIFeedbacksByDocumentID = /* GraphQL */ `query AIFeedbacksByDocumentID(
+  $documentID: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelAIFeedbackFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  aIFeedbacksByDocumentID(
+    documentID: $documentID
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      owner
+      identityId
+      contentType
+      feedbackType
+      reasons
+      comment
+      model
+      prompt
+      generatedContent
+      unitID
+      gradeID
+      documentID
+      messageId
+      sessionId
+      metadata
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.AIFeedbacksByDocumentIDQueryVariables,
+  APITypes.AIFeedbacksByDocumentIDQuery
+>;
 export const getQuestionUnit = /* GraphQL */ `query GetQuestionUnit($id: ID!) {
   getQuestionUnit(id: $id) {
     id
@@ -3359,6 +4127,9 @@ export const getQuestionUnit = /* GraphQL */ `query GetQuestionUnit($id: ID!) {
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -3440,6 +4211,9 @@ export const getQuestionUnit = /* GraphQL */ `query GetQuestionUnit($id: ID!) {
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -3494,6 +4268,9 @@ export const listQuestionUnits = /* GraphQL */ `query ListQuestionUnits(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -3520,6 +4297,9 @@ export const listQuestionUnits = /* GraphQL */ `query ListQuestionUnits(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -3584,6 +4364,9 @@ export const syncQuestionUnits = /* GraphQL */ `query SyncQuestionUnits(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -3610,6 +4393,9 @@ export const syncQuestionUnits = /* GraphQL */ `query SyncQuestionUnits(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -3676,6 +4462,9 @@ export const questionUnitsByQuestionId = /* GraphQL */ `query QuestionUnitsByQue
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -3702,6 +4491,9 @@ export const questionUnitsByQuestionId = /* GraphQL */ `query QuestionUnitsByQue
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -3768,6 +4560,9 @@ export const questionUnitsByUnitId = /* GraphQL */ `query QuestionUnitsByUnitId(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -3794,6 +4589,9 @@ export const questionUnitsByUnitId = /* GraphQL */ `query QuestionUnitsByUnitId(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -3852,6 +4650,9 @@ export const getQuestionWord = /* GraphQL */ `query GetQuestionWord($id: ID!) {
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -3917,6 +4718,9 @@ export const getQuestionWord = /* GraphQL */ `query GetQuestionWord($id: ID!) {
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -3971,6 +4775,9 @@ export const listQuestionWords = /* GraphQL */ `query ListQuestionWords(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -3996,6 +4803,9 @@ export const listQuestionWords = /* GraphQL */ `query ListQuestionWords(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -4060,6 +4870,9 @@ export const syncQuestionWords = /* GraphQL */ `query SyncQuestionWords(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -4085,6 +4898,9 @@ export const syncQuestionWords = /* GraphQL */ `query SyncQuestionWords(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -4151,6 +4967,9 @@ export const questionWordsByQuestionId = /* GraphQL */ `query QuestionWordsByQue
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -4176,6 +4995,9 @@ export const questionWordsByQuestionId = /* GraphQL */ `query QuestionWordsByQue
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -4242,6 +5064,9 @@ export const questionWordsByWordId = /* GraphQL */ `query QuestionWordsByWordId(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -4267,6 +5092,9 @@ export const questionWordsByWordId = /* GraphQL */ `query QuestionWordsByWordId(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -4325,6 +5153,9 @@ export const getQuestionFile = /* GraphQL */ `query GetQuestionFile($id: ID!) {
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4387,8 +5218,34 @@ export const getQuestionFile = /* GraphQL */ `query GetQuestionFile($id: ID!) {
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -4464,6 +5321,9 @@ export const listQuestionFiles = /* GraphQL */ `query ListQuestionFiles(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -4492,6 +5352,7 @@ export const listQuestionFiles = /* GraphQL */ `query ListQuestionFiles(
         waveformData
         embedding
         documentID
+        parsedContentID
         createdAt
         updatedAt
         _version
@@ -4556,6 +5417,9 @@ export const syncQuestionFiles = /* GraphQL */ `query SyncQuestionFiles(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -4584,6 +5448,7 @@ export const syncQuestionFiles = /* GraphQL */ `query SyncQuestionFiles(
         waveformData
         embedding
         documentID
+        parsedContentID
         createdAt
         updatedAt
         _version
@@ -4650,6 +5515,9 @@ export const questionFilesByQuestionId = /* GraphQL */ `query QuestionFilesByQue
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -4678,6 +5546,7 @@ export const questionFilesByQuestionId = /* GraphQL */ `query QuestionFilesByQue
         waveformData
         embedding
         documentID
+        parsedContentID
         createdAt
         updatedAt
         _version
@@ -4744,6 +5613,9 @@ export const questionFilesByFileId = /* GraphQL */ `query QuestionFilesByFileId(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -4772,6 +5644,7 @@ export const questionFilesByFileId = /* GraphQL */ `query QuestionFilesByFileId(
         waveformData
         embedding
         documentID
+        parsedContentID
         createdAt
         updatedAt
         _version
@@ -4830,6 +5703,9 @@ export const getDocumentQuestion = /* GraphQL */ `query GetDocumentQuestion($id:
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4877,6 +5753,7 @@ export const getDocumentQuestion = /* GraphQL */ `query GetDocumentQuestion($id:
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -4957,6 +5834,9 @@ export const listDocumentQuestions = /* GraphQL */ `query ListDocumentQuestions(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -4978,6 +5858,7 @@ export const listDocumentQuestions = /* GraphQL */ `query ListDocumentQuestions(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt
@@ -5043,6 +5924,9 @@ export const syncDocumentQuestions = /* GraphQL */ `query SyncDocumentQuestions(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -5064,6 +5948,7 @@ export const syncDocumentQuestions = /* GraphQL */ `query SyncDocumentQuestions(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt
@@ -5131,6 +6016,9 @@ export const documentQuestionsByQuestionId = /* GraphQL */ `query DocumentQuesti
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -5152,6 +6040,7 @@ export const documentQuestionsByQuestionId = /* GraphQL */ `query DocumentQuesti
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt
@@ -5219,6 +6108,9 @@ export const documentQuestionsByDocumentId = /* GraphQL */ `query DocumentQuesti
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -5240,6 +6132,7 @@ export const documentQuestionsByDocumentId = /* GraphQL */ `query DocumentQuesti
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt
@@ -5305,8 +6198,34 @@ export const getUnitFile = /* GraphQL */ `query GetUnitFile($id: ID!) {
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -5389,6 +6308,9 @@ export const getUnitFile = /* GraphQL */ `query GetUnitFile($id: ID!) {
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -5440,6 +6362,7 @@ export const listUnitFiles = /* GraphQL */ `query ListUnitFiles(
         waveformData
         embedding
         documentID
+        parsedContentID
         createdAt
         updatedAt
         _version
@@ -5466,6 +6389,9 @@ export const listUnitFiles = /* GraphQL */ `query ListUnitFiles(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -5527,6 +6453,7 @@ export const syncUnitFiles = /* GraphQL */ `query SyncUnitFiles(
         waveformData
         embedding
         documentID
+        parsedContentID
         createdAt
         updatedAt
         _version
@@ -5553,6 +6480,9 @@ export const syncUnitFiles = /* GraphQL */ `query SyncUnitFiles(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -5616,6 +6546,7 @@ export const unitFilesByFileId = /* GraphQL */ `query UnitFilesByFileId(
         waveformData
         embedding
         documentID
+        parsedContentID
         createdAt
         updatedAt
         _version
@@ -5642,6 +6573,9 @@ export const unitFilesByFileId = /* GraphQL */ `query UnitFilesByFileId(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -5705,6 +6639,7 @@ export const unitFilesByUnitId = /* GraphQL */ `query UnitFilesByUnitId(
         waveformData
         embedding
         documentID
+        parsedContentID
         createdAt
         updatedAt
         _version
@@ -5731,6 +6666,9 @@ export const unitFilesByUnitId = /* GraphQL */ `query UnitFilesByUnitId(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -5795,8 +6733,34 @@ export const getWordFile = /* GraphQL */ `query GetWordFile($id: ID!) {
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -5863,6 +6827,9 @@ export const getWordFile = /* GraphQL */ `query GetWordFile($id: ID!) {
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -5914,6 +6881,7 @@ export const listWordFiles = /* GraphQL */ `query ListWordFiles(
         waveformData
         embedding
         documentID
+        parsedContentID
         createdAt
         updatedAt
         _version
@@ -5939,6 +6907,9 @@ export const listWordFiles = /* GraphQL */ `query ListWordFiles(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -6000,6 +6971,7 @@ export const syncWordFiles = /* GraphQL */ `query SyncWordFiles(
         waveformData
         embedding
         documentID
+        parsedContentID
         createdAt
         updatedAt
         _version
@@ -6025,6 +6997,9 @@ export const syncWordFiles = /* GraphQL */ `query SyncWordFiles(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -6088,6 +7063,7 @@ export const wordFilesByFileId = /* GraphQL */ `query WordFilesByFileId(
         waveformData
         embedding
         documentID
+        parsedContentID
         createdAt
         updatedAt
         _version
@@ -6113,6 +7089,9 @@ export const wordFilesByFileId = /* GraphQL */ `query WordFilesByFileId(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -6176,6 +7155,7 @@ export const wordFilesByWordId = /* GraphQL */ `query WordFilesByWordId(
         waveformData
         embedding
         documentID
+        parsedContentID
         createdAt
         updatedAt
         _version
@@ -6201,6 +7181,9 @@ export const wordFilesByWordId = /* GraphQL */ `query WordFilesByWordId(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -6284,6 +7267,9 @@ export const getUnitWord = /* GraphQL */ `query GetUnitWord($id: ID!) {
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6329,6 +7315,9 @@ export const getUnitWord = /* GraphQL */ `query GetUnitWord($id: ID!) {
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6378,6 +7367,9 @@ export const listUnitWords = /* GraphQL */ `query ListUnitWords(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -6403,6 +7395,9 @@ export const listUnitWords = /* GraphQL */ `query ListUnitWords(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -6462,6 +7457,9 @@ export const syncUnitWords = /* GraphQL */ `query SyncUnitWords(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -6487,6 +7485,9 @@ export const syncUnitWords = /* GraphQL */ `query SyncUnitWords(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -6548,6 +7549,9 @@ export const unitWordsByUnitId = /* GraphQL */ `query UnitWordsByUnitId(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -6573,6 +7577,9 @@ export const unitWordsByUnitId = /* GraphQL */ `query UnitWordsByUnitId(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -6634,6 +7641,9 @@ export const unitWordsByWordId = /* GraphQL */ `query UnitWordsByWordId(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -6659,6 +7669,9 @@ export const unitWordsByWordId = /* GraphQL */ `query UnitWordsByWordId(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -6742,6 +7755,9 @@ export const getUnitDocument = /* GraphQL */ `query GetUnitDocument($id: ID!) {
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6769,6 +7785,7 @@ export const getUnitDocument = /* GraphQL */ `query GetUnitDocument($id: ID!) {
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -6844,6 +7861,9 @@ export const listUnitDocuments = /* GraphQL */ `query ListUnitDocuments(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -6865,6 +7885,7 @@ export const listUnitDocuments = /* GraphQL */ `query ListUnitDocuments(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt
@@ -6925,6 +7946,9 @@ export const syncUnitDocuments = /* GraphQL */ `query SyncUnitDocuments(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -6946,6 +7970,7 @@ export const syncUnitDocuments = /* GraphQL */ `query SyncUnitDocuments(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt
@@ -7008,6 +8033,9 @@ export const unitDocumentsByUnitId = /* GraphQL */ `query UnitDocumentsByUnitId(
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -7029,6 +8057,7 @@ export const unitDocumentsByUnitId = /* GraphQL */ `query UnitDocumentsByUnitId(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt
@@ -7091,6 +8120,9 @@ export const unitDocumentsByDocumentId = /* GraphQL */ `query UnitDocumentsByDoc
         embeddingWordCount
         publishedAt
         isDraft
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -7112,6 +8144,7 @@ export const unitDocumentsByDocumentId = /* GraphQL */ `query UnitDocumentsByDoc
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt
@@ -7180,6 +8213,9 @@ export const getDocumentWord = /* GraphQL */ `query GetDocumentWord($id: ID!) {
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -7207,6 +8243,7 @@ export const getDocumentWord = /* GraphQL */ `query GetDocumentWord($id: ID!) {
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -7281,6 +8318,9 @@ export const listDocumentWords = /* GraphQL */ `query ListDocumentWords(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -7302,6 +8342,7 @@ export const listDocumentWords = /* GraphQL */ `query ListDocumentWords(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt
@@ -7361,6 +8402,9 @@ export const syncDocumentWords = /* GraphQL */ `query SyncDocumentWords(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -7382,6 +8426,7 @@ export const syncDocumentWords = /* GraphQL */ `query SyncDocumentWords(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt
@@ -7443,6 +8488,9 @@ export const documentWordsByWordId = /* GraphQL */ `query DocumentWordsByWordId(
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -7464,6 +8512,7 @@ export const documentWordsByWordId = /* GraphQL */ `query DocumentWordsByWordId(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt
@@ -7525,6 +8574,9 @@ export const documentWordsByDocumentId = /* GraphQL */ `query DocumentWordsByDoc
         embeddingDimensions
         embeddingVersion
         embeddingWordCount
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -7546,6 +8598,7 @@ export const documentWordsByDocumentId = /* GraphQL */ `query DocumentWordsByDoc
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
         updatedAt

@@ -32,9 +32,11 @@ const FilesProvider = ({ children }) => {
   const [myPlaylistFiles, setMyPlaylistFiles] = React.useState({})
   const [myPlaylistUrls, setMyPlaylistUrls] = React.useState({})
   const [myPdfs, setMyPdfs] = React.useState({})
+  const [documents, setDocuments] = React.useState({});
   const [filesVersion, setFilesVersion] = React.useState(0);
   const filesFetchedRef = React.useRef(false);
   const subscriptionRef = React.useRef(null);
+  const documentSubscriptionRef = React.useRef(null);
 
   const [session, setSession] = React.useState({
     error: undefined,
@@ -146,6 +148,7 @@ const FilesProvider = ({ children }) => {
 
         // Query all files regardless of owner - we'll track by identityId for lookup
         subscriptionRef.current = DataStore.observeQuery(File).subscribe(({ items, isSynced }) => {
+          console.log('[FilesContext] DataStore subscription triggered with', items.length, 'files, isSynced:', isSynced);
           const _playlistFiltered = {}
           const _pdfsFiltered = {}
 
@@ -182,6 +185,7 @@ const FilesProvider = ({ children }) => {
           
           setMyFiles(prev => {
             if (prev.length !== items.length) {
+              console.log('[FilesContext] Files count changed:', prev.length, '→', items.length);
               setFilesVersion(v => v + 1);
               return items;
             }
@@ -189,6 +193,7 @@ const FilesProvider = ({ children }) => {
               !prev[i] || prev[i].id !== item.id || prev[i].updatedAt !== item.updatedAt
             );
             if (hasChanges) {
+              console.log('[FilesContext] Files have changes, updating state');
               setFilesVersion(v => v + 1);
               return items;
             }
@@ -209,6 +214,29 @@ const FilesProvider = ({ children }) => {
     return () => {
       subscriptionRef.current?.unsubscribe();
       filesFetchedRef.current = false;
+    };
+  }, []);
+
+  // Subscribe to Document status changes
+  React.useEffect(() => {
+    documentSubscriptionRef.current = DataStore.observeQuery(Document).subscribe(({ items }) => {
+      const statusMap = {};
+      items.forEach(doc => {
+        statusMap[doc.id] = {
+          id: doc.id,
+          s3Key: doc.s3Key,
+          status: doc.status,
+          pageCount: doc.pageCount,
+          extractedText: doc.extractedText,
+          pageEmbeddings: doc.pageEmbeddings,
+          metadata: doc.metadata,
+        };
+      });
+      setDocuments(statusMap);
+    });
+
+    return () => {
+      documentSubscriptionRef.current?.unsubscribe();
     };
   }, []);
 
@@ -235,6 +263,7 @@ const FilesProvider = ({ children }) => {
     myPlaylistFiles,
     myPlaylistUrls,
     myPdfs,
+    documents,
     session,
     filesVersion
   }), [
@@ -243,6 +272,7 @@ const FilesProvider = ({ children }) => {
     myPlaylistFiles,
     myPlaylistUrls,
     myPdfs,
+    documents,
     session,
     filesVersion
   ]);

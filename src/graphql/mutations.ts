@@ -2,7 +2,7 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-import * as APITypes from "../../amplify/backend/function/analyzeDocument/src/src/API";
+import * as APITypes from "../API";
 type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationInput: InputType;
   __generatedMutationOutput: OutputType;
@@ -75,6 +75,7 @@ export const generateAudioFile = /* GraphQL */ `mutation GenerateAudioFile($phra
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -102,6 +103,83 @@ export const generateAudioFile = /* GraphQL */ `mutation GenerateAudioFile($phra
         __typename
       }
       createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    parsedContentID
+    parsedContent {
+      id
+      owner
+      identityId
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      fileID
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      vocabularyJSON
+      summariesJSON
+      objectivesJSON
+      conceptsJSON
+      questionsJSON
+      responseId
+      modelUsed
+      tokensUsed
+      processingTime
+      createdAt
+      importedAt
+      metadata
       updatedAt
       _version
       _deleted
@@ -220,6 +298,7 @@ export const generateImageFile = /* GraphQL */ `mutation GenerateImageFile($phra
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -247,6 +326,83 @@ export const generateImageFile = /* GraphQL */ `mutation GenerateImageFile($phra
         __typename
       }
       createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    parsedContentID
+    parsedContent {
+      id
+      owner
+      identityId
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      fileID
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      vocabularyJSON
+      summariesJSON
+      objectivesJSON
+      conceptsJSON
+      questionsJSON
+      responseId
+      modelUsed
+      tokensUsed
+      processingTime
+      createdAt
+      importedAt
+      metadata
       updatedAt
       _version
       _deleted
@@ -448,6 +604,42 @@ export const generateEmbedding = /* GraphQL */ `mutation GenerateEmbedding(
   APITypes.GenerateEmbeddingMutationVariables,
   APITypes.GenerateEmbeddingMutation
 >;
+export const contentCompletion = /* GraphQL */ `mutation ContentCompletion($prompt: String!, $context: AWSJSON) {
+  contentCompletion(prompt: $prompt, context: $context)
+}
+` as GeneratedMutation<
+  APITypes.ContentCompletionMutationVariables,
+  APITypes.ContentCompletionMutation
+>;
+export const suggestBlocks = /* GraphQL */ `mutation SuggestBlocks(
+  $unitStructure: AWSJSON!
+  $currentContext: AWSJSON
+  $userHistory: AWSJSON
+) {
+  suggestBlocks(
+    unitStructure: $unitStructure
+    currentContext: $currentContext
+    userHistory: $userHistory
+  )
+}
+` as GeneratedMutation<
+  APITypes.SuggestBlocksMutationVariables,
+  APITypes.SuggestBlocksMutation
+>;
+export const moderateContent = /* GraphQL */ `mutation ModerateContent($content: String!) {
+  moderateContent(content: $content) {
+    flagged
+    categories
+    categoryScores
+    model
+    error
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.ModerateContentMutationVariables,
+  APITypes.ModerateContentMutation
+>;
 export const createAssistant = /* GraphQL */ `mutation CreateAssistant(
   $input: CreateAssistantInput!
   $condition: ModelAssistantConditionInput
@@ -562,6 +754,9 @@ export const createQuestion = /* GraphQL */ `mutation CreateQuestion(
     embeddingDimensions
     embeddingVersion
     embeddingWordCount
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     units {
       items {
         id
@@ -675,6 +870,9 @@ export const updateQuestion = /* GraphQL */ `mutation UpdateQuestion(
     embeddingDimensions
     embeddingVersion
     embeddingWordCount
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     units {
       items {
         id
@@ -788,6 +986,9 @@ export const deleteQuestion = /* GraphQL */ `mutation DeleteQuestion(
     embeddingDimensions
     embeddingVersion
     embeddingWordCount
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     units {
       items {
         id
@@ -913,6 +1114,7 @@ export const createFile = /* GraphQL */ `mutation CreateFile(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -940,6 +1142,83 @@ export const createFile = /* GraphQL */ `mutation CreateFile(
         __typename
       }
       createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    parsedContentID
+    parsedContent {
+      id
+      owner
+      identityId
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      fileID
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      vocabularyJSON
+      summariesJSON
+      objectivesJSON
+      conceptsJSON
+      questionsJSON
+      responseId
+      modelUsed
+      tokensUsed
+      processingTime
+      createdAt
+      importedAt
+      metadata
       updatedAt
       _version
       _deleted
@@ -1054,6 +1333,7 @@ export const updateFile = /* GraphQL */ `mutation UpdateFile(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -1081,6 +1361,83 @@ export const updateFile = /* GraphQL */ `mutation UpdateFile(
         __typename
       }
       createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    parsedContentID
+    parsedContent {
+      id
+      owner
+      identityId
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      fileID
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      vocabularyJSON
+      summariesJSON
+      objectivesJSON
+      conceptsJSON
+      questionsJSON
+      responseId
+      modelUsed
+      tokensUsed
+      processingTime
+      createdAt
+      importedAt
+      metadata
       updatedAt
       _version
       _deleted
@@ -1195,6 +1552,7 @@ export const deleteFile = /* GraphQL */ `mutation DeleteFile(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -1222,6 +1580,83 @@ export const deleteFile = /* GraphQL */ `mutation DeleteFile(
         __typename
       }
       createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    parsedContentID
+    parsedContent {
+      id
+      owner
+      identityId
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      fileID
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      vocabularyJSON
+      summariesJSON
+      objectivesJSON
+      conceptsJSON
+      questionsJSON
+      responseId
+      modelUsed
+      tokensUsed
+      processingTime
+      createdAt
+      importedAt
+      metadata
       updatedAt
       _version
       _deleted
@@ -1609,6 +2044,9 @@ export const createGrade = /* GraphQL */ `mutation CreateGrade(
     feedback
     files
     unitID
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -1639,6 +2077,9 @@ export const updateGrade = /* GraphQL */ `mutation UpdateGrade(
     feedback
     files
     unitID
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -1669,6 +2110,9 @@ export const deleteGrade = /* GraphQL */ `mutation DeleteGrade(
     feedback
     files
     unitID
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -1729,6 +2173,9 @@ export const createUnit = /* GraphQL */ `mutation CreateUnit(
         feedback
         files
         unitID
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -1848,6 +2295,9 @@ export const createUnit = /* GraphQL */ `mutation CreateUnit(
       startedAt
       __typename
     }
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -1908,6 +2358,9 @@ export const updateUnit = /* GraphQL */ `mutation UpdateUnit(
         feedback
         files
         unitID
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -2027,6 +2480,9 @@ export const updateUnit = /* GraphQL */ `mutation UpdateUnit(
       startedAt
       __typename
     }
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -2087,6 +2543,9 @@ export const deleteUnit = /* GraphQL */ `mutation DeleteUnit(
         feedback
         files
         unitID
+        moderationStatus
+        moderationFlags
+        moderationCheckedAt
         createdAt
         updatedAt
         _version
@@ -2206,6 +2665,9 @@ export const deleteUnit = /* GraphQL */ `mutation DeleteUnit(
       startedAt
       __typename
     }
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -2308,6 +2770,9 @@ export const createWord = /* GraphQL */ `mutation CreateWord(
       startedAt
       __typename
     }
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -2410,6 +2875,9 @@ export const updateWord = /* GraphQL */ `mutation UpdateWord(
       startedAt
       __typename
     }
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -2512,6 +2980,9 @@ export const deleteWord = /* GraphQL */ `mutation DeleteWord(
       startedAt
       __typename
     }
+    moderationStatus
+    moderationFlags
+    moderationCheckedAt
     createdAt
     updatedAt
     _version
@@ -2548,12 +3019,14 @@ export const createDocument = /* GraphQL */ `mutation CreateDocument(
       text
       __typename
     }
+    embeddingsS3Key
     parsedContent {
       items {
         id
         owner
         identityId
         documentID
+        fileID
         vocabularyJSON
         summariesJSON
         objectivesJSON
@@ -2694,12 +3167,14 @@ export const updateDocument = /* GraphQL */ `mutation UpdateDocument(
       text
       __typename
     }
+    embeddingsS3Key
     parsedContent {
       items {
         id
         owner
         identityId
         documentID
+        fileID
         vocabularyJSON
         summariesJSON
         objectivesJSON
@@ -2840,12 +3315,14 @@ export const deleteDocument = /* GraphQL */ `mutation DeleteDocument(
       text
       __typename
     }
+    embeddingsS3Key
     parsedContent {
       items {
         id
         owner
         identityId
         documentID
+        fileID
         vocabularyJSON
         summariesJSON
         objectivesJSON
@@ -2991,6 +3468,7 @@ export const createParsedContent = /* GraphQL */ `mutation CreateParsedContent(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -3002,6 +3480,98 @@ export const createParsedContent = /* GraphQL */ `mutation CreateParsedContent(
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    fileID
+    file {
+      id
+      name
+      owner
+      identityId
+      description
+      prompt
+      model
+      variant
+      mimeType
+      level
+      path
+      duration
+      size
+      generated
+      hex
+      byHex
+      thumbnail
+      waveformData
+      embedding
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -3076,6 +3646,7 @@ export const updateParsedContent = /* GraphQL */ `mutation UpdateParsedContent(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -3087,6 +3658,98 @@ export const updateParsedContent = /* GraphQL */ `mutation UpdateParsedContent(
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    fileID
+    file {
+      id
+      name
+      owner
+      identityId
+      description
+      prompt
+      model
+      variant
+      mimeType
+      level
+      path
+      duration
+      size
+      generated
+      hex
+      byHex
+      thumbnail
+      waveformData
+      embedding
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -3161,6 +3824,7 @@ export const deleteParsedContent = /* GraphQL */ `mutation DeleteParsedContent(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -3172,6 +3836,98 @@ export const deleteParsedContent = /* GraphQL */ `mutation DeleteParsedContent(
         __typename
       }
       metadata
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    fileID
+    file {
+      id
+      name
+      owner
+      identityId
+      description
+      prompt
+      model
+      variant
+      mimeType
+      level
+      path
+      duration
+      size
+      generated
+      hex
+      byHex
+      thumbnail
+      waveformData
+      embedding
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
       units {
         nextToken
         startedAt
@@ -3248,6 +4004,7 @@ export const createAgentJob = /* GraphQL */ `mutation CreateAgentJob(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -3336,6 +4093,9 @@ export const createAgentJob = /* GraphQL */ `mutation CreateAgentJob(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -3396,6 +4156,7 @@ export const updateAgentJob = /* GraphQL */ `mutation UpdateAgentJob(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -3484,6 +4245,9 @@ export const updateAgentJob = /* GraphQL */ `mutation UpdateAgentJob(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -3544,6 +4308,7 @@ export const deleteAgentJob = /* GraphQL */ `mutation DeleteAgentJob(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -3632,6 +4397,9 @@ export const deleteAgentJob = /* GraphQL */ `mutation DeleteAgentJob(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -3754,6 +4522,105 @@ export const deleteSettings = /* GraphQL */ `mutation DeleteSettings(
   APITypes.DeleteSettingsMutationVariables,
   APITypes.DeleteSettingsMutation
 >;
+export const createAIFeedback = /* GraphQL */ `mutation CreateAIFeedback(
+  $input: CreateAIFeedbackInput!
+  $condition: ModelAIFeedbackConditionInput
+) {
+  createAIFeedback(input: $input, condition: $condition) {
+    id
+    owner
+    identityId
+    contentType
+    feedbackType
+    reasons
+    comment
+    model
+    prompt
+    generatedContent
+    unitID
+    gradeID
+    documentID
+    messageId
+    sessionId
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAIFeedbackMutationVariables,
+  APITypes.CreateAIFeedbackMutation
+>;
+export const updateAIFeedback = /* GraphQL */ `mutation UpdateAIFeedback(
+  $input: UpdateAIFeedbackInput!
+  $condition: ModelAIFeedbackConditionInput
+) {
+  updateAIFeedback(input: $input, condition: $condition) {
+    id
+    owner
+    identityId
+    contentType
+    feedbackType
+    reasons
+    comment
+    model
+    prompt
+    generatedContent
+    unitID
+    gradeID
+    documentID
+    messageId
+    sessionId
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAIFeedbackMutationVariables,
+  APITypes.UpdateAIFeedbackMutation
+>;
+export const deleteAIFeedback = /* GraphQL */ `mutation DeleteAIFeedback(
+  $input: DeleteAIFeedbackInput!
+  $condition: ModelAIFeedbackConditionInput
+) {
+  deleteAIFeedback(input: $input, condition: $condition) {
+    id
+    owner
+    identityId
+    contentType
+    feedbackType
+    reasons
+    comment
+    model
+    prompt
+    generatedContent
+    unitID
+    gradeID
+    documentID
+    messageId
+    sessionId
+    metadata
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAIFeedbackMutationVariables,
+  APITypes.DeleteAIFeedbackMutation
+>;
 export const createQuestionUnit = /* GraphQL */ `mutation CreateQuestionUnit(
   $input: CreateQuestionUnitInput!
   $condition: ModelQuestionUnitConditionInput
@@ -3791,6 +4658,9 @@ export const createQuestionUnit = /* GraphQL */ `mutation CreateQuestionUnit(
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -3872,6 +4742,9 @@ export const createQuestionUnit = /* GraphQL */ `mutation CreateQuestionUnit(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -3929,6 +4802,9 @@ export const updateQuestionUnit = /* GraphQL */ `mutation UpdateQuestionUnit(
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4010,6 +4886,9 @@ export const updateQuestionUnit = /* GraphQL */ `mutation UpdateQuestionUnit(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -4067,6 +4946,9 @@ export const deleteQuestionUnit = /* GraphQL */ `mutation DeleteQuestionUnit(
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4148,6 +5030,9 @@ export const deleteQuestionUnit = /* GraphQL */ `mutation DeleteQuestionUnit(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -4205,6 +5090,9 @@ export const createQuestionWord = /* GraphQL */ `mutation CreateQuestionWord(
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4270,6 +5158,9 @@ export const createQuestionWord = /* GraphQL */ `mutation CreateQuestionWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -4327,6 +5218,9 @@ export const updateQuestionWord = /* GraphQL */ `mutation UpdateQuestionWord(
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4392,6 +5286,9 @@ export const updateQuestionWord = /* GraphQL */ `mutation UpdateQuestionWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -4449,6 +5346,9 @@ export const deleteQuestionWord = /* GraphQL */ `mutation DeleteQuestionWord(
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4514,6 +5414,9 @@ export const deleteQuestionWord = /* GraphQL */ `mutation DeleteQuestionWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -4571,6 +5474,9 @@ export const createQuestionFile = /* GraphQL */ `mutation CreateQuestionFile(
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4633,8 +5539,34 @@ export const createQuestionFile = /* GraphQL */ `mutation CreateQuestionFile(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -4713,6 +5645,9 @@ export const updateQuestionFile = /* GraphQL */ `mutation UpdateQuestionFile(
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4775,8 +5710,34 @@ export const updateQuestionFile = /* GraphQL */ `mutation UpdateQuestionFile(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -4855,6 +5816,9 @@ export const deleteQuestionFile = /* GraphQL */ `mutation DeleteQuestionFile(
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -4917,8 +5881,34 @@ export const deleteQuestionFile = /* GraphQL */ `mutation DeleteQuestionFile(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -4997,6 +5987,9 @@ export const createDocumentQuestion = /* GraphQL */ `mutation CreateDocumentQues
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -5044,6 +6037,7 @@ export const createDocumentQuestion = /* GraphQL */ `mutation CreateDocumentQues
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -5127,6 +6121,9 @@ export const updateDocumentQuestion = /* GraphQL */ `mutation UpdateDocumentQues
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -5174,6 +6171,7 @@ export const updateDocumentQuestion = /* GraphQL */ `mutation UpdateDocumentQues
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -5257,6 +6255,9 @@ export const deleteDocumentQuestion = /* GraphQL */ `mutation DeleteDocumentQues
       embeddingDimensions
       embeddingVersion
       embeddingWordCount
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       units {
         nextToken
         startedAt
@@ -5304,6 +6305,7 @@ export const deleteDocumentQuestion = /* GraphQL */ `mutation DeleteDocumentQues
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -5393,8 +6395,34 @@ export const createUnitFile = /* GraphQL */ `mutation CreateUnitFile(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -5477,6 +6505,9 @@ export const createUnitFile = /* GraphQL */ `mutation CreateUnitFile(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -5540,8 +6571,34 @@ export const updateUnitFile = /* GraphQL */ `mutation UpdateUnitFile(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -5624,6 +6681,9 @@ export const updateUnitFile = /* GraphQL */ `mutation UpdateUnitFile(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -5687,8 +6747,34 @@ export const deleteUnitFile = /* GraphQL */ `mutation DeleteUnitFile(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -5771,6 +6857,9 @@ export const deleteUnitFile = /* GraphQL */ `mutation DeleteUnitFile(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -5834,8 +6923,34 @@ export const createWordFile = /* GraphQL */ `mutation CreateWordFile(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -5902,6 +7017,9 @@ export const createWordFile = /* GraphQL */ `mutation CreateWordFile(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -5965,8 +7083,34 @@ export const updateWordFile = /* GraphQL */ `mutation UpdateWordFile(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -6033,6 +7177,9 @@ export const updateWordFile = /* GraphQL */ `mutation UpdateWordFile(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6096,8 +7243,34 @@ export const deleteWordFile = /* GraphQL */ `mutation DeleteWordFile(
         mimeType
         uploadedAt
         resumeState
+        embeddingsS3Key
         metadata
         createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
         updatedAt
         _version
         _deleted
@@ -6164,6 +7337,9 @@ export const deleteWordFile = /* GraphQL */ `mutation DeleteWordFile(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6246,6 +7422,9 @@ export const createUnitWord = /* GraphQL */ `mutation CreateUnitWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6291,6 +7470,9 @@ export const createUnitWord = /* GraphQL */ `mutation CreateUnitWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6373,6 +7555,9 @@ export const updateUnitWord = /* GraphQL */ `mutation UpdateUnitWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6418,6 +7603,9 @@ export const updateUnitWord = /* GraphQL */ `mutation UpdateUnitWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6500,6 +7688,9 @@ export const deleteUnitWord = /* GraphQL */ `mutation DeleteUnitWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6545,6 +7736,9 @@ export const deleteUnitWord = /* GraphQL */ `mutation DeleteUnitWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6627,6 +7821,9 @@ export const createUnitDocument = /* GraphQL */ `mutation CreateUnitDocument(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6654,6 +7851,7 @@ export const createUnitDocument = /* GraphQL */ `mutation CreateUnitDocument(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -6762,6 +7960,9 @@ export const updateUnitDocument = /* GraphQL */ `mutation UpdateUnitDocument(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6789,6 +7990,7 @@ export const updateUnitDocument = /* GraphQL */ `mutation UpdateUnitDocument(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -6897,6 +8099,9 @@ export const deleteUnitDocument = /* GraphQL */ `mutation DeleteUnitDocument(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -6924,6 +8129,7 @@ export const deleteUnitDocument = /* GraphQL */ `mutation DeleteUnitDocument(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -7016,6 +8222,9 @@ export const createDocumentWord = /* GraphQL */ `mutation CreateDocumentWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -7043,6 +8252,7 @@ export const createDocumentWord = /* GraphQL */ `mutation CreateDocumentWord(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -7135,6 +8345,9 @@ export const updateDocumentWord = /* GraphQL */ `mutation UpdateDocumentWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -7162,6 +8375,7 @@ export const updateDocumentWord = /* GraphQL */ `mutation UpdateDocumentWord(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
@@ -7254,6 +8468,9 @@ export const deleteDocumentWord = /* GraphQL */ `mutation DeleteDocumentWord(
         startedAt
         __typename
       }
+      moderationStatus
+      moderationFlags
+      moderationCheckedAt
       createdAt
       updatedAt
       _version
@@ -7281,6 +8498,7 @@ export const deleteDocumentWord = /* GraphQL */ `mutation DeleteDocumentWord(
         text
         __typename
       }
+      embeddingsS3Key
       parsedContent {
         nextToken
         startedAt
