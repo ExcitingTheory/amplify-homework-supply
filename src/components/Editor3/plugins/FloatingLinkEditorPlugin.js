@@ -45,6 +45,8 @@ import CloseIcon from '@mui/icons-material/Close';
 
 const VERTICAL_GAP = 10;
 const HORIZONTAL_OFFSET = 0;
+const HORIZONTAL_OFFSET_LEFT = 350; // Default left drawer width
+const HORIZONTAL_OFFSET_RIGHT = 350; // Default right drawer width
 
 // YouTube URL detection
 function getYouTubeVideoID(url) {
@@ -134,7 +136,8 @@ function FloatingLinkEditor({
     isLink,
     setIsLink,
     anchorElem,
-    isSidebarOpen,
+    isLeftDrawerOpen = false,
+    isRightDrawerOpen = false,
 }) {
     const editorRef = useRef(null);
     const inputRef = useRef(null);
@@ -144,8 +147,11 @@ function FloatingLinkEditor({
     const [lastSelection, setLastSelection] = useState(null);
     const initialScrollPos = useRef({ top: 0, left: 0 });
 
-    const drawerWidth = useMemo(() => isSidebarOpen ? HORIZONTAL_OFFSET : -70, [isSidebarOpen]);
-    const verticalGap = useMemo(() => VERTICAL_GAP, [])
+    const drawerWidthLeft = useMemo(() => isLeftDrawerOpen ? HORIZONTAL_OFFSET_LEFT : 40, [isLeftDrawerOpen]);
+    const drawerWidthRight = useMemo(() => isRightDrawerOpen ? HORIZONTAL_OFFSET_RIGHT : 40, [isRightDrawerOpen]);
+    // Total horizontal offset is from the left drawer only (position is relative to anchor)
+    const drawerWidth = useMemo(() => drawerWidthLeft, [drawerWidthLeft]);
+    const verticalGap = useMemo(() => VERTICAL_GAP, []);
 
     // Store initial scroll position when link editor first appears
     useEffect(() => {
@@ -536,7 +542,8 @@ function FloatingLinkEditor({
 function useFloatingLinkEditorToolbar(
     editor,
     anchorElem,
-    isSidebarOpen,
+    isLeftDrawerOpen,
+    isRightDrawerOpen,
 ) {
     const [activeEditor, setActiveEditor] = useState(editor);
     const [isLink, setIsLink] = useState(false);
@@ -593,7 +600,8 @@ function useFloatingLinkEditorToolbar(
             isLink={isLink}
             anchorElem={anchorElem}
             setIsLink={setIsLink}
-            isSidebarOpen={isSidebarOpen}
+            isLeftDrawerOpen={isLeftDrawerOpen}
+            isRightDrawerOpen={isRightDrawerOpen}
         />,
         anchorElem,
     );
@@ -601,8 +609,9 @@ function useFloatingLinkEditorToolbar(
 
 export default function FloatingLinkEditorPlugin({
     anchorElem = document.body,
-    isSidebarOpen,
+    isLeftDrawerOpen = false,
+    isRightDrawerOpen = false,
 }) {
     const [editor] = useLexicalComposerContext();
-    return useFloatingLinkEditorToolbar(editor, anchorElem, isSidebarOpen);
+    return useFloatingLinkEditorToolbar(editor, anchorElem, isLeftDrawerOpen, isRightDrawerOpen);
 }

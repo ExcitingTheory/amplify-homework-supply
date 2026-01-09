@@ -177,16 +177,22 @@ export const handler = awslambda.streamifyResponse(async (event, responseStream,
 
     responseStream = awslambda.HttpResponseStream.from(responseStream, metadata);
 
-    // Stream the response
+    // Stream the response in AI SDK format
     let toolCalls = [];
-    let currentToolCall = null;
+    let messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    let contentBuffer = '';
 
     for await (const chunk of stream) {
       const delta = chunk.choices[0]?.delta;
+      const finishReason = chunk.choices[0]?.finish_reason;
 
-      // Handle content streaming
+      // Stream OpenAI chunk directly (AI SDK can parse this)
+      const streamData = JSON.stringify(chunk);
+      responseStream.write(`data: ${streamData}\n\n`);
+
+      // Track content and tool calls for logging
       if (delta?.content) {
-        responseStream.write(delta.content);
+        contentBuffer += delta.content;
       }
 
       // Handle tool calls
@@ -220,14 +226,10 @@ export const handler = awslambda.streamifyResponse(async (event, responseStream,
       }
     }
 
-    // If there were tool calls, send them in a special format
-    if (toolCalls.length > 0) {
-      const toolCallData = JSON.stringify({
-        type: 'tool_calls',
-        tool_calls: toolCalls,
-      });
-      responseStream.write(`\n__TOOL_CALLS__:${toolCallData}`);
-    }
+    // Send done signal
+    responseStream.write('data: [DONE]\n\n');
+    
+    console.log('[Chat Lambda] Streamed', contentBuffer.length, 'chars,', toolCalls.length, 'tool calls');
 
     responseStream.end();
     console.log('[Chat Lambda] Stream completed');

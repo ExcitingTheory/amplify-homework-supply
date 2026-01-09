@@ -8,7 +8,8 @@ import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import VerticalTabsRo from './components/VerticalTabsRo';
-import VerticalTabs from './components/VerticalTabs';
+import TabsVerticalLeft from './components/TabsVerticalLeft';
+import TabsVerticalRight from './components/TabsVerticalRight';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListNode, ListItemNode } from '@lexical/list';
 import { CodeNode, CodeHighlightNode } from '@lexical/code';
@@ -105,6 +106,7 @@ import AnswerPlugin from './plugins/AnswerPlugin.js';
 import { AnswerNode } from './plugins/AnswerPlugin.js';
 import CustomAnswerPlugin, { CustomAnswerNode } from './plugins/CustomAnswerPlugin.js';
 import BlockSuggestionPlugin from './plugins/BlockSuggestionPlugin.js';
+import { SuggestionProvider } from './context/SuggestionContext';
 import AIContentCompletionPlugin from './plugins/AIContentCompletionPlugin.js';
 import { DataStore } from 'aws-amplify/datastore';
 import { Unit } from '../../models';
@@ -274,43 +276,72 @@ export default function Editor() {
   // Removed previousStateRef - version comparison in DataPlugin prevents loops
   const { unit } = useContext(UnitContext);
   const theme = useTheme();
-  const [openTab, setOpenTab] = React.useState(false);
-  const [tabValue, setTabValue] = React.useState(0);
+  
+  // Left drawer state
+  const [openTabVerticalLeft, setOpenTabVerticalLeft] = React.useState(false);
+  const [tabValueLeft, setTabValueLeft] = React.useState(5);
+  const [currentDrawerWidthLeft, setCurrentDrawerWidthLeft] = React.useState(drawerWidth);
+  const [actualDrawerWidthLeft, setActualDrawerWidthLeft] = React.useState(drawerWidth);
+  
+  // Right drawer state
+  const [openTabVerticalRight, setOpenTabVerticalRight] = React.useState(false);
+  const [tabValueRight, setTabValueRight] = React.useState(5);
+  const [currentDrawerWidthRight, setCurrentDrawerWidthRight] = React.useState(drawerWidth);
+  const [actualDrawerWidthRight, setActualDrawerWidthRight] = React.useState(drawerWidth);
+  
   const [isEditable, setIsEditable] = React.useState(true);
-  const drawerRef = React.useRef(null);
+  const drawerRefLeft = React.useRef(null);
+  const drawerRefRight = React.useRef(null);
   const toolbarRef = React.useRef(null);
   const [toolbarHeight, setToolbarHeight] = React.useState(0);
-  const [actualDrawerWidth, setActualDrawerWidth] = React.useState(drawerWidth);
-  const [currentDrawerWidth, setCurrentDrawerWidth] = React.useState(drawerWidth);
-  const [isResizing, setIsResizing] = React.useState(false);
 
-  const handleDrawerOpen = () => {
-    setOpenTab(true);
+  const handleDrawerLeftClose = () => {
+    setOpenTabVerticalLeft(false);
   };
 
-  const handleDrawerClose = () => {
-    setOpenTab(false);
+  const handleDrawerRightClose = () => {
+    setOpenTabVerticalRight(false);
   };
 
-  // Measure drawer content width
+  // Measure left drawer content width
   React.useEffect(() => {
-    if (openTab && drawerRef.current) {
+    if (openTabVerticalLeft && drawerRefLeft.current) {
       const resizeObserver = new ResizeObserver((entries) => {
         for (let entry of entries) {
           const width = entry.contentRect.width;
           if (width > 0) {
-            setActualDrawerWidth(width);
+            setActualDrawerWidthLeft(width);
           }
         }
       });
 
-      resizeObserver.observe(drawerRef.current);
+      resizeObserver.observe(drawerRefLeft.current);
 
       return () => {
         resizeObserver.disconnect();
       };
     }
-  }, [openTab]);
+  }, [openTabVerticalLeft]);
+
+  // Measure right drawer content width
+  React.useEffect(() => {
+    if (openTabVerticalRight && drawerRefRight.current) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          const width = entry.contentRect.width;
+          if (width > 0) {
+            setActualDrawerWidthRight(width);
+          }
+        }
+      });
+
+      resizeObserver.observe(drawerRefRight.current);
+
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }
+  }, [openTabVerticalRight]);
 
   // Measure toolbar height dynamically
   React.useEffect(() => {
@@ -396,12 +427,13 @@ export default function Editor() {
   // };
 
   return (
-    <DndWrapper>
-      <AutocompleteProvider>
-        <LexicalComposer
-          initialConfig={initialConfig}
-        >
-          <style jsx global>{`
+    <SuggestionProvider>
+      <DndWrapper>
+        <AutocompleteProvider>
+          <LexicalComposer
+            initialConfig={initialConfig}
+          >
+            <style jsx global>{`
             .layout-container {
               display: grid;
             }
@@ -451,7 +483,8 @@ export default function Editor() {
             <>
               <FloatingLinkEditorPlugin
                 anchorElem={floatingAnchorElem}
-                isSidebarOpen={openTab}
+                isLeftDrawerOpen={openTabVerticalLeft}
+                isRightDrawerOpen={openTabVerticalRight}
                 appBarHeight={toolbarHeight}
               />
 
@@ -468,41 +501,46 @@ export default function Editor() {
           }}>
             <ToolBarPlugin
               ref={toolbarRef}
-              setOpen={setOpenTab}
-              open={openTab}
-              setTabValue={setTabValue}
+              setOpen={setOpenTabVerticalLeft}
+              open={openTabVerticalLeft}
+              setTabValue={setTabValueLeft}
             />
+            {/* Left Drawer */}
             <Drawer
-              ref={drawerRef}
-              drawerwidth={currentDrawerWidth}
+              ref={drawerRefLeft}
+              drawerwidth={currentDrawerWidthLeft}
+              anchor="left"
               sx={{
                 height: '100%',
                 flexShrink: 0,
                 position: 'relative',
               }}
-              variant="permanent" open={openTab}>
+              variant="permanent" 
+              open={openTabVerticalLeft}
+            >
               <DrawerHeader
                 style={{
                   height: 'var(--app-bar-height, 11rem)',
-                  // backgroundColor: '#fafafa',
                 }}
               >
-                <IconButton onClick={handleDrawerClose}>
+                <IconButton onClick={handleDrawerLeftClose}>
                   {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
                 </IconButton>
               </DrawerHeader>
-              <VerticalTabs
-                setOpen={setOpenTab}
-                open={openTab}
-                setDrawerWidth={setCurrentDrawerWidth}
-                value={tabValue}
-                setValue={setTabValue}
+              <TabsVerticalLeft
+                setOpen={setOpenTabVerticalLeft}
+                open={openTabVerticalLeft}
+                setDrawerWidth={setCurrentDrawerWidthLeft}
+                value={tabValueLeft}
+                setValue={setTabValueLeft}
               />
             </Drawer>
+            
+            {/* Main Content */}
             <Box component="main" sx={{
               flexGrow: 1,
               padding: 0,
-              width: openTab ? `calc(100% - ${actualDrawerWidth}px)` : 'calc(100% - 2.5rem)',
+              width: `calc(100% - ${openTabVerticalLeft ? actualDrawerWidthLeft : 40}px - ${openTabVerticalRight ? actualDrawerWidthRight : 40}px)`,
               transition: 'width 0.3s ease',
             }}>
               <DrawerHeader
@@ -531,11 +569,44 @@ export default function Editor() {
                 <MyOnChangePlugin onChange={onChange} />
               </div>
             </Box>
+            
+            {/* Right Drawer */}
+            <Drawer
+              ref={drawerRefRight}
+              drawerwidth={currentDrawerWidthRight}
+              anchor="right"
+              sx={{
+                height: '100%',
+                flexShrink: 0,
+                position: 'relative',
+              }}
+              variant="permanent" 
+              open={openTabVerticalRight}
+            >
+              <DrawerHeader
+                style={{
+                  height: 'var(--app-bar-height, 11rem)',
+                  justifyContent: 'flex-start',
+                }}
+              >
+                <IconButton onClick={handleDrawerRightClose}>
+                  {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                </IconButton>
+              </DrawerHeader>
+              <TabsVerticalRight
+                setOpen={setOpenTabVerticalRight}
+                open={openTabVerticalRight}
+                setDrawerWidth={setCurrentDrawerWidthRight}
+                value={tabValueRight}
+                setValue={setTabValueRight}
+              />
+            </Drawer>
           </Box>
 
         </LexicalComposer>
       </AutocompleteProvider>
     </DndWrapper>
+    </SuggestionProvider>
   );
 }
 
@@ -543,7 +614,7 @@ export default function Editor() {
 export function Workbook() {
   const theme = useTheme();
   const [openTab, setOpenTab] = React.useState(false);
-  const [tabValue, setTabValue] = React.useState(0);
+  const [tabValue, setTabValue] = React.useState(5);
   const drawerRef = React.useRef(null);
   const [actualDrawerWidth, setActualDrawerWidth] = React.useState(drawerWidth);
   const [currentDrawerWidth, setCurrentDrawerWidth] = React.useState(drawerWidth);
@@ -595,6 +666,7 @@ export function Workbook() {
   return (
     <DndWrapper>
       <AutocompleteProvider>
+        <AudioPlayerProvider>
         <LexicalComposer
           initialConfig={initialConfig}
         >
@@ -721,6 +793,7 @@ export function Workbook() {
           </Box>
 
         </LexicalComposer>
+        </AudioPlayerProvider>
       </AutocompleteProvider>
     </DndWrapper>
   );

@@ -75,6 +75,87 @@ DataStore.observe(YourModel).subscribe(msg => {
 
 **Debouncing**: Consider debouncing DataStore saves to avoid excessive writes during rapid Yjs updates.
 
+Would you like me to elaborate on any specific aspect, such as setting up a Yjs provider, handling specific data types, or implementing more sophisticated conflict resolution?
+
+
+
+I'll help you integrate Yjs with AWS Amplify DataStore. This is an interesting challenge since they serve different purposes - Yjs for real-time collaboration and DataStore for offline-first data sync with AWS.
+
+Here's a practical approach:
+
+## Architecture Overview
+
+You'll need to decide on a synchronization strategy:
+
+1. **Yjs as the primary source** - Use Yjs for real-time collaboration, then periodically sync to DataStore for persistence
+2. **Bidirectional sync** - Keep both in sync, which is more complex but allows offline capabilities
+
+## Basic Integration Pattern
+
+The most straightforward approach is to sync Yjs changes to DataStore:
+
+```javascript
+import * as Y from 'yjs';
+import { DataStore } from '@aws-amplify/datastore';
+import { YourModel } from './models'; // Your Amplify model
+
+// Initialize Yjs document
+const ydoc = new Y.Doc();
+const ymap = ydoc.getMap('data');
+
+// Listen to Yjs changes and update DataStore
+ymap.observe(async (event) => {
+  const changes = event.changes.keys;
+  
+  for (let [key, change] of changes) {
+    if (change.action === 'add' || change.action === 'update') {
+      const value = ymap.get(key);
+      
+      // Update or create in DataStore
+      const existing = await DataStore.query(YourModel, value.id);
+      
+      if (existing) {
+        await DataStore.save(
+          YourModel.copyOf(existing, updated => {
+            Object.assign(updated, value);
+          })
+        );
+      } else {
+        await DataStore.save(new YourModel(value));
+      }
+    } else if (change.action === 'delete') {
+      const toDelete = await DataStore.query(YourModel, key);
+      if (toDelete) {
+        await DataStore.delete(toDelete);
+      }
+    }
+  }
+});
+
+// Listen to DataStore changes and update Yjs (optional for bidirectional sync)
+DataStore.observe(YourModel).subscribe(msg => {
+  if (msg.opType === 'INSERT' || msg.opType === 'UPDATE') {
+    ydoc.transact(() => {
+      ymap.set(msg.element.id, msg.element);
+    });
+  } else if (msg.opType === 'DELETE') {
+    ydoc.transact(() => {
+      ymap.delete(msg.element.id);
+    });
+  }
+});
+```
+
+## Key Considerations
+
+**Conflict Resolution**: DataStore and Yjs have different conflict resolution strategies. You'll need to decide which takes precedence when conflicts occur. Typically, Yjs changes should be prioritized for real-time collaboration.
+
+**Performance**: Avoid creating update loops. Use flags or transaction IDs to track the source of changes and prevent circular updates.
+
+**Provider Setup**: For real-time Yjs sync across clients, you'll need a provider (y-websocket, y-webrtc, etc.). This is separate from DataStore's sync.
+
+**Debouncing**: Consider debouncing DataStore saves to avoid excessive writes during rapid Yjs updates.
+
 ## Best Options
 
 **OpenAI Embeddings API** (recommended for most cases)

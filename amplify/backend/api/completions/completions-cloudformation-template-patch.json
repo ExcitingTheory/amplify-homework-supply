@@ -1,0 +1,28 @@
+{
+  "Resources": {
+    "completions": {
+      "Properties": {
+        "Body": {
+          "paths": {
+            "/chat": {
+              "x-amazon-apigateway-any-method": {
+                "x-amazon-apigateway-integration": {
+                  "invokeMode": "RESPONSE_STREAM",
+                  "responseMode": "STREAM"
+                }
+              }
+            },
+            "/chat/{proxy+}": {
+              "x-amazon-apigateway-any-method": {
+                "x-amazon-apigateway-integration": {
+                  "invokeMode": "RESPONSE_STREAM",
+                  "responseMode": "STREAM"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

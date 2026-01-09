@@ -180,6 +180,13 @@ const result = await uploadData({
 
 ## Common Pitfalls
 
+**REST API Calls**:
+- Always use Amplify's `post()` from `aws-amplify/api` for REST calls to Lambda functions, which handles auth tokens automatically.
+- AdminQueries is the default API name for Amplify Gen 1 REST functions managed by Auth and we should never use it for other APIs.
+- completions is an example of a custom API name that can be used for other REST APIs we create.
+
+
+
 **Authentication Context**: Always check `session.username` exists before DataStore operations that require auth:
 ```javascript
 const { session } = React.useContext(UnitContext);
@@ -217,3 +224,11 @@ Component development uses Storybook with mocked AWS services:
 - Mocks in `.storybook/__mocks__/` (DataStore, Auth, AI SDK)
 - Run `npm run storybook` to develop components in isolation
 - See [ChatSidebar.stories.jsx](src/components/ChatSidebar.stories.jsx) for advanced mocking patterns
+
+
+## Next.js /api Routes - DO NOT USE
+
+- Amplify Gen 1 uses Lambda functions for backend logic, and if we need rest we will use Express style routes in Lambda functions under `amplify/backend/function/` with `aws-serverless-express` and API Gateway. Do not create new Next.js `/api` routes.
+- Instead use the Amplify.api REST client or GraphQL client from the frontend to call Lambda functions or GraphQL API.
+
+

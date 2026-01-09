@@ -3,7 +3,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import FileManager2 from '../components/FileManager2';
+import FileManager2 from './FileManager2';
 import { DictionaryEditor2 } from '../../DictionaryEditor2';
 import { QuestionEditor2 } from '../../QuestionEditor2';
 import { AudioPlayerProvider } from '../context/AudioPlayerContext';
@@ -42,9 +42,9 @@ function TabPanel(props) {
       {...other}
     >
       {value === index && (
-        <>
+        <div style={{ height: '100%' }}>
           {children}
-        </>
+        </div>
       )}
     </div>
   );
@@ -58,7 +58,7 @@ function a11yProps(index) {
   };
 }
 
-export default function VerticalTabs({
+export default function TabsVerticalLeft({
   setOpen,
   open,
   value,
@@ -198,9 +198,9 @@ export default function VerticalTabs({
         <Tab
           onClick={() => handleTabClick(4)}
           label={<FolderIcon />} {...a11yProps('Files')} />
-        <Tab
+        {/* <Tab
           onClick={() => handleTabClick(5)}
-          label={<ChatIcon />} {...a11yProps('AI Assistant')} />
+          label={<ChatIcon />} {...a11yProps('AI Assistant')} /> */}
         <Tab
           onClick={() => handleTabClick(6)}
           label={<ConfigIcon />} {...a11yProps('Configuration')} />
@@ -221,13 +221,11 @@ export default function VerticalTabs({
         <QuestionEditor2 />
       </TabPanel>  
       <TabPanel value={value} index={4}>
-        <AudioPlayerProvider>
-          <FileManager2 />
-        </AudioPlayerProvider>
+        <FileManager2 />
       </TabPanel>
-      <TabPanel value={value} index={5} overflowY='hidden'>
+      {/* <TabPanel value={value} index={5} overflowY='hidden'>
         <ChatSidebar />
-      </TabPanel>
+      </TabPanel> */}
       <TabPanel value={value} index={6}>
         <ConfigurationManager />
       </TabPanel>

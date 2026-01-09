@@ -378,7 +378,7 @@ import { API } from 'aws-amplify';
 
 const callOpenAI = async (data) => {
   try {
-    const result = await API.post('AdminQueries', '/openai', {
+    const result = await API.post('completions', '/openai', {
       body: data
     });
     return result;

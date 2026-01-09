@@ -30,7 +30,7 @@
             "Arn"
           ],
           "category": "function",
-          "resourceName": "chatStream"
+          "resourceName": "contentCompletionStream"
         },
         {
           "attributes": [
@@ -66,14 +66,6 @@
             "Arn"
           ],
           "category": "function",
-          "resourceName": "contentCompletionStream"
-        },
-        {
-          "attributes": [
-            "Name",
-            "Arn"
-          ],
-          "category": "function",
           "resourceName": "suggestBlocksStream"
         },
         {
@@ -83,6 +75,14 @@
           ],
           "category": "function",
           "resourceName": "openaiWebhook"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "chatStream"
         }
       ],
       "providerPlugin": "awscloudformation",

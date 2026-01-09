@@ -107,7 +107,6 @@ import UnitContext from '../../../context/unitContext';
 import { FileManagerProvider, useFileManager } from './FileManagerContext';
 import getCachedUrl from "../../../utils/getCachedUrl";
 import AudioWaveformPlayer from './AudioWaveformPlayer';
-
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -1812,6 +1811,8 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
 const ProtectionLevelHeader = React.memo(function ProtectionLevelHeader({ label, totalFiles }) {
     return (
         <Box sx={{
+            position: 'sticky',
+            top: 88, // Below toolbar (52) + tabs (36)
             height: '100%',
             minHeight: 48,
             px: 2,
@@ -1820,7 +1821,10 @@ const ProtectionLevelHeader = React.memo(function ProtectionLevelHeader({ label,
             display: 'flex',
             alignItems: 'center',
             gap: 1,
-            flexShrink: 0
+            flexShrink: 0,
+            zIndex: 98,
+            borderBottom: '1px solid',
+            borderColor: 'divider'
         }}>
             <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'inherit', fontSize: '0.875rem' }}>
                 {label}
@@ -1854,6 +1858,8 @@ const FileTypeSubheader = React.memo(function FileTypeSubheader({ label, fileTyp
 
     return (
         <Box sx={{
+            position: 'sticky',
+            top: 136, // Below toolbar (52) + tabs (36) + protection header (48)
             height: '100%',
             minHeight: 36,
             px: 2,
@@ -1863,7 +1869,8 @@ const FileTypeSubheader = React.memo(function FileTypeSubheader({ label, fileTyp
             gap: 1,
             borderBottom: '1px solid',
             borderColor: 'divider',
-            flexShrink: 0
+            flexShrink: 0,
+            zIndex: 97
         }}>
             <Box component="span" sx={{ fontSize: '1rem', lineHeight: 1 }}>
                 {getIconForType(fileType)}
@@ -3610,7 +3617,7 @@ export default function FileManager2() {
                     alignItems: 'center',
                     px: 1,
                     py: 0.5,
-                    zIndex: 4,
+                    zIndex: 100,
                 }}
             >
                 <Box sx={{ display: 'flex', gap: 0, alignItems: 'center' }}>
@@ -3815,11 +3822,12 @@ export default function FileManager2() {
                 }}
                 variant="scrollable"
                 scrollButtons="auto"
+                allowScrollButtonsMobile
                 sx={{
                     position: 'sticky',
                     top: 52,
                     bgcolor: 'background.paper',
-                    zIndex: 3,
+                    zIndex: 99,
                     borderBottom: 1,
                     borderColor: 'divider',
                     width: '100%',
@@ -3833,6 +3841,13 @@ export default function FileManager2() {
                     },
                     '& .MuiTabs-flexContainer': {
                         gap: 0,
+                        justifyContent: 'flex-start',
+                    },
+                    '& .MuiTabs-scrollButtons': {
+                        width: 32,
+                        '&.Mui-disabled': {
+                            opacity: 0.3,
+                        },
                     },
                 }}
             >

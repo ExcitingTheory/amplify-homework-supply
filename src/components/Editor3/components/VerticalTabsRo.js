@@ -29,9 +29,9 @@ function TabPanel(props) {
       {...other}
     >
       {value === index && (
-        <>
+        <div style={{ height: '100%' }}>
           {children}
-        </>
+        </div>
       )}
     </div>
   );

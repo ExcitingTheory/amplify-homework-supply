@@ -1,8 +1,5 @@
 # Custom Blocks Implementation Plan
 
-**Date**: January 4, 2026  
-**Status**: 📋 Planning Phase
-
 ## Overview
 
 This document outlines the implementation plan for four new custom Lexical editor blocks that will enhance the Homework Supply platform with instructor notes, polling, real-time chat, and collaborative editing capabilities.
@@ -1022,6 +1019,300 @@ function AwarenessBar({ provider }) {
 
 ---
 
+## 5. Color Association Block
+
+### Purpose
+Enable visual-semantic learning by creating associations between vocabulary words and colors. Students either select colors to represent words/concepts, or match colors to their corresponding vocabulary items.
+
+### Design
+
+#### Node Structure
+```javascript
+// src/components/Editor3/nodes/ColorAssociationNode/ColorAssociationNode.js
+export class ColorAssociationNode extends DecoratorNode {
+  static getType() {
+    return 'color-association';
+  }
+  
+  __id: string;           // Unique block ID
+  __mode: 'word-to-color' | 'color-to-word'; // Learning direction
+  __words: Array<{        // Vocabulary items
+    id: string;
+    phrase: string;
+    definition?: string;
+    phonetic?: string;
+    correctColor?: string; // Hex color for grading (instructor-set)
+  }>;
+  __colorPalette: string[]; // Array of hex colors (for color-to-word mode)
+  __allowCustomColors: boolean; // Allow students to pick any color
+  __shuffleOrder: boolean; // Randomize word/color order per student
+  __createdAt: AWSTimestamp;
+}
+```
+
+#### Modes
+
+**Word-to-Color Mode**:
+- Display vocabulary word + definition
+- Student selects color from picker or palette
+- Records color choice in grade data
+- Optional: Instructor sets "correct" color for auto-grading
+
+**Color-to-Word Mode**:
+- Display color swatches
+- Student matches each swatch to a word/definition
+- Drag-and-drop or dropdown selection
+- Correct answers defined by instructor
+
+#### Data Flow
+
+**Block Creation** (Instructor):
+```javascript
+// In editor, insert ColorAssociationNode
+const colorNode = $createColorAssociationNode({
+  id: generateId(),
+  mode: 'word-to-color',
+  words: [
+    { 
+      id: '1', 
+      phrase: '愛', 
+      phonetic: 'ai',
+      definition: 'love',
+      correctColor: '#ff1744' // Red for love (optional)
+    },
+    { 
+      id: '2', 
+      phrase: '海', 
+      phonetic: 'umi',
+      definition: 'ocean',
+      correctColor: '#2196f3' // Blue for ocean
+    }
+  ],
+  allowCustomColors: true,
+  shuffleOrder: true
+});
+```
+
+**Student Interaction** (Workbook):
+```javascript
+// Word-to-Color: Student picks color for each word
+const responses = {
+  '1': '#ff69b4', // Student chose pink for 愛
+  '2': '#1976d2'  // Student chose dark blue for 海
+};
+
+// Color-to-Word: Student matches swatches to words
+const matches = {
+  '#ff1744': '1', // Red swatch matched to 愛
+  '#2196f3': '2'  // Blue swatch matched to 海
+};
+
+// Save to grade data
+gradeData[blockId] = {
+  complete: true,
+  responses: mode === 'word-to-color' ? responses : matches,
+  accuracy: calculateColorAccuracy(responses, correctColors)
+};
+```
+
+**Grading Logic**:
+```javascript
+function calculateColorAccuracy(studentResponses, correctColors) {
+  if (!correctColors) return null; // No auto-grading
+  
+  let matches = 0;
+  for (const [wordId, studentColor] of Object.entries(studentResponses)) {
+    const correctColor = correctColors[wordId];
+    // Use color distance algorithm (Delta E)
+    const distance = calculateColorDistance(studentColor, correctColor);
+    if (distance < 30) { // Threshold for "close enough"
+      matches++;
+    }
+  }
+  return (matches / Object.keys(correctColors).length) * 100;
+}
+
+function calculateColorDistance(color1, color2) {
+  // Convert hex to LAB color space
+  const lab1 = hexToLab(color1);
+  const lab2 = hexToLab(color2);
+  
+  // Calculate Delta E (CIE 2000)
+  return Math.sqrt(
+    Math.pow(lab1.L - lab2.L, 2) +
+    Math.pow(lab1.a - lab2.a, 2) +
+    Math.pow(lab1.b - lab2.b, 2)
+  );
+}
+```
+
+#### UI Components
+
+**ColorAssociationEditor** (Instructor):
+- Mode selector (word-to-color / color-to-word)
+- Add/remove words from list
+- Import words from dictionary
+- Set correct colors (optional)
+- Define color palette for color-to-word mode
+- Toggle custom color picker
+- Preview both modes
+
+**ColorPicker** (Student - Word-to-Color):
+- Display word + definition + phonetic
+- Color wheel or swatch grid
+- Selected color preview
+- Submit button
+- Progress indicator (word 1 of N)
+
+**ColorMatcher** (Student - Color-to-Word):
+- Display color swatches (horizontal row)
+- Word list (drag targets or dropdowns)
+- Drag-and-drop swatch to word
+- Visual feedback on match
+- Submit when all matched
+
+**ColorResultsView** (Instructor Grading):
+- Side-by-side: Correct color vs Student color
+- Color distance metric
+- Visual similarity indicator
+- Override auto-grade option
+
+#### Implementation Tasks
+
+##### Phase 1: Node Creation
+- [ ] Create `src/components/Editor3/nodes/ColorAssociationNode/`
+- [ ] Implement `ColorAssociationNode.js` (DecoratorNode)
+- [ ] Create `ColorAssociationEditor.jsx` (Instructor UI)
+- [ ] Create `ColorPicker.jsx` (Student word-to-color UI)
+- [ ] Create `ColorMatcher.jsx` (Student color-to-word UI)
+
+##### Phase 2: Color Utilities
+- [ ] Create `src/utils/colorUtils.js`:
+  - `hexToRgb(hex)`
+  - `rgbToLab(rgb)`
+  - `hexToLab(hex)`
+  - `calculateColorDistance(color1, color2)` (Delta E)
+  - `generateColorPalette(count)` (Create visually distinct colors)
+- [ ] Install `color` package for conversions:
+  ```bash
+  npm install color
+  ```
+
+##### Phase 3: Plugin Integration
+- [ ] Create `src/components/Editor3/plugins/ColorAssociationPlugin.js`
+- [ ] Add `INSERT_COLOR_ASSOCIATION_COMMAND`
+- [ ] Add toolbar button with color wheel icon
+- [ ] Import dictionary words for quick setup
+
+##### Phase 4: Grading Integration
+- [ ] Update `src/context/unitContext.js`:
+  - Calculate accuracy for color blocks
+  - Include in overall grade
+- [ ] Create `src/components/ColorResultsView.jsx`:
+  - Display student responses
+  - Show color distance metrics
+  - Allow manual override
+
+##### Phase 5: Accessibility
+- [ ] Add text labels to color swatches
+- [ ] Support keyboard navigation for color picker
+- [ ] Provide color-blind friendly mode (patterns/labels)
+- [ ] ARIA labels for all interactive elements
+
+##### Phase 6: Export/Import
+- [ ] Export color associations to CSV:
+  ```csv
+  word,phonetic,definition,student_color,correct_color,distance,match
+  愛,ai,love,#ff69b4,#ff1744,12.5,true
+  海,umi,ocean,#1976d2,#2196f3,8.3,true
+  ```
+- [ ] Import word sets from dictionary with bulk color assignment
+
+#### Educational Rationale
+
+**Learning Benefits**:
+- **Visual-Semantic Encoding**: Creates dual coding (word + visual representation)
+- **Memory Enhancement**: Color associations strengthen recall
+- **Cultural Learning**: Colors have cultural meanings (e.g., white = purity in Western cultures, death in some Asian cultures)
+- **Emotional Connection**: Colors evoke emotions that can be linked to word meanings
+- **Creative Expression**: Students engage creatively with vocabulary
+
+**Use Cases**:
+- Abstract concepts (love, fear, hope)
+- Nature vocabulary (ocean, forest, sky)
+- Emotions and feelings
+- Cultural concepts
+- Mnemonic device creation
+
+#### Example Scenarios
+
+**Scenario 1: Japanese Emotions**
+```javascript
+{
+  mode: 'word-to-color',
+  words: [
+    { phrase: '喜び', phonetic: 'yorokobi', definition: 'joy' },
+    { phrase: '悲しみ', phonetic: 'kanashimi', definition: 'sadness' },
+    { phrase: '怒り', phonetic: 'ikari', definition: 'anger' }
+  ],
+  allowCustomColors: true
+}
+```
+
+**Scenario 2: Nature Vocabulary**
+```javascript
+{
+  mode: 'color-to-word',
+  colorPalette: ['#87CEEB', '#228B22', '#8B4513', '#FFD700'],
+  words: [
+    { phrase: 'sky', definition: 'the atmosphere above' },
+    { phrase: 'grass', definition: 'green plants' },
+    { phrase: 'earth', definition: 'soil, ground' },
+    { phrase: 'sun', definition: 'star at center of solar system' }
+  ],
+  shuffleOrder: true
+}
+```
+
+**Scenario 3: Abstract Concepts**
+```javascript
+{
+  mode: 'word-to-color',
+  words: [
+    { phrase: 'freedom', correctColor: '#4CAF50' },
+    { phrase: 'danger', correctColor: '#F44336' },
+    { phrase: 'peace', correctColor: '#2196F3' },
+    { phrase: 'energy', correctColor: '#FFC107' }
+  ],
+  allowCustomColors: false, // Must choose from palette
+  colorPalette: ['#F44336', '#2196F3', '#4CAF50', '#FFC107', '#9C27B0']
+}
+```
+
+#### Advanced Features (Future)
+
+**Color Themes**:
+- Preset palettes (warm, cool, pastel, vibrant)
+- Cultural color sets (Japanese traditional, Chinese auspicious)
+- Seasonal colors
+
+**Collaborative Color Sets**:
+- Class creates shared color vocabulary
+- Vote on "best" color for each word
+- Export as study guide
+
+**Animation**:
+- Fade between colors for related concepts
+- Color wheel spins to student's choice
+- Celebration animation on match
+
+**Analytics**:
+- Most commonly chosen colors per word
+- Cultural differences in color associations
+- Accuracy trends over time
+
+---
+
 ## Integration & Dependencies
 
 ### Cross-Feature Interactions
@@ -1033,6 +1324,11 @@ function AwarenessBar({ provider }) {
 **Poll + Chat**:
 - Polls can have discussion threads attached
 - Link ChatNode to PollNode for contextual conversation
+
+**Color Association + Dictionary**:
+- Import words directly from dictionary context
+- Auto-populate color blocks from unit vocabulary
+- Export color associations back to dictionary as metadata
 
 **All Blocks + Y.js**:
 - All custom nodes work in collaborative mode
@@ -1051,6 +1347,12 @@ export function generateBlockId(type) {
 - Used by InstructorNoteNode sanitization
 - Filter nodes based on predicates
 
+**src/utils/colorUtils.js**:
+- Color space conversions (RGB, LAB, HSL)
+- Color distance calculations (Delta E)
+- Palette generation algorithms
+- Accessibility helpers (contrast ratios)
+
 **src/utils/websocketManager.js**:
 - Shared WebSocket connection pool
 - Reconnection logic
@@ -1067,6 +1369,11 @@ export function generateBlockId(type) {
 **src/context/pollContext.js**:
 - Poll subscriptions
 - Response aggregation
+**src/context/colorContext.js** (Optional):
+- Color palette presets
+- Cultural color mappings
+- Class-wide color associations
+
 
 **src/context/chatContext.js**:
 - Thread subscriptions
@@ -1110,26 +1417,43 @@ export function generateBlockId(type) {
 **Deliverables**:
 - AWS WebSocket API
 - Lambda functions
-- Y.js integration
+- Y.Phase 5: Color Association (2-3 weeks)
+**Priority**: Medium - Unique pedagogical tool  
+**Dependencies**: None  
+**Deliverables**:
+- ColorAssociationNode implementation
+- Color picker and matcher components
+- Color distance algorithms
+- Grading integration
+- Dictionary import/export
+
+### Total Timeline: ~18-23 weeks (4.5-6
 - Collaborative editor
 - Instructor pop-in feature
 - Offline persistence
 
 ### Total Timeline: ~16-20 weeks (4-5 months)
 
----
-
-## Testing Strategy
-
-### Unit Tests
-- [ ] InstructorNoteNode serialization/deserialization
-- [ ] Sanitization logic for different visibility modes
-- [ ] Poll aggregation calculations
-- [ ] @mention extraction
-- [ ] Y.js update encoding/decoding
+- [ ] Color distance calculations (Delta E accuracy)
+- [ ] Color space conversions (hex → LAB)
 
 ### Integration Tests
 - [ ] Create instructor note → Save → Load → Verify sanitization
+- [ ] Create poll → Submit responses → Verify aggregation
+- [ ] Send chat message → Trigger notification → Mark as read
+- [ ] Concurrent edits → Verify Y.js merge
+- [ ] Word-to-color → Submit → Calculate accuracy
+- [ ] Color-to-word → Match all → Verify correct matches
+
+### E2E Tests (Cypress)
+- [ ] Instructor creates note, student doesn't see it in workbook
+- [ ] Student answers poll, instructor sees updated results
+- [ ] Student @mentions classmate, notification is sent
+- [ ] Two students edit simultaneously, changes merge correctly
+- [ ] Instructor pops into student workbook, sees real-time changes
+- [ ] Student picks colors for words, instructor sees results with distance metrics
+- [ ] Student matches colors to words, auto-grading calculates score
+- [ ] Color distance calculations for 100 words (performance benchmark)
 - [ ] Create poll → Submit responses → Verify aggregation
 - [ ] Send chat message → Trigger notification → Mark as read
 - [ ] Concurrent edits → Verify Y.js merge
@@ -1174,6 +1498,7 @@ export function generateBlockId(type) {
 
 ---
 
+- **Color Association**: Completion rate, average color distance, most common color choices per word
 ## Monitoring & Analytics
 
 ### Metrics to Track
@@ -1198,7 +1523,8 @@ After implementation, update:
 - [ ] [docs/USER_GUIDE.md](./USER_GUIDE.md) (new) - How to use new blocks
 - [ ] [.github/copilot-instructions.md](../.github/copilot-instructions.md) - Architecture updates
 
----
+---Color Association**: Should we use strict color matching or allow tolerance ranges? What's the optimal Delta E threshold?
+6. **
 
 ## Open Questions
 
@@ -1230,6 +1556,13 @@ After implementation, update:
 ### Collaboration
 - ✅ Two students can edit simultaneously without conflicts
 - ✅ Instructors can view student work in real-time
+### Color Association
+- ✅ Students can select colors for words with smooth UX
+- ✅ Color-to-word matching works with drag-and-drop
+- ✅ Auto-grading calculates color distance accurately
+- ✅ Results display shows visual comparison
+- ✅ Dictionary integration allows bulk import
+
 - ✅ Offline edits sync when connection is restored
 - ✅ Cursor positions and selections are visible
 

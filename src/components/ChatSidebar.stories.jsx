@@ -91,7 +91,7 @@ AI chat assistant with context awareness, streaming responses, and file attachme
 - **Message History**: Persistent conversation within the session
 
 ## Mocked Services
-All AWS services (DataStore, Auth, Storage) and the /api/chat endpoint are mocked in Storybook.
+All AWS services (DataStore, Auth, Storage) and the /chat endpoint are mocked in Storybook.
         `.trim(),
       },
     },
@@ -102,7 +102,7 @@ All AWS services (DataStore, Auth, Storage) and the /api/chat endpoint are mocke
       return (
         <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
           <DemoBanner>
-            AWS services (DataStore, Auth, Storage) and chat API (/api/chat) are mocked. 
+            AWS services (DataStore, Auth, Storage) and chat API (/chat) are mocked. 
             File uploads and streaming responses are simulated!
           </DemoBanner>
           <div style={{ 

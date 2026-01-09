@@ -1,8 +1,10 @@
-const { SSMClient, GetParametersCommand } = require('@aws-sdk/client-ssm');
-const OpenAI = require('openai');
-const express = require('express');
-const bodyParser = require('body-parser');
-const awsServerlessExpressMiddleware = require('aws-serverless-express/middleware');
+import { SSMClient, GetParametersCommand } from '@aws-sdk/client-ssm';
+import { createOpenAI } from '@ai-sdk/openai';
+import { streamText, tool, convertToModelMessages, pipeUIMessageStreamToResponse } from 'ai';
+import express from 'express';
+import bodyParser from 'body-parser';
+import awsServerlessExpressMiddleware from 'aws-serverless-express/middleware.js';
+import { z } from 'zod';
 
 // SSM and OpenAI initialization
 const ssmClient = new SSMClient();
@@ -33,67 +35,79 @@ async function getOpenAIApiKey() {
 async function getOpenAI() {
   if (!openaiInstance) {
     const apiKey = await getOpenAIApiKey();
-    openaiInstance = new OpenAI({ apiKey });
+    openaiInstance = createOpenAI({ apiKey });
   }
   return openaiInstance;
 }
 
-// Tool definitions
-const tools = [
-  {
-    type: 'function',
-    function: {
-      name: 'search_content',
-      description: 'Search through unit content, files, questions, and vocabulary using semantic search',
-      parameters: {
-        type: 'object',
-        properties: {
-          query: { type: 'string', description: 'The search query' },
-          contentType: {
-            type: 'string',
-            enum: ['all', 'files', 'questions', 'vocabulary'],
-            description: 'Type of content to search',
-          },
-        },
-        required: ['query'],
-      },
+// Tool definitions - AI SDK format
+// Client-side tools (search) don't have execute functions
+// Server-side tools (create_section, generate_unit_content) have execute functions
+const tools = {
+  // Client-side tool - executed in browser with access to DataStore/VectorStore
+  search_content: tool({
+    description: 'Search through unit content, files, questions, and vocabulary using semantic search. Returns relevant files, vocabulary words, and questions.',
+    inputSchema: z.object({
+      query: z.string().describe('The search query text'),
+      type: z.enum(['all', 'files', 'words', 'questions']).optional().describe('Type of content to search - defaults to "all"'),
+      limit: z.number().optional().describe('Maximum number of results to return - defaults to 10'),
+    }),
+    // No execute - client-side only
+  }),
+  
+  // Server-side tool with execute function
+  create_section: tool({
+    description: 'Create a new class section (group of students) with a name and optional description',
+    inputSchema: z.object({
+      name: z.string().describe('Name of the section'),
+      description: z.string().optional().describe('Optional description of the section'),
+      learner: z.string().optional().describe('Optional learner group identifier'),
+    }),
+    // Executed on server - actual DataStore operations happen on client after approval
+    execute: async ({ name, description, learner }) => {
+      // Return instructions for client-side execution
+      return {
+        action: 'create_section_approved',
+        name,
+        description,
+        learner,
+        message: `Section "${name}" will be created${description ? ` with description: ${description}` : ''}`
+      };
     },
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'create_section',
-      description: 'Create a new class section with a name and optional description',
-      parameters: {
-        type: 'object',
-        properties: {
-          name: { type: 'string', description: 'Name of the section' },
-          description: { type: 'string', description: 'Optional description' },
-        },
-        required: ['name'],
-      },
+  }),
+  
+  // Server-side tool with execute function
+  generate_unit_content: tool({
+    description: 'Generate rich educational content (explanations, examples, quizzes, etc.) that can be inserted into the current unit',
+    inputSchema: z.object({
+      contentType: z.enum(['explanation', 'example', 'practice', 'quiz', 'summary', 'vocabulary_section', 'custom']).describe('Type of content to generate'),
+      topic: z.string().describe('The topic or subject for the content'),
+      instructions: z.string().optional().describe('Specific instructions or requirements'),
+      includeMarkdown: z.boolean().optional().default(true).describe('Whether to include markdown formatting'),
+    }),
+    execute: async ({ contentType, topic, instructions, includeMarkdown = true }) => {
+      // This tool provides guidance - actual content generation happens via GPT response
+      const templates = {
+        explanation: includeMarkdown ? `## ${topic}\n\n[Clear explanation]\n\n### Key Points\n- Point 1\n- Point 2` : `${topic}\n\n[Explanation]`,
+        example: includeMarkdown ? `### Examples: ${topic}\n\n**Example 1:** [text]\n- Explanation: [details]` : `Examples: ${topic}\n\nExample 1: [text]`,
+        practice: includeMarkdown ? `### Practice: ${topic}\n\n1. [Exercise 1]\n   - Answer: [Answer]` : `Practice: ${topic}\n\n1. [Exercise]`,
+        quiz: includeMarkdown ? `### Quiz: ${topic}\n\n**Q1:** [Question]\n- A) [Option]\n- **Answer:** [Correct]` : `Quiz: ${topic}\n\nQ1: [Question]`,
+        summary: includeMarkdown ? `## Summary: ${topic}\n\n[Summary]\n\n### Main Takeaways\n1. [Point]` : `Summary: ${topic}\n\n[Summary]`,
+        vocabulary_section: includeMarkdown ? `### Vocabulary: ${topic}\n\n| Term | Reading | Meaning |\n|------|---------|---------|` : `Vocabulary: ${topic}\n\n[Term] - [Reading] - [Definition]`,
+        custom: includeMarkdown ? `## ${topic}\n\n[Content]` : `${topic}\n\n[Content]`,
+      };
+      
+      return {
+        contentType,
+        topic,
+        template: templates[contentType] || templates.custom,
+        guidance: instructions || `Generate ${contentType} content about "${topic}"`,
+        includeMarkdown,
+        message: `Ready to generate ${contentType} content. Follow the template structure.`
+      };
     },
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'generate_unit_content',
-      description: 'Generate rich educational content for a unit based on a topic or description',
-      parameters: {
-        type: 'object',
-        properties: {
-          topic: { type: 'string', description: 'The topic or subject for the unit' },
-          level: {
-            type: 'string',
-            enum: ['beginner', 'intermediate', 'advanced'],
-            description: 'The difficulty level',
-          },
-        },
-        required: ['topic'],
-      },
-    },
-  },
-];
+  }),
+};
 
 function buildSystemMessage(context) {
   let systemContent = `You are Kai, an AI teaching assistant helping instructors with curriculum development and educational content creation.
@@ -223,99 +237,79 @@ function detectPromptInjection(message) {
 
 // POST /chat - Streaming chat endpoint compatible with Vercel AI SDK TextStreamChatTransport
 app.post('/chat', async function(req, res) {
-  try {
     const { messages, context } = req.body;
     
-    console.log('[Chat] Received request with', messages?.length || 0, 'messages');
+    console.log('[Chat] Received request with', messages?.length || 0, 'messages', 'context:', {
+      hasUnit: !!context?.unit,
+      filesCount: context?.files?.length || 0,
+      questionsCount: context?.questionBank?.length || 0,
+      wordsCount: context?.dictionary?.length || 0,
+      sectionsCount: context?.sections?.length || 0,
+    });
     
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: 'Invalid request: messages array is required' });
     }
 
-    // Transform AI SDK v3 parts format to OpenAI content format
-    const transformedMessages = messages.map(msg => {
-      // If message has parts array, extract text content
-      if (msg.parts && Array.isArray(msg.parts)) {
-        const textContent = msg.parts
+    // Check last user message for prompt injection attempts
+    const lastUserMessage = messages.filter(m => m.role === 'user').pop();
+    if (lastUserMessage) {
+      // Extract content from either content string or parts array
+      let messageContent = '';
+      if (typeof lastUserMessage.content === 'string') {
+        messageContent = lastUserMessage.content;
+      } else if (lastUserMessage.parts && Array.isArray(lastUserMessage.parts)) {
+        messageContent = lastUserMessage.parts
           .filter(part => part.type === 'text')
           .map(part => part.text)
           .join('');
-        
-        return {
-          role: msg.role,
-          content: textContent || '',
-        };
       }
       
-      // Already in OpenAI format or has content
-      return {
-        role: msg.role,
-        content: msg.content || '',
-      };
-    });
-
-    console.log('[Chat] Transformed', transformedMessages.length, 'messages');
-
-    // Check last user message for prompt injection attempts
-    const lastUserMessage = transformedMessages.filter(m => m.role === 'user').pop();
-    if (lastUserMessage && detectPromptInjection(lastUserMessage.content)) {
-      console.warn('[Chat] Potential prompt injection detected:', lastUserMessage.content.substring(0, 100));
-      // Don't reject - let the system prompt handle it, but log for monitoring
+      if (detectPromptInjection(messageContent)) {
+        console.warn('[Chat] Potential prompt injection detected:', messageContent.substring(0, 100));
+        // Don't reject - let the system prompt handle it, but log for monitoring
+      }
     }
 
-    const openai = await getOpenAI();
+    const openai = await getOpenAI({
+      apiKey: await getOpenAIApiKey(),
+    });
     const systemMessage = buildSystemMessage(context);
-    const allMessages = [systemMessage, ...transformedMessages];
 
-    console.log('[Chat] Creating chat completion with', allMessages.length, 'messages');
+    console.log('[Chat] Creating chat completion with', messages.length, 'messages');
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: allMessages,
-      stream: true,
+    // Use AI SDK's streamText
+    const result = streamText({
+      model: openai('gpt-4o'),
+      system: systemMessage.content,
+      messages: await convertToModelMessages(messages),
       tools,
-      tool_choice: 'auto',
       temperature: 0.7,
-      max_tokens: 2000,
+      maxTokens: 2000,
     });
 
-    // Set headers for streaming - TextStreamChatTransport expects plain text
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no'); // Disable buffering
+    console.log('[Chat] Streaming response with tool support...');
+    
+    try {
+      // Set headers for SSE streaming
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.setHeader('X-Accel-Buffering', 'no');
 
-    let chunkCount = 0;
-
-    // Stream just the text content (TextStreamChatTransport expects plain text, not SSE)
-    for await (const chunk of completion) {
-      chunkCount++;
-      const delta = chunk.choices[0]?.delta;
+      result.pipeUIMessageStreamToResponse(res);
       
-      // Send only text content directly
-      if (delta?.content) {
-        res.write(delta.content);
+      console.log('[Chat] Stream pipeline established');
+    } catch (error) {
+      console.error('[Chat] Streaming error:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: error.message });
       }
-      
-      // Note: Tool calls are not supported with TextStreamChatTransport
-      // If you need tool calling, you'll need to use a different transport
     }
-
-    console.log('[Chat] Stream completed, sent', chunkCount, 'chunks');
-    res.end();
-  } catch (error) {
-    console.error('[Chat] Error:', error);
-    console.error('[Chat] Error stack:', error.stack);
-    if (!res.headersSent) {
-      res.status(500).json({ error: error.message || 'Internal server error' });
-    } else {
-      res.end();
-    }
-  }
 });
 
 app.listen(3000, function() {
   console.log('App started');
 });
 
-module.exports = app;
+export default app;

@@ -39,6 +39,7 @@ import { $isQuizNode, INSERT_QUIZ_COMMAND } from './QuizPlugin';
 import { $isAnswerNode, INSERT_ANSWER_BLOCK_COMMAND } from './AnswerPlugin';
 import { $isCustomAnswerNode, INSERT_CUSTOM_ANSWER_BLOCK_COMMAND } from './CustomAnswerPlugin';
 import UnitContext from '../../../context/unitContext';
+import { useSuggestions } from '../context/SuggestionContext';
 
 /**
  * Block type categories for pattern matching
@@ -181,10 +182,10 @@ function $analyzePreviousBlocks() {
  */
 export default function BlockSuggestionPlugin({ useAI = false }) {
   const [editor] = useLexicalComposerContext();
-  const [suggestions, setSuggestions] = useState(null);
+  // Use suggestion context instead of local state
+  const { suggestions, setSuggestions, isLoadingAI, setIsLoadingAI, registerInsertCallback } = useSuggestions();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [anchorElement, setAnchorElement] = useState(null);
-  const [isLoadingAI, setIsLoadingAI] = useState(false);
   const aiRequestTimer = useRef(null);
   const abortController = useRef(null);
   
@@ -314,22 +315,22 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
     });
   }, [editor, useAI, fetchAISuggestions]);
   
-  // Get anchor element for menu positioning
-  useEffect(() => {
-    return editor.registerUpdateListener(() => {
-      editor.getEditorState().read(() => {
-        const selection = $getSelection();
+  // // Get anchor element for menu positioning
+  // useEffect(() => {
+  //   return editor.registerUpdateListener(() => {
+  //     editor.getEditorState().read(() => {
+  //       const selection = $getSelection();
         
-        if ($isRangeSelection(selection)) {
-          const nativeSelection = window.getSelection();
-          if (nativeSelection && nativeSelection.rangeCount > 0) {
-            const range = nativeSelection.getRangeAt(0);
-            setAnchorElement(range);
-          }
-        }
-      });
-    });
-  }, [editor]);
+  //       if ($isRangeSelection(selection)) {
+  //         const nativeSelection = window.getSelection();
+  //         if (nativeSelection && nativeSelection.rangeCount > 0) {
+  //           const range = nativeSelection.getRangeAt(0);
+  //           setAnchorElement(range);
+  //         }
+  //       }
+  //     });
+  //   });
+  // }, [editor]);
   
   // Handle keyboard navigation
   const handleKeyCommand = useCallback((event, command) => {
@@ -422,7 +423,57 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
       
       setSuggestions(null);
     });
-  }, [editor, suggestions, selectedIndex]);
+  }, [editor, suggestions, selectedIndex, setSuggestions]);
+  
+  // Register the insert callback with the context so the sidebar can use it
+  useEffect(() => {
+    if (registerInsertCallback) {
+      registerInsertCallback((suggestion) => {
+        editor.update(() => {
+          switch (suggestion.type) {
+            case 'quiz':
+              editor.dispatchCommand(INSERT_QUIZ_COMMAND, null);
+              break;
+              
+            case 'answer':
+              editor.dispatchCommand(INSERT_ANSWER_BLOCK_COMMAND, {
+                wordIDs: [],
+                requestDefinition: 'translation',
+                allowedInput: ['text'],
+                promptMethod: ['phrase'],
+              });
+              break;
+              
+            case 'custom-answer':
+              editor.dispatchCommand(INSERT_CUSTOM_ANSWER_BLOCK_COMMAND, null);
+              break;
+              
+            case 'heading':
+              editor.update(() => {
+                const selection = $getSelection();
+                if ($isRangeSelection(selection)) {
+                  const anchorNode = selection.anchor.getNode();
+                  const parent = anchorNode.getParent();
+                  if (parent) {
+                    parent.selectEnd();
+                  }
+                }
+              });
+              break;
+              
+            case 'paragraph':
+              // Just let the user type
+              break;
+              
+            default:
+              console.warn('Unknown block type:', suggestion.type);
+          }
+          
+          setSuggestions(null);
+        });
+      });
+    }
+  }, [registerInsertCallback, editor, setSuggestions]);
   
   const handleSuggestionClick = useCallback((index) => {
     setSelectedIndex(index);
@@ -432,15 +483,15 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
   if (!suggestions || suggestions.length === 0) {
     return null;
   }
-  
-  return (
-    <BlockSuggestionMenu
-      suggestions={suggestions}
-      selectedIndex={selectedIndex}
-      onSelect={handleSuggestionClick}
-      anchorElement={anchorElement}
-      isLoadingAI={isLoadingAI}
-      useAI={useAI}
-    />
-  );
+return null;  
+  // return (
+  //   <BlockSuggestionMenu
+  //     suggestions={suggestions}
+  //     selectedIndex={selectedIndex}
+  //     onSelect={handleSuggestionClick}
+  //     anchorElement={anchorElement}
+  //     isLoadingAI={isLoadingAI}
+  //     useAI={useAI}
+  //   />
+  // );
 }

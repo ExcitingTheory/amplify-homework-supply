@@ -55,7 +55,7 @@ Migrated AI authoring features from Edge API routes to AWS Lambda with proper st
 import { post } from 'aws-amplify/api';
 
 const restOperation = post({
-  apiName: 'AdminQueries',
+  apiName: 'completions',
   path: '/complete',
   options: {
     body: { prompt, context: contextData },
@@ -82,7 +82,7 @@ while (true) {
 import { post } from 'aws-amplify/api';
 
 const restOperation = post({
-  apiName: 'AdminQueries',
+  apiName: 'completions',
   path: '/suggest-blocks',
   options: {
     body: { unitStructure, currentContext, userHistory },
@@ -106,7 +106,7 @@ export default async function handler(req) {
   const { messages, context } = await req.json();
   
   const restOperation = post({
-    apiName: 'AdminQueries',
+    apiName: 'completions',
     path: '/chat',
     options: { body: { messages, context } },
   });
@@ -136,7 +136,7 @@ amplify update api
 
 When prompted:
 1. Select **REST** API
-2. Choose the **AdminQueries** API (or create a new "completions" API)
+2. Choose the **completions** API (or create a new "completions" API)
 3. Add the following paths:
 
 | Path | Lambda Function | Method | Auth |
@@ -190,7 +190,7 @@ If they don't exist, Amplify will prompt you to add them during `amplify push`.
 ✅ **Authentication**: Cognito User Pool authorizer  
 ✅ **Centralized**: All AI endpoints in one REST API  
 ✅ **Monitoring**: CloudWatch logs for all Lambda functions  
-✅ **Consistent**: Same infrastructure pattern as AdminQueries  
+✅ **Consistent**: Same infrastructure pattern as completions  
 ✅ **Better DX**: Use `useChat` hook from Vercel AI SDK  
 
 ## Testing Checklist

@@ -83,7 +83,13 @@ The application currently has hardcoded strings throughout the codebase. This gu
 - **Existing dependency**: `react-i18next` v14.1.2 (in devDependencies)
 - **Framework**: Next.js 16 with App Router support
 - **UI Framework**: Material UI v7
-- **Target languages**: English (primary), Japanese (secondary)
+- **Target languages**: English (primary), Japanese (secondary),
+Spanish (future),
+French (future),
+Chinese (future),
+German (future)
+
+> The best languages to translate your app or website into often include Spanish, French, German, Portuguese (Brazil), Chinese (Simplified), Japanese, and Korean, balancing global reach, economic power, and high internet usage for maximum impact, with Chinese and Spanish topping most lists for sheer volume, while German, Japanese, and Korean often yield higher revenue due to user spending habits. Your specific priorities (downloads vs. revenue) and target markets should guide your choices beyond these core languages, considering markets like Arabic, Russian, Hindi, and Italian as well. 
 
 ---
 

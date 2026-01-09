@@ -1,15 +1,14 @@
 /**
- * @fileoverview BlockSuggestionMenu - Floating menu for block suggestions.
+ * @fileoverview BlockSuggestionMenu - Static sidebar menu for block suggestions.
  * 
  * Displays a list of suggested block types that would pedagogically follow
- * the current content. Supports keyboard navigation and click selection.
+ * the current content. Embedded in sidebar for non-intrusive suggestions.
  * 
  * @module BlockSuggestionMenu
  */
 
 import React, { useEffect, useRef } from 'react';
-import { Box, Paper, List, ListItem, ListItemButton, ListItemText, Typography, Chip, CircularProgress } from '@mui/material';
-import { createPortal } from 'react-dom';
+import { Box, List, ListItem, ListItemButton, Typography, Chip, CircularProgress } from '@mui/material';
 
 /**
  * BlockSuggestionMenu component
@@ -18,40 +17,17 @@ import { createPortal } from 'react-dom';
  * @param {Array} props.suggestions - Array of suggestion objects with type, label, icon, reasoning
  * @param {number} props.selectedIndex - Currently selected suggestion index
  * @param {Function} props.onSelect - Callback when suggestion is clicked
- * @param {Range} props.anchorElement - Selection range for positioning
  * @param {boolean} props.isLoadingAI - Whether AI suggestions are loading
  * @param {boolean} props.useAI - Whether AI mode is enabled
  */
 export default function BlockSuggestionMenu({ 
   suggestions, 
-  selectedIndex, 
+  selectedIndex,
   onSelect, 
-  anchorElement,
   isLoadingAI = false,
   useAI = false,
-}) {
+}) {  
   const menuRef = useRef(null);
-  const [position, setPosition] = React.useState({ top: 0, left: 0 });
-  
-  // Position menu below cursor
-  useEffect(() => {
-    if (anchorElement && menuRef.current) {
-      const rect = anchorElement.getBoundingClientRect();
-      const menuHeight = menuRef.current.offsetHeight;
-      const viewportHeight = window.innerHeight;
-      
-      // Position below cursor, or above if not enough space
-      let top = rect.bottom + window.scrollY + 8;
-      if (top + menuHeight > viewportHeight + window.scrollY) {
-        top = rect.top + window.scrollY - menuHeight - 8;
-      }
-      
-      setPosition({
-        top,
-        left: rect.left + window.scrollX,
-      });
-    }
-  }, [anchorElement]);
   
   // Scroll selected item into view
   useEffect(() => {
@@ -63,36 +39,39 @@ export default function BlockSuggestionMenu({
     }
   }, [selectedIndex]);
   
-  if (!suggestions || suggestions.length === 0) {
-    return null;
+  // Show loading state
+  if (isLoadingAI) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 4 }}>
+        <CircularProgress size={32} />
+      </Box>
+    );
   }
   
-  return createPortal(
-    <Paper
-      ref={menuRef}
-      elevation={8}
-      sx={{
-        position: 'absolute',
-        top: `${position.top}px`,
-        left: `${position.left}px`,
-        zIndex: 1000,
-        minWidth: useAI ? 400 : 280,
-        maxWidth: useAI ? 600 : 400,
-        maxHeight: 400,
-        overflow: 'auto',
-        bgcolor: 'background.paper',
-        border: '1px solid',
-        borderColor: useAI ? 'primary.main' : 'divider',
-      }}
-    >
-      <Box sx={{ p: 1, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, flex: 1 }}>
-          {useAI ? '🤖 AI-Powered Suggestions' : '💡 Suggested blocks'}
+  // Show empty state
+  if (!suggestions || suggestions.length === 0) {
+    return (
+      <Box sx={{ p: 2, textAlign: 'center' }}>
+        <Typography variant="body2" color="text.secondary">
+          No suggestions available yet.
         </Typography>
-        {isLoadingAI && <CircularProgress size={14} />}
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+          Start typing in the editor to see AI-powered block suggestions.
+        </Typography>
+      </Box>
+    );
+  }
+  
+  return (
+    <Box ref={menuRef} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ p: 1.5, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography variant="body2" color="text.primary" sx={{ fontWeight: 600, flex: 1 }}>
+          {useAI ? '🤖 AI-Powered Suggestions' : '💡 Suggested Blocks'}
+        </Typography>
+        {isLoadingAI && <CircularProgress size={16} />}
       </Box>
       
-      <List disablePadding>
+      <List disablePadding sx={{ flex: 1, overflow: 'auto' }}>
         {suggestions.map((suggestion, index) => (
           <ListItem 
             key={index} 
@@ -116,12 +95,12 @@ export default function BlockSuggestionMenu({
                 },
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}>
-                <Typography variant="h6" component="span">
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, width: '100%' }}>
+                <Typography variant="h6" component="span" sx={{ fontSize: '1.5rem' }}>
                   {suggestion.icon}
                 </Typography>
-                <Box sx={{ flex: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
                       {suggestion.label}
                     </Typography>
@@ -134,7 +113,7 @@ export default function BlockSuggestionMenu({
                           suggestion.priority === 'medium' ? 'warning' : 
                           'default'
                         }
-                        sx={{ height: 18, fontSize: '10px' }}
+                        sx={{ height: 20, fontSize: '11px' }}
                       />
                     )}
                   </Box>
@@ -145,23 +124,18 @@ export default function BlockSuggestionMenu({
                         opacity: index === selectedIndex ? 0.9 : 0.7,
                         display: 'block',
                         mt: 0.5,
-                        lineHeight: 1.3,
+                        lineHeight: 1.4,
                       }}
                     >
                       {suggestion.reasoning}
                     </Typography>
                   )}
                   {!useAI && suggestion.description && (
-                    <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                    <Typography variant="caption" sx={{ opacity: 0.8, display: 'block', mt: 0.5 }}>
                       {suggestion.description}
                     </Typography>
                   )}
                 </Box>
-                {index === selectedIndex && (
-                  <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                    Tab ↹
-                  </Typography>
-                )}
               </Box>
             </ListItemButton>
           </ListItem>
@@ -170,17 +144,16 @@ export default function BlockSuggestionMenu({
       
       <Box 
         sx={{ 
-          p: 1, 
+          p: 1.5, 
           borderTop: '1px solid', 
           borderColor: 'divider',
           bgcolor: 'action.hover',
         }}
       >
         <Typography variant="caption" color="text.secondary">
-          ↑↓ Navigate • Tab/Enter Select • Esc Dismiss
+          Click a suggestion to insert it into your lesson
         </Typography>
       </Box>
-    </Paper>,
-    document.body
+    </Box>
   );
 }
