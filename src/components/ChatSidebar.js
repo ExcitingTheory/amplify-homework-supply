@@ -30,6 +30,7 @@ import { Section, Document } from "../models";
 import UnitContext from "../context/unitContext";
 import SectionContext from "../context/sectionContext";
 import VectorStoreContext from "../context/vectorStoreContext";
+import { useTabContext } from "../context/tabContext";
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
 import { fetchAuthSession } from 'aws-amplify/auth';
@@ -39,6 +40,7 @@ import FilesContext from "../context/fileContext";
 import VocabularyReview from "./VocabularyReview";
 import { toolDefinitions, executeTool, setVectorStoreSearch } from '../utils/chatTools';
 import AIFeedbackWidget from './AIFeedbackWidget';
+import SearchResults from './ChatSidebar/SearchResults';
 import amplifyConfig from '../amplifyconfiguration.json';
 import { TextStreamChatTransport } from 'ai';
 
@@ -54,13 +56,21 @@ const ChatSidebar = () => {
     const [vocabularyReviewDialogOpen, setVocabularyReviewDialogOpen] = useState(false);
     const [reviewDocumentId, setReviewDocumentId] = useState(null);
     const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: null, severity: 'info' });
+    const [toolExecutionStates, setToolExecutionStates] = useState({}); // { toolCallId: 'executing' | 'success' | 'error' }
+    const addToolOutputRef = useRef(null);
 
     const {
         unit,
         files,
         questionBank,
         dictionary,
+        editorRef,
+        insertWord,
+        insertQuestion,
     } = React.useContext(UnitContext);
+    
+    // Get tab management from context
+    const tabContext = useTabContext();
 
     // Track renders and throttle logging
     renderCountRef.current += 1;
@@ -88,6 +98,29 @@ const ChatSidebar = () => {
 
     // Get sections from SectionContext instead of local query
     const { sections = [] } = React.useContext(SectionContext) || {};
+    
+    // Insert handlers from UnitContext
+    const handleInsertWord = useCallback((word) => {
+        if (insertWord) {
+            insertWord(word);
+            console.log('[ChatSidebar] Inserted word:', word.phrase);
+        }
+    }, [insertWord]);
+    
+    const handleInsertQuestion = useCallback((question) => {
+        if (insertQuestion) {
+            insertQuestion(question);
+            console.log('[ChatSidebar] Inserted question:', question.prompt);
+        }
+    }, [insertQuestion]);
+    
+    // Focus handler - sets focus item in tab context
+    const handleFocusItem = useCallback((type, id) => {
+        if (tabContext.setFocusItem) {
+            tabContext.setFocusItem({ type, id, timestamp: Date.now() });
+            console.log(`[ChatSidebar] Focus requested: ${type} ${id}`);
+        }
+    }, [tabContext]);
 
     const { session } = React.useContext(FilesContext);
     const { identityId } = session || {};
@@ -246,45 +279,43 @@ const ChatSidebar = () => {
     const chatHookResult = useChat({
         transport,
 
+        // Handle client-side tools
         async onToolCall({ toolCall }) {
             console.log('[ChatSidebar] onToolCall invoked:', toolCall.toolName, toolCall.toolCallId);
-
-            if (toolCall.toolName === 'search_content') {
-                console.log('[ChatSidebar] Executing search_content:', toolCall.input);
-
-                try {
-                    const timeoutPromise = new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error('Search timeout after 10s')), 10000)
-                    );
-
-                    const searchPromise = executeTool('search_content', toolCall.input);
-                    const result = await Promise.race([searchPromise, timeoutPromise]);
-
-                    console.log('[ChatSidebar] Search result:', result);
-                    console.log('[ChatSidebar] Search result type:', typeof result);
-
-                    // Ensure result is serializable
-                    const output = typeof result === 'string' ? result : JSON.stringify(result);
-                    console.log('[ChatSidebar] Returning output:', output);
-                    
-                    return output;
-                } catch (error) {
-                    console.error('[ChatSidebar] Search error:', error);
-                    console.error('[ChatSidebar] Error stack:', error.stack);
-
-                    const errorOutput = JSON.stringify({
-                        success: false,
-                        error: error.message || 'Search failed',
-                        results: []
-                    });
-                    console.log('[ChatSidebar] Returning error output:', errorOutput);
-                    
-                    return errorOutput;
-                }
+            
+            // Check if it's a dynamic tool first for proper type narrowing
+            if (toolCall.dynamic) {
+                console.log('[ChatSidebar] Dynamic tool, skipping');
+                return;
             }
             
-            // For server-side tools, don't return anything
-            console.log('[ChatSidebar] Server-side tool, not handling:', toolCall.toolName);
+            if (toolCall.toolName === 'search_content') {
+                console.log('[ChatSidebar] Executing client-side search_content:', toolCall.input);
+                
+                try {
+                    const result = await executeTool('search_content', toolCall.input);
+                    console.log('[ChatSidebar] Search result:', result);
+                    
+                    // Use addToolOutput from ref (no await to avoid deadlocks)
+                    if (addToolOutputRef.current) {
+                        addToolOutputRef.current({
+                            toolCallId: toolCall.toolCallId,
+                            output: result
+                        });
+                    }
+                } catch (error) {
+                    console.error('[ChatSidebar] Search error:', error);
+                    
+                    // Add error output
+                    if (addToolOutputRef.current) {
+                        addToolOutputRef.current({
+                            toolCallId: toolCall.toolCallId,
+                            state: 'output-error',
+                            errorText: error.message || 'Search failed'
+                        });
+                    }
+                }
+            }
         },
 
         // Automatically send when all tool results are available
@@ -323,6 +354,11 @@ const ChatSidebar = () => {
     } = chatHookResult || {};
 
     console.log('[ChatSidebar] useChat status:', status, 'messages:', messages.length, 'toolCalls:', toolCalls.length);
+
+    // Store addToolOutput in ref so it's accessible in onToolCall
+    React.useEffect(() => {
+        addToolOutputRef.current = addToolOutput;
+    }, [addToolOutput]);
 
     // Manage input state locally (v3 API doesn't provide this)
     const [input, setInput] = React.useState('');
@@ -805,6 +841,12 @@ const ChatSidebar = () => {
                         const toolParts = message.parts?.filter(part =>
                             part.type?.startsWith('tool-')
                         ) || [];
+                        
+                        // Debug: Log message parts to see structure
+                        if (message.parts && message.parts.length > 0 && message.role === 'assistant') {
+                            console.log('[ChatSidebar] Message parts:', message.parts.map(p => ({ type: p.type, toolName: p.toolName, state: p.state })));
+                            console.log('[ChatSidebar] Tool parts found:', toolParts.length);
+                        }
 
                         return (
                             <Box
@@ -855,55 +897,111 @@ const ChatSidebar = () => {
                                 {/* Render tool invocations as separate status items, not inside message bubble */}
                                 {toolParts.map((part, toolIdx) => {
                                     const callId = part.toolCallId;
+                                    // Extract tool name from type (e.g., 'tool-search_content' -> 'search_content')
+                                    const toolName = part.type?.replace('tool-', '') || part.toolName || 'unknown';
 
-                                    // Render tool parts based on specific tool types
-                                    switch (part.type) {
-                                        case 'tool-search_content':
-                                            return (
-                                                <Box
-                                                    key={callId || toolIdx}
-                                                    sx={{
-                                                        mb: 1,
-                                                        p: 1,
-                                                        bgcolor: 'transparent',
-                                                        borderLeft: '2px solid',
-                                                        borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
-                                                        fontSize: '0.8rem',
-                                                        color: 'text.secondary',
-                                                    }}
-                                                >
-                                                    <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
+                                    // Render tool parts based on specific tool names
+                                    if (toolName === 'search_content') {
+                                        const executionState = toolExecutionStates[callId];
+                                        let parsedOutput = null;
+                                        
+                                        if (part.state === 'output-available' && part.output) {
+                                            try {
+                                                parsedOutput = typeof part.output === 'string' 
+                                                    ? JSON.parse(part.output) 
+                                                    : part.output;
+                                            } catch (e) {
+                                                console.error('[ChatSidebar] Failed to parse search output:', e);
+                                            }
+                                        }
+                                        
+                                        return (
+                                            <Box
+                                                key={callId || toolIdx}
+                                                sx={{
+                                                    mb: 1,
+                                                    p: 1.5,
+                                                    bgcolor: 'background.paper',
+                                                    borderRadius: 1,
+                                                    border: '1px solid',
+                                                    borderColor: part.state === 'output-error' ? 'error.main' : 'divider',
+                                                }}
+                                            >
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                                    <Typography variant="caption" sx={{ fontWeight: 600, color: 'primary.main' }}>
                                                         🔍 Search
                                                     </Typography>
-
-                                                    {part.state === 'input-streaming' && (
-                                                        <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
-                                                            Preparing...
-                                                        </Typography>
-                                                    )}
-
-                                                    {part.state === 'input-available' && (
-                                                        <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
-                                                            "{part.input?.query}"
-                                                        </Typography>
-                                                    )}
-
-                                                    {part.state === 'output-available' && (
-                                                        <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
-                                                            ✓ {part.output?.results?.length || 0} results
-                                                        </Typography>
-                                                    )}
-
-                                                    {part.state === 'output-error' && (
-                                                        <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
-                                                            ✗ {part.errorText}
-                                                        </Typography>
+                                                    {executionState === 'executing' && (
+                                                        <CircularProgress size={12} />
                                                     )}
                                                 </Box>
-                                            );
 
-                                        case 'tool-create_section':
-                                            return (
+                                                {part.state === 'input-streaming' && (
+                                                    <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic', color: 'text.secondary' }}>
+                                                        Preparing search...
+                                                    </Typography>
+                                                )}
+
+                                                {(() => {
+                                                    console.log('[ChatSidebar] Tool part debug:', {
+                                                        state: part.state,
+                                                        hasOutput: !!part.output,
+                                                        output: part.output,
+                                                        parsedOutput,
+                                                        toolCallId: part.toolCallId
+                                                    });
+                                                    return null;
+                                                })()}
+
+                                                {part.state === 'input-available' && (
+                                                    <Box>
+                                                        <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', mb: 1 }}>
+                                                            Query: <strong>"{part.input?.query}"</strong>
+                                                        </Typography>
+                                                        {executionState === 'executing' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic', color: 'info.main' }}>
+                                                                Searching...
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                )}
+
+                                                {part.state === 'output-available' && parsedOutput && (
+                                                    <Box>
+                                                        {parsedOutput.success ? (
+                                                            <>
+                                                                <Typography variant="caption" sx={{ display: 'block', color: 'success.dark', mb: 1 }}>
+                                                                    ✓ Found {parsedOutput.results?.length || 0} results
+                                                                </Typography>
+                                                                <SearchResults 
+                                                                    results={parsedOutput.results || []}
+                                                                    unitId={unit?.id}
+                                                                    tabHandlers={tabContext}
+                                                                    onInsertWord={handleInsertWord}
+                                                                    onInsertQuestion={handleInsertQuestion}
+                                                                    onFocusItem={handleFocusItem}
+                                                                />
+                                                            </>
+                                                        ) : (
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
+                                                                ✗ {parsedOutput.error || 'Search failed'}
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                )}
+
+                                                {part.state === 'output-error' && (
+                                                    <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
+                                                        ✗ {part.errorText}
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        );
+                                    }
+
+                                    // Handle create_section tool
+                                    if (toolName === 'create_section') {
+                                        return (
                                                 <Box
                                                     key={callId || toolIdx}
                                                     sx={{
@@ -945,55 +1043,56 @@ const ChatSidebar = () => {
                                                     )}
                                                 </Box>
                                             );
+                                    }
 
-                                        case 'tool-generate_unit_content':
-                                            return (
-                                                <Box
-                                                    key={callId || toolIdx}
-                                                    sx={{
-                                                        mb: 1,
-                                                        p: 1,
-                                                        bgcolor: 'transparent',
-                                                        borderLeft: '2px solid',
-                                                        borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
-                                                        fontSize: '0.8rem',
-                                                        color: 'text.secondary',
-                                                    }}
-                                                >
-                                                    <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
-                                                        ✨ Generate Content
+                                    // Handle generate_unit_content tool
+                                    if (toolName === 'generate_unit_content') {
+                                        return (
+                                            <Box
+                                                key={callId || toolIdx}
+                                                sx={{
+                                                    mb: 1,
+                                                    p: 1,
+                                                    bgcolor: 'transparent',
+                                                    borderLeft: '2px solid',
+                                                    borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
+                                                    fontSize: '0.8rem',
+                                                    color: 'text.secondary',
+                                                }}
+                                            >
+                                                <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
+                                                    ✨ Generate Content
+                                                </Typography>
+
+                                                {part.state === 'input-streaming' && (
+                                                    <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
+                                                        Preparing...
                                                     </Typography>
+                                                )}
 
-                                                    {part.state === 'input-streaming' && (
-                                                        <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
-                                                            Preparing...
-                                                        </Typography>
-                                                    )}
+                                                {part.state === 'input-available' && (
+                                                    <Typography variant="caption" sx={{ display: 'block' }}>
+                                                        {part.input?.contentType}: "{part.input?.topic}"
+                                                    </Typography>
+                                                )}
 
-                                                    {part.state === 'input-available' && (
-                                                        <Typography variant="caption" sx={{ display: 'block' }}>
-                                                            {part.input?.contentType}: "{part.input?.topic}"
-                                                        </Typography>
-                                                    )}
+                                                {part.state === 'output-available' && (
+                                                    <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
+                                                        ✓ {part.output?.message || 'Ready'}
+                                                    </Typography>
+                                                )}
 
-                                                    {part.state === 'output-available' && (
-                                                        <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
-                                                            ✓ {part.output?.message || 'Ready'}
-                                                        </Typography>
-                                                    )}
+                                                {part.state === 'output-error' && (
+                                                    <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
+                                                        ✗ {part.errorText}
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        );
+                                    }
 
-                                                    {part.state === 'output-error' && (
-                                                        <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
-                                                            ✗ {part.errorText}
-                                                        </Typography>
-                                                    )}
-                                                </Box>
-                                            );
-
-                                        // Handle dynamic or unknown tools
-                                        default:
-                                            const toolName = part.type?.replace('tool-', '') || 'unknown';
-                                            return (
+                                    // Handle dynamic or unknown tools
+                                    return (
                                                 <Box
                                                     key={callId || toolIdx}
                                                     sx={{
@@ -1007,7 +1106,7 @@ const ChatSidebar = () => {
                                                     }}
                                                 >
                                                     <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', color: 'text.primary' }}>
-                                                        🔧 {toolName}
+                                                        🔧 {toolName || 'unknown'}
                                                     </Typography>
 
                                                     {part.state === 'input-streaming' && (
@@ -1035,7 +1134,6 @@ const ChatSidebar = () => {
                                                     )}
                                                 </Box>
                                             );
-                                    }
                                 })}
 
                                 {/* Add feedback widget for assistant messages with text content */}

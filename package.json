@@ -61,7 +61,7 @@
   },
   "devDependencies": {
     "@ai-sdk/openai": "^3.0.7",
-    "@ai-sdk/react": "^3.0.14",
+    "@ai-sdk/react": "^3.0.29",
     "@babel/eslint-parser": "^7.28.5",
     "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.28.5",

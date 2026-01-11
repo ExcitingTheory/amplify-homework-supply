@@ -99,7 +99,20 @@ export function useTabState(options = {}) {
     const urlState = parseTabStateFromURL(router.query);
     const localState = syncToLocalStorage ? loadTabState() : null;
     
-    return mergeTabState(urlState, localState);
+    // Prioritize: URL state > component defaults > localStorage
+    // This prevents stale localStorage values from overriding new component defaults
+    const merged = {
+      leftTab: urlState.leftTab ?? defaultLeftTab ?? localState?.leftTab,
+      rightTab: urlState.rightTab ?? defaultRightTab ?? localState?.rightTab,
+      leftOpen: urlState.leftOpen ?? localState?.leftOpen ?? false,
+      rightOpen: urlState.rightOpen ?? localState?.rightOpen ?? false,
+      leftWidth: urlState.leftWidth ?? defaultLeftWidth ?? localState?.leftWidth,
+      rightWidth: urlState.rightWidth ?? defaultRightWidth ?? localState?.rightWidth,
+    };
+    
+    console.log('[useTabState] Initialized with:', merged, 'from URL:', urlState, 'localStorage:', localState, 'defaults:', { defaultLeftTab, defaultRightTab });
+    
+    return merged;
   });
 
   // Sync to localStorage whenever state changes
@@ -145,7 +158,16 @@ export function useTabState(options = {}) {
 
     const urlState = parseTabStateFromURL(router.query);
     const localState = syncToLocalStorage ? loadTabState() : null;
-    const merged = mergeTabState(urlState, localState);
+    
+    // Merge with component defaults, not utility defaults
+    const merged = {
+      leftTab: urlState.leftTab ?? localState?.leftTab ?? defaultLeftTab,
+      rightTab: urlState.rightTab ?? localState?.rightTab ?? defaultRightTab,
+      leftOpen: urlState.leftOpen ?? localState?.leftOpen ?? false,
+      rightOpen: urlState.rightOpen ?? localState?.rightOpen ?? false,
+      leftWidth: urlState.leftWidth ?? localState?.leftWidth ?? defaultLeftWidth,
+      rightWidth: urlState.rightWidth ?? localState?.rightWidth ?? defaultRightWidth,
+    };
 
     // Mark as initialized after first load
     if (!isInitialized.current) {
@@ -156,7 +178,7 @@ export function useTabState(options = {}) {
       // (We detect this by checking if we're not currently updating the URL ourselves)
       dispatch({ type: 'RESTORE_FROM_URL', payload: merged });
     }
-  }, [router.query, syncToURL, syncToLocalStorage]);
+  }, [router.query, syncToURL, syncToLocalStorage, defaultLeftTab, defaultRightTab, defaultLeftWidth, defaultRightWidth]);
 
   // Setter functions with dispatch
   const setLeftTab = useCallback((value) => {

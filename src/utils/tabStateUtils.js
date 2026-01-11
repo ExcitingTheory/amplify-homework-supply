@@ -26,11 +26,13 @@ const STORAGE_KEY = 'editor-tab-state';
 const DEFAULT_WIDTH = 350;
 
 // Tab name mappings
-const LEFT_TAB_NAMES = ['assignments', 'toc', 'dictionary', 'questions', 'files', 'config'];
-const RIGHT_TAB_NAMES = ['history', 'chat', 'settings'];
+// Left tabs: 0=assignments, 1=toc, 2=dictionary, 3=questions, 4=files, 6=config
+const LEFT_TAB_NAMES = ['assignments', 'toc', 'dictionary', 'questions', 'files', '', 'config'];
+// Right tabs: 5=chat, 7=suggestions, 8=grades, 9=cohortChat
+const RIGHT_TAB_NAMES = ['', '', '', '', '', 'chat', '', 'suggestions', 'grades', 'cohortChat'];
 
 const DEFAULT_LEFT_TAB = 4; // files
-const DEFAULT_RIGHT_TAB = 1; // chat
+const DEFAULT_RIGHT_TAB = 5; // chat
 
 /**
  * Convert tab index to name

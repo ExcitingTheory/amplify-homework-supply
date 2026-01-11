@@ -10,6 +10,8 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import VerticalTabsRo from './components/VerticalTabsRo';
 import TabsVerticalLeft from './components/TabsVerticalLeft';
 import TabsVerticalRight from './components/TabsVerticalRight';
+import { TabProvider } from '../../context/tabContext';
+import { useTabState } from '../../hooks/useTabState';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListNode, ListItemNode } from '@lexical/list';
 import { CodeNode, CodeHighlightNode } from '@lexical/code';
@@ -277,16 +279,35 @@ export default function Editor() {
   const { unit } = useContext(UnitContext);
   const theme = useTheme();
   
-  // Left drawer state
-  const [openTabVerticalLeft, setOpenTabVerticalLeft] = React.useState(false);
-  const [tabValueLeft, setTabValueLeft] = React.useState(5);
-  const [currentDrawerWidthLeft, setCurrentDrawerWidthLeft] = React.useState(drawerWidth);
-  const [actualDrawerWidthLeft, setActualDrawerWidthLeft] = React.useState(drawerWidth);
+  // Use tab state hook instead of local state
+  const tabState = useTabState({
+    defaultLeftTab: 4, // files
+    defaultRightTab: 5, // chat (index 5 in TabsVerticalRight)
+    defaultLeftWidth: 350,
+    defaultRightWidth: 350,
+    syncToURL: true,
+    syncToLocalStorage: false, // Disabled to avoid stale data issues
+  });
+
+  const {
+    leftTab: tabValueLeft,
+    leftOpen: openTabVerticalLeft,
+    leftWidth: currentDrawerWidthLeft,
+    rightTab: tabValueRight,
+    rightOpen: openTabVerticalRight,
+    rightWidth: currentDrawerWidthRight,
+    setLeftTab: setTabValueLeft,
+    setLeftOpen: setOpenTabVerticalLeft,
+    setLeftWidth: setCurrentDrawerWidthLeft,
+    setRightTab: setTabValueRight,
+    setRightOpen: setOpenTabVerticalRight,
+    setRightWidth: setCurrentDrawerWidthRight,
+  } = tabState;
   
-  // Right drawer state
-  const [openTabVerticalRight, setOpenTabVerticalRight] = React.useState(false);
-  const [tabValueRight, setTabValueRight] = React.useState(5);
-  const [currentDrawerWidthRight, setCurrentDrawerWidthRight] = React.useState(drawerWidth);
+  // Focus management state
+  const [focusItem, setFocusItem] = React.useState(null);
+
+  const [actualDrawerWidthLeft, setActualDrawerWidthLeft] = React.useState(drawerWidth);
   const [actualDrawerWidthRight, setActualDrawerWidthRight] = React.useState(drawerWidth);
   
   const [isEditable, setIsEditable] = React.useState(true);
@@ -427,12 +448,11 @@ export default function Editor() {
   // };
 
   return (
-    <SuggestionProvider>
-      <DndWrapper>
-        <AutocompleteProvider>
-          <LexicalComposer
-            initialConfig={initialConfig}
-          >
+    <TabProvider value={{ ...tabState, focusItem, setFocusItem }}>
+      <SuggestionProvider>
+        <DndWrapper>
+          <AutocompleteProvider>
+            <LexicalComposer initialConfig={initialConfig}>
             <style jsx global>{`
             .layout-container {
               display: grid;
@@ -604,9 +624,10 @@ export default function Editor() {
           </Box>
 
         </LexicalComposer>
-      </AutocompleteProvider>
-    </DndWrapper>
-    </SuggestionProvider>
+          </AutocompleteProvider>
+        </DndWrapper>
+      </SuggestionProvider>
+    </TabProvider>
   );
 }
 
