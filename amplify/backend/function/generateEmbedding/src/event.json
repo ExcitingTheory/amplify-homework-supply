@@ -1,5 +1,14 @@
 {
-  "key1": "value1",
-  "key2": "value2",
-  "key3": "value3"
+  "arguments": {
+    "content": "hiragana is a Japanese syllabary",
+    "model": "text-embedding-3-small",
+    "dimensions": 512
+  },
+  "identity": {
+    "username": "test-user"
+  },
+  "source": null,
+  "request": {
+    "headers": {}
+  }
 }

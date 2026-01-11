@@ -442,18 +442,9 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
     // Generate embedding for the query
     console.log('[executeSearchContent] Calling generateEmbedding mutation...');
     const response = await client.graphql({
-      query: /* GraphQL */ `
-        mutation GenerateEmbedding($text: String!, $model: String, $dimensions: Int) {
-          generateEmbedding(text: $text, model: $model, dimensions: $dimensions) {
-            embedding
-            model
-            dimensions
-            tokenCount
-          }
-        }
-      `,
+      query: generateEmbedding,  // Use the imported mutation
       variables: {
-        text: query,
+        content: query,  // Changed from 'text' to 'content'
         model: 'text-embedding-3-small',
         dimensions: 512
       }

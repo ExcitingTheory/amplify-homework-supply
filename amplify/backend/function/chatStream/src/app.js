@@ -271,9 +271,7 @@ app.post('/chat', async function(req, res) {
       }
     }
 
-    const openai = await getOpenAI({
-      apiKey: await getOpenAIApiKey(),
-    });
+    const openai = await getOpenAI();
     const systemMessage = buildSystemMessage(context);
 
     console.log('[Chat] Creating chat completion with', messages.length, 'messages');

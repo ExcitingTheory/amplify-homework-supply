@@ -128,7 +128,7 @@
         "generateEmbedding": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/generateEmbedding-367a38584c5678433843-build.zip"
+          "s3Key": "amplify-builds/generateEmbedding-3458566d6e686b77722f-build.zip"
         },
         "contentCompletion": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
@@ -153,7 +153,7 @@
         "chatStream": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/chatStream-5672426932686b347678-build.zip"
+          "s3Key": "amplify-builds/chatStream-4f4c4d5966645a773742-build.zip"
         },
         "suggestBlocksStream": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",

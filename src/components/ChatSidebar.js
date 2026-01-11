@@ -61,22 +61,22 @@ const ChatSidebar = () => {
         questionBank,
         dictionary,
     } = React.useContext(UnitContext);
-    
+
     // Track renders and throttle logging
     renderCountRef.current += 1;
-    
+
     // Clear any pending update timeout
     if (updateTimeoutRef.current) {
         clearTimeout(updateTimeoutRef.current);
     }
-    
+
     // Debounce excessive renders by batching context updates
     updateTimeoutRef.current = setTimeout(() => {
         if (renderCountRef.current <= 10 || renderCountRef.current % 10 === 0) {
             console.log(`[ChatSidebar] Render #${renderCountRef.current}`);
         }
     }, 100);
-    
+
     // Clean up timeout on unmount
     useEffect(() => {
         return () => {
@@ -85,28 +85,28 @@ const ChatSidebar = () => {
             }
         };
     }, []);
-    
+
     // Get sections from SectionContext instead of local query
     const { sections = [] } = React.useContext(SectionContext) || {};
-    
+
     const { session } = React.useContext(FilesContext);
     const { identityId } = session || {};
-    
+
     // Get vector store for semantic search
     const vectorStoreCtx = React.useContext(VectorStoreContext);
-    
+
     // Register vector store search function with chatTools
     React.useEffect(() => {
         if (vectorStoreCtx?.search) {
             setVectorStoreSearch(vectorStoreCtx.search);
             console.log('[ChatSidebar] Registered vector store search, isReady:', vectorStoreCtx.isReady);
         }
-        
+
         return () => {
             setVectorStoreSearch(null);
         };
     }, [vectorStoreCtx]);
-    
+
     // Memoize stringified context keys to detect actual changes
     // Use a custom hook to get stable keys based on content, not object references
     const contextKeys = useMemo(() => {
@@ -116,11 +116,11 @@ const ChatSidebar = () => {
         const questionBankKeys = questionBank ? Object.keys(questionBank).sort().join(',') : 'no-questions';
         const dictionaryKeys = dictionary ? Object.keys(dictionary).sort().join(',') : 'no-dict';
         const sectionsKeys = sections && sections.length > 0 ? sections.map(s => s.id).sort().join(',') : 'no-sections';
-        
+
         const combined = `${unitKey}|${filesKeys}|${questionBankKeys}|${dictionaryKeys}|${sectionsKeys}`;
         return combined;
     }, [
-        unit?.id, 
+        unit?.id,
         unit?._version,
         // Use stable primitive values for dependencies
         files ? Object.keys(files).length : 0,
@@ -128,7 +128,7 @@ const ChatSidebar = () => {
         dictionary ? Object.keys(dictionary).length : 0,
         sections ? sections.length : 0,
     ]);
-    
+
     // Store previous contextKeys in a ref to detect actual changes
     const prevContextKeysRef = useRef(contextKeys);
     const contextKeysActuallyChanged = prevContextKeysRef.current !== contextKeys;
@@ -136,7 +136,7 @@ const ChatSidebar = () => {
         console.log('[ChatSidebar] Context keys changed:', prevContextKeysRef.current, '→', contextKeys);
         prevContextKeysRef.current = contextKeys;
     }
-    
+
     // Memoize context data to prevent customFetch recreation - only update when keys actually change
     const contextData = useMemo(() => {
         if (contextKeysActuallyChanged) {
@@ -177,33 +177,33 @@ const ChatSidebar = () => {
     // Memoize the fetch function to prevent recreation on every render
     const customFetch = useCallback(async (url, options) => {
         console.log('[ChatSidebar] Custom fetch with Amplify post client, ignoring url:', url);
-        
+
         try {
             // Parse the request body from AI SDK
             const requestBody = options.body ? JSON.parse(options.body) : {};
-            
+
             // Add context to the request body
             const bodyWithContext = {
                 ...requestBody,
                 context: contextData,
             };
-            
+
             console.log('[ChatSidebar] Sending request with context:', {
                 hasUnit: !!contextData.unit,
                 filesCount: contextData.files?.length || 0,
                 questionsCount: contextData.questionBank?.length || 0,
                 wordsCount: contextData.dictionary?.length || 0,
             });
-            
+
             // Use Amplify's post which handles auth automatically
             const restOperation = post({
                 apiName: 'completions',
                 path: '/chat',
                 options: { body: bodyWithContext },
             });
-            
+
             const response = await restOperation.response;
-            
+
             console.log('[ChatSidebar] Response received:', {
                 status: response.statusCode,
                 headers: response.headers,
@@ -215,19 +215,19 @@ const ChatSidebar = () => {
                 'Content-Type': 'text/event-stream',
                 'Cache-Control': 'no-cache',
             });
-            
+
             // Amplify response.body is already a ReadableStream - use it directly
             const webResponse = new Response(response.body, {
                 status: response.statusCode,
                 headers: webHeaders,
             });
-            
+
             console.log('[ChatSidebar] Created Web Response with streaming body:', {
                 ok: webResponse.ok,
                 status: webResponse.status,
                 bodyUsed: webResponse.bodyUsed,
             });
-            
+
             return webResponse;
         } catch (error) {
             console.error('[ChatSidebar] Error in customFetch:', error);
@@ -238,62 +238,67 @@ const ChatSidebar = () => {
     // Memoize the transport object to prevent recreation on every render
     // Using 'data' streamProtocol for Server-Sent Events format: "data: {...}\n\n"
     const transport = useMemo(() => new DefaultChatTransport({
-      api: '/api/chat',
-      fetch: customFetch, // Use our custom fetch that routes through Amplify
+        api: '/api/chat',
+        fetch: customFetch, // Use our custom fetch that routes through Amplify
     }), [customFetch]);
 
     // Use Vercel AI SDK's useChat hook with memoized transport
     const chatHookResult = useChat({
         transport,
-        
-        // Handle client-side tool execution with onToolCall
-        async onToolCall({ toolCall, addToolOutput }) {
-            console.log('[ChatSidebar] onToolCall invoked:', toolCall);
-            
-            // Check if it's a dynamic tool first for proper type narrowing
-            if (toolCall.dynamic) {
-                console.log('[ChatSidebar] Skipping dynamic tool:', toolCall.toolName);
-                return;
-            }
-            
-            // Execute client-side tools
+
+        async onToolCall({ toolCall }) {
+            console.log('[ChatSidebar] onToolCall invoked:', toolCall.toolName, toolCall.toolCallId);
+
             if (toolCall.toolName === 'search_content') {
                 console.log('[ChatSidebar] Executing search_content:', toolCall.input);
+
                 try {
-                    const result = await executeTool('search_content', toolCall.input);
+                    const timeoutPromise = new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Search timeout after 10s')), 10000)
+                    );
+
+                    const searchPromise = executeTool('search_content', toolCall.input);
+                    const result = await Promise.race([searchPromise, timeoutPromise]);
+
                     console.log('[ChatSidebar] Search result:', result);
+                    console.log('[ChatSidebar] Search result type:', typeof result);
+
+                    // Ensure result is serializable
+                    const output = typeof result === 'string' ? result : JSON.stringify(result);
+                    console.log('[ChatSidebar] Returning output:', output);
                     
-                    // No await - avoids potential deadlocks
-                    addToolOutput({
-                        tool: 'search_content',
-                        toolCallId: toolCall.toolCallId,
-                        output: result,
-                    });
+                    return output;
                 } catch (error) {
                     console.error('[ChatSidebar] Search error:', error);
-                    addToolOutput({
-                        tool: 'search_content',
-                        toolCallId: toolCall.toolCallId,
-                        state: 'output-error',
-                        errorText: error.message || 'Search failed',
+                    console.error('[ChatSidebar] Error stack:', error.stack);
+
+                    const errorOutput = JSON.stringify({
+                        success: false,
+                        error: error.message || 'Search failed',
+                        results: []
                     });
+                    console.log('[ChatSidebar] Returning error output:', errorOutput);
+                    
+                    return errorOutput;
                 }
             }
-            // Other client-side tools can be added here
+            
+            // For server-side tools, don't return anything
+            console.log('[ChatSidebar] Server-side tool, not handling:', toolCall.toolName);
         },
-        
+
         // Automatically send when all tool results are available
         sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-        
+
         onError: (error) => {
             console.error('[ChatSidebar] Chat error:', error);
         },
-        
+
         onFinish: (message) => {
             console.log('[ChatSidebar] Message finished:', message);
         },
     });
-    
+
     // Validate hook result
     if (!chatHookResult) {
         console.error('[ChatSidebar] useChat returned null/undefined!');
@@ -305,11 +310,11 @@ const ChatSidebar = () => {
     }
 
     // Destructure all available functions from useChat API
-    const { 
-        messages = [], 
+    const {
+        messages = [],
         sendMessage,
         regenerate,
-        setMessages = () => {},
+        setMessages = () => { },
         error: chatError,
         status = 'idle',
         stop,
@@ -318,20 +323,13 @@ const ChatSidebar = () => {
     } = chatHookResult || {};
 
     console.log('[ChatSidebar] useChat status:', status, 'messages:', messages.length, 'toolCalls:', toolCalls.length);
-    
+
     // Manage input state locally (v3 API doesn't provide this)
     const [input, setInput] = React.useState('');
-    const [isLoading, setIsLoading] = React.useState(false);
-    
-    // Update loading state based on status
-    React.useEffect(() => {
-        const wasLoading = isLoading;
-        setIsLoading(status === 'in_progress' || status === 'streaming');
-        if (wasLoading !== (status === 'in_progress' || status === 'streaming')) {
-            console.log('[ChatSidebar] Loading state changed:', status, 'isLoading:', status === 'in_progress' || status === 'streaming');
-        }
-    }, [status]);
-    
+
+    // Derive loading state directly from status - don't use local state
+    const isLoading = status === 'in_progress' || status === 'streaming' || status === 'submitted';
+
     // Handle input change
     const handleInputChange = (e) => {
         setInput(e.target.value);
@@ -342,7 +340,7 @@ const ChatSidebar = () => {
         if (e && e.preventDefault) {
             e.preventDefault();
         }
-        
+
         console.log('[ChatSidebar] submitMessage called', {
             input,
             inputLength: input?.length,
@@ -350,13 +348,13 @@ const ChatSidebar = () => {
             hasSendMessage: typeof sendMessage === 'function',
             status
         });
-        
+
         // If input is empty, don't submit
         if (!input || input.trim() === '') {
             console.log('[ChatSidebar] Empty input, not submitting');
             return;
         }
-        
+
         // Use sendMessage from useChat
         if (typeof sendMessage === 'function') {
             console.log('[ChatSidebar] Using sendMessage with input:', input);
@@ -385,7 +383,7 @@ const ChatSidebar = () => {
 
     // Note: Section data is now provided by SectionContext
     // Removed redundant Section observer to reduce subscription overhead
-    
+
     // Subscribe to Document status changes
     useEffect(() => {
         const subscription = DataStore.observeQuery(Document).subscribe(({ items }) => {
@@ -400,21 +398,21 @@ const ChatSidebar = () => {
             setDocumentStatuses(statusMap);
             console.log('[ChatSidebar] Document statuses updated:', statusMap);
         });
-        
+
         return () => subscription.unsubscribe();
     }, []);
-    
+
     // Update document processing status when document status changes
     useEffect(() => {
         setDocumentProcessingStatus(prev => {
             const updated = { ...prev };
             let hasChanges = false;
-            
+
             Object.entries(updated).forEach(([index, status]) => {
                 if (status.documentId && documentStatuses[status.documentId]) {
                     const docStatus = documentStatuses[status.documentId].status;
                     const pageCount = documentStatuses[status.documentId].pageCount;
-                    
+
                     // Map document status to processing status
                     if (docStatus === 'completed' && status.status !== 'analyzed') {
                         updated[index] = {
@@ -456,7 +454,7 @@ const ChatSidebar = () => {
                     }
                 }
             });
-            
+
             return hasChanges ? updated : prev;
         });
     }, [documentStatuses]);
@@ -497,7 +495,7 @@ const ChatSidebar = () => {
             return newStatus;
         });
     };
-    
+
     // Cancel document processing
     const cancelProcessing = async (index) => {
         const status = documentProcessingStatus[index];
@@ -508,43 +506,43 @@ const ChatSidebar = () => {
 
         try {
             console.log('[ChatSidebar] Cancelling analysis for document:', status.documentId);
-            
+
             setDocumentProcessingStatus(prev => ({
                 ...prev,
-                [index]: { 
+                [index]: {
                     ...prev[index],
-                    message: 'Cancelling...' 
+                    message: 'Cancelling...'
                 }
             }));
 
             await cancelPDFAnalysis(status.documentId);
-            
+
             setDocumentProcessingStatus(prev => ({
                 ...prev,
-                [index]: { 
+                [index]: {
                     ...prev[index],
                     status: 'cancelled',
-                    message: 'Analysis cancelled' 
+                    message: 'Analysis cancelled'
                 }
             }));
         } catch (error) {
             console.error('[ChatSidebar] Error cancelling analysis:', error);
             setDocumentProcessingStatus(prev => ({
                 ...prev,
-                [index]: { 
+                [index]: {
                     ...prev[index],
-                    message: `Cancel failed: ${error.message}` 
+                    message: `Cancel failed: ${error.message}`
                 }
             }));
         }
     };
-    
+
     // Open vocabulary review dialog
     const openVocabularyReview = (documentId) => {
         setReviewDocumentId(documentId);
         setVocabularyReviewDialogOpen(true);
     };
-    
+
     // Handle vocabulary import completion
     const handleVocabularyImportComplete = (result) => {
         console.log('[ChatSidebar] Vocabulary import complete:', result);
@@ -557,7 +555,7 @@ const ChatSidebar = () => {
 
     // Process documents when they're added
     const processDocument = async (file, index) => {
-        if ( file.type !== 'application/pdf' &&
+        if (file.type !== 'application/pdf' &&
             file.type !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' &&
             file.type !== 'application/msword' &&
             file.type !== 'text/plain' &&
@@ -568,7 +566,7 @@ const ChatSidebar = () => {
 
         try {
             console.log('[ChatSidebar] Processing document:', file.name, { index });
-            
+
             // Update status to uploading
             setDocumentProcessingStatus(prev => ({
                 ...prev,
@@ -578,7 +576,7 @@ const ChatSidebar = () => {
             // Get identity ID if not already available
             const session = await fetchAuthSession();
             const currentIdentityId = identityId || session.identityId;
-            
+
             console.log('[ChatSidebar] Identity ID:', currentIdentityId);
             console.log('[ChatSidebar] Unit ID:', unit?.id);
 
@@ -592,24 +590,24 @@ const ChatSidebar = () => {
                     const progress = Math.round((loaded / total) * 100);
                     setDocumentProcessingStatus(prev => ({
                         ...prev,
-                        [index]: { 
-                            status: 'uploading', 
-                            progress, 
-                            message: `Uploading... ${progress}%` 
+                        [index]: {
+                            status: 'uploading',
+                            progress,
+                            message: `Uploading... ${progress}%`
                         }
                     }));
                 }
             );
-            
+
             console.log('[ChatSidebar] Upload result:', result);
 
             // Update status based on result - store documentId for tracking
             if (result.analysisResult && result.analysisResult.success) {
                 setDocumentProcessingStatus(prev => ({
                     ...prev,
-                    [index]: { 
-                        status: 'analyzing', 
-                        progress: 100, 
+                    [index]: {
+                        status: 'analyzing',
+                        progress: 100,
                         message: 'Document uploaded, analysis started...',
                         documentId: result.documentModel?.id,
                     }
@@ -617,9 +615,9 @@ const ChatSidebar = () => {
             } else if (result.documentModel) {
                 setDocumentProcessingStatus(prev => ({
                     ...prev,
-                    [index]: { 
-                        status: 'uploaded', 
-                        progress: 100, 
+                    [index]: {
+                        status: 'uploaded',
+                        progress: 100,
                         message: 'Document uploaded successfully',
                         documentId: result.documentModel?.id,
                     }
@@ -627,10 +625,10 @@ const ChatSidebar = () => {
             } else {
                 setDocumentProcessingStatus(prev => ({
                     ...prev,
-                    [index]: { 
-                        status: 'uploaded', 
-                        progress: 100, 
-                        message: 'Document uploaded (no document created)' 
+                    [index]: {
+                        status: 'uploaded',
+                        progress: 100,
+                        message: 'Document uploaded (no document created)'
                     }
                 }));
             }
@@ -638,10 +636,10 @@ const ChatSidebar = () => {
             console.error('[ChatSidebar] Error processing document:', error);
             setDocumentProcessingStatus(prev => ({
                 ...prev,
-                [index]: { 
-                    status: 'error', 
-                    progress: 0, 
-                    message: `Error: ${error.message}` 
+                [index]: {
+                    status: 'error',
+                    progress: 0,
+                    message: `Error: ${error.message}`
                 }
             }));
         }
@@ -664,10 +662,10 @@ const ChatSidebar = () => {
                         // Mark as declined
                         setDocumentProcessingStatus(prev => ({
                             ...prev,
-                            [index]: { 
-                                status: 'declined', 
-                                progress: 0, 
-                                message: 'Analysis declined' 
+                            [index]: {
+                                status: 'declined',
+                                progress: 0,
+                                message: 'Analysis declined'
                             }
                         }));
                         setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'info' });
@@ -679,13 +677,13 @@ const ChatSidebar = () => {
 
     return (
         <>
-            <Box 
-                sx={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    height: '100%', 
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%',
                     minHeight: 0,
-                    position: 'relative' 
+                    position: 'relative'
                 }}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -771,9 +769,9 @@ const ChatSidebar = () => {
                             }}
                         >
                             <ChatIcon sx={{ fontSize: 48, mb: 2, opacity: 0.3 }} />
-                            <Typography 
+                            <Typography
                                 variant="body2"
-                                sx={{ 
+                                sx={{
                                     wordWrap: 'break-word',
                                     textAlign: 'center',
                                     whiteSpace: 'normal'
@@ -793,7 +791,7 @@ const ChatSidebar = () => {
                                 partsCount: message.parts?.length || 0,
                             });
                         }
-                        
+
                         // Extract text content from message.parts (AI SDK v6 format)
                         let textContent = '';
                         if (message.parts && Array.isArray(message.parts)) {
@@ -802,279 +800,353 @@ const ChatSidebar = () => {
                                 .map(part => part.text)
                                 .join('');
                         }
-                        
+
                         // Extract tool invocations from message.parts
-                        const toolParts = message.parts?.filter(part => 
+                        const toolParts = message.parts?.filter(part =>
                             part.type?.startsWith('tool-')
                         ) || [];
-                        
+
                         return (
-                        <Box
-                            key={message.id}
-                            sx={{
-                                m: 0.75,
-                                p: '0.75rem 1rem',
-                                borderRadius: '1rem',
-                                maxWidth: '85%',
-                                wordWrap: 'break-word',
-                                ...(message.role === 'user' ? {
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                    color: 'white',
-                                    alignSelf: 'flex-end',
-                                    borderBottomRightRadius: '0.25rem',
-                                } : {
-                                    bgcolor: '#f3f4f6',
-                                    color: '#1f2937',
-                                    alignSelf: 'flex-start',
-                                    borderBottomLeftRadius: '0.25rem',
-                                    border: '1px solid #e5e7eb',
-                                    position: 'relative',
-                                    pr: 6,
-                                })
-                            }}
-                        >
-                            {/* Render text content */}
-                            {textContent && (
-                                <Box 
-                                    component="pre"
-                                    sx={{
-                                        m: 0,
-                                        whiteSpace: 'pre-wrap',
-                                        wordWrap: 'break-word',
-                                        fontFamily: 'inherit',
-                                        fontSize: '0.9rem',
-                                        lineHeight: 1.5,
-                                    }}
-                                >
-                                    {textContent}
-                                </Box>
-                            )}
-                            
-                            {/* Render tool invocations from message.parts */}
-                            {toolParts.map((part, toolIdx) => {
-                                const callId = part.toolCallId;
-                                
-                                // Render tool parts based on specific tool types
-                                switch (part.type) {
-                                    case 'tool-search_content':
-                                        return (
-                                            <Box
-                                                key={callId || toolIdx}
-                                                sx={{
-                                                    mb: 1,
-                                                    p: 1.5,
-                                                    bgcolor: part.state === 'output-error' ? 'error.light' : 'info.light',
-                                                    borderRadius: 1,
-                                                    fontSize: '0.85rem'
-                                                }}
-                                            >
-                                                <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', mb: 0.5 }}>
-                                                    🔍 Searching Content
-                                                </Typography>
-                                                
-                                                {part.state === 'input-streaming' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
-                                                        Preparing search...
-                                                    </Typography>
-                                                )}
-                                                
-                                                {part.state === 'input-available' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
-                                                        Searching for: "{part.input?.query}"
-                                                    </Typography>
-                                                )}
-                                                
-                                                {part.state === 'output-available' && (
-                                                    <Box>
-                                                        <Typography variant="caption" sx={{ display: 'block', color: 'success.main', mb: 0.5 }}>
-                                                            ✓ Found {part.output?.results?.length || 0} results
-                                                        </Typography>
-                                                        {part.output?.results?.slice(0, 3).map((result, idx) => (
-                                                            <Typography key={idx} variant="caption" sx={{ display: 'block', ml: 1, fontSize: '0.75rem' }}>
-                                                                • {result.type}: {result.phrase || result.name || result.prompt?.substring(0, 50)}
-                                                            </Typography>
-                                                        ))}
-                                                    </Box>
-                                                )}
-                                                
-                                                {part.state === 'output-error' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
-                                                        ✗ Error: {part.errorText}
-                                                    </Typography>
-                                                )}
-                                            </Box>
-                                        );
-                                    
-                                    case 'tool-create_section':
-                                        return (
-                                            <Box
-                                                key={callId || toolIdx}
-                                                sx={{
-                                                    mb: 1,
-                                                    p: 1.5,
-                                                    bgcolor: part.state === 'output-error' ? 'error.light' : 'success.light',
-                                                    borderRadius: 1,
-                                                    fontSize: '0.85rem'
-                                                }}
-                                            >
-                                                <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', mb: 0.5 }}>
-                                                    ➕ Creating Section
-                                                </Typography>
-                                                
-                                                {part.state === 'input-streaming' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
-                                                        Preparing to create section...
-                                                    </Typography>
-                                                )}
-                                                
-                                                {part.state === 'input-available' && (
-                                                    <Typography variant="caption" sx={{ display: 'block' }}>
-                                                        Section: "{part.input?.name}"
-                                                    </Typography>
-                                                )}
-                                                
-                                                {part.state === 'output-available' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
-                                                        ✓ {part.output?.message || 'Section created successfully'}
-                                                    </Typography>
-                                                )}
-                                                
-                                                {part.state === 'output-error' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
-                                                        ✗ Error: {part.errorText}
-                                                    </Typography>
-                                                )}
-                                            </Box>
-                                        );
-                                    
-                                    case 'tool-generate_unit_content':
-                                        return (
-                                            <Box
-                                                key={callId || toolIdx}
-                                                sx={{
-                                                    mb: 1,
-                                                    p: 1.5,
-                                                    bgcolor: part.state === 'output-error' ? 'error.light' : 'warning.light',
-                                                    borderRadius: 1,
-                                                    fontSize: '0.85rem'
-                                                }}
-                                            >
-                                                <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', mb: 0.5 }}>
-                                                    ✨ Generating Content
-                                                </Typography>
-                                                
-                                                {part.state === 'input-streaming' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
-                                                        Preparing content generation...
-                                                    </Typography>
-                                                )}
-                                                
-                                                {part.state === 'input-available' && (
-                                                    <Typography variant="caption" sx={{ display: 'block' }}>
-                                                        Generating {part.input?.contentType} about: "{part.input?.topic}"
-                                                    </Typography>
-                                                )}
-                                                
-                                                {part.state === 'output-available' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
-                                                        ✓ {part.output?.message || 'Content template ready'}
-                                                    </Typography>
-                                                )}
-                                                
-                                                {part.state === 'output-error' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
-                                                        ✗ Error: {part.errorText}
-                                                    </Typography>
-                                                )}
-                                            </Box>
-                                        );
-                                    
-                                    // Handle dynamic or unknown tools
-                                    case 'dynamic-tool':
-                                    default:
-                                        const toolName = part.type?.replace('tool-', '') || 'unknown';
-                                        return (
-                                            <Box
-                                                key={callId || toolIdx}
-                                                sx={{
-                                                    mb: 1,
-                                                    p: 1,
-                                                    bgcolor: part.state === 'output-error' ? 'error.light' : 'grey.200',
-                                                    borderRadius: 1,
-                                                    fontSize: '0.85rem'
-                                                }}
-                                            >
-                                                <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block' }}>
-                                                    🔧 {toolName}
-                                                </Typography>
-                                                
-                                                {part.state === 'input-streaming' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
-                                                        Preparing...
-                                                    </Typography>
-                                                )}
-                                                
-                                                {part.state === 'input-available' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
-                                                        Executing...
-                                                    </Typography>
-                                                )}
-                                                
-                                                {part.state === 'output-available' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'success.main' }}>
-                                                        ✓ {typeof part.output === 'string' ? part.output : JSON.stringify(part.output).substring(0, 100)}
-                                                    </Typography>
-                                                )}
-                                                
-                                                {part.state === 'output-error' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'error.main' }}>
-                                                        ✗ Error: {part.errorText}
-                                                    </Typography>
-                                                )}
-                                            </Box>
-                                        );
-                                }
-                            })}
-                            
-                            {/* Add feedback widget for assistant messages with text content */}
-                            {message.role === 'assistant' && textContent && (
-                                <Box 
-                                    sx={{
-                                        position: 'absolute',
-                                        bottom: '0.5rem',
-                                        right: '0.5rem',
-                                    }}
-                                >
-                                    <AIFeedbackWidget
-                                        contentType="CHAT_MESSAGE"
-                                        messageId={message.id}
-                                        generatedContent={textContent}
-                                        model="gpt-4"
-                                        unitId={unit?.id}
-                                        sessionId={session?.sub}
-                                        metadata={{
-                                            role: message.role,
-                                            timestamp: new Date().toISOString(),
+                            <Box
+                                key={message.id}
+                                sx={{
+                                    m: 0.75,
+                                    p: '0.75rem 1rem',
+                                    borderRadius: '1rem',
+                                    maxWidth: '85%',
+                                    wordWrap: 'break-word',
+                                    ...(message.role === 'user' ? {
+                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                        color: 'white',
+                                        alignSelf: 'flex-end',
+                                        borderBottomRightRadius: '0.25rem',
+                                    } : {
+                                        bgcolor: '#f3f4f6',
+                                        color: '#1f2937',
+                                        alignSelf: 'flex-start',
+                                        borderBottomLeftRadius: '0.25rem',
+                                        border: '1px solid #e5e7eb',
+                                        position: 'relative',
+                                        // Add padding to right and bottom when message has text content (for feedback widget)
+                                        ...(textContent && {
+                                            pr: 6,
+                                            pb: 4,
+                                        })
+                                    })
+                                }}
+                            >
+                                {/* Render text content */}
+                                {textContent && (
+                                    <Box
+                                        component="pre"
+                                        sx={{
+                                            m: 0,
+                                            whiteSpace: 'pre-wrap',
+                                            wordWrap: 'break-word',
+                                            fontFamily: 'inherit',
+                                            fontSize: '0.9rem',
+                                            lineHeight: 1.5,
                                         }}
-                                        size="small"
-                                    />
-                                </Box>
-                            )}
-                        </Box>
+                                    >
+                                        {textContent}
+                                    </Box>
+                                )}
+
+                                {/* Render tool invocations as separate status items, not inside message bubble */}
+                                {toolParts.map((part, toolIdx) => {
+                                    const callId = part.toolCallId;
+
+                                    // Render tool parts based on specific tool types
+                                    switch (part.type) {
+                                        case 'tool-search_content':
+                                            return (
+                                                <Box
+                                                    key={callId || toolIdx}
+                                                    sx={{
+                                                        mb: 1,
+                                                        p: 1,
+                                                        bgcolor: 'transparent',
+                                                        borderLeft: '2px solid',
+                                                        borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
+                                                        fontSize: '0.8rem',
+                                                        color: 'text.secondary',
+                                                    }}
+                                                >
+                                                    <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
+                                                        🔍 Search
+                                                    </Typography>
+
+                                                    {part.state === 'input-streaming' && (
+                                                        <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
+                                                            Preparing...
+                                                        </Typography>
+                                                    )}
+
+                                                    {part.state === 'input-available' && (
+                                                        <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
+                                                            "{part.input?.query}"
+                                                        </Typography>
+                                                    )}
+
+                                                    {part.state === 'output-available' && (
+                                                        <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
+                                                            ✓ {part.output?.results?.length || 0} results
+                                                        </Typography>
+                                                    )}
+
+                                                    {part.state === 'output-error' && (
+                                                        <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
+                                                            ✗ {part.errorText}
+                                                        </Typography>
+                                                    )}
+                                                </Box>
+                                            );
+
+                                        case 'tool-create_section':
+                                            return (
+                                                <Box
+                                                    key={callId || toolIdx}
+                                                    sx={{
+                                                        mb: 1,
+                                                        p: 1,
+                                                        bgcolor: 'transparent',
+                                                        borderLeft: '2px solid',
+                                                        borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
+                                                        fontSize: '0.8rem',
+                                                        color: 'text.secondary',
+                                                    }}
+                                                >
+                                                    <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
+                                                        ➕ Create Section
+                                                    </Typography>
+
+                                                    {part.state === 'input-streaming' && (
+                                                        <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
+                                                            Preparing...
+                                                        </Typography>
+                                                    )}
+
+                                                    {part.state === 'input-available' && (
+                                                        <Typography variant="caption" sx={{ display: 'block' }}>
+                                                            "{part.input?.name}"
+                                                        </Typography>
+                                                    )}
+
+                                                    {part.state === 'output-available' && (
+                                                        <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
+                                                            ✓ {part.output?.message || 'Created'}
+                                                        </Typography>
+                                                    )}
+
+                                                    {part.state === 'output-error' && (
+                                                        <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
+                                                            ✗ {part.errorText}
+                                                        </Typography>
+                                                    )}
+                                                </Box>
+                                            );
+
+                                        case 'tool-generate_unit_content':
+                                            return (
+                                                <Box
+                                                    key={callId || toolIdx}
+                                                    sx={{
+                                                        mb: 1,
+                                                        p: 1,
+                                                        bgcolor: 'transparent',
+                                                        borderLeft: '2px solid',
+                                                        borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
+                                                        fontSize: '0.8rem',
+                                                        color: 'text.secondary',
+                                                    }}
+                                                >
+                                                    <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
+                                                        ✨ Generate Content
+                                                    </Typography>
+
+                                                    {part.state === 'input-streaming' && (
+                                                        <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
+                                                            Preparing...
+                                                        </Typography>
+                                                    )}
+
+                                                    {part.state === 'input-available' && (
+                                                        <Typography variant="caption" sx={{ display: 'block' }}>
+                                                            {part.input?.contentType}: "{part.input?.topic}"
+                                                        </Typography>
+                                                    )}
+
+                                                    {part.state === 'output-available' && (
+                                                        <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
+                                                            ✓ {part.output?.message || 'Ready'}
+                                                        </Typography>
+                                                    )}
+
+                                                    {part.state === 'output-error' && (
+                                                        <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
+                                                            ✗ {part.errorText}
+                                                        </Typography>
+                                                    )}
+                                                </Box>
+                                            );
+
+                                        // Handle dynamic or unknown tools
+                                        default:
+                                            const toolName = part.type?.replace('tool-', '') || 'unknown';
+                                            return (
+                                                <Box
+                                                    key={callId || toolIdx}
+                                                    sx={{
+                                                        mb: 1,
+                                                        p: 1,
+                                                        bgcolor: 'transparent',
+                                                        borderLeft: '2px solid',
+                                                        borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
+                                                        fontSize: '0.8rem',
+                                                        color: 'text.secondary',
+                                                    }}
+                                                >
+                                                    <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', color: 'text.primary' }}>
+                                                        🔧 {toolName}
+                                                    </Typography>
+
+                                                    {part.state === 'input-streaming' && (
+                                                        <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
+                                                            Preparing...
+                                                        </Typography>
+                                                    )}
+
+                                                    {part.state === 'input-available' && (
+                                                        <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
+                                                            Executing...
+                                                        </Typography>
+                                                    )}
+
+                                                    {part.state === 'output-available' && (
+                                                        <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'success.dark' }}>
+                                                            ✓ Complete
+                                                        </Typography>
+                                                    )}
+
+                                                    {part.state === 'output-error' && (
+                                                        <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'error.main' }}>
+                                                            ✗ {part.errorText}
+                                                        </Typography>
+                                                    )}
+                                                </Box>
+                                            );
+                                    }
+                                })}
+
+                                {/* Add feedback widget for assistant messages with text content */}
+                                {message.role === 'assistant' && textContent && (
+                                    <Box
+                                        sx={{
+                                            position: 'absolute',
+                                            bottom: '0.5rem',
+                                            right: '0.5rem',
+                                        }}
+                                    >
+                                        <AIFeedbackWidget
+                                            contentType="CHAT_MESSAGE"
+                                            messageId={message.id}
+                                            generatedContent={textContent}
+                                            model="gpt-4"
+                                            unitId={unit?.id}
+                                            sessionId={session?.sub}
+                                            metadata={{
+                                                role: message.role,
+                                                timestamp: new Date().toISOString(),
+                                            }}
+                                            size="small"
+                                        />
+                                    </Box>
+                                )}
+                            </Box>
                         );
                     })}
-                    {isLoading && (
+                    {isLoading && messages.length > 0 && messages[messages.length - 1]?.role !== 'assistant' && (
                         <Box
                             sx={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: 1,
                                 p: 2,
-                                color: 'text.secondary',
+                                alignSelf: 'flex-start',
+                                m: 0.75,
                             }}
                         >
-                            <CircularProgress size={16} />
-                            <Typography variant="body2">Thinking...</Typography>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    gap: 0.5,
+                                    p: '0.75rem 1rem',
+                                    borderRadius: '1rem',
+                                    bgcolor: '#f3f4f6',
+                                    border: '1px solid #e5e7eb',
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        width: 8,
+                                        height: 8,
+                                        borderRadius: '50%',
+                                        bgcolor: '#9ca3af',
+                                        animation: 'typing 1s infinite',
+                                        animationDelay: '0s',
+                                        '@keyframes typing': {
+                                            '0%, 60%, 100%': {
+                                                transform: 'translateY(0)',
+                                                opacity: 0.7,
+                                            },
+                                            '30%': {
+                                                transform: 'translateY(-7px)',
+                                                opacity: 1,
+                                            },
+                                        },
+                                    }}
+                                />
+                                <Box
+                                    sx={{
+                                        width: 8,
+                                        height: 8,
+                                        borderRadius: '50%',
+                                        bgcolor: '#9ca3af',
+                                        animation: 'typing 1s infinite',
+                                        animationDelay: '0.2s',
+                                        '@keyframes typing': {
+                                            '0%, 60%, 100%': {
+                                                transform: 'translateY(0)',
+                                                opacity: 0.7,
+                                            },
+                                            '30%': {
+                                                transform: 'translateY(-7px)',
+                                                opacity: 1,
+                                            },
+                                        },
+                                    }}
+                                />
+                                <Box
+                                    sx={{
+                                        width: 8,
+                                        height: 8,
+                                        borderRadius: '50%',
+                                        bgcolor: '#9ca3af',
+                                        animation: 'typing 1s infinite',
+                                        animationDelay: '0.4s',
+                                        '@keyframes typing': {
+                                            '0%, 60%, 100%': {
+                                                transform: 'translateY(0)',
+                                                opacity: 0.7,
+                                            },
+                                            '30%': {
+                                                transform: 'translateY(-7px)',
+                                                opacity: 1,
+                                            },
+                                        },
+                                    }}
+                                />
+                            </Box>
                         </Box>
                     )}
                 </Box>
@@ -1096,100 +1168,101 @@ const ChatSidebar = () => {
                             {uploadedFiles.map((file, index) => {
                                 const isDocument = file.type === 'application/pdf';
                                 const status = documentProcessingStatus[index];
-                                
+
                                 return (
-                                <Paper
-                                    key={index}
-                                    elevation={1}
-                                    sx={{
-                                        p: 1,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 1,
-                                        bgcolor: isDocument ? (
-                                            status?.status === 'error' ? 'error.light' :
-                                            status?.status === 'analyzed' ? 'success.light' :
-                                            status?.status === 'analyzing' || status?.status === 'extracting' ? 'warning.light' :
-                                            status?.status === 'cancelled' ? 'grey.200' :
-                                            'grey.100'
-                                        ) : 'grey.100',
-                                        border: isDocument ? '1px solid' : 'none',
-                                        borderColor: isDocument ? (
-                                            status?.status === 'error' ? 'error.main' :
-                                            status?.status === 'analyzed' ? 'success.main' :
-                                            status?.status === 'analyzing' || status?.status === 'extracting' ? 'warning.main' :
-                                            status?.status === 'cancelled' ? 'grey.400' :
-                                            'grey.300'
-                                        ) : 'transparent',
-                                    }}
-                                >
-                                    {isDocument && <PictureAsPdfIcon sx={{ fontSize: 18, color: 'error.main' }} />}
-                                    {!isDocument && <AttachFileIcon sx={{ fontSize: 18 }} />}
-                                    
-                                    <Box sx={{ flex: 1 }}>
-                                        <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
-                                            {file.name}
-                                        </Typography>
-                                        {status && (
-                                            <Typography 
-                                                variant="caption" 
-                                                sx={{ 
-                                                    fontSize: '0.65rem',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: 0.5,
-                                                    color: status.status === 'error' ? 'error.main' : 
-                                                           status.status === 'analyzed' ? 'success.main' :
-                                                           'text.secondary'
-                                                }}
-                                            >
-                                                {status.status === 'uploading' && (
-                                                    <CircularProgress size={10} />
-                                                )}
-                                                {status.status === 'analyzed' && (
-                                                    <CheckCircleIcon sx={{ fontSize: 12 }} />
-                                                )}
-                                                {status.message}
-                                            </Typography>
-                                        )}
-                                    </Box>
-                                    
-                                    {/* Cancel button for processing documents */}
-                                    {isDocument && status && ['uploading', 'analyzing', 'extracting'].includes(status.status) && (
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => cancelProcessing(index)}
-                                            sx={{ p: 0.5 }}
-                                            title="Cancel analysis"
-                                        >
-                                            <CancelIcon sx={{ fontSize: 16, color: 'warning.main' }} />
-                                        </IconButton>
-                                    )}
-                                    
-                                    {/* Review Vocabulary button for completed documents */}
-                                    {isDocument && status && status.status === 'analyzed' && status.documentId && (
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => openVocabularyReview(status.documentId)}
-                                            sx={{ p: 0.5 }}
-                                            title="Review vocabulary"
-                                            color="primary"
-                                        >
-                                            <RateReviewIcon sx={{ fontSize: 16 }} />
-                                        </IconButton>
-                                    )}
-                                    
-                                    {/* Remove/Delete button */}
-                                    <IconButton
-                                        size="small"
-                                        onClick={() => removeFile(index)}
-                                        sx={{ p: 0.5 }}
-                                        title="Remove file"
+                                    <Paper
+                                        key={index}
+                                        elevation={1}
+                                        sx={{
+                                            p: 1,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            bgcolor: isDocument ? (
+                                                status?.status === 'error' ? 'error.light' :
+                                                    status?.status === 'analyzed' ? 'success.light' :
+                                                        status?.status === 'analyzing' || status?.status === 'extracting' ? 'warning.light' :
+                                                            status?.status === 'cancelled' ? 'grey.200' :
+                                                                'grey.100'
+                                            ) : 'grey.100',
+                                            border: isDocument ? '1px solid' : 'none',
+                                            borderColor: isDocument ? (
+                                                status?.status === 'error' ? 'error.main' :
+                                                    status?.status === 'analyzed' ? 'success.main' :
+                                                        status?.status === 'analyzing' || status?.status === 'extracting' ? 'warning.main' :
+                                                            status?.status === 'cancelled' ? 'grey.400' :
+                                                                'grey.300'
+                                            ) : 'transparent',
+                                        }}
                                     >
-                                        <DeleteIcon sx={{ fontSize: 16 }} />
-                                    </IconButton>
-                                </Paper>
-                            )})}
+                                        {isDocument && <PictureAsPdfIcon sx={{ fontSize: 18, color: 'error.main' }} />}
+                                        {!isDocument && <AttachFileIcon sx={{ fontSize: 18 }} />}
+
+                                        <Box sx={{ flex: 1 }}>
+                                            <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+                                                {file.name}
+                                            </Typography>
+                                            {status && (
+                                                <Typography
+                                                    variant="caption"
+                                                    sx={{
+                                                        fontSize: '0.65rem',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: 0.5,
+                                                        color: status.status === 'error' ? 'error.main' :
+                                                            status.status === 'analyzed' ? 'success.main' :
+                                                                'text.secondary'
+                                                    }}
+                                                >
+                                                    {status.status === 'uploading' && (
+                                                        <CircularProgress size={10} />
+                                                    )}
+                                                    {status.status === 'analyzed' && (
+                                                        <CheckCircleIcon sx={{ fontSize: 12 }} />
+                                                    )}
+                                                    {status.message}
+                                                </Typography>
+                                            )}
+                                        </Box>
+
+                                        {/* Cancel button for processing documents */}
+                                        {isDocument && status && ['uploading', 'analyzing', 'extracting'].includes(status.status) && (
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => cancelProcessing(index)}
+                                                sx={{ p: 0.5 }}
+                                                title="Cancel analysis"
+                                            >
+                                                <CancelIcon sx={{ fontSize: 16, color: 'warning.main' }} />
+                                            </IconButton>
+                                        )}
+
+                                        {/* Review Vocabulary button for completed documents */}
+                                        {isDocument && status && status.status === 'analyzed' && status.documentId && (
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => openVocabularyReview(status.documentId)}
+                                                sx={{ p: 0.5 }}
+                                                title="Review vocabulary"
+                                                color="primary"
+                                            >
+                                                <RateReviewIcon sx={{ fontSize: 16 }} />
+                                            </IconButton>
+                                        )}
+
+                                        {/* Remove/Delete button */}
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => removeFile(index)}
+                                            sx={{ p: 0.5 }}
+                                            title="Remove file"
+                                        >
+                                            <DeleteIcon sx={{ fontSize: 16 }} />
+                                        </IconButton>
+                                    </Paper>
+                                )
+                            })}
                         </Box>
                     )}
 
@@ -1202,7 +1275,7 @@ const ChatSidebar = () => {
                             hidden
                             onChange={handleFileSelect}
                         />
-                        
+
                         {/* Attach button */}
                         <IconButton
                             onClick={() => fileInputRef.current?.click()}
@@ -1253,7 +1326,7 @@ const ChatSidebar = () => {
                     </Box>
                 </Paper>
             </Box>
-            
+
             {/* Vocabulary Review Dialog */}
             <Dialog
                 open={vocabularyReviewDialogOpen}
@@ -1293,10 +1366,10 @@ const ChatSidebar = () => {
                             return;
                         }
                     }}
-            >
+                >
                     <Alert
                         severity={confirmDialog.severity}
-                        sx={{ 
+                        sx={{
                             width: '100%',
                             minWidth: '300px',
                             boxShadow: 3

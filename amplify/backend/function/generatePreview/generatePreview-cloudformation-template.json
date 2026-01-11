@@ -24,8 +24,9 @@
       "Type": "String",
       "Default": "apijapanese5GraphQLAPIEndpointOutput"
     },
-    "secretsPathAmplifyAppId": {
-      "Type": "String"
+    "storagefilesBucketName": {
+      "Type": "String",
+      "Default": "storagefilesBucketName"
     }
   },
   "Conditions": {
@@ -58,12 +59,12 @@
         "FunctionName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "generateEmbedding",
+            "generatePreview",
             {
               "Fn::Join": [
                 "",
                 [
-                  "generateEmbedding",
+                  "generatePreview",
                   "-",
                   {
                     "Ref": "env"
@@ -87,25 +88,32 @@
             "API_JAPANESE5_GRAPHQLAPIENDPOINTOUTPUT": {
               "Ref": "apijapanese5GraphQLAPIEndpointOutput"
             },
-            "OPENAI_API_KEY": {
+            "STORAGE_FILES_BUCKETNAME": {
+              "Ref": "storagefilesBucketName"
+            },
+            "API_JAPANESE5_FILETABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
+              }
+            },
+            "API_JAPANESE5_FILETABLE_ARN": {
               "Fn::Join": [
                 "",
                 [
+                  "arn:aws:dynamodb:",
                   {
-                    "Fn::Sub": [
-                      "/amplify/${appId}/${env}/AMPLIFY_${functionName}_",
-                      {
-                        "appId": {
-                          "Ref": "secretsPathAmplifyAppId"
-                        },
-                        "env": {
-                          "Ref": "env"
-                        },
-                        "functionName": "generateEmbedding"
-                      }
-                    ]
+                    "Ref": "AWS::Region"
                   },
-                  "OPENAI_API_KEY"
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":table/",
+                  {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
+                    }
+                  }
                 ]
               ]
             }
@@ -128,12 +136,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "amplifyhomeworksupplyLambdaRoled2462db7",
+            "amplifyhomeworksupplyLambdaRole95269ea5",
             {
               "Fn::Join": [
                 "",
                 [
-                  "amplifyhomeworksupplyLambdaRoled2462db7",
+                  "amplifyhomeworksupplyLambdaRole95269ea5",
                   "-",
                   {
                     "Ref": "env"
@@ -266,94 +274,112 @@
                   ]
                 }
               ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": "s3:ListBucket",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "storagefilesBucketName"
+                      }
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:PutObject",
+                "s3:GetObject"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "storagefilesBucketName"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:Put*",
+                "dynamodb:Create*",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PartiQLInsert",
+                "dynamodb:Get*",
+                "dynamodb:BatchGetItem",
+                "dynamodb:List*",
+                "dynamodb:Describe*",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:PartiQLSelect",
+                "dynamodb:Update*",
+                "dynamodb:RestoreTable*",
+                "dynamodb:PartiQLUpdate"
+              ],
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
+                        }
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":table/",
+                      {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${apijapanese5GraphQLAPIIdOutput}:GetAtt:FileTable:Name"
+                        }
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
             }
           ]
         }
       }
-    },
-    "AmplifyFunctionSecretsPolicy": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyName": "amplify-function-secrets-policy",
-        "Roles": [
-          {
-            "Ref": "LambdaExecutionRole"
-          }
-        ],
-        "PolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Action": [
-                "ssm:GetParameter",
-                "ssm:GetParameters"
-              ],
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region"
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId"
-                    },
-                    ":parameter",
-                    {
-                      "Fn::Sub": [
-                        "/amplify/${appId}/${env}/AMPLIFY_${functionName}_",
-                        {
-                          "appId": {
-                            "Ref": "secretsPathAmplifyAppId"
-                          },
-                          "env": {
-                            "Ref": "env"
-                          },
-                          "functionName": "generateEmbedding"
-                        }
-                      ]
-                    },
-                    "*"
-                  ]
-                ]
-              }
-            }
-          ]
-        }
-      },
-      "DependsOn": [
-        "LambdaExecutionRole"
-      ]
-    },
-    "CustomLambdaExecutionPolicy": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyName": "custom-lambda-execution-policy",
-        "PolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter"
-              ],
-              "Resource": [
-                "arn:aws:ssm:us-east-1:759854655984:parameter/OPENAI_API_KEY"
-              ],
-              "Effect": "Allow"
-            }
-          ]
-        },
-        "Roles": [
-          {
-            "Ref": "LambdaExecutionRole"
-          }
-        ]
-      },
-      "DependsOn": "LambdaExecutionRole"
     }
   },
   "Outputs": {
