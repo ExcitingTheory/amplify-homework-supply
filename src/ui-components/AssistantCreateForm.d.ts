@@ -22,35 +22,29 @@ export declare type ValidationResponse = {
 };
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type AssistantCreateFormInputValues = {
+    owner?: string;
     model?: string;
-    assistantId?: string;
     threadInstructions?: string;
     additionalInstructions?: string;
-    messages?: string;
     moderationFlag?: boolean;
-    identityId?: string;
     threadId?: string;
 };
 export declare type AssistantCreateFormValidationValues = {
+    owner?: ValidationFunction<string>;
     model?: ValidationFunction<string>;
-    assistantId?: ValidationFunction<string>;
     threadInstructions?: ValidationFunction<string>;
     additionalInstructions?: ValidationFunction<string>;
-    messages?: ValidationFunction<string>;
     moderationFlag?: ValidationFunction<boolean>;
-    identityId?: ValidationFunction<string>;
     threadId?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type AssistantCreateFormOverridesProps = {
     AssistantCreateFormGrid?: PrimitiveOverrideProps<GridProps>;
+    owner?: PrimitiveOverrideProps<TextFieldProps>;
     model?: PrimitiveOverrideProps<TextFieldProps>;
-    assistantId?: PrimitiveOverrideProps<TextFieldProps>;
     threadInstructions?: PrimitiveOverrideProps<TextFieldProps>;
     additionalInstructions?: PrimitiveOverrideProps<TextFieldProps>;
-    messages?: PrimitiveOverrideProps<TextFieldProps>;
     moderationFlag?: PrimitiveOverrideProps<SwitchFieldProps>;
-    identityId?: PrimitiveOverrideProps<TextFieldProps>;
     threadId?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type AssistantCreateFormProps = React.PropsWithChildren<{

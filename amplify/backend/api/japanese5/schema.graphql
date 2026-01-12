@@ -105,27 +105,44 @@ type Choice {
   correct: Boolean
 }
 
-type Assistant @model @auth(
+# Consolidated model combining assistant config with chat session data
+type AssistantChat @model @auth(
     rules: [
       { allow: owner },
-      { allow: groups, groups: ["Admins"], operations: [read] },
+      { allow: groups, groups: ["Admins"] },
+      { allow: private, provider: identityPool }
     ]
   ) {
   id: ID!
-  model: String
-  assistantId: String
-  threadInstructions: String
-  additionalInstructions: String
-  messages: String
-  moderationFlag: Boolean
-  identityId: String # The identityId of the owner
-  threadId: String
+  owner: String
+  
+  # Assistant Configuration
+  model: String  # OpenAI model (gpt-4, gpt-3.5-turbo, etc.)
+  threadInstructions: String  # System prompt/instructions for this assistant
+  additionalInstructions: String  # Supplemental instructions
+  threadId: String  # OpenAI thread ID if using Assistants API
+  moderationFlag: Boolean  # Content moderation flag
+  
+  # Chat Session Data
+  messages: AWSJSON  # Chat messages as JSON array
+  draft: String  # Current draft message content (markdown)
+  archived: Boolean  # Whether chat is archived
+  
+  # Usage Tracking
+  inputTokens: String  # Total input tokens used
+  outputTokens: String  # Total output tokens used
+  
+  # Relationships
+  files: [File] @manyToMany(relationName: "AssistantChatFile")  # Attached files
+
 }
 
 type Question @model @auth(
     rules: [
       { allow: owner },
       { allow: groups, groups: ["Learners"], operations: [read] },
+      { allow: groups, groups: ["Admins"] },
+      { allow: private, provider: identityPool }
     ]
   ) {
   id: ID!
@@ -167,6 +184,8 @@ type File @model @auth(
     rules: [
       { allow: owner },
       { allow: groups, groups: ["Learners"], operations: [read] },
+      { allow: groups, groups: ["Admins"] },
+      { allow: private, provider: identityPool }
     ]
   ) {
   id: ID!
@@ -196,23 +215,14 @@ type File @model @auth(
   units: [Unit] @manyToMany(relationName: "UnitFile")
   words: [Word] @manyToMany(relationName: "WordFile")
   questions: [Question] @manyToMany(relationName: "QuestionFile")
-}
-
-type ChatHistory @model @auth(rules: [
-  { allow: owner },
-  { allow: groups, groups: ["Admins"], operations: [read] },
-  ]) {
-  id: ID!
-  owner: String 
-  messages: String
-  model: String
-  inputTokens: String
-  outputTokens: String
+  chats: [AssistantChat] @manyToMany(relationName: "AssistantChatFile")
 }
 
 type Section @model @auth(rules: [
       { allow: owner },
       { allow: groups, groupsField: "learner", operations: [read] },
+      { allow: groups, groups: ["Admins"] },
+      { allow: private, provider: identityPool }
   ]) {
   id: ID!
   name: String
@@ -237,6 +247,8 @@ type Assignment @model @auth(
     rules: [
       { allow: owner },
       { allow: groups, groupsField: "learner", operations: [read] },
+      { allow: groups, groups: ["Admins"] },
+      { allow: private, provider: identityPool }
     ]
   ) {
   id: ID!
@@ -251,7 +263,8 @@ type Assignment @model @auth(
 type Grade @model @auth(rules: [
   { allow: owner, ownerField: "instructor", operations: [read] },
   { allow: owner },
-  { allow: groups, groups: ["Admins"], operations: [read] }
+  { allow: groups, groups: ["Admins"] },
+  { allow: private, provider: identityPool }
   ]) {
   id: ID!
   percentComplete: Float
@@ -276,6 +289,8 @@ type Unit @model  @auth(
     rules: [
       { allow: owner },
       { allow: groups, groups: ["Learners"], operations: [read] },
+      { allow: groups, groups: ["Admins"] },
+      { allow: private, provider: identityPool }
     ]
   )
   {
@@ -316,6 +331,8 @@ type Word @model @auth(
     rules: [
       { allow: owner },
       { allow: groups, groups: ["Learners"], operations: [read] },
+      { allow: groups, groups: ["Admins"] },
+      { allow: private, provider: identityPool }
     ]
   ) {
   id: ID!
@@ -356,6 +373,8 @@ type Document @model  @auth(
     rules: [
       { allow: owner },
       { allow: groups, groups: ["Learners"], operations: [read] },
+      { allow: groups, groups: ["Admins"] },
+      { allow: private, provider: identityPool }
     ]
   ) {
   id: ID!
@@ -385,6 +404,8 @@ type ParsedContent @model @auth(
     rules: [
       { allow: owner },
       { allow: groups, groups: ["Learners"], operations: [read] },
+      { allow: groups, groups: ["Admins"] },
+      { allow: private, provider: identityPool }
     ]
   ) {
   id: ID!
@@ -411,6 +432,8 @@ type ParsedContent @model @auth(
 type AgentJob @model @auth(rules: [
   { allow: owner },
   { allow: groups, groups: ["Learners"], operations: [read] },
+  { allow: groups, groups: ["Admins"] },
+  { allow: private, provider: identityPool }
   ]) {
   id: ID!
   owner: String
@@ -435,6 +458,8 @@ type AgentJob @model @auth(rules: [
 
 type Settings @model @auth(rules: [
   { allow: owner },
+  { allow: groups, groups: ["Admins"] },
+  { allow: private, provider: identityPool }
   ]) {
   id: ID!
   owner: String
@@ -458,12 +483,12 @@ type Settings @model @auth(rules: [
   updatedAt: AWSDateTime
 }
 
-enum AIFeedbackType {
+enum AiFeedbackType {
   POSITIVE # thumbs up
   NEGATIVE # thumbs down
 }
 
-enum AIFeedbackReason {
+enum AiFeedbackReason {
   INCORRECT # Content is factually wrong
   INCOMPLETE # Content is missing important information
   INAPPROPRIATE # Content is offensive or inappropriate
@@ -473,7 +498,7 @@ enum AIFeedbackReason {
   OTHER # Other reason (see comment field)
 }
 
-enum AIContentType {
+enum AiContentType {
   CHAT_MESSAGE # AI assistant chat response
   CONTENT_COMPLETION # Editor content completion suggestion
   AUDIO_GENERATION # Generated audio file
@@ -488,17 +513,18 @@ enum AIContentType {
 
 type AIFeedback @model @auth(rules: [
   { allow: owner },
-  { allow: groups, groups: ["Admins"], operations: [read] }
+  { allow: groups, groups: ["Admins"] },
+  { allow: private, provider: identityPool }
   ]) {
   id: ID!
   owner: String
   identityId: String
   # What type of AI content was this?
-  contentType: AIContentType!
+  contentType: AiContentType!
   # Positive or negative feedback
-  feedbackType: AIFeedbackType!
+  feedbackType: AiFeedbackType!
   # Optional reason(s) for negative feedback
-  reasons: [AIFeedbackReason]
+  reasons: [AiFeedbackReason]
   # Optional free-form comment
   comment: String
   # Metadata about the AI generation

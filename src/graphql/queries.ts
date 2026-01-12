@@ -147,52 +147,78 @@ export const verifyImageUrl = /* GraphQL */ `query VerifyImageUrl($expected: Str
   APITypes.VerifyImageUrlQueryVariables,
   APITypes.VerifyImageUrlQuery
 >;
-export const getAssistant = /* GraphQL */ `query GetAssistant($id: ID!) {
-  getAssistant(id: $id) {
+export const getAssistantChat = /* GraphQL */ `query GetAssistantChat($id: ID!) {
+  getAssistantChat(id: $id) {
     id
+    owner
     model
-    assistantId
     threadInstructions
     additionalInstructions
-    messages
-    moderationFlag
-    identityId
     threadId
+    moderationFlag
+    messages
+    draft
+    archived
+    inputTokens
+    outputTokens
+    files {
+      items {
+        id
+        assistantChatId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
     _deleted
     _lastChangedAt
-    owner
     __typename
   }
 }
 ` as GeneratedQuery<
-  APITypes.GetAssistantQueryVariables,
-  APITypes.GetAssistantQuery
+  APITypes.GetAssistantChatQueryVariables,
+  APITypes.GetAssistantChatQuery
 >;
-export const listAssistants = /* GraphQL */ `query ListAssistants(
-  $filter: ModelAssistantFilterInput
+export const listAssistantChats = /* GraphQL */ `query ListAssistantChats(
+  $filter: ModelAssistantChatFilterInput
   $limit: Int
   $nextToken: String
 ) {
-  listAssistants(filter: $filter, limit: $limit, nextToken: $nextToken) {
+  listAssistantChats(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
       id
+      owner
       model
-      assistantId
       threadInstructions
       additionalInstructions
-      messages
-      moderationFlag
-      identityId
       threadId
+      moderationFlag
+      messages
+      draft
+      archived
+      inputTokens
+      outputTokens
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
       _deleted
       _lastChangedAt
-      owner
       __typename
     }
     nextToken
@@ -201,16 +227,16 @@ export const listAssistants = /* GraphQL */ `query ListAssistants(
   }
 }
 ` as GeneratedQuery<
-  APITypes.ListAssistantsQueryVariables,
-  APITypes.ListAssistantsQuery
+  APITypes.ListAssistantChatsQueryVariables,
+  APITypes.ListAssistantChatsQuery
 >;
-export const syncAssistants = /* GraphQL */ `query SyncAssistants(
-  $filter: ModelAssistantFilterInput
+export const syncAssistantChats = /* GraphQL */ `query SyncAssistantChats(
+  $filter: ModelAssistantChatFilterInput
   $limit: Int
   $nextToken: String
   $lastSync: AWSTimestamp
 ) {
-  syncAssistants(
+  syncAssistantChats(
     filter: $filter
     limit: $limit
     nextToken: $nextToken
@@ -218,20 +244,27 @@ export const syncAssistants = /* GraphQL */ `query SyncAssistants(
   ) {
     items {
       id
+      owner
       model
-      assistantId
       threadInstructions
       additionalInstructions
-      messages
-      moderationFlag
-      identityId
       threadId
+      moderationFlag
+      messages
+      draft
+      archived
+      inputTokens
+      outputTokens
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
       _deleted
       _lastChangedAt
-      owner
       __typename
     }
     nextToken
@@ -240,8 +273,8 @@ export const syncAssistants = /* GraphQL */ `query SyncAssistants(
   }
 }
 ` as GeneratedQuery<
-  APITypes.SyncAssistantsQueryVariables,
-  APITypes.SyncAssistantsQuery
+  APITypes.SyncAssistantChatsQueryVariables,
+  APITypes.SyncAssistantChatsQuery
 >;
 export const getQuestion = /* GraphQL */ `query GetQuestion($id: ID!) {
   getQuestion(id: $id) {
@@ -796,6 +829,23 @@ export const getFile = /* GraphQL */ `query GetFile($id: ID!) {
       startedAt
       __typename
     }
+    chats {
+      items {
+        id
+        assistantChatId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -891,6 +941,11 @@ export const listFiles = /* GraphQL */ `query ListFiles(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
         nextToken
         startedAt
         __typename
@@ -1000,6 +1055,11 @@ export const syncFiles = /* GraphQL */ `query SyncFiles(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
         nextToken
         startedAt
         __typename
@@ -1115,6 +1175,11 @@ export const filesByByHex = /* GraphQL */ `query FilesByByHex(
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -1130,90 +1195,6 @@ export const filesByByHex = /* GraphQL */ `query FilesByByHex(
 ` as GeneratedQuery<
   APITypes.FilesByByHexQueryVariables,
   APITypes.FilesByByHexQuery
->;
-export const getChatHistory = /* GraphQL */ `query GetChatHistory($id: ID!) {
-  getChatHistory(id: $id) {
-    id
-    owner
-    messages
-    model
-    inputTokens
-    outputTokens
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.GetChatHistoryQueryVariables,
-  APITypes.GetChatHistoryQuery
->;
-export const listChatHistories = /* GraphQL */ `query ListChatHistories(
-  $filter: ModelChatHistoryFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  listChatHistories(filter: $filter, limit: $limit, nextToken: $nextToken) {
-    items {
-      id
-      owner
-      messages
-      model
-      inputTokens
-      outputTokens
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    nextToken
-    startedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.ListChatHistoriesQueryVariables,
-  APITypes.ListChatHistoriesQuery
->;
-export const syncChatHistories = /* GraphQL */ `query SyncChatHistories(
-  $filter: ModelChatHistoryFilterInput
-  $limit: Int
-  $nextToken: String
-  $lastSync: AWSTimestamp
-) {
-  syncChatHistories(
-    filter: $filter
-    limit: $limit
-    nextToken: $nextToken
-    lastSync: $lastSync
-  ) {
-    items {
-      id
-      owner
-      messages
-      model
-      inputTokens
-      outputTokens
-      createdAt
-      updatedAt
-      _version
-      _deleted
-      _lastChangedAt
-      __typename
-    }
-    nextToken
-    startedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.SyncChatHistoriesQueryVariables,
-  APITypes.SyncChatHistoriesQuery
 >;
 export const getSection = /* GraphQL */ `query GetSection($id: ID!) {
   getSection(id: $id) {
@@ -2775,6 +2756,11 @@ export const getParsedContent = /* GraphQL */ `query GetParsedContent($id: ID!) 
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -4093,6 +4079,475 @@ export const aIFeedbacksByDocumentID = /* GraphQL */ `query AIFeedbacksByDocumen
   APITypes.AIFeedbacksByDocumentIDQueryVariables,
   APITypes.AIFeedbacksByDocumentIDQuery
 >;
+export const getAssistantChatFile = /* GraphQL */ `query GetAssistantChatFile($id: ID!) {
+  getAssistantChatFile(id: $id) {
+    id
+    assistantChatId
+    fileId
+    assistantChat {
+      id
+      owner
+      model
+      threadInstructions
+      additionalInstructions
+      threadId
+      moderationFlag
+      messages
+      draft
+      archived
+      inputTokens
+      outputTokens
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    file {
+      id
+      name
+      owner
+      identityId
+      description
+      prompt
+      model
+      variant
+      mimeType
+      level
+      path
+      duration
+      size
+      generated
+      hex
+      byHex
+      thumbnail
+      waveformData
+      embedding
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetAssistantChatFileQueryVariables,
+  APITypes.GetAssistantChatFileQuery
+>;
+export const listAssistantChatFiles = /* GraphQL */ `query ListAssistantChatFiles(
+  $filter: ModelAssistantChatFileFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listAssistantChatFiles(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      assistantChatId
+      fileId
+      assistantChat {
+        id
+        owner
+        model
+        threadInstructions
+        additionalInstructions
+        threadId
+        moderationFlag
+        messages
+        draft
+        archived
+        inputTokens
+        outputTokens
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListAssistantChatFilesQueryVariables,
+  APITypes.ListAssistantChatFilesQuery
+>;
+export const syncAssistantChatFiles = /* GraphQL */ `query SyncAssistantChatFiles(
+  $filter: ModelAssistantChatFileFilterInput
+  $limit: Int
+  $nextToken: String
+  $lastSync: AWSTimestamp
+) {
+  syncAssistantChatFiles(
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+    lastSync: $lastSync
+  ) {
+    items {
+      id
+      assistantChatId
+      fileId
+      assistantChat {
+        id
+        owner
+        model
+        threadInstructions
+        additionalInstructions
+        threadId
+        moderationFlag
+        messages
+        draft
+        archived
+        inputTokens
+        outputTokens
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SyncAssistantChatFilesQueryVariables,
+  APITypes.SyncAssistantChatFilesQuery
+>;
+export const assistantChatFilesByAssistantChatId = /* GraphQL */ `query AssistantChatFilesByAssistantChatId(
+  $assistantChatId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelAssistantChatFileFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  assistantChatFilesByAssistantChatId(
+    assistantChatId: $assistantChatId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      assistantChatId
+      fileId
+      assistantChat {
+        id
+        owner
+        model
+        threadInstructions
+        additionalInstructions
+        threadId
+        moderationFlag
+        messages
+        draft
+        archived
+        inputTokens
+        outputTokens
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.AssistantChatFilesByAssistantChatIdQueryVariables,
+  APITypes.AssistantChatFilesByAssistantChatIdQuery
+>;
+export const assistantChatFilesByFileId = /* GraphQL */ `query AssistantChatFilesByFileId(
+  $fileId: ID!
+  $sortDirection: ModelSortDirection
+  $filter: ModelAssistantChatFileFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  assistantChatFilesByFileId(
+    fileId: $fileId
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      assistantChatId
+      fileId
+      assistantChat {
+        id
+        owner
+        model
+        threadInstructions
+        additionalInstructions
+        threadId
+        moderationFlag
+        messages
+        draft
+        archived
+        inputTokens
+        outputTokens
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      file {
+        id
+        name
+        owner
+        identityId
+        description
+        prompt
+        model
+        variant
+        mimeType
+        level
+        path
+        duration
+        size
+        generated
+        hex
+        byHex
+        thumbnail
+        waveformData
+        embedding
+        documentID
+        parsedContentID
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      owner
+      __typename
+    }
+    nextToken
+    startedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.AssistantChatFilesByFileIdQueryVariables,
+  APITypes.AssistantChatFilesByFileIdQuery
+>;
 export const getQuestionUnit = /* GraphQL */ `query GetQuestionUnit($id: ID!) {
   getQuestionUnit(id: $id) {
     id
@@ -5267,6 +5722,11 @@ export const getQuestionFile = /* GraphQL */ `query GetQuestionFile($id: ID!) {
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -6247,6 +6707,11 @@ export const getUnitFile = /* GraphQL */ `query GetUnitFile($id: ID!) {
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -6778,6 +7243,11 @@ export const getWordFile = /* GraphQL */ `query GetWordFile($id: ID!) {
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
         nextToken
         startedAt
         __typename

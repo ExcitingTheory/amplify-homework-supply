@@ -32,6 +32,11 @@ export declare type SectionCreateFormInputValues = {
     identityId?: string;
     thumbnail?: string;
     backgroundColor?: string;
+    embedding?: number[];
+    embeddingModel?: string;
+    embeddingDimensions?: number;
+    embeddingVersion?: number;
+    embeddingWordCount?: number;
 };
 export declare type SectionCreateFormValidationValues = {
     name?: ValidationFunction<string>;
@@ -44,6 +49,11 @@ export declare type SectionCreateFormValidationValues = {
     identityId?: ValidationFunction<string>;
     thumbnail?: ValidationFunction<string>;
     backgroundColor?: ValidationFunction<string>;
+    embedding?: ValidationFunction<number>;
+    embeddingModel?: ValidationFunction<string>;
+    embeddingDimensions?: ValidationFunction<number>;
+    embeddingVersion?: ValidationFunction<number>;
+    embeddingWordCount?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type SectionCreateFormOverridesProps = {
@@ -58,6 +68,11 @@ export declare type SectionCreateFormOverridesProps = {
     identityId?: PrimitiveOverrideProps<TextFieldProps>;
     thumbnail?: PrimitiveOverrideProps<TextFieldProps>;
     backgroundColor?: PrimitiveOverrideProps<TextFieldProps>;
+    embedding?: PrimitiveOverrideProps<TextFieldProps>;
+    embeddingModel?: PrimitiveOverrideProps<TextFieldProps>;
+    embeddingDimensions?: PrimitiveOverrideProps<TextFieldProps>;
+    embeddingVersion?: PrimitiveOverrideProps<TextFieldProps>;
+    embeddingWordCount?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type SectionCreateFormProps = React.PropsWithChildren<{
     overrides?: SectionCreateFormOverridesProps | undefined | null;

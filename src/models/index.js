@@ -42,13 +42,12 @@ const AiContentType = {
   "BLOCK_SUGGESTION": "BLOCK_SUGGESTION"
 };
 
-const { Assistant, Question, File, ChatHistory, Section, Assignment, Grade, Unit, Word, Document, ParsedContent, AgentJob, Settings, AIFeedback, QuestionUnit, QuestionWord, QuestionFile, DocumentQuestion, UnitFile, WordFile, UnitWord, UnitDocument, DocumentWord, EmbeddingResult, ModerationResult, AnalyzeDocumentResult, CancelDocumentAnalysisResult, GenerateEmbeddingsResult, StudentInfo, Choice, PageEmbedding } = initSchema(schema);
+const { AssistantChat, Question, File, Section, Assignment, Grade, Unit, Word, Document, ParsedContent, AgentJob, Settings, AIFeedback, AssistantChatFile, QuestionUnit, QuestionWord, QuestionFile, DocumentQuestion, UnitFile, WordFile, UnitWord, UnitDocument, DocumentWord, EmbeddingResult, ModerationResult, AnalyzeDocumentResult, CancelDocumentAnalysisResult, GenerateEmbeddingsResult, StudentInfo, Choice, PageEmbedding } = initSchema(schema);
 
 export {
-  Assistant,
+  AssistantChat,
   Question,
   File,
-  ChatHistory,
   Section,
   Assignment,
   Grade,
@@ -59,6 +58,7 @@ export {
   AgentJob,
   Settings,
   AIFeedback,
+  AssistantChatFile,
   QuestionUnit,
   QuestionWord,
   QuestionFile,
@@ -70,9 +70,9 @@ export {
   DocumentWord,
   PublishedStatus,
   FileProtectionLevels,
-  AIFeedbackType,
-  AIFeedbackReason,
-  AIContentType,
+  AiFeedbackType,
+  AiFeedbackReason,
+  AiContentType,
   EmbeddingResult,
   ModerationResult,
   AnalyzeDocumentResult,

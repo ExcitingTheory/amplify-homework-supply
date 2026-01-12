@@ -661,6 +661,18 @@
                 "arn:aws:ssm:us-east-1:759854655984:parameter/OPENAI_API_KEY"
               ],
               "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "appsync:GraphQL"
+              ],
+              "Resource": [
+                "arn:aws:appsync:*:*:apis/*/types/Document/*",
+                "arn:aws:appsync:*:*:apis/*/types/File/*",
+                "arn:aws:appsync:*:*:apis/*/types/ParsedContent/*",
+                "arn:aws:appsync:*:*:apis/*/types/AgentJob/*"
+              ],
+              "Effect": "Allow"
             }
           ]
         },

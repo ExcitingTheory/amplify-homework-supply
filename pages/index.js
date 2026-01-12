@@ -87,6 +87,7 @@ function Index({ signOut, user }) {
    * Section id is passed in as a query parameter.
    * For Student users, it displays a list of grades organized by section like a gradebook, but only for their own grades.
    */
+  console.log('[Index] Component render, user:', user);
   const [grades, setGrades] = useState([])
   const [sections, setSections] = useState([])
   const [mySections, setMySections] = useState([])
@@ -202,15 +203,24 @@ function Index({ signOut, user }) {
 
   // Consolidated Section observer - handles both my and others' sections
   useEffect(() => {
+    console.log('[Index] Section useEffect triggered, user?.username:', user?.username);
     if (!user?.username) return;
     fetchAllSections()
     async function fetchAllSections() {
       const myUserId = user.username
+      const myGroups = user.groups || [] // Cognito groups the user belongs to
+      console.log('[Index] Fetching sections for user:', myUserId, 'groups:', myGroups);
       const allSections = await DataStore.query(Section)
+      console.log('[Index] Received sections from DataStore:', allSections.length, allSections);
       
+      // Sections I own (I'm the instructor)
       const mySections = allSections.filter(s => s.owner === myUserId)
-      const othersSections = allSections.filter(s => s.owner !== myUserId)
+      // Sections where I'm a student (I'm in the learner group)
+      const othersSections = allSections.filter(s => 
+        s.owner !== myUserId && s.learner && myGroups.includes(s.learner)
+      )
       
+      console.log('[Index] mySections:', mySections.length, 'othersSections (where I am in learner group):', othersSections.length);
       setMySections(mySections)
       setSections(othersSections)
     }
@@ -253,7 +263,7 @@ function Index({ signOut, user }) {
         <MainToolbar>
           <Box sx={{ flexGrow: 1, margin: '1rem' }} >
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Language Supply
+              Homework Supply
             </Typography>
           </Box>
         </MainToolbar>
@@ -922,11 +932,11 @@ function Index({ signOut, user }) {
 }
 
 
-function WrappedPage() {
+function WrappedPage({ signOut, user , ...args }) {
   return (
     <MyAuth>
       <FilesProvider>
-        <Index />
+        <Index signOut={signOut} user={user} {...args} />
       </FilesProvider>
     </MyAuth>
   )

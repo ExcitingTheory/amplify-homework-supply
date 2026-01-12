@@ -7,17 +7,178 @@
 /* eslint-disable */
 import * as React from "react";
 import {
+  Badge,
   Button,
+  Divider,
   Flex,
   Grid,
+  Icon,
+  ScrollView,
   SelectField,
   SwitchField,
+  Text,
   TextAreaField,
   TextField,
+  useTheme,
 } from "@aws-amplify/ui-react";
 import { File } from "../models";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { DataStore } from "aws-amplify/datastore";
+function ArrayField({
+  items = [],
+  onChange,
+  label,
+  inputFieldRef,
+  children,
+  hasError,
+  setFieldValue,
+  currentFieldValue,
+  defaultFieldValue,
+  lengthLimit,
+  getBadgeText,
+  runValidationTasks,
+  errorMessage,
+}) {
+  const labelElement = <Text>{label}</Text>;
+  const {
+    tokens: {
+      components: {
+        fieldmessages: { error: errorStyles },
+      },
+    },
+  } = useTheme();
+  const [selectedBadgeIndex, setSelectedBadgeIndex] = React.useState();
+  const [isEditing, setIsEditing] = React.useState();
+  React.useEffect(() => {
+    if (isEditing) {
+      inputFieldRef?.current?.focus();
+    }
+  }, [isEditing]);
+  const removeItem = async (removeIndex) => {
+    const newItems = items.filter((value, index) => index !== removeIndex);
+    await onChange(newItems);
+    setSelectedBadgeIndex(undefined);
+  };
+  const addItem = async () => {
+    const { hasError } = runValidationTasks();
+    if (
+      currentFieldValue !== undefined &&
+      currentFieldValue !== null &&
+      currentFieldValue !== "" &&
+      !hasError
+    ) {
+      const newItems = [...items];
+      if (selectedBadgeIndex !== undefined) {
+        newItems[selectedBadgeIndex] = currentFieldValue;
+        setSelectedBadgeIndex(undefined);
+      } else {
+        newItems.push(currentFieldValue);
+      }
+      await onChange(newItems);
+      setIsEditing(false);
+    }
+  };
+  const arraySection = (
+    <React.Fragment>
+      {!!items?.length && (
+        <ScrollView height="inherit" width="inherit" maxHeight={"7rem"}>
+          {items.map((value, index) => {
+            return (
+              <Badge
+                key={index}
+                style={{
+                  cursor: "pointer",
+                  alignItems: "center",
+                  marginRight: 3,
+                  marginTop: 3,
+                  backgroundColor:
+                    index === selectedBadgeIndex ? "#B8CEF9" : "",
+                }}
+                onClick={() => {
+                  setSelectedBadgeIndex(index);
+                  setFieldValue(items[index]);
+                  setIsEditing(true);
+                }}
+              >
+                {getBadgeText ? getBadgeText(value) : value.toString()}
+                <Icon
+                  style={{
+                    cursor: "pointer",
+                    paddingLeft: 3,
+                    width: 20,
+                    height: 20,
+                  }}
+                  viewBox={{ width: 20, height: 20 }}
+                  paths={[
+                    {
+                      d: "M10 10l5.09-5.09L10 10l5.09 5.09L10 10zm0 0L4.91 4.91 10 10l-5.09 5.09L10 10z",
+                      stroke: "black",
+                    },
+                  ]}
+                  ariaLabel="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    removeItem(index);
+                  }}
+                />
+              </Badge>
+            );
+          })}
+        </ScrollView>
+      )}
+      <Divider orientation="horizontal" marginTop={5} />
+    </React.Fragment>
+  );
+  if (lengthLimit !== undefined && items.length >= lengthLimit && !isEditing) {
+    return (
+      <React.Fragment>
+        {labelElement}
+        {arraySection}
+      </React.Fragment>
+    );
+  }
+  return (
+    <React.Fragment>
+      {labelElement}
+      {isEditing && children}
+      {!isEditing ? (
+        <>
+          <Button
+            onClick={() => {
+              setIsEditing(true);
+            }}
+          >
+            Add item
+          </Button>
+          {errorMessage && hasError && (
+            <Text color={errorStyles.color} fontSize={errorStyles.fontSize}>
+              {errorMessage}
+            </Text>
+          )}
+        </>
+      ) : (
+        <Flex justifyContent="flex-end">
+          {(currentFieldValue || isEditing) && (
+            <Button
+              children="Cancel"
+              type="button"
+              size="small"
+              onClick={() => {
+                setFieldValue(defaultFieldValue);
+                setIsEditing(false);
+                setSelectedBadgeIndex(undefined);
+              }}
+            ></Button>
+          )}
+          <Button size="small" variation="link" onClick={addItem}>
+            {selectedBadgeIndex !== undefined ? "Save" : "Add"}
+          </Button>
+        </Flex>
+      )}
+      {arraySection}
+    </React.Fragment>
+  );
+}
 export default function FileCreateForm(props) {
   const {
     clearOnSuccess = true,
@@ -47,6 +208,7 @@ export default function FileCreateForm(props) {
     byHex: "",
     thumbnail: "",
     waveformData: "",
+    embedding: [],
   };
   const [name, setName] = React.useState(initialValues.name);
   const [owner, setOwner] = React.useState(initialValues.owner);
@@ -69,6 +231,7 @@ export default function FileCreateForm(props) {
   const [waveformData, setWaveformData] = React.useState(
     initialValues.waveformData
   );
+  const [embedding, setEmbedding] = React.useState(initialValues.embedding);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setName(initialValues.name);
@@ -88,8 +251,12 @@ export default function FileCreateForm(props) {
     setByHex(initialValues.byHex);
     setThumbnail(initialValues.thumbnail);
     setWaveformData(initialValues.waveformData);
+    setEmbedding(initialValues.embedding);
+    setCurrentEmbeddingValue("");
     setErrors({});
   };
+  const [currentEmbeddingValue, setCurrentEmbeddingValue] = React.useState("");
+  const embeddingRef = React.createRef();
   const validations = {
     name: [],
     owner: [],
@@ -108,6 +275,7 @@ export default function FileCreateForm(props) {
     byHex: [],
     thumbnail: [],
     waveformData: [{ type: "JSON" }],
+    embedding: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -152,6 +320,7 @@ export default function FileCreateForm(props) {
           byHex,
           thumbnail,
           waveformData,
+          embedding,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -223,6 +392,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -263,6 +433,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.owner ?? value;
@@ -303,6 +474,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.identityId ?? value;
@@ -343,6 +515,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.description ?? value;
@@ -383,6 +556,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.prompt ?? value;
@@ -423,6 +597,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.model ?? value;
@@ -463,6 +638,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.variant ?? value;
@@ -503,6 +679,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.mimeType ?? value;
@@ -543,6 +720,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.level ?? value;
@@ -599,6 +777,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.path ?? value;
@@ -643,6 +822,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.duration ?? value;
@@ -687,6 +867,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.size ?? value;
@@ -727,6 +908,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.generated ?? value;
@@ -767,6 +949,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.hex ?? value;
@@ -807,6 +990,7 @@ export default function FileCreateForm(props) {
               byHex: value,
               thumbnail,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.byHex ?? value;
@@ -847,6 +1031,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail: value,
               waveformData,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.thumbnail ?? value;
@@ -886,6 +1071,7 @@ export default function FileCreateForm(props) {
               byHex,
               thumbnail,
               waveformData: value,
+              embedding,
             };
             const result = onChange(modelFields);
             value = result?.waveformData ?? value;
@@ -900,6 +1086,72 @@ export default function FileCreateForm(props) {
         hasError={errors.waveformData?.hasError}
         {...getOverrideProps(overrides, "waveformData")}
       ></TextAreaField>
+      <ArrayField
+        onChange={async (items) => {
+          let values = items;
+          if (onChange) {
+            const modelFields = {
+              name,
+              owner,
+              identityId,
+              description,
+              prompt,
+              model,
+              variant,
+              mimeType,
+              level,
+              path,
+              duration,
+              size,
+              generated,
+              hex,
+              byHex,
+              thumbnail,
+              waveformData,
+              embedding: values,
+            };
+            const result = onChange(modelFields);
+            values = result?.embedding ?? values;
+          }
+          setEmbedding(values);
+          setCurrentEmbeddingValue("");
+        }}
+        currentFieldValue={currentEmbeddingValue}
+        label={"Embedding"}
+        items={embedding}
+        hasError={errors?.embedding?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks("embedding", currentEmbeddingValue)
+        }
+        errorMessage={errors?.embedding?.errorMessage}
+        setFieldValue={setCurrentEmbeddingValue}
+        inputFieldRef={embeddingRef}
+        defaultFieldValue={""}
+      >
+        <TextField
+          label="Embedding"
+          isRequired={false}
+          isReadOnly={false}
+          type="number"
+          step="any"
+          value={currentEmbeddingValue}
+          onChange={(e) => {
+            let value = isNaN(parseFloat(e.target.value))
+              ? e.target.value
+              : parseFloat(e.target.value);
+            if (errors.embedding?.hasError) {
+              runValidationTasks("embedding", value);
+            }
+            setCurrentEmbeddingValue(value);
+          }}
+          onBlur={() => runValidationTasks("embedding", currentEmbeddingValue)}
+          errorMessage={errors.embedding?.errorMessage}
+          hasError={errors.embedding?.hasError}
+          ref={embeddingRef}
+          labelHidden={true}
+          {...getOverrideProps(overrides, "embedding")}
+        ></TextField>
+      </ArrayField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

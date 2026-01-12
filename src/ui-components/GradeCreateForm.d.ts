@@ -33,6 +33,9 @@ export declare type GradeCreateFormInputValues = {
     data?: string;
     feedback?: string;
     files?: string[];
+    moderationStatus?: string;
+    moderationFlags?: string;
+    moderationCheckedAt?: string;
 };
 export declare type GradeCreateFormValidationValues = {
     percentComplete?: ValidationFunction<number>;
@@ -46,6 +49,9 @@ export declare type GradeCreateFormValidationValues = {
     data?: ValidationFunction<string>;
     feedback?: ValidationFunction<string>;
     files?: ValidationFunction<string>;
+    moderationStatus?: ValidationFunction<string>;
+    moderationFlags?: ValidationFunction<string>;
+    moderationCheckedAt?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type GradeCreateFormOverridesProps = {
@@ -61,6 +67,9 @@ export declare type GradeCreateFormOverridesProps = {
     data?: PrimitiveOverrideProps<TextAreaFieldProps>;
     feedback?: PrimitiveOverrideProps<TextAreaFieldProps>;
     files?: PrimitiveOverrideProps<TextFieldProps>;
+    moderationStatus?: PrimitiveOverrideProps<TextFieldProps>;
+    moderationFlags?: PrimitiveOverrideProps<TextAreaFieldProps>;
+    moderationCheckedAt?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type GradeCreateFormProps = React.PropsWithChildren<{
     overrides?: GradeCreateFormOverridesProps | undefined | null;

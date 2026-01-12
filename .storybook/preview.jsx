@@ -161,6 +161,11 @@ const preview = {
       // Check if this is a fullscreen layout story (like pages)
       const isFullscreen = context?.parameters?.layout === 'fullscreen';
       
+      // Check if contexts should be disabled (for page-level stories)
+      const disableUnitContext = context?.parameters?.disableUnitContext;
+      const disableSectionContext = context?.parameters?.disableSectionContext;
+      const disableDictionaryContext = context?.parameters?.disableDictionaryContext;
+      
       return (
         <ThemeProvider theme={theme}>
           <CssBaseline />
@@ -171,6 +176,7 @@ const preview = {
               width: '100%',
               overflow: isFullscreen ? 'auto' : 'visible',
               position: 'relative',
+              backgroundColor: 'white',
               // Ensure proper scrolling for fullscreen layouts
               ...(isFullscreen && {
                 overflowX: 'auto',
@@ -180,13 +186,49 @@ const preview = {
           >
             <AudioPlayerProvider>
               <FilesProvider>
-                <DictionaryProvider>
-                  <UnitProvider id={unitId}>
-                    <SectionProvider unitId={unitId}>
+                {disableDictionaryContext ? (
+                  disableUnitContext ? (
+                    disableSectionContext ? (
                       <Story />
-                    </SectionProvider>
-                  </UnitProvider>
-                </DictionaryProvider>
+                    ) : (
+                      <SectionProvider unitId={unitId}>
+                        <Story />
+                      </SectionProvider>
+                    )
+                  ) : (
+                    <UnitProvider id={unitId}>
+                      {disableSectionContext ? (
+                        <Story />
+                      ) : (
+                        <SectionProvider unitId={unitId}>
+                          <Story />
+                        </SectionProvider>
+                      )}
+                    </UnitProvider>
+                  )
+                ) : (
+                  <DictionaryProvider>
+                    {disableUnitContext ? (
+                      disableSectionContext ? (
+                        <Story />
+                      ) : (
+                        <SectionProvider unitId={unitId}>
+                          <Story />
+                        </SectionProvider>
+                      )
+                    ) : (
+                      <UnitProvider id={unitId}>
+                        {disableSectionContext ? (
+                          <Story />
+                        ) : (
+                          <SectionProvider unitId={unitId}>
+                            <Story />
+                          </SectionProvider>
+                        )}
+                      </UnitProvider>
+                    )}
+                  </DictionaryProvider>
+                )}
               </FilesProvider>
             </AudioPlayerProvider>
           </div>

@@ -18,7 +18,7 @@ export default function FreeSoloCreateOptionDialog() {
 
     const {
         dictionary,
-    } = React.useContext(DictionaryContext});
+    } = React.useContext(DictionaryContext);
 
     const _dictionary = Object.values(dictionary);
 

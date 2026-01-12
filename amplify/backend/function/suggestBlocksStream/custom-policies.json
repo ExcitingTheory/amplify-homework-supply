@@ -1,6 +1,10 @@
 [
   {
-    "Action": [],
-    "Resource": []
+    "Action": [
+      "appsync:GraphQL"
+    ],
+    "Resource": [
+      "arn:aws:appsync:*:*:apis/*/types/Unit/fields/getUnit"
+    ]
   }
 ]

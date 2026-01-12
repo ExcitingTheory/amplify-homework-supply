@@ -105,6 +105,7 @@ import { $createFileMetadataNode } from "../nodes/FileMetadataNode";
 import { UnitFile } from '../../../models';
 import UnitContext from '../../../context/unitContext';
 import { FileManagerProvider, useFileManager } from './FileManagerContext';
+import { useTabContext } from '../../../context/tabContext';
 import getCachedUrl from "../../../utils/getCachedUrl";
 import AudioWaveformPlayer from './AudioWaveformPlayer';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
@@ -1904,11 +1905,42 @@ const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, 
         remove
     } = useFileManager();
     
+    const tabContext = useTabContext();
+    const fileItemRef = React.useRef(null);
+    const [isHighlighted, setIsHighlighted] = React.useState(false);
+    
+    // Derive state values early (before using in effects)
     const isExpanded = expandedItems.has(file.id);
-    const isSelected = selectedItems.has(file.id);
+    const isSelected = Boolean(selectedItems?.has(file.id));
     const parsedContent = parsedContentData[file.id];
     const documentStatus = documentStatuses[file.documentID];
     const isContentExpanded = expandedFileContent.has(file.id);
+    
+    // Register ref for scrolling
+    React.useEffect(() => {
+        if (tabContext?.registerItemRef && file?.id) {
+            tabContext.registerItemRef('file', file.id, fileItemRef);
+        }
+        return () => {
+            if (tabContext?.unregisterItemRef && file?.id) {
+                tabContext.unregisterItemRef('file', file.id);
+            }
+        };
+    }, [file?.id, tabContext]);
+    
+    // Highlight when focused from search results
+    React.useEffect(() => {
+        if (tabContext?.focusItem?.type === 'file' && tabContext.focusItem.id === file?.id) {
+            setIsHighlighted(true);
+            // Auto-expand when focused
+            if (!isContentExpanded) {
+                toggleFileContentExpansion(file.id);
+            }
+            // Remove highlight after 3 seconds
+            const timer = setTimeout(() => setIsHighlighted(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [tabContext?.focusItem, file?.id, isContentExpanded, toggleFileContentExpansion]);
     const isEvenRow = index % 2 === 0;
 
     // Common action buttons for all file types
@@ -2021,14 +2053,22 @@ const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, 
     );
 
     return (
-        <Box sx={{
-            backgroundColor: isSelected ? 'action.selected' : isEvenRow ? 'grey.50' : 'background.paper',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            flexDirection: 'column',
-            width: '100%'
-        }}>
+        <Box 
+            ref={fileItemRef}
+            sx={{
+                backgroundColor: isHighlighted
+                    ? 'rgba(25, 118, 210, 0.15)' // Primary blue highlight
+                    : isSelected ? 'action.selected' : isEvenRow ? 'grey.50' : 'background.paper',
+                borderBottom: '1px solid',
+                borderColor: isHighlighted ? 'primary.main' : 'divider',
+                borderLeftWidth: isHighlighted ? '4px' : 0,
+                borderLeftStyle: isHighlighted ? 'solid' : 'none',
+                borderLeftColor: isHighlighted ? 'primary.main' : 'transparent',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%'
+            }}>
             {/* Row 1: Preview/Icon and Actions */}
             <Box sx={{
                 display: 'flex',
@@ -3624,11 +3664,11 @@ export default function FileManager2() {
                     <Tooltip title="Select All">
                         <Checkbox
                             size="small"
-                            checked={
+                            checked={Boolean(
                                 files &&
                                 files.length > 0 &&
                                 selectedItems.size === files.length
-                            }
+                            )}
                             indeterminate={
                                 selectedItems.size > 0 &&
                                 selectedItems.size < files.length

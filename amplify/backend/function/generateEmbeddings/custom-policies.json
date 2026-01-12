@@ -7,5 +7,14 @@
     "Resource": [
       "arn:aws:ssm:us-east-1:759854655984:parameter/OPENAI_API_KEY"
     ]
+  },
+  {
+    "Action": [
+      "appsync:GraphQL"
+    ],
+    "Resource": [
+      "arn:aws:appsync:*:*:apis/*/types/File/*",
+      "arn:aws:appsync:*:*:apis/*/types/Document/*"
+    ]
   }
 ]

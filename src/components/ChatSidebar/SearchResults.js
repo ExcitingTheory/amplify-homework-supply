@@ -8,6 +8,7 @@ import {
     Tooltip,
     CircularProgress,
     ButtonGroup,
+    Link,
 } from '@mui/material';
 import {
     Description as FileIcon,
@@ -22,10 +23,64 @@ import { DataStore } from 'aws-amplify/datastore';
 import { Unit, UnitWord, QuestionUnit } from '../../models';
 
 /**
+ * Highlight search terms in text
+ */
+const highlightMatches = (text, searchTerm) => {
+    if (!searchTerm || !text) return text;
+    
+    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const parts = String(text).split(regex);
+    
+    return parts.map((part, index) => 
+        regex.test(part) ? (
+            <mark key={index} style={{ backgroundColor: '#ffeb3b', padding: '0 2px', borderRadius: '2px' }}>
+                {part}
+            </mark>
+        ) : part
+    );
+};
+
+/**
+ * Component to display truncated text with show more/less
+ */
+function TruncatedText({ text, maxLength = 150, variant = 'caption', sx = {}, searchTerm = '' }) {
+    const [expanded, setExpanded] = React.useState(false);
+    
+    if (!text || text.length <= maxLength) {
+        return (
+            <Typography variant={variant} sx={sx}>
+                {text}
+            </Typography>
+        );
+    }
+    
+    const displayText = expanded ? text : `${text.substring(0, maxLength)}...`;
+    
+    return (
+        <Typography variant={variant} sx={sx} component="div">
+            {searchTerm ? highlightMatches(displayText, searchTerm) : displayText}
+            {' '}
+            <Link
+                component="button"
+                variant={variant}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setExpanded(!expanded);
+                }}
+                sx={{ cursor: 'pointer', fontWeight: 600 }}
+            >
+                {expanded ? 'show less' : 'show more'}
+            </Link>
+        </Typography>
+    );
+}
+
+/**
  * Display search results from the search_content tool
  * 
  * @param {Array} results - Search results to display
  * @param {string} unitId - Current unit ID for linking
+ * @param {string} searchQuery - Original search query for highlighting
  * @param {object} tabHandlers - Tab management functions
  * @param {Function} tabHandlers.setLeftTab - Set left sidebar tab
  * @param {Function} tabHandlers.setLeftOpen - Open/close left sidebar
@@ -36,20 +91,21 @@ import { Unit, UnitWord, QuestionUnit } from '../../models';
  */
 export default function SearchResults({ 
     results, 
-    unitId, 
+    unitId,
+    searchQuery = '',
     tabHandlers = {},
     onInsertWord,
     onInsertQuestion,
     onFocusItem
 }) {
     const [linkingStates, setLinkingStates] = React.useState({});
-    const { setLeftTab, setLeftOpen, setRightOpen } = tabHandlers;
+    const { setLeftTab, setLeftOpen, setRightOpen, scrollToItem } = tabHandlers;
 
     // Tab indices (from useTabState defaults and typical setup)
     const TAB_INDICES = {
         FILES: 4,
-        DICTIONARY: 3,
-        QUESTIONS: 2,
+        DICTIONARY: 2,
+        QUESTIONS: 3,
     };
 
     const handleOpenFile = (file) => {
@@ -58,6 +114,10 @@ export default function SearchResults({
             setLeftOpen(true);
             if (onFocusItem) {
                 onFocusItem('file', file.id);
+            }
+            // Scroll to item after a short delay to allow tab to open
+            if (scrollToItem) {
+                setTimeout(() => scrollToItem('file', file.id), 300);
             }
         }
     };
@@ -69,6 +129,10 @@ export default function SearchResults({
             if (onFocusItem) {
                 onFocusItem('word', word.id);
             }
+            // Scroll to item after a short delay to allow tab to open
+            if (scrollToItem) {
+                setTimeout(() => scrollToItem('word', word.id), 300);
+            }
         }
     };
 
@@ -78,6 +142,10 @@ export default function SearchResults({
             setLeftOpen(true);
             if (onFocusItem) {
                 onFocusItem('question', question.id);
+            }
+            // Scroll to item after a short delay to allow tab to open
+            if (scrollToItem) {
+                setTimeout(() => scrollToItem('question', question.id), 300);
             }
         }
     };
@@ -157,9 +225,9 @@ export default function SearchResults({
                 key={file.id}
                 sx={{
                     display: 'flex',
-                    alignItems: 'center',
+                    flexDirection: 'column',
                     gap: 1,
-                    p: 1,
+                    p: 1.5,
                     borderRadius: 1,
                     bgcolor: 'background.paper',
                     border: '1px solid',
@@ -167,29 +235,40 @@ export default function SearchResults({
                     '&:hover': { bgcolor: 'action.hover' }
                 }}
             >
-                <FileIcon sx={{ color: 'primary.main' }} />
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {file.name}
-                    </Typography>
-                    {file.description && (
-                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-                            {file.description.substring(0, 80)}...
+                {/* Header row with icon, title, and controls */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0 }}>
+                        <FileIcon sx={{ color: 'primary.main', flexShrink: 0 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }} component="div">
+                            {searchQuery ? highlightMatches(file.name, searchQuery) : file.name}
                         </Typography>
-                    )}
-                    {file.page && (
-                        <Chip label={`Page ${file.page}`} size="small" sx={{ mt: 0.5 }} />
-                    )}
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
+                        <Chip label={`${similarity}%`} size="small" color="primary" />
+                        <Tooltip title="Open file">
+                            <IconButton
+                                size="small"
+                                onClick={() => handleOpenFile(file)}
+                            >
+                                <OpenIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
                 </Box>
-                <Chip label={`${similarity}%`} size="small" color="primary" />
-                <Tooltip title="Open file">
-                    <IconButton
-                        size="small"
-                        onClick={() => handleOpenFile(file)}
-                    >
-                        <OpenIcon fontSize="small" />
-                    </IconButton>
-                </Tooltip>
+                
+                {/* Description */}
+                {file.description && (
+                    <TruncatedText
+                        text={file.description}
+                        maxLength={150}
+                        variant="caption"
+                        searchTerm={searchQuery}
+                        sx={{ color: 'text.secondary', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal', pl: 4, display: 'block' }}
+                    />
+                )}
+                {file.page && (
+                    <Chip label={`Page ${file.page}`} size="small" sx={{ alignSelf: 'flex-start', ml: 4 }} />
+                )}
             </Box>
         );
     };
@@ -204,9 +283,9 @@ export default function SearchResults({
                 key={word.id}
                 sx={{
                     display: 'flex',
-                    alignItems: 'center',
+                    flexDirection: 'column',
                     gap: 1,
-                    p: 1,
+                    p: 1.5,
                     borderRadius: 1,
                     bgcolor: 'background.paper',
                     border: '1px solid',
@@ -214,62 +293,73 @@ export default function SearchResults({
                     '&:hover': { bgcolor: 'action.hover' }
                 }}
             >
-                <WordIcon sx={{ color: 'secondary.main' }} />
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {word.phrase}
-                        {word.phonetic && (
-                            <Typography component="span" variant="caption" sx={{ ml: 1, color: 'text.secondary' }}>
-                                ({word.phonetic})
-                            </Typography>
-                        )}
-                    </Typography>
-                    {word.definition && (
-                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-                            {word.definition}
+                {/* Header row with icon, title, and controls */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0 }}>
+                        <WordIcon sx={{ color: 'secondary.main', flexShrink: 0 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }} component="div">
+                            {searchQuery ? highlightMatches(word.phrase, searchQuery) : word.phrase}
+                            {word.phonetic && (
+                                <Typography component="span" variant="caption" sx={{ ml: 1, color: 'text.secondary' }}>
+                                    ({searchQuery ? highlightMatches(word.phonetic, searchQuery) : word.phonetic})
+                                </Typography>
+                            )}
                         </Typography>
-                    )}
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
+                        <Chip label={`${similarity}%`} size="small" color="secondary" />
+                        <ButtonGroup size="small" variant="outlined">
+                            {onInsertWord && (
+                                <Tooltip title="Insert into editor">
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => onInsertWord(word)}
+                                        color="primary"
+                                    >
+                                        <InsertIcon fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
+                            {unitId && (
+                                <Tooltip title={linkState === 'linked' ? 'Linked to unit' : 'Add to unit'}>
+                                    <span>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleLinkToUnit(word, 'word')}
+                                            disabled={linkState === 'loading' || linkState === 'linked'}
+                                            color={linkState === 'linked' ? 'success' : 'default'}
+                                        >
+                                            {linkState === 'loading' ? (
+                                                <CircularProgress size={16} />
+                                            ) : (
+                                                <AddIcon fontSize="small" />
+                                            )}
+                                        </IconButton>
+                                    </span>
+                                </Tooltip>
+                            )}
+                            <Tooltip title="Edit word">
+                                <IconButton
+                                    size="small"
+                                    onClick={() => handleOpenWord(word)}
+                                >
+                                    <EditIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        </ButtonGroup>
+                    </Box>
                 </Box>
-                <Chip label={`${similarity}%`} size="small" color="secondary" />
-                <ButtonGroup size="small" variant="outlined">
-                    {onInsertWord && (
-                        <Tooltip title="Insert into editor">
-                            <IconButton
-                                size="small"
-                                onClick={() => onInsertWord(word)}
-                                color="primary"
-                            >
-                                <InsertIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    )}
-                    {unitId && (
-                        <Tooltip title={linkState === 'linked' ? 'Linked to unit' : 'Add to unit'}>
-                            <IconButton
-                                size="small"
-                                onClick={() => handleLinkToUnit(word, 'word')}
-                                disabled={linkState === 'loading' || linkState === 'linked'}
-                                color={linkState === 'linked' ? 'success' : 'default'}
-                            >
-                                {linkState === 'loading' ? (
-                                    <CircularProgress size={16} />
-                                ) : linkState === 'linked' ? (
-                                    <AddIcon fontSize="small" />
-                                ) : (
-                                    <AddIcon fontSize="small" />
-                                )}
-                            </IconButton>
-                        </Tooltip>
-                    )}
-                    <Tooltip title="Edit word">
-                        <IconButton
-                            size="small"
-                            onClick={() => handleOpenWord(word)}
-                        >
-                            <EditIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                </ButtonGroup>
+                
+                {/* Definition */}
+                {word.definition && (
+                    <TruncatedText
+                        text={word.definition}
+                        maxLength={150}
+                        variant="caption"
+                        searchTerm={searchQuery}
+                        sx={{ color: 'text.secondary', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal', pl: 4, display: 'block' }}
+                    />
+                )}
             </Box>
         );
     };
@@ -284,9 +374,9 @@ export default function SearchResults({
                 key={question.id}
                 sx={{
                     display: 'flex',
-                    alignItems: 'center',
+                    flexDirection: 'column',
                     gap: 1,
-                    p: 1,
+                    p: 1.5,
                     borderRadius: 1,
                     bgcolor: 'background.paper',
                     border: '1px solid',
@@ -294,58 +384,68 @@ export default function SearchResults({
                     '&:hover': { bgcolor: 'action.hover' }
                 }}
             >
-                <QuestionIcon sx={{ color: 'info.main' }} />
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {question.prompt}
-                    </Typography>
-                    {question.answer && (
-                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-                            Answer: {question.answer.substring(0, 80)}
-                            {question.answer.length > 80 && '...'}
+                {/* Header row with icon, title, and controls */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1, minWidth: 0 }}>
+                        <QuestionIcon sx={{ color: 'info.main', flexShrink: 0 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }} component="div">
+                            {searchQuery ? highlightMatches(question.prompt, searchQuery) : question.prompt}
                         </Typography>
-                    )}
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
+                        <Chip label={`${similarity}%`} size="small" color="info" />
+                        <ButtonGroup size="small" variant="outlined">
+                            {onInsertQuestion && (
+                                <Tooltip title="Insert into editor">
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => onInsertQuestion(question)}
+                                        color="primary"
+                                    >
+                                        <InsertIcon fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
+                            {unitId && (
+                                <Tooltip title={linkState === 'linked' ? 'Linked to unit' : 'Add to unit'}>
+                                    <span>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleLinkToUnit(question, 'question')}
+                                            disabled={linkState === 'loading' || linkState === 'linked'}
+                                            color={linkState === 'linked' ? 'success' : 'default'}
+                                        >
+                                            {linkState === 'loading' ? (
+                                                <CircularProgress size={16} />
+                                            ) : (
+                                                <AddIcon fontSize="small" />
+                                            )}
+                                        </IconButton>
+                                    </span>
+                                </Tooltip>
+                            )}
+                            <Tooltip title="Edit question">
+                                <IconButton
+                                    size="small"
+                                    onClick={() => handleOpenQuestion(question)}
+                                >
+                                    <EditIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        </ButtonGroup>
+                    </Box>
                 </Box>
-                <Chip label={`${similarity}%`} size="small" color="info" />
-                <ButtonGroup size="small" variant="outlined">
-                    {onInsertQuestion && (
-                        <Tooltip title="Insert into editor">
-                            <IconButton
-                                size="small"
-                                onClick={() => onInsertQuestion(question)}
-                                color="primary"
-                            >
-                                <InsertIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    )}
-                    {unitId && (
-                        <Tooltip title={linkState === 'linked' ? 'Linked to unit' : 'Add to unit'}>
-                            <IconButton
-                                size="small"
-                                onClick={() => handleLinkToUnit(question, 'question')}
-                                disabled={linkState === 'loading' || linkState === 'linked'}
-                                color={linkState === 'linked' ? 'success' : 'default'}
-                            >
-                                {linkState === 'loading' ? (
-                                    <CircularProgress size={16} />
-                                ) : linkState === 'linked' ? (
-                                    <AddIcon fontSize="small" />
-                                ) : (
-                                    <AddIcon fontSize="small" />
-                                )}
-                            </IconButton>
-                        </Tooltip>
-                    )}
-                    <Tooltip title="Edit question">
-                        <IconButton
-                            size="small"
-                            onClick={() => handleOpenQuestion(question)}
-                        >
-                            <EditIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                </ButtonGroup>
+                
+                {/* Answer */}
+                {question.answer && (
+                    <TruncatedText
+                        text={`Answer: ${question.answer}`}
+                        maxLength={150}
+                        variant="caption"
+                        searchTerm={searchQuery}
+                        sx={{ color: 'text.secondary', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal', pl: 4, display: 'block' }}
+                    />
+                )}
             </Box>
         );
     };

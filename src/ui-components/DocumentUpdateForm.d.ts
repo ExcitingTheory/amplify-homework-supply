@@ -34,6 +34,8 @@ export declare type DocumentUpdateFormInputValues = {
     fileSize?: number;
     mimeType?: string;
     uploadedAt?: string;
+    resumeState?: string;
+    embeddingsS3Key?: string;
     metadata?: string;
 };
 export declare type DocumentUpdateFormValidationValues = {
@@ -48,6 +50,8 @@ export declare type DocumentUpdateFormValidationValues = {
     fileSize?: ValidationFunction<number>;
     mimeType?: ValidationFunction<string>;
     uploadedAt?: ValidationFunction<string>;
+    resumeState?: ValidationFunction<string>;
+    embeddingsS3Key?: ValidationFunction<string>;
     metadata?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
@@ -64,6 +68,8 @@ export declare type DocumentUpdateFormOverridesProps = {
     fileSize?: PrimitiveOverrideProps<TextFieldProps>;
     mimeType?: PrimitiveOverrideProps<TextFieldProps>;
     uploadedAt?: PrimitiveOverrideProps<TextFieldProps>;
+    resumeState?: PrimitiveOverrideProps<TextAreaFieldProps>;
+    embeddingsS3Key?: PrimitiveOverrideProps<TextFieldProps>;
     metadata?: PrimitiveOverrideProps<TextAreaFieldProps>;
 } & EscapeHatchProps;
 export declare type DocumentUpdateFormProps = React.PropsWithChildren<{

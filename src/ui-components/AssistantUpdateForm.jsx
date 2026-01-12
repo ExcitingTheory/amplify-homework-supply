@@ -29,43 +29,35 @@ export default function AssistantUpdateForm(props) {
     ...rest
   } = props;
   const initialValues = {
+    owner: "",
     model: "",
-    assistantId: "",
     threadInstructions: "",
     additionalInstructions: "",
-    messages: "",
     moderationFlag: false,
-    identityId: "",
     threadId: "",
   };
+  const [owner, setOwner] = React.useState(initialValues.owner);
   const [model, setModel] = React.useState(initialValues.model);
-  const [assistantId, setAssistantId] = React.useState(
-    initialValues.assistantId
-  );
   const [threadInstructions, setThreadInstructions] = React.useState(
     initialValues.threadInstructions
   );
   const [additionalInstructions, setAdditionalInstructions] = React.useState(
     initialValues.additionalInstructions
   );
-  const [messages, setMessages] = React.useState(initialValues.messages);
   const [moderationFlag, setModerationFlag] = React.useState(
     initialValues.moderationFlag
   );
-  const [identityId, setIdentityId] = React.useState(initialValues.identityId);
   const [threadId, setThreadId] = React.useState(initialValues.threadId);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = assistantRecord
       ? { ...initialValues, ...assistantRecord }
       : initialValues;
+    setOwner(cleanValues.owner);
     setModel(cleanValues.model);
-    setAssistantId(cleanValues.assistantId);
     setThreadInstructions(cleanValues.threadInstructions);
     setAdditionalInstructions(cleanValues.additionalInstructions);
-    setMessages(cleanValues.messages);
     setModerationFlag(cleanValues.moderationFlag);
-    setIdentityId(cleanValues.identityId);
     setThreadId(cleanValues.threadId);
     setErrors({});
   };
@@ -82,13 +74,11 @@ export default function AssistantUpdateForm(props) {
   }, [idProp, assistantModelProp]);
   React.useEffect(resetStateValues, [assistantRecord]);
   const validations = {
+    owner: [],
     model: [],
-    assistantId: [],
     threadInstructions: [],
     additionalInstructions: [],
-    messages: [],
     moderationFlag: [],
-    identityId: [],
     threadId: [],
   };
   const runValidationTasks = async (
@@ -117,13 +107,11 @@ export default function AssistantUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
+          owner,
           model,
-          assistantId,
           threadInstructions,
           additionalInstructions,
-          messages,
           moderationFlag,
-          identityId,
           threadId,
         };
         const validationResponses = await Promise.all(
@@ -172,6 +160,35 @@ export default function AssistantUpdateForm(props) {
       {...rest}
     >
       <TextField
+        label="Owner"
+        isRequired={false}
+        isReadOnly={false}
+        value={owner}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              owner: value,
+              model,
+              threadInstructions,
+              additionalInstructions,
+              moderationFlag,
+              threadId,
+            };
+            const result = onChange(modelFields);
+            value = result?.owner ?? value;
+          }
+          if (errors.owner?.hasError) {
+            runValidationTasks("owner", value);
+          }
+          setOwner(value);
+        }}
+        onBlur={() => runValidationTasks("owner", owner)}
+        errorMessage={errors.owner?.errorMessage}
+        hasError={errors.owner?.hasError}
+        {...getOverrideProps(overrides, "owner")}
+      ></TextField>
+      <TextField
         label="Model"
         isRequired={false}
         isReadOnly={false}
@@ -180,13 +197,11 @@ export default function AssistantUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              owner,
               model: value,
-              assistantId,
               threadInstructions,
               additionalInstructions,
-              messages,
               moderationFlag,
-              identityId,
               threadId,
             };
             const result = onChange(modelFields);
@@ -203,37 +218,6 @@ export default function AssistantUpdateForm(props) {
         {...getOverrideProps(overrides, "model")}
       ></TextField>
       <TextField
-        label="Assistant id"
-        isRequired={false}
-        isReadOnly={false}
-        value={assistantId}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              model,
-              assistantId: value,
-              threadInstructions,
-              additionalInstructions,
-              messages,
-              moderationFlag,
-              identityId,
-              threadId,
-            };
-            const result = onChange(modelFields);
-            value = result?.assistantId ?? value;
-          }
-          if (errors.assistantId?.hasError) {
-            runValidationTasks("assistantId", value);
-          }
-          setAssistantId(value);
-        }}
-        onBlur={() => runValidationTasks("assistantId", assistantId)}
-        errorMessage={errors.assistantId?.errorMessage}
-        hasError={errors.assistantId?.hasError}
-        {...getOverrideProps(overrides, "assistantId")}
-      ></TextField>
-      <TextField
         label="Thread instructions"
         isRequired={false}
         isReadOnly={false}
@@ -242,13 +226,11 @@ export default function AssistantUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              owner,
               model,
-              assistantId,
               threadInstructions: value,
               additionalInstructions,
-              messages,
               moderationFlag,
-              identityId,
               threadId,
             };
             const result = onChange(modelFields);
@@ -275,13 +257,11 @@ export default function AssistantUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              owner,
               model,
-              assistantId,
               threadInstructions,
               additionalInstructions: value,
-              messages,
               moderationFlag,
-              identityId,
               threadId,
             };
             const result = onChange(modelFields);
@@ -299,37 +279,6 @@ export default function AssistantUpdateForm(props) {
         hasError={errors.additionalInstructions?.hasError}
         {...getOverrideProps(overrides, "additionalInstructions")}
       ></TextField>
-      <TextField
-        label="Messages"
-        isRequired={false}
-        isReadOnly={false}
-        value={messages}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              model,
-              assistantId,
-              threadInstructions,
-              additionalInstructions,
-              messages: value,
-              moderationFlag,
-              identityId,
-              threadId,
-            };
-            const result = onChange(modelFields);
-            value = result?.messages ?? value;
-          }
-          if (errors.messages?.hasError) {
-            runValidationTasks("messages", value);
-          }
-          setMessages(value);
-        }}
-        onBlur={() => runValidationTasks("messages", messages)}
-        errorMessage={errors.messages?.errorMessage}
-        hasError={errors.messages?.hasError}
-        {...getOverrideProps(overrides, "messages")}
-      ></TextField>
       <SwitchField
         label="Moderation flag"
         defaultChecked={false}
@@ -339,13 +288,11 @@ export default function AssistantUpdateForm(props) {
           let value = e.target.checked;
           if (onChange) {
             const modelFields = {
+              owner,
               model,
-              assistantId,
               threadInstructions,
               additionalInstructions,
-              messages,
               moderationFlag: value,
-              identityId,
               threadId,
             };
             const result = onChange(modelFields);
@@ -362,37 +309,6 @@ export default function AssistantUpdateForm(props) {
         {...getOverrideProps(overrides, "moderationFlag")}
       ></SwitchField>
       <TextField
-        label="Identity id"
-        isRequired={false}
-        isReadOnly={false}
-        value={identityId}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              model,
-              assistantId,
-              threadInstructions,
-              additionalInstructions,
-              messages,
-              moderationFlag,
-              identityId: value,
-              threadId,
-            };
-            const result = onChange(modelFields);
-            value = result?.identityId ?? value;
-          }
-          if (errors.identityId?.hasError) {
-            runValidationTasks("identityId", value);
-          }
-          setIdentityId(value);
-        }}
-        onBlur={() => runValidationTasks("identityId", identityId)}
-        errorMessage={errors.identityId?.errorMessage}
-        hasError={errors.identityId?.hasError}
-        {...getOverrideProps(overrides, "identityId")}
-      ></TextField>
-      <TextField
         label="Thread id"
         isRequired={false}
         isReadOnly={false}
@@ -401,13 +317,11 @@ export default function AssistantUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              owner,
               model,
-              assistantId,
               threadInstructions,
               additionalInstructions,
-              messages,
               moderationFlag,
-              identityId,
               threadId: value,
             };
             const result = onChange(modelFields);

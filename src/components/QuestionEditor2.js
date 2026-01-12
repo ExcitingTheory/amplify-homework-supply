@@ -13,6 +13,7 @@ import { HistoryPlugin, createEmptyHistoryState } from '@lexical/react/LexicalHi
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { MarkNode } from '@lexical/mark';
 import { DecoratorNode } from 'lexical';
 import {
   $getRoot,
@@ -21,6 +22,7 @@ import {
   createCommand,
   COMMAND_PRIORITY_EDITOR,
 } from 'lexical';
+import SearchHighlightPlugin from './Editor3/plugins/SearchHighlightPlugin';
 
 // MUI imports
 import {
@@ -57,6 +59,7 @@ import {
 import DictionaryContext from '../context/dictionaryContext';
 import FilesContext from '../context/fileContext';
 import UnitContext from '../context/unitContext';
+import { useTabContext } from '../context/tabContext';
 
 // GraphQL imports
 import { createQuestion, updateQuestion, deleteQuestion } from '../graphql/mutations';
@@ -668,21 +671,58 @@ function QuestionRowComponent({
     (hint && hint.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  const questionItemRef = React.useRef(null);
+  const tabContext = useTabContext();
+  const [isHighlighted, setIsHighlighted] = React.useState(false);
+  
+  // Register ref for scrolling
+  React.useEffect(() => {
+    if (tabContext?.registerItemRef && questionId) {
+      tabContext.registerItemRef('question', questionId, questionItemRef);
+    }
+    return () => {
+      if (tabContext?.unregisterItemRef && questionId) {
+        tabContext.unregisterItemRef('question', questionId);
+      }
+    };
+  }, [questionId, tabContext]);
+  
+  // Highlight when focused from search results
+  React.useEffect(() => {
+    if (tabContext?.focusItem?.type === 'question' && tabContext.focusItem.id === questionId) {
+      setIsHighlighted(true);
+      // Auto-expand when focused
+      if (onToggleExpand && !isExpanded) {
+        onToggleExpand();
+      }
+      // Remove highlight after 3 seconds
+      const timer = setTimeout(() => setIsHighlighted(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [tabContext?.focusItem, questionId, onToggleExpand, isExpanded]);
+
   return (
     <ListItem
+      ref={questionItemRef}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       onDragLeave={handleDragLeave}
       sx={{
-        backgroundColor: isEvenRow ? 'background.paper' : 'grey.50',
+        backgroundColor: isHighlighted 
+          ? 'rgba(33, 150, 243, 0.15)' // Blue highlight (info color)
+          : isEvenRow ? 'background.paper' : 'grey.50',
         flexDirection: 'column',
         alignItems: 'stretch',
         padding: 0,
         margin: 0,
         borderBottom: '1px solid',
-        borderColor: 'divider',
+        borderColor: isHighlighted ? 'info.main' : 'divider',
+        borderLeftWidth: isHighlighted ? '4px' : 0,
+        borderLeftStyle: isHighlighted ? 'solid' : 'none',
+        borderLeftColor: isHighlighted ? 'info.main' : 'transparent',
+        transition: 'all 0.3s ease',
         '&:hover': {
-          backgroundColor: 'action.hover',
+          backgroundColor: isHighlighted ? 'rgba(33, 150, 243, 0.25)' : 'action.hover',
         },
       }}
     >
@@ -814,7 +854,10 @@ function NestedQuestionField({
 
   const initialConfig = {
     namespace: `QuestionField-${field}-${questionId}`,
-    theme: {},
+    nodes: [MarkNode],
+    theme: {
+      mark: 'search-highlight',
+    },
     onError: (error) => console.error('Lexical error:', error),
     editorState: () => {
       const root = $getRoot();
@@ -904,6 +947,7 @@ function NestedQuestionField({
         />
         {sharedHistory && <HistoryPlugin externalHistoryState={sharedHistory} />}
         <OnChangePlugin onChange={handleChange} />
+        {searchTerm && searchTerm.length >= 2 && <SearchHighlightPlugin searchTerm={searchTerm} />}
       </LexicalComposer>
     </Box>
   );

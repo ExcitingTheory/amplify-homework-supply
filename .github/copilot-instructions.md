@@ -199,12 +199,19 @@ if (!session.username) return; // Wait for auth
 
 **Editor Content Saving**: Don't directly mutate `unit.data` - always use `saveEditorContent()` from UnitContext which handles JSON serialization and DataStore.copyOf.
 
-**Grade Data Structure**: `Grade.data` is a JSON object keyed by block IDs:
+**Grade Data Structure**: `Grade.data` is a JSON string that when parsed becomes an object keyed by block IDs:
 ```javascript
-{
-  "block-id-1": { complete: true, accuracy: 85, userAnswer: "..." },
-  "block-id-2": { complete: false, accuracy: 0 }
-}
+// Stored as string in Grade.data field
+const gradeData = JSON.parse(grade.data);
+// {
+//   "block-id-1": { complete: true, accuracy: 85, userAnswer: "..." },
+//   "block-id-2": { complete: false, accuracy: 0 }
+// }
+
+// When saving:
+await DataStore.save(Grade.copyOf(currentGrade, updated => {
+  updated.data = JSON.stringify(gradeDataObject);
+}));
 ```
 
 ## Key Files to Reference
@@ -230,5 +237,13 @@ Component development uses Storybook with mocked AWS services:
 
 - Amplify Gen 1 uses Lambda functions for backend logic, and if we need rest we will use Express style routes in Lambda functions under `amplify/backend/function/` with `aws-serverless-express` and API Gateway. Do not create new Next.js `/api` routes.
 - Instead use the Amplify.api REST client or GraphQL client from the frontend to call Lambda functions or GraphQL API.
+
+
+## Optimistic Concurrency Control
+
+- Amplify DataStore uses Optimistic Concurrency Control (OCC) to prevent overwriting newer data. Always save the latest `_version + 1` before updating records. 
+- We will use that version that we saved to determine if we need to update the component state after a save. The best example of this is in the Workbook Grade flow or in the Editor's [src/components/Editor3/plugins/DataPlugin.js](src/components/Editor3/plugins/DataPlugin.js) where we check if the version has changed before updating local state after a save.
+- This must happen as a prediction, do not re-query DataStore after every save to get the latest version as that will lead to infinite loops and performance issues.
+- We should use inequality (>) instead of equality (!==, or >=) to check if the version changed unexpectedly. This is because it will make a render loop if the is not the same but won't if it is greater than expected.
 
 

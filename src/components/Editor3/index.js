@@ -12,6 +12,7 @@ import TabsVerticalLeft from './components/TabsVerticalLeft';
 import TabsVerticalRight from './components/TabsVerticalRight';
 import { TabProvider } from '../../context/tabContext';
 import { useTabState } from '../../hooks/useTabState';
+import { AudioPlayerProvider } from './context/AudioPlayerContext';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListNode, ListItemNode } from '@lexical/list';
 import { CodeNode, CodeHighlightNode } from '@lexical/code';
@@ -306,6 +307,31 @@ export default function Editor() {
   
   // Focus management state
   const [focusItem, setFocusItem] = React.useState(null);
+  
+  // Item refs for scrolling to items
+  const itemRefsMap = React.useRef({});
+  
+  const registerItemRef = React.useCallback((type, id, ref) => {
+    if (!itemRefsMap.current[type]) {
+      itemRefsMap.current[type] = {};
+    }
+    itemRefsMap.current[type][id] = ref;
+  }, []);
+  
+  const unregisterItemRef = React.useCallback((type, id) => {
+    if (itemRefsMap.current[type]) {
+      delete itemRefsMap.current[type][id];
+    }
+  }, []);
+  
+  const scrollToItem = React.useCallback((type, id) => {
+    const ref = itemRefsMap.current[type]?.[id];
+    if (ref?.current) {
+      ref.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return true;
+    }
+    return false;
+  }, []);
 
   const [actualDrawerWidthLeft, setActualDrawerWidthLeft] = React.useState(drawerWidth);
   const [actualDrawerWidthRight, setActualDrawerWidthRight] = React.useState(drawerWidth);
@@ -416,6 +442,13 @@ export default function Editor() {
     // Skip saves for DataPlugin updates and history operations (undo/redo)
     if (tags && (tags.has(DATASTORE_UPDATE_TAG) || tags.has(HISTORY_MERGE_TAG) || tags.has(INITIAL_LOAD_TAG) ||
       tags.has(HISTORIC_TAG) || tags.has(HISTORY_PUSH_TAG))) {
+      console.log('[Editor onChange] Skipping save due to tags:', Array.from(tags));
+      return;
+    }
+
+    // Skip if we haven't loaded initial state yet (editorStateRef not set)
+    if (!editorStateRef.current) {
+      console.log('[Editor onChange] Skipping save - no initial state loaded yet');
       return;
     }
 
@@ -425,6 +458,7 @@ export default function Editor() {
 
     // Skip if the state hasn't actually changed
     if (newStateJSON === currentStateJSON) {
+      console.log('[Editor onChange] Skipping save - no changes detected');
       return;
     }
 
@@ -447,8 +481,19 @@ export default function Editor() {
   //   theme: LanguageEditorTheme,
   // };
 
+  // Memoize the tab provider value to prevent unnecessary re-renders
+  const tabProviderValue = React.useMemo(() => ({
+    ...tabState,
+    focusItem,
+    setFocusItem,
+    itemRefs: itemRefsMap,
+    registerItemRef,
+    unregisterItemRef,
+    scrollToItem,
+  }), [tabState, focusItem, registerItemRef, unregisterItemRef, scrollToItem]);
+
   return (
-    <TabProvider value={{ ...tabState, focusItem, setFocusItem }}>
+    <TabProvider value={tabProviderValue}>
       <SuggestionProvider>
         <DndWrapper>
           <AutocompleteProvider>

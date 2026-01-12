@@ -16,6 +16,7 @@ import {
   ScrollView,
   SwitchField,
   Text,
+  TextAreaField,
   TextField,
   useTheme,
 } from "@aws-amplify/ui-react";
@@ -195,12 +196,25 @@ export default function QuestionCreateForm(props) {
     hint: "",
     prompt: "",
     audio: [],
+    audioWaveformData: "",
     answerAudio: [],
+    answerAudioWaveformData: "",
     generated: false,
     model: "",
     promptHex: "",
     byPromptHex: "",
     thumbnail: "",
+    difficulty: "",
+    metadata: "",
+    importedAt: "",
+    embedding: [],
+    embeddingModel: "",
+    embeddingDimensions: "",
+    embeddingVersion: "",
+    embeddingWordCount: "",
+    moderationStatus: "",
+    moderationFlags: "",
+    moderationCheckedAt: "",
   };
   const [owner, setOwner] = React.useState(initialValues.owner);
   const [identityId, setIdentityId] = React.useState(initialValues.identityId);
@@ -208,8 +222,14 @@ export default function QuestionCreateForm(props) {
   const [hint, setHint] = React.useState(initialValues.hint);
   const [prompt, setPrompt] = React.useState(initialValues.prompt);
   const [audio, setAudio] = React.useState(initialValues.audio);
+  const [audioWaveformData, setAudioWaveformData] = React.useState(
+    initialValues.audioWaveformData
+  );
   const [answerAudio, setAnswerAudio] = React.useState(
     initialValues.answerAudio
+  );
+  const [answerAudioWaveformData, setAnswerAudioWaveformData] = React.useState(
+    initialValues.answerAudioWaveformData
   );
   const [generated, setGenerated] = React.useState(initialValues.generated);
   const [model, setModel] = React.useState(initialValues.model);
@@ -218,6 +238,31 @@ export default function QuestionCreateForm(props) {
     initialValues.byPromptHex
   );
   const [thumbnail, setThumbnail] = React.useState(initialValues.thumbnail);
+  const [difficulty, setDifficulty] = React.useState(initialValues.difficulty);
+  const [metadata, setMetadata] = React.useState(initialValues.metadata);
+  const [importedAt, setImportedAt] = React.useState(initialValues.importedAt);
+  const [embedding, setEmbedding] = React.useState(initialValues.embedding);
+  const [embeddingModel, setEmbeddingModel] = React.useState(
+    initialValues.embeddingModel
+  );
+  const [embeddingDimensions, setEmbeddingDimensions] = React.useState(
+    initialValues.embeddingDimensions
+  );
+  const [embeddingVersion, setEmbeddingVersion] = React.useState(
+    initialValues.embeddingVersion
+  );
+  const [embeddingWordCount, setEmbeddingWordCount] = React.useState(
+    initialValues.embeddingWordCount
+  );
+  const [moderationStatus, setModerationStatus] = React.useState(
+    initialValues.moderationStatus
+  );
+  const [moderationFlags, setModerationFlags] = React.useState(
+    initialValues.moderationFlags
+  );
+  const [moderationCheckedAt, setModerationCheckedAt] = React.useState(
+    initialValues.moderationCheckedAt
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setOwner(initialValues.owner);
@@ -227,13 +272,27 @@ export default function QuestionCreateForm(props) {
     setPrompt(initialValues.prompt);
     setAudio(initialValues.audio);
     setCurrentAudioValue("");
+    setAudioWaveformData(initialValues.audioWaveformData);
     setAnswerAudio(initialValues.answerAudio);
     setCurrentAnswerAudioValue("");
+    setAnswerAudioWaveformData(initialValues.answerAudioWaveformData);
     setGenerated(initialValues.generated);
     setModel(initialValues.model);
     setPromptHex(initialValues.promptHex);
     setByPromptHex(initialValues.byPromptHex);
     setThumbnail(initialValues.thumbnail);
+    setDifficulty(initialValues.difficulty);
+    setMetadata(initialValues.metadata);
+    setImportedAt(initialValues.importedAt);
+    setEmbedding(initialValues.embedding);
+    setCurrentEmbeddingValue("");
+    setEmbeddingModel(initialValues.embeddingModel);
+    setEmbeddingDimensions(initialValues.embeddingDimensions);
+    setEmbeddingVersion(initialValues.embeddingVersion);
+    setEmbeddingWordCount(initialValues.embeddingWordCount);
+    setModerationStatus(initialValues.moderationStatus);
+    setModerationFlags(initialValues.moderationFlags);
+    setModerationCheckedAt(initialValues.moderationCheckedAt);
     setErrors({});
   };
   const [currentAudioValue, setCurrentAudioValue] = React.useState("");
@@ -241,6 +300,8 @@ export default function QuestionCreateForm(props) {
   const [currentAnswerAudioValue, setCurrentAnswerAudioValue] =
     React.useState("");
   const answerAudioRef = React.createRef();
+  const [currentEmbeddingValue, setCurrentEmbeddingValue] = React.useState("");
+  const embeddingRef = React.createRef();
   const validations = {
     owner: [],
     identityId: [],
@@ -248,12 +309,25 @@ export default function QuestionCreateForm(props) {
     hint: [],
     prompt: [],
     audio: [],
+    audioWaveformData: [{ type: "JSON" }],
     answerAudio: [],
+    answerAudioWaveformData: [{ type: "JSON" }],
     generated: [],
     model: [],
     promptHex: [],
     byPromptHex: [],
     thumbnail: [],
+    difficulty: [],
+    metadata: [],
+    importedAt: [],
+    embedding: [],
+    embeddingModel: [],
+    embeddingDimensions: [],
+    embeddingVersion: [],
+    embeddingWordCount: [],
+    moderationStatus: [],
+    moderationFlags: [{ type: "JSON" }],
+    moderationCheckedAt: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -272,6 +346,29 @@ export default function QuestionCreateForm(props) {
     setErrors((errors) => ({ ...errors, [fieldName]: validationResponse }));
     return validationResponse;
   };
+  const convertTimeStampToDate = (ts) => {
+    if (Math.abs(Date.now() - ts) < Math.abs(Date.now() - ts * 1000)) {
+      return new Date(ts);
+    }
+    return new Date(ts * 1000);
+  };
+  const convertToLocal = (date) => {
+    const df = new Intl.DateTimeFormat("default", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      calendar: "iso8601",
+      numberingSystem: "latn",
+      hourCycle: "h23",
+    });
+    const parts = df.formatToParts(date).reduce((acc, part) => {
+      acc[part.type] = part.value;
+      return acc;
+    }, {});
+    return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+  };
   return (
     <Grid
       as="form"
@@ -287,12 +384,25 @@ export default function QuestionCreateForm(props) {
           hint,
           prompt,
           audio,
+          audioWaveformData,
           answerAudio,
+          answerAudioWaveformData,
           generated,
           model,
           promptHex,
           byPromptHex,
           thumbnail,
+          difficulty,
+          metadata,
+          importedAt,
+          embedding,
+          embeddingModel,
+          embeddingDimensions,
+          embeddingVersion,
+          embeddingWordCount,
+          moderationStatus,
+          moderationFlags,
+          moderationCheckedAt,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -353,12 +463,25 @@ export default function QuestionCreateForm(props) {
               hint,
               prompt,
               audio,
+              audioWaveformData,
               answerAudio,
+              answerAudioWaveformData,
               generated,
               model,
               promptHex,
               byPromptHex,
               thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.owner ?? value;
@@ -388,12 +511,25 @@ export default function QuestionCreateForm(props) {
               hint,
               prompt,
               audio,
+              audioWaveformData,
               answerAudio,
+              answerAudioWaveformData,
               generated,
               model,
               promptHex,
               byPromptHex,
               thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.identityId ?? value;
@@ -423,12 +559,25 @@ export default function QuestionCreateForm(props) {
               hint,
               prompt,
               audio,
+              audioWaveformData,
               answerAudio,
+              answerAudioWaveformData,
               generated,
               model,
               promptHex,
               byPromptHex,
               thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.answer ?? value;
@@ -458,12 +607,25 @@ export default function QuestionCreateForm(props) {
               hint: value,
               prompt,
               audio,
+              audioWaveformData,
               answerAudio,
+              answerAudioWaveformData,
               generated,
               model,
               promptHex,
               byPromptHex,
               thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.hint ?? value;
@@ -493,12 +655,25 @@ export default function QuestionCreateForm(props) {
               hint,
               prompt: value,
               audio,
+              audioWaveformData,
               answerAudio,
+              answerAudioWaveformData,
               generated,
               model,
               promptHex,
               byPromptHex,
               thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.prompt ?? value;
@@ -524,12 +699,25 @@ export default function QuestionCreateForm(props) {
               hint,
               prompt,
               audio: values,
+              audioWaveformData,
               answerAudio,
+              answerAudioWaveformData,
               generated,
               model,
               promptHex,
               byPromptHex,
               thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             values = result?.audio ?? values;
@@ -569,6 +757,55 @@ export default function QuestionCreateForm(props) {
           {...getOverrideProps(overrides, "audio")}
         ></TextField>
       </ArrayField>
+      <TextAreaField
+        label="Audio waveform data"
+        isRequired={false}
+        isReadOnly={false}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              owner,
+              identityId,
+              answer,
+              hint,
+              prompt,
+              audio,
+              audioWaveformData: value,
+              answerAudio,
+              answerAudioWaveformData,
+              generated,
+              model,
+              promptHex,
+              byPromptHex,
+              thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.audioWaveformData ?? value;
+          }
+          if (errors.audioWaveformData?.hasError) {
+            runValidationTasks("audioWaveformData", value);
+          }
+          setAudioWaveformData(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("audioWaveformData", audioWaveformData)
+        }
+        errorMessage={errors.audioWaveformData?.errorMessage}
+        hasError={errors.audioWaveformData?.hasError}
+        {...getOverrideProps(overrides, "audioWaveformData")}
+      ></TextAreaField>
       <ArrayField
         onChange={async (items) => {
           let values = items;
@@ -580,12 +817,25 @@ export default function QuestionCreateForm(props) {
               hint,
               prompt,
               audio,
+              audioWaveformData,
               answerAudio: values,
+              answerAudioWaveformData,
               generated,
               model,
               promptHex,
               byPromptHex,
               thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             values = result?.answerAudio ?? values;
@@ -627,6 +877,55 @@ export default function QuestionCreateForm(props) {
           {...getOverrideProps(overrides, "answerAudio")}
         ></TextField>
       </ArrayField>
+      <TextAreaField
+        label="Answer audio waveform data"
+        isRequired={false}
+        isReadOnly={false}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              owner,
+              identityId,
+              answer,
+              hint,
+              prompt,
+              audio,
+              audioWaveformData,
+              answerAudio,
+              answerAudioWaveformData: value,
+              generated,
+              model,
+              promptHex,
+              byPromptHex,
+              thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.answerAudioWaveformData ?? value;
+          }
+          if (errors.answerAudioWaveformData?.hasError) {
+            runValidationTasks("answerAudioWaveformData", value);
+          }
+          setAnswerAudioWaveformData(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("answerAudioWaveformData", answerAudioWaveformData)
+        }
+        errorMessage={errors.answerAudioWaveformData?.errorMessage}
+        hasError={errors.answerAudioWaveformData?.hasError}
+        {...getOverrideProps(overrides, "answerAudioWaveformData")}
+      ></TextAreaField>
       <SwitchField
         label="Generated"
         defaultChecked={false}
@@ -642,12 +941,25 @@ export default function QuestionCreateForm(props) {
               hint,
               prompt,
               audio,
+              audioWaveformData,
               answerAudio,
+              answerAudioWaveformData,
               generated: value,
               model,
               promptHex,
               byPromptHex,
               thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.generated ?? value;
@@ -677,12 +989,25 @@ export default function QuestionCreateForm(props) {
               hint,
               prompt,
               audio,
+              audioWaveformData,
               answerAudio,
+              answerAudioWaveformData,
               generated,
               model: value,
               promptHex,
               byPromptHex,
               thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.model ?? value;
@@ -712,12 +1037,25 @@ export default function QuestionCreateForm(props) {
               hint,
               prompt,
               audio,
+              audioWaveformData,
               answerAudio,
+              answerAudioWaveformData,
               generated,
               model,
               promptHex: value,
               byPromptHex,
               thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.promptHex ?? value;
@@ -747,12 +1085,25 @@ export default function QuestionCreateForm(props) {
               hint,
               prompt,
               audio,
+              audioWaveformData,
               answerAudio,
+              answerAudioWaveformData,
               generated,
               model,
               promptHex,
               byPromptHex: value,
               thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.byPromptHex ?? value;
@@ -782,12 +1133,25 @@ export default function QuestionCreateForm(props) {
               hint,
               prompt,
               audio,
+              audioWaveformData,
               answerAudio,
+              answerAudioWaveformData,
               generated,
               model,
               promptHex,
               byPromptHex,
               thumbnail: value,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.thumbnail ?? value;
@@ -801,6 +1165,583 @@ export default function QuestionCreateForm(props) {
         errorMessage={errors.thumbnail?.errorMessage}
         hasError={errors.thumbnail?.hasError}
         {...getOverrideProps(overrides, "thumbnail")}
+      ></TextField>
+      <TextField
+        label="Difficulty"
+        isRequired={false}
+        isReadOnly={false}
+        value={difficulty}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              owner,
+              identityId,
+              answer,
+              hint,
+              prompt,
+              audio,
+              audioWaveformData,
+              answerAudio,
+              answerAudioWaveformData,
+              generated,
+              model,
+              promptHex,
+              byPromptHex,
+              thumbnail,
+              difficulty: value,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.difficulty ?? value;
+          }
+          if (errors.difficulty?.hasError) {
+            runValidationTasks("difficulty", value);
+          }
+          setDifficulty(value);
+        }}
+        onBlur={() => runValidationTasks("difficulty", difficulty)}
+        errorMessage={errors.difficulty?.errorMessage}
+        hasError={errors.difficulty?.hasError}
+        {...getOverrideProps(overrides, "difficulty")}
+      ></TextField>
+      <TextField
+        label="Metadata"
+        isRequired={false}
+        isReadOnly={false}
+        value={metadata}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              owner,
+              identityId,
+              answer,
+              hint,
+              prompt,
+              audio,
+              audioWaveformData,
+              answerAudio,
+              answerAudioWaveformData,
+              generated,
+              model,
+              promptHex,
+              byPromptHex,
+              thumbnail,
+              difficulty,
+              metadata: value,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.metadata ?? value;
+          }
+          if (errors.metadata?.hasError) {
+            runValidationTasks("metadata", value);
+          }
+          setMetadata(value);
+        }}
+        onBlur={() => runValidationTasks("metadata", metadata)}
+        errorMessage={errors.metadata?.errorMessage}
+        hasError={errors.metadata?.hasError}
+        {...getOverrideProps(overrides, "metadata")}
+      ></TextField>
+      <TextField
+        label="Imported at"
+        isRequired={false}
+        isReadOnly={false}
+        type="datetime-local"
+        value={importedAt && convertToLocal(new Date(importedAt))}
+        onChange={(e) => {
+          let value =
+            e.target.value === "" ? "" : new Date(e.target.value).toISOString();
+          if (onChange) {
+            const modelFields = {
+              owner,
+              identityId,
+              answer,
+              hint,
+              prompt,
+              audio,
+              audioWaveformData,
+              answerAudio,
+              answerAudioWaveformData,
+              generated,
+              model,
+              promptHex,
+              byPromptHex,
+              thumbnail,
+              difficulty,
+              metadata,
+              importedAt: value,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.importedAt ?? value;
+          }
+          if (errors.importedAt?.hasError) {
+            runValidationTasks("importedAt", value);
+          }
+          setImportedAt(value);
+        }}
+        onBlur={() => runValidationTasks("importedAt", importedAt)}
+        errorMessage={errors.importedAt?.errorMessage}
+        hasError={errors.importedAt?.hasError}
+        {...getOverrideProps(overrides, "importedAt")}
+      ></TextField>
+      <ArrayField
+        onChange={async (items) => {
+          let values = items;
+          if (onChange) {
+            const modelFields = {
+              owner,
+              identityId,
+              answer,
+              hint,
+              prompt,
+              audio,
+              audioWaveformData,
+              answerAudio,
+              answerAudioWaveformData,
+              generated,
+              model,
+              promptHex,
+              byPromptHex,
+              thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding: values,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            values = result?.embedding ?? values;
+          }
+          setEmbedding(values);
+          setCurrentEmbeddingValue("");
+        }}
+        currentFieldValue={currentEmbeddingValue}
+        label={"Embedding"}
+        items={embedding}
+        hasError={errors?.embedding?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks("embedding", currentEmbeddingValue)
+        }
+        errorMessage={errors?.embedding?.errorMessage}
+        setFieldValue={setCurrentEmbeddingValue}
+        inputFieldRef={embeddingRef}
+        defaultFieldValue={""}
+      >
+        <TextField
+          label="Embedding"
+          isRequired={false}
+          isReadOnly={false}
+          type="number"
+          step="any"
+          value={currentEmbeddingValue}
+          onChange={(e) => {
+            let value = isNaN(parseFloat(e.target.value))
+              ? e.target.value
+              : parseFloat(e.target.value);
+            if (errors.embedding?.hasError) {
+              runValidationTasks("embedding", value);
+            }
+            setCurrentEmbeddingValue(value);
+          }}
+          onBlur={() => runValidationTasks("embedding", currentEmbeddingValue)}
+          errorMessage={errors.embedding?.errorMessage}
+          hasError={errors.embedding?.hasError}
+          ref={embeddingRef}
+          labelHidden={true}
+          {...getOverrideProps(overrides, "embedding")}
+        ></TextField>
+      </ArrayField>
+      <TextField
+        label="Embedding model"
+        isRequired={false}
+        isReadOnly={false}
+        value={embeddingModel}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              owner,
+              identityId,
+              answer,
+              hint,
+              prompt,
+              audio,
+              audioWaveformData,
+              answerAudio,
+              answerAudioWaveformData,
+              generated,
+              model,
+              promptHex,
+              byPromptHex,
+              thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel: value,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingModel ?? value;
+          }
+          if (errors.embeddingModel?.hasError) {
+            runValidationTasks("embeddingModel", value);
+          }
+          setEmbeddingModel(value);
+        }}
+        onBlur={() => runValidationTasks("embeddingModel", embeddingModel)}
+        errorMessage={errors.embeddingModel?.errorMessage}
+        hasError={errors.embeddingModel?.hasError}
+        {...getOverrideProps(overrides, "embeddingModel")}
+      ></TextField>
+      <TextField
+        label="Embedding dimensions"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={embeddingDimensions}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              owner,
+              identityId,
+              answer,
+              hint,
+              prompt,
+              audio,
+              audioWaveformData,
+              answerAudio,
+              answerAudioWaveformData,
+              generated,
+              model,
+              promptHex,
+              byPromptHex,
+              thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions: value,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingDimensions ?? value;
+          }
+          if (errors.embeddingDimensions?.hasError) {
+            runValidationTasks("embeddingDimensions", value);
+          }
+          setEmbeddingDimensions(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("embeddingDimensions", embeddingDimensions)
+        }
+        errorMessage={errors.embeddingDimensions?.errorMessage}
+        hasError={errors.embeddingDimensions?.hasError}
+        {...getOverrideProps(overrides, "embeddingDimensions")}
+      ></TextField>
+      <TextField
+        label="Embedding version"
+        isRequired={false}
+        isReadOnly={false}
+        type="datetime-local"
+        value={
+          embeddingVersion &&
+          convertToLocal(convertTimeStampToDate(embeddingVersion))
+        }
+        onChange={(e) => {
+          let value =
+            e.target.value === "" ? "" : Number(new Date(e.target.value));
+          if (onChange) {
+            const modelFields = {
+              owner,
+              identityId,
+              answer,
+              hint,
+              prompt,
+              audio,
+              audioWaveformData,
+              answerAudio,
+              answerAudioWaveformData,
+              generated,
+              model,
+              promptHex,
+              byPromptHex,
+              thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion: value,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingVersion ?? value;
+          }
+          if (errors.embeddingVersion?.hasError) {
+            runValidationTasks("embeddingVersion", value);
+          }
+          setEmbeddingVersion(value);
+        }}
+        onBlur={() => runValidationTasks("embeddingVersion", embeddingVersion)}
+        errorMessage={errors.embeddingVersion?.errorMessage}
+        hasError={errors.embeddingVersion?.hasError}
+        {...getOverrideProps(overrides, "embeddingVersion")}
+      ></TextField>
+      <TextField
+        label="Embedding word count"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={embeddingWordCount}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              owner,
+              identityId,
+              answer,
+              hint,
+              prompt,
+              audio,
+              audioWaveformData,
+              answerAudio,
+              answerAudioWaveformData,
+              generated,
+              model,
+              promptHex,
+              byPromptHex,
+              thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount: value,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingWordCount ?? value;
+          }
+          if (errors.embeddingWordCount?.hasError) {
+            runValidationTasks("embeddingWordCount", value);
+          }
+          setEmbeddingWordCount(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("embeddingWordCount", embeddingWordCount)
+        }
+        errorMessage={errors.embeddingWordCount?.errorMessage}
+        hasError={errors.embeddingWordCount?.hasError}
+        {...getOverrideProps(overrides, "embeddingWordCount")}
+      ></TextField>
+      <TextField
+        label="Moderation status"
+        isRequired={false}
+        isReadOnly={false}
+        value={moderationStatus}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              owner,
+              identityId,
+              answer,
+              hint,
+              prompt,
+              audio,
+              audioWaveformData,
+              answerAudio,
+              answerAudioWaveformData,
+              generated,
+              model,
+              promptHex,
+              byPromptHex,
+              thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus: value,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.moderationStatus ?? value;
+          }
+          if (errors.moderationStatus?.hasError) {
+            runValidationTasks("moderationStatus", value);
+          }
+          setModerationStatus(value);
+        }}
+        onBlur={() => runValidationTasks("moderationStatus", moderationStatus)}
+        errorMessage={errors.moderationStatus?.errorMessage}
+        hasError={errors.moderationStatus?.hasError}
+        {...getOverrideProps(overrides, "moderationStatus")}
+      ></TextField>
+      <TextAreaField
+        label="Moderation flags"
+        isRequired={false}
+        isReadOnly={false}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              owner,
+              identityId,
+              answer,
+              hint,
+              prompt,
+              audio,
+              audioWaveformData,
+              answerAudio,
+              answerAudioWaveformData,
+              generated,
+              model,
+              promptHex,
+              byPromptHex,
+              thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags: value,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.moderationFlags ?? value;
+          }
+          if (errors.moderationFlags?.hasError) {
+            runValidationTasks("moderationFlags", value);
+          }
+          setModerationFlags(value);
+        }}
+        onBlur={() => runValidationTasks("moderationFlags", moderationFlags)}
+        errorMessage={errors.moderationFlags?.errorMessage}
+        hasError={errors.moderationFlags?.hasError}
+        {...getOverrideProps(overrides, "moderationFlags")}
+      ></TextAreaField>
+      <TextField
+        label="Moderation checked at"
+        isRequired={false}
+        isReadOnly={false}
+        type="datetime-local"
+        value={
+          moderationCheckedAt && convertToLocal(new Date(moderationCheckedAt))
+        }
+        onChange={(e) => {
+          let value =
+            e.target.value === "" ? "" : new Date(e.target.value).toISOString();
+          if (onChange) {
+            const modelFields = {
+              owner,
+              identityId,
+              answer,
+              hint,
+              prompt,
+              audio,
+              audioWaveformData,
+              answerAudio,
+              answerAudioWaveformData,
+              generated,
+              model,
+              promptHex,
+              byPromptHex,
+              thumbnail,
+              difficulty,
+              metadata,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.moderationCheckedAt ?? value;
+          }
+          if (errors.moderationCheckedAt?.hasError) {
+            runValidationTasks("moderationCheckedAt", value);
+          }
+          setModerationCheckedAt(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("moderationCheckedAt", moderationCheckedAt)
+        }
+        errorMessage={errors.moderationCheckedAt?.errorMessage}
+        hasError={errors.moderationCheckedAt?.hasError}
+        {...getOverrideProps(overrides, "moderationCheckedAt")}
       ></TextField>
       <Flex
         justifyContent="space-between"

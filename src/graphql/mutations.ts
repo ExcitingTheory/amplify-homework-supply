@@ -237,6 +237,23 @@ export const generateAudioFile = /* GraphQL */ `mutation GenerateAudioFile($phra
       startedAt
       __typename
     }
+    chats {
+      items {
+        id
+        assistantChatId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -460,6 +477,23 @@ export const generateImageFile = /* GraphQL */ `mutation GenerateImageFile($phra
       startedAt
       __typename
     }
+    chats {
+      items {
+        id
+        assistantChatId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -640,86 +674,143 @@ export const moderateContent = /* GraphQL */ `mutation ModerateContent($content:
   APITypes.ModerateContentMutationVariables,
   APITypes.ModerateContentMutation
 >;
-export const createAssistant = /* GraphQL */ `mutation CreateAssistant(
-  $input: CreateAssistantInput!
-  $condition: ModelAssistantConditionInput
+export const createAssistantChat = /* GraphQL */ `mutation CreateAssistantChat(
+  $input: CreateAssistantChatInput!
+  $condition: ModelAssistantChatConditionInput
 ) {
-  createAssistant(input: $input, condition: $condition) {
+  createAssistantChat(input: $input, condition: $condition) {
     id
+    owner
     model
-    assistantId
     threadInstructions
     additionalInstructions
-    messages
-    moderationFlag
-    identityId
     threadId
+    moderationFlag
+    messages
+    draft
+    archived
+    inputTokens
+    outputTokens
+    files {
+      items {
+        id
+        assistantChatId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
     _deleted
     _lastChangedAt
-    owner
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.CreateAssistantMutationVariables,
-  APITypes.CreateAssistantMutation
+  APITypes.CreateAssistantChatMutationVariables,
+  APITypes.CreateAssistantChatMutation
 >;
-export const updateAssistant = /* GraphQL */ `mutation UpdateAssistant(
-  $input: UpdateAssistantInput!
-  $condition: ModelAssistantConditionInput
+export const updateAssistantChat = /* GraphQL */ `mutation UpdateAssistantChat(
+  $input: UpdateAssistantChatInput!
+  $condition: ModelAssistantChatConditionInput
 ) {
-  updateAssistant(input: $input, condition: $condition) {
+  updateAssistantChat(input: $input, condition: $condition) {
     id
+    owner
     model
-    assistantId
     threadInstructions
     additionalInstructions
-    messages
-    moderationFlag
-    identityId
     threadId
+    moderationFlag
+    messages
+    draft
+    archived
+    inputTokens
+    outputTokens
+    files {
+      items {
+        id
+        assistantChatId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
     _deleted
     _lastChangedAt
-    owner
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.UpdateAssistantMutationVariables,
-  APITypes.UpdateAssistantMutation
+  APITypes.UpdateAssistantChatMutationVariables,
+  APITypes.UpdateAssistantChatMutation
 >;
-export const deleteAssistant = /* GraphQL */ `mutation DeleteAssistant(
-  $input: DeleteAssistantInput!
-  $condition: ModelAssistantConditionInput
+export const deleteAssistantChat = /* GraphQL */ `mutation DeleteAssistantChat(
+  $input: DeleteAssistantChatInput!
+  $condition: ModelAssistantChatConditionInput
 ) {
-  deleteAssistant(input: $input, condition: $condition) {
+  deleteAssistantChat(input: $input, condition: $condition) {
     id
+    owner
     model
-    assistantId
     threadInstructions
     additionalInstructions
-    messages
-    moderationFlag
-    identityId
     threadId
+    moderationFlag
+    messages
+    draft
+    archived
+    inputTokens
+    outputTokens
+    files {
+      items {
+        id
+        assistantChatId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
     _deleted
     _lastChangedAt
-    owner
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.DeleteAssistantMutationVariables,
-  APITypes.DeleteAssistantMutation
+  APITypes.DeleteAssistantChatMutationVariables,
+  APITypes.DeleteAssistantChatMutation
 >;
 export const createQuestion = /* GraphQL */ `mutation CreateQuestion(
   $input: CreateQuestionInput!
@@ -1276,6 +1367,23 @@ export const createFile = /* GraphQL */ `mutation CreateFile(
       startedAt
       __typename
     }
+    chats {
+      items {
+        id
+        assistantChatId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -1482,6 +1590,23 @@ export const updateFile = /* GraphQL */ `mutation UpdateFile(
       items {
         id
         questionId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    chats {
+      items {
+        id
+        assistantChatId
         fileId
         createdAt
         updatedAt
@@ -1714,6 +1839,23 @@ export const deleteFile = /* GraphQL */ `mutation DeleteFile(
       startedAt
       __typename
     }
+    chats {
+      items {
+        id
+        assistantChatId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -1725,75 +1867,6 @@ export const deleteFile = /* GraphQL */ `mutation DeleteFile(
 ` as GeneratedMutation<
   APITypes.DeleteFileMutationVariables,
   APITypes.DeleteFileMutation
->;
-export const createChatHistory = /* GraphQL */ `mutation CreateChatHistory(
-  $input: CreateChatHistoryInput!
-  $condition: ModelChatHistoryConditionInput
-) {
-  createChatHistory(input: $input, condition: $condition) {
-    id
-    owner
-    messages
-    model
-    inputTokens
-    outputTokens
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateChatHistoryMutationVariables,
-  APITypes.CreateChatHistoryMutation
->;
-export const updateChatHistory = /* GraphQL */ `mutation UpdateChatHistory(
-  $input: UpdateChatHistoryInput!
-  $condition: ModelChatHistoryConditionInput
-) {
-  updateChatHistory(input: $input, condition: $condition) {
-    id
-    owner
-    messages
-    model
-    inputTokens
-    outputTokens
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateChatHistoryMutationVariables,
-  APITypes.UpdateChatHistoryMutation
->;
-export const deleteChatHistory = /* GraphQL */ `mutation DeleteChatHistory(
-  $input: DeleteChatHistoryInput!
-  $condition: ModelChatHistoryConditionInput
-) {
-  deleteChatHistory(input: $input, condition: $condition) {
-    id
-    owner
-    messages
-    model
-    inputTokens
-    outputTokens
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteChatHistoryMutationVariables,
-  APITypes.DeleteChatHistoryMutation
 >;
 export const createSection = /* GraphQL */ `mutation CreateSection(
   $input: CreateSectionInput!
@@ -3587,6 +3660,11 @@ export const createParsedContent = /* GraphQL */ `mutation CreateParsedContent(
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -3765,6 +3843,11 @@ export const updateParsedContent = /* GraphQL */ `mutation UpdateParsedContent(
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -3939,6 +4022,11 @@ export const deleteParsedContent = /* GraphQL */ `mutation DeleteParsedContent(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
         nextToken
         startedAt
         __typename
@@ -4620,6 +4708,432 @@ export const deleteAIFeedback = /* GraphQL */ `mutation DeleteAIFeedback(
 ` as GeneratedMutation<
   APITypes.DeleteAIFeedbackMutationVariables,
   APITypes.DeleteAIFeedbackMutation
+>;
+export const createAssistantChatFile = /* GraphQL */ `mutation CreateAssistantChatFile(
+  $input: CreateAssistantChatFileInput!
+  $condition: ModelAssistantChatFileConditionInput
+) {
+  createAssistantChatFile(input: $input, condition: $condition) {
+    id
+    assistantChatId
+    fileId
+    assistantChat {
+      id
+      owner
+      model
+      threadInstructions
+      additionalInstructions
+      threadId
+      moderationFlag
+      messages
+      draft
+      archived
+      inputTokens
+      outputTokens
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    file {
+      id
+      name
+      owner
+      identityId
+      description
+      prompt
+      model
+      variant
+      mimeType
+      level
+      path
+      duration
+      size
+      generated
+      hex
+      byHex
+      thumbnail
+      waveformData
+      embedding
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAssistantChatFileMutationVariables,
+  APITypes.CreateAssistantChatFileMutation
+>;
+export const updateAssistantChatFile = /* GraphQL */ `mutation UpdateAssistantChatFile(
+  $input: UpdateAssistantChatFileInput!
+  $condition: ModelAssistantChatFileConditionInput
+) {
+  updateAssistantChatFile(input: $input, condition: $condition) {
+    id
+    assistantChatId
+    fileId
+    assistantChat {
+      id
+      owner
+      model
+      threadInstructions
+      additionalInstructions
+      threadId
+      moderationFlag
+      messages
+      draft
+      archived
+      inputTokens
+      outputTokens
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    file {
+      id
+      name
+      owner
+      identityId
+      description
+      prompt
+      model
+      variant
+      mimeType
+      level
+      path
+      duration
+      size
+      generated
+      hex
+      byHex
+      thumbnail
+      waveformData
+      embedding
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAssistantChatFileMutationVariables,
+  APITypes.UpdateAssistantChatFileMutation
+>;
+export const deleteAssistantChatFile = /* GraphQL */ `mutation DeleteAssistantChatFile(
+  $input: DeleteAssistantChatFileInput!
+  $condition: ModelAssistantChatFileConditionInput
+) {
+  deleteAssistantChatFile(input: $input, condition: $condition) {
+    id
+    assistantChatId
+    fileId
+    assistantChat {
+      id
+      owner
+      model
+      threadInstructions
+      additionalInstructions
+      threadId
+      moderationFlag
+      messages
+      draft
+      archived
+      inputTokens
+      outputTokens
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    file {
+      id
+      name
+      owner
+      identityId
+      description
+      prompt
+      model
+      variant
+      mimeType
+      level
+      path
+      duration
+      size
+      generated
+      hex
+      byHex
+      thumbnail
+      waveformData
+      embedding
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAssistantChatFileMutationVariables,
+  APITypes.DeleteAssistantChatFileMutation
 >;
 export const createQuestionUnit = /* GraphQL */ `mutation CreateQuestionUnit(
   $input: CreateQuestionUnitInput!
@@ -5588,6 +6102,11 @@ export const createQuestionFile = /* GraphQL */ `mutation CreateQuestionFile(
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -5759,6 +6278,11 @@ export const updateQuestionFile = /* GraphQL */ `mutation UpdateQuestionFile(
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -5926,6 +6450,11 @@ export const deleteQuestionFile = /* GraphQL */ `mutation DeleteQuestionFile(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
         nextToken
         startedAt
         __typename
@@ -6444,6 +6973,11 @@ export const createUnitFile = /* GraphQL */ `mutation CreateUnitFile(
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -6616,6 +7150,11 @@ export const updateUnitFile = /* GraphQL */ `mutation UpdateUnitFile(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
         nextToken
         startedAt
         __typename
@@ -6796,6 +7335,11 @@ export const deleteUnitFile = /* GraphQL */ `mutation DeleteUnitFile(
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -6972,6 +7516,11 @@ export const createWordFile = /* GraphQL */ `mutation CreateWordFile(
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -7132,6 +7681,11 @@ export const updateWordFile = /* GraphQL */ `mutation UpdateWordFile(
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -7288,6 +7842,11 @@ export const deleteWordFile = /* GraphQL */ `mutation DeleteWordFile(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
         nextToken
         startedAt
         __typename

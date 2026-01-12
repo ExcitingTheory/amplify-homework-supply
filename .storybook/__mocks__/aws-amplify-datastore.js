@@ -18,9 +18,10 @@ const mockParsedContent = {};
 const mockWords = {};
 const mockQuestions = {};
 const mockSections = {};
+const mockAssignments = {};
 
 // Export storage for seed data
-export { mockUnits, mockGrades, mockFiles, mockSettings, mockDocuments, mockParsedContent, mockWords, mockQuestions, mockSections };
+export { mockUnits, mockGrades, mockFiles, mockSettings, mockDocuments, mockParsedContent, mockWords, mockQuestions, mockSections, mockAssignments };
 
 // Store active subscriptions
 const activeSubscriptions = {
@@ -33,6 +34,7 @@ const activeSubscriptions = {
   Word: [],
   Question: [],
   Section: [],
+  Assignment: [],
 };
 
 // Helper to seed mock data for stories
@@ -333,6 +335,24 @@ export const seedMockSections = (sectionsArray) => {
   });
 };
 
+// Helper to seed mock assignments data for stories
+export const seedMockAssignments = (assignmentsArray) => {
+  console.log('[Mock DataStore] Seeding assignments:', assignmentsArray.length);
+  assignmentsArray.forEach(assignment => {
+    if (assignment.id) {
+      mockAssignments[assignment.id] = assignment;
+    }
+  });
+  console.log('[Mock DataStore] Total assignments in store:', Object.keys(mockAssignments).length);
+  
+  // Notify all Assignment subscribers about the new data
+  const items = Object.values(mockAssignments);
+  activeSubscriptions.Assignment.forEach(callback => {
+    console.log('[Mock DataStore] Notifying Assignment subscriber with', items.length, 'assignments');
+    callback({ items, isSynced: true });
+  });
+};
+
 // Helper to seed mock settings data for stories
 export const seedMockSettings = (settingsData) => {
   console.log('[Mock DataStore] Seeding settings:', settingsData);
@@ -361,6 +381,7 @@ export const clearMockUnits = () => {
   Object.keys(mockWords).forEach(key => delete mockWords[key]);
   Object.keys(mockQuestions).forEach(key => delete mockQuestions[key]);
   Object.keys(mockSections).forEach(key => delete mockSections[key]);
+  Object.keys(mockAssignments).forEach(key => delete mockAssignments[key]);
   console.log('[Mock DataStore] Cleared all mock data');
   
   // Always seed a default unit for stories that don't provide their own
@@ -811,6 +832,12 @@ export const SortDirection = {
   DESCENDING: 'DESCENDING'
 };
 
+// Mock AuthModeStrategyType enum
+export const AuthModeStrategyType = {
+  DEFAULT: 'DEFAULT',
+  MULTI_AUTH: 'MULTI_AUTH',
+};
+
 /**
  * Mock initSchema function that creates model classes matching Amplify DataStore structure
  * This is called by src/models/index.js: const { Unit, Grade, ... } = initSchema(schema);
@@ -973,6 +1000,15 @@ export class DataStore {
       activeSubscriptions.Section.forEach(callback => {
         callback({ items: Object.values(mockSections), isSynced: true });
       });
+    } else if (modelName === 'Assignment') {
+      // This is an Assignment
+      mockAssignments[model.id] = model;
+      console.log('[Mock DataStore] Saved Assignment:', model.id, 'for unit:', model.unitID);
+      
+      // Notify all Assignment subscribers
+      activeSubscriptions.Assignment.forEach(callback => {
+        callback({ items: Object.values(mockAssignments), isSynced: true });
+      });
     } else if (isParsedContent) {
       // This is a ParsedContent
       mockParsedContent[model.id] = model;
@@ -1036,7 +1072,7 @@ export class DataStore {
 
   static async query(modelConstructor, idOrPredicate) {
     const modelName = modelConstructor?.name;
-    console.log('Mock DataStore.query called for:', modelName, 'with predicate:', typeof idOrPredicate);
+    console.log('[Mock DataStore] query called for:', modelName, 'with predicate:', typeof idOrPredicate, 'constructor:', modelConstructor);
     
     // If idOrPredicate is a string, treat it as an ID lookup
     if (typeof idOrPredicate === 'string') {
@@ -1052,6 +1088,9 @@ export class DataStore {
       }
       if (modelName === 'Section' && mockSections[idOrPredicate]) {
         return mockSections[idOrPredicate];
+      }
+      if (modelName === 'Assignment' && mockAssignments[idOrPredicate]) {
+        return mockAssignments[idOrPredicate];
       }
       if (modelName === 'Unit' && mockUnits[idOrPredicate]) {
         return mockUnits[idOrPredicate];
@@ -1137,7 +1176,27 @@ export class DataStore {
       return Object.values(mockWords);
     }
     if (modelName === 'Section') {
-      return Object.values(mockSections);
+      console.log('[Mock DataStore] Section case HIT! mockSections:', Object.keys(mockSections));
+      const sections = Object.values(mockSections);
+      // In real Amplify, sections are filtered by auth rules (owner or learner group)
+      // For mocking, we return all sections and let the page filter by owner
+      console.log('[Mock DataStore] Returning', sections.length, 'sections:', sections.map(s => ({ id: s.id, name: s.name, owner: s.owner, learner: s.learner })));
+      return sections;
+    }
+    if (modelName === 'Assignment') {
+      const assignments = Object.values(mockAssignments);
+      console.log('[Mock DataStore] Returning', assignments.length, 'assignments');
+      return assignments;
+    }
+    if (modelName === 'Grade') {
+      const grades = Object.values(mockGrades);
+      console.log('[Mock DataStore] Returning', grades.length, 'grades');
+      return grades;
+    }
+    if (modelName === 'Unit') {
+      const units = Object.values(mockUnits);
+      console.log('[Mock DataStore] Returning', units.length, 'units');
+      return units;
     }
     
     const data = mockData[modelName];
@@ -1331,6 +1390,13 @@ export class DataStore {
           }
           console.log('[Mock DataStore] Returning', items.length, 'sections (filtered)');
           activeSubscriptions.Section.push(callback);
+        } else if (modelName === 'Assignment') {
+          items = Object.values(mockAssignments);
+          if (filterFn) {
+            items = items.filter(filterFn);
+          }
+          console.log('[Mock DataStore] Returning', items.length, 'assignments (filtered)');
+          activeSubscriptions.Assignment.push(callback);
         } else {
           const data = mockData[modelName];
           items = data ? Object.values(data) : [];
@@ -1390,6 +1456,11 @@ export class DataStore {
               const index = activeSubscriptions.Section.indexOf(callback);
               if (index > -1) {
                 activeSubscriptions.Section.splice(index, 1);
+              }
+            } else if (modelName === 'Assignment') {
+              const index = activeSubscriptions.Assignment.indexOf(callback);
+              if (index > -1) {
+                activeSubscriptions.Assignment.splice(index, 1);
               }
             }
           }

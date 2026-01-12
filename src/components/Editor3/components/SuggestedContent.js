@@ -416,7 +416,7 @@ function SuggestedWordItem({
         >
             <Box sx={{ display: 'flex', alignItems: 'flex-start', width: '100%', gap: 0.5 }}>
                 <Checkbox
-                    checked={selected}
+                    checked={Boolean(selected)}
                     onChange={onToggle}
                     disabled={importing}
                     sx={{ p: 0.5 }}
@@ -900,7 +900,7 @@ function SuggestedQuestionItem({ item, index, selected, isImported, importing, o
         >
             <Box sx={{ display: 'flex', width: '100%', alignItems: 'flex-start', gap: 0.5 }}>
                 <Checkbox
-                    checked={selected}
+                    checked={Boolean(selected)}
                     onChange={onToggle}
                     disabled={importing}
                     sx={{ p: 0.5 }}

@@ -8,86 +8,143 @@ type GeneratedSubscription<InputType, OutputType> = string & {
   __generatedSubscriptionOutput: OutputType;
 };
 
-export const onCreateAssistant = /* GraphQL */ `subscription OnCreateAssistant(
-  $filter: ModelSubscriptionAssistantFilterInput
+export const onCreateAssistantChat = /* GraphQL */ `subscription OnCreateAssistantChat(
+  $filter: ModelSubscriptionAssistantChatFilterInput
   $owner: String
 ) {
-  onCreateAssistant(filter: $filter, owner: $owner) {
+  onCreateAssistantChat(filter: $filter, owner: $owner) {
     id
+    owner
     model
-    assistantId
     threadInstructions
     additionalInstructions
-    messages
-    moderationFlag
-    identityId
     threadId
+    moderationFlag
+    messages
+    draft
+    archived
+    inputTokens
+    outputTokens
+    files {
+      items {
+        id
+        assistantChatId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
     _deleted
     _lastChangedAt
-    owner
     __typename
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnCreateAssistantSubscriptionVariables,
-  APITypes.OnCreateAssistantSubscription
+  APITypes.OnCreateAssistantChatSubscriptionVariables,
+  APITypes.OnCreateAssistantChatSubscription
 >;
-export const onUpdateAssistant = /* GraphQL */ `subscription OnUpdateAssistant(
-  $filter: ModelSubscriptionAssistantFilterInput
+export const onUpdateAssistantChat = /* GraphQL */ `subscription OnUpdateAssistantChat(
+  $filter: ModelSubscriptionAssistantChatFilterInput
   $owner: String
 ) {
-  onUpdateAssistant(filter: $filter, owner: $owner) {
+  onUpdateAssistantChat(filter: $filter, owner: $owner) {
     id
+    owner
     model
-    assistantId
     threadInstructions
     additionalInstructions
-    messages
-    moderationFlag
-    identityId
     threadId
+    moderationFlag
+    messages
+    draft
+    archived
+    inputTokens
+    outputTokens
+    files {
+      items {
+        id
+        assistantChatId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
     _deleted
     _lastChangedAt
-    owner
     __typename
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnUpdateAssistantSubscriptionVariables,
-  APITypes.OnUpdateAssistantSubscription
+  APITypes.OnUpdateAssistantChatSubscriptionVariables,
+  APITypes.OnUpdateAssistantChatSubscription
 >;
-export const onDeleteAssistant = /* GraphQL */ `subscription OnDeleteAssistant(
-  $filter: ModelSubscriptionAssistantFilterInput
+export const onDeleteAssistantChat = /* GraphQL */ `subscription OnDeleteAssistantChat(
+  $filter: ModelSubscriptionAssistantChatFilterInput
   $owner: String
 ) {
-  onDeleteAssistant(filter: $filter, owner: $owner) {
+  onDeleteAssistantChat(filter: $filter, owner: $owner) {
     id
+    owner
     model
-    assistantId
     threadInstructions
     additionalInstructions
-    messages
-    moderationFlag
-    identityId
     threadId
+    moderationFlag
+    messages
+    draft
+    archived
+    inputTokens
+    outputTokens
+    files {
+      items {
+        id
+        assistantChatId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
     _deleted
     _lastChangedAt
-    owner
     __typename
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnDeleteAssistantSubscriptionVariables,
-  APITypes.OnDeleteAssistantSubscription
+  APITypes.OnDeleteAssistantChatSubscriptionVariables,
+  APITypes.OnDeleteAssistantChatSubscription
 >;
 export const onCreateQuestion = /* GraphQL */ `subscription OnCreateQuestion(
   $filter: ModelSubscriptionQuestionFilterInput
@@ -644,6 +701,23 @@ export const onCreateFile = /* GraphQL */ `subscription OnCreateFile(
       startedAt
       __typename
     }
+    chats {
+      items {
+        id
+        assistantChatId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -850,6 +924,23 @@ export const onUpdateFile = /* GraphQL */ `subscription OnUpdateFile(
       items {
         id
         questionId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
+    chats {
+      items {
+        id
+        assistantChatId
         fileId
         createdAt
         updatedAt
@@ -1082,6 +1173,23 @@ export const onDeleteFile = /* GraphQL */ `subscription OnDeleteFile(
       startedAt
       __typename
     }
+    chats {
+      items {
+        id
+        assistantChatId
+        fileId
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        owner
+        __typename
+      }
+      nextToken
+      startedAt
+      __typename
+    }
     createdAt
     updatedAt
     _version
@@ -1093,75 +1201,6 @@ export const onDeleteFile = /* GraphQL */ `subscription OnDeleteFile(
 ` as GeneratedSubscription<
   APITypes.OnDeleteFileSubscriptionVariables,
   APITypes.OnDeleteFileSubscription
->;
-export const onCreateChatHistory = /* GraphQL */ `subscription OnCreateChatHistory(
-  $filter: ModelSubscriptionChatHistoryFilterInput
-  $owner: String
-) {
-  onCreateChatHistory(filter: $filter, owner: $owner) {
-    id
-    owner
-    messages
-    model
-    inputTokens
-    outputTokens
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnCreateChatHistorySubscriptionVariables,
-  APITypes.OnCreateChatHistorySubscription
->;
-export const onUpdateChatHistory = /* GraphQL */ `subscription OnUpdateChatHistory(
-  $filter: ModelSubscriptionChatHistoryFilterInput
-  $owner: String
-) {
-  onUpdateChatHistory(filter: $filter, owner: $owner) {
-    id
-    owner
-    messages
-    model
-    inputTokens
-    outputTokens
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnUpdateChatHistorySubscriptionVariables,
-  APITypes.OnUpdateChatHistorySubscription
->;
-export const onDeleteChatHistory = /* GraphQL */ `subscription OnDeleteChatHistory(
-  $filter: ModelSubscriptionChatHistoryFilterInput
-  $owner: String
-) {
-  onDeleteChatHistory(filter: $filter, owner: $owner) {
-    id
-    owner
-    messages
-    model
-    inputTokens
-    outputTokens
-    createdAt
-    updatedAt
-    _version
-    _deleted
-    _lastChangedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnDeleteChatHistorySubscriptionVariables,
-  APITypes.OnDeleteChatHistorySubscription
 >;
 export const onCreateSection = /* GraphQL */ `subscription OnCreateSection(
   $filter: ModelSubscriptionSectionFilterInput
@@ -2958,6 +2997,11 @@ export const onCreateParsedContent = /* GraphQL */ `subscription OnCreateParsedC
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -3136,6 +3180,11 @@ export const onUpdateParsedContent = /* GraphQL */ `subscription OnUpdateParsedC
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -3310,6 +3359,11 @@ export const onDeleteParsedContent = /* GraphQL */ `subscription OnDeleteParsedC
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
         nextToken
         startedAt
         __typename
@@ -3991,6 +4045,432 @@ export const onDeleteAIFeedback = /* GraphQL */ `subscription OnDeleteAIFeedback
 ` as GeneratedSubscription<
   APITypes.OnDeleteAIFeedbackSubscriptionVariables,
   APITypes.OnDeleteAIFeedbackSubscription
+>;
+export const onCreateAssistantChatFile = /* GraphQL */ `subscription OnCreateAssistantChatFile(
+  $filter: ModelSubscriptionAssistantChatFileFilterInput
+  $owner: String
+) {
+  onCreateAssistantChatFile(filter: $filter, owner: $owner) {
+    id
+    assistantChatId
+    fileId
+    assistantChat {
+      id
+      owner
+      model
+      threadInstructions
+      additionalInstructions
+      threadId
+      moderationFlag
+      messages
+      draft
+      archived
+      inputTokens
+      outputTokens
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    file {
+      id
+      name
+      owner
+      identityId
+      description
+      prompt
+      model
+      variant
+      mimeType
+      level
+      path
+      duration
+      size
+      generated
+      hex
+      byHex
+      thumbnail
+      waveformData
+      embedding
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateAssistantChatFileSubscriptionVariables,
+  APITypes.OnCreateAssistantChatFileSubscription
+>;
+export const onUpdateAssistantChatFile = /* GraphQL */ `subscription OnUpdateAssistantChatFile(
+  $filter: ModelSubscriptionAssistantChatFileFilterInput
+  $owner: String
+) {
+  onUpdateAssistantChatFile(filter: $filter, owner: $owner) {
+    id
+    assistantChatId
+    fileId
+    assistantChat {
+      id
+      owner
+      model
+      threadInstructions
+      additionalInstructions
+      threadId
+      moderationFlag
+      messages
+      draft
+      archived
+      inputTokens
+      outputTokens
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    file {
+      id
+      name
+      owner
+      identityId
+      description
+      prompt
+      model
+      variant
+      mimeType
+      level
+      path
+      duration
+      size
+      generated
+      hex
+      byHex
+      thumbnail
+      waveformData
+      embedding
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateAssistantChatFileSubscriptionVariables,
+  APITypes.OnUpdateAssistantChatFileSubscription
+>;
+export const onDeleteAssistantChatFile = /* GraphQL */ `subscription OnDeleteAssistantChatFile(
+  $filter: ModelSubscriptionAssistantChatFileFilterInput
+  $owner: String
+) {
+  onDeleteAssistantChatFile(filter: $filter, owner: $owner) {
+    id
+    assistantChatId
+    fileId
+    assistantChat {
+      id
+      owner
+      model
+      threadInstructions
+      additionalInstructions
+      threadId
+      moderationFlag
+      messages
+      draft
+      archived
+      inputTokens
+      outputTokens
+      files {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    file {
+      id
+      name
+      owner
+      identityId
+      description
+      prompt
+      model
+      variant
+      mimeType
+      level
+      path
+      duration
+      size
+      generated
+      hex
+      byHex
+      thumbnail
+      waveformData
+      embedding
+      documentID
+      document {
+        id
+        filename
+        s3Key
+        status
+        owner
+        identityId
+        learner
+        extractedText
+        pageCount
+        fileSize
+        mimeType
+        uploadedAt
+        resumeState
+        embeddingsS3Key
+        metadata
+        createdAt
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      parsedContentID
+      parsedContent {
+        id
+        owner
+        identityId
+        documentID
+        fileID
+        vocabularyJSON
+        summariesJSON
+        objectivesJSON
+        conceptsJSON
+        questionsJSON
+        responseId
+        modelUsed
+        tokensUsed
+        processingTime
+        createdAt
+        importedAt
+        metadata
+        updatedAt
+        _version
+        _deleted
+        _lastChangedAt
+        __typename
+      }
+      units {
+        nextToken
+        startedAt
+        __typename
+      }
+      words {
+        nextToken
+        startedAt
+        __typename
+      }
+      questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      _version
+      _deleted
+      _lastChangedAt
+      __typename
+    }
+    createdAt
+    updatedAt
+    _version
+    _deleted
+    _lastChangedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteAssistantChatFileSubscriptionVariables,
+  APITypes.OnDeleteAssistantChatFileSubscription
 >;
 export const onCreateQuestionUnit = /* GraphQL */ `subscription OnCreateQuestionUnit(
   $filter: ModelSubscriptionQuestionUnitFilterInput
@@ -4959,6 +5439,11 @@ export const onCreateQuestionFile = /* GraphQL */ `subscription OnCreateQuestion
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -5130,6 +5615,11 @@ export const onUpdateQuestionFile = /* GraphQL */ `subscription OnUpdateQuestion
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -5297,6 +5787,11 @@ export const onDeleteQuestionFile = /* GraphQL */ `subscription OnDeleteQuestion
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
         nextToken
         startedAt
         __typename
@@ -5815,6 +6310,11 @@ export const onCreateUnitFile = /* GraphQL */ `subscription OnCreateUnitFile(
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -5987,6 +6487,11 @@ export const onUpdateUnitFile = /* GraphQL */ `subscription OnUpdateUnitFile(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
         nextToken
         startedAt
         __typename
@@ -6167,6 +6672,11 @@ export const onDeleteUnitFile = /* GraphQL */ `subscription OnDeleteUnitFile(
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -6343,6 +6853,11 @@ export const onCreateWordFile = /* GraphQL */ `subscription OnCreateWordFile(
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -6503,6 +7018,11 @@ export const onUpdateWordFile = /* GraphQL */ `subscription OnUpdateWordFile(
         startedAt
         __typename
       }
+      chats {
+        nextToken
+        startedAt
+        __typename
+      }
       createdAt
       updatedAt
       _version
@@ -6659,6 +7179,11 @@ export const onDeleteWordFile = /* GraphQL */ `subscription OnDeleteWordFile(
         __typename
       }
       questions {
+        nextToken
+        startedAt
+        __typename
+      }
+      chats {
         nextToken
         startedAt
         __typename

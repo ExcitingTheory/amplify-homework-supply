@@ -9,18 +9,18 @@ import { DataStore } from '@aws-amplify/datastore';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { 
   AIFeedback,
-  AIFeedbackType, 
-  AIFeedbackReason, 
-  AIContentType 
+  AiFeedbackType, 
+  AiFeedbackReason, 
+  AiContentType 
 } from '../models';
 
 interface CreateFeedbackParams {
-  contentType: keyof typeof AIContentType;
+  contentType: keyof typeof AiContentType;
   feedbackType: 'POSITIVE' | 'NEGATIVE';
   generatedContent: string;
   model?: string;
   prompt?: string;
-  reasons?: Array<keyof typeof AIFeedbackReason>;
+  reasons?: Array<keyof typeof AiFeedbackReason>;
   comment?: string;
   messageId?: string;
   unitId?: string;
@@ -38,15 +38,15 @@ export async function createAIFeedback(params: CreateFeedbackParams): Promise<AI
   const owner = session.tokens?.idToken?.payload.sub as string;
   const identityId = session.identityId;
 
-  const feedback = await DataStore.save(
+  const savedFeedback = await DataStore.save(
     new AIFeedback({
       owner,
       identityId,
-      contentType: AIContentType[params.contentType],
+      contentType: AiContentType[params.contentType],
       feedbackType: params.feedbackType === 'POSITIVE' 
-        ? AIFeedbackType.POSITIVE 
-        : AIFeedbackType.NEGATIVE,
-      reasons: params.reasons?.map(r => AIFeedbackReason[r]),
+        ? AiFeedbackType.POSITIVE 
+        : AiFeedbackType.NEGATIVE,
+      reasons: params.reasons?.map(r => AiFeedbackReason[r]),
       comment: params.comment,
       model: params.model,
       prompt: params.prompt,
@@ -57,17 +57,17 @@ export async function createAIFeedback(params: CreateFeedbackParams): Promise<AI
       messageId: params.messageId,
       sessionId: params.sessionId,
       metadata: params.metadata ? JSON.stringify(params.metadata) : undefined,
-    })
+    } as AIFeedback)
   );
 
-  return feedback;
+    return savedFeedback;
 }
 
 /**
  * Get all feedback for a specific content type
  */
 export async function getFeedbackByContentType(
-  contentType: keyof typeof AIContentType
+  contentType: keyof typeof AiContentType
 ): Promise<AIFeedback[]> {
   const session = await fetchAuthSession();
   const owner = session.tokens?.idToken?.payload.sub as string;
@@ -75,7 +75,7 @@ export async function getFeedbackByContentType(
   const feedback = await DataStore.query(AIFeedback, f =>
     f.and(f => [
       f.owner.eq(owner),
-      f.contentType.eq(AIContentType[contentType])
+      f.contentType.eq(AiContentType[contentType])
     ])
   );
 
@@ -129,7 +129,7 @@ export interface FeedbackStats {
 }
 
 export async function getFeedbackStats(
-  contentType?: keyof typeof AIContentType,
+  contentType?: keyof typeof AiContentType,
   unitId?: string
 ): Promise<FeedbackStats> {
   const session = await fetchAuthSession();
@@ -142,7 +142,7 @@ export async function getFeedbackStats(
     feedback = await DataStore.query(AIFeedback, f =>
       f.and(f => [
         f.owner.eq(owner),
-        f.contentType.eq(AIContentType[contentType]),
+        f.contentType.eq(AiContentType[contentType]),
         f.unitID.eq(unitId)
       ])
     );
@@ -150,7 +150,7 @@ export async function getFeedbackStats(
     feedback = await DataStore.query(AIFeedback, f =>
       f.and(f => [
         f.owner.eq(owner),
-        f.contentType.eq(AIContentType[contentType])
+        f.contentType.eq(AiContentType[contentType])
       ])
     );
   } else if (unitId) {
@@ -165,15 +165,17 @@ export async function getFeedbackStats(
   }
 
   const total = feedback.length;
-  const positive = feedback.filter(f => f.feedbackType === AIFeedbackType.POSITIVE).length;
-  const negative = feedback.filter(f => f.feedbackType === AIFeedbackType.NEGATIVE).length;
+  const positive = feedback.filter(f => f.feedbackType === AiFeedbackType.POSITIVE).length;
+  const negative = feedback.filter(f => f.feedbackType === AiFeedbackType.NEGATIVE).length;
 
   // Count reasons
   const reasonCounts: Record<string, number> = {};
   feedback.forEach(f => {
     if (f.reasons) {
       f.reasons.forEach(reason => {
-        reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
+        if (reason) {
+          reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
+        }
       });
     }
   });
@@ -206,7 +208,7 @@ export async function deleteFeedback(feedbackId: string): Promise<void> {
  * Quick helper to submit positive feedback
  */
 export async function submitPositiveFeedback(
-  contentType: keyof typeof AIContentType,
+  contentType: keyof typeof AiContentType,
   generatedContent: string,
   metadata?: CreateFeedbackParams
 ): Promise<AIFeedback> {
@@ -222,9 +224,9 @@ export async function submitPositiveFeedback(
  * Quick helper to submit negative feedback
  */
 export async function submitNegativeFeedback(
-  contentType: keyof typeof AIContentType,
+  contentType: keyof typeof AiContentType,
   generatedContent: string,
-  reasons: Array<keyof typeof AIFeedbackReason>,
+  reasons: Array<keyof typeof AiFeedbackReason>,
   comment?: string,
   metadata?: Omit<CreateFeedbackParams, 'feedbackType' | 'contentType' | 'generatedContent' | 'reasons' | 'comment'>
 ): Promise<AIFeedback> {

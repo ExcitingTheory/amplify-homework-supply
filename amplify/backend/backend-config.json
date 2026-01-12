@@ -208,51 +208,7 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
-    "chat": {
-      "build": true,
-      "dependsOn": [
-        {
-          "attributes": [
-            "GraphQLAPIIdOutput",
-            "GraphQLAPIEndpointOutput"
-          ],
-          "category": "api",
-          "resourceName": "japanese5"
-        },
-        {
-          "attributes": [
-            "BucketName"
-          ],
-          "category": "storage",
-          "resourceName": "files"
-        }
-      ],
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
     "chatStream": {
-      "build": true,
-      "dependsOn": [
-        {
-          "attributes": [
-            "GraphQLAPIIdOutput",
-            "GraphQLAPIEndpointOutput"
-          ],
-          "category": "api",
-          "resourceName": "japanese5"
-        },
-        {
-          "attributes": [
-            "BucketName"
-          ],
-          "category": "storage",
-          "resourceName": "files"
-        }
-      ],
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
-    "contentCompletion": {
       "build": true,
       "dependsOn": [
         {
@@ -291,28 +247,6 @@
           ],
           "category": "storage",
           "resourceName": "files"
-        }
-      ],
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
-    "editorChat": {
-      "build": true,
-      "dependsOn": [
-        {
-          "attributes": [
-            "BucketName"
-          ],
-          "category": "storage",
-          "resourceName": "files"
-        },
-        {
-          "attributes": [
-            "GraphQLAPIIdOutput",
-            "GraphQLAPIEndpointOutput"
-          ],
-          "category": "api",
-          "resourceName": "japanese5"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -415,35 +349,6 @@
           ],
           "category": "api",
           "resourceName": "japanese5"
-        },
-        {
-          "attributes": [
-            "BucketName"
-          ],
-          "category": "storage",
-          "resourceName": "files"
-        }
-      ],
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
-    "openai": {
-      "build": true,
-      "dependsOn": [
-        {
-          "attributes": [
-            "GraphQLAPIIdOutput",
-            "GraphQLAPIEndpointOutput"
-          ],
-          "category": "api",
-          "resourceName": "japanese5"
-        },
-        {
-          "attributes": [
-            "UserPoolId"
-          ],
-          "category": "auth",
-          "resourceName": "japanese56739ab6b"
         },
         {
           "attributes": [
@@ -581,30 +486,6 @@
         }
       ]
     },
-    "AMPLIFY_function_chat_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "chat"
-        }
-      ]
-    },
-    "AMPLIFY_function_chat_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "chat"
-        }
-      ]
-    },
-    "AMPLIFY_function_chat_secretsPathAmplifyAppId": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "chat"
-        }
-      ]
-    },
     "AMPLIFY_function_contentCompletionStream_deploymentBucketName": {
       "usedBy": [
         {
@@ -626,54 +507,6 @@
         {
           "category": "function",
           "resourceName": "contentCompletionStream"
-        }
-      ]
-    },
-    "AMPLIFY_function_contentCompletion_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "contentCompletion"
-        }
-      ]
-    },
-    "AMPLIFY_function_contentCompletion_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "contentCompletion"
-        }
-      ]
-    },
-    "AMPLIFY_function_contentCompletion_secretsPathAmplifyAppId": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "contentCompletion"
-        }
-      ]
-    },
-    "AMPLIFY_function_editorChat_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "editorChat"
-        }
-      ]
-    },
-    "AMPLIFY_function_editorChat_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "editorChat"
-        }
-      ]
-    },
-    "AMPLIFY_function_editorChat_secretsPathAmplifyAppId": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "editorChat"
         }
       ]
     },
@@ -818,30 +651,6 @@
         {
           "category": "function",
           "resourceName": "openaiWebhook"
-        }
-      ]
-    },
-    "AMPLIFY_function_openai_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "openai"
-        }
-      ]
-    },
-    "AMPLIFY_function_openai_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "openai"
-        }
-      ]
-    },
-    "AMPLIFY_function_openai_secretsPathAmplifyAppId": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "openai"
         }
       ]
     },

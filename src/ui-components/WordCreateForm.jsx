@@ -15,6 +15,7 @@ import {
   Icon,
   ScrollView,
   Text,
+  TextAreaField,
   TextField,
   useTheme,
 } from "@aws-amplify/ui-react";
@@ -194,8 +195,19 @@ export default function WordCreateForm(props) {
     pronunciation: "",
     definition: "",
     audio: [],
+    waveformData: "",
     definitionAudio: [],
+    definitionWaveformData: "",
     rubyTags: "",
+    importedAt: "",
+    embedding: [],
+    embeddingModel: "",
+    embeddingDimensions: "",
+    embeddingVersion: "",
+    embeddingWordCount: "",
+    moderationStatus: "",
+    moderationFlags: "",
+    moderationCheckedAt: "",
   };
   const [phrase, setPhrase] = React.useState(initialValues.phrase);
   const [owner, setOwner] = React.useState(initialValues.owner);
@@ -205,10 +217,39 @@ export default function WordCreateForm(props) {
   );
   const [definition, setDefinition] = React.useState(initialValues.definition);
   const [audio, setAudio] = React.useState(initialValues.audio);
+  const [waveformData, setWaveformData] = React.useState(
+    initialValues.waveformData
+  );
   const [definitionAudio, setDefinitionAudio] = React.useState(
     initialValues.definitionAudio
   );
+  const [definitionWaveformData, setDefinitionWaveformData] = React.useState(
+    initialValues.definitionWaveformData
+  );
   const [rubyTags, setRubyTags] = React.useState(initialValues.rubyTags);
+  const [importedAt, setImportedAt] = React.useState(initialValues.importedAt);
+  const [embedding, setEmbedding] = React.useState(initialValues.embedding);
+  const [embeddingModel, setEmbeddingModel] = React.useState(
+    initialValues.embeddingModel
+  );
+  const [embeddingDimensions, setEmbeddingDimensions] = React.useState(
+    initialValues.embeddingDimensions
+  );
+  const [embeddingVersion, setEmbeddingVersion] = React.useState(
+    initialValues.embeddingVersion
+  );
+  const [embeddingWordCount, setEmbeddingWordCount] = React.useState(
+    initialValues.embeddingWordCount
+  );
+  const [moderationStatus, setModerationStatus] = React.useState(
+    initialValues.moderationStatus
+  );
+  const [moderationFlags, setModerationFlags] = React.useState(
+    initialValues.moderationFlags
+  );
+  const [moderationCheckedAt, setModerationCheckedAt] = React.useState(
+    initialValues.moderationCheckedAt
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setPhrase(initialValues.phrase);
@@ -218,9 +259,21 @@ export default function WordCreateForm(props) {
     setDefinition(initialValues.definition);
     setAudio(initialValues.audio);
     setCurrentAudioValue("");
+    setWaveformData(initialValues.waveformData);
     setDefinitionAudio(initialValues.definitionAudio);
     setCurrentDefinitionAudioValue("");
+    setDefinitionWaveformData(initialValues.definitionWaveformData);
     setRubyTags(initialValues.rubyTags);
+    setImportedAt(initialValues.importedAt);
+    setEmbedding(initialValues.embedding);
+    setCurrentEmbeddingValue("");
+    setEmbeddingModel(initialValues.embeddingModel);
+    setEmbeddingDimensions(initialValues.embeddingDimensions);
+    setEmbeddingVersion(initialValues.embeddingVersion);
+    setEmbeddingWordCount(initialValues.embeddingWordCount);
+    setModerationStatus(initialValues.moderationStatus);
+    setModerationFlags(initialValues.moderationFlags);
+    setModerationCheckedAt(initialValues.moderationCheckedAt);
     setErrors({});
   };
   const [currentAudioValue, setCurrentAudioValue] = React.useState("");
@@ -228,6 +281,8 @@ export default function WordCreateForm(props) {
   const [currentDefinitionAudioValue, setCurrentDefinitionAudioValue] =
     React.useState("");
   const definitionAudioRef = React.createRef();
+  const [currentEmbeddingValue, setCurrentEmbeddingValue] = React.useState("");
+  const embeddingRef = React.createRef();
   const validations = {
     phrase: [],
     owner: [],
@@ -235,8 +290,19 @@ export default function WordCreateForm(props) {
     pronunciation: [],
     definition: [],
     audio: [],
+    waveformData: [{ type: "JSON" }],
     definitionAudio: [],
+    definitionWaveformData: [{ type: "JSON" }],
     rubyTags: [],
+    importedAt: [],
+    embedding: [],
+    embeddingModel: [],
+    embeddingDimensions: [],
+    embeddingVersion: [],
+    embeddingWordCount: [],
+    moderationStatus: [],
+    moderationFlags: [{ type: "JSON" }],
+    moderationCheckedAt: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -255,6 +321,29 @@ export default function WordCreateForm(props) {
     setErrors((errors) => ({ ...errors, [fieldName]: validationResponse }));
     return validationResponse;
   };
+  const convertTimeStampToDate = (ts) => {
+    if (Math.abs(Date.now() - ts) < Math.abs(Date.now() - ts * 1000)) {
+      return new Date(ts);
+    }
+    return new Date(ts * 1000);
+  };
+  const convertToLocal = (date) => {
+    const df = new Intl.DateTimeFormat("default", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      calendar: "iso8601",
+      numberingSystem: "latn",
+      hourCycle: "h23",
+    });
+    const parts = df.formatToParts(date).reduce((acc, part) => {
+      acc[part.type] = part.value;
+      return acc;
+    }, {});
+    return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+  };
   return (
     <Grid
       as="form"
@@ -270,8 +359,19 @@ export default function WordCreateForm(props) {
           pronunciation,
           definition,
           audio,
+          waveformData,
           definitionAudio,
+          definitionWaveformData,
           rubyTags,
+          importedAt,
+          embedding,
+          embeddingModel,
+          embeddingDimensions,
+          embeddingVersion,
+          embeddingWordCount,
+          moderationStatus,
+          moderationFlags,
+          moderationCheckedAt,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -332,8 +432,19 @@ export default function WordCreateForm(props) {
               pronunciation,
               definition,
               audio,
+              waveformData,
               definitionAudio,
+              definitionWaveformData,
               rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.phrase ?? value;
@@ -363,8 +474,19 @@ export default function WordCreateForm(props) {
               pronunciation,
               definition,
               audio,
+              waveformData,
               definitionAudio,
+              definitionWaveformData,
               rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.owner ?? value;
@@ -394,8 +516,19 @@ export default function WordCreateForm(props) {
               pronunciation,
               definition,
               audio,
+              waveformData,
               definitionAudio,
+              definitionWaveformData,
               rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.identityId ?? value;
@@ -425,8 +558,19 @@ export default function WordCreateForm(props) {
               pronunciation: value,
               definition,
               audio,
+              waveformData,
               definitionAudio,
+              definitionWaveformData,
               rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.pronunciation ?? value;
@@ -456,8 +600,19 @@ export default function WordCreateForm(props) {
               pronunciation,
               definition: value,
               audio,
+              waveformData,
               definitionAudio,
+              definitionWaveformData,
               rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.definition ?? value;
@@ -483,8 +638,19 @@ export default function WordCreateForm(props) {
               pronunciation,
               definition,
               audio: values,
+              waveformData,
               definitionAudio,
+              definitionWaveformData,
               rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             values = result?.audio ?? values;
@@ -524,6 +690,47 @@ export default function WordCreateForm(props) {
           {...getOverrideProps(overrides, "audio")}
         ></TextField>
       </ArrayField>
+      <TextAreaField
+        label="Waveform data"
+        isRequired={false}
+        isReadOnly={false}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              phrase,
+              owner,
+              identityId,
+              pronunciation,
+              definition,
+              audio,
+              waveformData: value,
+              definitionAudio,
+              definitionWaveformData,
+              rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.waveformData ?? value;
+          }
+          if (errors.waveformData?.hasError) {
+            runValidationTasks("waveformData", value);
+          }
+          setWaveformData(value);
+        }}
+        onBlur={() => runValidationTasks("waveformData", waveformData)}
+        errorMessage={errors.waveformData?.errorMessage}
+        hasError={errors.waveformData?.hasError}
+        {...getOverrideProps(overrides, "waveformData")}
+      ></TextAreaField>
       <ArrayField
         onChange={async (items) => {
           let values = items;
@@ -535,8 +742,19 @@ export default function WordCreateForm(props) {
               pronunciation,
               definition,
               audio,
+              waveformData,
               definitionAudio: values,
+              definitionWaveformData,
               rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             values = result?.definitionAudio ?? values;
@@ -581,6 +799,49 @@ export default function WordCreateForm(props) {
           {...getOverrideProps(overrides, "definitionAudio")}
         ></TextField>
       </ArrayField>
+      <TextAreaField
+        label="Definition waveform data"
+        isRequired={false}
+        isReadOnly={false}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              phrase,
+              owner,
+              identityId,
+              pronunciation,
+              definition,
+              audio,
+              waveformData,
+              definitionAudio,
+              definitionWaveformData: value,
+              rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.definitionWaveformData ?? value;
+          }
+          if (errors.definitionWaveformData?.hasError) {
+            runValidationTasks("definitionWaveformData", value);
+          }
+          setDefinitionWaveformData(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("definitionWaveformData", definitionWaveformData)
+        }
+        errorMessage={errors.definitionWaveformData?.errorMessage}
+        hasError={errors.definitionWaveformData?.hasError}
+        {...getOverrideProps(overrides, "definitionWaveformData")}
+      ></TextAreaField>
       <TextField
         label="Ruby tags"
         isRequired={false}
@@ -596,8 +857,19 @@ export default function WordCreateForm(props) {
               pronunciation,
               definition,
               audio,
+              waveformData,
               definitionAudio,
+              definitionWaveformData,
               rubyTags: value,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.rubyTags ?? value;
@@ -611,6 +883,433 @@ export default function WordCreateForm(props) {
         errorMessage={errors.rubyTags?.errorMessage}
         hasError={errors.rubyTags?.hasError}
         {...getOverrideProps(overrides, "rubyTags")}
+      ></TextField>
+      <TextField
+        label="Imported at"
+        isRequired={false}
+        isReadOnly={false}
+        type="datetime-local"
+        value={importedAt && convertToLocal(new Date(importedAt))}
+        onChange={(e) => {
+          let value =
+            e.target.value === "" ? "" : new Date(e.target.value).toISOString();
+          if (onChange) {
+            const modelFields = {
+              phrase,
+              owner,
+              identityId,
+              pronunciation,
+              definition,
+              audio,
+              waveformData,
+              definitionAudio,
+              definitionWaveformData,
+              rubyTags,
+              importedAt: value,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.importedAt ?? value;
+          }
+          if (errors.importedAt?.hasError) {
+            runValidationTasks("importedAt", value);
+          }
+          setImportedAt(value);
+        }}
+        onBlur={() => runValidationTasks("importedAt", importedAt)}
+        errorMessage={errors.importedAt?.errorMessage}
+        hasError={errors.importedAt?.hasError}
+        {...getOverrideProps(overrides, "importedAt")}
+      ></TextField>
+      <ArrayField
+        onChange={async (items) => {
+          let values = items;
+          if (onChange) {
+            const modelFields = {
+              phrase,
+              owner,
+              identityId,
+              pronunciation,
+              definition,
+              audio,
+              waveformData,
+              definitionAudio,
+              definitionWaveformData,
+              rubyTags,
+              importedAt,
+              embedding: values,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            values = result?.embedding ?? values;
+          }
+          setEmbedding(values);
+          setCurrentEmbeddingValue("");
+        }}
+        currentFieldValue={currentEmbeddingValue}
+        label={"Embedding"}
+        items={embedding}
+        hasError={errors?.embedding?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks("embedding", currentEmbeddingValue)
+        }
+        errorMessage={errors?.embedding?.errorMessage}
+        setFieldValue={setCurrentEmbeddingValue}
+        inputFieldRef={embeddingRef}
+        defaultFieldValue={""}
+      >
+        <TextField
+          label="Embedding"
+          isRequired={false}
+          isReadOnly={false}
+          type="number"
+          step="any"
+          value={currentEmbeddingValue}
+          onChange={(e) => {
+            let value = isNaN(parseFloat(e.target.value))
+              ? e.target.value
+              : parseFloat(e.target.value);
+            if (errors.embedding?.hasError) {
+              runValidationTasks("embedding", value);
+            }
+            setCurrentEmbeddingValue(value);
+          }}
+          onBlur={() => runValidationTasks("embedding", currentEmbeddingValue)}
+          errorMessage={errors.embedding?.errorMessage}
+          hasError={errors.embedding?.hasError}
+          ref={embeddingRef}
+          labelHidden={true}
+          {...getOverrideProps(overrides, "embedding")}
+        ></TextField>
+      </ArrayField>
+      <TextField
+        label="Embedding model"
+        isRequired={false}
+        isReadOnly={false}
+        value={embeddingModel}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              phrase,
+              owner,
+              identityId,
+              pronunciation,
+              definition,
+              audio,
+              waveformData,
+              definitionAudio,
+              definitionWaveformData,
+              rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel: value,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingModel ?? value;
+          }
+          if (errors.embeddingModel?.hasError) {
+            runValidationTasks("embeddingModel", value);
+          }
+          setEmbeddingModel(value);
+        }}
+        onBlur={() => runValidationTasks("embeddingModel", embeddingModel)}
+        errorMessage={errors.embeddingModel?.errorMessage}
+        hasError={errors.embeddingModel?.hasError}
+        {...getOverrideProps(overrides, "embeddingModel")}
+      ></TextField>
+      <TextField
+        label="Embedding dimensions"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={embeddingDimensions}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              phrase,
+              owner,
+              identityId,
+              pronunciation,
+              definition,
+              audio,
+              waveformData,
+              definitionAudio,
+              definitionWaveformData,
+              rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions: value,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingDimensions ?? value;
+          }
+          if (errors.embeddingDimensions?.hasError) {
+            runValidationTasks("embeddingDimensions", value);
+          }
+          setEmbeddingDimensions(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("embeddingDimensions", embeddingDimensions)
+        }
+        errorMessage={errors.embeddingDimensions?.errorMessage}
+        hasError={errors.embeddingDimensions?.hasError}
+        {...getOverrideProps(overrides, "embeddingDimensions")}
+      ></TextField>
+      <TextField
+        label="Embedding version"
+        isRequired={false}
+        isReadOnly={false}
+        type="datetime-local"
+        value={
+          embeddingVersion &&
+          convertToLocal(convertTimeStampToDate(embeddingVersion))
+        }
+        onChange={(e) => {
+          let value =
+            e.target.value === "" ? "" : Number(new Date(e.target.value));
+          if (onChange) {
+            const modelFields = {
+              phrase,
+              owner,
+              identityId,
+              pronunciation,
+              definition,
+              audio,
+              waveformData,
+              definitionAudio,
+              definitionWaveformData,
+              rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion: value,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingVersion ?? value;
+          }
+          if (errors.embeddingVersion?.hasError) {
+            runValidationTasks("embeddingVersion", value);
+          }
+          setEmbeddingVersion(value);
+        }}
+        onBlur={() => runValidationTasks("embeddingVersion", embeddingVersion)}
+        errorMessage={errors.embeddingVersion?.errorMessage}
+        hasError={errors.embeddingVersion?.hasError}
+        {...getOverrideProps(overrides, "embeddingVersion")}
+      ></TextField>
+      <TextField
+        label="Embedding word count"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={embeddingWordCount}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              phrase,
+              owner,
+              identityId,
+              pronunciation,
+              definition,
+              audio,
+              waveformData,
+              definitionAudio,
+              definitionWaveformData,
+              rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount: value,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingWordCount ?? value;
+          }
+          if (errors.embeddingWordCount?.hasError) {
+            runValidationTasks("embeddingWordCount", value);
+          }
+          setEmbeddingWordCount(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("embeddingWordCount", embeddingWordCount)
+        }
+        errorMessage={errors.embeddingWordCount?.errorMessage}
+        hasError={errors.embeddingWordCount?.hasError}
+        {...getOverrideProps(overrides, "embeddingWordCount")}
+      ></TextField>
+      <TextField
+        label="Moderation status"
+        isRequired={false}
+        isReadOnly={false}
+        value={moderationStatus}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              phrase,
+              owner,
+              identityId,
+              pronunciation,
+              definition,
+              audio,
+              waveformData,
+              definitionAudio,
+              definitionWaveformData,
+              rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus: value,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.moderationStatus ?? value;
+          }
+          if (errors.moderationStatus?.hasError) {
+            runValidationTasks("moderationStatus", value);
+          }
+          setModerationStatus(value);
+        }}
+        onBlur={() => runValidationTasks("moderationStatus", moderationStatus)}
+        errorMessage={errors.moderationStatus?.errorMessage}
+        hasError={errors.moderationStatus?.hasError}
+        {...getOverrideProps(overrides, "moderationStatus")}
+      ></TextField>
+      <TextAreaField
+        label="Moderation flags"
+        isRequired={false}
+        isReadOnly={false}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              phrase,
+              owner,
+              identityId,
+              pronunciation,
+              definition,
+              audio,
+              waveformData,
+              definitionAudio,
+              definitionWaveformData,
+              rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags: value,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.moderationFlags ?? value;
+          }
+          if (errors.moderationFlags?.hasError) {
+            runValidationTasks("moderationFlags", value);
+          }
+          setModerationFlags(value);
+        }}
+        onBlur={() => runValidationTasks("moderationFlags", moderationFlags)}
+        errorMessage={errors.moderationFlags?.errorMessage}
+        hasError={errors.moderationFlags?.hasError}
+        {...getOverrideProps(overrides, "moderationFlags")}
+      ></TextAreaField>
+      <TextField
+        label="Moderation checked at"
+        isRequired={false}
+        isReadOnly={false}
+        type="datetime-local"
+        value={
+          moderationCheckedAt && convertToLocal(new Date(moderationCheckedAt))
+        }
+        onChange={(e) => {
+          let value =
+            e.target.value === "" ? "" : new Date(e.target.value).toISOString();
+          if (onChange) {
+            const modelFields = {
+              phrase,
+              owner,
+              identityId,
+              pronunciation,
+              definition,
+              audio,
+              waveformData,
+              definitionAudio,
+              definitionWaveformData,
+              rubyTags,
+              importedAt,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.moderationCheckedAt ?? value;
+          }
+          if (errors.moderationCheckedAt?.hasError) {
+            runValidationTasks("moderationCheckedAt", value);
+          }
+          setModerationCheckedAt(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("moderationCheckedAt", moderationCheckedAt)
+        }
+        errorMessage={errors.moderationCheckedAt?.errorMessage}
+        hasError={errors.moderationCheckedAt?.hasError}
+        {...getOverrideProps(overrides, "moderationCheckedAt")}
       ></TextField>
       <Flex
         justifyContent="space-between"

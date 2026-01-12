@@ -7,15 +7,176 @@
 /* eslint-disable */
 import * as React from "react";
 import {
+  Badge,
   Button,
+  Divider,
   Flex,
   Grid,
+  Icon,
+  ScrollView,
   SelectField,
+  Text,
   TextField,
+  useTheme,
 } from "@aws-amplify/ui-react";
 import { Section } from "../models";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { DataStore } from "aws-amplify/datastore";
+function ArrayField({
+  items = [],
+  onChange,
+  label,
+  inputFieldRef,
+  children,
+  hasError,
+  setFieldValue,
+  currentFieldValue,
+  defaultFieldValue,
+  lengthLimit,
+  getBadgeText,
+  runValidationTasks,
+  errorMessage,
+}) {
+  const labelElement = <Text>{label}</Text>;
+  const {
+    tokens: {
+      components: {
+        fieldmessages: { error: errorStyles },
+      },
+    },
+  } = useTheme();
+  const [selectedBadgeIndex, setSelectedBadgeIndex] = React.useState();
+  const [isEditing, setIsEditing] = React.useState();
+  React.useEffect(() => {
+    if (isEditing) {
+      inputFieldRef?.current?.focus();
+    }
+  }, [isEditing]);
+  const removeItem = async (removeIndex) => {
+    const newItems = items.filter((value, index) => index !== removeIndex);
+    await onChange(newItems);
+    setSelectedBadgeIndex(undefined);
+  };
+  const addItem = async () => {
+    const { hasError } = runValidationTasks();
+    if (
+      currentFieldValue !== undefined &&
+      currentFieldValue !== null &&
+      currentFieldValue !== "" &&
+      !hasError
+    ) {
+      const newItems = [...items];
+      if (selectedBadgeIndex !== undefined) {
+        newItems[selectedBadgeIndex] = currentFieldValue;
+        setSelectedBadgeIndex(undefined);
+      } else {
+        newItems.push(currentFieldValue);
+      }
+      await onChange(newItems);
+      setIsEditing(false);
+    }
+  };
+  const arraySection = (
+    <React.Fragment>
+      {!!items?.length && (
+        <ScrollView height="inherit" width="inherit" maxHeight={"7rem"}>
+          {items.map((value, index) => {
+            return (
+              <Badge
+                key={index}
+                style={{
+                  cursor: "pointer",
+                  alignItems: "center",
+                  marginRight: 3,
+                  marginTop: 3,
+                  backgroundColor:
+                    index === selectedBadgeIndex ? "#B8CEF9" : "",
+                }}
+                onClick={() => {
+                  setSelectedBadgeIndex(index);
+                  setFieldValue(items[index]);
+                  setIsEditing(true);
+                }}
+              >
+                {getBadgeText ? getBadgeText(value) : value.toString()}
+                <Icon
+                  style={{
+                    cursor: "pointer",
+                    paddingLeft: 3,
+                    width: 20,
+                    height: 20,
+                  }}
+                  viewBox={{ width: 20, height: 20 }}
+                  paths={[
+                    {
+                      d: "M10 10l5.09-5.09L10 10l5.09 5.09L10 10zm0 0L4.91 4.91 10 10l-5.09 5.09L10 10z",
+                      stroke: "black",
+                    },
+                  ]}
+                  ariaLabel="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    removeItem(index);
+                  }}
+                />
+              </Badge>
+            );
+          })}
+        </ScrollView>
+      )}
+      <Divider orientation="horizontal" marginTop={5} />
+    </React.Fragment>
+  );
+  if (lengthLimit !== undefined && items.length >= lengthLimit && !isEditing) {
+    return (
+      <React.Fragment>
+        {labelElement}
+        {arraySection}
+      </React.Fragment>
+    );
+  }
+  return (
+    <React.Fragment>
+      {labelElement}
+      {isEditing && children}
+      {!isEditing ? (
+        <>
+          <Button
+            onClick={() => {
+              setIsEditing(true);
+            }}
+          >
+            Add item
+          </Button>
+          {errorMessage && hasError && (
+            <Text color={errorStyles.color} fontSize={errorStyles.fontSize}>
+              {errorMessage}
+            </Text>
+          )}
+        </>
+      ) : (
+        <Flex justifyContent="flex-end">
+          {(currentFieldValue || isEditing) && (
+            <Button
+              children="Cancel"
+              type="button"
+              size="small"
+              onClick={() => {
+                setFieldValue(defaultFieldValue);
+                setIsEditing(false);
+                setSelectedBadgeIndex(undefined);
+              }}
+            ></Button>
+          )}
+          <Button size="small" variation="link" onClick={addItem}>
+            {selectedBadgeIndex !== undefined ? "Save" : "Add"}
+          </Button>
+        </Flex>
+      )}
+      {arraySection}
+    </React.Fragment>
+  );
+}
 export default function SectionCreateForm(props) {
   const {
     clearOnSuccess = true,
@@ -38,6 +199,11 @@ export default function SectionCreateForm(props) {
     identityId: "",
     thumbnail: "",
     backgroundColor: "",
+    embedding: [],
+    embeddingModel: "",
+    embeddingDimensions: "",
+    embeddingVersion: "",
+    embeddingWordCount: "",
   };
   const [name, setName] = React.useState(initialValues.name);
   const [owner, setOwner] = React.useState(initialValues.owner);
@@ -55,6 +221,19 @@ export default function SectionCreateForm(props) {
   const [backgroundColor, setBackgroundColor] = React.useState(
     initialValues.backgroundColor
   );
+  const [embedding, setEmbedding] = React.useState(initialValues.embedding);
+  const [embeddingModel, setEmbeddingModel] = React.useState(
+    initialValues.embeddingModel
+  );
+  const [embeddingDimensions, setEmbeddingDimensions] = React.useState(
+    initialValues.embeddingDimensions
+  );
+  const [embeddingVersion, setEmbeddingVersion] = React.useState(
+    initialValues.embeddingVersion
+  );
+  const [embeddingWordCount, setEmbeddingWordCount] = React.useState(
+    initialValues.embeddingWordCount
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setName(initialValues.name);
@@ -67,8 +246,16 @@ export default function SectionCreateForm(props) {
     setIdentityId(initialValues.identityId);
     setThumbnail(initialValues.thumbnail);
     setBackgroundColor(initialValues.backgroundColor);
+    setEmbedding(initialValues.embedding);
+    setCurrentEmbeddingValue("");
+    setEmbeddingModel(initialValues.embeddingModel);
+    setEmbeddingDimensions(initialValues.embeddingDimensions);
+    setEmbeddingVersion(initialValues.embeddingVersion);
+    setEmbeddingWordCount(initialValues.embeddingWordCount);
     setErrors({});
   };
+  const [currentEmbeddingValue, setCurrentEmbeddingValue] = React.useState("");
+  const embeddingRef = React.createRef();
   const validations = {
     name: [],
     owner: [],
@@ -80,6 +267,11 @@ export default function SectionCreateForm(props) {
     identityId: [],
     thumbnail: [],
     backgroundColor: [],
+    embedding: [],
+    embeddingModel: [],
+    embeddingDimensions: [],
+    embeddingVersion: [],
+    embeddingWordCount: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -97,6 +289,29 @@ export default function SectionCreateForm(props) {
     }
     setErrors((errors) => ({ ...errors, [fieldName]: validationResponse }));
     return validationResponse;
+  };
+  const convertTimeStampToDate = (ts) => {
+    if (Math.abs(Date.now() - ts) < Math.abs(Date.now() - ts * 1000)) {
+      return new Date(ts);
+    }
+    return new Date(ts * 1000);
+  };
+  const convertToLocal = (date) => {
+    const df = new Intl.DateTimeFormat("default", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      calendar: "iso8601",
+      numberingSystem: "latn",
+      hourCycle: "h23",
+    });
+    const parts = df.formatToParts(date).reduce((acc, part) => {
+      acc[part.type] = part.value;
+      return acc;
+    }, {});
+    return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
   };
   return (
     <Grid
@@ -117,6 +332,11 @@ export default function SectionCreateForm(props) {
           identityId,
           thumbnail,
           backgroundColor,
+          embedding,
+          embeddingModel,
+          embeddingDimensions,
+          embeddingVersion,
+          embeddingWordCount,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -181,6 +401,11 @@ export default function SectionCreateForm(props) {
               identityId,
               thumbnail,
               backgroundColor,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -214,6 +439,11 @@ export default function SectionCreateForm(props) {
               identityId,
               thumbnail,
               backgroundColor,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
             };
             const result = onChange(modelFields);
             value = result?.owner ?? value;
@@ -247,6 +477,11 @@ export default function SectionCreateForm(props) {
               identityId,
               thumbnail,
               backgroundColor,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
             };
             const result = onChange(modelFields);
             value = result?.learner ?? value;
@@ -280,6 +515,11 @@ export default function SectionCreateForm(props) {
               identityId,
               thumbnail,
               backgroundColor,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
             };
             const result = onChange(modelFields);
             value = result?.description ?? value;
@@ -313,6 +553,11 @@ export default function SectionCreateForm(props) {
               identityId,
               thumbnail,
               backgroundColor,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
             };
             const result = onChange(modelFields);
             value = result?.status ?? value;
@@ -362,6 +607,11 @@ export default function SectionCreateForm(props) {
               identityId,
               thumbnail,
               backgroundColor,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
             };
             const result = onChange(modelFields);
             value = result?.code ?? value;
@@ -395,6 +645,11 @@ export default function SectionCreateForm(props) {
               identityId,
               thumbnail,
               backgroundColor,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
             };
             const result = onChange(modelFields);
             value = result?.featuredImage ?? value;
@@ -428,6 +683,11 @@ export default function SectionCreateForm(props) {
               identityId: value,
               thumbnail,
               backgroundColor,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
             };
             const result = onChange(modelFields);
             value = result?.identityId ?? value;
@@ -461,6 +721,11 @@ export default function SectionCreateForm(props) {
               identityId,
               thumbnail: value,
               backgroundColor,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
             };
             const result = onChange(modelFields);
             value = result?.thumbnail ?? value;
@@ -494,6 +759,11 @@ export default function SectionCreateForm(props) {
               identityId,
               thumbnail,
               backgroundColor: value,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
             };
             const result = onChange(modelFields);
             value = result?.backgroundColor ?? value;
@@ -507,6 +777,238 @@ export default function SectionCreateForm(props) {
         errorMessage={errors.backgroundColor?.errorMessage}
         hasError={errors.backgroundColor?.hasError}
         {...getOverrideProps(overrides, "backgroundColor")}
+      ></TextField>
+      <ArrayField
+        onChange={async (items) => {
+          let values = items;
+          if (onChange) {
+            const modelFields = {
+              name,
+              owner,
+              learner,
+              description,
+              status,
+              code,
+              featuredImage,
+              identityId,
+              thumbnail,
+              backgroundColor,
+              embedding: values,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+            };
+            const result = onChange(modelFields);
+            values = result?.embedding ?? values;
+          }
+          setEmbedding(values);
+          setCurrentEmbeddingValue("");
+        }}
+        currentFieldValue={currentEmbeddingValue}
+        label={"Embedding"}
+        items={embedding}
+        hasError={errors?.embedding?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks("embedding", currentEmbeddingValue)
+        }
+        errorMessage={errors?.embedding?.errorMessage}
+        setFieldValue={setCurrentEmbeddingValue}
+        inputFieldRef={embeddingRef}
+        defaultFieldValue={""}
+      >
+        <TextField
+          label="Embedding"
+          isRequired={false}
+          isReadOnly={false}
+          type="number"
+          step="any"
+          value={currentEmbeddingValue}
+          onChange={(e) => {
+            let value = isNaN(parseFloat(e.target.value))
+              ? e.target.value
+              : parseFloat(e.target.value);
+            if (errors.embedding?.hasError) {
+              runValidationTasks("embedding", value);
+            }
+            setCurrentEmbeddingValue(value);
+          }}
+          onBlur={() => runValidationTasks("embedding", currentEmbeddingValue)}
+          errorMessage={errors.embedding?.errorMessage}
+          hasError={errors.embedding?.hasError}
+          ref={embeddingRef}
+          labelHidden={true}
+          {...getOverrideProps(overrides, "embedding")}
+        ></TextField>
+      </ArrayField>
+      <TextField
+        label="Embedding model"
+        isRequired={false}
+        isReadOnly={false}
+        value={embeddingModel}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              name,
+              owner,
+              learner,
+              description,
+              status,
+              code,
+              featuredImage,
+              identityId,
+              thumbnail,
+              backgroundColor,
+              embedding,
+              embeddingModel: value,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingModel ?? value;
+          }
+          if (errors.embeddingModel?.hasError) {
+            runValidationTasks("embeddingModel", value);
+          }
+          setEmbeddingModel(value);
+        }}
+        onBlur={() => runValidationTasks("embeddingModel", embeddingModel)}
+        errorMessage={errors.embeddingModel?.errorMessage}
+        hasError={errors.embeddingModel?.hasError}
+        {...getOverrideProps(overrides, "embeddingModel")}
+      ></TextField>
+      <TextField
+        label="Embedding dimensions"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={embeddingDimensions}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              name,
+              owner,
+              learner,
+              description,
+              status,
+              code,
+              featuredImage,
+              identityId,
+              thumbnail,
+              backgroundColor,
+              embedding,
+              embeddingModel,
+              embeddingDimensions: value,
+              embeddingVersion,
+              embeddingWordCount,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingDimensions ?? value;
+          }
+          if (errors.embeddingDimensions?.hasError) {
+            runValidationTasks("embeddingDimensions", value);
+          }
+          setEmbeddingDimensions(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("embeddingDimensions", embeddingDimensions)
+        }
+        errorMessage={errors.embeddingDimensions?.errorMessage}
+        hasError={errors.embeddingDimensions?.hasError}
+        {...getOverrideProps(overrides, "embeddingDimensions")}
+      ></TextField>
+      <TextField
+        label="Embedding version"
+        isRequired={false}
+        isReadOnly={false}
+        type="datetime-local"
+        value={
+          embeddingVersion &&
+          convertToLocal(convertTimeStampToDate(embeddingVersion))
+        }
+        onChange={(e) => {
+          let value =
+            e.target.value === "" ? "" : Number(new Date(e.target.value));
+          if (onChange) {
+            const modelFields = {
+              name,
+              owner,
+              learner,
+              description,
+              status,
+              code,
+              featuredImage,
+              identityId,
+              thumbnail,
+              backgroundColor,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion: value,
+              embeddingWordCount,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingVersion ?? value;
+          }
+          if (errors.embeddingVersion?.hasError) {
+            runValidationTasks("embeddingVersion", value);
+          }
+          setEmbeddingVersion(value);
+        }}
+        onBlur={() => runValidationTasks("embeddingVersion", embeddingVersion)}
+        errorMessage={errors.embeddingVersion?.errorMessage}
+        hasError={errors.embeddingVersion?.hasError}
+        {...getOverrideProps(overrides, "embeddingVersion")}
+      ></TextField>
+      <TextField
+        label="Embedding word count"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={embeddingWordCount}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              name,
+              owner,
+              learner,
+              description,
+              status,
+              code,
+              featuredImage,
+              identityId,
+              thumbnail,
+              backgroundColor,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingWordCount ?? value;
+          }
+          if (errors.embeddingWordCount?.hasError) {
+            runValidationTasks("embeddingWordCount", value);
+          }
+          setEmbeddingWordCount(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("embeddingWordCount", embeddingWordCount)
+        }
+        errorMessage={errors.embeddingWordCount?.errorMessage}
+        hasError={errors.embeddingWordCount?.hasError}
+        {...getOverrideProps(overrides, "embeddingWordCount")}
       ></TextField>
       <Flex
         justifyContent="space-between"

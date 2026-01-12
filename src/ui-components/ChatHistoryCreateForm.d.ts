@@ -5,7 +5,7 @@
  **************************************************************************/
 
 import * as React from "react";
-import { GridProps, TextFieldProps } from "@aws-amplify/ui-react";
+import { GridProps, SwitchFieldProps, TextAreaFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
 } | null;
@@ -27,6 +27,8 @@ export declare type ChatHistoryCreateFormInputValues = {
     model?: string;
     inputTokens?: string;
     outputTokens?: string;
+    draft?: string;
+    archived?: boolean;
 };
 export declare type ChatHistoryCreateFormValidationValues = {
     owner?: ValidationFunction<string>;
@@ -34,15 +36,19 @@ export declare type ChatHistoryCreateFormValidationValues = {
     model?: ValidationFunction<string>;
     inputTokens?: ValidationFunction<string>;
     outputTokens?: ValidationFunction<string>;
+    draft?: ValidationFunction<string>;
+    archived?: ValidationFunction<boolean>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type ChatHistoryCreateFormOverridesProps = {
     ChatHistoryCreateFormGrid?: PrimitiveOverrideProps<GridProps>;
     owner?: PrimitiveOverrideProps<TextFieldProps>;
-    messages?: PrimitiveOverrideProps<TextFieldProps>;
+    messages?: PrimitiveOverrideProps<TextAreaFieldProps>;
     model?: PrimitiveOverrideProps<TextFieldProps>;
     inputTokens?: PrimitiveOverrideProps<TextFieldProps>;
     outputTokens?: PrimitiveOverrideProps<TextFieldProps>;
+    draft?: PrimitiveOverrideProps<TextFieldProps>;
+    archived?: PrimitiveOverrideProps<SwitchFieldProps>;
 } & EscapeHatchProps;
 export declare type ChatHistoryCreateFormProps = React.PropsWithChildren<{
     overrides?: ChatHistoryCreateFormOverridesProps | undefined | null;

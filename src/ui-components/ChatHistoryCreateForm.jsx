@@ -6,7 +6,14 @@
 
 /* eslint-disable */
 import * as React from "react";
-import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
+import {
+  Button,
+  Flex,
+  Grid,
+  SwitchField,
+  TextAreaField,
+  TextField,
+} from "@aws-amplify/ui-react";
 import { ChatHistory } from "../models";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { DataStore } from "aws-amplify/datastore";
@@ -27,6 +34,8 @@ export default function ChatHistoryCreateForm(props) {
     model: "",
     inputTokens: "",
     outputTokens: "",
+    draft: "",
+    archived: false,
   };
   const [owner, setOwner] = React.useState(initialValues.owner);
   const [messages, setMessages] = React.useState(initialValues.messages);
@@ -37,6 +46,8 @@ export default function ChatHistoryCreateForm(props) {
   const [outputTokens, setOutputTokens] = React.useState(
     initialValues.outputTokens
   );
+  const [draft, setDraft] = React.useState(initialValues.draft);
+  const [archived, setArchived] = React.useState(initialValues.archived);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setOwner(initialValues.owner);
@@ -44,14 +55,18 @@ export default function ChatHistoryCreateForm(props) {
     setModel(initialValues.model);
     setInputTokens(initialValues.inputTokens);
     setOutputTokens(initialValues.outputTokens);
+    setDraft(initialValues.draft);
+    setArchived(initialValues.archived);
     setErrors({});
   };
   const validations = {
     owner: [],
-    messages: [],
+    messages: [{ type: "JSON" }],
     model: [],
     inputTokens: [],
     outputTokens: [],
+    draft: [],
+    archived: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -84,6 +99,8 @@ export default function ChatHistoryCreateForm(props) {
           model,
           inputTokens,
           outputTokens,
+          draft,
+          archived,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -143,6 +160,8 @@ export default function ChatHistoryCreateForm(props) {
               model,
               inputTokens,
               outputTokens,
+              draft,
+              archived,
             };
             const result = onChange(modelFields);
             value = result?.owner ?? value;
@@ -157,11 +176,10 @@ export default function ChatHistoryCreateForm(props) {
         hasError={errors.owner?.hasError}
         {...getOverrideProps(overrides, "owner")}
       ></TextField>
-      <TextField
+      <TextAreaField
         label="Messages"
         isRequired={false}
         isReadOnly={false}
-        value={messages}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
@@ -171,6 +189,8 @@ export default function ChatHistoryCreateForm(props) {
               model,
               inputTokens,
               outputTokens,
+              draft,
+              archived,
             };
             const result = onChange(modelFields);
             value = result?.messages ?? value;
@@ -184,7 +204,7 @@ export default function ChatHistoryCreateForm(props) {
         errorMessage={errors.messages?.errorMessage}
         hasError={errors.messages?.hasError}
         {...getOverrideProps(overrides, "messages")}
-      ></TextField>
+      ></TextAreaField>
       <TextField
         label="Model"
         isRequired={false}
@@ -199,6 +219,8 @@ export default function ChatHistoryCreateForm(props) {
               model: value,
               inputTokens,
               outputTokens,
+              draft,
+              archived,
             };
             const result = onChange(modelFields);
             value = result?.model ?? value;
@@ -227,6 +249,8 @@ export default function ChatHistoryCreateForm(props) {
               model,
               inputTokens: value,
               outputTokens,
+              draft,
+              archived,
             };
             const result = onChange(modelFields);
             value = result?.inputTokens ?? value;
@@ -255,6 +279,8 @@ export default function ChatHistoryCreateForm(props) {
               model,
               inputTokens,
               outputTokens: value,
+              draft,
+              archived,
             };
             const result = onChange(modelFields);
             value = result?.outputTokens ?? value;
@@ -269,6 +295,66 @@ export default function ChatHistoryCreateForm(props) {
         hasError={errors.outputTokens?.hasError}
         {...getOverrideProps(overrides, "outputTokens")}
       ></TextField>
+      <TextField
+        label="Draft"
+        isRequired={false}
+        isReadOnly={false}
+        value={draft}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              owner,
+              messages,
+              model,
+              inputTokens,
+              outputTokens,
+              draft: value,
+              archived,
+            };
+            const result = onChange(modelFields);
+            value = result?.draft ?? value;
+          }
+          if (errors.draft?.hasError) {
+            runValidationTasks("draft", value);
+          }
+          setDraft(value);
+        }}
+        onBlur={() => runValidationTasks("draft", draft)}
+        errorMessage={errors.draft?.errorMessage}
+        hasError={errors.draft?.hasError}
+        {...getOverrideProps(overrides, "draft")}
+      ></TextField>
+      <SwitchField
+        label="Archived"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={archived}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              owner,
+              messages,
+              model,
+              inputTokens,
+              outputTokens,
+              draft,
+              archived: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.archived ?? value;
+          }
+          if (errors.archived?.hasError) {
+            runValidationTasks("archived", value);
+          }
+          setArchived(value);
+        }}
+        onBlur={() => runValidationTasks("archived", archived)}
+        errorMessage={errors.archived?.errorMessage}
+        hasError={errors.archived?.hasError}
+        {...getOverrideProps(overrides, "archived")}
+      ></SwitchField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

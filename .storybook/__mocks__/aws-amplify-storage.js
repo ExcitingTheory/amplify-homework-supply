@@ -101,6 +101,24 @@ export const uploadData = ({ key, data, options = {} }) => {
   };
 };
 
+export const downloadData = async ({ key, options = {} }) => {
+  console.log('[Mock Storage] downloadData called with:', key);
+  
+  // Return a mock blob for downloads
+  const mockContent = `Mock file content for ${key}`;
+  const blob = new Blob([mockContent], { type: 'text/plain' });
+  
+  return {
+    result: Promise.resolve({
+      body: blob,
+      contentType: 'text/plain',
+      contentLength: blob.size,
+      eTag: 'mock-etag',
+      lastModified: new Date(),
+    }),
+  };
+};
+
 export const remove = async () => ({});
 
 export const list = async () => ({ items: [] });

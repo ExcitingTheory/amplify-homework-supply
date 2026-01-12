@@ -40,6 +40,8 @@ export default function DocumentUpdateForm(props) {
     fileSize: "",
     mimeType: "",
     uploadedAt: "",
+    resumeState: "",
+    embeddingsS3Key: "",
     metadata: "",
   };
   const [filename, setFilename] = React.useState(initialValues.filename);
@@ -55,6 +57,12 @@ export default function DocumentUpdateForm(props) {
   const [fileSize, setFileSize] = React.useState(initialValues.fileSize);
   const [mimeType, setMimeType] = React.useState(initialValues.mimeType);
   const [uploadedAt, setUploadedAt] = React.useState(initialValues.uploadedAt);
+  const [resumeState, setResumeState] = React.useState(
+    initialValues.resumeState
+  );
+  const [embeddingsS3Key, setEmbeddingsS3Key] = React.useState(
+    initialValues.embeddingsS3Key
+  );
   const [metadata, setMetadata] = React.useState(initialValues.metadata);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
@@ -72,6 +80,13 @@ export default function DocumentUpdateForm(props) {
     setFileSize(cleanValues.fileSize);
     setMimeType(cleanValues.mimeType);
     setUploadedAt(cleanValues.uploadedAt);
+    setResumeState(
+      typeof cleanValues.resumeState === "string" ||
+        cleanValues.resumeState === null
+        ? cleanValues.resumeState
+        : JSON.stringify(cleanValues.resumeState)
+    );
+    setEmbeddingsS3Key(cleanValues.embeddingsS3Key);
     setMetadata(
       typeof cleanValues.metadata === "string" || cleanValues.metadata === null
         ? cleanValues.metadata
@@ -102,6 +117,8 @@ export default function DocumentUpdateForm(props) {
     fileSize: [],
     mimeType: [],
     uploadedAt: [],
+    resumeState: [{ type: "JSON" }],
+    embeddingsS3Key: [],
     metadata: [{ type: "JSON" }],
   };
   const runValidationTasks = async (
@@ -158,6 +175,8 @@ export default function DocumentUpdateForm(props) {
           fileSize,
           mimeType,
           uploadedAt,
+          resumeState,
+          embeddingsS3Key,
           metadata,
         };
         const validationResponses = await Promise.all(
@@ -225,6 +244,8 @@ export default function DocumentUpdateForm(props) {
               fileSize,
               mimeType,
               uploadedAt,
+              resumeState,
+              embeddingsS3Key,
               metadata,
             };
             const result = onChange(modelFields);
@@ -260,6 +281,8 @@ export default function DocumentUpdateForm(props) {
               fileSize,
               mimeType,
               uploadedAt,
+              resumeState,
+              embeddingsS3Key,
               metadata,
             };
             const result = onChange(modelFields);
@@ -295,6 +318,8 @@ export default function DocumentUpdateForm(props) {
               fileSize,
               mimeType,
               uploadedAt,
+              resumeState,
+              embeddingsS3Key,
               metadata,
             };
             const result = onChange(modelFields);
@@ -330,6 +355,8 @@ export default function DocumentUpdateForm(props) {
               fileSize,
               mimeType,
               uploadedAt,
+              resumeState,
+              embeddingsS3Key,
               metadata,
             };
             const result = onChange(modelFields);
@@ -365,6 +392,8 @@ export default function DocumentUpdateForm(props) {
               fileSize,
               mimeType,
               uploadedAt,
+              resumeState,
+              embeddingsS3Key,
               metadata,
             };
             const result = onChange(modelFields);
@@ -400,6 +429,8 @@ export default function DocumentUpdateForm(props) {
               fileSize,
               mimeType,
               uploadedAt,
+              resumeState,
+              embeddingsS3Key,
               metadata,
             };
             const result = onChange(modelFields);
@@ -435,6 +466,8 @@ export default function DocumentUpdateForm(props) {
               fileSize,
               mimeType,
               uploadedAt,
+              resumeState,
+              embeddingsS3Key,
               metadata,
             };
             const result = onChange(modelFields);
@@ -474,6 +507,8 @@ export default function DocumentUpdateForm(props) {
               fileSize,
               mimeType,
               uploadedAt,
+              resumeState,
+              embeddingsS3Key,
               metadata,
             };
             const result = onChange(modelFields);
@@ -513,6 +548,8 @@ export default function DocumentUpdateForm(props) {
               fileSize: value,
               mimeType,
               uploadedAt,
+              resumeState,
+              embeddingsS3Key,
               metadata,
             };
             const result = onChange(modelFields);
@@ -548,6 +585,8 @@ export default function DocumentUpdateForm(props) {
               fileSize,
               mimeType: value,
               uploadedAt,
+              resumeState,
+              embeddingsS3Key,
               metadata,
             };
             const result = onChange(modelFields);
@@ -585,6 +624,8 @@ export default function DocumentUpdateForm(props) {
               fileSize,
               mimeType,
               uploadedAt: value,
+              resumeState,
+              embeddingsS3Key,
               metadata,
             };
             const result = onChange(modelFields);
@@ -599,6 +640,80 @@ export default function DocumentUpdateForm(props) {
         errorMessage={errors.uploadedAt?.errorMessage}
         hasError={errors.uploadedAt?.hasError}
         {...getOverrideProps(overrides, "uploadedAt")}
+      ></TextField>
+      <TextAreaField
+        label="Resume state"
+        isRequired={false}
+        isReadOnly={false}
+        value={resumeState}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              filename,
+              s3Key,
+              status,
+              owner,
+              identityId,
+              learner,
+              extractedText,
+              pageCount,
+              fileSize,
+              mimeType,
+              uploadedAt,
+              resumeState: value,
+              embeddingsS3Key,
+              metadata,
+            };
+            const result = onChange(modelFields);
+            value = result?.resumeState ?? value;
+          }
+          if (errors.resumeState?.hasError) {
+            runValidationTasks("resumeState", value);
+          }
+          setResumeState(value);
+        }}
+        onBlur={() => runValidationTasks("resumeState", resumeState)}
+        errorMessage={errors.resumeState?.errorMessage}
+        hasError={errors.resumeState?.hasError}
+        {...getOverrideProps(overrides, "resumeState")}
+      ></TextAreaField>
+      <TextField
+        label="Embeddings s3 key"
+        isRequired={false}
+        isReadOnly={false}
+        value={embeddingsS3Key}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              filename,
+              s3Key,
+              status,
+              owner,
+              identityId,
+              learner,
+              extractedText,
+              pageCount,
+              fileSize,
+              mimeType,
+              uploadedAt,
+              resumeState,
+              embeddingsS3Key: value,
+              metadata,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingsS3Key ?? value;
+          }
+          if (errors.embeddingsS3Key?.hasError) {
+            runValidationTasks("embeddingsS3Key", value);
+          }
+          setEmbeddingsS3Key(value);
+        }}
+        onBlur={() => runValidationTasks("embeddingsS3Key", embeddingsS3Key)}
+        errorMessage={errors.embeddingsS3Key?.errorMessage}
+        hasError={errors.embeddingsS3Key?.hasError}
+        {...getOverrideProps(overrides, "embeddingsS3Key")}
       ></TextField>
       <TextAreaField
         label="Metadata"
@@ -620,6 +735,8 @@ export default function DocumentUpdateForm(props) {
               fileSize,
               mimeType,
               uploadedAt,
+              resumeState,
+              embeddingsS3Key,
               metadata: value,
             };
             const result = onChange(modelFields);

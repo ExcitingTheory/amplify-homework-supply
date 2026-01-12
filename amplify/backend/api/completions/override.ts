@@ -1,7 +1,13 @@
 // This file is used to override the REST API resources configuration
-import { AmplifyApiRestResourceStackTemplate, AmplifyProjectInfo } from '@aws-amplify/cli-extensibility-helper';
+import {
+  AmplifyApiRestResourceStackTemplate,
+  // AmplifyProjectInfo 
+} from '@aws-amplify/cli-extensibility-helper';
 
-export function override(resources: AmplifyApiRestResourceStackTemplate, amplifyProjectInfo: AmplifyProjectInfo) {
+export function override(
+  resources: AmplifyApiRestResourceStackTemplate
+  // , amplifyProjectInfo: AmplifyProjectInfo
+  ) {
   // Enable Lambda response streaming for /chat endpoint
   resources.restApi.body.paths['/chat']['x-amazon-apigateway-any-method']['x-amazon-apigateway-integration'].type = 'AWS_PROXY';
   resources.restApi.body.paths['/chat']['x-amazon-apigateway-any-method']['x-amazon-apigateway-integration'].uri = {

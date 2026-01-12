@@ -1,7 +1,6 @@
 import * as React from 'react';
 // import Paper from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -14,6 +13,8 @@ import {
   fetchAuthSession
 } from 'aws-amplify/auth';
 
+import { DataStore } from 'aws-amplify/datastore';
+
 import FormControl from '@mui/material/FormControl';
 import MainToolbar from '../src/components/MainToolbar'
 
@@ -21,7 +22,7 @@ import MyAuth from '../src/components/authenticator';
 import Snackbar from '@mui/material/Snackbar';
 
 import Button from '@mui/material/Button';
-import { CircularProgress, Modal } from '@mui/material';
+import { CircularProgress, Modal, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import { Label } from '@mui/icons-material';
 
 function Profile() {
@@ -43,7 +44,7 @@ function Profile() {
   const [newPassword, setNewPassword] = React.useState('')
   const [confirmNewPassword, setConfirmNewPassword] = React.useState('')
   const [email, setEmail] = React.useState('')
-  const [name, setName] = React.useState(user)
+  const [name, setName] = React.useState('')
   const [username, setUsername] = React.useState('')
   const [language, setLanguage] = React.useState('')
   const [isWorking, setIsWorking] = React.useState(false)
@@ -52,6 +53,7 @@ function Profile() {
   const [identityId, setIdentityId] = React.useState('')
 
   const [successMessage, setSuccessMessage] = React.useState('')
+  const [clearDataStoreDialogOpen, setClearDataStoreDialogOpen] = React.useState(false)
 
 
   const updateEmailConfirmation = async (event) => {
@@ -148,6 +150,21 @@ function Profile() {
     setConfirmNewPassword('')
   }
 
+  const handleClearDataStore = async () => {
+    setIsWorking(true)
+    setClearDataStoreDialogOpen(false)
+    
+    try {
+      await DataStore.clear()
+      console.log('Local DataStore cache cleared.')
+      setSuccessMessage('Local cache cleared successfully. Please refresh the page.')
+    } catch (error) {
+      alert('Error clearing DataStore: ' + error.message)
+    }
+    
+    setIsWorking(false)
+  }
+
   React.useEffect(() => {
     fetchUser()
     async function fetchUser() {
@@ -158,14 +175,6 @@ function Profile() {
       const {
         identityId,
       } = await fetchAuthSession();
-        
-
-
-      console.log('userAttributes', userAttributes)
-
-      // const userData = await getUser(currentUser)
-      // console.log('userData', userData)
-
       setUser(userAttributes)
       setName(userAttributes?.name || '')
       setEmail(userAttributes?.email || '')
@@ -202,17 +211,20 @@ function Profile() {
           </Box>
         </MainToolbar>
       </AppBar>
-      <Container
-
-        style={{
-          padding: '2rem 1rem',
-          margin: '3rem auto',
-
-        }}>
+      <Box
+        sx={{
+          marginTop: '5rem',
+          marginBottom: '3rem',
+          padding: '1rem',
+          height: 'calc(100vh - 5rem)',
+          overflow: 'auto',
+        }}
+      >
         <Card sx={{
           padding: '2rem 1rem',
-          margin: '3rem auto',
-          height: 'fit-content'
+          margin: '1rem auto',
+          height: 'fit-content',
+          maxWidth: '60rem',
         }}>
           <h1>My Profile</h1>
           <p>Here is your profile information.</p>
@@ -221,6 +233,16 @@ function Profile() {
 
             <FormControl fullWidth>
 
+              {/* Hidden username field for password managers */}
+              <input
+                type="text"
+                name="username"
+                value={username || ''}
+                autoComplete="username"
+                style={{ display: 'none' }}
+                readOnly
+                aria-hidden="true"
+              />
 
               {/* <TextField
                 label="Name"
@@ -242,6 +264,7 @@ function Profile() {
                 }}
                 required
                 sx={{ mb: 2 }}
+                autoComplete="email"
               />
 
               <label>User Id</label>
@@ -249,7 +272,7 @@ function Profile() {
               <TextField
                 // label="User Id"
                 type="text"
-                value={user?.sub}
+                value={user?.sub || ''}
                 disabled
                 sx={{ mb: 2 }}
               />
@@ -259,7 +282,7 @@ function Profile() {
               <TextField
                 // label="User Id"
                 type="text"
-                value={identityId}
+                value={identityId || ''}
                 disabled
                 sx={{ mb: 2 }}
               />
@@ -370,16 +393,13 @@ function Profile() {
 
             </Card>
           </Modal>
-
-
-
-
         </Card>
 
         <Card sx={{
           padding: '2rem 1rem',
-          margin: '3rem auto',
-          height: 'fit-content'
+          margin: '1rem auto',
+          height: 'fit-content',
+          maxWidth: '60rem',
         }}>
           <h1>Change Password</h1>
           <p>Here you can change your password.</p>
@@ -390,6 +410,17 @@ function Profile() {
 
             <FormControl fullWidth>
 
+              {/* Hidden username field for password managers */}
+              <input
+                type="text"
+                name="username"
+                value={username || ''}
+                autoComplete="username"
+                style={{ display: 'none' }}
+                readOnly
+                aria-hidden="true"
+              />
+
               <TextField
                 label="Old Password"
                 type="password"
@@ -399,6 +430,7 @@ function Profile() {
                 }}
                 required
                 sx={{ mb: 2 }}
+                autoComplete="current-password"
               />
 
               <TextField
@@ -410,6 +442,7 @@ function Profile() {
                 }}
                 required
                 sx={{ mb: 2 }}
+                autoComplete="new-password"
               />
 
               <TextField
@@ -421,6 +454,7 @@ function Profile() {
                 }}
                 required
                 sx={{ mb: 2 }}
+                autoComplete="new-password"
               />
 
               <Button
@@ -438,6 +472,59 @@ function Profile() {
 
         </Card>
 
+        <Card sx={{
+          padding: '2rem 1rem',
+          margin: '1rem auto',
+          height: 'fit-content',
+          maxWidth: '60rem',
+        }}>
+          <h1>Advanced</h1>
+          <p>Clear local data cache. This will remove all locally stored data and force a fresh sync from the server.</p>
+          
+          <Button
+            variant="outlined"
+            color="warning"
+            disabled={isWorking}
+            onClick={() => setClearDataStoreDialogOpen(true)}
+            sx={{ mt: 2 }}
+          >
+            Clear Local Cache
+          </Button>
+        </Card>
+
+        <Dialog
+          open={clearDataStoreDialogOpen}
+          onClose={() => setClearDataStoreDialogOpen(false)}
+          aria-labelledby="clear-datastore-dialog-title"
+          aria-describedby="clear-datastore-dialog-description"
+        >
+          <DialogTitle id="clear-datastore-dialog-title">
+            Clear Local Data Cache?
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="clear-datastore-dialog-description">
+              This will remove all locally cached data from your device. Your data will be re-synced from the server when you refresh the page.
+              <br /><br />
+              <strong>Warning:</strong> Any unsaved changes will be lost. Make sure all your work is saved before proceeding.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button 
+              onClick={() => setClearDataStoreDialogOpen(false)}
+              color="primary"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleClearDataStore}
+              color="warning"
+              variant="contained"
+              autoFocus
+            >
+              Clear Cache
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         <Snackbar
           open={successMessage !== ''}
@@ -447,7 +534,7 @@ function Profile() {
         // action={action}
         />
 
-      </Container>
+      </Box>
     </>
   );
 }

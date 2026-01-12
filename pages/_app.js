@@ -23,36 +23,18 @@ Amplify.configure({
 })
 
 // Schema version - increment this when you run amplify push with schema changes
-const SCHEMA_VERSION = '1.0.1';
+const SCHEMA_VERSION = '1.6.0'; // Updated for AssistantChat model migration
 
 // Clear DataStore only when schema version changes (dynamic import to avoid premature DataStore initialization)
+let needsDataStoreClear = false;
 if (typeof window !== 'undefined') {
   const storedVersion = localStorage.getItem('datastore_schema_version');
+  const isClearing = sessionStorage.getItem('datastore_clearing');
   
-  if (storedVersion !== SCHEMA_VERSION) {
-    console.log(`Schema version mismatch. Stored: ${storedVersion}, Current: ${SCHEMA_VERSION}. Clearing DataStore...`);
-    
-    // Set a flag to prevent infinite reload loops
-    const isClearing = sessionStorage.getItem('datastore_clearing');
-    
-    if (!isClearing) {
-      sessionStorage.setItem('datastore_clearing', 'true');
-      
-      import('aws-amplify/datastore').then(({ DataStore }) => {
-        DataStore.clear()
-          .then(() => {
-            localStorage.setItem('datastore_schema_version', SCHEMA_VERSION);
-            sessionStorage.removeItem('datastore_clearing');
-            console.log('DataStore cleared and version updated. Reloading...');
-            // Reload the page to reinitialize all DataStore contexts
-            window.location.reload();
-          })
-          .catch(err => {
-            console.log('Error clearing DataStore:', err);
-            sessionStorage.removeItem('datastore_clearing');
-          });
-      });
-    }
+  if (storedVersion !== SCHEMA_VERSION && !isClearing) {
+    console.log(`Schema version mismatch. Stored: ${storedVersion}, Current: ${SCHEMA_VERSION}. Will clear DataStore...`);
+    needsDataStoreClear = true;
+    sessionStorage.setItem('datastore_clearing', 'true');
   }
 }
 
@@ -106,23 +88,56 @@ export default function MyApp(props) {
    */
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
 
-  // Start DataStore once at app level
+  // Handle DataStore clearing and initialization
   useEffect(() => {
-    let isStarted = false;
+    let isMounted = true;
     
-    const startDataStore = async () => {
-      if (typeof window !== 'undefined' && !isStarted) {
-        try {
-          const { DataStore } = await import('aws-amplify/datastore');
-          await DataStore.start();
-          isStarted = true;
-        } catch (error) {
-          console.error('[_app] Error starting DataStore:', error);
+    const initDataStore = async () => {
+      if (typeof window === 'undefined') return;
+      
+      try {
+        const { DataStore } = await import('aws-amplify/datastore');
+        
+        // If schema version mismatch, stop and clear DataStore
+        if (needsDataStoreClear) {
+          console.log('[_app] Stopping DataStore before clear...');
+          
+          try {
+            await DataStore.stop();
+          } catch (stopErr) {
+            console.warn('[_app] DataStore stop warning:', stopErr.message);
+          }
+          
+          console.log('[_app] Clearing DataStore...');
+          await DataStore.clear();
+          
+          if (isMounted) {
+            localStorage.setItem('datastore_schema_version', SCHEMA_VERSION);
+            sessionStorage.removeItem('datastore_clearing');
+            console.log('[_app] DataStore cleared. Reloading...');
+            window.location.reload();
+          }
+          return;
         }
+        
+        // Normal startup - start DataStore
+        if (isMounted) {
+          console.log('[_app] Starting DataStore...');
+          await DataStore.start();
+          console.log('[_app] DataStore started successfully');
+        }
+      } catch (error) {
+        console.error('[_app] Error initializing DataStore:', error);
+        // Clear the clearing flag if there was an error
+        sessionStorage.removeItem('datastore_clearing');
       }
     };
 
-    startDataStore();
+    initDataStore();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (

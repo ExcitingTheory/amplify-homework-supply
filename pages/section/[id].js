@@ -553,17 +553,6 @@ function SectionDetail({ user, signOut }) {
       // const user = await getCurrentUser()
       const userAttributes = await fetchUserAttributes();
 
-      // console.log('userAttributes', userAttributes)
-
-      // const userData = await getUser(currentUser)
-      // console.log('userData', userData)
-
-      // setUser(userAttributes)
-      // setName(userAttributes?.name || '')
-      // setEmail(userAttributes?.email || '')
-      // setUsername(userAttributes?.sub || '')
-
-
       if (userAttributes?.sub !== section.owner) {
 
         console.log('fetchSectionStudents.user.username !== section.owner', user.username, section.owner)

@@ -341,11 +341,15 @@ export default {
     (Story) => {
       return (
         <FilesContext.Provider value={mockFilesContext}>
-          <DemoBanner
-            title="Recording Studio 3.0"
-            description="Script-based dialogue editor with TTS generation and human recordings"
-          />
-          <Story />
+          <div style={{ height: 'calc(100vh', display: 'flex', flexDirection: 'column' }}>
+            <DemoBanner
+              title="Recording Studio 3.0"
+              description="Script-based dialogue editor with TTS generation and human recordings"
+            />
+            <div style={{ flex: 1, overflow: 'auto' }}>
+              <Story />
+            </div>
+          </div>
         </FilesContext.Provider>
       );
     },

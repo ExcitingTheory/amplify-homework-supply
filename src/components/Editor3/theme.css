@@ -107,3 +107,13 @@ p {
         min-width: 4rem !important;
     }
 }
+
+/**
+* Search highlight styles for MarkNode
+*/
+mark[data-lexical-mark-id*="search-highlight"],
+.search-highlight {
+    background-color: #ffeb3b;
+    padding: 0 2px;
+    border-radius: 2px;
+}

@@ -5,7 +5,7 @@
  **************************************************************************/
 
 import * as React from "react";
-import { GridProps, SelectFieldProps, TextAreaFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
+import { GridProps, SelectFieldProps, SwitchFieldProps, TextAreaFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
 import { Unit } from "../models";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
@@ -33,6 +33,16 @@ export declare type UnitUpdateFormInputValues = {
     featuredImage?: string;
     identityId?: string;
     thumbnail?: string;
+    embedding?: number[];
+    embeddingModel?: string;
+    embeddingDimensions?: number;
+    embeddingVersion?: number;
+    embeddingWordCount?: number;
+    publishedAt?: number;
+    isDraft?: boolean;
+    moderationStatus?: string;
+    moderationFlags?: string;
+    moderationCheckedAt?: string;
 };
 export declare type UnitUpdateFormValidationValues = {
     number?: ValidationFunction<number>;
@@ -45,6 +55,16 @@ export declare type UnitUpdateFormValidationValues = {
     featuredImage?: ValidationFunction<string>;
     identityId?: ValidationFunction<string>;
     thumbnail?: ValidationFunction<string>;
+    embedding?: ValidationFunction<number>;
+    embeddingModel?: ValidationFunction<string>;
+    embeddingDimensions?: ValidationFunction<number>;
+    embeddingVersion?: ValidationFunction<number>;
+    embeddingWordCount?: ValidationFunction<number>;
+    publishedAt?: ValidationFunction<number>;
+    isDraft?: ValidationFunction<boolean>;
+    moderationStatus?: ValidationFunction<string>;
+    moderationFlags?: ValidationFunction<string>;
+    moderationCheckedAt?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type UnitUpdateFormOverridesProps = {
@@ -59,6 +79,16 @@ export declare type UnitUpdateFormOverridesProps = {
     featuredImage?: PrimitiveOverrideProps<TextFieldProps>;
     identityId?: PrimitiveOverrideProps<TextFieldProps>;
     thumbnail?: PrimitiveOverrideProps<TextFieldProps>;
+    embedding?: PrimitiveOverrideProps<TextFieldProps>;
+    embeddingModel?: PrimitiveOverrideProps<TextFieldProps>;
+    embeddingDimensions?: PrimitiveOverrideProps<TextFieldProps>;
+    embeddingVersion?: PrimitiveOverrideProps<TextFieldProps>;
+    embeddingWordCount?: PrimitiveOverrideProps<TextFieldProps>;
+    publishedAt?: PrimitiveOverrideProps<TextFieldProps>;
+    isDraft?: PrimitiveOverrideProps<SwitchFieldProps>;
+    moderationStatus?: PrimitiveOverrideProps<TextFieldProps>;
+    moderationFlags?: PrimitiveOverrideProps<TextAreaFieldProps>;
+    moderationCheckedAt?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type UnitUpdateFormProps = React.PropsWithChildren<{
     overrides?: UnitUpdateFormOverridesProps | undefined | null;

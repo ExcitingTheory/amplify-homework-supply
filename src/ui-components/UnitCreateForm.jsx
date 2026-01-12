@@ -7,16 +7,178 @@
 /* eslint-disable */
 import * as React from "react";
 import {
+  Badge,
   Button,
+  Divider,
   Flex,
   Grid,
+  Icon,
+  ScrollView,
   SelectField,
+  SwitchField,
+  Text,
   TextAreaField,
   TextField,
+  useTheme,
 } from "@aws-amplify/ui-react";
 import { Unit } from "../models";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { DataStore } from "aws-amplify/datastore";
+function ArrayField({
+  items = [],
+  onChange,
+  label,
+  inputFieldRef,
+  children,
+  hasError,
+  setFieldValue,
+  currentFieldValue,
+  defaultFieldValue,
+  lengthLimit,
+  getBadgeText,
+  runValidationTasks,
+  errorMessage,
+}) {
+  const labelElement = <Text>{label}</Text>;
+  const {
+    tokens: {
+      components: {
+        fieldmessages: { error: errorStyles },
+      },
+    },
+  } = useTheme();
+  const [selectedBadgeIndex, setSelectedBadgeIndex] = React.useState();
+  const [isEditing, setIsEditing] = React.useState();
+  React.useEffect(() => {
+    if (isEditing) {
+      inputFieldRef?.current?.focus();
+    }
+  }, [isEditing]);
+  const removeItem = async (removeIndex) => {
+    const newItems = items.filter((value, index) => index !== removeIndex);
+    await onChange(newItems);
+    setSelectedBadgeIndex(undefined);
+  };
+  const addItem = async () => {
+    const { hasError } = runValidationTasks();
+    if (
+      currentFieldValue !== undefined &&
+      currentFieldValue !== null &&
+      currentFieldValue !== "" &&
+      !hasError
+    ) {
+      const newItems = [...items];
+      if (selectedBadgeIndex !== undefined) {
+        newItems[selectedBadgeIndex] = currentFieldValue;
+        setSelectedBadgeIndex(undefined);
+      } else {
+        newItems.push(currentFieldValue);
+      }
+      await onChange(newItems);
+      setIsEditing(false);
+    }
+  };
+  const arraySection = (
+    <React.Fragment>
+      {!!items?.length && (
+        <ScrollView height="inherit" width="inherit" maxHeight={"7rem"}>
+          {items.map((value, index) => {
+            return (
+              <Badge
+                key={index}
+                style={{
+                  cursor: "pointer",
+                  alignItems: "center",
+                  marginRight: 3,
+                  marginTop: 3,
+                  backgroundColor:
+                    index === selectedBadgeIndex ? "#B8CEF9" : "",
+                }}
+                onClick={() => {
+                  setSelectedBadgeIndex(index);
+                  setFieldValue(items[index]);
+                  setIsEditing(true);
+                }}
+              >
+                {getBadgeText ? getBadgeText(value) : value.toString()}
+                <Icon
+                  style={{
+                    cursor: "pointer",
+                    paddingLeft: 3,
+                    width: 20,
+                    height: 20,
+                  }}
+                  viewBox={{ width: 20, height: 20 }}
+                  paths={[
+                    {
+                      d: "M10 10l5.09-5.09L10 10l5.09 5.09L10 10zm0 0L4.91 4.91 10 10l-5.09 5.09L10 10z",
+                      stroke: "black",
+                    },
+                  ]}
+                  ariaLabel="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    removeItem(index);
+                  }}
+                />
+              </Badge>
+            );
+          })}
+        </ScrollView>
+      )}
+      <Divider orientation="horizontal" marginTop={5} />
+    </React.Fragment>
+  );
+  if (lengthLimit !== undefined && items.length >= lengthLimit && !isEditing) {
+    return (
+      <React.Fragment>
+        {labelElement}
+        {arraySection}
+      </React.Fragment>
+    );
+  }
+  return (
+    <React.Fragment>
+      {labelElement}
+      {isEditing && children}
+      {!isEditing ? (
+        <>
+          <Button
+            onClick={() => {
+              setIsEditing(true);
+            }}
+          >
+            Add item
+          </Button>
+          {errorMessage && hasError && (
+            <Text color={errorStyles.color} fontSize={errorStyles.fontSize}>
+              {errorMessage}
+            </Text>
+          )}
+        </>
+      ) : (
+        <Flex justifyContent="flex-end">
+          {(currentFieldValue || isEditing) && (
+            <Button
+              children="Cancel"
+              type="button"
+              size="small"
+              onClick={() => {
+                setFieldValue(defaultFieldValue);
+                setIsEditing(false);
+                setSelectedBadgeIndex(undefined);
+              }}
+            ></Button>
+          )}
+          <Button size="small" variation="link" onClick={addItem}>
+            {selectedBadgeIndex !== undefined ? "Save" : "Add"}
+          </Button>
+        </Flex>
+      )}
+      {arraySection}
+    </React.Fragment>
+  );
+}
 export default function UnitCreateForm(props) {
   const {
     clearOnSuccess = true,
@@ -39,6 +201,16 @@ export default function UnitCreateForm(props) {
     featuredImage: "",
     identityId: "",
     thumbnail: "",
+    embedding: [],
+    embeddingModel: "",
+    embeddingDimensions: "",
+    embeddingVersion: "",
+    embeddingWordCount: "",
+    publishedAt: "",
+    isDraft: false,
+    moderationStatus: "",
+    moderationFlags: "",
+    moderationCheckedAt: "",
   };
   const [number, setNumber] = React.useState(initialValues.number);
   const [name, setName] = React.useState(initialValues.name);
@@ -56,6 +228,32 @@ export default function UnitCreateForm(props) {
   );
   const [identityId, setIdentityId] = React.useState(initialValues.identityId);
   const [thumbnail, setThumbnail] = React.useState(initialValues.thumbnail);
+  const [embedding, setEmbedding] = React.useState(initialValues.embedding);
+  const [embeddingModel, setEmbeddingModel] = React.useState(
+    initialValues.embeddingModel
+  );
+  const [embeddingDimensions, setEmbeddingDimensions] = React.useState(
+    initialValues.embeddingDimensions
+  );
+  const [embeddingVersion, setEmbeddingVersion] = React.useState(
+    initialValues.embeddingVersion
+  );
+  const [embeddingWordCount, setEmbeddingWordCount] = React.useState(
+    initialValues.embeddingWordCount
+  );
+  const [publishedAt, setPublishedAt] = React.useState(
+    initialValues.publishedAt
+  );
+  const [isDraft, setIsDraft] = React.useState(initialValues.isDraft);
+  const [moderationStatus, setModerationStatus] = React.useState(
+    initialValues.moderationStatus
+  );
+  const [moderationFlags, setModerationFlags] = React.useState(
+    initialValues.moderationFlags
+  );
+  const [moderationCheckedAt, setModerationCheckedAt] = React.useState(
+    initialValues.moderationCheckedAt
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setNumber(initialValues.number);
@@ -68,8 +266,21 @@ export default function UnitCreateForm(props) {
     setFeaturedImage(initialValues.featuredImage);
     setIdentityId(initialValues.identityId);
     setThumbnail(initialValues.thumbnail);
+    setEmbedding(initialValues.embedding);
+    setCurrentEmbeddingValue("");
+    setEmbeddingModel(initialValues.embeddingModel);
+    setEmbeddingDimensions(initialValues.embeddingDimensions);
+    setEmbeddingVersion(initialValues.embeddingVersion);
+    setEmbeddingWordCount(initialValues.embeddingWordCount);
+    setPublishedAt(initialValues.publishedAt);
+    setIsDraft(initialValues.isDraft);
+    setModerationStatus(initialValues.moderationStatus);
+    setModerationFlags(initialValues.moderationFlags);
+    setModerationCheckedAt(initialValues.moderationCheckedAt);
     setErrors({});
   };
+  const [currentEmbeddingValue, setCurrentEmbeddingValue] = React.useState("");
+  const embeddingRef = React.createRef();
   const validations = {
     number: [],
     name: [],
@@ -81,6 +292,16 @@ export default function UnitCreateForm(props) {
     featuredImage: [],
     identityId: [],
     thumbnail: [],
+    embedding: [],
+    embeddingModel: [],
+    embeddingDimensions: [],
+    embeddingVersion: [],
+    embeddingWordCount: [],
+    publishedAt: [],
+    isDraft: [],
+    moderationStatus: [],
+    moderationFlags: [{ type: "JSON" }],
+    moderationCheckedAt: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -98,6 +319,29 @@ export default function UnitCreateForm(props) {
     }
     setErrors((errors) => ({ ...errors, [fieldName]: validationResponse }));
     return validationResponse;
+  };
+  const convertTimeStampToDate = (ts) => {
+    if (Math.abs(Date.now() - ts) < Math.abs(Date.now() - ts * 1000)) {
+      return new Date(ts);
+    }
+    return new Date(ts * 1000);
+  };
+  const convertToLocal = (date) => {
+    const df = new Intl.DateTimeFormat("default", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      calendar: "iso8601",
+      numberingSystem: "latn",
+      hourCycle: "h23",
+    });
+    const parts = df.formatToParts(date).reduce((acc, part) => {
+      acc[part.type] = part.value;
+      return acc;
+    }, {});
+    return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
   };
   return (
     <Grid
@@ -118,6 +362,16 @@ export default function UnitCreateForm(props) {
           featuredImage,
           identityId,
           thumbnail,
+          embedding,
+          embeddingModel,
+          embeddingDimensions,
+          embeddingVersion,
+          embeddingWordCount,
+          publishedAt,
+          isDraft,
+          moderationStatus,
+          moderationFlags,
+          moderationCheckedAt,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -186,6 +440,16 @@ export default function UnitCreateForm(props) {
               featuredImage,
               identityId,
               thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.number ?? value;
@@ -219,6 +483,16 @@ export default function UnitCreateForm(props) {
               featuredImage,
               identityId,
               thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -252,6 +526,16 @@ export default function UnitCreateForm(props) {
               featuredImage,
               identityId,
               thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.owner ?? value;
@@ -285,6 +569,16 @@ export default function UnitCreateForm(props) {
               featuredImage,
               identityId,
               thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.description ?? value;
@@ -317,6 +611,16 @@ export default function UnitCreateForm(props) {
               featuredImage,
               identityId,
               thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.data ?? value;
@@ -350,6 +654,16 @@ export default function UnitCreateForm(props) {
               featuredImage,
               identityId,
               thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.status ?? value;
@@ -403,6 +717,16 @@ export default function UnitCreateForm(props) {
               featuredImage,
               identityId,
               thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.timeLimitSeconds ?? value;
@@ -436,6 +760,16 @@ export default function UnitCreateForm(props) {
               featuredImage: value,
               identityId,
               thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.featuredImage ?? value;
@@ -469,6 +803,16 @@ export default function UnitCreateForm(props) {
               featuredImage,
               identityId: value,
               thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.identityId ?? value;
@@ -502,6 +846,16 @@ export default function UnitCreateForm(props) {
               featuredImage,
               identityId,
               thumbnail: value,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.thumbnail ?? value;
@@ -515,6 +869,487 @@ export default function UnitCreateForm(props) {
         errorMessage={errors.thumbnail?.errorMessage}
         hasError={errors.thumbnail?.hasError}
         {...getOverrideProps(overrides, "thumbnail")}
+      ></TextField>
+      <ArrayField
+        onChange={async (items) => {
+          let values = items;
+          if (onChange) {
+            const modelFields = {
+              number,
+              name,
+              owner,
+              description,
+              data,
+              status,
+              timeLimitSeconds,
+              featuredImage,
+              identityId,
+              thumbnail,
+              embedding: values,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            values = result?.embedding ?? values;
+          }
+          setEmbedding(values);
+          setCurrentEmbeddingValue("");
+        }}
+        currentFieldValue={currentEmbeddingValue}
+        label={"Embedding"}
+        items={embedding}
+        hasError={errors?.embedding?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks("embedding", currentEmbeddingValue)
+        }
+        errorMessage={errors?.embedding?.errorMessage}
+        setFieldValue={setCurrentEmbeddingValue}
+        inputFieldRef={embeddingRef}
+        defaultFieldValue={""}
+      >
+        <TextField
+          label="Embedding"
+          isRequired={false}
+          isReadOnly={false}
+          type="number"
+          step="any"
+          value={currentEmbeddingValue}
+          onChange={(e) => {
+            let value = isNaN(parseFloat(e.target.value))
+              ? e.target.value
+              : parseFloat(e.target.value);
+            if (errors.embedding?.hasError) {
+              runValidationTasks("embedding", value);
+            }
+            setCurrentEmbeddingValue(value);
+          }}
+          onBlur={() => runValidationTasks("embedding", currentEmbeddingValue)}
+          errorMessage={errors.embedding?.errorMessage}
+          hasError={errors.embedding?.hasError}
+          ref={embeddingRef}
+          labelHidden={true}
+          {...getOverrideProps(overrides, "embedding")}
+        ></TextField>
+      </ArrayField>
+      <TextField
+        label="Embedding model"
+        isRequired={false}
+        isReadOnly={false}
+        value={embeddingModel}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              number,
+              name,
+              owner,
+              description,
+              data,
+              status,
+              timeLimitSeconds,
+              featuredImage,
+              identityId,
+              thumbnail,
+              embedding,
+              embeddingModel: value,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingModel ?? value;
+          }
+          if (errors.embeddingModel?.hasError) {
+            runValidationTasks("embeddingModel", value);
+          }
+          setEmbeddingModel(value);
+        }}
+        onBlur={() => runValidationTasks("embeddingModel", embeddingModel)}
+        errorMessage={errors.embeddingModel?.errorMessage}
+        hasError={errors.embeddingModel?.hasError}
+        {...getOverrideProps(overrides, "embeddingModel")}
+      ></TextField>
+      <TextField
+        label="Embedding dimensions"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={embeddingDimensions}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              number,
+              name,
+              owner,
+              description,
+              data,
+              status,
+              timeLimitSeconds,
+              featuredImage,
+              identityId,
+              thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions: value,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingDimensions ?? value;
+          }
+          if (errors.embeddingDimensions?.hasError) {
+            runValidationTasks("embeddingDimensions", value);
+          }
+          setEmbeddingDimensions(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("embeddingDimensions", embeddingDimensions)
+        }
+        errorMessage={errors.embeddingDimensions?.errorMessage}
+        hasError={errors.embeddingDimensions?.hasError}
+        {...getOverrideProps(overrides, "embeddingDimensions")}
+      ></TextField>
+      <TextField
+        label="Embedding version"
+        isRequired={false}
+        isReadOnly={false}
+        type="datetime-local"
+        value={
+          embeddingVersion &&
+          convertToLocal(convertTimeStampToDate(embeddingVersion))
+        }
+        onChange={(e) => {
+          let value =
+            e.target.value === "" ? "" : Number(new Date(e.target.value));
+          if (onChange) {
+            const modelFields = {
+              number,
+              name,
+              owner,
+              description,
+              data,
+              status,
+              timeLimitSeconds,
+              featuredImage,
+              identityId,
+              thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion: value,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingVersion ?? value;
+          }
+          if (errors.embeddingVersion?.hasError) {
+            runValidationTasks("embeddingVersion", value);
+          }
+          setEmbeddingVersion(value);
+        }}
+        onBlur={() => runValidationTasks("embeddingVersion", embeddingVersion)}
+        errorMessage={errors.embeddingVersion?.errorMessage}
+        hasError={errors.embeddingVersion?.hasError}
+        {...getOverrideProps(overrides, "embeddingVersion")}
+      ></TextField>
+      <TextField
+        label="Embedding word count"
+        isRequired={false}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={embeddingWordCount}
+        onChange={(e) => {
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              number,
+              name,
+              owner,
+              description,
+              data,
+              status,
+              timeLimitSeconds,
+              featuredImage,
+              identityId,
+              thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount: value,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.embeddingWordCount ?? value;
+          }
+          if (errors.embeddingWordCount?.hasError) {
+            runValidationTasks("embeddingWordCount", value);
+          }
+          setEmbeddingWordCount(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("embeddingWordCount", embeddingWordCount)
+        }
+        errorMessage={errors.embeddingWordCount?.errorMessage}
+        hasError={errors.embeddingWordCount?.hasError}
+        {...getOverrideProps(overrides, "embeddingWordCount")}
+      ></TextField>
+      <TextField
+        label="Published at"
+        isRequired={false}
+        isReadOnly={false}
+        type="datetime-local"
+        value={
+          publishedAt && convertToLocal(convertTimeStampToDate(publishedAt))
+        }
+        onChange={(e) => {
+          let value =
+            e.target.value === "" ? "" : Number(new Date(e.target.value));
+          if (onChange) {
+            const modelFields = {
+              number,
+              name,
+              owner,
+              description,
+              data,
+              status,
+              timeLimitSeconds,
+              featuredImage,
+              identityId,
+              thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt: value,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.publishedAt ?? value;
+          }
+          if (errors.publishedAt?.hasError) {
+            runValidationTasks("publishedAt", value);
+          }
+          setPublishedAt(value);
+        }}
+        onBlur={() => runValidationTasks("publishedAt", publishedAt)}
+        errorMessage={errors.publishedAt?.errorMessage}
+        hasError={errors.publishedAt?.hasError}
+        {...getOverrideProps(overrides, "publishedAt")}
+      ></TextField>
+      <SwitchField
+        label="Is draft"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={isDraft}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              number,
+              name,
+              owner,
+              description,
+              data,
+              status,
+              timeLimitSeconds,
+              featuredImage,
+              identityId,
+              thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft: value,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.isDraft ?? value;
+          }
+          if (errors.isDraft?.hasError) {
+            runValidationTasks("isDraft", value);
+          }
+          setIsDraft(value);
+        }}
+        onBlur={() => runValidationTasks("isDraft", isDraft)}
+        errorMessage={errors.isDraft?.errorMessage}
+        hasError={errors.isDraft?.hasError}
+        {...getOverrideProps(overrides, "isDraft")}
+      ></SwitchField>
+      <TextField
+        label="Moderation status"
+        isRequired={false}
+        isReadOnly={false}
+        value={moderationStatus}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              number,
+              name,
+              owner,
+              description,
+              data,
+              status,
+              timeLimitSeconds,
+              featuredImage,
+              identityId,
+              thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus: value,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.moderationStatus ?? value;
+          }
+          if (errors.moderationStatus?.hasError) {
+            runValidationTasks("moderationStatus", value);
+          }
+          setModerationStatus(value);
+        }}
+        onBlur={() => runValidationTasks("moderationStatus", moderationStatus)}
+        errorMessage={errors.moderationStatus?.errorMessage}
+        hasError={errors.moderationStatus?.hasError}
+        {...getOverrideProps(overrides, "moderationStatus")}
+      ></TextField>
+      <TextAreaField
+        label="Moderation flags"
+        isRequired={false}
+        isReadOnly={false}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              number,
+              name,
+              owner,
+              description,
+              data,
+              status,
+              timeLimitSeconds,
+              featuredImage,
+              identityId,
+              thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags: value,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.moderationFlags ?? value;
+          }
+          if (errors.moderationFlags?.hasError) {
+            runValidationTasks("moderationFlags", value);
+          }
+          setModerationFlags(value);
+        }}
+        onBlur={() => runValidationTasks("moderationFlags", moderationFlags)}
+        errorMessage={errors.moderationFlags?.errorMessage}
+        hasError={errors.moderationFlags?.hasError}
+        {...getOverrideProps(overrides, "moderationFlags")}
+      ></TextAreaField>
+      <TextField
+        label="Moderation checked at"
+        isRequired={false}
+        isReadOnly={false}
+        type="datetime-local"
+        value={
+          moderationCheckedAt && convertToLocal(new Date(moderationCheckedAt))
+        }
+        onChange={(e) => {
+          let value =
+            e.target.value === "" ? "" : new Date(e.target.value).toISOString();
+          if (onChange) {
+            const modelFields = {
+              number,
+              name,
+              owner,
+              description,
+              data,
+              status,
+              timeLimitSeconds,
+              featuredImage,
+              identityId,
+              thumbnail,
+              embedding,
+              embeddingModel,
+              embeddingDimensions,
+              embeddingVersion,
+              embeddingWordCount,
+              publishedAt,
+              isDraft,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.moderationCheckedAt ?? value;
+          }
+          if (errors.moderationCheckedAt?.hasError) {
+            runValidationTasks("moderationCheckedAt", value);
+          }
+          setModerationCheckedAt(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("moderationCheckedAt", moderationCheckedAt)
+        }
+        errorMessage={errors.moderationCheckedAt?.errorMessage}
+        hasError={errors.moderationCheckedAt?.hasError}
+        {...getOverrideProps(overrides, "moderationCheckedAt")}
       ></TextField>
       <Flex
         justifyContent="space-between"

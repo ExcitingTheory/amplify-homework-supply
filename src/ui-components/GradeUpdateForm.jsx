@@ -202,6 +202,9 @@ export default function GradeUpdateForm(props) {
     data: "",
     feedback: "",
     files: [],
+    moderationStatus: "",
+    moderationFlags: "",
+    moderationCheckedAt: "",
   };
   const [percentComplete, setPercentComplete] = React.useState(
     initialValues.percentComplete
@@ -220,6 +223,15 @@ export default function GradeUpdateForm(props) {
   const [data, setData] = React.useState(initialValues.data);
   const [feedback, setFeedback] = React.useState(initialValues.feedback);
   const [files, setFiles] = React.useState(initialValues.files);
+  const [moderationStatus, setModerationStatus] = React.useState(
+    initialValues.moderationStatus
+  );
+  const [moderationFlags, setModerationFlags] = React.useState(
+    initialValues.moderationFlags
+  );
+  const [moderationCheckedAt, setModerationCheckedAt] = React.useState(
+    initialValues.moderationCheckedAt
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = gradeRecord
@@ -245,6 +257,14 @@ export default function GradeUpdateForm(props) {
     );
     setFiles(cleanValues.files ?? []);
     setCurrentFilesValue("");
+    setModerationStatus(cleanValues.moderationStatus);
+    setModerationFlags(
+      typeof cleanValues.moderationFlags === "string" ||
+        cleanValues.moderationFlags === null
+        ? cleanValues.moderationFlags
+        : JSON.stringify(cleanValues.moderationFlags)
+    );
+    setModerationCheckedAt(cleanValues.moderationCheckedAt);
     setErrors({});
   };
   const [gradeRecord, setGradeRecord] = React.useState(gradeModelProp);
@@ -272,6 +292,9 @@ export default function GradeUpdateForm(props) {
     data: [{ type: "JSON" }],
     feedback: [{ type: "JSON" }],
     files: [],
+    moderationStatus: [],
+    moderationFlags: [{ type: "JSON" }],
+    moderationCheckedAt: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -289,6 +312,23 @@ export default function GradeUpdateForm(props) {
     }
     setErrors((errors) => ({ ...errors, [fieldName]: validationResponse }));
     return validationResponse;
+  };
+  const convertToLocal = (date) => {
+    const df = new Intl.DateTimeFormat("default", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      calendar: "iso8601",
+      numberingSystem: "latn",
+      hourCycle: "h23",
+    });
+    const parts = df.formatToParts(date).reduce((acc, part) => {
+      acc[part.type] = part.value;
+      return acc;
+    }, {});
+    return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
   };
   return (
     <Grid
@@ -310,6 +350,9 @@ export default function GradeUpdateForm(props) {
           data,
           feedback,
           files,
+          moderationStatus,
+          moderationFlags,
+          moderationCheckedAt,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -380,6 +423,9 @@ export default function GradeUpdateForm(props) {
               data,
               feedback,
               files,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.percentComplete ?? value;
@@ -418,6 +464,9 @@ export default function GradeUpdateForm(props) {
               data,
               feedback,
               files,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.accuracy ?? value;
@@ -452,6 +501,9 @@ export default function GradeUpdateForm(props) {
               data,
               feedback,
               files,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.timerStarted ?? value;
@@ -486,6 +538,9 @@ export default function GradeUpdateForm(props) {
               data,
               feedback,
               files,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.complete ?? value;
@@ -520,6 +575,9 @@ export default function GradeUpdateForm(props) {
               data,
               feedback,
               files,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.owner ?? value;
@@ -554,6 +612,9 @@ export default function GradeUpdateForm(props) {
               data,
               feedback,
               files,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.identityId ?? value;
@@ -588,6 +649,9 @@ export default function GradeUpdateForm(props) {
               data,
               feedback,
               files,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.instructor ?? value;
@@ -626,6 +690,9 @@ export default function GradeUpdateForm(props) {
               data,
               feedback,
               files,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.unitVersion ?? value;
@@ -660,6 +727,9 @@ export default function GradeUpdateForm(props) {
               data: value,
               feedback,
               files,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.data ?? value;
@@ -694,6 +764,9 @@ export default function GradeUpdateForm(props) {
               data,
               feedback: value,
               files,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             value = result?.feedback ?? value;
@@ -724,6 +797,9 @@ export default function GradeUpdateForm(props) {
               data,
               feedback,
               files: values,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt,
             };
             const result = onChange(modelFields);
             values = result?.files ?? values;
@@ -763,6 +839,123 @@ export default function GradeUpdateForm(props) {
           {...getOverrideProps(overrides, "files")}
         ></TextField>
       </ArrayField>
+      <TextField
+        label="Moderation status"
+        isRequired={false}
+        isReadOnly={false}
+        value={moderationStatus}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              percentComplete,
+              accuracy,
+              timerStarted,
+              complete,
+              owner,
+              identityId,
+              instructor,
+              unitVersion,
+              data,
+              feedback,
+              files,
+              moderationStatus: value,
+              moderationFlags,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.moderationStatus ?? value;
+          }
+          if (errors.moderationStatus?.hasError) {
+            runValidationTasks("moderationStatus", value);
+          }
+          setModerationStatus(value);
+        }}
+        onBlur={() => runValidationTasks("moderationStatus", moderationStatus)}
+        errorMessage={errors.moderationStatus?.errorMessage}
+        hasError={errors.moderationStatus?.hasError}
+        {...getOverrideProps(overrides, "moderationStatus")}
+      ></TextField>
+      <TextAreaField
+        label="Moderation flags"
+        isRequired={false}
+        isReadOnly={false}
+        value={moderationFlags}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              percentComplete,
+              accuracy,
+              timerStarted,
+              complete,
+              owner,
+              identityId,
+              instructor,
+              unitVersion,
+              data,
+              feedback,
+              files,
+              moderationStatus,
+              moderationFlags: value,
+              moderationCheckedAt,
+            };
+            const result = onChange(modelFields);
+            value = result?.moderationFlags ?? value;
+          }
+          if (errors.moderationFlags?.hasError) {
+            runValidationTasks("moderationFlags", value);
+          }
+          setModerationFlags(value);
+        }}
+        onBlur={() => runValidationTasks("moderationFlags", moderationFlags)}
+        errorMessage={errors.moderationFlags?.errorMessage}
+        hasError={errors.moderationFlags?.hasError}
+        {...getOverrideProps(overrides, "moderationFlags")}
+      ></TextAreaField>
+      <TextField
+        label="Moderation checked at"
+        isRequired={false}
+        isReadOnly={false}
+        type="datetime-local"
+        value={
+          moderationCheckedAt && convertToLocal(new Date(moderationCheckedAt))
+        }
+        onChange={(e) => {
+          let value =
+            e.target.value === "" ? "" : new Date(e.target.value).toISOString();
+          if (onChange) {
+            const modelFields = {
+              percentComplete,
+              accuracy,
+              timerStarted,
+              complete,
+              owner,
+              identityId,
+              instructor,
+              unitVersion,
+              data,
+              feedback,
+              files,
+              moderationStatus,
+              moderationFlags,
+              moderationCheckedAt: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.moderationCheckedAt ?? value;
+          }
+          if (errors.moderationCheckedAt?.hasError) {
+            runValidationTasks("moderationCheckedAt", value);
+          }
+          setModerationCheckedAt(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("moderationCheckedAt", moderationCheckedAt)
+        }
+        errorMessage={errors.moderationCheckedAt?.errorMessage}
+        hasError={errors.moderationCheckedAt?.hasError}
+        {...getOverrideProps(overrides, "moderationCheckedAt")}
+      ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

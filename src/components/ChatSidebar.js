@@ -1,5 +1,5 @@
 // react component that renders the chat session with the user and the bot
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback, useReducer } from "react";
 import {
     Alert,
     TextField,
@@ -15,6 +15,14 @@ import {
     DialogActions,
     Portal,
     Snackbar,
+    Drawer,
+    List,
+    ListItem,
+    ListItemText,
+    ListItemButton,
+    Divider,
+    Chip,
+    Tooltip,
 } from "@mui/material";
 import { DataStore } from '@aws-amplify/datastore';
 import ChatIcon from '@mui/icons-material/Chat';
@@ -26,7 +34,11 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import CancelIcon from '@mui/icons-material/Cancel';
 import RateReviewIcon from '@mui/icons-material/RateReview';
-import { Section, Document } from "../models";
+import HistoryIcon from '@mui/icons-material/History';
+import AddIcon from '@mui/icons-material/Add';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import UnarchiveIcon from '@mui/icons-material/Unarchive';
+import { Section, Document, AssistantChat, File } from "../models";
 import UnitContext from "../context/unitContext";
 import SectionContext from "../context/sectionContext";
 import VectorStoreContext from "../context/vectorStoreContext";
@@ -45,20 +57,138 @@ import amplifyConfig from '../amplifyconfiguration.json';
 import { TextStreamChatTransport } from 'ai';
 
 const ChatSidebar = () => {
+    // Utility function to deep clone messages to prevent frozen object errors
+    // The AI SDK mutates message objects during streaming, so they must be mutable
+    const deepCloneMessages = useCallback((messages) => {
+        if (!messages || messages.length === 0) return [];
+
+        // Use structuredClone if available (better performance, handles more types)
+        // Otherwise fallback to JSON stringify/parse
+        try {
+            return typeof structuredClone !== 'undefined'
+                ? structuredClone(messages)
+                : JSON.parse(JSON.stringify(messages));
+        } catch (error) {
+            console.error('[ChatSidebar] Error cloning messages:', error);
+            // Last resort: return empty array to prevent crashes
+            return [];
+        }
+    }, []);
+
+    // Action types for the reducer
+    const ACTIONS = {
+        SET_DRAGGING: 'SET_DRAGGING',
+        SET_UPLOADED_FILES: 'SET_UPLOADED_FILES',
+        ADD_UPLOADED_FILES: 'ADD_UPLOADED_FILES',
+        REMOVE_UPLOADED_FILE: 'REMOVE_UPLOADED_FILE',
+        SET_DOCUMENT_PROCESSING_STATUS: 'SET_DOCUMENT_PROCESSING_STATUS',
+        UPDATE_DOCUMENT_PROCESSING_STATUS: 'UPDATE_DOCUMENT_PROCESSING_STATUS',
+        SET_DOCUMENT_STATUSES: 'SET_DOCUMENT_STATUSES',
+        SET_VOCABULARY_REVIEW_DIALOG: 'SET_VOCABULARY_REVIEW_DIALOG',
+        SET_REVIEW_DOCUMENT_ID: 'SET_REVIEW_DOCUMENT_ID',
+        SET_CONFIRM_DIALOG: 'SET_CONFIRM_DIALOG',
+        SET_TOOL_EXECUTION_STATES: 'SET_TOOL_EXECUTION_STATES',
+        UPDATE_TOOL_EXECUTION_STATES: 'UPDATE_TOOL_EXECUTION_STATES',
+        SET_HISTORY_DRAWER_OPEN: 'SET_HISTORY_DRAWER_OPEN',
+        SET_INPUT: 'SET_INPUT',
+        SET_LAST_CHAT_ID: 'SET_LAST_CHAT_ID',
+        RESET_FOR_NEW_CHAT: 'RESET_FOR_NEW_CHAT',
+    };
+
+    // Initial state for the reducer
+    const initialState = {
+        isDragging: false,
+        uploadedFiles: [],
+        documentProcessingStatus: {},
+        documentStatuses: {},
+        vocabularyReviewDialogOpen: false,
+        reviewDocumentId: null,
+        confirmDialog: { open: false, message: '', onConfirm: null, severity: 'info' },
+        toolExecutionStates: {},
+        historyDrawerOpen: false,
+        input: '',
+        lastChatId: null,
+    };
+
+    // Reducer function
+    function chatSidebarReducer(state, action) {
+        switch (action.type) {
+            case ACTIONS.SET_DRAGGING:
+                return { ...state, isDragging: action.payload };
+            case ACTIONS.SET_UPLOADED_FILES:
+                return { ...state, uploadedFiles: action.payload };
+            case ACTIONS.ADD_UPLOADED_FILES:
+                return { ...state, uploadedFiles: [...state.uploadedFiles, ...action.payload] };
+            case ACTIONS.REMOVE_UPLOADED_FILE:
+                return {
+                    ...state,
+                    uploadedFiles: state.uploadedFiles.filter((_, i) => i !== action.payload),
+                    documentProcessingStatus: Object.fromEntries(
+                        Object.entries(state.documentProcessingStatus).filter(([index]) => parseInt(index) !== action.payload)
+                    )
+                };
+            case ACTIONS.SET_DOCUMENT_PROCESSING_STATUS:
+                return { ...state, documentProcessingStatus: action.payload };
+            case ACTIONS.UPDATE_DOCUMENT_PROCESSING_STATUS:
+                return {
+                    ...state,
+                    documentProcessingStatus: { ...state.documentProcessingStatus, ...action.payload }
+                };
+            case ACTIONS.SET_DOCUMENT_STATUSES:
+                return { ...state, documentStatuses: action.payload };
+            case ACTIONS.SET_VOCABULARY_REVIEW_DIALOG:
+                return { ...state, vocabularyReviewDialogOpen: action.payload };
+            case ACTIONS.SET_REVIEW_DOCUMENT_ID:
+                return { ...state, reviewDocumentId: action.payload };
+            case ACTIONS.SET_CONFIRM_DIALOG:
+                return { ...state, confirmDialog: action.payload };
+            case ACTIONS.SET_TOOL_EXECUTION_STATES:
+                return { ...state, toolExecutionStates: action.payload };
+            case ACTIONS.UPDATE_TOOL_EXECUTION_STATES:
+                return {
+                    ...state,
+                    toolExecutionStates: { ...state.toolExecutionStates, ...action.payload }
+                };
+            case ACTIONS.SET_HISTORY_DRAWER_OPEN:
+                return { ...state, historyDrawerOpen: action.payload };
+            case ACTIONS.SET_INPUT:
+                return { ...state, input: action.payload };
+            case ACTIONS.SET_LAST_CHAT_ID:
+                return { ...state, lastChatId: action.payload };
+            case ACTIONS.RESET_FOR_NEW_CHAT:
+                return {
+                    ...state,
+                    uploadedFiles: [],
+                    input: '',
+                    documentProcessingStatus: {},
+                    toolExecutionStates: {}
+                };
+            default:
+                return state;
+        }
+    }
+
+    // UI State - now using reducer
+    const [state, dispatch] = useReducer(chatSidebarReducer, initialState);
+    const {
+        isDragging,
+        uploadedFiles,
+        documentProcessingStatus,
+        documentStatuses,
+        vocabularyReviewDialogOpen,
+        reviewDocumentId,
+        confirmDialog,
+        toolExecutionStates,
+        historyDrawerOpen,
+        input,
+        lastChatId,
+    } = state;
+    // Refs for DOM interaction
     const chatContainerRef = useRef(null);
-    const renderCountRef = useRef(0);
-    const updateTimeoutRef = useRef(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [uploadedFiles, setUploadedFiles] = useState([]);
-    const [documentProcessingStatus, setDocumentProcessingStatus] = useState({}); // { fileIndex: { status: 'uploading'|'uploaded'|'analyzing'|'analyzed'|'error', progress: 0-100, message: '', documentId: '' } }
-    const [documentStatuses, setDocumentStatuses] = useState({}); // { documentId: { status: 'uploaded'|'extracting'|'analyzing'|'completed'|'failed' } }
     const fileInputRef = useRef(null);
-    const [vocabularyReviewDialogOpen, setVocabularyReviewDialogOpen] = useState(false);
-    const [reviewDocumentId, setReviewDocumentId] = useState(null);
-    const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: null, severity: 'info' });
-    const [toolExecutionStates, setToolExecutionStates] = useState({}); // { toolCallId: 'executing' | 'success' | 'error' }
     const addToolOutputRef = useRef(null);
 
+    const unitContext = React.useContext(UnitContext);
     const {
         unit,
         files,
@@ -67,65 +197,51 @@ const ChatSidebar = () => {
         editorRef,
         insertWord,
         insertQuestion,
-    } = React.useContext(UnitContext);
-    
-    // Get tab management from context
+    } = unitContext;
+
+    // Get tab management and chat state from context
     const tabContext = useTabContext();
+    const {
+        assistantChat,
+        chatHistories,
+        setCurrentChat,
+        isLoadingChat,
+    } = tabContext;
 
-    // Track renders and throttle logging
-    renderCountRef.current += 1;
 
-    // Clear any pending update timeout
-    if (updateTimeoutRef.current) {
-        clearTimeout(updateTimeoutRef.current);
-    }
-
-    // Debounce excessive renders by batching context updates
-    updateTimeoutRef.current = setTimeout(() => {
-        if (renderCountRef.current <= 10 || renderCountRef.current % 10 === 0) {
-            console.log(`[ChatSidebar] Render #${renderCountRef.current}`);
-        }
-    }, 100);
-
-    // Clean up timeout on unmount
-    useEffect(() => {
-        return () => {
-            if (updateTimeoutRef.current) {
-                clearTimeout(updateTimeoutRef.current);
-            }
-        };
-    }, []);
 
     // Get sections from SectionContext instead of local query
     const { sections = [] } = React.useContext(SectionContext) || {};
-    
-    // Insert handlers from UnitContext
-    const handleInsertWord = useCallback((word) => {
-        if (insertWord) {
-            insertWord(word);
-            console.log('[ChatSidebar] Inserted word:', word.phrase);
-        }
-    }, [insertWord]);
-    
-    const handleInsertQuestion = useCallback((question) => {
-        if (insertQuestion) {
-            insertQuestion(question);
-            console.log('[ChatSidebar] Inserted question:', question.prompt);
-        }
-    }, [insertQuestion]);
-    
-    // Focus handler - sets focus item in tab context
-    const handleFocusItem = useCallback((type, id) => {
-        if (tabContext.setFocusItem) {
-            tabContext.setFocusItem({ type, id, timestamp: Date.now() });
-            console.log(`[ChatSidebar] Focus requested: ${type} ${id}`);
-        }
-    }, [tabContext]);
 
-    const { session } = React.useContext(FilesContext);
-    const { identityId } = session || {};
+    // Simple handlers
+    const handleInsertWord = (word) => insertWord?.(word);
+    const handleInsertQuestion = (question) => insertQuestion?.(question);
+    const handleFocusItem = (type, id) => tabContext.setFocusItem?.({ type, id, timestamp: Date.now() });
 
-    // Get vector store for semantic search
+    // Load chat data when chat changes
+    useEffect(() => {
+        if (!assistantChat || isLoadingChat) return;
+        if (assistantChat._version == null) return;
+
+        const chatChanged = lastChatId !== assistantChat.id;
+
+        if (chatChanged) {
+            dispatch({ type: ACTIONS.SET_LAST_CHAT_ID, payload: assistantChat.id });
+
+            // Load messages
+            const messages = assistantChat.messages || [];
+            setMessages(deepCloneMessages(messages));
+
+            // Load draft (only on chat change, not version updates)
+            dispatch({ type: ACTIONS.SET_INPUT, payload: assistantChat.draft || '' });
+
+            // Load files
+            assistantChat.files?.toArray()
+                .then(files => dispatch({ type: ACTIONS.SET_UPLOADED_FILES, payload: files || [] }))
+                .catch(err => console.error('[ChatSidebar] Error loading files:', err));
+        }
+    }, [assistantChat?.id, assistantChat?._version, isLoadingChat]);
+
     const vectorStoreCtx = React.useContext(VectorStoreContext);
 
     // Register vector store search function with chatTools
@@ -140,72 +256,36 @@ const ChatSidebar = () => {
         };
     }, [vectorStoreCtx]);
 
-    // Memoize stringified context keys to detect actual changes
-    // Use a custom hook to get stable keys based on content, not object references
-    const contextKeys = useMemo(() => {
-        const unitKey = unit ? `${unit.id}-${unit._version}` : 'no-unit';
-        // Create sorted comma-separated lists of IDs for comparison
-        const filesKeys = files ? Object.keys(files).sort().join(',') : 'no-files';
-        const questionBankKeys = questionBank ? Object.keys(questionBank).sort().join(',') : 'no-questions';
-        const dictionaryKeys = dictionary ? Object.keys(dictionary).sort().join(',') : 'no-dict';
-        const sectionsKeys = sections && sections.length > 0 ? sections.map(s => s.id).sort().join(',') : 'no-sections';
-
-        const combined = `${unitKey}|${filesKeys}|${questionBankKeys}|${dictionaryKeys}|${sectionsKeys}`;
-        return combined;
-    }, [
-        unit?.id,
-        unit?._version,
-        // Use stable primitive values for dependencies
-        files ? Object.keys(files).length : 0,
-        questionBank ? Object.keys(questionBank).length : 0,
-        dictionary ? Object.keys(dictionary).length : 0,
-        sections ? sections.length : 0,
-    ]);
-
-    // Store previous contextKeys in a ref to detect actual changes
-    const prevContextKeysRef = useRef(contextKeys);
-    const contextKeysActuallyChanged = prevContextKeysRef.current !== contextKeys;
-    if (contextKeysActuallyChanged) {
-        console.log('[ChatSidebar] Context keys changed:', prevContextKeysRef.current, '→', contextKeys);
-        prevContextKeysRef.current = contextKeys;
-    }
-
-    // Memoize context data to prevent customFetch recreation - only update when keys actually change
-    const contextData = useMemo(() => {
-        if (contextKeysActuallyChanged) {
-            console.log('[ChatSidebar] Recomputing contextData due to key change');
-        }
-        return {
-            unit: unit ? {
-                id: unit.id,
-                name: unit.name,
-                description: unit.description,
-                data: unit.data, // use markdown in unit data if available
-            } : null,
-            files: files ? Object.values(files).map(f => ({
-                id: f.id,
-                name: f.name,
-                description: f.description,
-                mimeType: f.mimeType,
-            })) : [],
-            questionBank: questionBank ? Object.values(questionBank).map(q => ({
-                id: q.id,
-                prompt: q.prompt,
-                answer: q.answer,
-            })) : [],
-            dictionary: dictionary ? Object.values(dictionary).map(d => ({
-                id: d.id,
-                phrase: d.phrase,
-                definition: d.definition,
-            })) : [],
-            sections: sections ? sections.map(s => ({
-                id: s.id,
-                name: s.name,
-                description: s.description,
-            })) : [],
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [contextKeys]); // Only depend on the stable contextKeys string
+    // Simple context data for chat API
+    const contextData = useMemo(() => ({
+        unit: unit ? {
+            id: unit.id,
+            name: unit.name,
+            description: unit.description,
+            data: unit.data,
+        } : null,
+        files: files ? Object.values(files).map(f => ({
+            id: f.id,
+            name: f.name,
+            description: f.description,
+            mimeType: f.mimeType,
+        })) : [],
+        questionBank: questionBank ? Object.values(questionBank).map(q => ({
+            id: q.id,
+            prompt: q.prompt,
+            answer: q.answer,
+        })) : [],
+        dictionary: dictionary ? Object.values(dictionary).map(d => ({
+            id: d.id,
+            phrase: d.phrase,
+            definition: d.definition,
+        })) : [],
+        sections: sections?.map(s => ({
+            id: s.id,
+            name: s.name,
+            description: s.description,
+        })) || [],
+    }), [unit, files, questionBank, dictionary, sections]);
 
     // Memoize the fetch function to prevent recreation on every render
     const customFetch = useCallback(async (url, options) => {
@@ -275,6 +355,72 @@ const ChatSidebar = () => {
         fetch: customFetch, // Use our custom fetch that routes through Amplify
     }), [customFetch]);
 
+    // Simplified save functions
+    const saveDraft = useCallback(async (draftText, chat, currentMessages = []) => {
+        if (!chat?.id) return;
+
+        try {
+            await DataStore.save(
+                AssistantChat.copyOf(chat, (draft) => {
+                    draft.draft = draftText;
+                    draft.messages = currentMessages;
+                })
+            );
+        } catch (error) {
+            console.error('[ChatSidebar] Error saving draft:', error);
+        }
+    }, []);
+
+    const saveMessages = useCallback(async (msgs, chat, currentDraft) => {
+        if (!chat) return;
+
+        try {
+            const clonedMessages = deepCloneMessages(msgs);
+            await DataStore.save(
+                AssistantChat.copyOf(chat, (draft) => {
+                    draft.messages = clonedMessages;
+                    draft.draft = currentDraft;
+                })
+            );
+        } catch (error) {
+            console.error('[ChatSidebar] Error saving messages:', error);
+        }
+    }, [deepCloneMessages]);
+
+    const saveFileAssociations = useCallback(async (files, chat) => {
+        if (!chat) return;
+
+        try {
+            // AssistantChat uses @manyToMany with AssistantChatFile join table
+            const { AssistantChatFile } = await import('../models');
+            const currentAssociations = await DataStore.query(AssistantChatFile, (acf) =>
+                acf.assistantChatId.eq(chat.id)
+            );
+            const currentFileIds = new Set(currentAssociations.map(a => a.fileId));
+            const uploadedFileIds = new Set(files.filter(f => f.id).map(f => f.id));
+
+            const filesToAdd = files.filter(f => f.id && !currentFileIds.has(f.id));
+            const associationsToRemove = currentAssociations.filter(a => !uploadedFileIds.has(a.fileId));
+
+            if (filesToAdd.length === 0 && associationsToRemove.length === 0) return;
+
+            for (const association of associationsToRemove) {
+                await DataStore.delete(AssistantChatFile, association.id);
+            }
+
+            for (const file of filesToAdd) {
+                await DataStore.save(
+                    new AssistantChatFile({
+                        assistantChat: chat,
+                        file: file,
+                    })
+                );
+            }
+        } catch (error) {
+            console.error('[ChatSidebar] Error saving file associations:', error);
+        }
+    }, []);
+
     // Use Vercel AI SDK's useChat hook with memoized transport
     const chatHookResult = useChat({
         transport,
@@ -282,20 +428,20 @@ const ChatSidebar = () => {
         // Handle client-side tools
         async onToolCall({ toolCall }) {
             console.log('[ChatSidebar] onToolCall invoked:', toolCall.toolName, toolCall.toolCallId);
-            
+
             // Check if it's a dynamic tool first for proper type narrowing
             if (toolCall.dynamic) {
                 console.log('[ChatSidebar] Dynamic tool, skipping');
                 return;
             }
-            
+
             if (toolCall.toolName === 'search_content') {
                 console.log('[ChatSidebar] Executing client-side search_content:', toolCall.input);
-                
+
                 try {
                     const result = await executeTool('search_content', toolCall.input);
                     console.log('[ChatSidebar] Search result:', result);
-                    
+
                     // Use addToolOutput from ref (no await to avoid deadlocks)
                     if (addToolOutputRef.current) {
                         addToolOutputRef.current({
@@ -305,7 +451,7 @@ const ChatSidebar = () => {
                     }
                 } catch (error) {
                     console.error('[ChatSidebar] Search error:', error);
-                    
+
                     // Add error output
                     if (addToolOutputRef.current) {
                         addToolOutputRef.current({
@@ -327,6 +473,10 @@ const ChatSidebar = () => {
 
         onFinish: (message) => {
             console.log('[ChatSidebar] Message finished:', message);
+            // Save messages when streaming completes
+            if (assistantChat) {
+                saveMessages(messages, assistantChat, input);
+            }
         },
     });
 
@@ -353,69 +503,68 @@ const ChatSidebar = () => {
         addToolOutput,
     } = chatHookResult || {};
 
-    console.log('[ChatSidebar] useChat status:', status, 'messages:', messages.length, 'toolCalls:', toolCalls.length);
+    // Only log useChat status on meaningful changes
+    if (status !== 'ready' || (messages?.length > 0) || (toolCalls?.length > 0)) {
+        console.log('[ChatSidebar] useChat status:', status, 'messages:', messages.length, 'toolCalls:', toolCalls.length);
+    }
 
-    // Store addToolOutput in ref so it's accessible in onToolCall
-    React.useEffect(() => {
+    // Derive loading state from useChat status
+    const isLoading = status === 'in_progress' || status === 'streaming' || status === 'submitted';
+
+    // Simple input change handler with debounced draft saving
+    const handleInputChange = (e) => {
+        const newValue = e.target.value;
+        dispatch({ type: ACTIONS.SET_INPUT, payload: newValue });
+
+        // Debounce draft saving
+        if (assistantChat) {
+            clearTimeout(handleInputChange.timeoutId);
+            handleInputChange.timeoutId = setTimeout(() => {
+                saveDraft(newValue, assistantChat, messages);
+            }, 1000);
+        }
+    };
+
+    // Simple submit function
+    const submitMessage = useCallback(async (e) => {
+        e?.preventDefault();
+        if (!input?.trim() || !sendMessage) return;
+
+        try {
+            sendMessage({ text: input });
+            dispatch({ type: ACTIONS.SET_INPUT, payload: '' });
+
+            // Clear draft
+            if (assistantChat?.draft) {
+                DataStore.save(
+                    AssistantChat.copyOf(assistantChat, (draft) => {
+                        draft.draft = '';
+                    })
+                ).catch(err => console.error('[ChatSidebar] Error clearing draft:', err));
+            }
+        } catch (error) {
+            console.error('[ChatSidebar] Error sending message:', error);
+        }
+    }, [input, sendMessage, assistantChat]);
+
+    // Store addToolOutput in ref for onToolCall access
+    useEffect(() => {
         addToolOutputRef.current = addToolOutput;
     }, [addToolOutput]);
 
-    // Manage input state locally (v3 API doesn't provide this)
-    const [input, setInput] = React.useState('');
-
-    // Derive loading state directly from status - don't use local state
-    const isLoading = status === 'in_progress' || status === 'streaming' || status === 'submitted';
-
-    // Handle input change
-    const handleInputChange = (e) => {
-        setInput(e.target.value);
-    };
-
-    // Create a unified submit function
-    const submitMessage = React.useCallback(async (e) => {
-        if (e && e.preventDefault) {
-            e.preventDefault();
-        }
-
-        console.log('[ChatSidebar] submitMessage called', {
-            input,
-            inputLength: input?.length,
-            inputType: typeof input,
-            hasSendMessage: typeof sendMessage === 'function',
-            status
-        });
-
-        // If input is empty, don't submit
-        if (!input || input.trim() === '') {
-            console.log('[ChatSidebar] Empty input, not submitting');
-            return;
-        }
-
-        // Use sendMessage from useChat
-        if (typeof sendMessage === 'function') {
-            console.log('[ChatSidebar] Using sendMessage with input:', input);
-            try {
-                // AI SDK v6: sendMessage expects { text: string }
-                sendMessage({ text: input });
-                // Clear input after successful send
-                setInput('');
-            } catch (error) {
-                console.error('[ChatSidebar] Error sending message:', error);
-            }
-        } else {
-            console.error('[ChatSidebar] sendMessage function not available:', {
-                sendMessage: typeof sendMessage,
-                allKeys: Object.keys(chatHookResult)
-            });
-        }
-    }, [input, sendMessage, status, chatHookResult]);
-
-    // Auto-scroll to bottom when new messages arrive
+    // Auto-scroll to bottom when messages change
     useEffect(() => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
     }, [messages]);
+
+    // Save file associations when files change
+    useEffect(() => {
+        if (assistantChat && uploadedFiles) {
+            saveFileAssociations(uploadedFiles, assistantChat);
+        }
+    }, [uploadedFiles, assistantChat?.id, saveFileAssociations]);
 
     // Note: Section data is now provided by SectionContext
     // Removed redundant Section observer to reduce subscription overhead
@@ -431,105 +580,119 @@ const ChatSidebar = () => {
                     s3Key: doc.s3Key,
                 };
             });
-            setDocumentStatuses(statusMap);
-            console.log('[ChatSidebar] Document statuses updated:', statusMap);
+
+            // Only update if versions have actually changed
+            const hasChanges = items.some(doc => {
+                const prevDoc = documentStatuses[doc.id];
+                return !prevDoc || doc._version > (prevDoc._version || 0);
+            });
+
+            if (hasChanges) {
+                // Include version info for future comparisons
+                items.forEach(doc => {
+                    statusMap[doc.id]._version = doc._version;
+                });
+                console.log('[ChatSidebar] Document statuses updated:', statusMap);
+                dispatch({ type: ACTIONS.SET_DOCUMENT_STATUSES, payload: statusMap });
+            }
         });
 
         return () => subscription.unsubscribe();
     }, []);
 
     // Update document processing status when document status changes
+    const documentStatusesRef = useRef({});
     useEffect(() => {
-        setDocumentProcessingStatus(prev => {
-            const updated = { ...prev };
-            let hasChanges = false;
+        // Only run if documentStatuses actually changed
+        const statusesStr = JSON.stringify(documentStatuses);
+        if (documentStatusesRef.current.str === statusesStr) return;
+        documentStatusesRef.current.str = statusesStr;
 
-            Object.entries(updated).forEach(([index, status]) => {
-                if (status.documentId && documentStatuses[status.documentId]) {
-                    const docStatus = documentStatuses[status.documentId].status;
-                    const pageCount = documentStatuses[status.documentId].pageCount;
+        const updated = { ...documentProcessingStatus };
+        let hasChanges = false;
 
-                    // Map document status to processing status
-                    if (docStatus === 'completed' && status.status !== 'analyzed') {
-                        updated[index] = {
-                            ...status,
-                            status: 'analyzed',
-                            progress: 100,
-                            message: `Analysis complete! ${pageCount ? `${pageCount} pages analyzed.` : ''}`.trim(),
-                        };
-                        hasChanges = true;
-                    } else if (docStatus === 'analyzing' && status.status !== 'analyzing') {
-                        updated[index] = {
-                            ...status,
-                            status: 'analyzing',
-                            message: 'Analyzing content...',
-                        };
-                        hasChanges = true;
-                    } else if (docStatus === 'extracting' && status.status !== 'extracting') {
-                        updated[index] = {
-                            ...status,
-                            status: 'extracting',
-                            message: 'Extracting text...',
-                        };
-                        hasChanges = true;
-                    } else if (docStatus === 'uploaded' && ['analyzing', 'extracting'].includes(status.status)) {
-                        // Document went back to uploaded - likely cancelled
-                        updated[index] = {
-                            ...status,
-                            status: 'cancelled',
-                            message: 'Analysis cancelled',
-                        };
-                        hasChanges = true;
-                    } else if (docStatus === 'failed') {
-                        updated[index] = {
-                            ...status,
-                            status: 'error',
-                            message: 'Analysis failed',
-                        };
-                        hasChanges = true;
-                    }
+        Object.entries(updated).forEach(([index, status]) => {
+            if (status.documentId && documentStatuses[status.documentId]) {
+                const docStatus = documentStatuses[status.documentId].status;
+                const pageCount = documentStatuses[status.documentId].pageCount;
+
+                // Map document status to processing status
+                if (docStatus === 'completed' && status.status !== 'analyzed') {
+                    updated[index] = {
+                        ...status,
+                        status: 'analyzed',
+                        progress: 100,
+                        message: `Analysis complete! ${pageCount ? `${pageCount} pages analyzed.` : ''}`.trim(),
+                    };
+                    hasChanges = true;
+                } else if (docStatus === 'analyzing' && status.status !== 'analyzing') {
+                    updated[index] = {
+                        ...status,
+                        status: 'analyzing',
+                        message: 'Analyzing content...',
+                    };
+                    hasChanges = true;
+                } else if (docStatus === 'extracting' && status.status !== 'extracting') {
+                    updated[index] = {
+                        ...status,
+                        status: 'extracting',
+                        message: 'Extracting text...',
+                    };
+                    hasChanges = true;
+                } else if (docStatus === 'uploaded' && ['analyzing', 'extracting'].includes(status.status)) {
+                    // Document went back to uploaded - likely cancelled
+                    updated[index] = {
+                        ...status,
+                        status: 'cancelled',
+                        message: 'Analysis cancelled',
+                    };
+                    hasChanges = true;
+                } else if (docStatus === 'failed') {
+                    updated[index] = {
+                        ...status,
+                        status: 'error',
+                        message: 'Analysis failed',
+                    };
+                    hasChanges = true;
                 }
-            });
-
-            return hasChanges ? updated : prev;
+            }
         });
-    }, [documentStatuses]);
+
+        if (hasChanges) {
+            dispatch({ type: ACTIONS.SET_DOCUMENT_PROCESSING_STATUS, payload: updated });
+        }
+    }, [Object.keys(documentStatuses).length]);
 
     const handleDragOver = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        setIsDragging(true);
+        dispatch({ type: ACTIONS.SET_DRAGGING, payload: true });
     };
 
     const handleDragLeave = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        setIsDragging(false);
+        dispatch({ type: ACTIONS.SET_DRAGGING, payload: false });
     };
 
     const handleDrop = async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        setIsDragging(false);
+        dispatch({ type: ACTIONS.SET_DRAGGING, payload: false });
 
         const files = Array.from(e.dataTransfer.files);
         console.log('Files dropped:', files);
-        setUploadedFiles(prev => [...prev, ...files]);
+        dispatch({ type: ACTIONS.ADD_UPLOADED_FILES, payload: files });
     };
 
     const handleFileSelect = (e) => {
         const files = Array.from(e.target.files);
         console.log('Files selected:', files);
-        setUploadedFiles(prev => [...prev, ...files]);
+        dispatch({ type: ACTIONS.ADD_UPLOADED_FILES, payload: files });
     };
 
     const removeFile = (index) => {
-        setUploadedFiles(prev => prev.filter((_, i) => i !== index));
-        setDocumentProcessingStatus(prev => {
-            const newStatus = { ...prev };
-            delete newStatus[index];
-            return newStatus;
-        });
+        dispatch({ type: ACTIONS.REMOVE_UPLOADED_FILE, payload: index });
     };
 
     // Cancel document processing
@@ -543,40 +706,43 @@ const ChatSidebar = () => {
         try {
             console.log('[ChatSidebar] Cancelling analysis for document:', status.documentId);
 
-            setDocumentProcessingStatus(prev => ({
-                ...prev,
-                [index]: {
-                    ...prev[index],
-                    message: 'Cancelling...'
+            dispatch({
+                type: ACTIONS.UPDATE_DOCUMENT_PROCESSING_STATUS, payload: {
+                    [index]: {
+                        ...documentProcessingStatus[index],
+                        message: 'Cancelling...'
+                    }
                 }
-            }));
+            });
 
             await cancelPDFAnalysis(status.documentId);
 
-            setDocumentProcessingStatus(prev => ({
-                ...prev,
-                [index]: {
-                    ...prev[index],
-                    status: 'cancelled',
-                    message: 'Analysis cancelled'
+            dispatch({
+                type: ACTIONS.UPDATE_DOCUMENT_PROCESSING_STATUS, payload: {
+                    [index]: {
+                        ...documentProcessingStatus[index],
+                        status: 'cancelled',
+                        message: 'Analysis cancelled'
+                    }
                 }
-            }));
+            });
         } catch (error) {
             console.error('[ChatSidebar] Error cancelling analysis:', error);
-            setDocumentProcessingStatus(prev => ({
-                ...prev,
-                [index]: {
-                    ...prev[index],
-                    message: `Cancel failed: ${error.message}`
+            dispatch({
+                type: ACTIONS.UPDATE_DOCUMENT_PROCESSING_STATUS, payload: {
+                    [index]: {
+                        ...documentProcessingStatus[index],
+                        message: `Cancel failed: ${error.message}`
+                    }
                 }
-            }));
+            });
         }
     };
 
     // Open vocabulary review dialog
     const openVocabularyReview = (documentId) => {
-        setReviewDocumentId(documentId);
-        setVocabularyReviewDialogOpen(true);
+        dispatch({ type: ACTIONS.SET_REVIEW_DOCUMENT_ID, payload: documentId });
+        dispatch({ type: ACTIONS.SET_VOCABULARY_REVIEW_DIALOG, payload: true });
     };
 
     // Handle vocabulary import completion
@@ -585,7 +751,7 @@ const ChatSidebar = () => {
         // Could show a success message or update UI
         // Optionally close the dialog after a delay
         setTimeout(() => {
-            setVocabularyReviewDialogOpen(false);
+            dispatch({ type: ACTIONS.SET_VOCABULARY_REVIEW_DIALOG, payload: false });
         }, 2000);
     };
 
@@ -604,34 +770,36 @@ const ChatSidebar = () => {
             console.log('[ChatSidebar] Processing document:', file.name, { index });
 
             // Update status to uploading
-            setDocumentProcessingStatus(prev => ({
-                ...prev,
-                [index]: { status: 'uploading', progress: 0, message: 'Uploading document...' }
-            }));
+            dispatch({
+                type: ACTIONS.UPDATE_DOCUMENT_PROCESSING_STATUS, payload: {
+                    [index]: { status: 'uploading', progress: 0, message: 'Uploading document...' }
+                }
+            });
 
             // Get identity ID if not already available
             const session = await fetchAuthSession();
-            const currentIdentityId = identityId || session.identityId;
+            const identityId = session.identityId;
 
-            console.log('[ChatSidebar] Identity ID:', currentIdentityId);
+            console.log('[ChatSidebar] Identity ID:', identityId);
             console.log('[ChatSidebar] Unit ID:', unit?.id);
 
             // Upload and analyze
             const result = await uploadAndAnalyzePDF(
                 file,
-                currentIdentityId,
+                identityId,
                 unit?.id,
                 true, // auto-analyze
                 (loaded, total) => {
                     const progress = Math.round((loaded / total) * 100);
-                    setDocumentProcessingStatus(prev => ({
-                        ...prev,
-                        [index]: {
-                            status: 'uploading',
-                            progress,
-                            message: `Uploading... ${progress}%`
+                    dispatch({
+                        type: ACTIONS.UPDATE_DOCUMENT_PROCESSING_STATUS, payload: {
+                            [index]: {
+                                status: 'uploading',
+                                progress,
+                                message: `Uploading... ${progress}%`
+                            }
                         }
-                    }));
+                    });
                 }
             );
 
@@ -639,45 +807,49 @@ const ChatSidebar = () => {
 
             // Update status based on result - store documentId for tracking
             if (result.analysisResult && result.analysisResult.success) {
-                setDocumentProcessingStatus(prev => ({
-                    ...prev,
-                    [index]: {
-                        status: 'analyzing',
-                        progress: 100,
-                        message: 'Document uploaded, analysis started...',
-                        documentId: result.documentModel?.id,
+                dispatch({
+                    type: ACTIONS.UPDATE_DOCUMENT_PROCESSING_STATUS, payload: {
+                        [index]: {
+                            status: 'analyzing',
+                            progress: 100,
+                            message: 'Document uploaded, analysis started...',
+                            documentId: result.documentModel?.id,
+                        }
                     }
-                }));
+                });
             } else if (result.documentModel) {
-                setDocumentProcessingStatus(prev => ({
-                    ...prev,
-                    [index]: {
-                        status: 'uploaded',
-                        progress: 100,
-                        message: 'Document uploaded successfully',
-                        documentId: result.documentModel?.id,
+                dispatch({
+                    type: ACTIONS.UPDATE_DOCUMENT_PROCESSING_STATUS, payload: {
+                        [index]: {
+                            status: 'uploaded',
+                            progress: 100,
+                            message: 'Document uploaded successfully',
+                            documentId: result.documentModel?.id,
+                        }
                     }
-                }));
+                });
             } else {
-                setDocumentProcessingStatus(prev => ({
-                    ...prev,
-                    [index]: {
-                        status: 'uploaded',
-                        progress: 100,
-                        message: 'Document uploaded (no document created)'
+                dispatch({
+                    type: ACTIONS.UPDATE_DOCUMENT_PROCESSING_STATUS, payload: {
+                        [index]: {
+                            status: 'uploaded',
+                            progress: 100,
+                            message: 'Document uploaded (no document created)'
+                        }
                     }
-                }));
+                });
             }
         } catch (error) {
             console.error('[ChatSidebar] Error processing document:', error);
-            setDocumentProcessingStatus(prev => ({
-                ...prev,
-                [index]: {
-                    status: 'error',
-                    progress: 0,
-                    message: `Error: ${error.message}`
+            dispatch({
+                type: ACTIONS.UPDATE_DOCUMENT_PROCESSING_STATUS, payload: {
+                    [index]: {
+                        status: 'error',
+                        progress: 0,
+                        message: `Error: ${error.message}`
+                    }
                 }
-            }));
+            });
         }
     };
 
@@ -686,30 +858,33 @@ const ChatSidebar = () => {
         uploadedFiles.forEach((file, index) => {
             if (file.type === 'application/pdf' && !documentProcessingStatus[index]) {
                 // Ask user if they want to process the document
-                setConfirmDialog({
-                    open: true,
-                    message: `Would you like to upload and analyze "${file.name}"? This will extract text and generate vocabulary.`,
-                    severity: 'info',
-                    onConfirm: () => {
-                        processDocument(file, index);
-                        setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'info' });
-                    },
-                    onCancel: () => {
-                        // Mark as declined
-                        setDocumentProcessingStatus(prev => ({
-                            ...prev,
-                            [index]: {
-                                status: 'declined',
-                                progress: 0,
-                                message: 'Analysis declined'
-                            }
-                        }));
-                        setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'info' });
+                dispatch({
+                    type: ACTIONS.SET_CONFIRM_DIALOG, payload: {
+                        open: true,
+                        message: `Would you like to upload and analyze "${file.name}"? This will extract text and generate vocabulary.`,
+                        severity: 'info',
+                        onConfirm: () => {
+                            processDocument(file, index);
+                            dispatch({ type: ACTIONS.SET_CONFIRM_DIALOG, payload: { open: false, message: '', onConfirm: null, severity: 'info' } });
+                        },
+                        onCancel: () => {
+                            // Mark as declined
+                            dispatch({
+                                type: ACTIONS.UPDATE_DOCUMENT_PROCESSING_STATUS, payload: {
+                                    [index]: {
+                                        status: 'declined',
+                                        progress: 0,
+                                        message: 'Analysis declined'
+                                    }
+                                }
+                            });
+                            dispatch({ type: ACTIONS.SET_CONFIRM_DIALOG, payload: { open: false, message: '', onConfirm: null, severity: 'info' } });
+                        }
                     }
                 });
             }
         });
-    }, [uploadedFiles, documentProcessingStatus, unit?.id, identityId]);
+    }, [uploadedFiles.length, unit?.id]); // Use length instead of the full objects to prevent infinite loops
 
     return (
         <>
@@ -764,19 +939,114 @@ const ChatSidebar = () => {
                     }}
                 >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <ChatIcon color="primary" />
-                        <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
-                            AI Assistant
-                        </Typography>
+                        {historyDrawerOpen ? (
+                            <>
+                                <HistoryIcon color="primary" />
+                                <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
+                                    History
+                                </Typography>
+                            </>
+                        ) : (
+                            <>
+                                <ChatIcon color="primary" />
+                                <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
+                                    AI Assistant
+                                </Typography>
+                            </>
+                        )}
                     </Box>
-                    <IconButton
-                        size="small"
-                        onClick={() => setMessages([])}
-                        title="Clear chat"
-                        sx={{ color: 'error.main' }}
-                    >
-                        <DeleteIcon fontSize="small" />
-                    </IconButton>
+                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        {historyDrawerOpen ? (
+                            <IconButton
+                                size="small"
+                                onClick={() => dispatch({ type: ACTIONS.SET_HISTORY_DRAWER_OPEN, payload: false })}
+                                title="Back to chat"
+                                sx={{ color: 'primary.main' }}
+                            >
+                                <ChatIcon fontSize="small" />
+                            </IconButton>
+                        ) : (
+                            <>
+                                <IconButton
+                                    size="small"
+                                    onClick={async () => {
+                                        // Save current draft before switching to history
+                                        if (input && assistantChat?.id) {
+                                            await saveDraft(input, assistantChat, messages);
+                                        }
+                                        dispatch({ type: ACTIONS.SET_HISTORY_DRAWER_OPEN, payload: true });
+                                    }}
+                                    title="Chat history"
+                                    sx={{ color: 'primary.main' }}
+                                >
+                                    <HistoryIcon fontSize="small" />
+                                </IconButton>
+                                <IconButton
+                                    size="small"
+                                    onClick={async () => {
+                                        try {
+                                            // Step 0: Save current state if there's a current chat
+                                            if (assistantChat?.id && (input.trim() || messages.length > 0)) {
+                                                console.log('[ChatSidebar] Saving current chat state before creating new chat');
+                                                await saveDraft(input, assistantChat, messages);
+                                            }
+
+                                            console.log('[ChatSidebar] Creating new chat');
+
+                                            // Clear local state
+                                            setMessages([]);
+                                            dispatch({ type: ACTIONS.RESET_FOR_NEW_CHAT });
+
+                                            // Create new AssistantChat directly
+                                            const newChat = await DataStore.save(new AssistantChat({
+                                                model: 'gpt-4',
+                                                messages: JSON.stringify([]),
+                                                threadInstructions: '',
+                                                additionalInstructions: '',
+                                            }));
+                                            console.log('[ChatSidebar] Created new chat:', newChat.id);
+                                            
+                                            // TabContext subscription will pick up the new chat automatically
+                                        } catch (error) {
+                                            console.error('[ChatSidebar] Error creating new chat:', error);
+                                        }
+                                    }}
+                                    title="New chat"
+                                    sx={{ color: 'success.main' }}
+                                >
+                                    <AddIcon fontSize="small" />
+                                </IconButton>
+                                <IconButton
+                                    size="small"
+                                    onClick={async () => {
+                                        // Archive current chat by marking it archived
+                                        // TabContext will detect this and create a new chat automatically
+                                        if (assistantChat?.id && !isLoadingChat) {
+                                            try {
+                                                // Mark current chat as archived
+                                                await DataStore.save(
+                                                    AssistantChat.copyOf(assistantChat, updated => {
+                                                        updated.archived = true;
+                                                    })
+                                                );
+                                                console.log('[ChatSidebar] Chat archived - TabContext will create new chat');
+
+                                                // Clear local state
+                                                setMessages([]);
+                                                dispatch({ type: ACTIONS.RESET_FOR_NEW_CHAT });
+                                            } catch (error) {
+                                                console.error('[ChatSidebar] Error archiving chat:', error);
+                                            }
+                                        }
+                                    }}
+                                    title="Archive chat"
+                                    sx={{ color: 'warning.main' }}
+                                >
+                                    <ArchiveIcon fontSize="small" />
+                                </IconButton>
+                            </>
+                        )}
+                    </Box>
                 </Paper>
 
                 {/* Messages */}
@@ -791,308 +1061,524 @@ const ChatSidebar = () => {
                         bgcolor: 'grey.50',
                     }}
                 >
-                    {messages.length === 0 && (
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                height: '100%',
-                                color: 'text.secondary',
-                                textAlign: 'center',
-                                p: 3,
-                            }}
-                        >
-                            <ChatIcon sx={{ fontSize: 48, mb: 2, opacity: 0.3 }} />
-                            <Typography
-                                variant="body2"
-                                sx={{
-                                    wordWrap: 'break-word',
-                                    textAlign: 'center',
-                                    whiteSpace: 'normal'
-                                }}
-                            >
-                                Ask me anything about your curriculum, files, or content!
-                            </Typography>
+
+                    {historyDrawerOpen ? (
+                        /* Show chat history list */
+                        <Box sx={{ p: 2 }}>
+                            {isLoadingChat && chatHistories.length === 0 ? (
+                                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                                    <CircularProgress size={24} />
+                                </Box>
+                            ) : chatHistories.length === 0 ? (
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        height: '100%',
+                                        color: 'text.secondary',
+                                        textAlign: 'center',
+                                        p: 3,
+                                    }}
+                                >
+                                    <HistoryIcon sx={{ fontSize: 48, mb: 2, opacity: 0.3 }} />
+                                    <Typography variant="body2">
+                                        No history available
+                                    </Typography>
+                                </Box>
+                            ) : (
+                                <>
+                                    {/* Active Chats */}
+                                    {chatHistories.filter(h => !h.archived).length > 0 && (
+                                        <>
+                                            <Typography variant="subtitle2" sx={{ px: 2, py: 1, color: 'text.secondary', fontWeight: 600 }}>
+                                                Active Chats
+                                            </Typography>
+                                            <List sx={{ p: 0 }}>
+                                                {chatHistories.filter(h => !h.archived).map((history, index) => {
+                                                    console.log('[ChatSidebar] Rendering chat history:', history.id, history);
+                                                    const isActive = assistantChat?.id === history.id;
+                                                    const isArchived = history.archived;
+                                                    let historyMessages = [];
+                                                    let historyDraft = '';
+                                                    try {
+                                                        historyMessages = history?.messages?.length ? history.messages : [];
+                                                        historyDraft = history?.draft || '';
+                                                    } catch (err) {
+                                                        console.error('[ChatSidebar] Error parsing messages:', err);
+                                                    }
+                                                    const messageCount = historyMessages.length;
+                                                    const firstUserMessage = historyMessages.find(m => m.role === 'user');
+                                                    console.log('First user message for history', history.id, ':', firstUserMessage, historyMessages);
+                                                    const preview = firstUserMessage?.part || historyDraft || 'Empty chat';
+                                                    const displayPreview = typeof preview === 'string' ? preview : JSON.stringify(preview);
+                                                    const createdAt = history.createdAt ? new Date(history.createdAt).toLocaleDateString() : 'Unknown';
+
+                                                    return (
+                                                        <React.Fragment key={history.id}>
+                                                            <ListItemButton
+                                                                onClick={async () => {
+                                                                    if (assistantChat && input.trim()) {
+                                                                        try {
+                                                                            await DataStore.save(
+                                                                                AssistantChat.copyOf(assistantChat, updated => {
+                                                                                    updated.draft = input;
+                                                                                })
+                                                                            );
+                                                                        } catch (error) {
+                                                                            console.error('[ChatSidebar] Error saving draft:', error);
+                                                                        }
+                                                                    }
+                                                                    if (tabContext.switchToChat) {
+                                                                        tabContext.switchToChat(history.id);
+                                                                    } else {
+                                                                        setCurrentChat(history);
+                                                                        setMessages(JSON.parse(JSON.stringify(historyMessages)));
+                                                                        dispatch({ type: ACTIONS.SET_INPUT, payload: historyDraft || '' });
+                                                                    }
+                                                                    dispatch({ type: ACTIONS.SET_HISTORY_DRAWER_OPEN, payload: false });
+                                                                    console.log('[ChatSidebar] Switching to chat history:', history.id);
+                                                                }}
+                                                                selected={isActive}
+                                                                sx={{
+                                                                    borderRadius: 1,
+                                                                    mb: 0.5,
+                                                                    bgcolor: isActive ? 'primary.light' : 'transparent',
+                                                                    '&:hover': {
+                                                                        bgcolor: isActive ? 'primary.light' : 'grey.100',
+                                                                    },
+                                                                }}
+                                                            >
+
+                                                                <ListItemText
+                                                                    primary={
+                                                                        <Typography
+                                                                            variant="body2"
+                                                                            sx={{
+                                                                                fontWeight: isActive ? 600 : 400,
+                                                                                overflow: 'hidden',
+                                                                                textOverflow: 'ellipsis',
+                                                                                whiteSpace: 'nowrap',
+                                                                            }}
+                                                                        >
+                                                                            {displayPreview.substring(0, 50)}{displayPreview.length > 50 ? '...' : ''}
+                                                                        </Typography>
+                                                                    }
+                                                                    secondary={
+                                                                        <Typography variant="caption" color="text.secondary">
+                                                                            {messageCount} messages • {createdAt}{isArchived ? ' • Archived' : ''}
+                                                                        </Typography>
+                                                                    }
+                                                                />
+                                                            </ListItemButton>
+                                                            {index < chatHistories.length - 1 && <Divider sx={{ my: 0.5 }} />}
+                                                        </React.Fragment>
+                                                    );
+                                                })}
+                                            </List>
+                                        </>
+                                    )}
+
+                                    {/* Archived Chats */}
+                                    {chatHistories.filter(h => h.archived).length > 0 && (
+                                        <>
+                                            <Typography variant="subtitle2" sx={{ px: 2, py: 1, mt: 2, color: 'text.secondary', fontWeight: 600 }}>
+                                                Archived Chats
+                                            </Typography>
+                                            <List sx={{ p: 0 }}>
+                                                {chatHistories.filter(h => h.archived).map((history, index) => {
+                                                    const isActive = assistantChat?.id === history.id;
+                                                    let historyMessages = [];
+                                                    let historyDraft = '';
+                                                    try {
+                                                        historyMessages = history?.messages?.length ? history.messages : [];
+                                                        historyDraft = history?.draft || '';
+                                                    } catch (err) {
+                                                        console.error('[ChatSidebar] Error parsing messages:', err);
+                                                    }
+                                                    const messageCount = historyMessages.length;
+                                                    const firstUserMessage = historyMessages.find(m => m.role === 'user');
+                                                    const preview = firstUserMessage?.content || historyDraft || 'Empty chat';
+                                                    const displayPreview = typeof preview === 'string' ? preview : JSON.stringify(preview);
+                                                    const createdAt = history.createdAt ? new Date(history.createdAt).toLocaleDateString() : 'Unknown';
+
+                                                    return (
+                                                        <React.Fragment key={history.id}>
+                                                            <ListItemButton
+                                                                onClick={async () => {
+                                                                    if (tabContext.switchToChat) {
+                                                                        tabContext.switchToChat(history.id);
+                                                                    } else {
+                                                                        setCurrentChat(history);
+                                                                        setMessages(JSON.parse(JSON.stringify(historyMessages)));
+                                                                        dispatch({ type: ACTIONS.SET_INPUT, payload: historyDraft || '' });
+                                                                    }
+                                                                    dispatch({ type: ACTIONS.SET_HISTORY_DRAWER_OPEN, payload: false });
+                                                                    console.log('[ChatSidebar] Switching to archived chat:', history.id);
+                                                                }}
+                                                                selected={isActive}
+                                                                sx={{
+                                                                    borderRadius: 1,
+                                                                    mb: 0.5,
+                                                                    bgcolor: isActive ? 'primary.light' : 'transparent',
+                                                                    '&:hover': {
+                                                                        bgcolor: isActive ? 'primary.light' : 'grey.100',
+                                                                    },
+                                                                    opacity: 0.7,
+                                                                }}
+                                                            >
+                                                                <ListItemText
+                                                                    primary={
+                                                                        <Typography
+                                                                            variant="body2"
+                                                                            sx={{
+                                                                                fontWeight: isActive ? 600 : 400,
+                                                                                overflow: 'hidden',
+                                                                                textOverflow: 'ellipsis',
+                                                                                whiteSpace: 'nowrap',
+                                                                            }}
+                                                                        >
+                                                                            {displayPreview.substring(0, 50)}{displayPreview.length > 50 ? '...' : ''}
+                                                                        </Typography>
+                                                                    }
+                                                                    secondary={
+                                                                        <Typography variant="caption" color="text.secondary">
+                                                                            {messageCount} messages • {createdAt}{isLegacy ? ' • Legacy (read-only)' : ''}
+                                                                        </Typography>
+                                                                    }
+                                                                />
+                                                                <Tooltip title={isLegacy ? 'Cannot unarchive legacy chat' : 'Unarchive chat'}>
+                                                                    <span>
+                                                                        <IconButton
+                                                                            size="small"
+                                                                            onClick={async (e) => {
+                                                                                e.stopPropagation();
+                                                                                if (history.assistantID) {
+                                                                                    try {
+                                                                                        await DataStore.save(
+                                                                                            ChatHistory.copyOf(history, updated => {
+                                                                                                updated.archived = false;
+                                                                                            })
+                                                                                        );
+                                                                                        console.log('[ChatSidebar] Unarchived chat:', history.id);
+                                                                                    } catch (error) {
+                                                                                        console.error('[ChatSidebar] Error unarchiving chat:', error);
+                                                                                    }
+                                                                                } else {
+                                                                                    console.warn('[ChatSidebar] Cannot unarchive legacy chat');
+                                                                                }
+                                                                            }}
+                                                                            disabled={isLegacy}
+                                                                            sx={{ opacity: isLegacy ? 0.3 : 1 }}
+                                                                        >
+                                                                            <UnarchiveIcon fontSize="small" />
+                                                                        </IconButton>
+                                                                    </span>
+                                                                </Tooltip>
+                                                            </ListItemButton>
+                                                            {index < chatHistories.filter(h => h.archived).length - 1 && <Divider sx={{ my: 0.5 }} />}
+                                                        </React.Fragment>
+                                                    );
+                                                })}
+                                            </List>
+                                        </>
+                                    )}
+                                </>
+                            )}
                         </Box>
-                    )}
-                    {messages.map((message) => {
-                        // Only log on first render of this message
-                        if (!message._logged) {
-                            message._logged = true;
-                            console.log('[ChatSidebar] New message:', {
-                                id: message.id,
-                                role: message.role,
-                                partsCount: message.parts?.length || 0,
-                            });
-                        }
 
-                        // Extract text content from message.parts (AI SDK v6 format)
-                        let textContent = '';
-                        if (message.parts && Array.isArray(message.parts)) {
-                            textContent = message.parts
-                                .filter(part => part.type === 'text')
-                                .map(part => part.text)
-                                .join('');
-                        }
-
-                        // Extract tool invocations from message.parts
-                        const toolParts = message.parts?.filter(part =>
-                            part.type?.startsWith('tool-')
-                        ) || [];
-                        
-                        // Debug: Log message parts to see structure
-                        if (message.parts && message.parts.length > 0 && message.role === 'assistant') {
-                            console.log('[ChatSidebar] Message parts:', message.parts.map(p => ({ type: p.type, toolName: p.toolName, state: p.state })));
-                            console.log('[ChatSidebar] Tool parts found:', toolParts.length);
-                        }
-
-                        return (
-                            <Box
-                                key={message.id}
-                                sx={{
-                                    m: 0.75,
-                                    p: '0.75rem 1rem',
-                                    borderRadius: '1rem',
-                                    maxWidth: '85%',
-                                    wordWrap: 'break-word',
-                                    ...(message.role === 'user' ? {
-                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                        color: 'white',
-                                        alignSelf: 'flex-end',
-                                        borderBottomRightRadius: '0.25rem',
-                                    } : {
-                                        bgcolor: '#f3f4f6',
-                                        color: '#1f2937',
-                                        alignSelf: 'flex-start',
-                                        borderBottomLeftRadius: '0.25rem',
-                                        border: '1px solid #e5e7eb',
-                                        position: 'relative',
-                                        // Add padding to right and bottom when message has text content (for feedback widget)
-                                        ...(textContent && {
-                                            pr: 6,
-                                            pb: 4,
-                                        })
-                                    })
-                                }}
-                            >
-                                {/* Render text content */}
-                                {textContent && (
-                                    <Box
-                                        component="pre"
+                    ) : (
+                        /* Show normal chat messages */
+                        <div key={assistantChat ? assistantChat.id : 'no-history'}>
+                            {messages.length === 0 && (
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        height: '100%',
+                                        color: 'text.secondary',
+                                        textAlign: 'center',
+                                        p: 3,
+                                    }}
+                                >
+                                    <ChatIcon sx={{ fontSize: 48, mb: 2, opacity: 0.3 }} />
+                                    <Typography
+                                        variant="body2"
                                         sx={{
-                                            m: 0,
-                                            whiteSpace: 'pre-wrap',
                                             wordWrap: 'break-word',
-                                            fontFamily: 'inherit',
-                                            fontSize: '0.9rem',
-                                            lineHeight: 1.5,
+                                            textAlign: 'center',
+                                            whiteSpace: 'normal'
                                         }}
                                     >
-                                        {textContent}
-                                    </Box>
-                                )}
+                                        Ask me anything about your curriculum, files, or content!
+                                    </Typography>
+                                </Box>
+                            )}
+                            {messages.map((message, index) => {
 
-                                {/* Render tool invocations as separate status items, not inside message bubble */}
-                                {toolParts.map((part, toolIdx) => {
-                                    const callId = part.toolCallId;
-                                    // Extract tool name from type (e.g., 'tool-search_content' -> 'search_content')
-                                    const toolName = part.type?.replace('tool-', '') || part.toolName || 'unknown';
+                                // Extract text content from message.parts (AI SDK v6 format)
+                                let textContent = '';
+                                if (message.parts && Array.isArray(message.parts)) {
+                                    textContent = message.parts
+                                        .filter(part => part.type === 'text')
+                                        .map(part => part.text)
+                                        .join('');
+                                }
 
-                                    // Render tool parts based on specific tool names
-                                    if (toolName === 'search_content') {
-                                        const executionState = toolExecutionStates[callId];
-                                        let parsedOutput = null;
-                                        
-                                        if (part.state === 'output-available' && part.output) {
-                                            try {
-                                                parsedOutput = typeof part.output === 'string' 
-                                                    ? JSON.parse(part.output) 
-                                                    : part.output;
-                                            } catch (e) {
-                                                console.error('[ChatSidebar] Failed to parse search output:', e);
-                                            }
-                                        }
-                                        
-                                        return (
+                                // Extract tool invocations from message.parts
+                                const toolParts = message.parts?.filter(part =>
+                                    part.type?.startsWith('tool-')
+                                ) || [];
+
+                                return (
+                                    <Box key={message.id || `message-${index}`} sx={{ width: '100%', mb: 1 }}>
+                                        {/* Render text content in speech bubble */}
+                                        {textContent && (
                                             <Box
-                                                key={callId || toolIdx}
                                                 sx={{
-                                                    mb: 1,
-                                                    p: 1.5,
-                                                    bgcolor: 'background.paper',
-                                                    borderRadius: 1,
-                                                    border: '1px solid',
-                                                    borderColor: part.state === 'output-error' ? 'error.main' : 'divider',
+                                                    m: 0.75,
+                                                    p: '0.75rem 1rem',
+                                                    borderRadius: '1rem',
+                                                    maxWidth: '85%',
+                                                    wordWrap: 'break-word',
+                                                    ...(message.role === 'user' ? {
+                                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                        color: 'white',
+                                                        alignSelf: 'flex-end',
+                                                        marginLeft: 'auto',
+                                                        borderBottomRightRadius: '0.25rem',
+                                                    } : {
+                                                        bgcolor: '#f3f4f6',
+                                                        color: '#1f2937',
+                                                        alignSelf: 'flex-start',
+                                                        borderBottomLeftRadius: '0.25rem',
+                                                        border: '1px solid #e5e7eb',
+                                                        position: 'relative',
+                                                        pr: 6,
+                                                        pb: 4,
+                                                    })
                                                 }}
                                             >
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                                    <Typography variant="caption" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                                                        🔍 Search
-                                                    </Typography>
-                                                    {executionState === 'executing' && (
-                                                        <CircularProgress size={12} />
-                                                    )}
-                                                </Box>
-
-                                                {part.state === 'input-streaming' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic', color: 'text.secondary' }}>
-                                                        Preparing search...
-                                                    </Typography>
-                                                )}
-
-                                                {(() => {
-                                                    console.log('[ChatSidebar] Tool part debug:', {
-                                                        state: part.state,
-                                                        hasOutput: !!part.output,
-                                                        output: part.output,
-                                                        parsedOutput,
-                                                        toolCallId: part.toolCallId
-                                                    });
-                                                    return null;
-                                                })()}
-
-                                                {part.state === 'input-available' && (
-                                                    <Box>
-                                                        <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', mb: 1 }}>
-                                                            Query: <strong>"{part.input?.query}"</strong>
-                                                        </Typography>
-                                                        {executionState === 'executing' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic', color: 'info.main' }}>
-                                                                Searching...
-                                                            </Typography>
-                                                        )}
-                                                    </Box>
-                                                )}
-
-                                                {part.state === 'output-available' && parsedOutput && (
-                                                    <Box>
-                                                        {parsedOutput.success ? (
-                                                            <>
-                                                                <Typography variant="caption" sx={{ display: 'block', color: 'success.dark', mb: 1 }}>
-                                                                    ✓ Found {parsedOutput.results?.length || 0} results
-                                                                </Typography>
-                                                                <SearchResults 
-                                                                    results={parsedOutput.results || []}
-                                                                    unitId={unit?.id}
-                                                                    tabHandlers={tabContext}
-                                                                    onInsertWord={handleInsertWord}
-                                                                    onInsertQuestion={handleInsertQuestion}
-                                                                    onFocusItem={handleFocusItem}
-                                                                />
-                                                            </>
-                                                        ) : (
-                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
-                                                                ✗ {parsedOutput.error || 'Search failed'}
-                                                            </Typography>
-                                                        )}
-                                                    </Box>
-                                                )}
-
-                                                {part.state === 'output-error' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
-                                                        ✗ {part.errorText}
-                                                    </Typography>
-                                                )}
-                                            </Box>
-                                        );
-                                    }
-
-                                    // Handle create_section tool
-                                    if (toolName === 'create_section') {
-                                        return (
                                                 <Box
-                                                    key={callId || toolIdx}
+                                                    component="pre"
                                                     sx={{
-                                                        mb: 1,
-                                                        p: 1,
-                                                        bgcolor: 'transparent',
-                                                        borderLeft: '2px solid',
-                                                        borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
-                                                        fontSize: '0.8rem',
-                                                        color: 'text.secondary',
+                                                        m: 0,
+                                                        whiteSpace: 'pre-wrap',
+                                                        wordWrap: 'break-word',
+                                                        fontFamily: 'inherit',
+                                                        fontSize: '0.9rem',
+                                                        lineHeight: 1.5,
                                                     }}
                                                 >
-                                                    <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
-                                                        ➕ Create Section
-                                                    </Typography>
-
-                                                    {part.state === 'input-streaming' && (
-                                                        <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
-                                                            Preparing...
-                                                        </Typography>
-                                                    )}
-
-                                                    {part.state === 'input-available' && (
-                                                        <Typography variant="caption" sx={{ display: 'block' }}>
-                                                            "{part.input?.name}"
-                                                        </Typography>
-                                                    )}
-
-                                                    {part.state === 'output-available' && (
-                                                        <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
-                                                            ✓ {part.output?.message || 'Created'}
-                                                        </Typography>
-                                                    )}
-
-                                                    {part.state === 'output-error' && (
-                                                        <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
-                                                            ✗ {part.errorText}
-                                                        </Typography>
-                                                    )}
+                                                    {textContent}
                                                 </Box>
-                                            );
-                                    }
 
-                                    // Handle generate_unit_content tool
-                                    if (toolName === 'generate_unit_content') {
-                                        return (
-                                            <Box
-                                                key={callId || toolIdx}
-                                                sx={{
-                                                    mb: 1,
-                                                    p: 1,
-                                                    bgcolor: 'transparent',
-                                                    borderLeft: '2px solid',
-                                                    borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
-                                                    fontSize: '0.8rem',
-                                                    color: 'text.secondary',
-                                                }}
-                                            >
-                                                <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
-                                                    ✨ Generate Content
-                                                </Typography>
-
-                                                {part.state === 'input-streaming' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
-                                                        Preparing...
-                                                    </Typography>
-                                                )}
-
-                                                {part.state === 'input-available' && (
-                                                    <Typography variant="caption" sx={{ display: 'block' }}>
-                                                        {part.input?.contentType}: "{part.input?.topic}"
-                                                    </Typography>
-                                                )}
-
-                                                {part.state === 'output-available' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
-                                                        ✓ {part.output?.message || 'Ready'}
-                                                    </Typography>
-                                                )}
-
-                                                {part.state === 'output-error' && (
-                                                    <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
-                                                        ✗ {part.errorText}
-                                                    </Typography>
+                                                {/* AI Feedback Widget for assistant messages with text */}
+                                                {message.role === 'assistant' && (
+                                                    <Box sx={{ position: 'absolute', bottom: 4, right: 4 }}>
+                                                        <AIFeedbackWidget
+                                                            contentType="CHAT_MESSAGE"
+                                                            messageId={message.id}
+                                                            generatedContent={textContent}
+                                                            model={message.model}
+                                                            unitId={unit?.id}
+                                                            sessionId={assistantChat?.id}
+                                                            metadata={{
+                                                                unitName: unit?.name,
+                                                            }}
+                                                        />
+                                                    </Box>
                                                 )}
                                             </Box>
-                                        );
-                                    }
+                                        )}
 
-                                    // Handle dynamic or unknown tools
-                                    return (
+                                        {/* Render tool invocations at full width, outside speech bubbles */}
+                                        {toolParts.map((part, toolIdx) => {
+                                            const callId = part.toolCallId;
+                                            // Extract tool name from type (e.g., 'tool-search_content' -> 'search_content')
+                                            const toolName = part.type?.replace('tool-', '') || part.toolName || 'unknown';
+
+                                            // Render tool parts based on specific tool names
+                                            if (toolName === 'search_content') {
+                                                const executionState = toolExecutionStates[callId];
+                                                let parsedOutput = null;
+
+                                                if (part.state === 'output-available' && part.output) {
+                                                    try {
+                                                        parsedOutput = typeof part.output === 'string'
+                                                            ? JSON.parse(part.output)
+                                                            : part.output;
+                                                    } catch (e) {
+                                                        console.error('[ChatSidebar] Failed to parse search output:', e);
+                                                    }
+                                                }
+
+                                                return (
+                                                    <Box
+                                                        key={callId || toolIdx}
+                                                        sx={{
+                                                            width: '100%',
+                                                            mb: 2,
+                                                            p: 2,
+                                                            bgcolor: 'background.paper',
+                                                            borderRadius: 2,
+                                                            border: '1px solid',
+                                                            borderColor: part.state === 'output-error' ? 'error.main' : 'divider',
+                                                            boxShadow: 1,
+                                                        }}
+                                                    >
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                                                            <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                                                                🔍 Search Results
+                                                            </Typography>
+                                                            {executionState === 'executing' && (
+                                                                <CircularProgress size={16} />
+                                                            )}
+                                                        </Box>
+
+                                                        {part.state === 'input-streaming' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic', color: 'text.secondary' }}>
+                                                                Preparing search...
+                                                            </Typography>
+                                                        )}
+
+                                                        {part.state === 'input-available' && (
+                                                            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1, fontStyle: 'italic' }}>
+                                                                Searching for: "{part.input?.query}"
+                                                            </Typography>
+                                                        )}
+
+                                                        {part.state === 'output-available' && parsedOutput && (
+                                                            <Box sx={{ width: '100%' }}>
+                                                                {parsedOutput.success ? (
+                                                                    <>
+                                                                        <Typography variant="body2" sx={{ color: 'success.dark', mb: 2, fontWeight: 500 }}>
+                                                                            Found {parsedOutput.results?.length || 0} {parsedOutput.results?.length === 1 ? 'result' : 'results'}
+                                                                        </Typography>
+                                                                        <SearchResults
+                                                                            results={parsedOutput.results || []}
+                                                                            unitId={unit?.id}
+                                                                            searchQuery={part.input?.query || ''}
+                                                                            tabHandlers={tabContext}
+                                                                            onInsertWord={handleInsertWord}
+                                                                            onInsertQuestion={handleInsertQuestion}
+                                                                            onFocusItem={handleFocusItem}
+                                                                        />
+                                                                    </>
+                                                                ) : (
+                                                                    <Typography variant="body2" sx={{ color: 'error.main' }}>
+                                                                        {parsedOutput.error || 'Search failed'}
+                                                                    </Typography>
+                                                                )}
+                                                            </Box>
+                                                        )}
+
+                                                        {part.state === 'output-error' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
+                                                                ✗ {part.errorText}
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                );
+                                            }
+
+                                            // Handle create_section tool
+                                            if (toolName === 'create_section') {
+                                                return (
+                                                    <Box
+                                                        key={callId || toolIdx}
+                                                        sx={{
+                                                            mb: 1,
+                                                            p: 1,
+                                                            bgcolor: 'transparent',
+                                                            borderLeft: '2px solid',
+                                                            borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
+                                                            fontSize: '0.8rem',
+                                                            color: 'text.secondary',
+                                                        }}
+                                                    >
+                                                        <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
+                                                            ➕ Create Section
+                                                        </Typography>
+
+                                                        {part.state === 'input-streaming' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
+                                                                Preparing...
+                                                            </Typography>
+                                                        )}
+
+                                                        {part.state === 'input-available' && (
+                                                            <Typography variant="caption" sx={{ display: 'block' }}>
+                                                                "{part.input?.name}"
+                                                            </Typography>
+                                                        )}
+
+                                                        {part.state === 'output-available' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
+                                                                ✓ {part.output?.message || 'Created'}
+                                                            </Typography>
+                                                        )}
+
+                                                        {part.state === 'output-error' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
+                                                                ✗ {part.errorText}
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                );
+                                            }
+
+                                            // Handle generate_unit_content tool
+                                            if (toolName === 'generate_unit_content') {
+                                                return (
+                                                    <Box
+                                                        key={callId || toolIdx}
+                                                        sx={{
+                                                            mb: 1,
+                                                            p: 1,
+                                                            bgcolor: 'transparent',
+                                                            borderLeft: '2px solid',
+                                                            borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
+                                                            fontSize: '0.8rem',
+                                                            color: 'text.secondary',
+                                                        }}
+                                                    >
+                                                        <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
+                                                            ✨ Generate Content
+                                                        </Typography>
+
+                                                        {part.state === 'input-streaming' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
+                                                                Preparing...
+                                                            </Typography>
+                                                        )}
+
+                                                        {part.state === 'input-available' && (
+                                                            <Typography variant="caption" sx={{ display: 'block' }}>
+                                                                {part.input?.contentType}: "{part.input?.topic}"
+                                                            </Typography>
+                                                        )}
+
+                                                        {part.state === 'output-available' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
+                                                                ✓ {part.output?.message || 'Ready'}
+                                                            </Typography>
+                                                        )}
+
+                                                        {part.state === 'output-error' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
+                                                                ✗ {part.errorText}
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                );
+                                            }
+
+                                            // Handle dynamic or unknown tools
+                                            return (
                                                 <Box
                                                     key={callId || toolIdx}
                                                     sx={{
@@ -1134,118 +1620,95 @@ const ChatSidebar = () => {
                                                     )}
                                                 </Box>
                                             );
-                                })}
-
-                                {/* Add feedback widget for assistant messages with text content */}
-                                {message.role === 'assistant' && textContent && (
+                                        })}
+                                    </Box>
+                                );
+                            })}
+                            {isLoading && messages.length > 0 && messages[messages.length - 1]?.role !== 'assistant' && (
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1,
+                                        p: 2,
+                                        alignSelf: 'flex-start',
+                                        m: 0.75,
+                                    }}
+                                >
                                     <Box
                                         sx={{
-                                            position: 'absolute',
-                                            bottom: '0.5rem',
-                                            right: '0.5rem',
+                                            display: 'flex',
+                                            gap: 0.5,
+                                            p: '0.75rem 1rem',
+                                            borderRadius: '1rem',
+                                            bgcolor: '#f3f4f6',
+                                            border: '1px solid #e5e7eb',
                                         }}
                                     >
-                                        <AIFeedbackWidget
-                                            contentType="CHAT_MESSAGE"
-                                            messageId={message.id}
-                                            generatedContent={textContent}
-                                            model="gpt-4"
-                                            unitId={unit?.id}
-                                            sessionId={session?.sub}
-                                            metadata={{
-                                                role: message.role,
-                                                timestamp: new Date().toISOString(),
+                                        <Box
+                                            sx={{
+                                                width: 8,
+                                                height: 8,
+                                                borderRadius: '50%',
+                                                bgcolor: '#9ca3af',
+                                                animation: 'typing 1s infinite',
+                                                animationDelay: '0s',
+                                                '@keyframes typing': {
+                                                    '0%, 60%, 100%': {
+                                                        transform: 'translateY(0)',
+                                                        opacity: 0.7,
+                                                    },
+                                                    '30%': {
+                                                        transform: 'translateY(-7px)',
+                                                        opacity: 1,
+                                                    },
+                                                },
                                             }}
-                                            size="small"
+                                        />
+                                        <Box
+                                            sx={{
+                                                width: 8,
+                                                height: 8,
+                                                borderRadius: '50%',
+                                                bgcolor: '#9ca3af',
+                                                animation: 'typing 1s infinite',
+                                                animationDelay: '0.2s',
+                                                '@keyframes typing': {
+                                                    '0%, 60%, 100%': {
+                                                        transform: 'translateY(0)',
+                                                        opacity: 0.7,
+                                                    },
+                                                    '30%': {
+                                                        transform: 'translateY(-7px)',
+                                                        opacity: 1,
+                                                    },
+                                                },
+                                            }}
+                                        />
+                                        <Box
+                                            sx={{
+                                                width: 8,
+                                                height: 8,
+                                                borderRadius: '50%',
+                                                bgcolor: '#9ca3af',
+                                                animation: 'typing 1s infinite',
+                                                animationDelay: '0.4s',
+                                                '@keyframes typing': {
+                                                    '0%, 60%, 100%': {
+                                                        transform: 'translateY(0)',
+                                                        opacity: 0.7,
+                                                    },
+                                                    '30%': {
+                                                        transform: 'translateY(-7px)',
+                                                        opacity: 1,
+                                                    },
+                                                },
+                                            }}
                                         />
                                     </Box>
-                                )}
-                            </Box>
-                        );
-                    })}
-                    {isLoading && messages.length > 0 && messages[messages.length - 1]?.role !== 'assistant' && (
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1,
-                                p: 2,
-                                alignSelf: 'flex-start',
-                                m: 0.75,
-                            }}
-                        >
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    gap: 0.5,
-                                    p: '0.75rem 1rem',
-                                    borderRadius: '1rem',
-                                    bgcolor: '#f3f4f6',
-                                    border: '1px solid #e5e7eb',
-                                }}
-                            >
-                                <Box
-                                    sx={{
-                                        width: 8,
-                                        height: 8,
-                                        borderRadius: '50%',
-                                        bgcolor: '#9ca3af',
-                                        animation: 'typing 1s infinite',
-                                        animationDelay: '0s',
-                                        '@keyframes typing': {
-                                            '0%, 60%, 100%': {
-                                                transform: 'translateY(0)',
-                                                opacity: 0.7,
-                                            },
-                                            '30%': {
-                                                transform: 'translateY(-7px)',
-                                                opacity: 1,
-                                            },
-                                        },
-                                    }}
-                                />
-                                <Box
-                                    sx={{
-                                        width: 8,
-                                        height: 8,
-                                        borderRadius: '50%',
-                                        bgcolor: '#9ca3af',
-                                        animation: 'typing 1s infinite',
-                                        animationDelay: '0.2s',
-                                        '@keyframes typing': {
-                                            '0%, 60%, 100%': {
-                                                transform: 'translateY(0)',
-                                                opacity: 0.7,
-                                            },
-                                            '30%': {
-                                                transform: 'translateY(-7px)',
-                                                opacity: 1,
-                                            },
-                                        },
-                                    }}
-                                />
-                                <Box
-                                    sx={{
-                                        width: 8,
-                                        height: 8,
-                                        borderRadius: '50%',
-                                        bgcolor: '#9ca3af',
-                                        animation: 'typing 1s infinite',
-                                        animationDelay: '0.4s',
-                                        '@keyframes typing': {
-                                            '0%, 60%, 100%': {
-                                                transform: 'translateY(0)',
-                                                opacity: 0.7,
-                                            },
-                                            '30%': {
-                                                transform: 'translateY(-7px)',
-                                                opacity: 1,
-                                            },
-                                        },
-                                    }}
-                                />
-                            </Box>
-                        </Box>
+                                </Box>
+                            )}
+                        </div>
                     )}
                 </Box>
 
@@ -1364,6 +1827,31 @@ const ChatSidebar = () => {
                         </Box>
                     )}
 
+                    {/* Warning for legacy chats without assistantID */}
+                    {/* {currentChatHistory && !currentChatHistory.assistantID && (
+                        <Box sx={{ mb: 2, p: 2, bgcolor: 'warning.light', borderRadius: 1 }}>
+                            <Typography variant="body2" color="warning.dark" sx={{ mb: 1 }}>
+                                ⚠️ This chat session is using an outdated format and cannot be saved.
+                            </Typography>
+                            <Button
+                                size="small"
+                                variant="contained"
+                                color="warning"
+                                onClick={async () => {
+                                    try {
+                                        await DataStore.delete(currentChatHistory);
+                                        console.log('[ChatSidebar] Deleted legacy chat record');
+                                        // TabContext will create a new one automatically
+                                    } catch (error) {
+                                        console.error('[ChatSidebar] Error deleting legacy chat:', error);
+                                    }
+                                }}
+                            >
+                                Delete and Create New Chat
+                            </Button>
+                        </Box>
+                    )} */}
+
                     <Box sx={{ display: 'flex', gap: 1 }}>
                         {/* Hidden file input */}
                         <input
@@ -1377,7 +1865,7 @@ const ChatSidebar = () => {
                         {/* Attach button */}
                         <IconButton
                             onClick={() => fileInputRef.current?.click()}
-                            disabled={isLoading}
+                            disabled={isLoading || !assistantChat?.id}
                             sx={{ alignSelf: 'flex-end' }}
                         >
                             <UploadFile />
@@ -1394,8 +1882,12 @@ const ChatSidebar = () => {
                                     submitMessage(e);
                                 }
                             }}
-                            placeholder="Ask me anything..."
-                            disabled={isLoading}
+                            placeholder={
+                                !assistantChat?._version
+                                    ? "Setting up chat..."
+                                    : "Ask me anything..."
+                            }
+                            disabled={isLoading || !assistantChat?._version}
                             multiline
                             maxRows={4}
                             variant="outlined"
@@ -1408,7 +1900,7 @@ const ChatSidebar = () => {
                         <Button
                             type="submit"
                             variant="contained"
-                            disabled={isLoading}
+                            disabled={isLoading || !assistantChat?.id}
                             sx={{
                                 minWidth: 'auto',
                                 px: 2,
@@ -1428,14 +1920,14 @@ const ChatSidebar = () => {
             {/* Vocabulary Review Dialog */}
             <Dialog
                 open={vocabularyReviewDialogOpen}
-                onClose={() => setVocabularyReviewDialogOpen(false)}
+                onClose={() => dispatch({ type: ACTIONS.SET_VOCABULARY_REVIEW_DIALOG, payload: false })}
                 maxWidth="md"
                 fullWidth
             >
                 <DialogTitle>
                     Review & Import Vocabulary
                     <IconButton
-                        onClick={() => setVocabularyReviewDialogOpen(false)}
+                        onClick={() => dispatch({ type: ACTIONS.SET_VOCABULARY_REVIEW_DIALOG, payload: false })}
                         sx={{ position: 'absolute', right: 8, top: 8 }}
                     >
                         <DeleteIcon />
@@ -1495,7 +1987,7 @@ const ChatSidebar = () => {
                                         if (confirmDialog.onCancel) {
                                             confirmDialog.onCancel();
                                         } else {
-                                            setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'info' });
+                                            dispatch({ type: ACTIONS.SET_CONFIRM_DIALOG, payload: { open: false, message: '', onConfirm: null, severity: 'info' } });
                                         }
                                     }}
                                     variant="contained"

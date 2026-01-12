@@ -260,7 +260,7 @@ export default function RecordingStudio3({
       {
         ...scriptData,
         dialogue: scriptData.dialogue.map(d =>
-          d.id === dialogueId ? { ...d, ...updates } : d
+          d.id === dialogueId ? Object.assign({}, d, updates) : d
         ),
       },
       'DIALOGUE_UPDATED',

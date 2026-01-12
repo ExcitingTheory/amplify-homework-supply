@@ -2,15 +2,35 @@
  * Mock aws-amplify/auth for Storybook
  */
 
+// Allow stories to set the current user
+let mockCurrentUser = {
+  username: 'student-alice-sub',
+  userId: 'student-alice-sub',
+  attributes: {
+    sub: 'student-alice-sub',
+    email: 'alice@example.com',
+  },
+};
+
+export const setMockUser = (user) => {
+  console.log('[Mock Auth] setMockUser:', user);
+  mockCurrentUser = user;
+};
+
 export const fetchUserAttributes = async () => ({
-  sub: 'mock-user-sub',
-  email: 'mock@example.com',
+  sub: mockCurrentUser.attributes?.sub || mockCurrentUser.userId,
+  email: mockCurrentUser.attributes?.email || 'mock@example.com',
+  ...mockCurrentUser.attributes,
 });
 
-export const getCurrentUser = async () => ({
-  username: 'mock-user-sub',
-  userId: 'mock-user-sub',
-});
+export const getCurrentUser = async () => {
+  console.log('[Mock Auth] getCurrentUser returning:', mockCurrentUser);
+  return {
+    username: mockCurrentUser.username,
+    userId: mockCurrentUser.userId,
+    attributes: mockCurrentUser.attributes,
+  };
+};
 
 export const fetchAuthSession = async () => ({
   identityId: 'us-east-1:mock-identity-123',

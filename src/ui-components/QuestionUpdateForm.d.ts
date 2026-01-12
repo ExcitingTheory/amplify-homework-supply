@@ -5,7 +5,7 @@
  **************************************************************************/
 
 import * as React from "react";
-import { GridProps, SwitchFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
+import { GridProps, SwitchFieldProps, TextAreaFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
 import { Question } from "../models";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
@@ -29,12 +29,25 @@ export declare type QuestionUpdateFormInputValues = {
     hint?: string;
     prompt?: string;
     audio?: string[];
+    audioWaveformData?: string;
     answerAudio?: string[];
+    answerAudioWaveformData?: string;
     generated?: boolean;
     model?: string;
     promptHex?: string;
     byPromptHex?: string;
     thumbnail?: string;
+    difficulty?: string;
+    metadata?: string;
+    importedAt?: string;
+    embedding?: number[];
+    embeddingModel?: string;
+    embeddingDimensions?: number;
+    embeddingVersion?: number;
+    embeddingWordCount?: number;
+    moderationStatus?: string;
+    moderationFlags?: string;
+    moderationCheckedAt?: string;
 };
 export declare type QuestionUpdateFormValidationValues = {
     owner?: ValidationFunction<string>;
@@ -43,12 +56,25 @@ export declare type QuestionUpdateFormValidationValues = {
     hint?: ValidationFunction<string>;
     prompt?: ValidationFunction<string>;
     audio?: ValidationFunction<string>;
+    audioWaveformData?: ValidationFunction<string>;
     answerAudio?: ValidationFunction<string>;
+    answerAudioWaveformData?: ValidationFunction<string>;
     generated?: ValidationFunction<boolean>;
     model?: ValidationFunction<string>;
     promptHex?: ValidationFunction<string>;
     byPromptHex?: ValidationFunction<string>;
     thumbnail?: ValidationFunction<string>;
+    difficulty?: ValidationFunction<string>;
+    metadata?: ValidationFunction<string>;
+    importedAt?: ValidationFunction<string>;
+    embedding?: ValidationFunction<number>;
+    embeddingModel?: ValidationFunction<string>;
+    embeddingDimensions?: ValidationFunction<number>;
+    embeddingVersion?: ValidationFunction<number>;
+    embeddingWordCount?: ValidationFunction<number>;
+    moderationStatus?: ValidationFunction<string>;
+    moderationFlags?: ValidationFunction<string>;
+    moderationCheckedAt?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type QuestionUpdateFormOverridesProps = {
@@ -59,12 +85,25 @@ export declare type QuestionUpdateFormOverridesProps = {
     hint?: PrimitiveOverrideProps<TextFieldProps>;
     prompt?: PrimitiveOverrideProps<TextFieldProps>;
     audio?: PrimitiveOverrideProps<TextFieldProps>;
+    audioWaveformData?: PrimitiveOverrideProps<TextAreaFieldProps>;
     answerAudio?: PrimitiveOverrideProps<TextFieldProps>;
+    answerAudioWaveformData?: PrimitiveOverrideProps<TextAreaFieldProps>;
     generated?: PrimitiveOverrideProps<SwitchFieldProps>;
     model?: PrimitiveOverrideProps<TextFieldProps>;
     promptHex?: PrimitiveOverrideProps<TextFieldProps>;
     byPromptHex?: PrimitiveOverrideProps<TextFieldProps>;
     thumbnail?: PrimitiveOverrideProps<TextFieldProps>;
+    difficulty?: PrimitiveOverrideProps<TextFieldProps>;
+    metadata?: PrimitiveOverrideProps<TextFieldProps>;
+    importedAt?: PrimitiveOverrideProps<TextFieldProps>;
+    embedding?: PrimitiveOverrideProps<TextFieldProps>;
+    embeddingModel?: PrimitiveOverrideProps<TextFieldProps>;
+    embeddingDimensions?: PrimitiveOverrideProps<TextFieldProps>;
+    embeddingVersion?: PrimitiveOverrideProps<TextFieldProps>;
+    embeddingWordCount?: PrimitiveOverrideProps<TextFieldProps>;
+    moderationStatus?: PrimitiveOverrideProps<TextFieldProps>;
+    moderationFlags?: PrimitiveOverrideProps<TextAreaFieldProps>;
+    moderationCheckedAt?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type QuestionUpdateFormProps = React.PropsWithChildren<{
     overrides?: QuestionUpdateFormOverridesProps | undefined | null;

@@ -52,7 +52,7 @@ async function getOpenAI() {
 const tools = {
   // Client-side tool - executed in browser with access to DataStore/VectorStore
   search_content: tool({
-    description: 'Search through unit content, files, questions, and vocabulary using semantic search. Returns relevant files, vocabulary words, and questions.',
+    description: 'Search through unit content, class sections, file contents, questions, answers, vocabulary words, and definitions using semantic search. Return all relevant files, vocabulary words, units, sections, or questions.',
     inputSchema: z.object({
       query: z.string().describe('The search query text'),
       type: z.enum(['all', 'files', 'words', 'questions']).optional().describe('Type of content to search - defaults to "all"'),

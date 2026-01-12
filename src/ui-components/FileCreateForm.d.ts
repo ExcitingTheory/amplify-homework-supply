@@ -39,6 +39,7 @@ export declare type FileCreateFormInputValues = {
     byHex?: string;
     thumbnail?: string;
     waveformData?: string;
+    embedding?: number[];
 };
 export declare type FileCreateFormValidationValues = {
     name?: ValidationFunction<string>;
@@ -58,6 +59,7 @@ export declare type FileCreateFormValidationValues = {
     byHex?: ValidationFunction<string>;
     thumbnail?: ValidationFunction<string>;
     waveformData?: ValidationFunction<string>;
+    embedding?: ValidationFunction<number>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type FileCreateFormOverridesProps = {
@@ -79,6 +81,7 @@ export declare type FileCreateFormOverridesProps = {
     byHex?: PrimitiveOverrideProps<TextFieldProps>;
     thumbnail?: PrimitiveOverrideProps<TextFieldProps>;
     waveformData?: PrimitiveOverrideProps<TextAreaFieldProps>;
+    embedding?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type FileCreateFormProps = React.PropsWithChildren<{
     overrides?: FileCreateFormOverridesProps | undefined | null;

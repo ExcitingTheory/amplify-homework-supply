@@ -9,6 +9,7 @@ import { HistoryPlugin, createEmptyHistoryState } from '@lexical/react/LexicalHi
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
+import { MarkNode } from '@lexical/mark';
 import {
     DecoratorNode,
     $getRoot,
@@ -16,6 +17,7 @@ import {
     $createTextNode,
     createCommand,
 } from 'lexical';
+import SearchHighlightPlugin from './Editor3/plugins/SearchHighlightPlugin';
 
 // MUI imports
 import {
@@ -60,6 +62,7 @@ import RecordingStudioEnhanced from './RecordingStudioEnhanced';
 import DictionaryContext from '../context/dictionaryContext';
 import FilesContext from '../context/fileContext';
 import UnitContext from '../context/unitContext';
+import { useTabContext } from '../context/tabContext';
 
 // GraphQL imports
 import { generateClient } from 'aws-amplify/api';
@@ -446,59 +449,65 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
                         }}
                     >
                         <Tooltip title="Add selection">
-                            <IconButton
-                                size='large'
-                                color='inherit'
-                                disabled={loading}
-                                onClick={(event) => {
-                                    event.preventDefault();
-                                    event.stopPropagation();
-                                }}
-                                sx={{ border: '2px solid currentColor' }}
-                            >
-                                <AddIcon fontSize="large" />
-                            </IconButton>
+                            <span>
+                                <IconButton
+                                    size='large'
+                                    color='inherit'
+                                    disabled={loading}
+                                    onClick={(event) => {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                    }}
+                                    sx={{ border: '2px solid currentColor' }}
+                                >
+                                    <AddIcon fontSize="large" />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                         <Tooltip title="Clear and reset">
-                            <IconButton
-                                size='large'
-                                color='error'
-                                disabled={loading}
-                                onClick={() => {
-                                    setRubyTags([]);
-                                    setSelectedPhrase('');
-                                    setSelectedPronunciation('');
-                                    setSelectionStart(null);
-                                    setSelectionEnd(null);
-                                }}
-                                sx={{ border: '2px solid currentColor' }}
-                            >
-                                <CloseIcon fontSize="large" />
-                            </IconButton>
+                            <span>
+                                <IconButton
+                                    size='large'
+                                    color='error'
+                                    disabled={loading}
+                                    onClick={() => {
+                                        setRubyTags([]);
+                                        setSelectedPhrase('');
+                                        setSelectedPronunciation('');
+                                        setSelectionStart(null);
+                                        setSelectionEnd(null);
+                                    }}
+                                    sx={{ border: '2px solid currentColor' }}
+                                >
+                                    <CloseIcon fontSize="large" />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                         <Tooltip title="Save ruby tags">
-                            <IconButton
-                                size='large'
-                                color='primary'
-                                disabled={loading}
-                                onClick={async () => {
-                                    setLoading(true);
+                            <span>
+                                <IconButton
+                                    size='large'
+                                    color='primary'
+                                    disabled={loading}
+                                    onClick={async () => {
+                                        setLoading(true);
 
-                                    await DataStore.save(Word.copyOf(word, updated => {
-                                        updated.rubyTags = rubyTagsString;
-                                    }));
+                                        await DataStore.save(Word.copyOf(word, updated => {
+                                            updated.rubyTags = rubyTagsString;
+                                        }));
 
-                                    setRubyTags([]);
-                                    setSelectedPhrase('');
-                                    setSelectedPronunciation('');
-                                    setSelectionStart(null);
-                                    setSelectionEnd(null);
-                                    setLoading(false);
-                                }}
-                                sx={{ border: '2px solid currentColor' }}
-                            >
-                                <SaveIcon fontSize="large" />
-                            </IconButton>
+                                        setRubyTags([]);
+                                        setSelectedPhrase('');
+                                        setSelectedPronunciation('');
+                                        setSelectionStart(null);
+                                        setSelectionEnd(null);
+                                        setLoading(false);
+                                    }}
+                                    sx={{ border: '2px solid currentColor' }}
+                                >
+                                    <SaveIcon fontSize="large" />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                     </Box>
                 </Box>
@@ -1030,21 +1039,58 @@ function WordRowComponent({
         (definition && definition.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
+    const wordItemRef = React.useRef(null);
+    const tabContext = useTabContext();
+    const [isHighlighted, setIsHighlighted] = React.useState(false);
+    
+    // Register ref for scrolling
+    React.useEffect(() => {
+        if (tabContext?.registerItemRef && wordId) {
+            tabContext.registerItemRef('word', wordId, wordItemRef);
+        }
+        return () => {
+            if (tabContext?.unregisterItemRef && wordId) {
+                tabContext.unregisterItemRef('word', wordId);
+            }
+        };
+    }, [wordId, tabContext]);
+    
+    // Highlight when focused from search results
+    React.useEffect(() => {
+        if (tabContext?.focusItem?.type === 'word' && tabContext.focusItem.id === wordId) {
+            setIsHighlighted(true);
+            // Auto-expand when focused
+            if (onToggleExpand && !isExpanded) {
+                onToggleExpand(wordId);
+            }
+            // Remove highlight after 3 seconds
+            const timer = setTimeout(() => setIsHighlighted(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [tabContext?.focusItem, wordId, onToggleExpand, isExpanded]);
+
     return (
         <ListItem
+            ref={wordItemRef}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             onDragLeave={handleDragLeave}
             sx={{
-                backgroundColor: isEvenRow ? 'background.paper' : 'grey.50',
+                backgroundColor: isHighlighted 
+                    ? 'rgba(255, 235, 59, 0.3)' // Yellow highlight
+                    : isEvenRow ? 'background.paper' : 'grey.50',
                 flexDirection: 'column',
                 alignItems: 'stretch',
                 padding: 0,
                 margin: 0,
                 borderBottom: '1px solid',
-                borderColor: 'divider',
+                borderColor: isHighlighted ? 'primary.main' : 'divider',
+                borderLeftWidth: isHighlighted ? '4px' : 0,
+                borderLeftStyle: isHighlighted ? 'solid' : 'none',
+                borderLeftColor: isHighlighted ? 'primary.main' : 'transparent',
+                transition: 'all 0.3s ease',
                 '&:hover': {
-                    backgroundColor: 'action.hover',
+                    backgroundColor: isHighlighted ? 'rgba(255, 235, 59, 0.4)' : 'action.hover',
                 },
             }}
         >
@@ -1313,9 +1359,12 @@ function NestedWordField({
         setLocalValue(value);
     }, [value]);
 
-    const initialConfig = {
+    const initialConfig = React.useMemo(() => ({
         namespace: `WordField-${field}-${wordId}`,
-        theme: {},
+        nodes: [MarkNode],
+        theme: {
+            mark: 'search-highlight',
+        },
         onError: (error) => console.error('Lexical error:', error),
         editorState: () => {
             const root = $getRoot();
@@ -1325,7 +1374,7 @@ function NestedWordField({
             paragraph.append(text);
             root.append(paragraph);
         },
-    };
+    }), [field, wordId, value]);
 
     const handleChange = (editorState) => {
         editorState.read(() => {
@@ -1390,6 +1439,7 @@ function NestedWordField({
                 />
                 {sharedHistory && <HistoryPlugin externalHistoryState={sharedHistory} />}
                 <OnChangePlugin onChange={handleChange} />
+                {searchTerm && searchTerm.length >= 2 && <SearchHighlightPlugin searchTerm={searchTerm} />}
             </LexicalComposer>
         </Box>
     );
@@ -1684,12 +1734,12 @@ export function DictionaryEditor2() {
         debouncedSearch(e.target.value.trim());
     };
 
-    const initialConfig = {
+    const initialConfig = React.useMemo(() => ({
         namespace: 'DictionaryEditor2',
         theme: {},
         nodes: [WordDecoratorNode],
         onError: (error) => console.error('Lexical error:', error),
-    };
+    }), []);
 
     return (
         <>

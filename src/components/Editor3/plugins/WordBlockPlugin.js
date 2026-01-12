@@ -124,21 +124,41 @@ import getCachedUrl from '../../../utils/getCachedUrl';
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
               <Box sx={{ flex: 1 }}>
-                {/* Phrase */}
+                {/* Phrase with Ruby Tags */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <Typography 
-                    variant="h4" 
-                    component="div" 
-                    sx={{ 
-                      fontWeight: 700,
-                      color: '#1976d2',
-                      fontFamily: word?.phrase?.match(/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/) 
-                        ? '"Noto Sans JP", sans-serif' 
-                        : 'inherit'
-                    }}
-                  >
-                    {word.phrase}
-                  </Typography>
+                  {word.rubyTags ? (
+                    <Typography 
+                      variant="h4" 
+                      component="ruby" 
+                      sx={{ 
+                        fontWeight: 700,
+                        color: '#1976d2',
+                        fontFamily: word?.phrase?.match(/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/) 
+                          ? '"Noto Sans JP", sans-serif' 
+                          : 'inherit',
+                        '& rt': {
+                          fontWeight: 400,
+                          fontSize: '0.5em',
+                          color: '#666',
+                        }
+                      }}
+                      dangerouslySetInnerHTML={{ __html: word.rubyTags }}
+                    />
+                  ) : (
+                    <Typography 
+                      variant="h4" 
+                      component="div" 
+                      sx={{ 
+                        fontWeight: 700,
+                        color: '#1976d2',
+                        fontFamily: word?.phrase?.match(/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/) 
+                          ? '"Noto Sans JP", sans-serif' 
+                          : 'inherit'
+                      }}
+                    >
+                      {word.phrase}
+                    </Typography>
+                  )}
                 </Box>
 
                 {/* Audio Player with Waveform */}

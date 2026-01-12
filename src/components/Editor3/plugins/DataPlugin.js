@@ -16,7 +16,7 @@ import { INITIAL_LOAD_TAG } from '../constants/updateTags';
 
 export default function DataPlugin() {
 
-    const { unit, versionRef } = useContext(UnitContext);
+    const { unit, versionRef, editorStateRef } = useContext(UnitContext);
     const [editor] = useLexicalComposerContext();
     const hasLoadedInitialState = useRef(false);
   
@@ -26,6 +26,11 @@ export default function DataPlugin() {
         }
         
         const unitVersion = unit._version;
+        
+        // Skip if this is the same or older version we already processed
+        if (versionRef.current >= unitVersion) {
+            return;
+        }
         
         // Parse data if it's a string, otherwise use as-is
         let parsedData;
@@ -52,6 +57,9 @@ export default function DataPlugin() {
                 queueMicrotask(() => {
                     editor.setEditorState(editorState, { tag: INITIAL_LOAD_TAG });
                     
+                    // Update ref to prevent onChange from thinking state changed
+                    editorStateRef.current = editorState.toJSON();
+                    
                     // Only update version tracking after successful state set
                     hasLoadedInitialState.current = true;
                     versionRef.current = unitVersion;
@@ -72,7 +80,7 @@ export default function DataPlugin() {
         console.log('[DataPlugin] Newer version detected from external source:', unitVersion, 'current:', versionRef.current);
         // Don't apply it - just log for now
         
-    }, [editor, unit, versionRef]);
+    }, [editor, unit, versionRef, editorStateRef]);
 
     return null;
 }

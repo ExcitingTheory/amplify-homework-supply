@@ -204,20 +204,6 @@ export function UserMenu() {
 
   const router = useRouter()
 
-  // React.useEffect(() => {
-
-  // async function fetchUserAttributes() {
-  //   console.log('UserMenu.useEffect')
-  //   const userAttributes = await fetchUserAttributes();
-  //   console.log('userAttributes', userAttributes)
-  //   setUsername(userAttributes?.name)
-  // }
-  // fetchUserAttributes()
-  // }, [])
-
-  
-  
-
   return (
     <div>
       <IconButton
@@ -404,7 +390,10 @@ export default function MainToolbar({ children }) {
             open={state[anchor]}
             onClose={toggleDrawer(anchor, false)}
             onOpen={toggleDrawer(anchor, true)}
-            style={{ zIndex: 1000 }}
+            sx={{
+              marginTop: '4rem',
+              zIndex: 1000
+            }}
             ModalProps={{
               keepMounted: true, // Better open performance on mobile.
             }}
@@ -425,7 +414,9 @@ export default function MainToolbar({ children }) {
             }
           >
             <Box
-              sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 250 }}
+              sx={{
+                marginTop: '4rem',
+                width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 250 }}
               role="presentation"
               onClick={toggleDrawer(anchor, false)}
               onKeyDown={toggleDrawer(anchor, false)}

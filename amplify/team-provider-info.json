@@ -83,11 +83,6 @@
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
           "s3Key": "amplify-builds/AdminQueries65120535-765a79686b454631486d-build.zip"
         },
-        "editorChat": {
-          "secretsPathAmplifyAppId": "d29i5pr81uhal1",
-          "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/editorChat-78745a4d4a6776534d67-build.zip"
-        },
         "getStudentSubmission": {
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
           "s3Key": "amplify-builds/getStudentSubmission-355957696c726b347556-build.zip"
@@ -99,11 +94,6 @@
         "manageSection": {
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
           "s3Key": "amplify-builds/manageSection-79707946795247545339-build.zip"
-        },
-        "openai": {
-          "secretsPathAmplifyAppId": "d29i5pr81uhal1",
-          "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/openai-59514d4b5972646a346f-build.zip"
         },
         "japanese56739ab6b": {},
         "files": {},
@@ -130,20 +120,10 @@
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
           "s3Key": "amplify-builds/generateEmbedding-3458566d6e686b77722f-build.zip"
         },
-        "contentCompletion": {
-          "secretsPathAmplifyAppId": "d29i5pr81uhal1",
-          "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/contentCompletion-6e704e4c6d557366524c-build.zip"
-        },
         "suggestBlocks": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
           "s3Key": "amplify-builds/suggestBlocks-56734b764d4769646537-build.zip"
-        },
-        "chat": {
-          "secretsPathAmplifyAppId": "d29i5pr81uhal1",
-          "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/chat-682b30676f4841535a49-build.zip"
         },
         "contentCompletionStream": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
@@ -153,7 +133,7 @@
         "chatStream": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
-          "s3Key": "amplify-builds/chatStream-4f4c4d5966645a773742-build.zip"
+          "s3Key": "amplify-builds/chatStream-4e453955467a45766239-build.zip"
         },
         "suggestBlocksStream": {
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
@@ -164,7 +144,11 @@
           "secretsPathAmplifyAppId": "d29i5pr81uhal1",
           "deploymentBucketName": "amplify-amplifyhomeworksupply-main-46f49-deployment",
           "s3Key": "amplify-builds/moderation-6c673762394b4b5a4177-build.zip"
-        }
+        },
+        "chat": {},
+        "editorChat": {},
+        "contentCompletion": {},
+        "openai": {}
       },
       "api": {
         "AdminQueries": {},

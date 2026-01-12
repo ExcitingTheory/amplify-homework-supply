@@ -190,46 +190,54 @@ export declare type PageEmbedding = LazyLoading extends LazyLoadingDisabled ? Ea
 
 export declare const PageEmbedding: (new (init: ModelInit<PageEmbedding>) => PageEmbedding)
 
-type EagerAssistant = {
+type EagerAssistantChat = {
   readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<Assistant, 'id'>;
+    identifier: ManagedIdentifier<AssistantChat, 'id'>;
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly owner?: string | null;
   readonly model?: string | null;
-  readonly assistantId?: string | null;
   readonly threadInstructions?: string | null;
   readonly additionalInstructions?: string | null;
-  readonly messages?: string | null;
-  readonly moderationFlag?: boolean | null;
-  readonly identityId?: string | null;
   readonly threadId?: string | null;
+  readonly moderationFlag?: boolean | null;
+  readonly messages?: string | null;
+  readonly draft?: string | null;
+  readonly archived?: boolean | null;
+  readonly inputTokens?: string | null;
+  readonly outputTokens?: string | null;
+  readonly files?: (AssistantChatFile | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
 
-type LazyAssistant = {
+type LazyAssistantChat = {
   readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<Assistant, 'id'>;
+    identifier: ManagedIdentifier<AssistantChat, 'id'>;
     readOnlyFields: 'createdAt' | 'updatedAt';
   };
   readonly id: string;
+  readonly owner?: string | null;
   readonly model?: string | null;
-  readonly assistantId?: string | null;
   readonly threadInstructions?: string | null;
   readonly additionalInstructions?: string | null;
-  readonly messages?: string | null;
-  readonly moderationFlag?: boolean | null;
-  readonly identityId?: string | null;
   readonly threadId?: string | null;
+  readonly moderationFlag?: boolean | null;
+  readonly messages?: string | null;
+  readonly draft?: string | null;
+  readonly archived?: boolean | null;
+  readonly inputTokens?: string | null;
+  readonly outputTokens?: string | null;
+  readonly files: AsyncCollection<AssistantChatFile>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
 
-export declare type Assistant = LazyLoading extends LazyLoadingDisabled ? EagerAssistant : LazyAssistant
+export declare type AssistantChat = LazyLoading extends LazyLoadingDisabled ? EagerAssistantChat : LazyAssistantChat
 
-export declare const Assistant: (new (init: ModelInit<Assistant>) => Assistant) & {
-  copyOf(source: Assistant, mutator: (draft: MutableModel<Assistant>) => MutableModel<Assistant> | void): Assistant;
+export declare const AssistantChat: (new (init: ModelInit<AssistantChat>) => AssistantChat) & {
+  copyOf(source: AssistantChat, mutator: (draft: MutableModel<AssistantChat>) => MutableModel<AssistantChat> | void): AssistantChat;
 }
 
 type EagerQuestion = {
@@ -349,6 +357,7 @@ type EagerFile = {
   readonly units?: (UnitFile | null)[] | null;
   readonly words?: (WordFile | null)[] | null;
   readonly questions?: (QuestionFile | null)[] | null;
+  readonly chats?: (AssistantChatFile | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -384,6 +393,7 @@ type LazyFile = {
   readonly units: AsyncCollection<UnitFile>;
   readonly words: AsyncCollection<WordFile>;
   readonly questions: AsyncCollection<QuestionFile>;
+  readonly chats: AsyncCollection<AssistantChatFile>;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -392,42 +402,6 @@ export declare type File = LazyLoading extends LazyLoadingDisabled ? EagerFile :
 
 export declare const File: (new (init: ModelInit<File>) => File) & {
   copyOf(source: File, mutator: (draft: MutableModel<File>) => MutableModel<File> | void): File;
-}
-
-type EagerChatHistory = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<ChatHistory, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly owner?: string | null;
-  readonly messages?: string | null;
-  readonly model?: string | null;
-  readonly inputTokens?: string | null;
-  readonly outputTokens?: string | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-type LazyChatHistory = {
-  readonly [__modelMeta__]: {
-    identifier: ManagedIdentifier<ChatHistory, 'id'>;
-    readOnlyFields: 'createdAt' | 'updatedAt';
-  };
-  readonly id: string;
-  readonly owner?: string | null;
-  readonly messages?: string | null;
-  readonly model?: string | null;
-  readonly inputTokens?: string | null;
-  readonly outputTokens?: string | null;
-  readonly createdAt?: string | null;
-  readonly updatedAt?: string | null;
-}
-
-export declare type ChatHistory = LazyLoading extends LazyLoadingDisabled ? EagerChatHistory : LazyChatHistory
-
-export declare const ChatHistory: (new (init: ModelInit<ChatHistory>) => ChatHistory) & {
-  copyOf(source: ChatHistory, mutator: (draft: MutableModel<ChatHistory>) => MutableModel<ChatHistory> | void): ChatHistory;
 }
 
 type EagerSection = {
@@ -981,9 +955,9 @@ type EagerAIFeedback = {
   readonly id: string;
   readonly owner?: string | null;
   readonly identityId?: string | null;
-  readonly contentType: AIContentType | keyof typeof AIContentType;
-  readonly feedbackType: AIFeedbackType | keyof typeof AIFeedbackType;
-  readonly reasons?: (AIFeedbackReason | null)[] | Array<keyof typeof AIFeedbackReason> | null;
+  readonly contentType: AiContentType | keyof typeof AiContentType;
+  readonly feedbackType: AiFeedbackType | keyof typeof AiFeedbackType;
+  readonly reasons?: (AiFeedbackReason | null)[] | Array<keyof typeof AiFeedbackReason> | null;
   readonly comment?: string | null;
   readonly model?: string | null;
   readonly prompt?: string | null;
@@ -1005,9 +979,9 @@ type LazyAIFeedback = {
   readonly id: string;
   readonly owner?: string | null;
   readonly identityId?: string | null;
-  readonly contentType: AIContentType | keyof typeof AIContentType;
-  readonly feedbackType: AIFeedbackType | keyof typeof AIFeedbackType;
-  readonly reasons?: (AIFeedbackReason | null)[] | Array<keyof typeof AIFeedbackReason> | null;
+  readonly contentType: AiContentType | keyof typeof AiContentType;
+  readonly feedbackType: AiFeedbackType | keyof typeof AiFeedbackType;
+  readonly reasons?: (AiFeedbackReason | null)[] | Array<keyof typeof AiFeedbackReason> | null;
   readonly comment?: string | null;
   readonly model?: string | null;
   readonly prompt?: string | null;
@@ -1026,6 +1000,40 @@ export declare type AIFeedback = LazyLoading extends LazyLoadingDisabled ? Eager
 
 export declare const AIFeedback: (new (init: ModelInit<AIFeedback>) => AIFeedback) & {
   copyOf(source: AIFeedback, mutator: (draft: MutableModel<AIFeedback>) => MutableModel<AIFeedback> | void): AIFeedback;
+}
+
+type EagerAssistantChatFile = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<AssistantChatFile, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly assistantChatId?: string | null;
+  readonly fileId?: string | null;
+  readonly assistantChat: AssistantChat;
+  readonly file: File;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyAssistantChatFile = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<AssistantChatFile, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly assistantChatId?: string | null;
+  readonly fileId?: string | null;
+  readonly assistantChat: AsyncItem<AssistantChat>;
+  readonly file: AsyncItem<File>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type AssistantChatFile = LazyLoading extends LazyLoadingDisabled ? EagerAssistantChatFile : LazyAssistantChatFile
+
+export declare const AssistantChatFile: (new (init: ModelInit<AssistantChatFile>) => AssistantChatFile) & {
+  copyOf(source: AssistantChatFile, mutator: (draft: MutableModel<AssistantChatFile>) => MutableModel<AssistantChatFile> | void): AssistantChatFile;
 }
 
 type EagerQuestionUnit = {

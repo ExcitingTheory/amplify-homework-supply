@@ -40,14 +40,14 @@ import { DataStore } from '@aws-amplify/datastore';
 
 import { AIFeedback } from '../models';
 import { 
-  AIFeedbackType, 
-  AIFeedbackReason, 
-  AIContentType 
+  AiFeedbackType, 
+  AiFeedbackReason, 
+  AiContentType 
 } from '../API';
 
 interface AIFeedbackWidgetProps {
   /** Type of AI-generated content */
-  contentType: keyof typeof AIContentType;
+  contentType: keyof typeof AiContentType;
   /** The AI-generated content itself */
   generatedContent: string;
   /** The model used to generate the content */
@@ -101,7 +101,7 @@ export default function AIFeedbackWidget({
 }: AIFeedbackWidgetProps) {
   const [feedbackType, setFeedbackType] = useState<'POSITIVE' | 'NEGATIVE' | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [selectedReasons, setSelectedReasons] = useState<Set<keyof typeof AIFeedbackReason>>(new Set());
+  const [selectedReasons, setSelectedReasons] = useState<Set<keyof typeof AiFeedbackReason>>(new Set());
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
@@ -131,7 +131,7 @@ export default function AIFeedbackWidget({
     }
   };
 
-  const handleReasonToggle = (reason: keyof typeof AIFeedbackReason) => {
+  const handleReasonToggle = (reason: keyof typeof AiFeedbackReason) => {
     const newReasons = new Set(selectedReasons);
     if (newReasons.has(reason)) {
       newReasons.delete(reason);
@@ -151,10 +151,10 @@ export default function AIFeedbackWidget({
     try {
       const feedback = await DataStore.save(
         new AIFeedback({
-          contentType: AIContentType[contentType],
-          feedbackType: type === 'POSITIVE' ? AIFeedbackType.POSITIVE : AIFeedbackType.NEGATIVE,
-          reasons: reasons?.map(r => AIFeedbackReason[r as keyof typeof AIFeedbackReason]) || undefined,
-          comment: userComment || undefined,
+          contentType: AiContentType[contentType],
+          feedbackType: type === 'POSITIVE' ? AiFeedbackType.POSITIVE : AiFeedbackType.NEGATIVE,
+          reasons: reasons?.map(r => AiFeedbackReason[r as keyof typeof AiFeedbackReason]),
+          comment: userComment,
           model,
           prompt,
           generatedContent,
@@ -164,7 +164,7 @@ export default function AIFeedbackWidget({
           messageId,
           sessionId,
           metadata: metadata ? JSON.stringify(metadata) : undefined,
-        })
+        } as any)
       );
 
       setSnackbar({
@@ -192,7 +192,7 @@ export default function AIFeedbackWidget({
   };
 
   const handleSubmitNegativeFeedback = () => {
-    const reasonArray = Array.from(selectedReasons);
+    const reasonArray = Array.from(selectedReasons) as string[];
     submitFeedback('NEGATIVE', reasonArray, comment);
   };
 
@@ -202,20 +202,22 @@ export default function AIFeedbackWidget({
     <>
       <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
         <Tooltip title="This was helpful">
-          <IconButton
-            size={size}
-            onClick={handleThumbsUp}
-            color={feedbackType === 'POSITIVE' ? 'success' : 'default'}
-            disabled={isSubmitting}
-            sx={{ 
-              opacity: feedbackType === 'NEGATIVE' ? 0.3 : 1,
-              '&:hover': {
-                backgroundColor: feedbackType === 'POSITIVE' ? 'success.light' : undefined,
-              }
-            }}
-          >
-            {feedbackType === 'POSITIVE' ? <ThumbUpIcon fontSize={size} /> : <ThumbUpOutlinedIcon fontSize={size} />}
-          </IconButton>
+          <span>
+            <IconButton
+              size={size}
+              onClick={handleThumbsUp}
+              color={feedbackType === 'POSITIVE' ? 'success' : 'default'}
+              disabled={isSubmitting}
+              sx={{ 
+                opacity: feedbackType === 'NEGATIVE' ? 0.3 : 1,
+                '&:hover': {
+                  backgroundColor: feedbackType === 'POSITIVE' ? 'success.light' : undefined,
+                }
+              }}
+            >
+              {feedbackType === 'POSITIVE' ? <ThumbUpIcon fontSize={size} /> : <ThumbUpOutlinedIcon fontSize={size} />}
+            </IconButton>
+          </span>
         </Tooltip>
         
         {showLabels && feedbackType === 'POSITIVE' && (
@@ -225,20 +227,22 @@ export default function AIFeedbackWidget({
         )}
 
         <Tooltip title="This needs improvement">
-          <IconButton
-            size={size}
-            onClick={handleThumbsDown}
-            color={feedbackType === 'NEGATIVE' ? 'error' : 'default'}
-            disabled={isSubmitting}
-            sx={{ 
-              opacity: feedbackType === 'POSITIVE' ? 0.3 : 1,
-              '&:hover': {
-                backgroundColor: feedbackType === 'NEGATIVE' ? 'error.light' : undefined,
-              }
-            }}
-          >
-            {feedbackType === 'NEGATIVE' ? <ThumbDownIcon fontSize={size} /> : <ThumbDownOutlinedIcon fontSize={size} />}
-          </IconButton>
+          <span>
+            <IconButton
+              size={size}
+              onClick={handleThumbsDown}
+              color={feedbackType === 'NEGATIVE' ? 'error' : 'default'}
+              disabled={isSubmitting}
+              sx={{ 
+                opacity: feedbackType === 'POSITIVE' ? 0.3 : 1,
+                '&:hover': {
+                  backgroundColor: feedbackType === 'NEGATIVE' ? 'error.light' : undefined,
+                }
+              }}
+            >
+              {feedbackType === 'NEGATIVE' ? <ThumbDownIcon fontSize={size} /> : <ThumbDownOutlinedIcon fontSize={size} />}
+            </IconButton>
+          </span>
         </Tooltip>
         
         {showLabels && feedbackType === 'NEGATIVE' && (
@@ -273,7 +277,7 @@ export default function AIFeedbackWidget({
             </FormLabel>
             <FormGroup>
               {Object.entries(REASON_LABELS).map(([key, label]) => {
-                const reasonKey = key as keyof typeof AIFeedbackReason;
+                const reasonKey = key as keyof typeof AiFeedbackReason;
                 return (
                   <FormControlLabel
                     key={key}
