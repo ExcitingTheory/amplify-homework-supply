@@ -15,6 +15,16 @@ const config: StorybookConfig = {
   "framework": "@storybook/nextjs-vite",
   "staticDirs": [
     "../public"
-  ]
+  ],
+  async viteFinal(config) {
+    // Mock amplifyconfiguration.json for Storybook
+    config.resolve = config.resolve || {};
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '../amplifyconfiguration.json': require.resolve('./__mocks__/amplifyconfig.js'),
+      './amplifyconfiguration.json': require.resolve('./__mocks__/amplifyconfig.js'),
+    };
+    return config;
+  }
 };
 export default config;
