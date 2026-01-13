@@ -19,9 +19,10 @@ const mockWords = {};
 const mockQuestions = {};
 const mockSections = {};
 const mockAssignments = {};
+const mockAssistantChats = {};
 
 // Export storage for seed data
-export { mockUnits, mockGrades, mockFiles, mockSettings, mockDocuments, mockParsedContent, mockWords, mockQuestions, mockSections, mockAssignments };
+export { mockUnits, mockGrades, mockFiles, mockSettings, mockDocuments, mockParsedContent, mockWords, mockQuestions, mockSections, mockAssignments, mockAssistantChats };
 
 // Store active subscriptions
 const activeSubscriptions = {
@@ -29,6 +30,7 @@ const activeSubscriptions = {
   Grade: [],
   File: [],
   Settings: [],
+  AssistantChat: [],
   Document: [],
   ParsedContent: [],
   Word: [],
@@ -951,6 +953,8 @@ export class DataStore {
     const isSettings = model.autoAnalyzeDocuments !== undefined;
     const isUnit = model.name && model.data !== undefined && !model.unitID && !isFile;
     const isSection = model.name && !model.unitID && !model.data && !isFile && !model.path;
+    const isAssistantChat = model.model && model.messages !== undefined && model.threadInstructions !== undefined;
+    const isAssignment = model.unitID && model.sectionID && !model.data;
     
     // Update the mock data based on model type
     if (isFile) {
@@ -1000,7 +1004,7 @@ export class DataStore {
       activeSubscriptions.Section.forEach(callback => {
         callback({ items: Object.values(mockSections), isSynced: true });
       });
-    } else if (modelName === 'Assignment') {
+    } else if (isAssignment) {
       // This is an Assignment
       mockAssignments[model.id] = model;
       console.log('[Mock DataStore] Saved Assignment:', model.id, 'for unit:', model.unitID);
@@ -1008,6 +1012,15 @@ export class DataStore {
       // Notify all Assignment subscribers
       activeSubscriptions.Assignment.forEach(callback => {
         callback({ items: Object.values(mockAssignments), isSynced: true });
+      });
+    } else if (isAssistantChat) {
+      // This is an AssistantChat
+      mockAssistantChats[model.id] = model;
+      console.log('[Mock DataStore] Saved AssistantChat:', model.id, 'model:', model.model);
+      
+      // Notify all AssistantChat subscribers
+      activeSubscriptions.AssistantChat.forEach(callback => {
+        callback({ items: Object.values(mockAssistantChats), isSynced: true });
       });
     } else if (isParsedContent) {
       // This is a ParsedContent
@@ -1176,15 +1189,68 @@ export class DataStore {
       return Object.values(mockWords);
     }
     if (modelName === 'Section') {
-      console.log('[Mock DataStore] Section case HIT! mockSections:', Object.keys(mockSections));
-      const sections = Object.values(mockSections);
-      // In real Amplify, sections are filtered by auth rules (owner or learner group)
-      // For mocking, we return all sections and let the page filter by owner
+      console.log('[Mock DataStore] Section query - mockSections keys:', Object.keys(mockSections));
+      console.log('[Mock DataStore] Section query - all section values:', Object.values(mockSections));
+      let sections = Object.values(mockSections);
+      
+      // Apply predicate filter if provided
+      if (typeof idOrPredicate === 'function') {
+        let idFilter = null;
+        const predicateCapture = {
+          id: {
+            eq: (value) => {
+              idFilter = value;
+              console.log('[Mock DataStore] Filtering Section by id.eq:', value);
+              return predicateCapture;
+            }
+          },
+          and: (fn) => fn(predicateCapture)
+        };
+        
+        try {
+          idOrPredicate(predicateCapture);
+        } catch (e) {
+          console.log('[Mock DataStore] Could not parse Section predicate:', e.message);
+        }
+        
+        if (idFilter) {
+          console.log('[Mock DataStore] Before filter - sections:', sections.map(s => s.id));
+          sections = sections.filter(s => s.id === idFilter);
+          console.log('[Mock DataStore] After filter - sections:', sections.map(s => s.id));
+        }
+      }
+      
       console.log('[Mock DataStore] Returning', sections.length, 'sections:', sections.map(s => ({ id: s.id, name: s.name, owner: s.owner, learner: s.learner })));
       return sections;
     }
     if (modelName === 'Assignment') {
-      const assignments = Object.values(mockAssignments);
+      let assignments = Object.values(mockAssignments);
+      
+      // Apply predicate filter if provided
+      if (typeof idOrPredicate === 'function') {
+        let sectionIDFilter = null;
+        const predicateCapture = {
+          sectionID: {
+            eq: (value) => {
+              sectionIDFilter = value;
+              console.log('[Mock DataStore] Filtering Assignment by sectionID.eq:', value);
+              return predicateCapture;
+            }
+          },
+          and: (fn) => fn(predicateCapture)
+        };
+        
+        try {
+          idOrPredicate(predicateCapture);
+        } catch (e) {
+          console.log('[Mock DataStore] Could not parse Assignment predicate:', e.message);
+        }
+        
+        if (sectionIDFilter) {
+          assignments = assignments.filter(a => a.sectionID === sectionIDFilter);
+        }
+      }
+      
       console.log('[Mock DataStore] Returning', assignments.length, 'assignments');
       return assignments;
     }
@@ -1397,6 +1463,13 @@ export class DataStore {
           }
           console.log('[Mock DataStore] Returning', items.length, 'assignments (filtered)');
           activeSubscriptions.Assignment.push(callback);
+        } else if (modelName === 'AssistantChat') {
+          items = Object.values(mockAssistantChats);
+          if (filterFn) {
+            items = items.filter(filterFn);
+          }
+          console.log('[Mock DataStore] Returning', items.length, 'assistant chats (filtered)');
+          activeSubscriptions.AssistantChat.push(callback);
         } else {
           const data = mockData[modelName];
           items = data ? Object.values(data) : [];
@@ -1461,6 +1534,11 @@ export class DataStore {
               const index = activeSubscriptions.Assignment.indexOf(callback);
               if (index > -1) {
                 activeSubscriptions.Assignment.splice(index, 1);
+              }
+            } else if (modelName === 'AssistantChat') {
+              const index = activeSubscriptions.AssistantChat.indexOf(callback);
+              if (index > -1) {
+                activeSubscriptions.AssistantChat.splice(index, 1);
               }
             }
           }

@@ -19,6 +19,9 @@ export default {
   component: CustomAnswerPlugin,
   parameters: {
     layout: 'fullscreen',
+    disableUnitContext: true,
+    disableDictionaryContext: true,
+    disableSectionContext: true,
     docs: {
       description: {
         component: 'Examples of custom questions that accept audio recordings and drawings as answers.',

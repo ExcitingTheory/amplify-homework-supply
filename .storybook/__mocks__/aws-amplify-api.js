@@ -240,6 +240,37 @@ export const generateClient = () => ({
       };
     }
     
+    // Mock listSectionStudents query
+    if (query.includes('listSectionStudents')) {
+      console.log('[Mock API] Listing section students:', variables);
+      return {
+        data: {
+          listSectionStudents: [
+            {
+              id: 'student-alice-sub',
+              email: 'alice@example.com',
+              name: 'Alice Johnson'
+            },
+            {
+              id: 'student-bob-sub',
+              email: 'bob@example.com',
+              name: 'Bob Smith'
+            },
+            {
+              id: 'student-carol-sub',
+              email: 'carol@example.com',
+              name: 'Carol Williams'
+            },
+            {
+              id: 'student-dave-sub',
+              email: 'dave@example.com',
+              name: 'Dave Brown'
+            }
+          ]
+        }
+      };
+    }
+    
     // Mock chat response
     if (query.includes('chat')) {
       return {

@@ -5,12 +5,15 @@ import { Box, Paper, Typography } from '@mui/material';
 import FilesContext, { FilesProvider } from '../../../context/fileContext';
 import UnitContext from '../../../context/unitContext';
 import SettingsContext from '../../../context/settingsContext';
-
 export default {
   title: 'Editor/FileManager2',
   component: FileManager2,
   parameters: {
     layout: 'padded',
+    // Ensure AudioPlayerProvider is available (needed for audio file waveforms)
+    disableUnitContext: false,
+    disableSectionContext: false,
+    disableDictionaryContext: false,
     docs: {
       description: {
         component: `

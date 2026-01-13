@@ -1,14 +1,20 @@
 import React from 'react';
 import Index from '../../pages/index';
+import { FilesProvider } from '../../src/context/fileContext';
 import { seedIndexPageData } from '../../.storybook/__mocks__/index-page-examples';
 import { setMockUser } from '../../.storybook/__mocks__/aws-amplify-auth';
 // import { clearMockUnits } from '../../.storybook/__mocks__/aws-amplify-datastore';
 
 // Wrapper component to bridge Storybook args to Next.js page props
-// Next.js pages don't receive props from story args by default
+// We use Index directly (not WrappedPage) to bypass MyAuth which doesn't work in Storybook
+// FilesProvider is added here instead
 function IndexPageWrapper(props) {
   console.log('[IndexPageWrapper] Received props:', props);
-  return <Index {...props} />;
+  return (
+    <FilesProvider>
+      <Index {...props} />
+    </FilesProvider>
+  );
 }
 
 export default {
@@ -16,7 +22,7 @@ export default {
   component: IndexPageWrapper,
   parameters: {
     layout: 'fullscreen',
-    // Disable unit/section context providers for this page
+    // Disable all extra context providers - index page queries DataStore directly
     disableUnitContext: true,
     disableSectionContext: true,
     disableDictionaryContext: true,

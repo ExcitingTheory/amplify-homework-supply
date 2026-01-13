@@ -11,6 +11,8 @@
  * - Grade: Student submissions and progress on units
  */
 
+import { MOCK_MEDIA } from './mockMediaData';
+
 /**
  * Mock Units for Index Page
  */
@@ -32,7 +34,7 @@ export const mockUnits = {
         ]
       }
     }),
-    featuredImage: 'public/units/japanese-greetings.jpg',
+    featuredImage: MOCK_MEDIA.FEATURED_CROPPED.JAPANESE_CLASSROOM,
     published: true,
     createdAt: new Date('2024-01-01T10:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-10T15:00:00Z').toISOString(),
@@ -57,7 +59,7 @@ export const mockUnits = {
         ]
       }
     }),
-    featuredImage: 'public/units/japanese-numbers.jpg',
+    featuredImage: MOCK_MEDIA.FEATURED_CROPPED.JAPANESE_CULTURE,
     published: true,
     createdAt: new Date('2024-01-05T10:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-12T15:00:00Z').toISOString(),
@@ -82,7 +84,7 @@ export const mockUnits = {
         ]
       }
     }),
-    featuredImage: 'public/units/daily-activities.jpg',
+    featuredImage: MOCK_MEDIA.FEATURED_CROPPED.JAPANESE_MODERN,
     published: true,
     createdAt: new Date('2024-01-10T10:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-15T15:00:00Z').toISOString(),
@@ -107,7 +109,7 @@ export const mockUnits = {
         ]
       }
     }),
-    featuredImage: 'public/units/kanji-basics.jpg',
+    featuredImage: MOCK_MEDIA.IMAGE_JPEG,
     published: true,
     createdAt: new Date('2024-01-08T10:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-18T15:00:00Z').toISOString(),
@@ -130,7 +132,7 @@ export const mockSections = {
     learner: 'section-jpn-101-learners', // Cognito group name for students in this section
     code: 'JPN101SPRING',
     status: 'PUBLISHED',
-    featuredImage: 'public/sections/jpn-101.jpg',
+    featuredImage: MOCK_MEDIA.FEATURED_CROPPED.EDUCATION_GENERAL,
     createdAt: new Date('2024-01-01T08:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-01T08:00:00Z').toISOString(),
     _version: 1,
@@ -146,7 +148,7 @@ export const mockSections = {
     learner: 'section-jpn-102-learners', // Cognito group name for students in this section
     code: 'JPN102ADV',
     status: 'PUBLISHED',
-    featuredImage: 'public/sections/jpn-102.jpg',
+    featuredImage: MOCK_MEDIA.FEATURED_CROPPED.ACADEMIC,
     createdAt: new Date('2024-01-02T08:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-02T08:00:00Z').toISOString(),
     _version: 1,
@@ -166,6 +168,7 @@ export const studentAssignments = [
     sectionID: 'section-jpn-101',
     owner: 'teacher-1', // Assignment owner is the instructor who created it
     instructor: 'teacher-1',
+    status: 'PUBLISHED',
     dueDate: new Date('2024-01-25T23:59:00Z').toISOString(),
     createdAt: new Date('2024-01-15T10:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-15T10:00:00Z').toISOString(),
@@ -179,6 +182,7 @@ export const studentAssignments = [
     sectionID: 'section-jpn-101',
     owner: 'teacher-1',
     instructor: 'teacher-1',
+    status: 'PUBLISHED',
     dueDate: new Date('2024-01-30T23:59:00Z').toISOString(),
     createdAt: new Date('2024-01-16T10:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-16T10:00:00Z').toISOString(),
@@ -192,6 +196,7 @@ export const studentAssignments = [
     sectionID: 'section-jpn-101',
     owner: 'teacher-1',
     instructor: 'teacher-1',
+    status: 'PUBLISHED',
     dueDate: new Date('2024-02-05T23:59:00Z').toISOString(),
     createdAt: new Date('2024-01-18T10:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-18T10:00:00Z').toISOString(),
@@ -205,6 +210,7 @@ export const studentAssignments = [
     sectionID: 'section-jpn-102',
     owner: 'teacher-2',
     instructor: 'teacher-2',
+    status: 'PUBLISHED',
     dueDate: new Date('2024-02-10T23:59:00Z').toISOString(),
     createdAt: new Date('2024-01-20T10:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-20T10:00:00Z').toISOString(),
@@ -224,6 +230,7 @@ export const instructorAssignments = [
     sectionID: 'section-jpn-101',
     owner: 'teacher-1', // Assignment owner is the instructor who created it
     instructor: 'teacher-1',
+    status: 'PUBLISHED',
     dueDate: new Date('2024-01-25T23:59:00Z').toISOString(),
     createdAt: new Date('2024-01-15T09:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-15T09:00:00Z').toISOString(),
@@ -237,11 +244,206 @@ export const instructorAssignments = [
     sectionID: 'section-jpn-101',
     owner: 'teacher-1',
     instructor: 'teacher-1',
+    status: 'PUBLISHED',
     dueDate: new Date('2024-01-30T23:59:00Z').toISOString(),
     createdAt: new Date('2024-01-16T09:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-16T09:00:00Z').toISOString(),
     _version: 1,
     _lastChangedAt: Date.parse('2024-01-16T09:00:00Z'),
+    _deleted: false,
+  },
+  {
+    id: 'assignment-instructor-3',
+    unitID: 'unit-japanese-3',
+    sectionID: 'section-jpn-101',
+    owner: 'teacher-1',
+    instructor: 'teacher-1',
+    status: 'PUBLISHED',
+    dueDate: new Date('2024-02-05T23:59:00Z').toISOString(),
+    createdAt: new Date('2024-01-18T09:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-18T09:00:00Z').toISOString(),
+    _version: 1,
+    _lastChangedAt: Date.parse('2024-01-18T09:00:00Z'),
+    _deleted: false,
+  },
+  // Future assignment - due in 2050
+  {
+    id: 'assignment-instructor-future-1',
+    unitID: 'unit-japanese-1',
+    sectionID: 'section-jpn-101',
+    owner: 'teacher-1',
+    instructor: 'teacher-1',
+    status: 'PUBLISHED',
+    dueDate: new Date('2050-12-31T23:59:00Z').toISOString(),
+    createdAt: new Date('2024-01-19T09:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-19T09:00:00Z').toISOString(),
+    _version: 1,
+    _lastChangedAt: Date.parse('2024-01-19T09:00:00Z'),
+    _deleted: false,
+  },
+  // Draft assignment - not yet published
+  {
+    id: 'assignment-instructor-draft-1',
+    unitID: 'unit-japanese-2',
+    sectionID: 'section-jpn-101',
+    owner: 'teacher-1',
+    instructor: 'teacher-1',
+    status: 'DRAFT',
+    dueDate: new Date('2024-02-15T23:59:00Z').toISOString(),
+    createdAt: new Date('2024-01-20T09:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-20T09:00:00Z').toISOString(),
+    _version: 1,
+    _lastChangedAt: Date.parse('2024-01-20T09:00:00Z'),
+    _deleted: false,
+  },
+];
+
+/**
+ * Mock Grades for Other Students (Bob, Carol, Dave)
+ * For instructor gradebook view
+ */
+export const otherStudentGrades = [
+  // Bob - unit-japanese-1
+  {
+    id: 'grade-bob-1',
+    unitID: 'unit-japanese-1',
+    owner: 'student-bob-sub',
+    identityId: 'identity-bob',
+    instructor: 'teacher-1',
+    unitVersion: 1,
+    percentComplete: 100,
+    accuracy: 87,
+    complete: true,
+    timerStarted: true,
+    data: JSON.stringify({
+      'quiz-block-1': { complete: true, accuracy: 90 },
+      'meaning-assoc-1': { complete: true, accuracy: 85 },
+      'custom-q-1': { complete: true, accuracy: 86 }
+    }),
+    files: [],
+    createdAt: new Date('2024-01-17T11:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-21T10:00:00Z').toISOString(),
+    _version: 4,
+    _lastChangedAt: Date.parse('2024-01-21T10:00:00Z'),
+    _deleted: false,
+  },
+  // Bob - unit-japanese-2
+  {
+    id: 'grade-bob-2',
+    unitID: 'unit-japanese-2',
+    owner: 'student-bob-sub',
+    identityId: 'identity-bob',
+    instructor: 'teacher-1',
+    unitVersion: 1,
+    percentComplete: 100,
+    accuracy: 82,
+    complete: true,
+    timerStarted: true,
+    data: JSON.stringify({
+      'quiz-block-1': { complete: true, accuracy: 80 },
+      'meaning-assoc-1': { complete: true, accuracy: 85 },
+      'custom-q-1': { complete: true, accuracy: 81 }
+    }),
+    files: [],
+    createdAt: new Date('2024-01-18T14:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-22T09:30:00Z').toISOString(),
+    _version: 3,
+    _lastChangedAt: Date.parse('2024-01-22T09:30:00Z'),
+    _deleted: false,
+  },
+  // Carol - unit-japanese-1
+  {
+    id: 'grade-carol-1',
+    unitID: 'unit-japanese-1',
+    owner: 'student-carol-sub',
+    identityId: 'identity-carol',
+    instructor: 'teacher-1',
+    unitVersion: 1,
+    percentComplete: 100,
+    accuracy: 91,
+    complete: true,
+    timerStarted: true,
+    data: JSON.stringify({
+      'quiz-block-1': { complete: true, accuracy: 95 },
+      'meaning-assoc-1': { complete: true, accuracy: 90 },
+      'custom-q-1': { complete: true, accuracy: 88 }
+    }),
+    files: [],
+    createdAt: new Date('2024-01-16T15:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-20T14:15:00Z').toISOString(),
+    _version: 5,
+    _lastChangedAt: Date.parse('2024-01-20T14:15:00Z'),
+    _deleted: false,
+  },
+  // Carol - unit-japanese-2 (in progress)
+  {
+    id: 'grade-carol-2',
+    unitID: 'unit-japanese-2',
+    owner: 'student-carol-sub',
+    identityId: 'identity-carol',
+    instructor: 'teacher-1',
+    unitVersion: 1,
+    percentComplete: 60,
+    accuracy: 0,
+    complete: false,
+    timerStarted: true,
+    data: JSON.stringify({
+      'quiz-block-1': { complete: true, accuracy: 88 },
+      'meaning-assoc-1': { complete: false, accuracy: 0 }
+    }),
+    files: [],
+    createdAt: new Date('2024-01-19T10:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-19T11:00:00Z').toISOString(),
+    _version: 2,
+    _lastChangedAt: Date.parse('2024-01-19T11:00:00Z'),
+    _deleted: false,
+  },
+  // Dave - unit-japanese-1
+  {
+    id: 'grade-dave-1',
+    unitID: 'unit-japanese-1',
+    owner: 'student-dave-sub',
+    identityId: 'identity-dave',
+    instructor: 'teacher-1',
+    unitVersion: 1,
+    percentComplete: 100,
+    accuracy: 78,
+    complete: true,
+    timerStarted: true,
+    data: JSON.stringify({
+      'quiz-block-1': { complete: true, accuracy: 75 },
+      'meaning-assoc-1': { complete: true, accuracy: 80 },
+      'custom-q-1': { complete: true, accuracy: 79 }
+    }),
+    files: [],
+    createdAt: new Date('2024-01-18T09:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-23T08:00:00Z').toISOString(),
+    _version: 6,
+    _lastChangedAt: Date.parse('2024-01-23T08:00:00Z'),
+    _deleted: false,
+  },
+  // Dave - unit-japanese-2
+  {
+    id: 'grade-dave-2',
+    unitID: 'unit-japanese-2',
+    owner: 'student-dave-sub',
+    identityId: 'identity-dave',
+    instructor: 'teacher-1',
+    unitVersion: 1,
+    percentComplete: 100,
+    accuracy: 84,
+    complete: true,
+    timerStarted: true,
+    data: JSON.stringify({
+      'quiz-block-1': { complete: true, accuracy: 85 },
+      'meaning-assoc-1': { complete: true, accuracy: 83 },
+      'custom-q-1': { complete: true, accuracy: 84 }
+    }),
+    files: [],
+    createdAt: new Date('2024-01-22T13:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-24T10:00:00Z').toISOString(),
+    _version: 3,
+    _lastChangedAt: Date.parse('2024-01-24T10:00:00Z'),
     _deleted: false,
   },
 ];
@@ -251,7 +453,7 @@ export const instructorAssignments = [
  * Showing various completion states and accuracy levels
  */
 export const studentGrades = [
-  // Completed assignment with high score
+  // Alice - Completed assignment with high score
   {
     id: 'grade-alice-1',
     unitID: 'unit-japanese-1',
@@ -446,14 +648,20 @@ export function seedIndexPageData(scenario = 'student') {
     seedMockAssignments(allAssignments);
   }
 
-  // Seed grades
-  data.grades.forEach(grade => seedMockGrade(grade));
+  // Seed grades - for instructor view, seed ALL student grades
+  if (scenario === 'instructor') {
+    // Seed all student grades so gradebook shows data
+    [...studentGrades, ...otherStudentGrades].forEach(grade => seedMockGrade(grade));
+  } else {
+    // For student view, just seed their own grades
+    data.grades.forEach(grade => seedMockGrade(grade));
+  }
 
   console.log('[IndexPageData] Seeded', scenario, 'dashboard with', {
     units: Object.keys(data.units).length,
     sections: allSections.length,
     assignments: allAssignments.length,
-    grades: data.grades.length,
+    grades: scenario === 'instructor' ? (studentGrades.length + otherStudentGrades.length) : data.grades.length,
   });
 }
 
@@ -463,6 +671,7 @@ export default {
   studentAssignments,
   instructorAssignments,
   studentGrades,
+  otherStudentGrades,
   studentDashboardData,
   instructorDashboardData,
   emptyDashboardData,

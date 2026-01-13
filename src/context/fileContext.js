@@ -13,7 +13,20 @@ import { CourseVectorStore } from "../components/Editor3/components/FileManager2
 import { loadEmbeddingsByDocument, loadEmbeddingsFromS3 } from "../utils/vectorStoreDB";
 
 // Provider and Consumer are connected through their "parent" context
-const FilesContext = createContext();
+const FilesContext = createContext({
+  audioFiles: {},
+  refreshAudioFiles: () => {},
+  files: [],
+  myFiles: [],
+  myPlaylistFiles: [],
+  myPlaylistUrls: [],
+  myPdfs: [],
+  documents: [],
+  session: { identityId: undefined, idToken: undefined, error: undefined },
+  filesVersion: 0,
+  vectorStore: { loaded: false, items: [], add: () => {}, loadFromIndexedDB: async () => 0 },
+  vectorStoreReady: false,
+});
 
 export const ACCEPTABLE_PLAYLIST_TYPES = [
   'audio/mp3',

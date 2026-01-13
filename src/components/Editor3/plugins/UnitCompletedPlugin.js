@@ -33,8 +33,8 @@ export default function UnitCompletedPlugin() {
         name,
         showUnitComplete,
         setShowUnitComplete,
-        recentGrades,
-    } = useContext(UnitContext);
+        recentGrades = [],
+    } = useContext(UnitContext) || {};
 
 
     console.log('unitcompleted_PPPPlugin', name)

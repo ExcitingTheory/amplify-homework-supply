@@ -1189,6 +1189,7 @@ const ChatSidebar = () => {
                                             <List sx={{ p: 0 }}>
                                                 {chatHistories.filter(h => h.archived).map((history, index) => {
                                                     const isActive = assistantChat?.id === history.id;
+                                                    const isLegacy = !history.assistantID;
                                                     let historyMessages = [];
                                                     let historyDraft = '';
                                                     try {

@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { userEvent, within, waitFor, expect } from 'storybook/test';
+import { AudioPlayerProvider } from '../context/AudioPlayerContext';
 import AudioWaveformPlayer from './AudioWaveformPlayer';
 import { Box } from '@mui/material';
 import { MOCK_AUDIO_BASE64, mockWaveformData } from '../../../../.storybook/__mocks__/media';
@@ -13,7 +14,12 @@ import { MOCK_AUDIO_BASE64, mockWaveformData } from '../../../../.storybook/__mo
 export default {
   title: 'Components/AudioWaveformPlayer',
   component: AudioWaveformPlayer,
-  parameters: {    layout: 'padded',
+  parameters: {
+    layout: 'padded',
+    // AudioPlayerProvider is required for this component
+    disableUnitContext: true,
+    disableSectionContext: true,
+    disableDictionaryContext: true,
     docs: {
       description: {
         component: 'Complete audio player with waveform visualization, playback controls, and progress tracking.',
@@ -135,6 +141,7 @@ export const MultiplePlayersInList = () => {
   ];
 
   return (
+    <AudioPlayerProvider>
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 700 }}>
       {recordings.map((recording) => (
         <AudioWaveformPlayer
@@ -147,6 +154,7 @@ export const MultiplePlayersInList = () => {
         />
       ))}
     </Box>
+    </AudioPlayerProvider>
   );
 };
 
@@ -204,6 +212,7 @@ export const RecordingWithCallback = () => {
   };
   
   return (
+    <AudioPlayerProvider>
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <AudioWaveformPlayer
         enableRecording={true}
@@ -233,6 +242,7 @@ export const RecordingWithCallback = () => {
         </Box>
       )}
     </Box>
+    </AudioPlayerProvider>
   );
 };
 

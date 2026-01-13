@@ -67,7 +67,7 @@ function CardMediaComponent({ s3Key, identityId, level = 'protected', filter = n
     <CardMedia
       component="img"
       sx={{
-        width: 151,
+        width: url ? 400 : 151,
         alignSelf: 'left',
         filter: filter,
       }}
@@ -289,7 +289,7 @@ function Index({ signOut, user }) {
 
 
 
-          {(assignments.length > 0 && myAssignmentNeedsGrading.length > 0 && units) &&
+          {(assignments?.length > 0 && myAssignmentNeedsGrading?.length > 0 && units) &&
             <Box
               style={{
                 padding: '1rem',
@@ -307,7 +307,7 @@ function Index({ signOut, user }) {
 
 
               {
-                assignments.map(function (assignment, index) {
+                assignments?.map(function (assignment, index) {
                   console.log('(assignments && units).assignment', assignment)
                   console.log('(assignments && units).units', units)
                   // get local time from UTC
@@ -340,40 +340,59 @@ function Index({ signOut, user }) {
 
                       <Card
                         key={index}
-                        elevation={3}
+                        elevation={2}
                         sx={{
                           display: 'flex',
                           margin: '1rem auto',
                           width: '90vw',
                           maxWidth: '80rem',
+                          borderRadius: 2,
+                          borderLeft: '4px solid',
+                          borderLeftColor: 'primary.main',
+                          transition: 'all 0.3s ease-in-out',
+                          '&:hover': {
+                            elevation: 6,
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                          },
                         }}>
                         <Box sx={{
                           display: 'flex',
                           flexDirection: 'column',
-                          flexGrow: '1'
+                          flexGrow: '1',
+                          p: 0.5,
                         }}>
-                          <CardContent sx={{ flex: '1 0 auto' }}>
-                            <Typography component="div" variant="h5">
+                          <CardContent sx={{ flex: '1 0 auto', pb: 1 }}>
+                            <Typography component="div" variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
                               {itemPrimary}
                             </Typography>
-                            <Typography variant="subtitle1" color="text.secondary" component="div">
+                            <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                               {itemSecondary}
                             </Typography>
                           </CardContent>
 
 
-                          <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5 }}>
 
                             <Button
-                              variant="text"
-                              color="inherit"
+                              variant="outlined"
+                              color="primary"
                               href={workbookUrl}
                               disabled={work}
-                              style={{
-                                maxWidth: 'fit-content',
+                              startIcon={<EditNoteIcon />}
+                              sx={{
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                px: 3,
+                                py: 1,
+                                borderRadius: 2,
+                                boxShadow: 2,
+                                '&:hover': {
+                                  boxShadow: 4,
+                                },
                               }}
                             >
-                              <EditNoteIcon />&nbsp;View Workbook
+                              View Workbook
                             </Button>
 
                           </Box>
@@ -404,7 +423,7 @@ function Index({ signOut, user }) {
             </Box>
           }
 
-          {(assignments.length > 0 && units && Object.values(myGradeMap).length > 0) &&
+          {(assignments?.length > 0 && units && Object.values(myGradeMap).length > 0) &&
             <Box
               style={{
                 padding: '1rem',
@@ -422,7 +441,7 @@ function Index({ signOut, user }) {
 
 
               {
-                assignments.map(function (assignment, index) {
+                assignments?.map(function (assignment, index) {
                   console.log('(assignments && units).assignment', assignment)
                   console.log('(assignments && units).units', units)
                   // get local time from UTC
@@ -458,52 +477,72 @@ function Index({ signOut, user }) {
                   //   boxShadow = '0px 3px 3px -2px rgba(255,23,68,0.7), 0px 3px 4px 0px rgba(255,23,68,0.7), 0px 1px 8px 0px rgba(255,23,68,0.7)'
                   // }
 
+                  // Determine border color based on grade
+                  const getBorderColor = (accuracy) => {
+                    if (accuracy >= 90) return 'success.main';
+                    if (accuracy >= 80) return 'info.main';
+                    if (accuracy >= 70) return 'warning.main';
+                    return 'error.main';
+                  };
+
                   return (
                     <>
 
                       <Card
                         key={index}
-                        elevation={3}
+                        elevation={2}
                         sx={{
                           display: 'flex',
                           margin: '1rem auto',
                           width: '90vw',
                           maxWidth: '80rem',
-                          // boxShadow,
+                          borderRadius: 2,
+                          borderLeft: '4px solid',
+                          borderLeftColor: getBorderColor(gradesForUnit?.highest?.accuracy || 0),
+                          transition: 'all 0.3s ease-in-out',
+                          '&:hover': {
+                            elevation: 6,
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                          },
                         }}>
                         <Box sx={{
                           display: 'flex',
                           flexDirection: 'column',
-                          flexGrow: '1'
+                          flexGrow: '1',
+                          p: 0.5,
                         }}>
-                          <CardContent sx={{ flex: '1 0 auto' }}>
-                            <Typography component="div" variant="h5">
+                          <CardContent sx={{ flex: '1 0 auto', pb: 1 }}>
+                            <Typography component="div" variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
                               {itemPrimary}
                             </Typography>
-                            <Typography variant="subtitle1" color="text.secondary" component="div">
+                            <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                               {itemSecondary}
                             </Typography>
                           </CardContent>
                           {gradesForUnit?.last?.accuracy &&
                             <>
-                              <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>
-
-                                <Chip icon={<HighIcon />}
-                                  style={{
-                                    margin: '0 1rem 0 0',
-                                  }}
+                              <Box sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                flexWrap: 'wrap',
+                                gap: 1,
+                                pl: 2, 
+                                pb: 1 
+                              }}>
+                                <Chip 
+                                  icon={<HighIcon />}
                                   color={getColor(gradesForUnit?.highest?.accuracy)}
                                   label={`Highest ${Math.round(gradesForUnit?.highest?.accuracy) || 0}%`}
+                                  sx={{ fontWeight: 600 }}
                                 />
-
-<Chip icon={<StarIcon/>}
-                    style={{
-                      margin: '0 1rem 0 0',
-                      
-                    }}
-                    variant="contained"
-                    label={`Level ${gradesForUnit?.count || 0}`}
-                  />
+                                <Chip 
+                                  icon={<StarIcon/>}
+                                  variant="outlined"
+                                  color="primary"
+                                  label={`Level ${gradesForUnit?.count || 0}`}
+                                  sx={{ fontWeight: 600 }}
+                                />
 
                                 {/* <Badge
                                   // anchorOrigin={{
@@ -519,38 +558,52 @@ function Index({ signOut, user }) {
                                 </Badge> */}
 
                               </Box>
-                              <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>
-                                <Chip icon={<HistoryIcon />}
-                                  style={{
-                                    margin: '0 1rem 0 0',
-                                  }}
+                              <Box sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center',
+                                flexWrap: 'wrap',
+                                gap: 1,
+                                pl: 2, 
+                                pb: 1 
+                              }}>
+                                <Chip 
+                                  icon={<HistoryIcon />}
                                   color={getColor(gradesForUnit?.last?.accuracy)}
                                   label={`Last ${Math.round(gradesForUnit?.last?.accuracy) || 0}%`}
+                                  sx={{ fontWeight: 600 }}
                                 />
-                                <Chip icon={<AverageIcon />}
-                                  style={{
-                                    margin: '0 1rem 0 0',
-                                  }}
+                                <Chip 
+                                  icon={<AverageIcon />}
                                   color={getColor(gradesForUnit?.average)}
                                   label={`Average ${Math.round(gradesForUnit?.average) || 0}%`}
+                                  sx={{ fontWeight: 600 }}
                                 />
 
                               </Box>
                             </>
                           }
 
-                          <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5 }}>
 
                             <Button
-                              variant="text"
-                              color="inherit"
+                              variant="outlined"
+                              color="primary"
                               href={workbookUrl}
                               disabled={work}
-                              style={{
-                                maxWidth: 'fit-content',
+                              startIcon={<EditNoteIcon />}
+                              sx={{
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                px: 3,
+                                py: 1,
+                                borderRadius: 2,
+                                boxShadow: 2,
+                                '&:hover': {
+                                  boxShadow: 4,
+                                },
                               }}
                             >
-                              <EditNoteIcon />&nbsp;View Workbook
+                              View Workbook
                             </Button>
 
                           </Box>
@@ -584,7 +637,7 @@ function Index({ signOut, user }) {
 
 
 
-          {(myAssignments.length > 0 && units) &&
+          {(myAssignments?.length > 0 && units) &&
             <Box
               style={{
                 padding: '1rem',
@@ -602,7 +655,7 @@ function Index({ signOut, user }) {
 
 
               {
-                myAssignments.map(function (assignment, index) {
+                myAssignments?.map(function (assignment, index) {
 
                   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
                   // get timezone from user profile TBD
@@ -624,51 +677,86 @@ function Index({ signOut, user }) {
                     <>
 
                       <Card
-                        elevation={3}
+                        elevation={2}
                         key={index}
                         sx={{
                           display: 'flex',
                           margin: '1rem auto',
                           width: '90vw',
-                          maxWidth: '80rem',                  
+                          maxWidth: '80rem',
+                          borderRadius: 2,
+                          borderLeft: '4px solid',
+                          borderLeftColor: 'grey.900',
+                          transition: 'all 0.3s ease-in-out',
+                          '&:hover': {
+                            elevation: 6,
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                          },
                         }}>
                         <Box sx={{
                           display: 'flex',
                           flexDirection: 'column',
-                          flexGrow: '1'
+                          flexGrow: '1',
+                          p: 0.5,
                         }}>
-                          <CardContent sx={{ flex: '1 0 auto' }}>
-                            <Typography component="div" variant="h5">
+                          <CardContent sx={{ flex: '1 0 auto', pb: 1 }}>
+                            <Typography component="div" variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
                               {itemPrimary}
                             </Typography>
-                            <Typography variant="subtitle1" color="text.secondary" component="div">
+                            <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                               {itemSecondary}
                             </Typography>
                           </CardContent>
-                          <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5 }}>
 
                             <Button
-                              variant="text"
-                              color="inherit"
+                              variant="outlined"
                               href={workbookUrl}
                               disabled={work}
-                              style={{
-                                maxWidth: 'fit-content',
+                              startIcon={<EditNoteIcon />}
+                              sx={{
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                px: 3,
+                                py: 1,
+                                mr: 1,
+                                borderRadius: 2,
+                                boxShadow: 2,
+                                color: 'grey.900',
+                                borderColor: 'grey.900',
+                                '&:hover': {
+                                  boxShadow: 4,
+                                  borderColor: 'grey.900',
+                                  backgroundColor: 'grey.50',
+                                },
                               }}
                             >
-                              <EditNoteIcon />&nbsp;View Workbook
+                              View Workbook
                             </Button>
 
                             <Button
-                              variant="text"
-                              color="inherit"
+                              variant="outlined"
                               href={unitUrl}
                               disabled={work}
-                              style={{
-                                maxWidth: 'fit-content',
+                              startIcon={<EditIcon />}
+                              sx={{
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                px: 3,
+                                py: 1,
+                                borderRadius: 2,
+                                boxShadow: 2,
+                                color: 'grey.900',
+                                borderColor: 'grey.900',
+                                '&:hover': {
+                                  boxShadow: 4,
+                                  borderColor: 'grey.900',
+                                  backgroundColor: 'grey.50',
+                                },
                               }}
                             >
-                              <EditIcon />&nbsp;Edit Unit
+                              Edit Unit
                             </Button>
 
                           </Box>
@@ -699,57 +787,76 @@ function Index({ signOut, user }) {
             </Box>
           }
 
-          {(sections.length == 0 && mySections.length == 0) &&
+          {(sections?.length == 0 && mySections?.length == 0) &&
             //embed url to create a new section
             <Card
               elevation={3}
               sx={{
                 display: 'flex',
-                margin: '1rem auto',
-                width: '90vw',
-                maxWidth: '80rem',
+                margin: '3rem auto',
+                width: 'fit-content',
+                maxWidth: '500px',
+                minHeight: '300px',
+                borderRadius: 3,
               }}>
               <Box sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                flexGrow: '1'
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexGrow: '1',
+                p: 4,
               }}>
-                <CardContent sx={{ flex: '1 1 auto', padding: '2rem' }}>
-                  <Typography component="div" variant="h5">
+                <CardContent sx={{ 
+                  flex: '1 1 auto', 
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                }}>
+                  <Typography component="div" variant="h5" sx={{ mb: 3 }}>
                     No Sections Yet
-                    <br />
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
                     <Button
-                      variant="contained"
+                      variant="outlined"
                       color="primary"
                       href='sections'
                       disabled={work}
-                      style={{
-
-                        maxWidth: 'fit-content',
+                      sx={{
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        px: 3,
+                        py: 1,
+                        borderRadius: 2,
                       }}
                     >
                       Join Section?
                     </Button>
 
                     <Button
-                      variant="text"
-                      color="inherit"
+                      variant="outlined"
+                      color="primary"
                       href='sections'
                       disabled={work}
-                      style={{
-
-                        maxWidth: 'fit-content',
+                      sx={{
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        px: 3,
+                        py: 1,
+                        borderRadius: 2,
                       }}
                     >
                       Create New Section
                     </Button>
-                  </Typography>
+                  </Box>
                 </CardContent>
               </Box>
             </Card>
 
           }
-          {mySections.length > 0 &&
+          {mySections?.length > 0 &&
 
             <Box
               style={{
@@ -768,45 +875,67 @@ function Index({ signOut, user }) {
 
 
               {
-                mySections.map(function (section, index) {
+                mySections?.map(function (section, index) {
 
                   return (
                     <>
 
                       <Card
                         key={index}
-                        elevation={3}
+                        elevation={2}
                         sx={{
                           display: 'flex',
                           margin: '1rem auto',
-                          width: '90vw',
+                          width: 'ƒ',
                           maxWidth: '80rem',
+                          borderRadius: 2,
+                          borderLeft: '4px solid',
+                          borderLeftColor: 'grey.900',
+                          transition: 'all 0.3s ease-in-out',
+                          '&:hover': {
+                            elevation: 6,
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                          },
                         }}>
                         <Box sx={{
                           display: 'flex',
                           flexDirection: 'column',
-                          flexGrow: '1'
+                          flexGrow: '1',
+                          p: 0.5,
                         }}>
-                          <CardContent sx={{ flex: '1 0 auto' }}>
-                            <Typography component="div" variant="h5">
+                          <CardContent sx={{ flex: '1 0 auto', pb: 1 }}>
+                            <Typography component="div" variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
                               {section?.name || "Untitled Section"}
                             </Typography>
-                            <Typography variant="subtitle1" color="text.secondary" component="div">
+                            <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                               {section?.description || "No description"}
                             </Typography>
                           </CardContent>
-                          <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5 }}>
 
                             <Button
-                              variant="text"
-                              color="inherit"
+                              variant="outlined"
                               href={`section/${section.id}`}
                               disabled={work}
-                              style={{
-                                maxWidth: 'fit-content',
+                              startIcon={<PeopleIcon />}
+                              sx={{
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                px: 3,
+                                py: 1,
+                                borderRadius: 2,
+                                boxShadow: 2,
+                                color: 'grey.900',
+                                borderColor: 'grey.900',
+                                '&:hover': {
+                                  boxShadow: 4,
+                                  borderColor: 'grey.900',
+                                  backgroundColor: 'grey.50',
+                                },
                               }}
                             >
-                              <PeopleIcon />&nbsp;View Section
+                              View Section
                             </Button>
 
                           </Box>
@@ -838,7 +967,7 @@ function Index({ signOut, user }) {
 
           }
 
-          {sections.length > 0 &&
+          {sections?.length > 0 &&
             <Box
               style={{
                 padding: '1rem',
@@ -856,45 +985,67 @@ function Index({ signOut, user }) {
 
 
               {
-                sections.map(function (section, index) {
+                sections?.map(function (section, index) {
 
                   return (
                     <>
 
                       <Card
                         key={index}
-                        elevation={3}
+                        elevation={2}
                         sx={{
                           display: 'flex',
                           margin: '1rem auto',
                           width: '90vw',
                           maxWidth: '80rem',
+                          borderRadius: 2,
+                          borderLeft: '4px solid',
+                          borderLeftColor: 'grey.900',
+                          transition: 'all 0.3s ease-in-out',
+                          '&:hover': {
+                            elevation: 6,
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                          },
                         }}>
                         <Box sx={{
                           display: 'flex',
                           flexDirection: 'column',
-                          flexGrow: '1'
+                          flexGrow: '1',
+                          p: 0.5,
                         }}>
-                          <CardContent sx={{ flex: '1 0 auto' }}>
-                            <Typography component="div" variant="h5">
+                          <CardContent sx={{ flex: '1 0 auto', pb: 1 }}>
+                            <Typography component="div" variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
                               {section?.name || "Untitled Section"}
                             </Typography>
-                            <Typography variant="subtitle1" color="text.secondary" component="div">
+                            <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                               {section?.description || "No description"}
                             </Typography>
                           </CardContent>
-                          <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5 }}>
 
                             <Button
-                              variant="text"
-                              color="inherit"
+                              variant="outlined"
                               href={`section/${section.id}`}
                               disabled={work}
-                              style={{
-                                maxWidth: 'fit-content',
+                              startIcon={<EditNoteIcon />}
+                              sx={{
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                px: 3,
+                                py: 1,
+                                borderRadius: 2,
+                                boxShadow: 2,
+                                color: 'grey.900',
+                                borderColor: 'grey.900',
+                                '&:hover': {
+                                  boxShadow: 4,
+                                  borderColor: 'grey.900',
+                                  backgroundColor: 'grey.50',
+                                },
                               }}
                             >
-                              <EditNoteIcon />&nbsp;View Section
+                              View Section
                             </Button>
 
                           </Box>

@@ -17,7 +17,19 @@ import * as use from '@tensorflow-models/universal-sentence-encoder';
 
 
 // Provider and Consumer are connected through their "parent" context
-const DictionaryContext = createContext();
+const DictionaryContext = createContext({
+    dictionary: {},
+    filteredDictionary: {},
+    wordMapId: {},
+    wordMapPhrase: {},
+    wordRefs: {},
+    questionBank: {},
+    filter: "",
+    setFilter: () => {},
+    filterWords: () => {},
+    searching: false,
+    setSearching: () => {},
+});
 
 
 function jaroWinklerDistance(s1, s2) {

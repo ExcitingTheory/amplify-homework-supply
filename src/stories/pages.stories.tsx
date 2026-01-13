@@ -5,9 +5,14 @@ import GradesPage from '../../pages/grades.js';
 import ProfilePage from '../../pages/profile.js';
 import SectionsPage from '../../pages/sections.js';
 import UnitsPage from '../../pages/units.js';
-import SectionDetailPage from '../../pages/section/[id].js';
+import { SectionDetail as SectionDetailPage } from '../../pages/section/[id].js';
 import UnitDetailPage from '../../pages/unit/[id].js';
 import WorkbookPage from '../../pages/workbook/[id].js';
+
+// Mock data imports
+import { seedIndexPageData } from '../../.storybook/__mocks__/index-page-examples';
+import { setMockUser } from '../../.storybook/__mocks__/aws-amplify-auth';
+import { FilesProvider } from '../../src/context/fileContext';
 
 /**
  * Pages Stories - Storybook stories for all Next.js pages
@@ -74,7 +79,37 @@ export default meta;
  * - Sections the user belongs to
  */
 export const Index = {
-  render: ({signOut, user}) => <IndexPage args={{signOut, user}} />,
+  decorators: [
+    (Story) => {
+      setMockUser({
+        username: 'student-alice-sub',
+        userId: 'student-alice-sub',
+        attributes: {
+          sub: 'student-alice-sub',
+          email: 'alice@example.com',
+        },
+        groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
+      });
+      seedIndexPageData('student');
+      return (
+        <FilesProvider>
+          <Story />
+        </FilesProvider>
+      );
+    },
+  ],
+  render: () => <IndexPage args={{
+    user: {
+      username: 'student-alice-sub',
+      userId: 'student-alice-sub',
+      attributes: {
+        sub: 'student-alice-sub',
+        email: 'alice@example.com',
+      },
+      groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
+    },
+    signOut: () => console.log('Sign out clicked'),
+  }} />,
   parameters: {
     docs: {
       description: {
@@ -92,6 +127,17 @@ export const Index = {
  * - For students: Their own grades organized by assignment
  */
 export const Grades = {
+  decorators: [
+    (Story) => {
+      setMockUser({
+        username: 'student-alice-sub',
+        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
+        groups: ['section-jpn-101-learners'],
+      });
+      seedIndexPageData('student');
+      return <Story />;
+    },
+  ],
   render: () => <GradesPage />,
   parameters: {
     docs: {
@@ -111,6 +157,16 @@ export const Grades = {
  * - Change password
  */
 export const Profile = {
+  decorators: [
+    (Story) => {
+      setMockUser({
+        username: 'student-alice-sub',
+        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
+        groups: ['section-jpn-101-learners'],
+      });
+      return <Story />;
+    },
+  ],
   render: () => <ProfilePage />,
   parameters: {
     docs: {
@@ -130,6 +186,17 @@ export const Profile = {
  * - Create new sections
  */
 export const Sections = {
+  decorators: [
+    (Story) => {
+      setMockUser({
+        username: 'student-alice-sub',
+        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
+        groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
+      });
+      seedIndexPageData('student');
+      return <Story />;
+    },
+  ],
   render: () => <SectionsPage />,
   parameters: {
     docs: {
@@ -150,6 +217,17 @@ export const Sections = {
  * - Create new units
  */
 export const Units = {
+  decorators: [
+    (Story) => {
+      setMockUser({
+        username: 'teacher-1',
+        attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
+        groups: [],
+      });
+      seedIndexPageData('instructor');
+      return <Story />;
+    },
+  ],
   render: () => <UnitsPage />,
   parameters: {
     docs: {
@@ -171,15 +249,75 @@ export const Units = {
  * - Upload featured image
  */
 export const SectionDetail = {
+  decorators: [
+    (Story, context) => {
+      setMockUser({
+        username: 'teacher-1',
+        attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
+        groups: [],
+      });
+      seedIndexPageData('instructor');
+      
+      // Mock router to provide id from parameters
+      const { useRouter } = require('next/router');
+      const router = useRouter();
+      if (context.parameters.nextRouter) {
+        Object.assign(router, context.parameters.nextRouter);
+      }
+      
+      return <FilesProvider><Story /></FilesProvider>;
+    },
+  ],
   render: () => <SectionDetailPage />,
   parameters: {
     nextRouter: {
       pathname: '/section/[id]',
-      query: { id: 'test-section-id' },
+      query: { id: 'section-jpn-101' },
+      isReady: true,
     },
     docs: {
       description: {
-        story: 'Section detail page showing students, assignments, and grades.',
+        story: 'Section detail page for instructors - shows student roster, gradebook with all student scores, and assignments.',
+      },
+    },
+  },
+};
+
+/**
+ * Section Detail Page (Student View)
+ * 
+ * Student viewing their section - shows their own grades and assignments
+ */
+export const SectionDetailStudent = {
+  decorators: [
+    (Story, context) => {
+      setMockUser({
+        username: 'student-alice-sub',
+        attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' },
+        groups: ['section-jpn-101-learners'],
+      });
+      seedIndexPageData('student');
+      
+      // Mock router to provide id from parameters
+      const { useRouter } = require('next/router');
+      const router = useRouter();
+      if (context.parameters.nextRouter) {
+        Object.assign(router, context.parameters.nextRouter);
+      }
+      
+      return <FilesProvider><Story /></FilesProvider>;
+    },
+  ],
+  render: () => <SectionDetailPage />,
+  parameters: {
+    nextRouter: {
+      pathname: '/section/[id]',
+      query: { id: 'section-jpn-101' },
+      isReady: true,
+    },
+    docs: {
+      description: {
+        story: 'Section detail page for students - shows their personal grades and assignments for the section.',
       },
     },
   },
@@ -196,11 +334,22 @@ export const SectionDetail = {
  * - Publish/unpublish units
  */
 export const UnitDetail = {
+  decorators: [
+    (Story) => {
+      setMockUser({
+        username: 'teacher-1',
+        attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
+        groups: [],
+      });
+      seedIndexPageData('instructor');
+      return <FilesProvider><Story /></FilesProvider>;
+    },
+  ],
   render: () => <UnitDetailPage />,
   parameters: {
     nextRouter: {
       pathname: '/unit/[id]',
-      query: { id: 'test-unit-id' },
+      query: { id: 'unit-japanese-1' },
     },
     docs: {
       description: {
@@ -221,11 +370,22 @@ export const UnitDetail = {
  * - Timed exercises with countdown
  */
 export const Workbook = {
+  decorators: [
+    (Story) => {
+      setMockUser({
+        username: 'student-alice-sub',
+        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
+        groups: ['section-jpn-101-learners'],
+      });
+      seedIndexPageData('student');
+      return <FilesProvider><Story /></FilesProvider>;
+    },
+  ],
   render: () => <WorkbookPage />,
   parameters: {
     nextRouter: {
       pathname: '/workbook/[id]',
-      query: { id: 'test-unit-id' },
+      query: { id: 'assignment-1' },
     },
     docs: {
       description: {
@@ -241,7 +401,21 @@ export const Workbook = {
  * State when user has not joined or created any sections yet
  */
 export const IndexNoSections = {
-  render: ({ ...args }) => <IndexPage args={{...args}} />,
+  decorators: [
+    (Story) => {
+      setMockUser({
+        username: 'new-student',
+        attributes: { sub: 'new-student', email: 'new.student@example.com' },
+        groups: [],
+      });
+      seedIndexPageData('empty');
+      return <FilesProvider><Story /></FilesProvider>;
+    },
+  ],
+  render: () => <IndexPage args={{
+    user: { username: 'new-student', attributes: { sub: 'new-student', email: 'new.student@example.com' } },
+    signOut: () => console.log('Sign out'),
+  }} />,
   parameters: {
     docs: {
       description: {
@@ -257,6 +431,17 @@ export const IndexNoSections = {
  * State when no published units exist yet
  */
 export const UnitsEmptyState = {
+  decorators: [
+    (Story) => {
+      setMockUser({
+        username: 'new-teacher',
+        attributes: { sub: 'new-teacher', email: 'new.teacher@example.com' },
+        groups: [],
+      });
+      seedIndexPageData('empty');
+      return <Story />;
+    },
+  ],
   render: () => <UnitsPage />,
   parameters: {
     docs: {
@@ -273,6 +458,17 @@ export const UnitsEmptyState = {
  * State when user has no sections
  */
 export const SectionsEmptyState = {
+  decorators: [
+    (Story) => {
+      setMockUser({
+        username: 'new-student',
+        attributes: { sub: 'new-student', email: 'new.student@example.com' },
+        groups: [],
+      });
+      seedIndexPageData('empty');
+      return <Story />;
+    },
+  ],
   render: () => <SectionsPage />,
   parameters: {
     docs: {
@@ -289,6 +485,16 @@ export const SectionsEmptyState = {
  * Demonstrates the password change form
  */
 export const ProfilePasswordChange = {
+  decorators: [
+    (Story) => {
+      setMockUser({
+        username: 'student-alice-sub',
+        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
+        groups: ['section-jpn-101-learners'],
+      });
+      return <Story />;
+    },
+  ],
   render: () => <ProfilePage />,
   parameters: {
     docs: {
@@ -305,11 +511,22 @@ export const ProfilePasswordChange = {
  * Shows the timer interface before starting a timed exercise
  */
 export const WorkbookTimedExercise = {
+  decorators: [
+    (Story) => {
+      setMockUser({
+        username: 'student-alice-sub',
+        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
+        groups: ['section-jpn-101-learners'],
+      });
+      seedIndexPageData('student');
+      return <FilesProvider><Story /></FilesProvider>;
+    },
+  ],
   render: () => <WorkbookPage />,
   parameters: {
     nextRouter: {
       pathname: '/workbook/[id]',
-      query: { id: 'timed-unit-id' },
+      query: { id: 'assignment-2' },
     },
     docs: {
       description: {
@@ -325,31 +542,29 @@ export const WorkbookTimedExercise = {
  * Shows pending and completed assignments
  */
 export const IndexAssignments = {
-  render: ({...args}) => <IndexPage args={{...args}} />,
+  decorators: [
+    (Story) => {
+      setMockUser({
+        username: 'student-alice-sub',
+        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
+        groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
+      });
+      seedIndexPageData('student');
+      return <FilesProvider><Story /></FilesProvider>;
+    },
+  ],
+  render: () => <IndexPage args={{
+    user: {
+      username: 'student-alice-sub',
+      attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
+      groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
+    },
+    signOut: () => console.log('Sign out'),
+  }} />,
   parameters: {
     docs: {
       description: {
         story: 'Home page showing both pending and completed assignments with grade statistics.',
-      },
-    },
-  },
-};
-
-/**
- * Section Detail - Grade Table
- * 
- * Focus on the gradebook table view
- */
-export const SectionDetailGradeTable = {
-  render: () => <SectionDetailPage />,
-  parameters: {
-    nextRouter: {
-      pathname: '/section/[id]',
-      query: { id: 'test-section-id' },
-    },
-    docs: {
-      description: {
-        story: 'Section detail page showing student grades in table format.',
       },
     },
   },

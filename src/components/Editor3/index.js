@@ -497,7 +497,8 @@ export default function Editor() {
       <SuggestionProvider>
         <DndWrapper>
           <AutocompleteProvider>
-            <LexicalComposer initialConfig={initialConfig}>
+            <AudioPlayerProvider>
+              <LexicalComposer initialConfig={initialConfig}>
             <style jsx global>{`
             .layout-container {
               display: grid;
@@ -669,6 +670,7 @@ export default function Editor() {
           </Box>
 
         </LexicalComposer>
+            </AudioPlayerProvider>
           </AutocompleteProvider>
         </DndWrapper>
       </SuggestionProvider>
@@ -765,6 +767,8 @@ export function Workbook() {
           <PdfViewerPlugin />
           <ImagesPlugin />
           <QuizPlugin />
+          <AnswerPlugin />
+          <CustomAnswerPlugin />
           <UnitCompletedPlugin />
 
           <Box sx={{

@@ -9,7 +9,13 @@ import React from 'react';
 import ChatSidebar from './ChatSidebar';
 import { UnitProvider } from '../context/unitContext';
 import FilesContext from '../context/fileContext';
+import { TabProvider } from '../context/tabContext';
 import { DemoBanner } from '../../.storybook/components/DemoBanner';
+import {
+  MOCK_CHAT_GREETING,
+  MOCK_CHAT_QUESTION_SEARCH,
+  MOCK_CHAT_MULTIPLE_TOOLS,
+} from '../../.storybook/__mocks__/chatMockData';
 
 // Mock unit data
 const mockUnit = {
@@ -80,25 +86,39 @@ export default {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: `
-AI chat assistant with context awareness, streaming responses, and file attachment support.
-
-## Features
-- **Context-Aware**: Accesses current unit, vocabulary, questions, and files
-- **Streaming Responses**: Real-time token streaming via Vercel AI SDK
-- **File Attachments**: Drag-and-drop or click to attach files to messages
-- **OpenAI Integration**: GPT-4 powered responses with unit-specific context
-- **Message History**: Persistent conversation within the session
-
-## Mocked Services
-All AWS services (DataStore, Auth, Storage) and the /chat endpoint are mocked in Storybook.
-        `.trim(),
+        component: 'AI chat assistant with context awareness, streaming responses, and file attachment support.\n\n## Features\n- **Context-Aware**: Accesses current unit, vocabulary, questions, and files\n- **Streaming Responses**: Real-time token streaming via Vercel AI SDK\n- **File Attachments**: Drag-and-drop or click to attach files to messages\n- **OpenAI Integration**: GPT-4 powered responses with unit-specific context\n- **Message History**: Persistent conversation within the session\n- **Tool Calling**: AI can use tools to search content, create sections, generate quizzes, and more\n\n## Mocked Services\nAll AWS services (DataStore, Auth, Storage) and the /chat endpoint are mocked in Storybook.',
       },
     },
   },
   tags: ['autodocs'],
   decorators: [
-    (Story) => {
+    (Story, context) => {
+      // Get messages from story args or use empty array
+      const messages = context.args?.messages || [];
+      
+      // Create mock AssistantChat with messages
+      const mockAssistantChat = {
+        id: 'mock-chat-id',
+        messages: messages,
+        draft: '',
+        archived: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        _version: 1,
+        files: {
+          toArray: async () => []
+        }
+      };
+
+      // Mock TabContext value
+      const mockTabContext = {
+        assistantChat: messages.length > 0 ? mockAssistantChat : null,
+        chatHistories: messages.length > 0 ? [mockAssistantChat] : [],
+        setCurrentChat: () => {},
+        isLoadingChat: false,
+        chatCreationError: null,
+      };
+
       return (
         <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
           <DemoBanner>
@@ -112,19 +132,21 @@ All AWS services (DataStore, Auth, Storage) and the /chat endpoint are mocked in
             overflow: 'hidden',
             minHeight: 0,
           }}>
-            <FilesContext.Provider value={{
-              files: mockFiles,
-              session: mockSession,
-            }}>
-              <UnitProvider value={{
-                unit: mockUnit,
+            <TabProvider value={mockTabContext}>
+              <FilesContext.Provider value={{
                 files: mockFiles,
-                questionBank: mockQuestionBank,
-                dictionary: mockDictionary,
+                session: mockSession,
               }}>
-                <Story />
-              </UnitProvider>
-            </FilesContext.Provider>
+                <UnitProvider value={{
+                  unit: mockUnit,
+                  files: mockFiles,
+                  questionBank: mockQuestionBank,
+                  dictionary: mockDictionary,
+                }}>
+                  <Story />
+                </UnitProvider>
+              </FilesContext.Provider>
+            </TabProvider>
           </div>
         </div>
       );
@@ -133,30 +155,111 @@ All AWS services (DataStore, Auth, Storage) and the /chat endpoint are mocked in
 };
 
 export const Default = {
+  args: {
+    messages: [],
+  },
   parameters: {
     docs: {
       description: {
-        story: 'Default chat sidebar with empty conversation. Start typing a message to interact with the AI assistant.',
+        story: 'A basic conversation without tool calls. Shows natural chat flow with the AI assistant helping learn Japanese.',
       },
     },
   },
 };
 
-export const EmptyState = {
+export const WithToolCalls = {
+  args: {
+    messages: [],
+  },
   parameters: {
     docs: {
       description: {
-        story: 'Chat sidebar with no messages showing the empty state with helpful prompt suggestions.',
+        story: 'Shows the chat with tool calls - demonstrates how the AI uses tools like search_content to find vocabulary words. The tool invocation UI shows the search query and results in a structured format.',
       },
     },
   },
 };
 
-export const WithDragAndDrop = {
+export const CreateSectionTool = {
+  args: {
+    messages: [],
+  },
   parameters: {
     docs: {
       description: {
-        story: 'Demonstrates file attachment functionality. Try dragging and dropping files onto the chat area to attach them to your message.',
+        story: 'Demonstrates the create_section tool being used to create a new class section. Shows how the AI can perform administrative tasks.',
+      },
+    },
+  },
+};
+
+export const GenerateContentTool = {
+  args: {
+    messages: [],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Shows the generate_unit_content tool creating educational content. The AI can generate quizzes, lessons, and other learning materials.',
+      },
+    },
+  },
+};
+
+export const MultipleTools = {
+  args: {
+    messages: [],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Demonstrates multiple tool calls in sequence. The AI first searches for vocabulary, then uses those results to generate a quiz - showing how tools can be chained together.',
+      },
+    },
+  },
+};
+
+export const ToolCallInProgress = {
+  args: {
+    messages: [],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Shows a tool call in progress (input-available state). The search is prepared but results have not arrived yet - demonstrates the loading state.',
+      },
+    },
+  },
+};
+
+export const ToolCallError = {
+  render: () => <ChatSidebar initialMessages={[]} />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Demonstrates error handling in tool calls. Shows how the UI displays when a tool fails to execute properly.',
+      },
+    },
+  },
+};
+
+export const WithFileAttachments = {
+  render: () => <ChatSidebar initialMessages={[]} />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Demonstrates file attachment handling. The user uploaded a PDF and the AI acknowledged it for analysis.',
+      },
+    },
+  },
+};
+
+export const LongConversation = {
+  render: () => <ChatSidebar initialMessages={[]} />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Extended conversation showing context awareness and multiple tool calls. The AI helps create a complete lesson plan with associated quiz through a natural conversation flow.',
       },
     },
   },

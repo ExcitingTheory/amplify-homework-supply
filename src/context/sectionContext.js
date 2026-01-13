@@ -3,12 +3,16 @@ import { DataStore } from "aws-amplify/datastore";
 import { getCurrentUser } from "aws-amplify/auth";
 import { Section, Assignment } from "../models"
 
-const SectionContext = React.createContext();
+const SectionContext = React.createContext({
+    sections: [],
+    sectionMap: {},
+    assignments: [],
+});
 
 const SectionProvider = ({ children, unitId }) => {
 
     const [sections, setSections] = React.useState([]);
-    const [sectionMap, setSectionMap] = React.useState([]);
+    const [sectionMap, setSectionMap] = React.useState({});
     const [assignments, setAssignments] = React.useState([]);
 
     React.useEffect(() => {

@@ -57,10 +57,13 @@ function CardMediaComponent({ s3Key, identityId, level = 'protected' }) {
 
     return (
 
+        
+
         <CardMedia
         component="img"
         sx={{
-            width: 151,
+            width: url ? 400 : 151,
+            transition: 'width 0.3s ease-in-out',
             alignSelf: 'left',
         }}
         image={url}
@@ -309,27 +312,46 @@ function Sections() {
               elevation={3}
               sx={{
                 display: 'flex',
-                margin: '3rem auto',
+                margin: '1rem auto',
+                maxWidth: '500px',
+                minHeight: '300px',
+                borderRadius: 3,
               }}>
 
-              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                <CardContent sx={{ flex: '1 1 auto', padding: '2rem' }}>
-                  <Typography component="div" variant="h5">
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexGrow: '1',
+                p: 4,
+              }}>
+                <CardContent sx={{ 
+                  flex: '1 1 auto',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                }}>
+                  <Typography component="div" variant="h5" sx={{ mb: 3 }}>
                     No Sections Yet
-                    <br />
-                    <Button
-                      variant="text"
-                      color="inherit"
-                      onClick={handleClickOpen}
-                      disabled={work}
-                      style={{
-
-                        maxWidth: 'fit-content',
-                      }}
-                    >
-                      Create New Section
-                    </Button>
                   </Typography>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={handleClickOpen}
+                    disabled={work}
+                    sx={{
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      px: 3,
+                      py: 1,
+                      borderRadius: 2,
+                    }}
+                  >
+                    Create New Section
+                  </Button>
                 </CardContent>
               </Box>
             </Card>
@@ -342,84 +364,69 @@ function Sections() {
 
 
                                 <Card
-                                    elevation={3}
                                     key={section.id}
+                                    elevation={2}
                                     sx={{
                                         display: 'flex',
                                         margin: '1rem auto',
+                                        width: '90vw',
+                                        maxWidth: '80rem',
+                                        borderRadius: 2,
+                                        borderLeft: '4px solid',
+                                        borderLeftColor: 'grey.900',
+                                        transition: 'all 0.3s ease-in-out',
+                                        '&:hover': {
+                                            elevation: 6,
+                                            transform: 'translateY(-2px)',
+                                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                                        },
                                     }}>
-
-                                    
-                                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                        <CardContent sx={{ flex: '1 1 auto', padding: '2rem' }}>
-                                            <Typography component="div" variant="h5">
+                                    <Box sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        flexGrow: '1',
+                                        p: 0.5,
+                                    }}>
+                                        <CardContent sx={{ flex: '1 0 auto', pb: 1 }}>
+                                            <Typography component="div" variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
                                                 {section?.name || 'Untitled Section'}
-
-                                                {/* <Button
-            variant="text"
-            color="inherit"
-            href={`/section/${section.id}`}
-            disabled={work}
-            style={{
-                maxWidth: 'fit-content',
-            }}
-            >
-            
-            <EditNoteIcon
-                style={{
-                    marginRight: '0.5rem'
-                }}
-            />
-            View {section.name || 'Untitled Section'}
-          </Button> */}
                                             </Typography>
-                                            <Typography variant="subtitle1" color="text.secondary" component="div"
-                                                sx={{
-                                                    // textWrap: 'wrap',
-                                                    // display: 'flex',
-                                                    // flexDirection: 'row',
-                                                    // flexGrow: 1,
-                                                    width: 'calc(80vw - 151px)',
-                                                    wordWrap: 'break-word',
-                                                    // float: 'left'
-                                                }}
-                                            >
+                                            <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                                                 {section?.description || ''}
                                             </Typography>
                                         </CardContent>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', margin: '0rem 0rem 2rem 2rem' }}>
-                                            {/* <IconButton aria-label="previous">
-            {theme.direction === 'rtl' ? <SkipNextIcon /> : <SkipPreviousIcon />}
-          </IconButton> */}
-
+                                        <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5 }}>
                                             <Button
-                                                variant="text"
-                                                color="inherit"
+                                                variant="outlined"
                                                 href={`/section/${section.id}`}
                                                 disabled={work}
-                                                style={{
-                                                    maxWidth: 'fit-content',
+                                                startIcon={<PeopleIcon />}
+                                                sx={{
+                                                    textTransform: 'none',
+                                                    fontWeight: 600,
+                                                    px: 3,
+                                                    py: 1,
+                                                    borderRadius: 2,
+                                                    boxShadow: 2,
+                                                    color: 'grey.900',
+                                                    borderColor: 'grey.900',
+                                                    '&:hover': {
+                                                        boxShadow: 4,
+                                                        borderColor: 'grey.900',
+                                                        backgroundColor: 'grey.50',
+                                                    },
                                                 }}
                                             >
-
-                                                <PeopleIcon
-                                                    style={{
-                                                        marginRight: '0.5rem'
-                                                    }}
-                                                />
                                                 View Section
                                             </Button>
-
-                                            {/* <IconButton aria-label="next">
-            {theme.direction === 'rtl' ? <SkipPreviousIcon /> : <SkipNextIcon />}
-          </IconButton> */}
                                         </Box>
                                     </Box>
-
-                                    <CardMediaComponent
-                                        s3Key={section?.featuredImage}
-                                        identityId={section?.identityId}
-                                    />
+                                    {section?.featuredImage &&
+                                        <CardMediaComponent
+                                            s3Key={section?.featuredImage}
+                                            identityId={section?.identityId}
+                                        />
+                                    }
 
                                 </Card>
                             )

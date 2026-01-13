@@ -1,0 +1,509 @@
+/**
+ * Mock Chat SSE (Server-Sent Events) Data for Storybook
+ * 
+ * Follows Vercel AI SDK Stream Protocol
+ * Reference: https://sdk.vercel.ai/docs/ai-sdk-ui/stream-protocol
+ * 
+ * Provides realistic mock chat messages including:
+ * - Regular text streaming
+ * - Tool calls (function calling)
+ * - Structured data responses
+ */
+
+/**
+ * Helper to create SSE-formatted data line
+ */
+export function createSSEDataLine(data) {
+  return `data: ${JSON.stringify(data)}\n\n`;
+}
+
+/**
+ * Helper to create complete SSE stream
+ */
+export function createSSEStream(events) {
+  return events.map(event => createSSEDataLine(event)).join('');
+}
+
+// ==================== SIMPLE TEXT MESSAGES ====================
+
+/**
+ * Simple greeting message stream
+ */
+export const MOCK_CHAT_GREETING = [
+  // Message start
+  { type: 'text-delta', textDelta: 'Hello' },
+  { type: 'text-delta', textDelta: '!' },
+  { type: 'text-delta', textDelta: ' How' },
+  { type: 'text-delta', textDelta: ' can' },
+  { type: 'text-delta', textDelta: ' I' },
+  { type: 'text-delta', textDelta: ' help' },
+  { type: 'text-delta', textDelta: ' you' },
+  { type: 'text-delta', textDelta: ' today' },
+  { type: 'text-delta', textDelta: '?' },
+  // Stream end
+  { type: 'finish', finishReason: 'stop' }
+];
+
+/**
+ * Educational content response
+ */
+export const MOCK_CHAT_EDUCATION_RESPONSE = [
+  { type: 'text-delta', textDelta: 'Great' },
+  { type: 'text-delta', textDelta: ' question' },
+  { type: 'text-delta', textDelta: '!' },
+  { type: 'text-delta', textDelta: ' Let' },
+  { type: 'text-delta', textDelta: ' me' },
+  { type: 'text-delta', textDelta: ' explain' },
+  { type: 'text-delta', textDelta: ' photosynthesis' },
+  { type: 'text-delta', textDelta: '.\n\n' },
+  { type: 'text-delta', textDelta: 'Photosynthesis' },
+  { type: 'text-delta', textDelta: ' is' },
+  { type: 'text-delta', textDelta: ' the' },
+  { type: 'text-delta', textDelta: ' process' },
+  { type: 'text-delta', textDelta: ' by' },
+  { type: 'text-delta', textDelta: ' which' },
+  { type: 'text-delta', textDelta: ' plants' },
+  { type: 'text-delta', textDelta: ' convert' },
+  { type: 'text-delta', textDelta: ' light' },
+  { type: 'text-delta', textDelta: ' energy' },
+  { type: 'text-delta', textDelta: ' into' },
+  { type: 'text-delta', textDelta: ' chemical' },
+  { type: 'text-delta', textDelta: ' energy' },
+  { type: 'text-delta', textDelta: '.' },
+  { type: 'finish', finishReason: 'stop' }
+];
+
+/**
+ * Japanese language response
+ */
+export const MOCK_CHAT_JAPANESE_RESPONSE = [
+  { type: 'text-delta', textDelta: 'こんにちは' },
+  { type: 'text-delta', textDelta: '！\n\n' },
+  { type: 'text-delta', textDelta: '"' },
+  { type: 'text-delta', textDelta: 'こんにちは' },
+  { type: 'text-delta', textDelta: '"' },
+  { type: 'text-delta', textDelta: ' (konnichiwa)' },
+  { type: 'text-delta', textDelta: ' means' },
+  { type: 'text-delta', textDelta: ' "Hello"' },
+  { type: 'text-delta', textDelta: ' or' },
+  { type: 'text-delta', textDelta: ' "Good' },
+  { type: 'text-delta', textDelta: ' afternoon"' },
+  { type: 'text-delta', textDelta: ' in' },
+  { type: 'text-delta', textDelta: ' Japanese' },
+  { type: 'text-delta', textDelta: '.' },
+  { type: 'finish', finishReason: 'stop' }
+];
+
+// ==================== TOOL CALLING EXAMPLES ====================
+
+/**
+ * Dictionary lookup tool call
+ */
+export const MOCK_CHAT_DICTIONARY_LOOKUP = [
+  // Initial text response
+  { type: 'text-delta', textDelta: 'Let' },
+  { type: 'text-delta', textDelta: ' me' },
+  { type: 'text-delta', textDelta: ' look' },
+  { type: 'text-delta', textDelta: ' that' },
+  { type: 'text-delta', textDelta: ' up' },
+  { type: 'text-delta', textDelta: '...' },
+  
+  // Tool call start
+  { 
+    type: 'tool-call',
+    toolCallId: 'call_dict_001',
+    toolName: 'search_dictionary',
+    args: {}
+  },
+  
+  // Tool arguments streaming
+  { 
+    toolCallId: 'call_dict_001',
+    argsTextDelta: '{"query":'
+  },
+  { 
+    toolCallId: 'call_dict_001',
+    argsTextDelta: ' "水"}'
+  },
+  
+  // Tool call complete (sent after tool execution)
+  {
+    type: 'tool-result',
+    toolCallId: 'call_dict_001',
+    toolName: 'search_dictionary',
+    args: { query: '水' },
+    result: {
+      word: '水',
+      phonetic: 'mizu',
+      definition: 'Water; cold water; fluid',
+      partOfSpeech: 'noun',
+      example: '水を飲む (drink water)'
+    }
+  },
+  
+  // Response after tool use
+  { type: 'text-delta', textDelta: '\n\nI' },
+  { type: 'text-delta', textDelta: ' found' },
+  { type: 'text-delta', textDelta: ' it' },
+  { type: 'text-delta', textDelta: '!' },
+  { type: 'text-delta', textDelta: ' 水' },
+  { type: 'text-delta', textDelta: ' (mizu)' },
+  { type: 'text-delta', textDelta: ' means' },
+  { type: 'text-delta', textDelta: ' "water"' },
+  { type: 'text-delta', textDelta: '.' },
+  
+  { type: 'finish', finishReason: 'stop' }
+];
+
+/**
+ * Question bank search tool call
+ */
+export const MOCK_CHAT_QUESTION_SEARCH = [
+  { type: 'text-delta', textDelta: 'I\'ll' },
+  { type: 'text-delta', textDelta: ' search' },
+  { type: 'text-delta', textDelta: ' for' },
+  { type: 'text-delta', textDelta: ' biology' },
+  { type: 'text-delta', textDelta: ' questions' },
+  { type: 'text-delta', textDelta: '...' },
+  
+  {
+    type: 'tool-call',
+    toolCallId: 'call_q_001',
+    toolName: 'search_questions',
+    args: {}
+  },
+  
+  {
+    toolCallId: 'call_q_001',
+    argsTextDelta: '{"query":'
+  },
+  {
+    toolCallId: 'call_q_001',
+    argsTextDelta: ' "photosynthesis",'
+  },
+  {
+    toolCallId: 'call_q_001',
+    argsTextDelta: ' "subject": "biology",'
+  },
+  {
+    toolCallId: 'call_q_001',
+    argsTextDelta: ' "limit": 5}'
+  },
+  
+  {
+    type: 'tool-result',
+    toolCallId: 'call_q_001',
+    toolName: 'search_questions',
+    args: { 
+      query: 'photosynthesis',
+      subject: 'biology',
+      limit: 5
+    },
+    result: {
+      questions: [
+        {
+          id: 'q-bio-1',
+          prompt: 'What is photosynthesis?',
+          answer: 'The process by which plants convert light energy into chemical energy',
+          difficulty: 'medium'
+        },
+        {
+          id: 'q-bio-2',
+          prompt: 'What are the main products of photosynthesis?',
+          answer: 'Glucose and oxygen',
+          difficulty: 'easy'
+        }
+      ],
+      count: 2
+    }
+  },
+  
+  { type: 'text-delta', textDelta: '\n\nI' },
+  { type: 'text-delta', textDelta: ' found' },
+  { type: 'text-delta', textDelta: ' 2' },
+  { type: 'text-delta', textDelta: ' biology' },
+  { type: 'text-delta', textDelta: ' questions' },
+  { type: 'text-delta', textDelta: ' about' },
+  { type: 'text-delta', textDelta: ' photosynthesis' },
+  { type: 'text-delta', textDelta: '!' },
+  
+  { type: 'finish', finishReason: 'stop' }
+];
+
+/**
+ * Multiple tool calls in sequence
+ */
+export const MOCK_CHAT_MULTIPLE_TOOLS = [
+  { type: 'text-delta', textDelta: 'Let' },
+  { type: 'text-delta', textDelta: ' me' },
+  { type: 'text-delta', textDelta: ' check' },
+  { type: 'text-delta', textDelta: ' the' },
+  { type: 'text-delta', textDelta: ' dictionary' },
+  { type: 'text-delta', textDelta: ' and' },
+  { type: 'text-delta', textDelta: ' find' },
+  { type: 'text-delta', textDelta: ' related' },
+  { type: 'text-delta', textDelta: ' questions' },
+  { type: 'text-delta', textDelta: '...' },
+  
+  // First tool: Dictionary search
+  {
+    type: 'tool-call',
+    toolCallId: 'call_multi_001',
+    toolName: 'search_dictionary',
+    args: {}
+  },
+  {
+    toolCallId: 'call_multi_001',
+    argsTextDelta: '{"query": "光合成"}'
+  },
+  {
+    type: 'tool-result',
+    toolCallId: 'call_multi_001',
+    toolName: 'search_dictionary',
+    args: { query: '光合成' },
+    result: {
+      word: '光合成',
+      phonetic: 'kōgōsei',
+      definition: 'Photosynthesis',
+      partOfSpeech: 'noun'
+    }
+  },
+  
+  // Second tool: Question search
+  {
+    type: 'tool-call',
+    toolCallId: 'call_multi_002',
+    toolName: 'search_questions',
+    args: {}
+  },
+  {
+    toolCallId: 'call_multi_002',
+    argsTextDelta: '{"query": "photosynthesis", "limit": 3}'
+  },
+  {
+    type: 'tool-result',
+    toolCallId: 'call_multi_002',
+    toolName: 'search_questions',
+    args: { query: 'photosynthesis', limit: 3 },
+    result: {
+      questions: [
+        { id: 'q1', prompt: 'What is photosynthesis?', difficulty: 'medium' }
+      ],
+      count: 1
+    }
+  },
+  
+  { type: 'text-delta', textDelta: '\n\nI' },
+  { type: 'text-delta', textDelta: ' found' },
+  { type: 'text-delta', textDelta: ' the' },
+  { type: 'text-delta', textDelta: ' word' },
+  { type: 'text-delta', textDelta: ' 光合成' },
+  { type: 'text-delta', textDelta: ' (kōgōsei)' },
+  { type: 'text-delta', textDelta: ' which' },
+  { type: 'text-delta', textDelta: ' means' },
+  { type: 'text-delta', textDelta: ' photosynthesis' },
+  { type: 'text-delta', textDelta: ',' },
+  { type: 'text-delta', textDelta: ' and' },
+  { type: 'text-delta', textDelta: ' 1' },
+  { type: 'text-delta', textDelta: ' related' },
+  { type: 'text-delta', textDelta: ' question' },
+  { type: 'text-delta', textDelta: '.' },
+  
+  { type: 'finish', finishReason: 'stop' }
+];
+
+/**
+ * File upload/analysis tool call
+ */
+export const MOCK_CHAT_FILE_ANALYSIS = [
+  { type: 'text-delta', textDelta: 'Analyzing' },
+  { type: 'text-delta', textDelta: ' the' },
+  { type: 'text-delta', textDelta: ' uploaded' },
+  { type: 'text-delta', textDelta: ' image' },
+  { type: 'text-delta', textDelta: '...' },
+  
+  {
+    type: 'tool-call',
+    toolCallId: 'call_file_001',
+    toolName: 'analyze_image',
+    args: {}
+  },
+  {
+    toolCallId: 'call_file_001',
+    argsTextDelta: '{"fileId":'
+  },
+  {
+    toolCallId: 'call_file_001',
+    argsTextDelta: ' "file-image-diagram-1"}'
+  },
+  {
+    type: 'tool-result',
+    toolCallId: 'call_file_001',
+    toolName: 'analyze_image',
+    args: { fileId: 'file-image-diagram-1' },
+    result: {
+      description: 'Diagram showing the water cycle with labeled stages: evaporation, condensation, precipitation, and collection.',
+      detectedText: 'Water Cycle, Evaporation, Condensation, Precipitation',
+      concepts: ['water cycle', 'evaporation', 'condensation', 'precipitation', 'earth science']
+    }
+  },
+  
+  { type: 'text-delta', textDelta: '\n\nThis' },
+  { type: 'text-delta', textDelta: ' image' },
+  { type: 'text-delta', textDelta: ' shows' },
+  { type: 'text-delta', textDelta: ' a' },
+  { type: 'text-delta', textDelta: ' diagram' },
+  { type: 'text-delta', textDelta: ' of' },
+  { type: 'text-delta', textDelta: ' the' },
+  { type: 'text-delta', textDelta: ' water' },
+  { type: 'text-delta', textDelta: ' cycle' },
+  { type: 'text-delta', textDelta: '.' },
+  { type: 'text-delta', textDelta: ' The' },
+  { type: 'text-delta', textDelta: ' main' },
+  { type: 'text-delta', textDelta: ' stages' },
+  { type: 'text-delta', textDelta: ' are' },
+  { type: 'text-delta', textDelta: ':' },
+  { type: 'text-delta', textDelta: ' evaporation' },
+  { type: 'text-delta', textDelta: ',' },
+  { type: 'text-delta', textDelta: ' condensation' },
+  { type: 'text-delta', textDelta: ',' },
+  { type: 'text-delta', textDelta: ' precipitation' },
+  { type: 'text-delta', textDelta: ',' },
+  { type: 'text-delta', textDelta: ' and' },
+  { type: 'text-delta', textDelta: ' collection' },
+  { type: 'text-delta', textDelta: '.' },
+  
+  { type: 'finish', finishReason: 'stop' }
+];
+
+/**
+ * Audio transcription tool call
+ */
+export const MOCK_CHAT_AUDIO_TRANSCRIPTION = [
+  { type: 'text-delta', textDelta: 'Transcribing' },
+  { type: 'text-delta', textDelta: ' the' },
+  { type: 'text-delta', textDelta: ' audio' },
+  { type: 'text-delta', textDelta: '...' },
+  
+  {
+    type: 'tool-call',
+    toolCallId: 'call_audio_001',
+    toolName: 'transcribe_audio',
+    args: {}
+  },
+  {
+    toolCallId: 'call_audio_001',
+    argsTextDelta: '{"fileId": "file-audio-japanese-1"}'
+  },
+  {
+    type: 'tool-result',
+    toolCallId: 'call_audio_001',
+    toolName: 'transcribe_audio',
+    args: { fileId: 'file-audio-japanese-1' },
+    result: {
+      text: 'こんにちは',
+      language: 'ja',
+      confidence: 0.95
+    }
+  },
+  
+  { type: 'text-delta', textDelta: '\n\nThe' },
+  { type: 'text-delta', textDelta: ' audio' },
+  { type: 'text-delta', textDelta: ' says' },
+  { type: 'text-delta', textDelta: ':' },
+  { type: 'text-delta', textDelta: ' "こんにちは"' },
+  { type: 'text-delta', textDelta: ' (Hello)' },
+  
+  { type: 'finish', finishReason: 'stop' }
+];
+
+// ==================== ERROR HANDLING ====================
+
+/**
+ * Tool call with error
+ */
+export const MOCK_CHAT_TOOL_ERROR = [
+  { type: 'text-delta', textDelta: 'Searching' },
+  { type: 'text-delta', textDelta: '...' },
+  
+  {
+    type: 'tool-call',
+    toolCallId: 'call_error_001',
+    toolName: 'search_dictionary',
+    args: {}
+  },
+  {
+    toolCallId: 'call_error_001',
+    argsTextDelta: '{"query": "xyz123"}'
+  },
+  {
+    type: 'tool-result',
+    toolCallId: 'call_error_001',
+    toolName: 'search_dictionary',
+    args: { query: 'xyz123' },
+    result: {
+      error: 'No results found for query: xyz123'
+    }
+  },
+  
+  { type: 'text-delta', textDelta: '\n\nI' },
+  { type: 'text-delta', textDelta: ' couldn\'t' },
+  { type: 'text-delta', textDelta: ' find' },
+  { type: 'text-delta', textDelta: ' that' },
+  { type: 'text-delta', textDelta: ' word' },
+  { type: 'text-delta', textDelta: ' in' },
+  { type: 'text-delta', textDelta: ' the' },
+  { type: 'text-delta', textDelta: ' dictionary' },
+  { type: 'text-delta', textDelta: '.' },
+  
+  { type: 'finish', finishReason: 'stop' }
+];
+
+/**
+ * Stream interrupted/canceled
+ */
+export const MOCK_CHAT_CANCELED = [
+  { type: 'text-delta', textDelta: 'Let' },
+  { type: 'text-delta', textDelta: ' me' },
+  { type: 'text-delta', textDelta: ' explain' },
+  { type: 'text-delta', textDelta: ' this' },
+  { type: 'text-delta', textDelta: ' in' },
+  { type: 'text-delta', textDelta: ' detail' },
+  
+  { type: 'finish', finishReason: 'cancel' }
+];
+
+// ==================== COLLECTIONS ====================
+
+export const MOCK_CHAT_STREAMS = {
+  SIMPLE: {
+    GREETING: MOCK_CHAT_GREETING,
+    EDUCATION: MOCK_CHAT_EDUCATION_RESPONSE,
+    JAPANESE: MOCK_CHAT_JAPANESE_RESPONSE,
+  },
+  TOOLS: {
+    DICTIONARY: MOCK_CHAT_DICTIONARY_LOOKUP,
+    QUESTIONS: MOCK_CHAT_QUESTION_SEARCH,
+    MULTIPLE: MOCK_CHAT_MULTIPLE_TOOLS,
+    FILE_ANALYSIS: MOCK_CHAT_FILE_ANALYSIS,
+    AUDIO: MOCK_CHAT_AUDIO_TRANSCRIPTION,
+  },
+  ERRORS: {
+    TOOL_ERROR: MOCK_CHAT_TOOL_ERROR,
+    CANCELED: MOCK_CHAT_CANCELED,
+  },
+  ALL: [
+    ...MOCK_CHAT_GREETING,
+    ...MOCK_CHAT_EDUCATION_RESPONSE,
+    ...MOCK_CHAT_JAPANESE_RESPONSE,
+    ...MOCK_CHAT_DICTIONARY_LOOKUP,
+    ...MOCK_CHAT_QUESTION_SEARCH,
+    ...MOCK_CHAT_MULTIPLE_TOOLS,
+    ...MOCK_CHAT_FILE_ANALYSIS,
+    ...MOCK_CHAT_AUDIO_TRANSCRIPTION,
+    ...MOCK_CHAT_TOOL_ERROR,
+    ...MOCK_CHAT_CANCELED,
+  ]
+};
+
+export default MOCK_CHAT_STREAMS;

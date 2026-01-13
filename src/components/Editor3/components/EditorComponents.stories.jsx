@@ -3,7 +3,7 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { createEditor } from 'lexical';
 import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { Box } from '@mui/material';
-import QuizComponent from './QuizComponent';
+import QuestionBlockRo from './QuizComponent'; // Actual export is QuestionBlockRo
 import AnswerComponent from './AnswerComponent';
 import ImageComponent from './ImageComponent';
 import MediaPlayerComponent from './MediaPlayerComponent';
@@ -33,6 +33,8 @@ export default {
   title: 'Editor/Components/Nodes',
   parameters: {
     layout: 'padded',
+    disableUnitContext: true, // Stories provide their own UnitProvider
+    disableDictionaryContext: true, // Not needed for these component demos
     docs: {
       description: {
         component: `
@@ -77,7 +79,7 @@ export const QuizDefault = {
     });
     return (
       <UnitProvider id={unitId}>
-        <QuizComponent
+        <QuestionBlockRo
           nodeKey="quiz-1"
           data={[
             { answer: '3', correct: false },
@@ -110,7 +112,7 @@ export const QuizMultipleChoice = {
     });
     return (
       <UnitProvider id={unitId}>
-        <QuizComponent
+        <QuestionBlockRo
           nodeKey="quiz-2"
           data={[
             { answer: 'Mercury', correct: true },

@@ -39,6 +39,7 @@ const SketchPad = dynamic(
 
 import AudioWaveformPlayer from './AudioWaveformPlayer';
 import getCachedUrl from '../../../utils/getCachedUrl';
+import { RecordingStudio2 } from '../../RecordingStudio2';
 
 // Component to handle signed URL for word audio
 function SignedAudioPlayer({ audioKey, identityId, waveformData, width, height, title }) {
@@ -289,8 +290,13 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
 
     console.log('ByWordList', wordIDs, feedback, answers);
     console.log('ByWordList.currentPromptMethod', currentPromptMethod);
-    console.log('ByWordList.dictionary keys:', Object.keys(dictionary));
+    console.log('ByWordList.dictionary keys:', dictionary ? Object.keys(dictionary) : 'dictionary is null/undefined');
     console.log('ByWordList.dictionary:', dictionary);
+
+    // Add defensive check for dictionary
+    if (!dictionary) {
+        return <Typography variant="body2" color="error">No dictionary available</Typography>;
+    }
 
     return <ol>
         {currentInputMethod === 'text' && wordIDs.map((wordId, key) => {
@@ -302,6 +308,11 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
             console.log('definitionAudio', dictionary[wordId]?.definitionAudio);
             console.log('phrase:', dictionary[wordId]?.phrase);
             
+            // Skip if word not in dictionary
+            if (!dictionary[wordId]) {
+                console.warn(`Word ${wordId} not found in dictionary`);
+                return null;
+            }
 
             let borderStyle = '1px solid #ccc'
             if (isCorrect === true) {
@@ -380,12 +391,16 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                         minRows={3}
 
                         style={{
-                            flexBasis: '48%',
-                            color: isCorrect === true ? 'green' : isCorrect === false ? 'red' : 'black',
-                            border: borderStyle,
-                            color: isCorrect === true? 'green' : isCorrect === false? 'red' : 'black',
                             flexBasis: '80%',
                             maxWidth: '50rem',
+                            color: isCorrect === true ? 'green' : isCorrect === false ? 'red' : 'black',
+                            border: borderStyle,
+                            borderRadius: '12px',
+                            padding: '16px',
+                            fontSize: '16px',
+                            lineHeight: '1.5',
+                            fontFamily: 'inherit',
+                            resize: 'vertical',
                         }}
                         id={`${dictionary[wordId]?.phrase}-${key}`}
                         value={answers[key] || ''}
@@ -456,6 +471,12 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
 
         {currentInputMethod === 'audio' && wordIDs.map((wordId, key) => {
             const isCorrect = feedback[key]?.answer;    
+
+            // Skip if word not in dictionary
+            if (!dictionary[wordId]) {
+                console.warn(`Word ${wordId} not found in dictionary`);
+                return null;
+            }
 
             return(<li
                 display='flex'
@@ -567,10 +588,21 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
 }
 
 function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey) {
+    // Add defensive check for dictionary
+    if (!dictionary) {
+        return <Typography variant="body2" color="error">No dictionary available</Typography>;
+    }
+
     return <ol>
         {currentInputMethod === 'text' && wordIDs.map((wordId, key) => {
             console.log('currentPromptMethod', currentPromptMethod)
             console.log('dictionary[wordId]?.phrase', dictionary[wordId]?.phrase);
+
+            // Skip if word not in dictionary
+            if (!dictionary[wordId]) {
+                console.warn(`Word ${wordId} not found in dictionary`);
+                return null;
+            }
 
             let borderStyle = '1px solid #ccc';
             if (feedback[key]?.answer === true) {
@@ -619,8 +651,14 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                     } }
                     style={{
                         border: borderStyle,
+                        borderRadius: '12px',
+                        padding: '12px 16px',
+                        fontSize: '16px',
+                        width: '100%',
+                        maxWidth: '500px',
                         color: feedback[key]?.answer === true ? 'green' : feedback[key]?.answer === false ? 'red' : 'black',
                     }}
+                    disableUnderline
                     value={answers[key] || ''}
                     placeholder={'Enter answer here'} />
                 <Button
@@ -724,6 +762,12 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
         })}
 
         {currentInputMethod === 'writing' && wordIDs.map((wordId, key) => {
+            // Skip if word not in dictionary
+            if (!dictionary[wordId]) {
+                console.warn(`Word ${wordId} not found in dictionary`);
+                return null;
+            }
+
             return (<li key={`${wordId}-${key}`} sx={{ flexGrow: 1 }}>
                 {/* Display prompt based on currentPromptMethod */}
                 {currentPromptMethod === 'text' && 

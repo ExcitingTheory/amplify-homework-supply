@@ -44,7 +44,7 @@ function CardMediaComponent({ s3Key, identityId, level = 'protected' }) {
         <CardMedia
             component="img"
             sx={{
-                width: 151,
+                width: url ? 400 : 151,
                 alignSelf: 'left',
             }}
             image={url}
@@ -196,26 +196,46 @@ function Units() {
                             sx={{
                                 display: 'flex',
                                 margin: '3rem auto',
+                                width: 'fit-content',
+                                maxWidth: '500px',
+                                minHeight: '300px',
+                                borderRadius: 3,
                             }}>
 
-                            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                <CardContent sx={{ flex: '1 1 auto', padding: '2rem' }}>
-                                    <Typography component="div" variant="h5">
+                            <Box sx={{ 
+                                display: 'flex', 
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                flexGrow: '1',
+                                p: 4,
+                            }}>
+                                <CardContent sx={{ 
+                                    flex: '1 1 auto',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    textAlign: 'center',
+                                }}>
+                                    <Typography component="div" variant="h5" sx={{ mb: 3 }}>
                                         No Published Units Yet
-                                        <br />
-                                        <Button
-                                            variant="text"
-                                            color="inherit"
-                                            onClick={createUnit}
-                                            disabled={work}
-                                            style={{
-
-                                                maxWidth: 'fit-content',
-                                            }}
-                                        >
-                                            Create New Unit
-                                        </Button>
                                     </Typography>
+                                    <Button
+                                        variant="outlined"
+                                        color="primary"
+                                        onClick={createUnit}
+                                        disabled={work}
+                                        sx={{
+                                            textTransform: 'none',
+                                            fontWeight: 600,
+                                            px: 3,
+                                            py: 1,
+                                            borderRadius: 2,
+                                        }}
+                                    >
+                                        Create New Unit
+                                    </Button>
                                 </CardContent>
                             </Box>
                         </Card>
@@ -236,72 +256,92 @@ function Units() {
 
                                         <Card
                                             key={unit.id}
-                                            elevation={3}
+                                            elevation={2}
                                             sx={{
                                                 display: 'flex',
                                                 margin: '1rem auto',
+                                                width: '90vw',
+                                                maxWidth: '80rem',
+                                                borderRadius: 2,
+                                                borderLeft: '4px solid',
+                                                borderLeftColor: 'grey.900',
+                                                transition: 'all 0.3s ease-in-out',
+                                                '&:hover': {
+                                                    elevation: 6,
+                                                    transform: 'translateY(-2px)',
+                                                    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                                                },
                                             }}>
-
-
-                                            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                                <CardContent sx={{ flex: '1 1 auto', padding: '2rem' }}>
-                                                    <Typography component="div" variant="h5">
+                                            <Box sx={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                flexGrow: '1',
+                                                p: 0.5,
+                                            }}>
+                                                <CardContent sx={{ flex: '1 0 auto', pb: 1 }}>
+                                                    <Typography component="div" variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
                                                         {unit.name || 'Untitled Unit'}
                                                     </Typography>
-                                                    <Typography variant="subtitle1" color="text.secondary" component="div"
-                                                        sx={{
-                                                            width: 'calc(80vw - 151px)',
-                                                            wordWrap: 'break-word',
-                                                            // float: 'left'
-                                                        }}
-                                                    >
+                                                    <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                                                         {unit.description || ''}
                                                     </Typography>
                                                 </CardContent>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', margin: '0rem 0rem 2rem 2rem' }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5 }}>
                                                     <Button
-                                                        variant="text"
-                                                        color="inherit"
+                                                        variant="outlined"
                                                         href={`/workbook/${unit.id}`}
                                                         disabled={work}
-                                                        style={{
-                                                            maxWidth: 'fit-content',
+                                                        startIcon={<EditNoteIcon />}
+                                                        sx={{
+                                                            textTransform: 'none',
+                                                            fontWeight: 600,
+                                                            px: 3,
+                                                            py: 1,
+                                                            mr: 1,
+                                                            borderRadius: 2,
+                                                            boxShadow: 2,
+                                                            color: 'grey.900',
+                                                            borderColor: 'grey.900',
+                                                            '&:hover': {
+                                                                boxShadow: 4,
+                                                                borderColor: 'grey.900',
+                                                                backgroundColor: 'grey.50',
+                                                            },
                                                         }}
                                                     >
-
-                                                        <EditNoteIcon
-                                                            style={{
-                                                                marginRight: '0.5rem'
-                                                            }}
-                                                        />
                                                         View Workbook
                                                     </Button>
-
                                                     <Button
-                                                        variant="text"
-                                                        color="inherit"
+                                                        variant="outlined"
                                                         href={`/unit/${unit.id}`}
                                                         disabled={work}
-                                                        style={{
-                                                            maxWidth: 'fit-content',
+                                                        startIcon={<IconEdit />}
+                                                        sx={{
+                                                            textTransform: 'none',
+                                                            fontWeight: 600,
+                                                            px: 3,
+                                                            py: 1,
+                                                            borderRadius: 2,
+                                                            boxShadow: 2,
+                                                            color: 'grey.900',
+                                                            borderColor: 'grey.900',
+                                                            '&:hover': {
+                                                                boxShadow: 4,
+                                                                borderColor: 'grey.900',
+                                                                backgroundColor: 'grey.50',
+                                                            },
                                                         }}
                                                     >
-
-                                                        <IconEdit
-                                                            style={{
-                                                                marginRight: '0.5rem'
-                                                            }}
-                                                        />
                                                         Edit Unit
                                                     </Button>
                                                 </Box>
                                             </Box>
-
-
-                                            <CardMediaComponent
-                                                s3Key={unit?.featuredImage}
-                                                identityId={unit?.identityId}
-                                            />
+                                            {unit?.featuredImage &&
+                                                <CardMediaComponent
+                                                    s3Key={unit?.featuredImage}
+                                                    identityId={unit?.identityId}
+                                                />
+                                            }
 
 
                                         </Card>
@@ -329,72 +369,92 @@ function Units() {
 
                                         <Card
                                             key={unit.id}
-                                            elevation={3}
+                                            elevation={2}
                                             sx={{
                                                 display: 'flex',
                                                 margin: '1rem auto',
+                                                width: '90vw',
+                                                maxWidth: '80rem',
+                                                borderRadius: 2,
+                                                borderLeft: '4px solid',
+                                                borderLeftColor: 'grey.900',
+                                                transition: 'all 0.3s ease-in-out',
+                                                '&:hover': {
+                                                    elevation: 6,
+                                                    transform: 'translateY(-2px)',
+                                                    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                                                },
                                             }}>
-
-
-                                            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                                <CardContent sx={{ flex: '1 1 auto', padding: '2rem' }}>
-                                                    <Typography component="div" variant="h5">
+                                            <Box sx={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                flexGrow: '1',
+                                                p: 0.5,
+                                            }}>
+                                                <CardContent sx={{ flex: '1 0 auto', pb: 1 }}>
+                                                    <Typography component="div" variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
                                                         {unit.name || 'Untitled Unit'}
                                                     </Typography>
-                                                    <Typography variant="subtitle1" color="text.secondary" component="div"
-                                                        sx={{
-                                                            width: 'calc(80vw - 151px)',
-                                                            wordWrap: 'break-word',
-                                                            // float: 'left'
-                                                        }}
-                                                    >
+                                                    <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                                                         {unit.description || ''}
                                                     </Typography>
                                                 </CardContent>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', margin: '0rem 0rem 2rem 2rem' }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5 }}>
                                                     <Button
-                                                        variant="text"
-                                                        color="inherit"
+                                                        variant="outlined"
                                                         href={`/workbook/${unit.id}`}
                                                         disabled={work}
-                                                        style={{
-                                                            maxWidth: 'fit-content',
+                                                        startIcon={<EditNoteIcon />}
+                                                        sx={{
+                                                            textTransform: 'none',
+                                                            fontWeight: 600,
+                                                            px: 3,
+                                                            py: 1,
+                                                            mr: 1,
+                                                            borderRadius: 2,
+                                                            boxShadow: 2,
+                                                            color: 'grey.900',
+                                                            borderColor: 'grey.900',
+                                                            '&:hover': {
+                                                                boxShadow: 4,
+                                                                borderColor: 'grey.900',
+                                                                backgroundColor: 'grey.50',
+                                                            },
                                                         }}
                                                     >
-
-                                                        <EditNoteIcon
-                                                            style={{
-                                                                marginRight: '0.5rem'
-                                                            }}
-                                                        />
                                                         View Workbook
                                                     </Button>
-
                                                     <Button
-                                                        variant="text"
-                                                        color="inherit"
+                                                        variant="outlined"
                                                         href={`/unit/${unit.id}`}
                                                         disabled={work}
-                                                        style={{
-                                                            maxWidth: 'fit-content',
+                                                        startIcon={<IconEdit />}
+                                                        sx={{
+                                                            textTransform: 'none',
+                                                            fontWeight: 600,
+                                                            px: 3,
+                                                            py: 1,
+                                                            borderRadius: 2,
+                                                            boxShadow: 2,
+                                                            color: 'grey.900',
+                                                            borderColor: 'grey.900',
+                                                            '&:hover': {
+                                                                boxShadow: 4,
+                                                                borderColor: 'grey.900',
+                                                                backgroundColor: 'grey.50',
+                                                            },
                                                         }}
                                                     >
-
-                                                        <IconEdit
-                                                            style={{
-                                                                marginRight: '0.5rem'
-                                                            }}
-                                                        />
                                                         Edit Unit
                                                     </Button>
                                                 </Box>
                                             </Box>
-
-
-                                            <CardMediaComponent
-                                                s3Key={unit?.featuredImage}
-                                                identityId={unit?.identityId}
-                                            />
+                                            {unit?.featuredImage &&
+                                                <CardMediaComponent
+                                                    s3Key={unit?.featuredImage}
+                                                    identityId={unit?.identityId}
+                                                />
+                                            }
 
 
                                         </Card>
@@ -419,72 +479,92 @@ function Units() {
 
                                         <Card
                                             key={unit.id}
-                                            elevation={3}
+                                            elevation={2}
                                             sx={{
                                                 display: 'flex',
                                                 margin: '1rem auto',
+                                                width: '90vw',
+                                                maxWidth: '80rem',
+                                                borderRadius: 2,
+                                                borderLeft: '4px solid',
+                                                borderLeftColor: 'grey.900',
+                                                transition: 'all 0.3s ease-in-out',
+                                                '&:hover': {
+                                                    elevation: 6,
+                                                    transform: 'translateY(-2px)',
+                                                    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                                                },
                                             }}>
-
-
-                                            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                                <CardContent sx={{ flex: '1 1 auto', padding: '2rem' }}>
-                                                    <Typography component="div" variant="h5">
+                                            <Box sx={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                flexGrow: '1',
+                                                p: 0.5,
+                                            }}>
+                                                <CardContent sx={{ flex: '1 0 auto', pb: 1 }}>
+                                                    <Typography component="div" variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
                                                         {unit.name || 'Untitled Unit'}
                                                     </Typography>
-                                                    <Typography variant="subtitle1" color="text.secondary" component="div"
-                                                        sx={{
-                                                            width: 'calc(80vw - 151px)',
-                                                            wordWrap: 'break-word',
-                                                            // float: 'left'
-                                                        }}
-                                                    >
+                                                    <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                                                         {unit.description || ''}
                                                     </Typography>
                                                 </CardContent>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', margin: '0rem 0rem 2rem 2rem' }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5 }}>
                                                     <Button
-                                                        variant="text"
-                                                        color="inherit"
+                                                        variant="outlined"
                                                         href={`/workbook/${unit.id}`}
                                                         disabled={work}
-                                                        style={{
-                                                            maxWidth: 'fit-content',
+                                                        startIcon={<EditNoteIcon />}
+                                                        sx={{
+                                                            textTransform: 'none',
+                                                            fontWeight: 600,
+                                                            px: 3,
+                                                            py: 1,
+                                                            mr: 1,
+                                                            borderRadius: 2,
+                                                            boxShadow: 2,
+                                                            color: 'grey.900',
+                                                            borderColor: 'grey.900',
+                                                            '&:hover': {
+                                                                boxShadow: 4,
+                                                                borderColor: 'grey.900',
+                                                                backgroundColor: 'grey.50',
+                                                            },
                                                         }}
                                                     >
-
-                                                        <EditNoteIcon
-                                                            style={{
-                                                                marginRight: '0.5rem'
-                                                            }}
-                                                        />
                                                         View Workbook
                                                     </Button>
-
                                                     <Button
-                                                        variant="text"
-                                                        color="inherit"
+                                                        variant="outlined"
                                                         href={`/unit/${unit.id}`}
                                                         disabled={work}
-                                                        style={{
-                                                            maxWidth: 'fit-content',
+                                                        startIcon={<IconEdit />}
+                                                        sx={{
+                                                            textTransform: 'none',
+                                                            fontWeight: 600,
+                                                            px: 3,
+                                                            py: 1,
+                                                            borderRadius: 2,
+                                                            boxShadow: 2,
+                                                            color: 'grey.900',
+                                                            borderColor: 'grey.900',
+                                                            '&:hover': {
+                                                                boxShadow: 4,
+                                                                borderColor: 'grey.900',
+                                                                backgroundColor: 'grey.50',
+                                                            },
                                                         }}
                                                     >
-
-                                                        <IconEdit
-                                                            style={{
-                                                                marginRight: '0.5rem'
-                                                            }}
-                                                        />
                                                         Edit Unit
                                                     </Button>
                                                 </Box>
                                             </Box>
-
-
-                                            <CardMediaComponent
-                                                s3Key={unit?.featuredImage}
-                                                identityId={unit?.identityId}
-                                            />
+                                            {unit?.featuredImage &&
+                                                <CardMediaComponent
+                                                    s3Key={unit?.featuredImage}
+                                                    identityId={unit?.identityId}
+                                                />
+                                            }
 
 
                                         </Card>

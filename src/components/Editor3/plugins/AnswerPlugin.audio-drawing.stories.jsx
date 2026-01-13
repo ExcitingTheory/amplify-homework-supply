@@ -12,7 +12,68 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { HeadingNode } from '@lexical/rich-text';
 
 import AnswerPlugin, { AnswerNode } from './AnswerPlugin';
-import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit, seedMockWords } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { AudioPlayerProvider } from '../context/AudioPlayerContext';
+import { UnitProvider } from '../../../context/unitContext';
+
+// Seed mock vocabulary words for all stories
+seedMockWords([
+  {
+    id: 'vocab-word-1',
+    phrase: 'こんにちは',
+    phonetic: 'konnichiwa',
+    definition: 'Hello',
+    audio: ['public/audio/konnichiwa.mp3'],
+    definitionAudio: ['public/audio/hello.mp3'],
+    identityId: 'mock-identity-id',
+    _version: 1,
+    owner: 'mock-user-sub',
+  },
+  {
+    id: 'vocab-word-2',
+    phrase: 'ありがとう',
+    phonetic: 'arigatou',
+    definition: 'Thank you',
+    audio: ['public/audio/arigatou.mp3'],
+    definitionAudio: ['public/audio/thankyou.mp3'],
+    identityId: 'mock-identity-id',
+    _version: 1,
+    owner: 'mock-user-sub',
+  },
+  {
+    id: 'vocab-word-3',
+    phrase: 'さようなら',
+    phonetic: 'sayounara',
+    definition: 'Goodbye',
+    audio: ['public/audio/sayounara.mp3'],
+    definitionAudio: ['public/audio/goodbye.mp3'],
+    identityId: 'mock-identity-id',
+    _version: 1,
+    owner: 'mock-user-sub',
+  },
+  {
+    id: 'vocab-word-4',
+    phrase: '犬',
+    phonetic: 'inu',
+    definition: 'Dog',
+    audio: ['public/audio/inu.mp3'],
+    definitionAudio: ['public/audio/dog.mp3'],
+    identityId: 'mock-identity-id',
+    _version: 1,
+    owner: 'mock-user-sub',
+  },
+  {
+    id: 'vocab-word-5',
+    phrase: '猫',
+    phonetic: 'neko',
+    definition: 'Cat',
+    audio: ['public/audio/neko.mp3'],
+    definitionAudio: ['public/audio/cat.mp3'],
+    identityId: 'mock-identity-id',
+    _version: 1,
+    owner: 'mock-user-sub',
+  },
+]);
 
 export default {
   title: 'Components/Answer/Audio and Drawing',
@@ -59,38 +120,42 @@ const ReadOnlyTemplate = ({ editorState, wordIDs = [] }) => {
   });
 
   return (
-    <LexicalComposer initialConfig={initialConfig}>
-      <div style={{ 
-        padding: '2rem',
-        maxWidth: '900px',
-        margin: '0 auto',
-        backgroundColor: '#f5f5f5',
-        minHeight: '100vh'
-      }}>
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          padding: '2rem',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }}>
-          <RichTextPlugin
-            contentEditable={
-              <ContentEditable 
-                style={{
-                  minHeight: '400px',
-                  outline: 'none',
-                  padding: '1rem'
-                }}
+    <AudioPlayerProvider>
+      <UnitProvider id="mock-unit-id">
+        <LexicalComposer initialConfig={initialConfig}>
+          <div style={{ 
+            padding: '2rem',
+            maxWidth: '900px',
+            margin: '0 auto',
+            backgroundColor: '#f5f5f5',
+            minHeight: '100vh'
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '2rem',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            }}>
+              <RichTextPlugin
+                contentEditable={
+                  <ContentEditable 
+                    style={{
+                      minHeight: '400px',
+                      outline: 'none',
+                      padding: '1rem'
+                    }}
+                  />
+                }
+                placeholder={null}
+                ErrorBoundary={LexicalErrorBoundary}
               />
-            }
-            placeholder={null}
-            ErrorBoundary={LexicalErrorBoundary}
-          />
-          <HistoryPlugin />
-          <AnswerPlugin />
-        </div>
-      </div>
-    </LexicalComposer>
+              <HistoryPlugin />
+              <AnswerPlugin />
+            </div>
+          </div>
+        </LexicalComposer>
+      </UnitProvider>
+    </AudioPlayerProvider>
   );
 };
 

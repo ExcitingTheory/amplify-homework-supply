@@ -23,8 +23,8 @@ import { Assignment, Unit } from '../models';
 export const SectionAssigner = ({ setOpenAssignmentDialog, openAssignmentDialog, ContentModel }) => {
 
   const {
-    sections, sectionMap, assignments
-  } = React.useContext(SectionContext);
+    sections = [], sectionMap = {}, assignments = []
+  } = React.useContext(SectionContext) || {};
 
   // console.log('SectionAssigner.sections', sections)
   const [section, setSection] = React.useState('');

@@ -162,9 +162,9 @@ const preview = {
       const isFullscreen = context?.parameters?.layout === 'fullscreen';
       
       // Check if contexts should be disabled (for page-level stories)
-      const disableUnitContext = context?.parameters?.disableUnitContext;
-      const disableSectionContext = context?.parameters?.disableSectionContext;
-      const disableDictionaryContext = context?.parameters?.disableDictionaryContext;
+      const disableUnitContext = context?.parameters?.disableUnitContext || false;
+      const disableSectionContext = context?.parameters?.disableSectionContext || false;
+      const disableDictionaryContext = context?.parameters?.disableDictionaryContext || false;
       
       return (
         <ThemeProvider theme={theme}>
