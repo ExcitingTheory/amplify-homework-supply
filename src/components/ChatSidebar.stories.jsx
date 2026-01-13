@@ -96,10 +96,12 @@ export default {
       // Get messages from story args or use empty array
       const messages = context.args?.messages || [];
       
-      // Create mock AssistantChat with messages
-      const mockAssistantChat = {
+      // Create mock AssistantChat with messages as array
+      // Note: In the real app, messages are stored as JSON string in DataStore,
+      // but TabContext or ChatSidebar parses them before use
+      const mockAssistantChat = messages.length > 0 ? {
         id: 'mock-chat-id',
-        messages: messages,
+        messages: messages, // Already an array for Storybook
         draft: '',
         archived: false,
         createdAt: new Date().toISOString(),
@@ -108,12 +110,12 @@ export default {
         files: {
           toArray: async () => []
         }
-      };
+      } : null;
 
       // Mock TabContext value
       const mockTabContext = {
-        assistantChat: messages.length > 0 ? mockAssistantChat : null,
-        chatHistories: messages.length > 0 ? [mockAssistantChat] : [],
+        assistantChat: mockAssistantChat,
+        chatHistories: mockAssistantChat ? [mockAssistantChat] : [],
         setCurrentChat: () => {},
         isLoadingChat: false,
         chatCreationError: null,
@@ -169,7 +171,38 @@ export const Default = {
 
 export const WithToolCalls = {
   args: {
-    messages: [],
+    messages: [
+      {
+        id: 'msg-1',
+        role: 'user',
+        content: 'What does 水 mean in Japanese?',
+      },
+      {
+        id: 'msg-2',
+        role: 'assistant',
+        content: 'Let me look that up...',
+        toolInvocations: [
+          {
+            state: 'result',
+            toolCallId: 'call_dict_001',
+            toolName: 'search_dictionary',
+            args: { query: '水' },
+            result: {
+              word: '水',
+              phonetic: 'mizu',
+              definition: 'Water; cold water; fluid',
+              partOfSpeech: 'noun',
+              example: '水を飲む (drink water)',
+            },
+          },
+        ],
+      },
+      {
+        id: 'msg-3',
+        role: 'assistant',
+        content: 'I found it! 水 (mizu) means "water".',
+      },
+    ],
   },
   parameters: {
     docs: {
@@ -182,7 +215,40 @@ export const WithToolCalls = {
 
 export const CreateSectionTool = {
   args: {
-    messages: [],
+    messages: [
+      {
+        id: 'msg-1',
+        role: 'user',
+        content: 'Create a new section called "Japanese 101" for beginners',
+      },
+      {
+        id: 'msg-2',
+        role: 'assistant',
+        content: 'I\'ll create that section for you...',
+        toolInvocations: [
+          {
+            state: 'result',
+            toolCallId: 'call_section_001',
+            toolName: 'create_section',
+            args: {
+              name: 'Japanese 101',
+              description: 'Beginner Japanese language course',
+            },
+            result: {
+              id: 'section-jpn-101-new',
+              name: 'Japanese 101',
+              code: 'JPL-AB12CD',
+              description: 'Beginner Japanese language course',
+            },
+          },
+        ],
+      },
+      {
+        id: 'msg-3',
+        role: 'assistant',
+        content: 'I\'ve created the section "Japanese 101" with join code JPL-AB12CD. Students can use this code to enroll!',
+      },
+    ],
   },
   parameters: {
     docs: {
@@ -195,7 +261,53 @@ export const CreateSectionTool = {
 
 export const GenerateContentTool = {
   args: {
-    messages: [],
+    messages: [
+      {
+        id: 'msg-1',
+        role: 'user',
+        content: 'Generate a quiz about Japanese greetings with 3 questions',
+      },
+      {
+        id: 'msg-2',
+        role: 'assistant',
+        content: 'I\'ll generate a quiz for you...',
+        toolInvocations: [
+          {
+            state: 'result',
+            toolCallId: 'call_gen_001',
+            toolName: 'generate_quiz',
+            args: {
+              topic: 'Japanese greetings',
+              count: 3,
+            },
+            result: {
+              questions: [
+                {
+                  prompt: 'What does こんにちは mean?',
+                  answer: 'Hello / Good afternoon',
+                  type: 'short-answer',
+                },
+                {
+                  prompt: 'How do you say "good morning" in Japanese?',
+                  answer: 'おはようございます',
+                  type: 'short-answer',
+                },
+                {
+                  prompt: 'What is the appropriate greeting for evening?',
+                  answer: 'こんばんは',
+                  type: 'short-answer',
+                },
+              ],
+            },
+          },
+        ],
+      },
+      {
+        id: 'msg-3',
+        role: 'assistant',
+        content: 'I\'ve generated a 3-question quiz about Japanese greetings. Would you like me to add it to your unit?',
+      },
+    ],
   },
   parameters: {
     docs: {
@@ -208,7 +320,55 @@ export const GenerateContentTool = {
 
 export const MultipleTools = {
   args: {
-    messages: [],
+    messages: [
+      {
+        id: 'msg-1',
+        role: 'user',
+        content: 'Find words about nature and create a quiz',
+      },
+      {
+        id: 'msg-2',
+        role: 'assistant',
+        content: 'I\'ll search for nature vocabulary and then create a quiz...',
+        toolInvocations: [
+          {
+            state: 'result',
+            toolCallId: 'call_multi_001',
+            toolName: 'search_dictionary',
+            args: { query: 'nature' },
+            result: {
+              words: [
+                { word: '木', phonetic: 'ki', definition: 'tree' },
+                { word: '花', phonetic: 'hana', definition: 'flower' },
+                { word: '川', phonetic: 'kawa', definition: 'river' },
+              ],
+            },
+          },
+          {
+            state: 'result',
+            toolCallId: 'call_multi_002',
+            toolName: 'generate_quiz',
+            args: {
+              topic: 'nature vocabulary',
+              words: ['木', '花', '川'],
+              count: 3,
+            },
+            result: {
+              questions: [
+                { prompt: 'What does 木 mean?', answer: 'tree' },
+                { prompt: 'What does 花 mean?', answer: 'flower' },
+                { prompt: 'What does 川 mean?', answer: 'river' },
+              ],
+            },
+          },
+        ],
+      },
+      {
+        id: 'msg-3',
+        role: 'assistant',
+        content: 'I found 3 nature-related words (tree, flower, river) and created a quiz based on them!',
+      },
+    ],
   },
   parameters: {
     docs: {
@@ -221,12 +381,31 @@ export const MultipleTools = {
 
 export const ToolCallInProgress = {
   args: {
-    messages: [],
+    messages: [
+      {
+        id: 'msg-1',
+        role: 'user',
+        content: 'Can you search for vocabulary words about water?',
+      },
+      {
+        id: 'msg-2',
+        role: 'assistant',
+        content: 'I\'ll search the dictionary for water-related words...',
+        toolInvocations: [
+          {
+            state: 'call',
+            toolCallId: 'call_dict_water_001',
+            toolName: 'search_dictionary',
+            args: { query: '水' },
+          },
+        ],
+      },
+    ],
   },
   parameters: {
     docs: {
       description: {
-        story: 'Shows a tool call in progress (input-available state). The search is prepared but results have not arrived yet - demonstrates the loading state.',
+        story: 'Shows a tool call in progress (call state). The search is prepared but results have not arrived yet - demonstrates the loading state with the tool invocation UI.',
       },
     },
   },

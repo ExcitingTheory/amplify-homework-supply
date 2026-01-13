@@ -104,7 +104,7 @@ export function TabProvider({ children, value }) {
                     if (isSubscribed) {
                         // Update chat histories list
                         setChatHistories(items);
-                        console.log('[TabContext] AssistantChat list updated:', items.length, 'chats');
+                        console.log('[TabContext] AssistantChat list updated:', items.length, 'chats', items);
                         
                         // Update current chat
                         setAssistantChat(prevCurrent => {
@@ -143,8 +143,9 @@ export function TabProvider({ children, value }) {
                                 const updatedCurrent = items.find(item => item.id === prevCurrent.id);
                                 // Only update if version has actually changed (like Grade pattern)
                                 if (updatedCurrent && chatVersionRef.current !== updatedCurrent._version) {
+                                    const prevVersion = chatVersionRef.current;
                                     chatVersionRef.current = updatedCurrent._version;
-                                    console.log('[TabContext] Updating current chat version:', updatedCurrent.id, 'from', chatVersionRef.current, 'to', updatedCurrent._version);
+                                    console.log('[TabContext] Updating current chat version:', updatedCurrent.id, prevVersion, '→', updatedCurrent._version);
                                     return updatedCurrent;
                                 }
                             } else {

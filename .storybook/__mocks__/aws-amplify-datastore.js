@@ -372,6 +372,24 @@ export const seedMockSettings = (settingsData) => {
   });
 };
 
+// Helper to seed mock assistant chats data for stories
+export const seedMockAssistantChats = (chatsArray) => {
+  console.log('[Mock DataStore] Seeding assistant chats:', chatsArray.length);
+  chatsArray.forEach(chat => {
+    if (chat.id) {
+      mockAssistantChats[chat.id] = chat;
+    }
+  });
+  console.log('[Mock DataStore] Total assistant chats in store:', Object.keys(mockAssistantChats).length);
+  
+  // Notify all AssistantChat subscribers about the new data
+  const items = Object.values(mockAssistantChats);
+  activeSubscriptions.AssistantChat.forEach(callback => {
+    console.log('[Mock DataStore] Notifying AssistantChat subscriber with', items.length, 'chats');
+    callback({ items, isSynced: true });
+  });
+};
+
 // Helper to clear mock data between stories
 export const clearMockUnits = () => {
   Object.keys(mockUnits).forEach(key => delete mockUnits[key]);
@@ -384,6 +402,7 @@ export const clearMockUnits = () => {
   Object.keys(mockQuestions).forEach(key => delete mockQuestions[key]);
   Object.keys(mockSections).forEach(key => delete mockSections[key]);
   Object.keys(mockAssignments).forEach(key => delete mockAssignments[key]);
+  Object.keys(mockAssistantChats).forEach(key => delete mockAssistantChats[key]);
   console.log('[Mock DataStore] Cleared all mock data');
   
   // Always seed a default unit for stories that don't provide their own
@@ -826,6 +845,49 @@ export const clearMockUnits = () => {
       _version: 1,
     },
   ]);
+  
+  // Seed default assistant chat with sample messages
+  seedMockAssistantChats([
+    {
+      id: 'default-chat',
+      model: 'gpt-4',
+      messages: JSON.stringify([
+        {
+          id: 'msg-1',
+          role: 'user',
+          parts: [{ type: 'text', text: 'Hello! Can you help me with Japanese vocabulary?' }],
+          createdAt: new Date('2024-01-20T10:00:00Z').toISOString(),
+        },
+        {
+          id: 'msg-2',
+          role: 'assistant',
+          parts: [{ type: 'text', text: 'Of course! I\'d be happy to help you with Japanese vocabulary. What would you like to learn about?' }],
+          createdAt: new Date('2024-01-20T10:00:05Z').toISOString(),
+        },
+        {
+          id: 'msg-3',
+          role: 'user',
+          parts: [{ type: 'text', text: 'How do I say "thank you" in Japanese?' }],
+          createdAt: new Date('2024-01-20T10:01:00Z').toISOString(),
+        },
+        {
+          id: 'msg-4',
+          role: 'assistant',
+          parts: [{ type: 'text', text: 'In Japanese, "thank you" is ありがとう (arigatou). For a more polite form, you can say ありがとうございます (arigatou gozaimasu).' }],
+          createdAt: new Date('2024-01-20T10:01:05Z').toISOString(),
+        },
+      ]),
+      threadInstructions: 'You are a helpful Japanese language learning assistant.',
+      additionalInstructions: '',
+      archived: false,
+      createdAt: new Date('2024-01-20T09:00:00Z').toISOString(),
+      updatedAt: new Date('2024-01-20T10:01:05Z').toISOString(),
+      owner: 'mock-user-sub',
+      _version: 1,
+      _lastChangedAt: Date.now(),
+      _deleted: false,
+    },
+  ]);
 };
 
 // Mock SortDirection enum
@@ -1015,8 +1077,34 @@ export class DataStore {
       });
     } else if (isAssistantChat) {
       // This is an AssistantChat
-      mockAssistantChats[model.id] = model;
-      console.log('[Mock DataStore] Saved AssistantChat:', model.id, 'model:', model.model);
+      // If messages is empty, add sample messages for Storybook
+      let messages = model.messages;
+      try {
+        const parsedMessages = JSON.parse(messages || '[]');
+        if (parsedMessages.length === 0) {
+          console.log('[Mock DataStore] Empty messages detected, adding sample messages for Storybook');
+          const timestamp = Date.now();
+          messages = JSON.stringify([
+            {
+              id: `msg-${timestamp}-1`,
+              role: 'user',
+              parts: [{ type: 'text', text: 'Hello! Can you help me with Japanese vocabulary?' }],
+              createdAt: new Date().toISOString(),
+            },
+            {
+              id: `msg-${timestamp}-2`,
+              role: 'assistant',
+              parts: [{ type: 'text', text: 'Of course! I\'d be happy to help you with Japanese vocabulary. What would you like to learn about?' }],
+              createdAt: new Date().toISOString(),
+            },
+          ]);
+        }
+      } catch (e) {
+        console.warn('[Mock DataStore] Could not parse messages:', e);
+      }
+      
+      mockAssistantChats[model.id] = { ...model, messages };
+      console.log('[Mock DataStore] Saved AssistantChat:', model.id, 'model:', model.model, 'message count:', JSON.parse(messages).length);
       
       // Notify all AssistantChat subscribers
       activeSubscriptions.AssistantChat.forEach(callback => {
@@ -1110,6 +1198,13 @@ export class DataStore {
       }
       if (modelName === 'Grade' && mockGrades[idOrPredicate]) {
         return mockGrades[idOrPredicate];
+      }
+      if (modelName === 'AssistantChat' && mockAssistantChats[idOrPredicate]) {
+        const chat = mockAssistantChats[idOrPredicate];
+        return {
+          ...chat,
+          messages: typeof chat.messages === 'string' ? JSON.parse(chat.messages) : chat.messages
+        };
       }
       
       // Fall back to mockData
@@ -1464,7 +1559,10 @@ export class DataStore {
           console.log('[Mock DataStore] Returning', items.length, 'assignments (filtered)');
           activeSubscriptions.Assignment.push(callback);
         } else if (modelName === 'AssistantChat') {
-          items = Object.values(mockAssistantChats);
+          items = Object.values(mockAssistantChats).map(chat => ({
+            ...chat,
+            messages: typeof chat.messages === 'string' ? JSON.parse(chat.messages) : chat.messages
+          }));
           if (filterFn) {
             items = items.filter(filterFn);
           }

@@ -53,7 +53,6 @@ import VocabularyReview from "./VocabularyReview";
 import { toolDefinitions, executeTool, setVectorStoreSearch } from '../utils/chatTools';
 import AIFeedbackWidget from './AIFeedbackWidget';
 import SearchResults from './ChatSidebar/SearchResults';
-import amplifyConfig from '../amplifyconfiguration.json';
 import { TextStreamChatTransport } from 'ai';
 
 const ChatSidebar = () => {
