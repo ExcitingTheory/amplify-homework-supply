@@ -1,7 +1,6 @@
 // Import page components
 // Note: These are wrapped with MyAuth so we need to provide mock auth context
 import IndexPage from '../../pages/index.js';
-import GradesPage from '../../pages/grades.js';
 import ProfilePage from '../../pages/profile.js';
 import SectionsPage from '../../pages/sections.js';
 import UnitsPage from '../../pages/units.js';
@@ -19,7 +18,6 @@ import { FilesProvider } from '../../src/context/fileContext';
  * 
  * This file contains stories for all pages in the application:
  * - Index (Home/Dashboard)
- * - Grades
  * - Profile
  * - Sections
  * - Units
@@ -49,7 +47,6 @@ Complete Next.js page layouts demonstrating full application flows.
 
 ## Page Types
 - **Dashboard**: Assignment overview and quick actions
-- **Grades**: Grade management for students and instructors  
 - **Units**: Learning unit library (published, draft, archived)
 - **Sections**: Class sections and student groups
 - **Workbook**: Student interface for completing assignments
@@ -114,35 +111,6 @@ export const Index = {
     docs: {
       description: {
         story: 'Home page displaying assignments, grades, and sections for the current user.',
-      },
-    },
-  },
-};
-
-/**
- * Grades Page
- * 
- * Displays grades organized by section:
- * - For instructors: All student grades in their sections
- * - For students: Their own grades organized by assignment
- */
-export const Grades = {
-  decorators: [
-    (Story) => {
-      setMockUser({
-        username: 'student-alice-sub',
-        attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
-        groups: ['section-jpn-101-learners'],
-      });
-      seedIndexPageData('student');
-      return <Story />;
-    },
-  ],
-  render: () => <GradesPage />,
-  parameters: {
-    docs: {
-      description: {
-        story: 'Grades page showing individual or class grades depending on user role.',
       },
     },
   },
