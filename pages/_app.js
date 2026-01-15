@@ -81,7 +81,6 @@ export default function MyApp(props) {
    * @see https://mui.com/guides/server-rendering/#the-privacy-policy-page
    * 
    * TODO: Add a custom 404 page
-   * TODO: Add a custom Terms of Service page
    * TODO: Add a custom Privacy Policy page
    * TODO: Add a generic error page
    * 
