@@ -81,7 +81,7 @@ The application currently has hardcoded strings throughout the codebase. This gu
 
 - **Status**: No i18n implementation
 - **Existing dependency**: `react-i18next` v14.1.2 (in devDependencies)
-- **Framework**: Next.js 16 with App Router support
+- **Framework**: Next.js 20 with App Router support
 - **UI Framework**: Material UI v7
 - **Target languages**: English (primary), Japanese (secondary),
 Spanish (future),

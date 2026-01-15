@@ -4,7 +4,7 @@ Japanese language learning platform built with Next.js, AWS Amplify Gen 1, and O
 
 ## Architecture Overview
 
-**Stack**: Next.js 16 + AWS Amplify Gen 1 (GraphQL/DataStore) + Material UI + Lexical Editor + OpenAI  
+**Stack**: Next.js 20 + AWS Amplify Gen 1 (GraphQL/DataStore) + Material UI + Lexical Editor + OpenAI  
 **Database**: DynamoDB via Amplify DataStore with real-time sync  
 **Auth**: AWS Cognito with user groups (Admins, Instructors, Learners)  
 **Storage**: S3 for files (audio/video/PDFs), organized by protection level  
