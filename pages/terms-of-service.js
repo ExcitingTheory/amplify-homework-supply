@@ -4,7 +4,9 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import MainToolbar from '../src/components/MainToolbar';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import HomeIcon from '@mui/icons-material/Home';
 
 function TermsOfService() {
   return (
@@ -17,13 +19,21 @@ function TermsOfService() {
           backdropFilter: 'blur(8px)',
         }}
       >
-        <MainToolbar>
+        <Toolbar variant="dense" sx={{ minHeight: '48px' }}>
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="home"
+            href="/"
+          >
+            <HomeIcon />
+          </IconButton>
           <Box sx={{ flexGrow: 1, margin: '1rem' }}>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               Terms of Service
             </Typography>
           </Box>
-        </MainToolbar>
+        </Toolbar>
       </AppBar>
       <Box
         sx={{
