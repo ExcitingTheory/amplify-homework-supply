@@ -37,7 +37,7 @@ const createVocabularyLoader = (documentId: string, vocabulary: any[]) => {
 };
 
 const meta: Meta<typeof VocabularyReview2> = {
-    title: 'Components/VocabularyReview2',
+    title: '📁 Managing Content/Vocabulary Review',
     component: VocabularyReview2,
     parameters: {
         layout: 'padded',

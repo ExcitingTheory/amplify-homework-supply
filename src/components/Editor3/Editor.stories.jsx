@@ -2,7 +2,9 @@ import React from 'react';
 import { within, waitFor, screen, waitForElementToBeRemoved } from 'storybook/test';
 import Editor, { Workbook } from './index';
 import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
-import { seedMockUnit, seedMockFiles, seedMockWords, seedMockQuestions, seedMockQuestionUnits } from '../../../.storybook/__mocks__/aws-amplify-datastore';
+import { clearMockData, initializeMockData } from 'aws-amplify/datastore';
+
+// import { seedMockUnit, seedMockFiles, seedMockWords, seedMockQuestions, seedMockQuestionUnits } from '../../../.storybook/__mocks__/aws-amplify-datastore';
 const { MOCK_AUDIO_BASE64, mockWaveformData, MOCK_IMAGE_URL_1, MOCK_IMAGE_URL_2 } = await import('../../../.storybook/__mocks__/media');
 const { 
   MOCK_JAPANESE_GRAMMAR_PDF, 
@@ -24,7 +26,7 @@ const MOCK_UNIT_ID = 'story-unit-id';
 const KITCHEN_SINK_ID = 'kitchen-sink-id';
 
 export default {
-  title: 'Editor/Editor',
+  title: '📚 Creating Lessons/Editor',
   component: Editor,
   parameters: {
     layout: 'fullscreen',
@@ -310,11 +312,13 @@ export const EmptyEditorTextFormatting = {
 export const EmptyEditorCustomBlocks = {
   loaders: [
     async () => {
+      clearMockData();
+      initializeMockData();
       seedMockUnit({
         id: 'empty-editor-custom-blocksid',
         name: 'Empty Editor: Custom Blocks',
         description: 'A blank editor to start creating content',
-        data: null,
+        data: sampleEditorState,
         _version: 1,
         owner: 'mock-user-sub',
       });
@@ -514,6 +518,8 @@ export const EmptyEditorCustomBlocks = {
 export const EditorWithContent = {
   loaders: [
     async () => {
+      clearMockData();
+      initializeMockData();
       seedMockUnit({
         id: 'editor-with-content-id',
         name: 'Sample Unit with Content',

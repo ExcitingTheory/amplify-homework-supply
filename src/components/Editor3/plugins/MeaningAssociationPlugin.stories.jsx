@@ -24,7 +24,7 @@ import DictionaryContext from '../../../context/dictionaryContext';
 import { DndWrapper } from '../../MeaningAssociationExercise/DndWrapper';
 
 export default {
-  title: 'Editor3/Plugins/MeaningAssociationPlugin',
+  title: '🔌 Editor Plugins/Meaning Association',
   component: MeaningAssociationPlugin,
   parameters: {
     layout: 'fullscreen',

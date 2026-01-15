@@ -30,7 +30,7 @@ const WithLexical = ({ children }) => (
 );
 
 export default {
-  title: 'Editor/Components/Nodes',
+  title: '📚 Creating Lessons/Editor Components',
   parameters: {
     layout: 'padded',
     disableUnitContext: true, // Stories provide their own UnitProvider

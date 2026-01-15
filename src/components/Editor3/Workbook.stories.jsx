@@ -4,7 +4,7 @@ import { seedMockUnit, seedMockGrade } from '../../../.storybook/__mocks__/aws-a
 import { userEvent, within, waitFor, expect } from 'storybook/test';
 
 export default {
-  title: 'Workbook/Workbook',
+  title: '📚 Creating Lessons/Workbook',
   component: Workbook,
   parameters: {
     layout: 'fullscreen',
@@ -216,9 +216,6 @@ export const WorkbookWithContent = {
     },
   ],
   render: () => <Workbook />,
-  parameters: {
-    unitId: 'workbook-with-content-id',
-  },
 };
 
 const workbookWithProgressState = {

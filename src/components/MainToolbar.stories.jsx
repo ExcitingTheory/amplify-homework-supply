@@ -3,7 +3,7 @@ import { Box, Typography } from '@mui/material';
 import MainToolbar, { SettingsMenu, HelpMenu, UserMenu } from './MainToolbar';
 
 export default {
-  title: 'Components/MainToolbar',
+  title: '📚 Creating Lessons/Main Toolbar',
   component: MainToolbar,
   parameters: {
     layout: 'fullscreen',

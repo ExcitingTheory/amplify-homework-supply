@@ -62,7 +62,7 @@ const mockUncheckedItem = {
 };
 
 export default {
-  title: 'Components/Moderation/ModerationBadge',
+  title: '🧩 Components/Moderation Badge',
   component: ModerationBadge,
   parameters: {
     layout: 'centered',

@@ -72,7 +72,7 @@ console.log('  DataStore.query:', typeof DataStoreMock.DataStore.query === 'func
 // Test 7: Verify helper functions exist
 console.log('\n✓ Test 7: Helper functions exist:');
 console.log('  seedMockUnit:', typeof DataStoreMock.seedMockUnit === 'function');
-console.log('  clearMockUnits:', typeof DataStoreMock.clearMockUnits === 'function');
+console.log('  clearMockData:', typeof DataStoreMock.clearMockData === 'function');
 console.log('  SortDirection:', !!DataStoreMock.SortDirection);
 
 console.log('\n=== All Tests Passed! ===\n');

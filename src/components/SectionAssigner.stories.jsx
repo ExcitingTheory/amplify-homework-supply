@@ -2,7 +2,7 @@ import React from 'react';
 import { SectionAssigner } from './SectionAssigner';
 
 export default {
-  title: 'Components/SectionAssigner',
+  title: '🧩 Components/Section Assigner',
   component: SectionAssigner,
   parameters: {
     layout: 'centered',

@@ -389,7 +389,7 @@ export const seedMockAssistantChats = (chatsArray) => {
 };
 
 // Helper to clear mock data between stories
-export const clearMockUnits = () => {
+export const clearMockData = () => {
   Object.keys(mockUnits).forEach(key => delete mockUnits[key]);
   Object.keys(mockGrades).forEach(key => delete mockGrades[key]);
   Object.keys(mockFiles).forEach(key => delete mockFiles[key]);
@@ -402,6 +402,10 @@ export const clearMockUnits = () => {
   Object.keys(mockAssignments).forEach(key => delete mockAssignments[key]);
   Object.keys(mockAssistantChats).forEach(key => delete mockAssistantChats[key]);
   console.log('[Mock DataStore] Cleared all mock data');
+};
+
+// Seed default mock data for Storybook storiesq
+export const initializeMockData = () => {
   
   // Always seed a default unit for stories that don't provide their own
   seedMockUnit({

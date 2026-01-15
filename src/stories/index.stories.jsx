@@ -3,7 +3,7 @@ import Index from '../../pages/index';
 import { FilesProvider } from '../../src/context/fileContext';
 import { seedIndexPageData } from '../../.storybook/__mocks__/index-page-examples';
 import { setMockUser } from '../../.storybook/__mocks__/aws-amplify-auth';
-// import { clearMockUnits } from '../../.storybook/__mocks__/aws-amplify-datastore';
+// import { clearMockData } from '../../.storybook/__mocks__/aws-amplify-datastore';
 
 // Wrapper component to bridge Storybook args to Next.js page props
 // We use Index directly (not WrappedPage) to bypass MyAuth which doesn't work in Storybook
@@ -18,7 +18,7 @@ function IndexPageWrapper(props) {
 }
 
 export default {
-  title: 'Pages/Index',
+  title: '📄 Pages/Index',
   component: IndexPageWrapper,
   parameters: {
     layout: 'fullscreen',

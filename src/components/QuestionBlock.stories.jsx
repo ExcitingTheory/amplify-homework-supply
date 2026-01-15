@@ -2,7 +2,7 @@ import React from 'react';
 import QuestionBlock from './QuestionBlock';
 
 export default {
-  title: 'Components/QuestionBlock',
+  title: '🧩 Components/Question Block',
   component: QuestionBlock,
   parameters: {
     layout: 'padded',

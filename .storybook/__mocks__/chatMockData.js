@@ -27,6 +27,85 @@ export function createSSEStream(events) {
   return events.map(event => createSSEDataLine(event)).join('');
 }
 
+/**
+ * Convert message parts to stream events
+ * Simulates how the AI SDK streams message content
+ */
+function messageToStreamEvents(message) {
+  const events = [];
+  
+  if (!message || !message.parts) return events;
+  
+  for (const part of message.parts) {
+    if (part.type === 'text') {
+      // Split text into character chunks to simulate streaming
+      const text = part.text;
+      const words = text.split(' ');
+      for (let i = 0; i < words.length; i++) {
+        events.push({ 
+          type: 'text-delta', 
+          textDelta: i === 0 ? words[i] : ' ' + words[i]
+        });
+      }
+    } else if (part.type === 'step-start') {
+      // Step start indicates beginning of tool use
+      events.push({ type: 'step-start' });
+    } else if (part.type?.startsWith('tool-')) {
+      // Tool call
+      const toolName = part.type.replace('tool-', '');
+      
+      // Tool call initiation
+      events.push({
+        type: 'tool-call',
+        toolCallId: part.toolCallId,
+        toolName: toolName,
+        args: {}
+      });
+      
+      // Stream tool arguments
+      const argsStr = JSON.stringify(part.input || {});
+      events.push({
+        toolCallId: part.toolCallId,
+        argsTextDelta: argsStr
+      });
+      
+      // Tool result (if available)
+      if (part.state === 'output-available' && part.output) {
+        events.push({
+          type: 'tool-result',
+          toolCallId: part.toolCallId,
+          toolName: toolName,
+          args: part.input || {},
+          result: part.output
+        });
+      }
+    }
+  }
+  
+  return events;
+}
+
+/**
+ * Load and convert chat data to stream events
+ */
+const [chatData1, chatData2, chatData3] = allChatData;
+
+// ==================== STREAMS FROM ACTUAL CHAT DATA ====================
+
+/**
+ * Hiragana content search - derived from chat-bot-2.3.json
+ */
+export const MOCK_CHAT_HIRAGANA_SEARCH = chatData3?.message 
+  ? messageToStreamEvents(chatData3.message)
+  : [];
+
+/**
+ * Simple user message - derived from chat-bot-2.0.json
+ */
+export const MOCK_CHAT_USER_QUERY = chatData1 
+  ? messageToStreamEvents(chatData1)
+  : [];
+
 // ==================== SIMPLE TEXT MESSAGES ====================
 
 /**
@@ -431,10 +510,13 @@ export const MOCK_CHAT_CANCELED = [
 
 // ==================== COLLECTIONS ====================
 
-// Export loaded chat data
-export const chatMockData = allChatData;
-
 export const MOCK_CHAT_STREAMS = {
+  // Streams derived from actual chat data
+  FROM_CHAT_DATA: {
+    HIRAGANA_SEARCH: MOCK_CHAT_HIRAGANA_SEARCH,
+    USER_QUERY: MOCK_CHAT_USER_QUERY,
+  },
+  // Hand-crafted example streams
   SIMPLE: {
     JAPANESE: MOCK_CHAT_JAPANESE_RESPONSE,
   },
@@ -450,6 +532,7 @@ export const MOCK_CHAT_STREAMS = {
     CANCELED: MOCK_CHAT_CANCELED,
   },
   ALL: [
+    ...MOCK_CHAT_HIRAGANA_SEARCH,
     ...MOCK_CHAT_JAPANESE_RESPONSE,
     ...MOCK_CHAT_DICTIONARY_LOOKUP,
     ...MOCK_CHAT_QUESTION_SEARCH,
@@ -460,5 +543,8 @@ export const MOCK_CHAT_STREAMS = {
     ...MOCK_CHAT_CANCELED,
   ]
 };
+
+// Export helper function for custom stream generation
+export { messageToStreamEvents };
 
 export default MOCK_CHAT_STREAMS;

@@ -14,7 +14,7 @@ import SearchResults from './SearchResults';
 import { Box } from '@mui/material';
 
 export default {
-    title: '💬 AI Tools/Search Results',
+    title: '💬 AI Assistant/Search Results',
     component: SearchResults,
     parameters: {
         layout: 'padded',

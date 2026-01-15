@@ -24,7 +24,7 @@ import { UnitProvider } from '../../../context/unitContext';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
-  title: 'Editor3/Plugins/TablePlugin',
+  title: '🔌 Editor Plugins/Table',
   component: TablePlugin,
   parameters: {
     layout: 'fullscreen',

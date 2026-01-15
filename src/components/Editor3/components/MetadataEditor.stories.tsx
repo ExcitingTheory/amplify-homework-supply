@@ -4,7 +4,7 @@ import MetadataEditor from './MetadataEditor.tsx';
 import { Box, Typography, Paper } from '@mui/material';
 
 const meta: Meta<typeof MetadataEditor> = {
-    title: 'Editor/MetadataEditor',
+    title: '📚 Creating Lessons/Metadata Editor',
     component: MetadataEditor,
     parameters: {
         layout: 'padded',

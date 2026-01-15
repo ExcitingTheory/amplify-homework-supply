@@ -22,7 +22,7 @@ import { UnitProvider } from '../../../context/unitContext';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
-  title: 'Editor3/Plugins/LinkPlugin',
+  title: '🔌 Editor Plugins/Link',
   component: LinkPlugin,
   parameters: {
     layout: 'fullscreen',

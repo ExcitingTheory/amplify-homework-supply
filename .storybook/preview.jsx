@@ -18,6 +18,7 @@ import React from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme } from '@mui/material/styles';
+import { fn } from 'storybook/test';
 import '../src/components/Editor3/theme.css';
 import '../src/components/Editor3/components/LanguageEditorTheme.css';
 import './storybook.css';
@@ -30,7 +31,7 @@ import { UnitProvider } from '../src/context/unitContext';
 import { AudioPlayerProvider } from '../src/components/Editor3/context/AudioPlayerContext';
 
 // Import mock helpers
-import { clearMockUnits } from './__mocks__/aws-amplify-datastore';
+import { clearMockData, initializeMockData } from './__mocks__/aws-amplify-datastore';
 import { mockChatAPI } from './__mocks__/chat-api';
 
 // Import Next.js router mock
@@ -103,7 +104,21 @@ const theme = createTheme({
 /** @type { import('@storybook/nextjs').Preview } */
 const preview = {
   parameters: {
-    actions: { argTypesRegex: "^on[A-Z].*" },
+    actions: { args: {
+      onClick: fn(),
+      onChange: fn(),
+      onSubmit: fn(),
+      onClose: fn(),
+      onOpen: fn(),
+      onSelect: fn(),
+      onDelete: fn(),
+      onAdd: fn(),
+      onRemove: fn(),
+      onToggle: fn(),
+      onHover: fn(),
+      onFocus: fn(),
+      onBlur: fn(),
+    } },
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -195,7 +210,9 @@ const preview = {
       const disableDictionaryContext = context?.parameters?.disableDictionaryContext || false;
       
       // Get router configuration from story parameters
-      const routerParams = context?.parameters?.nextRouter || {};
+      const routerParams = context?.parameters?.nextRouter || {
+        
+      };
       const mockRouter = createMockRouter(routerParams);
       
       return (
@@ -273,11 +290,21 @@ const preview = {
   loaders: [
     async ({ parameters }) => {
       // Clear previous mock data before each story (unless disabled)
-      if (parameters?.skipClearMocks !== true) {
-        clearMockUnits();
-        console.log('[Preview] Cleared mock data for story');
+      if (parameters?.clearMockData !== true) {
+        console.log('[Preview] Skipped clearing mock data (clearMockData=true)');
       } else {
-        console.log('[Preview] Skipped clearing mock data (skipClearMocks=true)');
+        clearMockData();
+        console.log('[Preview] Cleared mock data for story');
+      }
+
+      if (parameters?.initializeMockData === false) {
+        // Optionally initialize default mock data here
+        console.log('[Preview] Skipped initializing default mock data (initializeMockData=false)');
+        
+      } else {
+        
+        console.log('[Preview] Initialized default mock data for story');
+        initializeMockData();
       }
       return null; // Return null instead of empty object to avoid extra div
     },

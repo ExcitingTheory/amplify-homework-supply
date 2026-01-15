@@ -23,7 +23,7 @@ import { UnitProvider } from '../../../context/unitContext';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
-  title: 'Editor3/Plugins/DragDropPastePlugin',
+  title: '🔌 Editor Plugins/Drag Drop Paste',
   component: DragDropPastePlugin,
   parameters: {
     layout: 'fullscreen',

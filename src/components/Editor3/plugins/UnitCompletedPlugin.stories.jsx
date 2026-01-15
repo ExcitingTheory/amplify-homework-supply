@@ -21,7 +21,7 @@ import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datas
 import UnitContext from '../../../context/unitContext';
 
 export default {
-  title: 'Editor3/Plugins/UnitCompletedPlugin',
+  title: '🔌 Editor Plugins/Unit Completed',
   component: UnitCompletedPlugin,
   parameters: {
     layout: 'fullscreen',

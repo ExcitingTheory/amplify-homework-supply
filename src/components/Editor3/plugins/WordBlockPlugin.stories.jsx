@@ -23,7 +23,7 @@ import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datas
 import { DictionaryProvider } from '../../../context/dictionaryContext';
 
 export default {
-  title: 'Editor3/Plugins/WordBlockPlugin',
+  title: '🔌 Editor Plugins/Word Block',
   component: WordBlockPlugin,
   parameters: {
     layout: 'fullscreen',

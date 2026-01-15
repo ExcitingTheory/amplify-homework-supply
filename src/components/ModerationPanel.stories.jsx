@@ -81,7 +81,7 @@ const mockUncheckedItem = {
 };
 
 export default {
-  title: 'Components/Moderation/ModerationPanel',
+  title: '🧩 Components/Moderation Panel',
   component: ModerationPanel,
   parameters: {
     layout: 'padded',

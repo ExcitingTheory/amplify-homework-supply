@@ -25,7 +25,7 @@ import { allChatData } from '../../.storybook/__mocks__/chatDataLoader';
 import { create } from 'domain';
 
 export default {
-  title: '💬 AI Tools/Chat Assistant',
+  title: '💬 AI Assistant/Chat Sidebar',
   component: ChatSidebar,
   parameters: {
     layout: 'padded',

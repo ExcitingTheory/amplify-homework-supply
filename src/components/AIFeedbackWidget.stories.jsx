@@ -7,7 +7,7 @@ import { Box, Paper, Typography } from '@mui/material';
 import AIFeedbackWidget from './AIFeedbackWidget';
 
 export default {
-  title: 'Components/AIFeedbackWidget',
+  title: '💬 AI Assistant/AI Feedback Widget',
   component: AIFeedbackWidget,
   parameters: {
     layout: 'centered',
