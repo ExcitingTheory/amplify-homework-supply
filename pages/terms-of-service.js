@@ -7,6 +7,13 @@ import CardContent from '@mui/material/CardContent';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import HomeIcon from '@mui/icons-material/Home';
+import Link from 'next/link';
+
+// Last updated date for Terms of Service
+const LAST_UPDATED = '2026-01-15';
+
+// Layout constants for consistent spacing
+const TOOLBAR_HEIGHT = '5rem';
 
 function TermsOfService() {
   return (
@@ -20,14 +27,16 @@ function TermsOfService() {
         }}
       >
         <Toolbar variant="dense" sx={{ minHeight: '48px' }}>
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="home"
-            href="/"
-          >
-            <HomeIcon />
-          </IconButton>
+          <Link href="/" passHref legacyBehavior>
+            <IconButton
+              edge="start"
+              color="inherit"
+              aria-label="home"
+              component="a"
+            >
+              <HomeIcon />
+            </IconButton>
+          </Link>
           <Box sx={{ flexGrow: 1, margin: '1rem' }}>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               Terms of Service
@@ -37,10 +46,10 @@ function TermsOfService() {
       </AppBar>
       <Box
         sx={{
-          marginTop: '5rem',
+          marginTop: TOOLBAR_HEIGHT,
           marginBottom: '3rem',
           padding: '1rem',
-          minHeight: 'calc(100vh - 5rem)',
+          minHeight: `calc(100vh - ${TOOLBAR_HEIGHT})`,
           overflow: 'auto',
         }}
       >
@@ -55,7 +64,7 @@ function TermsOfService() {
             </Typography>
             
             <Typography variant="body2" color="text.secondary" paragraph>
-              Last Updated: {new Date().toLocaleDateString()}
+              Last Updated: {LAST_UPDATED}
             </Typography>
 
             <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4 }}>
