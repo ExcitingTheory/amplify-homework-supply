@@ -9,17 +9,20 @@ import {
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import HomeIcon from '@mui/icons-material/Home';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 
+/**
+ * Custom error page for handling both client-side and server-side errors.
+ * This page is displayed when an error occurs in the application.
+ * 
+ * @param {object} props - Component props
+ * @param {number} props.statusCode - HTTP status code (404, 500, etc.)
+ * @returns {JSX.Element}
+ * 
+ * @see https://nextjs.org/docs/advanced-features/custom-error-page
+ */
 function Error({ statusCode }) {
-  /**
-   * Custom error page for handling both client-side and server-side errors.
-   * This page is displayed when an error occurs in the application.
-   * 
-   * @param {number} statusCode - HTTP status code (404, 500, etc.)
-   * @returns {JSX.Element}
-   * 
-   * @see https://nextjs.org/docs/advanced-features/custom-error-page
-   */
+  const router = useRouter();
 
   // Determine error message based on status code
   const getErrorMessage = (code) => {
@@ -150,7 +153,7 @@ function Error({ statusCode }) {
               <Button
                 variant="outlined"
                 color="primary"
-                onClick={() => window.history.back()}
+                onClick={() => router.back()}
                 sx={{
                   textTransform: 'none',
                   fontWeight: 600,
@@ -158,7 +161,8 @@ function Error({ statusCode }) {
                   py: 1.5,
                   borderRadius: 2,
                   '&:hover': {
-                    backgroundColor: 'rgba(85, 108, 214, 0.04)',
+                    backgroundColor: 'primary.light',
+                    opacity: 0.1,
                   },
                 }}
               >
