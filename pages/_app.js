@@ -14,11 +14,16 @@ import '../src/components/Editor3/components/LanguageEditorTheme.css';
 import { Amplify, Logger } from 'aws-amplify';
 
 // Configure Amplify with DataStore multi-auth
-Amplify.configure(amplifyconfig, {
+
+import { AuthModeStrategyType } from 'aws-amplify/datastore';
+
+// Configure Amplify BEFORE importing components that use DataStore
+Amplify.configure({
+  ...amplifyconfig,
   DataStore: {
-    authModeStrategyType: 'MULTI_AUTH', // String value in Amplify v6
+    authModeStrategyType: AuthModeStrategyType.MULTI_AUTH,
   },
-});
+})
 
 // Schema version - increment this when you run amplify push with schema changes
 const SCHEMA_VERSION = '1.6.0'; // Updated for AssistantChat model migration
@@ -52,7 +57,6 @@ const clientSideEmotionCache = createEmotionCache();
 //   logger: logger,
 // });
 // Amplify.addPluggable(new AmazonCloudWatchLogsProvider());
-
 
 export default function MyApp(props) {
   /**
