@@ -1,9 +1,0 @@
-{
-  "name": "addon-onboarding",
-  "projectType": "library",
-  "targets": {
-    "compile": {},
-    "check": {}
-  },
-  "tags": ["library"]
-}
