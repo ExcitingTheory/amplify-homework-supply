@@ -43,16 +43,13 @@ This document outlines four major initiatives:
 - ✅ Question prompts (short, single line - currently TextField)
 - ✅ Assignment due dates (date picker - currently TextField)
 - ✅ Search inputs (FileManager2, DictionaryEditor2 - currently TextField)
+- ✅ PDF analysis note
 
 **Multi-line Text Areas (Need Rich Text)**
 - ❌ Unit description (currently not editable, but should support rich text)
 - ❌ Section description (currently TextField, needs rich text)
-- ❌ File description (currently TextareaAutosize → needs **rich text** with links, formatting)
-- ❌ Word definition (currently TextField → needs **rich text** with examples, pronunciation guide)
-- ❌ Question explanations/feedback (currently TextareaAutosize → needs **rich text**)
 - ❌ Custom answer prompts (AnswerEditor - TextareaAutosize → needs **rich text**)
 - ❌ Meaning association instructions (MeaningAssociationEditor - TextareaAutosize → needs **rich text**)
-- ❌ PDF analysis notes (FileManager2 - TextareaAutosize → needs **rich text**)
 - ❌ Document review comments (currently TextareaAutosize → needs **rich text**)
 
 **Already Using Lexical Editor**
@@ -88,7 +85,7 @@ This document outlines four major initiatives:
 
 ### Implementation Strategy
 
-#### Phase 1: Create Reusable Editor Components (Week 1-2, 40 hours)
+#### Phase 1: Create Reusable Editor Components 
 
 **Goal**: Build standardized Lexical editor wrappers for different use cases
 
@@ -143,103 +140,7 @@ This document outlines four major initiatives:
    // See YJS_NOTES.md for implementation details
    ```
 
-#### Phase 2: Schema Updates (Week 2, 8 hours)
-
-**Update GraphQL schema** (`amplify/backend/api/japanese5/schema.graphql`):
-
-```graphql
-type Unit @model @auth(rules: [...]) {
-  id: ID!
-  number: Float
-  name: String
-  description: AWSJSON  # Change from String → AWSJSON for Lexical content
-  data: AWSJSON
-  # ... rest of fields
-}
-
-type Section @model @auth(rules: [...]) {
-  id: ID!
-  name: String
-  owner: String
-  description: AWSJSON  # Change from String → AWSJSON
-  code: String!
-  # ... rest of fields
-}
-
-type Word @model @auth(rules: [...]) {
-  id: ID!
-  phrase: String
-  phonetic: String
-  definition: AWSJSON  # Change from String → AWSJSON for rich definitions
-  definitionPlainText: String  # Add for search/preview
-  audio: [String]
-  # ... rest of fields
-}
-
-type File @model @auth(rules: [...]) {
-  id: ID!
-  name: String
-  description: AWSJSON  # Change from String → AWSJSON
-  descriptionPlainText: String  # Add for search
-  # ... rest of fields
-}
-
-type Question @model @auth(rules: [...]) {
-  id: ID!
-  prompt: AWSJSON  # Change from String → AWSJSON
-  promptPlainText: String
-  answer: String
-  explanation: AWSJSON  # New field for detailed feedback
-  # ... rest of fields
-}
-```
-
-**Migration Strategy**:
-1. Add new AWSJSON fields alongside existing String fields
-2. Migrate data in batches (script to convert plaintext → Lexical JSON)
-3. Update UI to use new fields
-4. Deprecate old String fields after 1 month
-
-**Migration Script** (`scripts/migrate-text-to-lexical.js`):
-```javascript
-// Convert existing plaintext to Lexical JSON format
-const plainTextToLexicalJSON = (text) => {
-  if (!text) return null;
-  return JSON.stringify({
-    root: {
-      children: [{
-        children: [{
-          detail: 0,
-          format: 0,
-          mode: "normal",
-          style: "",
-          text: text,
-          type: "text",
-          version: 1
-        }],
-        direction: "ltr",
-        format: "",
-        indent: 0,
-        type: "paragraph",
-        version: 1
-      }],
-      direction: "ltr",
-      format: "",
-      indent: 0,
-      type: "root",
-      version: 1
-    }
-  });
-};
-
-// Run migration for all models
-await migr migrateUnits();
-await migrateSections();
-await migrateWords();
-// ...
-```
-
-#### Phase 3: Component Replacement (Week 3-4, 60 hours)
+#### Phase 3: Component Replacement
 
 **Replace TextFields/TextareaAutosize** with `<SimpleRichTextEditor />`:
 
@@ -254,35 +155,6 @@ await migrateWords();
 | `AssignmentConfiguration.js` | Assignment notes | ~15 | 2h | Low |
 | `MainToolbar.js` | Unit description | ~30 | 3h | High - First impression |
 
-**Example Replacement** (DictionaryEditor2.js):
-
-```jsx
-// BEFORE (lines 1850-1868)
-<TextField
-  label="Definition"
-  value={definition}
-  onChange={(e) => setDefinition(e.target.value)}
-  multiline
-  rows={3}
-  fullWidth
-/>
-
-// AFTER
-<SimpleRichTextEditor
-  initialValue={word.definition} // AWSJSON from DataStore
-  onChange={async (lexicalJSON) => {
-    await DataStore.save(Word.copyOf(word, updated => {
-      updated.definition = lexicalJSON;
-      updated.definitionPlainText = extractPlainText(lexicalJSON); // For search
-    }));
-  }}
-  placeholder="Enter word definition with examples..."
-  minHeight={100}
-  autoFocus={false}
-/>
-```
-
-#### Phase 4: Testing & Validation (Week 5, 20 hours)
 
 **Test Cases**:
 1. ✅ Create new record with rich text → verify JSON saved correctly

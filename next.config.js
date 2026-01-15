@@ -19,9 +19,7 @@ module.exports = {
     : ['tsx', 'ts', 'jsx', 'js', 'mdx'],
   
   // Turbopack config - optimizations are mostly built-in
-  // Storybook packages excluded via pageExtensions filter above
-  turbopack: {
-    exclude: ['**/*.stories.@(js|jsx|ts|tsx|mdx)'],
-    
-  },
+  // https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack
+  // turbopack: {
+  // },
 };

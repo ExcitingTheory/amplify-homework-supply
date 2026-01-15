@@ -109,8 +109,7 @@ type Choice {
 type AssistantChat @model @auth(
     rules: [
       { allow: owner },
-      { allow: groups, groups: ["Admins"] },
-      { allow: private, provider: identityPool }
+      { allow: groups, groups: ["Admins"] }
     ]
   ) {
   id: ID!
@@ -141,8 +140,7 @@ type Question @model @auth(
     rules: [
       { allow: owner },
       { allow: groups, groups: ["Learners"], operations: [read] },
-      { allow: groups, groups: ["Admins"] },
-      { allow: private, provider: identityPool }
+      { allow: groups, groups: ["Admins"] }
     ]
   ) {
   id: ID!
@@ -184,8 +182,7 @@ type File @model @auth(
     rules: [
       { allow: owner },
       { allow: groups, groups: ["Learners"], operations: [read] },
-      { allow: groups, groups: ["Admins"] },
-      { allow: private, provider: identityPool }
+      { allow: groups, groups: ["Admins"] }
     ]
   ) {
   id: ID!
@@ -221,8 +218,7 @@ type File @model @auth(
 type Section @model @auth(rules: [
       { allow: owner },
       { allow: groups, groupsField: "learner", operations: [read] },
-      { allow: groups, groups: ["Admins"] },
-      { allow: private, provider: identityPool }
+      { allow: groups, groups: ["Admins"] }
   ]) {
   id: ID!
   name: String
@@ -247,8 +243,7 @@ type Assignment @model @auth(
     rules: [
       { allow: owner },
       { allow: groups, groupsField: "learner", operations: [read] },
-      { allow: groups, groups: ["Admins"] },
-      { allow: private, provider: identityPool }
+      { allow: groups, groups: ["Admins"] }
     ]
   ) {
   id: ID!
@@ -289,8 +284,7 @@ type Unit @model  @auth(
     rules: [
       { allow: owner },
       { allow: groups, groups: ["Learners"], operations: [read] },
-      { allow: groups, groups: ["Admins"] },
-      { allow: private, provider: identityPool }
+      { allow: groups, groups: ["Admins"] }
     ]
   )
   {
@@ -331,8 +325,7 @@ type Word @model @auth(
     rules: [
       { allow: owner },
       { allow: groups, groups: ["Learners"], operations: [read] },
-      { allow: groups, groups: ["Admins"] },
-      { allow: private, provider: identityPool }
+      { allow: groups, groups: ["Admins"] }
     ]
   ) {
   id: ID!
@@ -373,8 +366,7 @@ type Document @model  @auth(
     rules: [
       { allow: owner },
       { allow: groups, groups: ["Learners"], operations: [read] },
-      { allow: groups, groups: ["Admins"] },
-      { allow: private, provider: identityPool }
+      { allow: groups, groups: ["Admins"] }
     ]
   ) {
   id: ID!
@@ -404,8 +396,7 @@ type ParsedContent @model @auth(
     rules: [
       { allow: owner },
       { allow: groups, groups: ["Learners"], operations: [read] },
-      { allow: groups, groups: ["Admins"] },
-      { allow: private, provider: identityPool }
+      { allow: groups, groups: ["Admins"] }
     ]
   ) {
   id: ID!

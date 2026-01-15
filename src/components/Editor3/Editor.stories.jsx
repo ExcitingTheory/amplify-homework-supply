@@ -2,9 +2,7 @@ import React from 'react';
 import { within, waitFor, screen, waitForElementToBeRemoved } from 'storybook/test';
 import Editor, { Workbook } from './index';
 import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
-import { clearMockData, initializeMockData } from 'aws-amplify/datastore';
-
-// import { seedMockUnit, seedMockFiles, seedMockWords, seedMockQuestions, seedMockQuestionUnits } from '../../../.storybook/__mocks__/aws-amplify-datastore';
+import { clearMockData, initializeMockData, seedMockUnit, seedMockFiles, seedMockWords, seedMockQuestions, seedMockQuestionUnits } from 'aws-amplify/datastore';
 const { MOCK_AUDIO_BASE64, mockWaveformData, MOCK_IMAGE_URL_1, MOCK_IMAGE_URL_2 } = await import('../../../.storybook/__mocks__/media');
 const { 
   MOCK_JAPANESE_GRAMMAR_PDF, 
@@ -1849,6 +1847,11 @@ const mockFiles = [
 export const KitchenSink = {
   loaders: [
     async () => {
+
+      clearMockData();
+      
+      // Seed the kitchen sink lesson unit
+
       seedMockFiles(mockFiles);
       
       // Create mock words for the word blocks

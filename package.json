@@ -13,7 +13,7 @@
     "build:amplify:prod": "amplify push --envName prod",
     "cypress:open": "cypress open",
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
     "lint:translate": "eslint . --ext .js,.jsx,.ts,.tsx",

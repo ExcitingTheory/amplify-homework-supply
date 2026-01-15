@@ -1,6 +1,5 @@
 import type { StorybookConfig } from '@storybook/nextjs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 const config: StorybookConfig = {
   "stories": [
@@ -25,12 +24,9 @@ const config: StorybookConfig = {
     options: {},
   },
   "staticDirs": [
-    "../public"
+    "../public",
+    { from: "../mocks", to: "/story-mocks" }
   ],
-  
-  // docs: {
-  //   autodocs: "tag",
-  // },
   
   typescript: {
     reactDocgen: 'react-docgen-typescript',
@@ -52,7 +48,7 @@ const config: StorybookConfig = {
     
     // Configure externals to prevent bundling Node.js built-in modules and server-side dependencies
     config.externals = {
-      ...config.externals,
+      // ...config.externals,
       'child_process': 'commonjs child_process',
       'worker_threads': 'commonjs worker_threads',
       'inspector': 'commonjs inspector',
