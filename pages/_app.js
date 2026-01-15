@@ -12,16 +12,13 @@ import amplifyconfig from '../src/amplifyconfiguration.json';
 import '../src/components/Editor3/theme.css';
 import '../src/components/Editor3/components/LanguageEditorTheme.css';
 import { Amplify, Logger } from 'aws-amplify';
-// import { Amplify, AWSCloudWatchProvider, Logger } from "aws-amplify";
-// import { AuthModeStrategyType } from 'aws-amplify/datastore';
 
-// // Configure Amplify BEFORE importing components that use DataStore
-// Amplify.configure({
-//   ...amplifyconfig,
-//   DataStore: {
-//     authModeStrategyType: AuthModeStrategyType.MULTI_AUTH,
-//   },
-// })
+// Configure Amplify with DataStore multi-auth
+Amplify.configure(amplifyconfig, {
+  DataStore: {
+    authModeStrategyType: 'MULTI_AUTH', // String value in Amplify v6
+  },
+});
 
 // Schema version - increment this when you run amplify push with schema changes
 const SCHEMA_VERSION = '1.6.0'; // Updated for AssistantChat model migration
@@ -46,15 +43,15 @@ const clientSideEmotionCache = createEmotionCache();
 
 // investigate:
 // remote console logging to capture errors in production
-const logger = new Logger('CloudWatchLogger');
-const AmazonCloudWatchLogsProvider = new AWSCloudWatchProvider({
-  logGroupName: 'amplify-homework-supply-logs',
-  logStreamName: `frontend-${new Date().toISOString().split('T')[0]}`, // Daily log streams
-  region: amplifyconfig.aws_project_region,
-  level: 'ERROR', // Log only errors
-  logger: logger,
-});
-Amplify.addPluggable(new AmazonCloudWatchLogsProvider());
+// const logger = new Logger('CloudWatchLogger');
+// const AmazonCloudWatchLogsProvider = new AWSCloudWatchProvider({
+//   logGroupName: 'amplify-homework-supply-logs',
+//   logStreamName: `frontend-${new Date().toISOString().split('T')[0]}`, // Daily log streams
+//   region: amplifyconfig.aws_project_region,
+//   level: 'ERROR', // Log only errors
+//   logger: logger,
+// });
+// Amplify.addPluggable(new AmazonCloudWatchLogsProvider());
 
 
 export default function MyApp(props) {
