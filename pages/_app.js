@@ -11,16 +11,17 @@ import amplifyconfig from '../src/amplifyconfiguration.json';
 
 import '../src/components/Editor3/theme.css';
 import '../src/components/Editor3/components/LanguageEditorTheme.css';
-import { Amplify, AWSCloudWatchProvider, Logger } from "aws-amplify";
-import { AuthModeStrategyType } from 'aws-amplify/datastore';
+import { Amplify, Logger } from 'aws-amplify';
+// import { Amplify, AWSCloudWatchProvider, Logger } from "aws-amplify";
+// import { AuthModeStrategyType } from 'aws-amplify/datastore';
 
-// Configure Amplify BEFORE importing components that use DataStore
-Amplify.configure({
-  ...amplifyconfig,
-  DataStore: {
-    authModeStrategyType: AuthModeStrategyType.MULTI_AUTH,
-  },
-})
+// // Configure Amplify BEFORE importing components that use DataStore
+// Amplify.configure({
+//   ...amplifyconfig,
+//   DataStore: {
+//     authModeStrategyType: AuthModeStrategyType.MULTI_AUTH,
+//   },
+// })
 
 // Schema version - increment this when you run amplify push with schema changes
 const SCHEMA_VERSION = '1.6.0'; // Updated for AssistantChat model migration
