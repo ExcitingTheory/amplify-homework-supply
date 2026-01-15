@@ -1,3 +1,16 @@
+/*
+Use the following code to retrieve configured secrets from SSM:
+
+const { SSMClient, GetParametersCommand } = require('@aws-sdk/client-ssm');
+
+const client = new SSMClient();
+const { Parameters } = await client.send(new GetParametersCommand({
+  Names: ["OPENAI_API_KEY"].map(secretName => process.env[secretName]),
+  WithDecryption: true,
+}));
+
+Parameters will be of the form { Name: 'secretName', Value: 'secretValue', ... }[]
+*/
 import { SSMClient, GetParametersCommand } from '@aws-sdk/client-ssm';
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText, tool, convertToModelMessages, pipeUIMessageStreamToResponse } from 'ai';

@@ -159,5 +159,119 @@
         "files": {}
       }
     }
+  },
+  "cohortmain": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-amplifyhomeworksupply-cohortmain-f99db-authRole",
+      "UnauthRoleArn": "arn:aws:iam::324037300216:role/amplify-amplifyhomeworksupply-cohortmain-f99db-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::324037300216:role/amplify-amplifyhomeworksupply-cohortmain-f99db-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-amplifyhomeworksupply-cohortmain-f99db-deployment",
+      "UnauthRoleName": "amplify-amplifyhomeworksupply-cohortmain-f99db-unauthRole",
+      "StackName": "amplify-amplifyhomeworksupply-cohortmain-f99db",
+      "StackId": "arn:aws:cloudformation:us-east-1:324037300216:stack/amplify-amplifyhomeworksupply-cohortmain-f99db/243f1aa0-f0a9-11f0-837b-0affea36b6df",
+      "AmplifyAppId": "dwc6h8nw3dmbx"
+    },
+    "categories": {
+      "auth": {
+        "japanese56739ab6b": {},
+        "userPoolGroups": {},
+        "japanese46739ab6b": {}
+      },
+      "function": {
+        "AdminQueries65120535": {},
+        "analyzeDocument": {
+          "secretsPathAmplifyAppId": "dwc6h8nw3dmbx"
+        },
+        "chatStream": {
+          "secretsPathAmplifyAppId": "dwc6h8nw3dmbx"
+        },
+        "contentCompletionStream": {
+          "secretsPathAmplifyAppId": "dwc6h8nw3dmbx"
+        },
+        "generateEmbedding": {
+          "secretsPathAmplifyAppId": "dwc6h8nw3dmbx"
+        },
+        "generateEmbeddings": {
+          "secretsPathAmplifyAppId": "dwc6h8nw3dmbx"
+        },
+        "getStudentSubmission": {},
+        "japanese56739ab6bPostConfirmation": {},
+        "manageSection": {},
+        "moderation": {
+          "secretsPathAmplifyAppId": "dwc6h8nw3dmbx"
+        },
+        "openaiWebhook": {
+          "secretsPathAmplifyAppId": "dwc6h8nw3dmbx"
+        },
+        "suggestBlocks": {
+          "secretsPathAmplifyAppId": "dwc6h8nw3dmbx"
+        },
+        "suggestBlocksStream": {
+          "secretsPathAmplifyAppId": "dwc6h8nw3dmbx"
+        },
+        "japanese56739ab6b": {},
+        "japanese5": {},
+        "files": {},
+        "userPoolGroups": {}
+      }
+    }
+  },
+  "jpnmain": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-amplifyhomeworksupply-jpnmain-18729-authRole",
+      "UnauthRoleArn": "arn:aws:iam::410177262402:role/amplify-amplifyhomeworksupply-jpnmain-18729-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::410177262402:role/amplify-amplifyhomeworksupply-jpnmain-18729-authRole",
+      "Region": "ap-northeast-1",
+      "DeploymentBucketName": "amplify-amplifyhomeworksupply-jpnmain-18729-deployment",
+      "UnauthRoleName": "amplify-amplifyhomeworksupply-jpnmain-18729-unauthRole",
+      "StackName": "amplify-amplifyhomeworksupply-jpnmain-18729",
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:410177262402:stack/amplify-amplifyhomeworksupply-jpnmain-18729/1ebb5500-f0ac-11f0-9cdf-0a11fb4f250d",
+      "AmplifyAppId": "d17yhjv0lthcxb"
+    },
+    "categories": {
+      "auth": {
+        "japanese56739ab6b": {},
+        "userPoolGroups": {},
+        "japanese46739ab6b": {}
+      },
+      "function": {
+        "AdminQueries65120535": {},
+        "analyzeDocument": {
+          "secretsPathAmplifyAppId": "d17yhjv0lthcxb"
+        },
+        "chatStream": {
+          "secretsPathAmplifyAppId": "d17yhjv0lthcxb"
+        },
+        "contentCompletionStream": {
+          "secretsPathAmplifyAppId": "d17yhjv0lthcxb"
+        },
+        "generateEmbedding": {
+          "secretsPathAmplifyAppId": "d17yhjv0lthcxb"
+        },
+        "generateEmbeddings": {
+          "secretsPathAmplifyAppId": "d17yhjv0lthcxb"
+        },
+        "getStudentSubmission": {},
+        "japanese56739ab6bPostConfirmation": {},
+        "manageSection": {},
+        "moderation": {
+          "secretsPathAmplifyAppId": "d17yhjv0lthcxb"
+        },
+        "openaiWebhook": {
+          "secretsPathAmplifyAppId": "d17yhjv0lthcxb"
+        },
+        "suggestBlocks": {
+          "secretsPathAmplifyAppId": "d17yhjv0lthcxb"
+        },
+        "suggestBlocksStream": {
+          "secretsPathAmplifyAppId": "d17yhjv0lthcxb"
+        },
+        "japanese56739ab6b": {},
+        "japanese5": {},
+        "files": {},
+        "userPoolGroups": {}
+      }
+    }
   }
 }

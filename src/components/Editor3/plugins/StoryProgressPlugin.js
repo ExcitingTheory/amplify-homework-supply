@@ -9,7 +9,7 @@
 import { useEffect, useContext } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import UnitContext from '../../../context/unitContext';
-import { DataStore } from '@aws-amplify/datastore';
+import { DataStore } from 'aws-amplify/datastore';
 import { Grade } from '../../../models';
 
 

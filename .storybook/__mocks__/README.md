@@ -12,6 +12,7 @@ Webpack aliases in `.storybook/main.js` redirect all imports to these mock files
 'aws-amplify/storage' → '__mocks__/aws-amplify-storage.js'
 'aws-amplify/datastore' → '__mocks__/aws-amplify-datastore.js'
 'aws-amplify/utils' → '__mocks__/aws-amplify-utils.js'
+'next/router' → '__mocks__/next-router.js'
 '../src/utils/getCachedUrl' → '__mocks__/getCachedUrl.js'
 ```
 
@@ -42,6 +43,13 @@ Mocks DataStore operations with in-memory storage:
 - `DataStore.query()` - Queries from memory
 - `DataStore.delete()` - Removes from memory
 - `DataStore.observe()` - Observable subscriptions
+
+### `next-router.js`
+Mocks Next.js router for navigation testing:
+- `useRouter()` - Returns configurable mock router
+- `withRouter()` - HOC wrapper for router prop
+- Configure per story with `parameters.nextRouter`
+- See [ROUTER_MOCK_GUIDE.md](./ROUTER_MOCK_GUIDE.md) for details
 
 ## Usage in Stories
 

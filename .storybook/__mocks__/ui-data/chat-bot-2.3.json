@@ -1,0 +1,134 @@
+{
+    "message": {
+        "id": "T7hox8NcKnAe93Si",
+        "role": "assistant",
+        "parts": [
+            {
+                "type": "step-start"
+            },
+            {
+                "type": "tool-search_content",
+                "toolCallId": "call_lUTto7qzy4P5h2mBZAXzsAjY",
+                "state": "output-available",
+                "input": {
+                    "query": "hiragana",
+                    "type": "all",
+                    "limit": 10
+                },
+                "output": {
+                    "success": true,
+                    "query": "hiragana",
+                    "results": [
+                        {
+                            "type": "word",
+                            "id": "935084fa-8184-4977-a747-afa8f0ffc28a",
+                            "similarity": 0.7,
+                            "phrase": "hiragana",
+                            "definition": null
+                        },
+                        {
+                            "type": "question",
+                            "id": "41f9d81f-5b5a-451e-a324-9132083d1803",
+                            "similarity": 0.7,
+                            "prompt": "Describe what is meant by 'long vowels' in the Japanese language and how they are typically indicated.",
+                            "answer": "In Japanese, 'long vowels' involve elongating the vowel sound, effectively making it double its normal length. Long vowels are typically written by repeating the vowel in hiragana, or by adding an 'u' or 'i' for certain sounds—a discrepancy that can result in pronunciation that doesn’t exactly match the hiragana spelling. For example, こう ('kou') represents a long 'o' sound. These extensions of sound are notable because they change the meaning of words, making accurate pronunciation vital in communication."
+                        },
+                        {
+                            "type": "question",
+                            "id": "bf17003f-2a9d-4d2e-86b5-1cb512ca5d5d",
+                            "similarity": 0.7,
+                            "prompt": "What is a mora, and why is it significant in the Japanese language?",
+                            "answer": "A mora is the smallest complete sound unit in Japanese. Each hiragana and katakana character represents a mora, which determines the rhythm and timing of spoken Japanese. This concept is significant as it directly influences pronunciation and oral comprehension. Unlike syllables in English, which can have varying lengths, each mora takes an equal amount of time to pronounce, resulting in a rhythmic uniformity important for understanding and speaking Japanese correctly."
+                        },
+                        {
+                            "type": "question",
+                            "id": "89648906-69fb-4fc8-be9d-4130e8282165",
+                            "similarity": 0.7,
+                            "prompt": "Explain how svoiced and voiceless consonants are indicated in hiragana and katakana. Provide examples.",
+                            "answer": "Voiced and voiceless consonants in hiragana and katakana are indicated by diacritical marks. Voiceless sounds like [k] and [s] become voiced through the addition of two short lines called dakuten. For example, か (ka) becomes が (ga), and し (shi) becomes じ (ji) when voiced. This alteration in hiragana captures the phonetic shift crucial for accurate pronunciation and comprehension."
+                        }
+                    ]
+                },
+                "callProviderMetadata": {
+                    "openai": {
+                        "itemId": "fc_05a38e269f84ace30069660ca1d42481938067ef5586b41b9f"
+                    }
+                }
+            }
+        ]
+    },
+    "messages": [
+        {
+            "parts": [
+                {
+                    "type": "text",
+                    "text": "search for hiragana content"
+                }
+            ],
+            "id": "sTZUZiYXp3ejvxzp",
+            "role": "user"
+        },
+        {
+            "id": "T7hox8NcKnAe93Si",
+            "role": "assistant",
+            "parts": [
+                {
+                    "type": "step-start"
+                },
+                {
+                    "type": "tool-search_content",
+                    "toolCallId": "call_lUTto7qzy4P5h2mBZAXzsAjY",
+                    "state": "output-available",
+                    "input": {
+                        "query": "hiragana",
+                        "type": "all",
+                        "limit": 10
+                    },
+                    "output": {
+                        "success": true,
+                        "query": "hiragana",
+                        "results": [
+                            {
+                                "type": "word",
+                                "id": "935084fa-8184-4977-a747-afa8f0ffc28a",
+                                "similarity": 0.7,
+                                "phrase": "hiragana",
+                                "definition": null
+                            },
+                            {
+                                "type": "question",
+                                "id": "41f9d81f-5b5a-451e-a324-9132083d1803",
+                                "similarity": 0.7,
+                                "prompt": "Describe what is meant by 'long vowels' in the Japanese language and how they are typically indicated.",
+                                "answer": "In Japanese, 'long vowels' involve elongating the vowel sound, effectively making it double its normal length. Long vowels are typically written by repeating the vowel in hiragana, or by adding an 'u' or 'i' for certain sounds—a discrepancy that can result in pronunciation that doesn’t exactly match the hiragana spelling. For example, こう ('kou') represents a long 'o' sound. These extensions of sound are notable because they change the meaning of words, making accurate pronunciation vital in communication."
+                            },
+                            {
+                                "type": "question",
+                                "id": "bf17003f-2a9d-4d2e-86b5-1cb512ca5d5d",
+                                "similarity": 0.7,
+                                "prompt": "What is a mora, and why is it significant in the Japanese language?",
+                                "answer": "A mora is the smallest complete sound unit in Japanese. Each hiragana and katakana character represents a mora, which determines the rhythm and timing of spoken Japanese. This concept is significant as it directly influences pronunciation and oral comprehension. Unlike syllables in English, which can have varying lengths, each mora takes an equal amount of time to pronounce, resulting in a rhythmic uniformity important for understanding and speaking Japanese correctly."
+                            },
+                            {
+                                "type": "question",
+                                "id": "89648906-69fb-4fc8-be9d-4130e8282165",
+                                "similarity": 0.7,
+                                "prompt": "Explain how svoiced and voiceless consonants are indicated in hiragana and katakana. Provide examples.",
+                                "answer": "Voiced and voiceless consonants in hiragana and katakana are indicated by diacritical marks. Voiceless sounds like [k] and [s] become voiced through the addition of two short lines called dakuten. For example, か (ka) becomes が (ga), and し (shi) becomes じ (ji) when voiced. This alteration in hiragana captures the phonetic shift crucial for accurate pronunciation and comprehension."
+                            }
+                        ]
+                    },
+                    "callProviderMetadata": {
+                        "openai": {
+                            "itemId": "fc_05a38e269f84ace30069660ca1d42481938067ef5586b41b9f"
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "isAbort": false,
+    "isDisconnect": false,
+    "isError": false,
+    "finishReason": "tool-calls"
+}

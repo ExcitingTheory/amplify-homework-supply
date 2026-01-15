@@ -38,7 +38,7 @@ import { addSelfToSection } from '../../src/graphql/mutations';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { signOut } from 'aws-amplify/auth';
 import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
-import { DataStore } from '@aws-amplify/datastore';
+import { DataStore } from 'aws-amplify/datastore';
 import { Section } from '../../src/models';
 import Switch from '@mui/material/Switch';
 

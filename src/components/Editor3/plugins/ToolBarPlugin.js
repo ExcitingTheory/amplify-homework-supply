@@ -170,6 +170,10 @@ import {
 } from './MeaningAssociationPlugin';
 
 import {
+    INSERT_WORD_BLOCK_COMMAND
+} from './WordBlockPlugin';
+
+import {
     INSERT_PLAYLIST_COMMAND
 } from './PlaylistPlugin';
 
@@ -1094,6 +1098,21 @@ const InsertNodeDropDown = ({
                     aria-label="Meaning Association">
                     <WordBlockIcon />&nbsp;
                     <span className="text">Meaning Association</span>
+                </MenuItem>
+
+                <MenuItem
+                    tabIndex={-1}
+                    onClick={() => {
+                        editor.dispatchCommand(
+                            INSERT_WORD_BLOCK_COMMAND,
+                            'placeholder-word-id',
+                        );
+                        handleClose();
+                    }}
+                    title="Word Block"
+                    aria-label="Insert Word Block">
+                    <FontDownloadIcon />&nbsp;
+                    <span className="text">Word Block</span>
                 </MenuItem>
 
                  {/**

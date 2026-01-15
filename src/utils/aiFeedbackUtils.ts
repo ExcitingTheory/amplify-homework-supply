@@ -5,7 +5,7 @@
  * user feedback on AI-generated content.
  */
 
-import { DataStore } from '@aws-amplify/datastore';
+import { DataStore } from 'aws-amplify/datastore';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { 
   AIFeedback,

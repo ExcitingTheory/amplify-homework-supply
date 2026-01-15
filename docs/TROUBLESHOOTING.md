@@ -36,12 +36,12 @@ nvm use node
 # Check current version
 node --version
 
-# Install and use correct version (v16+)
-nvm install 16
-nvm use 16
+# Install and use correct version (v20+)
+nvm install 20
+nvm use 20
 
 # Set as default
-nvm alias default 16
+nvm alias default 20
 ```
 
 ### Next.js Issues

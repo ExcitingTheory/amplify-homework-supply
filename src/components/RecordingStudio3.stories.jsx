@@ -7,7 +7,8 @@ import React from 'react';
 import RecordingStudio3 from './RecordingStudio3';
 import FilesContext from '../context/fileContext';
 import { DemoBanner } from '../../.storybook/components/DemoBanner';
-
+import { KeyboardShortcuts } from '../../.storybook/components/KeyboardShortcuts';
+import TutorialBanner from '../../.storybook/components/TutorialBanner';
 /**
  * Mock Data for RecordingStudio3 Stories
  * 
@@ -327,13 +328,33 @@ const mockScriptWithTakes = {
 };
 
 export default {
-  title: 'Components/RecordingStudio3',
+  title: '🎙️ Recording Audio/Recording Studio',
   component: RecordingStudio3,
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: 'Advanced dialogue recording studio with script management, TTS generation, and multiple takes per line. Supports locked tracks for model-bound recordings.',
+        component: `
+# Recording Studio
+
+Create professional dialogue and voice recordings for your lessons. Perfect for:
+- 💬 **Conversations** - Multi-speaker dialogues with natural flow
+- 📚 **Vocabulary** - Word pronunciation with definitions
+- ❓ **Quiz Audio** - Question and answer recordings
+- 🎭 **Storytelling** - Narrated content with multiple characters
+
+**Features:**
+- 🤖 Text-to-Speech (TTS) - Generate computer voices instantly
+- 🎤 Human Recording - Record your own voice
+- 🎵 Multiple Takes - Record different versions and choose the best
+- 🔒 Locked Tracks - Protect specific recordings from editing
+- ⏱️ Timeline - Visualize your dialogue flow
+
+**Related Tools:**
+- [💬 AI Chat Assistant](?path=/docs/-ai-assistant-chat--getting-started) - Get dialogue ideas and translations
+- [📁 File Manager](?path=/docs/components-filemanager2--default) - Manage your audio files
+- [📚 Editor](?path=/docs/components-editor--empty-editor-text-formatting) - Embed recordings in lessons
+        `,
       },
     },
   },
@@ -343,8 +364,8 @@ export default {
         <FilesContext.Provider value={mockFilesContext}>
           <div style={{ height: 'calc(100vh', display: 'flex', flexDirection: 'column' }}>
             <DemoBanner
-              title="Recording Studio 3.0"
-              description="Script-based dialogue editor with TTS generation and human recordings"
+              title="🎙️ Recording Studio"
+              description="Create dialogue and voice recordings with text-to-speech or your own voice"
             />
             <div style={{ flex: 1, overflow: 'auto' }}>
               <Story />
@@ -357,7 +378,7 @@ export default {
 };
 
 // Basic conversation example
-export const Conversation = {
+export const CoffeeShopDialogue = {
   args: {
     scriptData: mockConversationScript,
     onScriptChange: (data) => console.log('Script changed:', data),
@@ -370,14 +391,32 @@ export const Conversation = {
   parameters: {
     docs: {
       description: {
-        story: 'Basic conversation script with multiple speakers. All tracks can be edited, deleted, and reordered.',
+        story: `
+### ☕ Coffee Shop Dialogue
+
+A natural conversation between two people meeting at a coffee shop. Perfect for beginners!
+
+**What you can do:**
+- ✏️ Edit speaker names and dialogue
+- 🎤 Click the microphone to generate audio with text-to-speech
+- ▶️ Press play to hear the conversation
+- ➕ Add more speakers or dialogue lines
+- 🗑️ Delete lines you don't need
+
+**Try this:**
+1. Click on any dialogue line to edit it
+2. Change what Alice or Bob says
+3. Click the microphone icon next to the line
+4. Wait a few seconds for the audio to generate
+5. Press the play button to hear your changes!
+        `,
       },
     },
   },
 };
 
 // Word model with locked tracks
-export const WordVocabulary = {
+export const JapaneseVocabularyWord = {
   args: {
     scriptData: mockWordScript,
     onScriptChange: (data) => console.log('Script changed:', data),
@@ -390,14 +429,39 @@ export const WordVocabulary = {
   parameters: {
     docs: {
       description: {
-        story: 'Vocabulary word recording with locked tracks. Tracks cannot be deleted or renamed, but you can add new takes. Perfect for Word model integration.',
+        story: `
+### 📚 Japanese Vocabulary Word
+
+Record pronunciation and definition for a vocabulary word. Notice the 🔒 lock icons—these tracks are protected.
+
+**What's different here:**
+- 🔒 Tracks are **locked** - you can't delete or rename them
+- ✅ You CAN add new recordings or generate TTS
+- 🎯 Each track has a specific purpose (phrase vs. definition)
+- 🔊 Perfect for creating consistent vocabulary lists
+
+**Use this for:**
+- Building vocabulary flashcards
+- Creating pronunciation guides
+- Teaching new words with audio
+- Standardized lesson content
+
+**Try recording your own voice:**
+1. Click the red record button next to a line
+2. Allow microphone access if prompted
+3. Speak clearly
+4. Click stop when finished
+5. Your recording appears as a new "take"
+
+**💡 Next:** Try the [Interactive Tutorial](?path=/story/🎙️-recording-audio-recording-studio--guided-tutorial) for step-by-step guidance.
+        `,
       },
     },
   },
 };
 
 // Question model with locked tracks
-export const QuestionPractice = {
+export const QuizQuestionAudio = {
   args: {
     scriptData: mockQuestionScript,
     onScriptChange: (data) => console.log('Script changed:', data),
@@ -410,14 +474,35 @@ export const QuestionPractice = {
   parameters: {
     docs: {
       description: {
-        story: 'Quiz question with locked prompt and answer tracks. Users can only add recordings/TTS to existing tracks. Perfect for Question model integration.',
+        story: `
+### ❓ Quiz Question with Audio
+
+Add voice recordings to quiz questions and answers. The question and answer tracks are locked to maintain structure.
+
+**Perfect for:**
+- 🎧 Listening comprehension questions
+- 🗣️ Pronunciation practice
+- 📝 Audio-based quizzes
+- ♿ Accessible content for screen readers
+
+**How it works:**
+1. Question is read aloud to the student
+2. Student responds (written or verbal)
+3. Answer is played for verification
+
+**Recording tips:**
+- Speak clearly and at a moderate pace
+- Pause between question and answer
+- Use TTS for consistency across multiple questions
+- Record yourself for more natural pronunciation
+        `,
       },
     },
   },
 };
 
 // With existing takes
-export const WithMultipleTakes = {
+export const ComparingMultipleTakes = {
   args: {
     scriptData: mockScriptWithTakes,
     onScriptChange: (data) => console.log('Script changed:', data),
@@ -430,14 +515,42 @@ export const WithMultipleTakes = {
   parameters: {
     docs: {
       description: {
-        story: 'Script with multiple takes per line. Shows TTS-generated and human-recorded takes. Click the star to set the active take.',
+        story: `
+### 🎵 Recording Multiple Takes
+
+Record different versions and choose the best one. Each line can have multiple "takes" (versions).
+
+**What are takes?**
+- 🤖 **TTS Takes** - Computer-generated voices
+- 🎤 **Human Takes** - Your recorded voice
+- ⭐ **Active Take** - The one that will be used (starred)
+
+**How to use:**
+1. Record or generate multiple versions of the same line
+2. Click play on each take to compare them
+3. Click the ⭐ star to choose which version to use
+4. Delete takes you don't want to keep
+
+**Why multiple takes?**
+- Try different emotions or pacing
+- Compare TTS vs. human voice
+- A/B test which sounds better
+- Keep backup versions
+- Experiment without losing work
+
+**Pro tip:** Generate a TTS version first to hear the timing, then record your own voice to match it!
+
+**See also:**
+- [Start From Scratch](?path=/story/🎙️-recording-audio-recording-studio--start-from-scratch) - Build your own dialogue
+- [AI Content Creation](?path=/docs/-ai-assistant-chat--content-creation) - Get dialogue writing help
+        `,
       },
     },
   },
 };
 
 // Read-only mode
-export const ReadOnly = {
+export const PreviewMode = {
   args: {
     scriptData: mockScriptWithTakes,
     onScriptChange: (data) => console.log('Script changed:', data),
@@ -450,14 +563,36 @@ export const ReadOnly = {
   parameters: {
     docs: {
       description: {
-        story: 'Read-only mode for reviewing scripts. All editing controls are disabled.',
+        story: `
+### 👁️ Preview Mode (Read-Only)
+
+See how your content looks to students or reviewers. No editing allowed in this mode.
+
+**What's disabled:**
+- ❌ Can't edit dialogue
+- ❌ Can't add or delete speakers
+- ❌ Can't record new audio
+- ❌ Can't generate TTS
+
+**What works:**
+- ✅ Play all audio
+- ✅ View script structure
+- ✅ See speaker assignments
+- ✅ Review dialogue flow
+
+**Use this mode to:**
+- Preview before publishing
+- Share with reviewers
+- Check final output
+- Demo to stakeholders
+        `,
       },
     },
   },
 };
 
 // Empty script (new project)
-export const EmptyScript = {
+export const StartFromScratch = {
   args: {
     scriptData: {
       metadata: {
@@ -479,7 +614,41 @@ export const EmptyScript = {
   parameters: {
     docs: {
       description: {
-        story: 'Start from scratch. Add speakers and dialogue lines to build your script.',
+        story: `
+### ✨ Create Your Own Dialogue
+
+Start with a blank canvas and build your own conversation, vocabulary, or quiz audio.
+
+**Step-by-step guide:**
+
+1. **Add Your First Speaker**
+   - Click "Add Speaker" button
+   - Enter a name (e.g., TEACHER, STUDENT, NARRATOR)
+   - Choose a voice from the dropdown
+   - Describe the character (optional)
+
+2. **Write Your First Line**
+   - Click "Add Dialogue Line"
+   - Select which speaker says it
+   - Type what they say
+   - Add (direction) or [emotion] if desired
+
+3. **Generate Audio**
+   - Click the microphone icon next to the line
+   - Wait for TTS to generate
+   - Press play to hear it!
+
+4. **Keep Building**
+   - Add more speakers and lines
+   - Rearrange by dragging
+   - Edit anytime
+   - Save your work
+
+**Quick tips:**
+- Keep lines under 2-3 sentences each
+- Add pauses with "..." or commas
+- Try different voices to find the right fit
+        `,
       },
     },
   },
@@ -539,7 +708,145 @@ export const Interactive = () => {
 Interactive.parameters = {
   docs: {
     description: {
-      story: 'Interactive demo showing locked track functionality. Toggle checkboxes to lock/unlock speaker tracks.',
+      story: `
+### 🎮 Interactive Demo
+
+Experiment with locking and unlocking tracks. This shows how protected content works in real lessons.
+
+**Try this:**
+- Check the boxes to lock Alice or Bob's tracks
+- Notice the 🔒 lock icon appears
+- Try to delete a locked track (it won't let you!)
+- Locked tracks protect important content from accidental changes
+
+**When to use locked tracks:**
+- Vocabulary words that should stay consistent
+- Quiz questions with fixed audio
+- Template dialogues for students to follow
+- Any content that shouldn't be modified
+      `,
+    },
+  },
+};
+
+/**
+ * Guided Tutorial Demo
+ * Step-by-step walkthrough for first-time users
+ */
+export const GuidedTutorial = () => {
+  const [step, setStep] = React.useState(0);
+  const [scriptData, setScriptData] = React.useState({
+    metadata: {
+      title: 'My First Dialogue',
+      scene: '',
+      date: '2026-01-04',
+      version: '1.0',
+    },
+    speakers: {},
+    dialogue: [],
+  });
+
+  const tutorialSteps = [
+    {
+      title: 'Welcome to Recording Studio!',
+      description: 'This tutorial will teach you how to create dialogue with audio in just 5 steps.',
+      tip: 'Take your time and follow each step carefully.',
+    },
+    {
+      title: 'Step 1: Add a Speaker',
+      description: 'Click the "Add Speaker" button to create your first character. Name them TEACHER.',
+      tip: 'Speaker names should be in UPPERCASE (like screenplay format).',
+    },
+    {
+      title: 'Step 2: Choose a Voice',
+      description: 'Select a voice from the dropdown menu. Try "Nova" for a friendly female voice.',
+      tip: 'You can always change the voice later!',
+    },
+    {
+      title: 'Step 3: Add Dialogue',
+      description: 'Click "Add Dialogue Line" and select your TEACHER speaker. Type: "Welcome to the class!"',
+      tip: 'Keep lines short and natural, like real conversation.',
+    },
+    {
+      title: 'Step 4: Generate Audio',
+      description: 'Click the microphone icon 🎤 next to your dialogue line to generate text-to-speech audio.',
+      tip: 'This takes a few seconds. Watch for the progress indicator!',
+    },
+    {
+      title: 'Step 5: Play Your Dialogue',
+      description: 'Click the play button ▶️ to hear your dialogue! Congratulations! 🎉',
+      tip: 'You can edit the text and regenerate audio anytime.',
+    },
+  ];
+
+  const handleNext = () => {
+    if (step < tutorialSteps.length - 1) {
+      setStep(step + 1);
+    } else {
+      setStep(tutorialSteps.length); // Mark as completed
+    }
+  };
+
+  const handlePrevious = () => {
+    if (step > 0) {
+      setStep(step - 1);
+    }
+  };
+
+  const handleClose = () => {
+    setStep(tutorialSteps.length); // Skip to completed
+  };
+
+  return (
+    <FilesContext.Provider value={mockFilesContext}>
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <TutorialBanner
+          currentStep={step}
+          steps={tutorialSteps}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          onClose={handleClose}
+          completed={step >= tutorialSteps.length}
+        />
+        <div style={{ flex: 1, overflow: 'auto' }}>
+          <RecordingStudio3
+            scriptData={scriptData}
+            onScriptChange={setScriptData}
+            gradeId="tutorial-session"
+            nodeKey="guided-tutorial"
+            identityId="us-east-1:mock-identity-123"
+            readOnly={false}
+          />
+        </div>
+        <KeyboardShortcuts />
+      </div>
+    </FilesContext.Provider>
+  );
+};
+
+GuidedTutorial.parameters = {
+  docs: {
+    description: {
+      story: `
+### 🎓 Interactive Tutorial
+
+Perfect for first-time users! Follow the step-by-step guide to create your first dialogue.
+
+**What you'll learn:**
+1. How to add speakers/characters
+2. How to choose TTS voices
+3. How to write dialogue lines
+4. How to generate audio
+5. How to play and review your work
+
+**Features:**
+- ✅ Progress tracking
+- ✅ Helpful tips at each step
+- ✅ Safe environment to experiment
+- ✅ Keyboard shortcuts reference
+
+Click "Next Step" to begin the tutorial!
+      `,
     },
   },
 };

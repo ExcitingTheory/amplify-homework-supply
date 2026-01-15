@@ -77,7 +77,7 @@ export default function TabsVerticalRight({
   const wasClosedRef = React.useRef(false);
   
   // Get suggestion state from context
-  const { suggestions, isLoadingAI, useAI, insertSuggestion } = useSuggestions();
+  const { suggestions, isLoadingAI, useAI, insertSuggestion, requestMoreSuggestions } = useSuggestions();
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   
   // Handler for when a suggestion is clicked
@@ -185,15 +185,33 @@ export default function TabsVerticalRight({
           <ChatSidebar />
         </TabPanel> 
         <TabPanel value={value} index={7}>
-          <Box sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <AutoAwesomeIcon color="primary" />
+          <Box sx={{ 
+            p: 3,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: 2,
+            m: 2,
+            mb: 3
+          }}>
+            <Typography variant="h6" gutterBottom sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1,
+              color: 'white',
+              fontWeight: 600
+            }}>
+              <AutoAwesomeIcon sx={{ fontSize: 28 }} />
               AI Block Suggestions
             </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
+            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.95)', lineHeight: 1.6 }}>
               AI-powered content block suggestions will appear here based on your current lesson content.
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+          </Box>
+          <Box sx={{ px: 2 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ 
+              display: 'block',
+              mb: 2,
+              fontStyle: 'italic'
+            }}>
               Coming soon: Interactive suggestions panel with reasoning and priority indicators.
             </Typography>
             {/** Add unit suggestions list here in the future */}
@@ -204,38 +222,89 @@ export default function TabsVerticalRight({
                 onSelect={handleSuggestionClick}
                 isLoadingAI={isLoadingAI}
                 useAI={useAI}
+                onRequestMore={requestMoreSuggestions}
               />
             {/*  Each suggestion shows preview of what it will look like in the editor as semi-transparent when the mouse hovers, clicking the suggestion will add. Important node when suggesting custom blocks we need ot add to the prompt the parameters too, for instance if something takes a list of questionIds or wordIds these need to be suggested as well */}
           </Box>
         </TabPanel>
         <TabPanel value={value} index={8}>
-          <Box sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <GradeIcon color="primary" />
+          <Box sx={{ 
+            p: 3,
+            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            borderRadius: 2,
+            m: 2,
+            mb: 3
+          }}>
+            <Typography variant="h6" gutterBottom sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1,
+              color: 'white',
+              fontWeight: 600
+            }}>
+              <GradeIcon sx={{ fontSize: 28 }} />
               Unit Grades
             </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
+            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.95)', lineHeight: 1.6 }}>
               View grades and progress for this unit.
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              • Instructors: View all student grades and submissions<br />
-              • Learners: View your own grades and feedback
+          </Box>
+          <Box sx={{ px: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontWeight: 500 }}>
+              📊 Instructors:
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2, pl: 2 }}>
+              View all student grades and submissions
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontWeight: 500 }}>
+              ✍️ Learners:
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', pl: 2 }}>
+              View your own grades and feedback
             </Typography>
           </Box>
         </TabPanel>
         <TabPanel value={value} index={9}>
-          <Box sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <ForumIcon color="primary" />
+          <Box sx={{ 
+            p: 3,
+            background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+            borderRadius: 2,
+            m: 2,
+            mb: 3
+          }}>
+            <Typography variant="h6" gutterBottom sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1,
+              color: '#1a1a1a',
+              fontWeight: 600
+            }}>
+              <ForumIcon sx={{ fontSize: 28, color: '#2196f3' }} />
               Cohort Chat
             </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
+            <Typography variant="body2" sx={{ color: 'rgba(0,0,0,0.75)', lineHeight: 1.6 }}>
               Collaborate with your classmates and instructor.
             </Typography>
-            <Typography variant="caption" color="text.secondary" component="div">
-              • Tag <strong>@kai</strong> to get AI assistance in the discussion<br />
-              • Use <strong>#topics</strong> to organize conversations by theme<br />
-              • Share insights, ask questions, and learn together
+          </Box>
+          <Box sx={{ px: 2 }}>
+            <Box sx={{ mb: 2, p: 2, bgcolor: 'background.default', borderRadius: 1, borderLeft: '3px solid #2196f3' }}>
+              <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: 'text.primary' }}>
+                💬 Tag <Box component="span" sx={{ px: 0.5, py: 0.25, bgcolor: 'primary.light', color: 'primary.contrastText', borderRadius: 0.5, fontFamily: 'monospace' }}>@kai</Box>
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', pl: 3 }}>
+                Get AI assistance in the discussion
+              </Typography>
+            </Box>
+            <Box sx={{ mb: 2, p: 2, bgcolor: 'background.default', borderRadius: 1, borderLeft: '3px solid #ff9800' }}>
+              <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: 'text.primary' }}>
+                🏷️ Use <Box component="span" sx={{ px: 0.5, py: 0.25, bgcolor: 'warning.light', color: 'warning.contrastText', borderRadius: 0.5, fontFamily: 'monospace' }}>#topics</Box>
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', pl: 3 }}>
+                Organize conversations by theme
+              </Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontStyle: 'italic', textAlign: 'center', mt: 2 }}>
+              Share insights, ask questions, and learn together
             </Typography>
           </Box>
         </TabPanel>

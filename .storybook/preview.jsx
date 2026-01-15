@@ -33,6 +33,9 @@ import { AudioPlayerProvider } from '../src/components/Editor3/context/AudioPlay
 import { clearMockUnits } from './__mocks__/aws-amplify-datastore';
 import { mockChatAPI } from './__mocks__/chat-api';
 
+// Import Next.js router mock
+import { RouterContext, createMockRouter } from './__mocks__/next-router';
+
 // Mock fetch for /api/chat endpoint
 const originalFetch = global.fetch;
 global.fetch = async (url, options) => {
@@ -152,6 +155,31 @@ const preview = {
       ],
     },
   },
+      options: {
+      storySort: {
+        order: [
+          'Introduction',
+          'Welcome',
+          'Getting Started',
+          '📚 Creating Lessons',
+          ['Editor', 'Workbook', 'Suggested Content'],
+          '🎙️ Recording Audio',
+          ['Recording Studio'],
+          '📁 Managing Content', 
+          ['File Manager', 'Dictionary', 'Questions'],
+          '💬 AI Tools',
+          ['Chat Assistant'],
+          '📄 Pages',
+          ['Index', 'Units', 'Sections', 'Profile', 'Workbook', 'Grades'],
+          '🧩 Components',
+          ['Header', 'Button', 'Nodes', 'Meaning Association'],
+          '🔌 Editor Plugins',
+          ['Editor3'],
+          'WIP',
+          '*',
+        ],
+      },
+    },
   tags: ['autodocs'],
   decorators: [
     (Story, context) => {
@@ -166,49 +194,33 @@ const preview = {
       const disableSectionContext = context?.parameters?.disableSectionContext || false;
       const disableDictionaryContext = context?.parameters?.disableDictionaryContext || false;
       
+      // Get router configuration from story parameters
+      const routerParams = context?.parameters?.nextRouter || {};
+      const mockRouter = createMockRouter(routerParams);
+      
       return (
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <div 
-            className="storybook-wrapper"
-            style={{
-              height: isFullscreen ? '100vh' : 'auto',
-              width: '100%',
-              overflow: isFullscreen ? 'auto' : 'visible',
-              position: 'relative',
-              backgroundColor: 'white',
-              // Ensure proper scrolling for fullscreen layouts
-              ...(isFullscreen && {
-                overflowX: 'auto',
-                overflowY: 'auto',
-              })
-            }}
-          >
-            <AudioPlayerProvider>
-              <FilesProvider>
-                {disableDictionaryContext ? (
-                  disableUnitContext ? (
-                    disableSectionContext ? (
-                      <Story />
-                    ) : (
-                      <SectionProvider unitId={unitId}>
-                        <Story />
-                      </SectionProvider>
-                    )
-                  ) : (
-                    <UnitProvider id={unitId}>
-                      {disableSectionContext ? (
-                        <Story />
-                      ) : (
-                        <SectionProvider unitId={unitId}>
-                          <Story />
-                        </SectionProvider>
-                      )}
-                    </UnitProvider>
-                  )
-                ) : (
-                  <DictionaryProvider>
-                    {disableUnitContext ? (
+        <RouterContext.Provider value={mockRouter}>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <div 
+              className="storybook-wrapper"
+              style={{
+                height: isFullscreen ? '100vh' : 'auto',
+                width: '100%',
+                overflow: isFullscreen ? 'auto' : 'visible',
+                position: 'relative',
+                backgroundColor: 'white',
+                // Ensure proper scrolling for fullscreen layouts
+                ...(isFullscreen && {
+                  overflowX: 'auto',
+                  overflowY: 'auto',
+                })
+              }}
+            >
+              <AudioPlayerProvider>
+                <FilesProvider>
+                  {disableDictionaryContext ? (
+                    disableUnitContext ? (
                       disableSectionContext ? (
                         <Story />
                       ) : (
@@ -226,21 +238,47 @@ const preview = {
                           </SectionProvider>
                         )}
                       </UnitProvider>
-                    )}
-                  </DictionaryProvider>
-                )}
-              </FilesProvider>
-            </AudioPlayerProvider>
-          </div>
-        </ThemeProvider>
+                    )
+                  ) : (
+                    <DictionaryProvider>
+                      {disableUnitContext ? (
+                        disableSectionContext ? (
+                          <Story />
+                        ) : (
+                          <SectionProvider unitId={unitId}>
+                            <Story />
+                          </SectionProvider>
+                        )
+                      ) : (
+                        <UnitProvider id={unitId}>
+                          {disableSectionContext ? (
+                            <Story />
+                          ) : (
+                            <SectionProvider unitId={unitId}>
+                              <Story />
+                            </SectionProvider>
+                          )}
+                        </UnitProvider>
+                      )}
+                    </DictionaryProvider>
+                  )}
+                </FilesProvider>
+              </AudioPlayerProvider>
+            </div>
+          </ThemeProvider>
+        </RouterContext.Provider>
       );
     },
   ],
   loaders: [
     async ({ parameters }) => {
-      // Clear previous mock data before each story
-      clearMockUnits();
-      console.log('[Preview] Cleared mock data for story');
+      // Clear previous mock data before each story (unless disabled)
+      if (parameters?.skipClearMocks !== true) {
+        clearMockUnits();
+        console.log('[Preview] Cleared mock data for story');
+      } else {
+        console.log('[Preview] Skipped clearing mock data (skipClearMocks=true)');
+      }
       return null; // Return null instead of empty object to avoid extra div
     },
   ],

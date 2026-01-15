@@ -14,12 +14,14 @@ const SuggestionContext = createContext({
   setSuggestions: () => {},
   setIsLoadingAI: () => {},
   insertSuggestion: () => {},
+  requestMoreSuggestions: () => {},
 });
 
 export function SuggestionProvider({ children, useAI = false }) {
   const [suggestions, setSuggestions] = useState([]);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const insertCallbackRef = useRef(null);
+  const requestMoreCallbackRef = useRef(null);
 
   const insertSuggestion = useCallback((suggestion) => {
     if (insertCallbackRef.current) {
@@ -27,8 +29,15 @@ export function SuggestionProvider({ children, useAI = false }) {
     }
   }, []);
 
-  const registerInsertCallback = useCallback((callback) => {
-    insertCallbackRef.current = callback;
+  const requestMoreSuggestions = useCallback(() => {
+    if (requestMoreCallbackRef.current) {
+      requestMoreCallbackRef.current();
+    }
+  }, []);
+
+  const registerInsertCallback = useCallback((insertCallback, requestMoreCallback) => {
+    insertCallbackRef.current = insertCallback;
+    requestMoreCallbackRef.current = requestMoreCallback;
   }, []);
 
   return (
@@ -40,6 +49,7 @@ export function SuggestionProvider({ children, useAI = false }) {
         setSuggestions,
         setIsLoadingAI,
         insertSuggestion,
+        requestMoreSuggestions,
         registerInsertCallback,
       }}
     >

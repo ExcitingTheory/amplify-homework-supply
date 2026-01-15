@@ -15,7 +15,7 @@ The most straightforward approach is to sync Yjs changes to DataStore:
 
 ```javascript
 import * as Y from 'yjs';
-import { DataStore } from '@aws-amplify/datastore';
+import { DataStore } from 'aws-amplify/datastore';
 import { YourModel } from './models'; // Your Amplify model
 
 // Initialize Yjs document
@@ -96,7 +96,7 @@ The most straightforward approach is to sync Yjs changes to DataStore:
 
 ```javascript
 import * as Y from 'yjs';
-import { DataStore } from '@aws-amplify/datastore';
+import { DataStore } from 'aws-amplify/datastore';
 import { YourModel } from './models'; // Your Amplify model
 
 // Initialize Yjs document
@@ -235,7 +235,7 @@ What's your budget and privacy constraints? That would help narrow it down furth
 
 ```
 import * as Y from 'yjs';
-import { DataStore } from '@aws-amplify/datastore';
+import { DataStore } from 'aws-amplify/datastore';
 import { Storage } from '@aws-amplify/storage';
 
 /**

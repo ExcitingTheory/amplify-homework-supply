@@ -86,7 +86,7 @@ We've chosen **gradual migration** over rewrite for the following reasons:
 export const schema = { /* complex object */ }
 
 // After (schema.ts)
-import { Schema } from '@aws-amplify/datastore';
+import { Schema } from 'aws-amplify/datastore';
 
 export interface UnitData {
   id: string;

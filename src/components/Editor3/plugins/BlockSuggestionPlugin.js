@@ -188,12 +188,21 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
   const [anchorElement, setAnchorElement] = useState(null);
   const aiRequestTimer = useRef(null);
   const abortController = useRef(null);
+  const lastAIRequestTime = useRef(0);
+  const AI_COOLDOWN_MS = 5000; // 5 second cooldown between automatic AI suggestions
   
   const { currentUnit } = useContext(UnitContext);
   
   // Fetch AI-powered suggestions
-  const fetchAISuggestions = useCallback(async () => {
+  const fetchAISuggestions = useCallback(async (forceRequest = false) => {
     if (!useAI) return null;
+    
+    // Check cooldown (skip for manual requests)
+    const now = Date.now();
+    if (!forceRequest && (now - lastAIRequestTime.current < AI_COOLDOWN_MS)) {
+      console.log('AI request throttled, cooldown active');
+      return null;
+    }
     
     // Cancel any in-flight requests
     if (abortController.current) {
@@ -202,6 +211,7 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
     
     abortController.current = new AbortController();
     setIsLoadingAI(true);
+    lastAIRequestTime.current = now;
     
     try {
       // Extract unit structure
@@ -230,6 +240,7 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
               lastBlockContent: lastBlock?.content,
             },
             userHistory: [], // TODO: Track user's preferred patterns
+            forceNew: forceRequest, // Tell backend to generate fresh suggestions
           },
         },
       });
@@ -239,7 +250,13 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
       const data = JSON.parse(text);
       setIsLoadingAI(false);
       
-      return data.suggestions || [];
+      // Add confidence scores if not present (mock for demo)
+      const enrichedSuggestions = (data.suggestions || []).map(s => ({
+        ...s,
+        confidence: s.confidence || Math.random() * 0.4 + 0.6, // 0.6-1.0 range
+      }));
+      
+      return enrichedSuggestions;
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error('Error fetching AI suggestions:', error);
@@ -247,7 +264,7 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
       }
       return null;
     }
-  }, [editor, useAI]);
+  }, [editor, useAI, setIsLoadingAI]);
   
   // Update suggestions when selection changes
   useEffect(() => {
@@ -283,7 +300,7 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
               }
               
               aiRequestTimer.current = setTimeout(async () => {
-                const aiSuggestions = await fetchAISuggestions();
+                const aiSuggestions = await fetchAISuggestions(false); // false = respect cooldown
                 
                 if (aiSuggestions && aiSuggestions.length > 0) {
                   setSuggestions(aiSuggestions);
@@ -296,7 +313,7 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
                   setSuggestions(analysis.suggestions);
                   setSelectedIndex(0);
                 }
-              }, 500); // 500ms debounce for AI
+              }, 1000); // 1 second debounce for AI (longer than before)
               
               return;
             }
@@ -428,52 +445,66 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
   // Register the insert callback with the context so the sidebar can use it
   useEffect(() => {
     if (registerInsertCallback) {
-      registerInsertCallback((suggestion) => {
-        editor.update(() => {
-          switch (suggestion.type) {
-            case 'quiz':
-              editor.dispatchCommand(INSERT_QUIZ_COMMAND, null);
-              break;
-              
-            case 'answer':
-              editor.dispatchCommand(INSERT_ANSWER_BLOCK_COMMAND, {
-                wordIDs: [],
-                requestDefinition: 'translation',
-                allowedInput: ['text'],
-                promptMethod: ['phrase'],
-              });
-              break;
-              
-            case 'custom-answer':
-              editor.dispatchCommand(INSERT_CUSTOM_ANSWER_BLOCK_COMMAND, null);
-              break;
-              
-            case 'heading':
-              editor.update(() => {
-                const selection = $getSelection();
-                if ($isRangeSelection(selection)) {
-                  const anchorNode = selection.anchor.getNode();
-                  const parent = anchorNode.getParent();
-                  if (parent) {
-                    parent.selectEnd();
+      // Provide both insert and manual AI request functions
+      registerInsertCallback(
+        // Insert callback
+        (suggestion) => {
+          editor.update(() => {
+            switch (suggestion.type) {
+              case 'quiz':
+                editor.dispatchCommand(INSERT_QUIZ_COMMAND, null);
+                break;
+                
+              case 'answer':
+                editor.dispatchCommand(INSERT_ANSWER_BLOCK_COMMAND, {
+                  wordIDs: [],
+                  requestDefinition: 'translation',
+                  allowedInput: ['text'],
+                  promptMethod: ['phrase'],
+                });
+                break;
+                
+              case 'custom-answer':
+                editor.dispatchCommand(INSERT_CUSTOM_ANSWER_BLOCK_COMMAND, null);
+                break;
+                
+              case 'heading':
+                editor.update(() => {
+                  const selection = $getSelection();
+                  if ($isRangeSelection(selection)) {
+                    const anchorNode = selection.anchor.getNode();
+                    const parent = anchorNode.getParent();
+                    if (parent) {
+                      parent.selectEnd();
+                    }
                   }
-                }
-              });
-              break;
-              
-            case 'paragraph':
-              // Just let the user type
-              break;
-              
-            default:
-              console.warn('Unknown block type:', suggestion.type);
+                });
+                break;
+                
+              case 'paragraph':
+                // Just let the user type
+                break;
+                
+              default:
+                console.warn('Unknown block type:', suggestion.type);
+            }
+            
+            setSuggestions(null);
+          });
+        },
+        // Manual AI request callback
+        async () => {
+          if (useAI) {
+            const aiSuggestions = await fetchAISuggestions(true); // true = force, ignore cooldown
+            if (aiSuggestions && aiSuggestions.length > 0) {
+              setSuggestions(aiSuggestions);
+              setSelectedIndex(0);
+            }
           }
-          
-          setSuggestions(null);
-        });
-      });
+        }
+      );
     }
-  }, [registerInsertCallback, editor, setSuggestions]);
+  }, [registerInsertCallback, editor, setSuggestions, useAI, fetchAISuggestions]);
   
   const handleSuggestionClick = useCallback((index) => {
     setSelectedIndex(index);

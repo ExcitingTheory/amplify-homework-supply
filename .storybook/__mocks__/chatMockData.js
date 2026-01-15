@@ -10,6 +10,9 @@
  * - Structured data responses
  */
 
+import {allChatData} from './chatDataLoader';
+
+
 /**
  * Helper to create SSE-formatted data line
  */
@@ -25,53 +28,6 @@ export function createSSEStream(events) {
 }
 
 // ==================== SIMPLE TEXT MESSAGES ====================
-
-/**
- * Simple greeting message stream
- */
-export const MOCK_CHAT_GREETING = [
-  // Message start
-  { type: 'text-delta', textDelta: 'Hello' },
-  { type: 'text-delta', textDelta: '!' },
-  { type: 'text-delta', textDelta: ' How' },
-  { type: 'text-delta', textDelta: ' can' },
-  { type: 'text-delta', textDelta: ' I' },
-  { type: 'text-delta', textDelta: ' help' },
-  { type: 'text-delta', textDelta: ' you' },
-  { type: 'text-delta', textDelta: ' today' },
-  { type: 'text-delta', textDelta: '?' },
-  // Stream end
-  { type: 'finish', finishReason: 'stop' }
-];
-
-/**
- * Educational content response
- */
-export const MOCK_CHAT_EDUCATION_RESPONSE = [
-  { type: 'text-delta', textDelta: 'Great' },
-  { type: 'text-delta', textDelta: ' question' },
-  { type: 'text-delta', textDelta: '!' },
-  { type: 'text-delta', textDelta: ' Let' },
-  { type: 'text-delta', textDelta: ' me' },
-  { type: 'text-delta', textDelta: ' explain' },
-  { type: 'text-delta', textDelta: ' photosynthesis' },
-  { type: 'text-delta', textDelta: '.\n\n' },
-  { type: 'text-delta', textDelta: 'Photosynthesis' },
-  { type: 'text-delta', textDelta: ' is' },
-  { type: 'text-delta', textDelta: ' the' },
-  { type: 'text-delta', textDelta: ' process' },
-  { type: 'text-delta', textDelta: ' by' },
-  { type: 'text-delta', textDelta: ' which' },
-  { type: 'text-delta', textDelta: ' plants' },
-  { type: 'text-delta', textDelta: ' convert' },
-  { type: 'text-delta', textDelta: ' light' },
-  { type: 'text-delta', textDelta: ' energy' },
-  { type: 'text-delta', textDelta: ' into' },
-  { type: 'text-delta', textDelta: ' chemical' },
-  { type: 'text-delta', textDelta: ' energy' },
-  { type: 'text-delta', textDelta: '.' },
-  { type: 'finish', finishReason: 'stop' }
-];
 
 /**
  * Japanese language response
@@ -475,10 +431,11 @@ export const MOCK_CHAT_CANCELED = [
 
 // ==================== COLLECTIONS ====================
 
+// Export loaded chat data
+export const chatMockData = allChatData;
+
 export const MOCK_CHAT_STREAMS = {
   SIMPLE: {
-    GREETING: MOCK_CHAT_GREETING,
-    EDUCATION: MOCK_CHAT_EDUCATION_RESPONSE,
     JAPANESE: MOCK_CHAT_JAPANESE_RESPONSE,
   },
   TOOLS: {
@@ -493,8 +450,6 @@ export const MOCK_CHAT_STREAMS = {
     CANCELED: MOCK_CHAT_CANCELED,
   },
   ALL: [
-    ...MOCK_CHAT_GREETING,
-    ...MOCK_CHAT_EDUCATION_RESPONSE,
     ...MOCK_CHAT_JAPANESE_RESPONSE,
     ...MOCK_CHAT_DICTIONARY_LOOKUP,
     ...MOCK_CHAT_QUESTION_SEARCH,

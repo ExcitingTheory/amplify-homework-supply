@@ -1,0 +1,79 @@
+.keyboard-shortcuts {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.keyboard-shortcuts h1 {
+  font-size: 2rem;
+  margin: 0 0 0.5rem 0;
+  color: #1a1a1a;
+}
+
+.keyboard-shortcuts p {
+  color: #666;
+  margin: 0 0 2rem 0;
+}
+
+.shortcuts-table {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.shortcuts-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  padding: 1rem 1.5rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+  font-weight: 600;
+  color: #666;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.shortcut-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.2s ease;
+}
+
+.shortcut-row:last-child {
+  border-bottom: none;
+}
+
+.shortcut-row:hover {
+  background: #f8f9fa;
+}
+
+.command {
+  color: #333;
+  font-size: 0.9375rem;
+}
+
+.shortcut {
+  display: flex;
+  gap: 0.375rem;
+  align-items: center;
+}
+
+kbd {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  font-family: monospace;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  color: #333;
+  min-width: 1.75rem;
+  text-align: center;
+}

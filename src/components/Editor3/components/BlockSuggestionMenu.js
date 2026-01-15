@@ -8,7 +8,8 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { Box, List, ListItem, ListItemButton, Typography, Chip, CircularProgress } from '@mui/material';
+import { Box, List, ListItem, ListItemButton, Typography, Chip, CircularProgress, Button, Tooltip } from '@mui/material';
+import { AutoAwesome as AutoAwesomeIcon } from '@mui/icons-material';
 
 /**
  * BlockSuggestionMenu component
@@ -26,8 +27,10 @@ export default function BlockSuggestionMenu({
   onSelect, 
   isLoadingAI = false,
   useAI = false,
+  onRequestMore,
 }) {  
   const menuRef = useRef(null);
+  const [hoveredIndex, setHoveredIndex] = React.useState(null);
   
   // Scroll selected item into view
   useEffect(() => {
@@ -81,17 +84,40 @@ export default function BlockSuggestionMenu({
             <ListItemButton
               selected={index === selectedIndex}
               onClick={() => onSelect(index)}
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
               sx={{
                 py: useAI ? 2 : 1.5,
                 px: 2,
                 flexDirection: 'column',
                 alignItems: 'stretch',
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                transform: hoveredIndex === index ? 'scale(1.02)' : 'scale(1)',
+                boxShadow: hoveredIndex === index ? 2 : 0,
                 '&.Mui-selected': {
                   bgcolor: 'primary.main',
                   color: 'primary.contrastText',
                   '&:hover': {
                     bgcolor: 'primary.dark',
                   },
+                },
+                '&:hover': {
+                  bgcolor: index === selectedIndex ? 'primary.dark' : 'action.hover',
+                },
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: '4px',
+                  bgcolor: suggestion.confidence >= 0.8 ? 'success.main' : 
+                          suggestion.confidence >= 0.6 ? 'warning.main' : 
+                          'action.disabled',
+                  opacity: useAI ? 1 : 0,
+                  transition: 'opacity 0.2s ease',
                 },
               }}
             >
@@ -114,6 +140,19 @@ export default function BlockSuggestionMenu({
                           'default'
                         }
                         sx={{ height: 20, fontSize: '11px' }}
+                      />
+                    )}
+                    {useAI && suggestion.confidence !== undefined && (
+                      <Chip 
+                        label={`${Math.round(suggestion.confidence * 100)}%`}
+                        size="small" 
+                        variant="outlined"
+                        color={
+                          suggestion.confidence >= 0.8 ? 'success' : 
+                          suggestion.confidence >= 0.6 ? 'warning' : 
+                          'default'
+                        }
+                        sx={{ height: 20, fontSize: '10px', fontWeight: 600 }}
                       />
                     )}
                   </Box>
@@ -148,11 +187,26 @@ export default function BlockSuggestionMenu({
           borderTop: '1px solid', 
           borderColor: 'divider',
           bgcolor: 'action.hover',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1,
         }}
       >
         <Typography variant="caption" color="text.secondary">
-          Click a suggestion to insert it into your lesson
+          {useAI ? 'Click a suggestion or press Tab/Enter to insert' : 'Click a suggestion to insert it into your lesson'}
         </Typography>
+        {useAI && onRequestMore && (
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<AutoAwesomeIcon />}
+            onClick={onRequestMore}
+            disabled={isLoadingAI}
+            sx={{ textTransform: 'none' }}
+          >
+            Generate More Suggestions
+          </Button>
+        )}
       </Box>
     </Box>
   );

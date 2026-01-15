@@ -24,7 +24,7 @@ import {
     Chip,
     Tooltip,
 } from "@mui/material";
-import { DataStore } from '@aws-amplify/datastore';
+import { DataStore } from 'aws-amplify/datastore';
 import ChatIcon from '@mui/icons-material/Chat';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
@@ -49,7 +49,7 @@ import { fetchAuthSession } from 'aws-amplify/auth';
 import { post } from 'aws-amplify/api';
 import { uploadAndAnalyzePDF, cancelPDFAnalysis } from '../utils/fileUploadUtils';
 import FilesContext from "../context/fileContext";
-import VocabularyReview from "./VocabularyReview";
+import VocabularyReview2 from "./VocabularyReview2";
 import { toolDefinitions, executeTool, setVectorStoreSearch } from '../utils/chatTools';
 import AIFeedbackWidget from './AIFeedbackWidget';
 import SearchResults from './ChatSidebar/SearchResults';
@@ -501,6 +501,19 @@ const ChatSidebar = () => {
         toolCalls = [],
         addToolOutput,
     } = chatHookResult || {};
+
+    // Debug: Log messages from useChat hook
+    console.log('[ChatSidebar] Messages from useChat:', {
+        count: messages.length,
+        messages: messages.map(m => ({
+            id: m.id,
+            role: m.role,
+            hasContent: !!m.content,
+            hasParts: !!m.parts,
+            hasToolInvocations: !!m.toolInvocations,
+            keys: Object.keys(m)
+        }))
+    });
 
     // Only log useChat status on meaningful changes
     if (status !== 'ready' || (messages?.length > 0) || (toolCalls?.length > 0)) {
@@ -1317,312 +1330,196 @@ const ChatSidebar = () => {
                                     </Typography>
                                 </Box>
                             )}
-                            {messages.map((message, index) => {
+                            {messages.map((message) => {
+                                console.log('[ChatSidebar] Rendering message:', {
+                                    id: message.id,
+                                    role: message.role,
+                                    hasContent: !!message.content,
+                                    contentLength: message.content?.length || 0,
+                                    hasParts: !!message.parts,
+                                    partsLength: message.parts?.length || 0,
+                                    hasToolInvocations: !!message.toolInvocations,
+                                    toolInvocationsCount: message.toolInvocations?.length || 0,
+                                    messageKeys: Object.keys(message)
+                                });
 
-                                // Extract text content from message.parts (AI SDK v6 format)
-                                let textContent = '';
-                                if (message.parts && Array.isArray(message.parts)) {
-                                    textContent = message.parts
-                                        .filter(part => part.type === 'text')
-                                        .map(part => part.text)
-                                        .join('');
-                                }
-
-                                // Extract tool invocations from message.parts
-                                const toolParts = message.parts?.filter(part =>
-                                    part.type?.startsWith('tool-')
-                                ) || [];
+                                // Extract text content from parts array (stored format)
+                                // or use content field directly (streaming format)
+                                const textContent = message.content || 
+                                    (message.parts?.filter(p => p.type === 'text').map(p => p.text).join('') || '');
+                                
+                                // Extract tool invocations from parts array (stored format with type: 'tool-*')
+                                // or use toolInvocations field directly (streaming format)
+                                const toolParts = message.toolInvocations || 
+                                    (message.parts?.filter(p => p.type?.startsWith('tool-')) || []);
 
                                 return (
-                                    <Box key={message.id || `message-${index}`} sx={{ width: '100%', mb: 1 }}>
-                                        {/* Render text content in speech bubble */}
-                                        {textContent && (
+                                <Box key={message.id} sx={{ width: '100%', mb: 1 }}>
+                                    {/* Render text content in speech bubble */}
+                                    {textContent && (
+                                        <Box
+                                            sx={{
+                                                m: 0.75,
+                                                p: '0.75rem 1rem',
+                                                borderRadius: '1rem',
+                                                maxWidth: '85%',
+                                                wordWrap: 'break-word',
+                                                ...(message.role === 'user' ? {
+                                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                    color: 'white',
+                                                    alignSelf: 'flex-end',
+                                                    marginLeft: 'auto',
+                                                    borderBottomRightRadius: '0.25rem',
+                                                } : {
+                                                    bgcolor: '#f3f4f6',
+                                                    color: '#1f2937',
+                                                    alignSelf: 'flex-start',
+                                                    borderBottomLeftRadius: '0.25rem',
+                                                    border: '1px solid #e5e7eb',
+                                                    position: 'relative',
+                                                    pr: 6,
+                                                    pb: 4,
+                                                })
+                                            }}
+                                        >
                                             <Box
+                                                component="pre"
                                                 sx={{
-                                                    m: 0.75,
-                                                    p: '0.75rem 1rem',
-                                                    borderRadius: '1rem',
-                                                    maxWidth: '85%',
+                                                    m: 0,
+                                                    whiteSpace: 'pre-wrap',
                                                     wordWrap: 'break-word',
-                                                    ...(message.role === 'user' ? {
-                                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                        color: 'white',
-                                                        alignSelf: 'flex-end',
-                                                        marginLeft: 'auto',
-                                                        borderBottomRightRadius: '0.25rem',
-                                                    } : {
-                                                        bgcolor: '#f3f4f6',
-                                                        color: '#1f2937',
-                                                        alignSelf: 'flex-start',
-                                                        borderBottomLeftRadius: '0.25rem',
-                                                        border: '1px solid #e5e7eb',
-                                                        position: 'relative',
-                                                        pr: 6,
-                                                        pb: 4,
-                                                    })
+                                                    fontFamily: 'inherit',
+                                                    fontSize: '0.9rem',
+                                                    lineHeight: 1.5,
                                                 }}
                                             >
-                                                <Box
-                                                    component="pre"
-                                                    sx={{
-                                                        m: 0,
-                                                        whiteSpace: 'pre-wrap',
-                                                        wordWrap: 'break-word',
-                                                        fontFamily: 'inherit',
-                                                        fontSize: '0.9rem',
-                                                        lineHeight: 1.5,
-                                                    }}
-                                                >
-                                                    {textContent}
-                                                </Box>
-
-                                                {/* AI Feedback Widget for assistant messages with text */}
-                                                {message.role === 'assistant' && (
-                                                    <Box sx={{ position: 'absolute', bottom: 4, right: 4 }}>
-                                                        <AIFeedbackWidget
-                                                            contentType="CHAT_MESSAGE"
-                                                            messageId={message.id}
-                                                            generatedContent={textContent}
-                                                            model={message.model}
-                                                            unitId={unit?.id}
-                                                            sessionId={assistantChat?.id}
-                                                            metadata={{
-                                                                unitName: unit?.name,
-                                                            }}
-                                                        />
-                                                    </Box>
-                                                )}
+                                                {message.content}
                                             </Box>
-                                        )}
 
-                                        {/* Render tool invocations at full width, outside speech bubbles */}
-                                        {toolParts.map((part, toolIdx) => {
-                                            const callId = part.toolCallId;
-                                            // Extract tool name from type (e.g., 'tool-search_content' -> 'search_content')
-                                            const toolName = part.type?.replace('tool-', '') || part.toolName || 'unknown';
+                                            {/* AI Feedback Widget for assistant messages */}
+                                            {message.role === 'assistant' && (
+                                                <Box sx={{ position: 'absolute', bottom: 4, right: 4 }}>
+                                                    <AIFeedbackWidget
+                                                        contentType="CHAT_MESSAGE"
+                                                        messageId={message.id}
+                                                        generatedContent={message.content}
+                                                        model={message.model || 'gpt-4'}
+                                                        unitId={unit?.id}
+                                                        sessionId={assistantChat?.id || session?.sub}
+                                                        metadata={{
+                                                            role: message.role,
+                                                            unitName: unit?.name,
+                                                            timestamp: new Date().toISOString(),
+                                                        }}
+                                                        size="small"
+                                                    />
+                                                </Box>
+                                            )}
+                                        </Box>
+                                    )}
 
-                                            // Render tool parts based on specific tool names
-                                            if (toolName === 'search_content') {
-                                                const executionState = toolExecutionStates[callId];
-                                                let parsedOutput = null;
+                                    {/* Render tool invocations with enhanced search results */}
+                                    {message.toolInvocations?.map((toolInvocation, idx) => {
+                                        // Enhanced rendering for search_content tool
+                                        if (toolInvocation.toolName === 'search_content') {
+                                            let parsedOutput = null;
 
-                                                if (part.state === 'output-available' && part.output) {
-                                                    try {
-                                                        parsedOutput = typeof part.output === 'string'
-                                                            ? JSON.parse(part.output)
-                                                            : part.output;
-                                                    } catch (e) {
-                                                        console.error('[ChatSidebar] Failed to parse search output:', e);
-                                                    }
+                                            if (toolInvocation.state === 'result' && toolInvocation.result) {
+                                                try {
+                                                    parsedOutput = typeof toolInvocation.result === 'string'
+                                                        ? JSON.parse(toolInvocation.result)
+                                                        : toolInvocation.result;
+                                                } catch (e) {
+                                                    console.error('[ChatSidebar] Failed to parse search output:', e);
                                                 }
-
-                                                return (
-                                                    <Box
-                                                        key={callId || toolIdx}
-                                                        sx={{
-                                                            width: '100%',
-                                                            mb: 2,
-                                                            p: 2,
-                                                            bgcolor: 'background.paper',
-                                                            borderRadius: 2,
-                                                            border: '1px solid',
-                                                            borderColor: part.state === 'output-error' ? 'error.main' : 'divider',
-                                                            boxShadow: 1,
-                                                        }}
-                                                    >
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                                                            <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                                                                🔍 Search Results
-                                                            </Typography>
-                                                            {executionState === 'executing' && (
-                                                                <CircularProgress size={16} />
-                                                            )}
-                                                        </Box>
-
-                                                        {part.state === 'input-streaming' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic', color: 'text.secondary' }}>
-                                                                Preparing search...
-                                                            </Typography>
-                                                        )}
-
-                                                        {part.state === 'input-available' && (
-                                                            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1, fontStyle: 'italic' }}>
-                                                                Searching for: "{part.input?.query}"
-                                                            </Typography>
-                                                        )}
-
-                                                        {part.state === 'output-available' && parsedOutput && (
-                                                            <Box sx={{ width: '100%' }}>
-                                                                {parsedOutput.success ? (
-                                                                    <>
-                                                                        <Typography variant="body2" sx={{ color: 'success.dark', mb: 2, fontWeight: 500 }}>
-                                                                            Found {parsedOutput.results?.length || 0} {parsedOutput.results?.length === 1 ? 'result' : 'results'}
-                                                                        </Typography>
-                                                                        <SearchResults
-                                                                            results={parsedOutput.results || []}
-                                                                            unitId={unit?.id}
-                                                                            searchQuery={part.input?.query || ''}
-                                                                            tabHandlers={tabContext}
-                                                                            onInsertWord={handleInsertWord}
-                                                                            onInsertQuestion={handleInsertQuestion}
-                                                                            onFocusItem={handleFocusItem}
-                                                                        />
-                                                                    </>
-                                                                ) : (
-                                                                    <Typography variant="body2" sx={{ color: 'error.main' }}>
-                                                                        {parsedOutput.error || 'Search failed'}
-                                                                    </Typography>
-                                                                )}
-                                                            </Box>
-                                                        )}
-
-                                                        {part.state === 'output-error' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
-                                                                ✗ {part.errorText}
-                                                            </Typography>
-                                                        )}
-                                                    </Box>
-                                                );
                                             }
 
-                                            // Handle create_section tool
-                                            if (toolName === 'create_section') {
-                                                return (
-                                                    <Box
-                                                        key={callId || toolIdx}
-                                                        sx={{
-                                                            mb: 1,
-                                                            p: 1,
-                                                            bgcolor: 'transparent',
-                                                            borderLeft: '2px solid',
-                                                            borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
-                                                            fontSize: '0.8rem',
-                                                            color: 'text.secondary',
-                                                        }}
-                                                    >
-                                                        <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
-                                                            ➕ Create Section
-                                                        </Typography>
-
-                                                        {part.state === 'input-streaming' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
-                                                                Preparing...
-                                                            </Typography>
-                                                        )}
-
-                                                        {part.state === 'input-available' && (
-                                                            <Typography variant="caption" sx={{ display: 'block' }}>
-                                                                "{part.input?.name}"
-                                                            </Typography>
-                                                        )}
-
-                                                        {part.state === 'output-available' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
-                                                                ✓ {part.output?.message || 'Created'}
-                                                            </Typography>
-                                                        )}
-
-                                                        {part.state === 'output-error' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
-                                                                ✗ {part.errorText}
-                                                            </Typography>
-                                                        )}
-                                                    </Box>
-                                                );
-                                            }
-
-                                            // Handle generate_unit_content tool
-                                            if (toolName === 'generate_unit_content') {
-                                                return (
-                                                    <Box
-                                                        key={callId || toolIdx}
-                                                        sx={{
-                                                            mb: 1,
-                                                            p: 1,
-                                                            bgcolor: 'transparent',
-                                                            borderLeft: '2px solid',
-                                                            borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
-                                                            fontSize: '0.8rem',
-                                                            color: 'text.secondary',
-                                                        }}
-                                                    >
-                                                        <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
-                                                            ✨ Generate Content
-                                                        </Typography>
-
-                                                        {part.state === 'input-streaming' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
-                                                                Preparing...
-                                                            </Typography>
-                                                        )}
-
-                                                        {part.state === 'input-available' && (
-                                                            <Typography variant="caption" sx={{ display: 'block' }}>
-                                                                {part.input?.contentType}: "{part.input?.topic}"
-                                                            </Typography>
-                                                        )}
-
-                                                        {part.state === 'output-available' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
-                                                                ✓ {part.output?.message || 'Ready'}
-                                                            </Typography>
-                                                        )}
-
-                                                        {part.state === 'output-error' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
-                                                                ✗ {part.errorText}
-                                                            </Typography>
-                                                        )}
-                                                    </Box>
-                                                );
-                                            }
-
-                                            // Handle dynamic or unknown tools
                                             return (
                                                 <Box
-                                                    key={callId || toolIdx}
+                                                    key={idx}
                                                     sx={{
-                                                        mb: 1,
-                                                        p: 1,
-                                                        bgcolor: 'transparent',
-                                                        borderLeft: '2px solid',
-                                                        borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
-                                                        fontSize: '0.8rem',
-                                                        color: 'text.secondary',
+                                                        width: '100%',
+                                                        mb: 2,
+                                                        p: 2,
+                                                        bgcolor: 'background.paper',
+                                                        borderRadius: 2,
+                                                        border: '1px solid',
+                                                        borderColor: 'divider',
+                                                        boxShadow: 1,
                                                     }}
                                                 >
-                                                    <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', color: 'text.primary' }}>
-                                                        🔧 {toolName || 'unknown'}
-                                                    </Typography>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                                                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                                                            🔍 Search Results
+                                                        </Typography>
+                                                    </Box>
 
-                                                    {part.state === 'input-streaming' && (
-                                                        <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
-                                                            Preparing...
+                                                    {toolInvocation.state === 'call' && (
+                                                        <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic', color: 'text.secondary' }}>
+                                                            Searching...
                                                         </Typography>
                                                     )}
 
-                                                    {part.state === 'input-available' && (
-                                                        <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
-                                                            Executing...
+                                                    {toolInvocation.args && (
+                                                        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1, fontStyle: 'italic' }}>
+                                                            Query: "{toolInvocation.args?.query}"
                                                         </Typography>
                                                     )}
 
-                                                    {part.state === 'output-available' && (
-                                                        <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'success.dark' }}>
-                                                            ✓ Complete
-                                                        </Typography>
-                                                    )}
-
-                                                    {part.state === 'output-error' && (
-                                                        <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'error.main' }}>
-                                                            ✗ {part.errorText}
-                                                        </Typography>
+                                                    {toolInvocation.state === 'result' && parsedOutput && (
+                                                        <Box sx={{ width: '100%' }}>
+                                                            {parsedOutput.success ? (
+                                                                <>
+                                                                    <Typography variant="body2" sx={{ color: 'success.dark', mb: 2, fontWeight: 500 }}>
+                                                                        Found {parsedOutput.results?.length || 0} {parsedOutput.results?.length === 1 ? 'result' : 'results'}
+                                                                    </Typography>
+                                                                    <SearchResults
+                                                                        results={parsedOutput.results || []}
+                                                                        unitId={unit?.id}
+                                                                        searchQuery={toolInvocation.args?.query || ''}
+                                                                        tabHandlers={tabContext}
+                                                                        onInsertWord={handleInsertWord}
+                                                                        onInsertQuestion={handleInsertQuestion}
+                                                                        onFocusItem={handleFocusItem}
+                                                                    />
+                                                                </>
+                                                            ) : (
+                                                                <Typography variant="body2" sx={{ color: 'error.main' }}>
+                                                                    {parsedOutput.error || 'Search failed'}
+                                                                </Typography>
+                                                            )}
+                                                        </Box>
                                                     )}
                                                 </Box>
                                             );
-                                        })}
-                                    </Box>
-                                );
+                                        }
+
+                                        // Simple rendering for other tools
+                                        return (
+                                            <Box
+                                                key={idx}
+                                                sx={{
+                                                    mb: 1,
+                                                    p: 1,
+                                                    bgcolor: 'info.light',
+                                                    borderRadius: 1,
+                                                    fontSize: '0.85rem'
+                                                }}
+                                            >
+                                                <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block' }}>
+                                                    🔧 {toolInvocation.toolName}
+                                                </Typography>
+                                                {toolInvocation.state === 'result' && (
+                                                    <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
+                                                        {toolInvocation.result?.success ? '✓ Success' : '✗ Failed'}
+                                                        {toolInvocation.result?.error && `: ${toolInvocation.result.error}`}
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        );
+                                    })}
+                                </Box>
+                            );
                             })}
                             {isLoading && messages.length > 0 && messages[messages.length - 1]?.role !== 'assistant' && (
                                 <Box
@@ -1935,7 +1832,7 @@ const ChatSidebar = () => {
                 </DialogTitle>
                 <DialogContent dividers sx={{ p: 0 }}>
                     {reviewDocumentId && (
-                        <VocabularyReview
+                        <VocabularyReview2
                             documentId={reviewDocumentId}
                             unitId={unit?.id}
                             owner={session?.sub}

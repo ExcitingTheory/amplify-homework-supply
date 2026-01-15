@@ -16,7 +16,7 @@ import { COMMAND_PRIORITY_HIGH, COMMAND_PRIORITY_LOW } from 'lexical';
 import { useEffect } from 'react';
 import { INSERT_IMAGE_COMMAND } from './ImagesPlugin';
 import { INSERT_PLAYLIST_COMMAND } from './PlaylistPlugin';
-import { DataStore } from '@aws-amplify/datastore';
+import { DataStore } from 'aws-amplify/datastore';
 import { File } from '../../../models';
 
 import { createPortal } from 'react-dom';

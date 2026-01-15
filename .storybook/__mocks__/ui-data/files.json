@@ -1,0 +1,117 @@
+{
+    "ecf2c67a-2750-4df0-8eea-0f611e1f7340": {
+        "status": "uploaded",
+        "pageCount": null,
+        "s3Key": "files/science-lesson-water-cycle.pdf",
+        "_version": 1
+    },
+    "cce4c1fe-08b7-4bbe-8f16-2088b9be9435": {
+        "status": "uploaded",
+        "pageCount": null,
+        "s3Key": "files/science-lesson-water-cycle.pdf",
+        "_version": 1
+    },
+    "76fdca5f-546f-4d0b-8fa2-510857235f79": {
+        "status": "failed",
+        "pageCount": null,
+        "s3Key": "files/science-lesson-water-cycle.pdf",
+        "_version": 3
+    },
+    "78e0af83-2eef-4d08-b955-7facf6d2be6a": {
+        "status": "uploaded",
+        "pageCount": null,
+        "s3Key": "files/science-lesson-water-cycle.pdf",
+        "_version": 1
+    },
+    "7d8dccfd-57ac-4323-b5bd-8d3d7bdda5d3": {
+        "status": "failed",
+        "pageCount": null,
+        "s3Key": "files/science-lesson-water-cycle.pdf",
+        "_version": 3
+    },
+    "90d6fc88-9a59-495c-b6a7-f23b1c9a8fd2": {
+        "status": "uploaded",
+        "pageCount": null,
+        "s3Key": "files/science-lesson-water-cycle.pdf",
+        "_version": 1
+    },
+    "8aa31c6f-c1d0-4efb-9433-b16efa1c2049": {
+        "status": "uploaded",
+        "pageCount": null,
+        "s3Key": "files/science-lesson-water-cycle.pdf",
+        "_version": 1
+    },
+    "f941e0c7-1325-4185-bc53-c9c0046630d0": {
+        "status": "uploaded",
+        "pageCount": null,
+        "s3Key": "files/science-lesson-water-cycle.pdf",
+        "_version": 1
+    },
+    "0e7f32b1-ce02-492f-8a82-ae2700741832": {
+        "status": "extracting",
+        "pageCount": null,
+        "s3Key": "files/Japanese Wind 1 ch1.pdf",
+        "_version": 2
+    },
+    "639c9661-6ff9-4f87-9e56-f688468e1331": {
+        "status": "extracting",
+        "pageCount": null,
+        "s3Key": "files/Japanese Wind 1.pdf",
+        "_version": 3
+    },
+    "5925bcd2-450c-40f4-be90-a7346321074b": {
+        "status": "uploaded",
+        "pageCount": null,
+        "s3Key": "files/science-lesson-water-cycle.pdf",
+        "_version": 1
+    },
+    "abf8003c-1ea8-4704-bcbc-385f220e323a": {
+        "status": "extracting",
+        "pageCount": null,
+        "s3Key": "files/Japanese Wind 1.pdf",
+        "_version": 2
+    },
+    "cd824b5b-2c66-41f8-8571-aa6794ff590c": {
+        "status": "completed",
+        "pageCount": 1,
+        "s3Key": "files/report.pdf",
+        "_version": 6
+    },
+    "7e6d93e4-b642-47b7-b3d8-ccda2baf8bc8": {
+        "status": "uploaded",
+        "pageCount": null,
+        "s3Key": "files/science-lesson-water-cycle.pdf",
+        "_version": 1
+    },
+    "1f0f8205-6d6b-422f-9138-a2efb6693382": {
+        "status": "failed",
+        "pageCount": null,
+        "s3Key": "files/science-lesson-water-cycle.pdf",
+        "_version": 3
+    },
+    "e01017e1-fe7a-4521-b71c-09ec31b18639": {
+        "status": "completed",
+        "pageCount": 160,
+        "s3Key": "files/Japanese Wind 1.pdf",
+        "_version": 13
+    },
+    "e02ef804-705b-454b-96f3-082f5b92e7c8": {
+        "status": "extracting",
+        "pageCount": null,
+        "s3Key": "files/Japanese Wind 1 ch1.pdf",
+        "_version": 2
+    },
+    "3278c033-ae45-4200-84e3-6aebab0ed69f": {
+        "status": "uploaded",
+        "pageCount": null,
+        "s3Key": "files/science-lesson-water-cycle.pdf",
+        "_version": 1
+    },
+    "2b77ed57-ef33-456f-b995-7ec01705518e": {
+        "status": "completed",
+        "pageCount": null,
+        "s3Key": "files/report.pdf",
+        "_version": 7
+    }
+}
+

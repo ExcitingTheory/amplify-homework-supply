@@ -699,7 +699,7 @@ export function DebugLogViewer() {
 
 ```javascript
 // src/utils/StateSnapshot.js
-import { DataStore } from '@aws-amplify/datastore';
+import { DataStore } from 'aws-amplify/datastore';
 import { Unit, Word, File, Question, Grade, Section } from '../models';
 
 export async function captureStateSnapshot() {

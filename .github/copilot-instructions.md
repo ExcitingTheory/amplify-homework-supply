@@ -124,7 +124,31 @@ await DataStore.delete(unit);
 - `useChat` hook from `@ai-sdk/react` in components like [ChatSidebar.js](src/components/ChatSidebar.js)
 - System messages built with current context (unit, files, dictionary)
 - Streams GPT-4 responses via `OpenAIStream` + `StreamingTextResponse`
+**CRITICAL - Chat Message Format**:
+Messages from `useChat` hook have a simple structure - **DO NOT modify message parsing without checking current code**:
+```javascript
+{
+  id: string,
+  role: 'user' | 'assistant',
+  content: string,  // Direct text content - use this, not parts array
+  toolInvocations: [  // Tool calls if present
+    {
+      toolName: string,
+      toolCallId: string,
+      state: 'call' | 'result',
+      args: object,
+      result: object
+    }
+  ]
+}
+```
 
+**Before changing message rendering**:
+1. Check git history: `git log --oneline -- src/components/ChatSidebar.js`
+2. View current working code: `git show HEAD:src/components/ChatSidebar.js`
+3. Verify mock data format in `.storybook/__mocks__/ui-data/` matches actual data structure
+4. The app uses a simplified message format, NOT AI SDK v6's `message.parts` array format
+5. Mock data is extracted from working component - use it as-is
 **Embeddings** (Lambda functions `generateEmbedding` and `generateEmbeddings`):
 - Uses `text-embedding-3-small` model
 - Stored in model fields like `embedding`, `embeddingModel`, `embeddingDimensions`
@@ -180,6 +204,13 @@ const result = await uploadData({
 
 ## Common Pitfalls
 
+**Before Making Structural Changes**:
+1. Check git history to see how code evolved: `git log --oneline -- <filepath>`
+2. View working version from specific commit: `git show <commit>:<filepath>`
+3. Search for existing patterns: `grep -r "pattern" src/`
+4. Verify mock data matches actual data structure in `.storybook/__mocks__/`
+5. When user says "data is already in correct format", believe them - don't refactor without proof of issue
+
 **REST API Calls**:
 - Always use Amplify's `post()` from `aws-amplify/api` for REST calls to Lambda functions, which handles auth tokens automatically.
 - AdminQueries is the default API name for Amplify Gen 1 REST functions managed by Auth and we should never use it for other APIs.
@@ -229,8 +260,14 @@ await DataStore.save(Grade.copyOf(currentGrade, updated => {
 Component development uses Storybook with mocked AWS services:
 - Stories in `*.stories.tsx` or `*.stories.jsx`
 - Mocks in `.storybook/__mocks__/` (DataStore, Auth, AI SDK)
+- Mock data in `.storybook/__mocks__/ui-data/` is **extracted from working components** - treat as source of truth for data structures
 - Run `npm run storybook` to develop components in isolation
 - See [ChatSidebar.stories.jsx](src/components/ChatSidebar.stories.jsx) for advanced mocking patterns
+
+**Critical**: When debugging component data handling:
+1. Check mock data format first - it reflects actual runtime data
+2. Don't modify component to match assumed data format
+3. Verify actual data structure before changing parsing logic
 
 
 ## Next.js /api Routes - DO NOT USE

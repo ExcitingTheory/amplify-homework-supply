@@ -1,4 +1,17 @@
 /*
+Use the following code to retrieve configured secrets from SSM:
+
+const { SSMClient, GetParametersCommand } = require('@aws-sdk/client-ssm');
+
+const client = new SSMClient();
+const { Parameters } = await client.send(new GetParametersCommand({
+  Names: ["OPENAI_WEBHOOK_SECRET"].map(secretName => process.env[secretName]),
+  WithDecryption: true,
+}));
+
+Parameters will be of the form { Name: 'secretName', Value: 'secretValue', ... }[]
+*/
+/*
 Copyright 2017 - 2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance with the License. A copy of the License is located at
     http://aws.amazon.com/apache2.0/

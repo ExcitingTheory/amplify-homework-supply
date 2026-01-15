@@ -33,7 +33,7 @@ import { post } from 'aws-amplify/api';
 import AIContentSuggestion from '../components/AIContentSuggestion';
 import UnitContext from '../../../context/unitContext';
 import { AIFeedback, AIFeedbackType, AIContentType } from '../../../models';
-import { DataStore } from '@aws-amplify/datastore';
+import { DataStore } from 'aws-amplify/datastore';
 import { fetchAuthSession } from 'aws-amplify/auth';
 
 const DEBOUNCE_DELAY = 800; // ms - wait for user to stop typing

@@ -1,6 +1,15 @@
 /**
  * @fileoverview Storybook stories for ChatSidebar component
- * Demonstrates AI chat with context awareness and file attachments
+ * Demonstrates AI chat assistant for content creation and teaching support
+ * 
+ * The AI assistant helps educators:
+ * - Get content ideas and lesson plans
+ * - Search with natural language queries
+ * - Do administrative tasks with natural language commands
+ * - Translate text between languages and input modes
+ * - Check grammar and pronunciation in multiple languages
+ * - Generate quiz questions
+ * - Answer questions about instructional topics
  * 
  * Note: All AWS services are mocked via webpack aliases in .storybook/main.js
  */
@@ -11,412 +20,186 @@ import { UnitProvider } from '../context/unitContext';
 import FilesContext from '../context/fileContext';
 import { TabProvider } from '../context/tabContext';
 import { DemoBanner } from '../../.storybook/components/DemoBanner';
-import {
-  MOCK_CHAT_GREETING,
-  MOCK_CHAT_QUESTION_SEARCH,
-  MOCK_CHAT_MULTIPLE_TOOLS,
-} from '../../.storybook/__mocks__/chatMockData';
-
-// Mock unit data
-const mockUnit = {
-  id: 'unit-123',
-  name: 'Introduction to Japanese',
-  description: 'Basic Japanese language fundamentals',
-  data: JSON.stringify({
-    lessons: ['Hiragana', 'Katakana', 'Basic Greetings'],
-  }),
-};
-
-// Mock files
-const mockFiles = {
-  'file-1': {
-    id: 'file-1',
-    name: 'japanese-grammar-guide.pdf',
-    description: 'Grammar reference guide',
-    mimeType: 'application/pdf',
-  },
-  'file-2': {
-    id: 'file-2',
-    name: 'vocabulary-list.pdf',
-    description: 'Chapter 1 vocabulary',
-    mimeType: 'application/pdf',
-  },
-};
-
-// Mock question bank
-const mockQuestionBank = {
-  'q-1': {
-    id: 'q-1',
-    prompt: 'What is "hello" in Japanese?',
-    answer: 'こんにちは (Konnichiwa)',
-  },
-  'q-2': {
-    id: 'q-2',
-    prompt: 'What is "thank you" in Japanese?',
-    answer: 'ありがとうございます (Arigatou gozaimasu)',
-  },
-};
-
-// Mock dictionary
-const mockDictionary = {
-  'd-1': {
-    id: 'd-1',
-    phrase: 'こんにちは',
-    definition: 'Hello, Good afternoon',
-  },
-  'd-2': {
-    id: 'd-2',
-    phrase: 'ありがとう',
-    definition: 'Thank you',
-  },
-};
-
-// Mock FilesContext session
-const mockSession = {
-  identityId: 'mock-identity-123',
-  tokens: {
-    idToken: 'mock-id-token',
-  },
-};
+import { seedMockAssistantChats } from '../../.storybook/__mocks__/aws-amplify-datastore';
+import { allChatData } from '../../.storybook/__mocks__/chatDataLoader';
+import { create } from 'domain';
 
 export default {
-  title: 'Components/ChatSidebar',
+  title: '💬 AI Tools/Chat Assistant',
   component: ChatSidebar,
   parameters: {
-    layout: 'fullscreen',
+    layout: 'padded',
     docs: {
       description: {
-        component: 'AI chat assistant with context awareness, streaming responses, and file attachment support.\n\n## Features\n- **Context-Aware**: Accesses current unit, vocabulary, questions, and files\n- **Streaming Responses**: Real-time token streaming via Vercel AI SDK\n- **File Attachments**: Drag-and-drop or click to attach files to messages\n- **OpenAI Integration**: GPT-4 powered responses with unit-specific context\n- **Message History**: Persistent conversation within the session\n- **Tool Calling**: AI can use tools to search content, create sections, generate quizzes, and more\n\n## Mocked Services\nAll AWS services (DataStore, Auth, Storage) and the /chat endpoint are mocked in Storybook.',
+        component: `
+# AI Chat Assistant
+
+Your intelligent teaching assistant that helps you create better content, faster.
+
+**What the AI can help with:**
+- 💡 **Content Ideas** - Get suggestions for lessons, activities, and exercises
+- 🌐 **Translation** - Translate between Japanese, English, and other languages
+- ✍️ **Grammar Help** - Check and explain Japanese grammar
+- ❓ **Quiz Generation** - Create questions based on your content
+- 📚 **Vocabulary** - Find related words and example sentences
+- 🎯 **Lesson Planning** - Structure your teaching materials
+**Use AI with other tools:**
+- [📝 Editor](?path=/docs/components-editor--empty-editor-text-formatting) - Create lessons with AI suggestions
+- [🎙️ Recording Studio](?path=/docs/🎙️-recording-audio-recording-studio--coffee-shop-dialogue) - Generate dialogue scripts
+- [📚 Workbook](?path=/docs/components-workbook--empty-workbook) - Design student exercises
+**How to use:**
+1. Type your question in the chat box
+2. Press Enter or click Send
+3. The AI will respond with helpful information
+4. Ask follow-up questions to dig deeper
+5. Use suggested actions when available
+
+**Example questions:**
+- "Help me create a lesson about Japanese seasons"
+- "Translate 'good morning' to Japanese with pronunciation"
+- "Generate 5 quiz questions about hiragana"
+- "Explain the difference between は and が particles"
+        `,
       },
     },
   },
-  tags: ['autodocs'],
   decorators: [
-    (Story, context) => {
-      // Get messages from story args or use empty array
-      const messages = context.args?.messages || [];
-      
-      // Create mock AssistantChat with messages as array
-      // Note: In the real app, messages are stored as JSON string in DataStore,
-      // but TabContext or ChatSidebar parses them before use
-      const mockAssistantChat = messages.length > 0 ? {
-        id: 'mock-chat-id',
-        messages: messages, // Already an array for Storybook
-        draft: '',
-        archived: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        _version: 1,
-        files: {
-          toArray: async () => []
-        }
-      } : null;
-
-      // Mock TabContext value
-      const mockTabContext = {
-        assistantChat: mockAssistantChat,
-        chatHistories: mockAssistantChat ? [mockAssistantChat] : [],
-        setCurrentChat: () => {},
-        isLoadingChat: false,
-        chatCreationError: null,
-      };
-
-      return (
-        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-          <DemoBanner>
-            AWS services (DataStore, Auth, Storage) and chat API (/chat) are mocked. 
-            File uploads and streaming responses are simulated!
-          </DemoBanner>
-          <div style={{ 
-            flex: 1,
-            display: 'flex', 
-            flexDirection: 'column',
-            overflow: 'hidden',
-            minHeight: 0,
-          }}>
-            <TabProvider value={mockTabContext}>
-              <FilesContext.Provider value={{
-                files: mockFiles,
-                session: mockSession,
-              }}>
-                <UnitProvider value={{
-                  unit: mockUnit,
-                  files: mockFiles,
-                  questionBank: mockQuestionBank,
-                  dictionary: mockDictionary,
-                }}>
-                  <Story />
-                </UnitProvider>
-              </FilesContext.Provider>
-            </TabProvider>
-          </div>
+    (Story) => (
+      <div style={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
+        <DemoBanner
+          title="💬 AI Chat Assistant"
+          description="Get help with content creation, translation, and teaching ideas"
+        />
+        <div style={{ flex: 1, overflow: 'hidden' }}>
+          <Story />
         </div>
-      );
-    },
+      </div>
+    ),
   ],
 };
 
-export const Default = {
-  args: {
-    messages: [],
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'A basic conversation without tool calls. Shows natural chat flow with the AI assistant helping learn Japanese.',
-      },
-    },
-  },
-};
-
-export const WithToolCalls = {
-  args: {
-    messages: [
-      {
-        id: 'msg-1',
-        role: 'user',
-        content: 'What does 水 mean in Japanese?',
-      },
-      {
-        id: 'msg-2',
-        role: 'assistant',
-        content: 'Let me look that up...',
-        toolInvocations: [
-          {
-            state: 'result',
-            toolCallId: 'call_dict_001',
-            toolName: 'search_dictionary',
-            args: { query: '水' },
-            result: {
-              word: '水',
-              phonetic: 'mizu',
-              definition: 'Water; cold water; fluid',
-              partOfSpeech: 'noun',
-              example: '水を飲む (drink water)',
-            },
-          },
-        ],
-      },
-      {
-        id: 'msg-3',
-        role: 'assistant',
-        content: 'I found it! 水 (mizu) means "water".',
-      },
-    ],
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Shows the chat with tool calls - demonstrates how the AI uses tools like search_content to find vocabulary words. The tool invocation UI shows the search query and results in a structured format.',
-      },
-    },
-  },
-};
-
-export const CreateSectionTool = {
-  args: {
-    messages: [
-      {
-        id: 'msg-1',
-        role: 'user',
-        content: 'Create a new section called "Japanese 101" for beginners',
-      },
-      {
-        id: 'msg-2',
-        role: 'assistant',
-        content: 'I\'ll create that section for you...',
-        toolInvocations: [
-          {
-            state: 'result',
-            toolCallId: 'call_section_001',
-            toolName: 'create_section',
-            args: {
-              name: 'Japanese 101',
-              description: 'Beginner Japanese language course',
-            },
-            result: {
-              id: 'section-jpn-101-new',
-              name: 'Japanese 101',
-              code: 'JPL-AB12CD',
-              description: 'Beginner Japanese language course',
-            },
-          },
-        ],
-      },
-      {
-        id: 'msg-3',
-        role: 'assistant',
-        content: 'I\'ve created the section "Japanese 101" with join code JPL-AB12CD. Students can use this code to enroll!',
-      },
-    ],
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Demonstrates the create_section tool being used to create a new class section. Shows how the AI can perform administrative tasks.',
-      },
-    },
-  },
-};
-
-export const GenerateContentTool = {
-  args: {
-    messages: [
-      {
-        id: 'msg-1',
-        role: 'user',
-        content: 'Generate a quiz about Japanese greetings with 3 questions',
-      },
-      {
-        id: 'msg-2',
-        role: 'assistant',
-        content: 'I\'ll generate a quiz for you...',
-        toolInvocations: [
-          {
-            state: 'result',
-            toolCallId: 'call_gen_001',
-            toolName: 'generate_quiz',
-            args: {
-              topic: 'Japanese greetings',
-              count: 3,
-            },
-            result: {
-              questions: [
-                {
-                  prompt: 'What does こんにちは mean?',
-                  answer: 'Hello / Good afternoon',
-                  type: 'short-answer',
-                },
-                {
-                  prompt: 'How do you say "good morning" in Japanese?',
-                  answer: 'おはようございます',
-                  type: 'short-answer',
-                },
-                {
-                  prompt: 'What is the appropriate greeting for evening?',
-                  answer: 'こんばんは',
-                  type: 'short-answer',
-                },
-              ],
-            },
-          },
-        ],
-      },
-      {
-        id: 'msg-3',
-        role: 'assistant',
-        content: 'I\'ve generated a 3-question quiz about Japanese greetings. Would you like me to add it to your unit?',
-      },
-    ],
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Shows the generate_unit_content tool creating educational content. The AI can generate quizzes, lessons, and other learning materials.',
-      },
-    },
-  },
-};
-
-export const MultipleTools = {
-  args: {
-    messages: [
-      {
-        id: 'msg-1',
-        role: 'user',
-        content: 'Find words about nature and create a quiz',
-      },
-      {
-        id: 'msg-2',
-        role: 'assistant',
-        content: 'I\'ll search for nature vocabulary and then create a quiz...',
-        toolInvocations: [
-          {
-            state: 'result',
-            toolCallId: 'call_multi_001',
-            toolName: 'search_dictionary',
-            args: { query: 'nature' },
-            result: {
-              words: [
-                { word: '木', phonetic: 'ki', definition: 'tree' },
-                { word: '花', phonetic: 'hana', definition: 'flower' },
-                { word: '川', phonetic: 'kawa', definition: 'river' },
-              ],
-            },
-          },
-          {
-            state: 'result',
-            toolCallId: 'call_multi_002',
-            toolName: 'generate_quiz',
-            args: {
-              topic: 'nature vocabulary',
-              words: ['木', '花', '川'],
-              count: 3,
-            },
-            result: {
-              questions: [
-                { prompt: 'What does 木 mean?', answer: 'tree' },
-                { prompt: 'What does 花 mean?', answer: 'flower' },
-                { prompt: 'What does 川 mean?', answer: 'river' },
-              ],
-            },
-          },
-        ],
-      },
-      {
-        id: 'msg-3',
-        role: 'assistant',
-        content: 'I found 3 nature-related words (tree, flower, river) and created a quiz based on them!',
-      },
-    ],
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Demonstrates multiple tool calls in sequence. The AI first searches for vocabulary, then uses those results to generate a quiz - showing how tools can be chained together.',
-      },
-    },
-  },
-};
-
-export const ToolCallInProgress = {
-  args: {
-    messages: [
-      {
-        id: 'msg-1',
-        role: 'user',
-        content: 'Can you search for vocabulary words about water?',
-      },
-      {
-        id: 'msg-2',
-        role: 'assistant',
-        content: 'I\'ll search the dictionary for water-related words...',
-        toolInvocations: [
-          {
-            state: 'call',
-            toolCallId: 'call_dict_water_001',
-            toolName: 'search_dictionary',
-            args: { query: '水' },
-          },
-        ],
-      },
-    ],
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Shows a tool call in progress (call state). The search is prepared but results have not arrived yet - demonstrates the loading state with the tool invocation UI.',
-      },
-    },
-  },
-};
-
-export const ToolCallError = {
+export const GettingStarted = {
   render: () => <ChatSidebar initialMessages={[]} />,
   parameters: {
     docs: {
       description: {
-        story: 'Demonstrates error handling in tool calls. Shows how the UI displays when a tool fails to execute properly.',
+        story: `
+### 🌟 Getting Started with the AI Assistant
+
+Start a conversation with your AI teaching assistant. The chat is empty and ready for your first question!
+
+**Try asking:**
+
+**For Content Ideas:**
+- "Help me create a beginner lesson about Japanese greetings"
+- "What activities can I use to teach hiragana?"
+- "Give me ideas for a cultural lesson about Japanese festivals"
+
+**For Translation:**
+- "How do you say 'thank you very much' in Japanese?"
+- "Translate 'I love learning Japanese' with pronunciation"
+- "What's the difference between ありがとう and ありがとうございます?"
+
+**For Quiz Questions:**
+- "Generate 5 multiple choice questions about basic Japanese greetings"
+- "Create practice questions for counting in Japanese"
+- "Make quiz questions about Japanese sentence structure"
+
+**For Grammar Help:**
+- "Explain how to use the particle を"
+- "When should I use です vs だ?"
+- "How do Japanese adjectives conjugate?"
+
+**Tips for better responses:**
+- Be specific about your level (beginner, intermediate, advanced)
+- Mention the age group you're teaching
+- Ask follow-up questions to refine the content
+- Request examples when helpful
+
+**🚀 Quick Links:**
+- [Translation Helper](?path=/docs/-ai-assistant-chat--translation-helper) - Focused translation tool
+- [Content Creation](?path=/docs/-ai-assistant-chat--content-creation) - Generate lesson content
+- [Quiz Generator](?path=/docs/-ai-assistant-chat--quiz-generator) - Create practice questions
+- [Grammar Help](?path=/docs/-ai-assistant-chat--grammar-explainer) - Japanese grammar assistance
+        `,
+      },
+    },
+  },
+};
+
+export const TranslationHelper = {
+  render: () => <ChatSidebar initialMessages={[]} />,
+  parameters: {
+    docs: {
+      description: {
+        story: `
+### 🌐 Translation & Language Help
+
+Use the AI as your translation assistant for creating bilingual content.
+
+**What you can do:**
+- 📝 Translate words, phrases, and sentences
+- 🔊 Get pronunciation guides (romaji)
+- 📖 Learn multiple ways to say the same thing
+- 🎓 Understand cultural context
+- ✏️ Check if your Japanese is natural
+
+**Example prompts:**
+- "Translate 'I would like to order coffee' to Japanese"
+- "How do you write 'spring' in kanji?"
+- "What's a polite way to say 'goodbye' in Japanese?"
+- "Give me 3 ways to say 'delicious' in Japanese"
+- "Is '日本語を勉強しています' correct?"
+
+**Pro tips:**
+- Ask for both formal and casual versions
+- Request romaji for pronunciation
+- Get kanji with furigana readings
+- Ask about cultural appropriateness
+- Learn when to use different levels of politeness
+        `,
+      },
+    },
+  },
+};
+
+export const ContentCreation = {
+  render: () => <ChatSidebar initialMessages={[]} />,
+  parameters: {
+    docs: {
+      description: {
+        story: `
+### ✨ Content Creation Assistant
+
+Let the AI help you brainstorm and create engaging lesson materials.
+
+**Lesson Planning:**
+- "Create an outline for a 30-minute lesson about Japanese food vocabulary"
+- "Design a week-long unit on Japanese grammar basics"
+- "What should I include in a lesson about Japanese writing systems?"
+
+**Activity Ideas:**
+- "Suggest 5 interactive activities for teaching Japanese verbs"
+- "Give me game ideas to practice hiragana"
+- "How can I make grammar practice more engaging?"
+
+**Dialogue Creation:**
+- "Write a simple conversation at a Japanese restaurant"
+- "Create a dialogue between two students introducing themselves"
+- "Make a phone conversation example in Japanese"
+
+**Vocabulary Lists:**
+- "List 20 common Japanese food words with translations"
+- "Give me essential travel phrases for Japan"
+- "Create a vocabulary set about Japanese school life"
+
+**The AI will:**
+- ✅ Structure content appropriately for your learners
+- ✅ Include cultural notes and context
+- ✅ Suggest progression and scaffolding
+- ✅ Provide example sentences and usage
+- ✅ Offer variations for different skill levels
+        `,
       },
     },
   },
@@ -433,12 +216,151 @@ export const WithFileAttachments = {
   },
 };
 
-export const LongConversation = {
+export const QuizGenerator = {
   render: () => <ChatSidebar initialMessages={[]} />,
   parameters: {
     docs: {
       description: {
-        story: 'Extended conversation showing context awareness and multiple tool calls. The AI helps create a complete lesson plan with associated quiz through a natural conversation flow.',
+        story: `
+### ❓ Quiz & Assessment Generator
+
+Generate quiz questions, practice exercises, and assessments automatically.
+
+**Create Questions:**
+- "Generate 10 multiple choice questions about Japanese particles"
+- "Make 5 fill-in-the-blank exercises for Japanese verbs"
+- "Create true/false questions about Japanese culture"
+
+**Different Question Types:**
+- Multiple choice with distractors
+- Short answer questions
+- Translation exercises
+- Matching activities
+- Listening comprehension prompts
+
+**Customization:**
+- "Make them easier for beginners"
+- "Add hints for each question"
+- "Include explanations for correct answers"
+- "Focus on practical, conversational Japanese"
+
+**Example request:**
+"Generate 5 quiz questions about basic Japanese greetings. Include:
+- Multiple choice format
+- 4 answer options each
+- One correct answer
+- Difficulty: beginner
+- Include both formal and informal greetings"
+
+**The AI provides:**
+- ✅ Well-formatted questions
+- ✅ Plausible wrong answers
+- ✅ Answer keys
+- ✅ Difficulty appropriate content
+- ✅ Explanations when requested
+
+**💡 Use with:** Add generated questions to the [Editor](?path=/docs/components-editor--empty-editor-text-formatting) with \`/quiz\` command
+        `,
+      },
+    },
+  },
+};
+
+export const GrammarExplainer = {
+  render: () => <ChatSidebar initialMessages={[]} />,
+  parameters: {
+    docs: {
+      description: {
+        story: `
+### 📚 Japanese Grammar Helper
+
+Get clear explanations of Japanese grammar concepts with examples.
+
+**Ask about:**
+- "Explain the は (wa) particle with examples"
+- "What's the difference between は and が?"
+- "How do I conjugate ru-verbs in past tense?"
+- "When do I use です vs だ?"
+- "Explain Japanese adjective conjugation"
+
+**Request examples:**
+- "Give me 5 example sentences using the particle に"
+- "Show me how to use ～たい form"
+- "Examples of polite vs casual Japanese"
+
+**Get comparisons:**
+- "Difference between これ, それ, and あれ?"
+- "When to use を vs に vs で?"
+- "Compare ～ている and ～てある"
+
+**Learning tips:**
+- Start with one concept at a time
+- Ask for examples at your level
+- Request practice exercises
+- Ask "why" to understand deeper
+- Get memory tricks and mnemonics
+
+**The AI explains:**
+- ✅ Clear, simple language
+- ✅ Multiple examples
+- ✅ Common mistakes to avoid
+- ✅ Usage in real contexts
+- ✅ Practice suggestions
+        `,
+      },
+    },
+  },
+};
+
+export const ConversationHistory = {
+  decorators: [
+    (Story) => {
+      // Seed mock assistant chat with conversation history from ui-data
+      // These are real messages extracted from the working component
+      seedMockAssistantChats([
+        {
+          id: 'chat-with-history',
+          model: 'gpt-4',
+          messages: allChatData, // Already in parts format from ui-data, leave as JSON
+          threadInstructions: 'You are a helpful Japanese language learning assistant.',
+          draft: '',
+          archived: false,
+          owner: 'mock-user-sub',
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          _version: 1,
+        }
+      ]);
+      
+      return <Story />;
+    }
+  ],
+  parameters: {
+    docs: {
+      description: {
+        story: `
+### 💾 Conversation History
+
+See an example of an ongoing conversation with the AI. This shows how the AI remembers context and builds on previous messages.
+
+**Benefits of conversation context:**
+- 📝 AI remembers what you talked about
+- 🔄 You can ask follow-up questions
+- 📊 Refine and improve responses
+- 💡 Build on previous ideas
+- 🎯 Get progressively better suggestions
+
+**Example conversation flow:**
+
+1. **You:** "Help me create a lesson about seasons"
+2. **AI:** *[Provides lesson outline]*
+3. **You:** "Make it simpler for beginners"
+4. **AI:** *[Adjusts complexity down]*
+5. **You:** "Add some vocabulary words"
+6. **AI:** *[Adds vocabulary to the lesson]*
+
+The AI understands "it", "that", and "this" in your questions because it remembers the context!
+        `,
       },
     },
   },

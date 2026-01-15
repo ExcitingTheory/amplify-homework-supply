@@ -546,18 +546,6 @@
                   ]
                 ]
               }
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "lambda:InvokeFunction"
-              ],
-              "Resource": {
-                "Fn::GetAtt": [
-                  "LambdaFunction",
-                  "Arn"
-                ]
-              }
             }
           ]
         }

@@ -1,0 +1,302 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import OnboardingGuide from '../.storybook/components/OnboardingGuide';
+import KeyboardShortcuts from '../.storybook/components/KeyboardShortcuts';
+import TutorialBanner from '../.storybook/components/TutorialBanner';
+
+<Meta title="Onboarding" />
+
+<TutorialBanner />
+
+# About Homework Supply
+
+Welcome to **Homework Supply** - a Japanese language learning platform with AI-powered content creation!
+    
+    ## Quick Start Guide
+    
+    This Storybook helps you learn the platform by exploring interactive components:
+    
+    ### � Setting Up Your Class
+    1. **Create a Section** - Set up a class/group
+    2. **Add Students** - Share join code or add manually
+    3. **Create Units** - Build learning modules (manually or with AI)
+    4. **Assign Work** - Create assignments with due dates
+    
+    ### 📝 Building Content Manually
+    1. **Create New Unit** - Click "New Unit" button
+    2. **Use Editor** - Add text, media, and graded blocks
+    3. **Add Vocabulary** - Link words from dictionary
+    4. **Create Questions** - Build quiz and answer blocks
+    5. **Publish** - Make available to students
+    
+    ### 🤖 Building Content with AI
+    1. **Open AI Chat** - Click chat icon in sidebar
+    2. **Describe Your Unit** - "Create a unit about Japanese greetings"
+    3. **Review Suggestions** - AI generates outline and content
+    4. **Insert & Refine** - Add to editor and customize
+    5. **Iterate** - Ask AI to expand, simplify, or modify
+    
+    ### 🎓 For Students
+    1. **Join Section** - Enter join code from instructor
+    2. **Open Workbook** - View assigned units
+    3. **Complete Work** - Answer questions and exercises
+    4. **Submit** - Get instant grading with AI feedback
+    5. **Track Progress** - See accuracy and completion stats
+    
+    ### 🤖 AI Features
+    - **Content Suggestions** - AI generates quiz questions, vocabulary, explanations
+    - **Unit Creation** - Describe your lesson, AI builds complete outline
+    - **Assignment Setup** - AI helps configure assignments and due dates
+    - **Document Parsing** - Upload PDFs to extract vocabulary automatically
+    - **Audio Transcription** - Whisper AI transcribes recordings
+    - **Smart Search** - Semantic search using embeddings
+    
+    ## Workflows: Manual vs AI-Assisted
+    
+    ### Creating a Section (Class)
+    
+    **Manual Approach:**
+    1. Go to Sections page
+    2. Click "Create Section" button
+    3. Enter section name (e.g., "Japanese 101 - Spring 2026")
+    4. Set grade level and description
+    5. Get unique join code for students
+    
+    **AI-Assisted Approach:**
+    1. Open AI Chat
+    2. Ask: "Create a section for beginner Japanese students"
+    3. AI suggests section structure with name and description
+    4. Review and confirm to create
+    
+    ### Creating a Unit
+    
+    **Manual Approach:**
+    1. Click "New Unit" from Units page
+    2. Enter title and description
+    3. Use editor to add content blocks
+    4. Insert media, vocabulary, questions
+    5. Save and publish
+    
+    **AI-Assisted Approach:**
+    1. Open AI Chat in a new/existing unit
+    2. Ask: "Create a unit teaching Japanese greetings with quiz questions"
+    3. AI generates outline with sections and content
+    4. Review suggested content forms (quiz, vocab, explanations)
+    5. Click "Insert" on forms you want to add
+    6. AI adds blocks directly to editor
+    7. Iterate: "Add more examples" or "Make it easier for beginners"
+    
+    ### Creating an Assignment
+    
+    **Manual Approach:**
+    1. Go to Sections page, select a section
+    2. Click "Create Assignment"
+    3. Select unit from dropdown
+    4. Set due date and time
+    5. Choose assignment settings (allow late, show answers after)
+    6. Assign to section
+    
+    **AI-Assisted Approach:**
+    1. Open AI Chat
+    2. Ask: "Create an assignment for Japanese 101 using the Greetings unit, due next Friday"
+    3. AI suggests assignment with recommended settings
+    4. Review and confirm to create
+    5. AI handles unit selection, date calculation, and optimal settings
+    
+    ## Core Components to Explore
+    
+    ### 📄 Pages
+    - **Index Page** (`/pages/index.js`) - Browse all units
+    - **Unit Detail** (`/pages/units/[id].js`) - Edit unit content
+    - **Workbook** (`/pages/workbook/[id].js`) - Student assignment view
+    - **Sections** (`/pages/sections.js`) - Manage classes
+    
+    ### ✏️ Editor System
+    - **Editor3** - Lexical-based rich text editor
+    - **Custom Blocks**:
+      - `QuizNode` - Multiple choice questions
+      - `AnswerNode` - Fill-in-the-blank
+      - `MeaningAssociationNode` - Vocabulary matching
+      - `CustomAnswerNode` - Free-form responses
+    - **Toolbar** - Add media, blocks, formatting
+    - **Autocomplete** - Quick word/question insertion
+    
+    ### 💬 AI Chat
+    - **ChatSidebar** - Streaming AI assistant
+    - **Tools**:
+      - `search_content` - Find units/words/questions
+      - `suggest_content` - Generate learning content
+      - `generate_audio` - Text-to-speech
+      - `transcribe_audio` - Speech-to-text
+    - **Forms** - Suggested content appears as interactive forms
+    
+    ### 📁 File Manager
+    - Upload audio (MP3, WAV), video (MP4), images (JPG, PNG)
+    - Organize with categories and tags
+    - Protection levels: `public`, `protected`, `private`
+    - Auto-transcription for audio files
+    
+    ### 📚 Dictionary Editor
+    - Add vocabulary words (Japanese, phonetic, definition)
+    - Upload/generate audio pronunciations
+    - Link words to specific units
+    - Create practice questions (multiple formats)
+    
+    ### 📄 Document Parser
+    - Upload PDFs for content extraction
+    - AI analyzes text and identifies vocabulary
+    - Review and import extracted words
+    - Track analysis progress with status indicators
+    
+    ## Tech Stack
+    
+    - **Next.js 16** - React framework
+    - **AWS Amplify Gen 1** - Backend (GraphQL, DataStore, Auth, Storage)
+    - **Material UI** - Component library
+    - **Lexical** - Rich text editor
+    - **OpenAI** - GPT-4, Whisper, TTS, Embeddings
+    - **Vercel AI SDK** - Streaming chat
+    
+    ## Architecture Patterns
+    
+    ### React Contexts (Avoid DataStore duplication)
+    - `UnitContext` - Unit data, files, dictionary, grading
+    - `SectionContext` - Classes and assignments
+    - `FilesContext` - File management
+    - `DictionaryContext` - Words and questions
+    
+    ### DataStore Best Practices
+    ```javascript
+    // ✅ Good - One subscription, client-side filter
+    DataStore.observeQuery(Grade).subscribe(({ items }) => {
+      const myGrades = items.filter(g => g.userID === userId);
+    });
+    
+    // ❌ Bad - Multiple subscriptions
+    DataStore.observeQuery(Grade, g => g.userID.eq(userId));
+    DataStore.observeQuery(Grade, g => g.complete.eq(true));
+    ```
+    
+    ### Editor Data Flow
+    1. Content stored as JSON in `Unit.data` field
+    2. Lexical parses JSON into editor state
+    3. Custom nodes render graded blocks
+    4. Save via `saveEditorContent()` from UnitContext
+    
+    ### Grading System
+    - `Grade.data` stores student responses as JSON
+    - Auto-calculated accuracy from rubric
+    - Rubric built from graded block types: `quiz`, `answer`, `meaning-association`, `custom-answer`
+    
+    ## Resources
+    
+    - [API Documentation](../docs/API.md) - Data models and GraphQL
+    - [DataStore Optimization](../docs/DATASTORE_OPTIMIZATION_CHANGES.md) - Subscription patterns
+    - [AI Chat Tools](../docs/CHATBOT_TOOLS.md) - Tool documentation
+    - [Content Generation](../docs/CONTENT_GENERATION_EXAMPLES.md) - AI examples
+
+---
+
+## Interactive Guide
+
+<OnboardingGuide />
+
+---
+
+## Keyboard Shortcuts
+
+<KeyboardShortcuts />
+
+---
+
+## What's New
+    
+    ## January 2026 Updates
+    
+    ### 🎯 Focused Onboarding
+    **NEW!** Task-based onboarding focused on practical workflows:
+    - Understanding app pages (Index, Unit, Workbook, Sections)
+    - Using the Lexical editor and custom blocks
+    - AI Chat with content suggestions
+    - File Manager for media uploads
+    - Dictionary and Question Editor
+    - Document parsing for vocabulary extraction
+    - Search and discovery features
+    
+    Progress tracked in localStorage with achievements! 🏆
+    
+    ### 🧭 Next.js Router Mocking
+    - Added `next/router` mock for Storybook
+    - Configure router per story with `parameters.nextRouter`
+    - See [ROUTER_MOCK_GUIDE.md](../.storybook/__mocks__/ROUTER_MOCK_GUIDE.md)
+    
+    ### 🎨 Custom Storybook Theme
+    - Replaced default onboarding with "Homework Supply" branding
+    - Custom theme with educational color palette
+    
+    ## Recent Features
+    
+    ### 💬 AI Chat & Content Generation
+    **Streaming chat interface** with tool execution:
+    - `search_content` - Semantic search across units, words, questions
+    - `suggest_content` - Generate quiz questions, vocabulary, explanations
+    - `generate_audio` - Text-to-speech for vocabulary
+    - `transcribe_audio` - Speech-to-text with Whisper
+    
+    **Suggested Content Forms**:
+    When AI suggests content, it appears as interactive forms you can:
+    - Review and edit before inserting
+    - Insert directly into editor
+    - Save to dictionary
+    - Modify and regenerate
+    
+    ### 📄 Document Analysis
+    Upload PDFs to extract learning content:
+    1. Upload PDF via File Manager
+    2. Click "Analyze Document"
+    3. AI extracts text and identifies Japanese vocabulary
+    4. Review extracted words with definitions
+    5. Import selected words to dictionary
+    6. Cancellable for long documents
+    
+    ### 🎯 Workbook Grading
+    Auto-grading system for student work:
+    - Multiple choice auto-graded instantly
+    - Fill-in-blank with fuzzy matching
+    - Free response questions for manual review
+    - Overall accuracy calculated from rubric
+    - Progress tracking per assignment
+    
+    ### 🔍 Semantic Search
+    Embeddings-powered search:
+    - Search by meaning, not just keywords
+    - Find similar units, words, questions
+    - AI understands context and synonyms
+    - Results ranked by relevance
+    
+    ## Key Documentation
+    
+    ### For Content Creators
+    - [Content Generation Examples](../docs/CONTENT_GENERATION_EXAMPLES.md) - AI prompts and patterns
+    - [Editor Surfaces Guide](../docs/EDITOR_SURFACES_AND_DEDUPLICATION_PLAN.md) - Editor architecture
+    - [Custom Blocks Plan](../docs/CUSTOM_BLOCKS_PLAN.md) - Building custom learning blocks
+    - [Vocabulary Import](../docs/VOCABULARY_IMPORT_GUIDE.md) - Bulk CSV import
+    
+    ### For Developers
+    - [API Documentation](../docs/API.md) - Data models and GraphQL
+    - [DataStore Optimization](../docs/DATASTORE_OPTIMIZATION_CHANGES.md) - Subscription patterns
+    - [Chatbot Tools](../docs/CHATBOT_TOOLS.md) - AI tool implementation
+    - [TypeScript Migration](../docs/TYPESCRIPT_MIGRATION.md) - JS to TS conversion
+    
+    ### For System Admins
+    - [Security Guide](../docs/SECURITY.md) - Auth, permissions, content moderation
+    - [Observability](../docs/OBSERVABILITY_AND_EVENT_REPLAY.md) - Logging and debugging
+    - [Offline Architecture](../docs/OFFLINE_HYBRID_ARCHITECTURE.md) - PWA and sync
+    
+    ## Coming Soon
+    
+    See [ROADMAP.md](../docs/ROADMAP.md) for planned features:
+    - 🌐 Multi-language support (i18n expansion)
+    - 🎮 Gamification system with XP and badges
+    - 📊 Advanced analytics dashboard
+    - 🔄 Real-time collaboration (Yjs integration)
+    - 📱 Mobile app (React Native)

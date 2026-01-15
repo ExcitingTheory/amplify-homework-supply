@@ -258,14 +258,14 @@ const { units, sections, assignments, grades } = studentDashboardData;
 
 ```javascript
 import { seedIndexPageData } from '../.storybook/__mocks__/index-page-examples';
-import { clearMockUnits } from '../.storybook/__mocks__/aws-amplify-datastore';
+// import { clearMockUnits } from '../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
   title: 'Pages/Index',
   component: Index,
   decorators: [
     (Story) => {
-      clearMockUnits(); // Clear between stories
+      // clearMockUnits(); // Clear between stories
       seedIndexPageData('student'); // Load student data
       return <Story />;
     }
@@ -276,7 +276,7 @@ export const StudentDashboard = {};
 export const InstructorDashboard = {
   decorators: [
     (Story) => {
-      clearMockUnits();
+      // clearMockUnits();
       seedIndexPageData('instructor');
       return <Story />;
     }
@@ -285,7 +285,7 @@ export const InstructorDashboard = {
 export const EmptyState = {
   decorators: [
     (Story) => {
-      clearMockUnits();
+      // clearMockUnits();
       seedIndexPageData('empty');
       return <Story />;
     }
@@ -295,7 +295,7 @@ export const EmptyState = {
 
 ## Tips
 
-1. **Always clear before seeding**: Call `clearMockUnits()` before `seedIndexPageData()` to prevent data from previous stories
+<!-- 1. **Always clear before seeding**: Call `clearMockUnits()` before `seedIndexPageData()` to prevent data from previous stories -->
 
 2. **Username must match**: Set mock auth username to match the data:
    - Student: `'student-alice-sub'`
