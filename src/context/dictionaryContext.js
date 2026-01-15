@@ -12,8 +12,6 @@
 import React, { createContext } from "react";
 import { DataStore } from "aws-amplify/datastore";
 import { Question, Word } from "../models"
-import * as tf from '@tensorflow/tfjs';
-import * as use from '@tensorflow-models/universal-sentence-encoder';
 
 
 // Provider and Consumer are connected through their "parent" context
@@ -30,179 +28,6 @@ const DictionaryContext = createContext({
     searching: false,
     setSearching: () => {},
 });
-
-
-function jaroWinklerDistance(s1, s2) {
-    // If the strings are equal, return 1
-    if (s1 === s2) {
-        return 1;
-    }
-
-    // Find the length of the matching prefix up to a maximum of 4 characters
-    let prefixLength = 0;
-    for (let i = 0; i < 4 && s1[i] === s2[i]; i++) {
-        prefixLength++;
-    }
-
-    // Calculate the Jaro distance
-    let m = 0;
-    let t = 0;
-    let s1Matches = new Array(s1.length).fill(false);
-    let s2Matches = new Array(s2.length).fill(false);
-    for (let i = 0; i < s1.length; i++) {
-        let start = Math.max(0, i - Math.floor(Math.max(0, s2.length - s1.length - i - 1) / 2));
-        let end = Math.min(s2.length - 1, i + Math.floor(Math.max(0, s1.length - s2.length - i - 1) / 2));
-        for (let j = start; j <= end; j++) {
-            if (!s2Matches[j] && s1[i] === s2[j]) {
-                s1Matches[i] = true;
-                s2Matches[j] = true;
-                m++;
-                break;
-            }
-        }
-    }
-
-    if (m === 0) {
-        return 0;
-    }
-
-    let jaro = (m / s1.length + m / s2.length + (m - Math.floor((m - t) / 2)) / m) / 3;
-
-    // Calculate the Jaro-Winkler distance
-    let jaroWinkler = jaro + prefixLength * 0.1 * (1 - jaro);
-
-    return jaroWinkler;
-}
-
-const dot = function (a, b) {
-    var hasOwnProperty = Object.prototype.hasOwnProperty;
-    var sum = 0;
-    for (var key in a) {
-        if (hasOwnProperty.call(a, key) && hasOwnProperty.call(b, key)) {
-            sum += a[key] * b[key]
-        }
-    }
-    return sum
-}
-
-const similarity = function (a, b) {
-    var magnitudeA = Math.sqrt(dot(a, a));
-    var magnitudeB = Math.sqrt(dot(b, b));
-    if (magnitudeA && magnitudeB)
-        return dot(a, b) / (magnitudeA * magnitudeB);
-    else return false
-}
-
-
-
-const cosineSimilarityMatrix = function (matrix) {
-    let cosine_similarity_matrix = [];
-    for (let i = 0; i < matrix.length; i++) {
-        let row = [];
-        for (let j = 0; j < i; j++) {
-            row.push(cosine_similarity_matrix[j][i]);
-        }
-        row.push(1);
-        for (let j = (i + 1); j < matrix.length; j++) {
-            row.push(similarity(matrix[i], matrix[j]));
-        }
-        cosine_similarity_matrix.push(row);
-    }
-    return cosine_similarity_matrix;
-}
-
-function memoize(func) {
-    const cache = {};
-
-    return function (...args) {
-        const key = JSON.stringify(args);
-
-        if (cache[key]) {
-            return cache[key];
-        }
-
-        const result = func.apply(this, args);
-        cache[key] = result;
-
-        return result;
-    };
-}
-
-function hasWebGLSupport() {
-    try {
-        const canvas = document.createElement('canvas');
-        return !!(
-            window.WebGLRenderingContext &&
-            (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
-        );
-    } catch (e) {
-        return false;
-    }
-}
-
-const syntacticSimilarity = async (sentences) => {
-    const model = await use.load()
-    const embeddings = await model.embed(sentences)
-    let arr = cosineSimilarityMatrix(embeddings.arraySync())
-    return arr
-}
-
-const syntacticSimilarityWebGl = async (sentences) => {
-    // Load the model
-    const model = await use.load();
-
-    // Embed the sentences using the model
-    const embeddings = await model.embed(sentences);
-
-    // Compute the cosine similarity matrix using WebGL
-    const embeddingsT = embeddings.transpose();
-    const dotProduct = embeddings.matMul(embeddingsT);
-    const norms = embeddings.norm(2, 1, true);
-    const normsT = norms.transpose();
-    const normProduct = norms.matMul(normsT);
-    const similarity = dotProduct.div(normProduct).arraySync();
-
-    // Clean up
-    embeddings.dispose();
-    embeddingsT.dispose();
-    dotProduct.dispose();
-    norms.dispose();
-    normsT.dispose();
-    normProduct.dispose();
-    // model.dispose();
-
-    return similarity;
-}
-
-
-
-const compareSyntacticSimilarity = async (string1, string2) => {
-
-    console.log("compareSyntacticSimilarity", string1, string2)
-
-    if (string1 === string2) {
-        return 1;
-    }
-
-    const sentences = [string1, string2]
-    console.log("sentences", sentences)
-
-    let _syntacticSimilarity
-    let syntacticSimilarityMatrix
-
-    if (hasWebGLSupport()) {
-        console.log("hasWebGLSupport")
-        syntacticSimilarityMatrix = await syntacticSimilarityWebGl(sentences)
-        _syntacticSimilarity = syntacticSimilarityMatrix[0][1]
-    } else {
-        syntacticSimilarityMatrix = await syntacticSimilarity(sentences)
-        _syntacticSimilarity = syntacticSimilarityMatrix[0][1]
-    }
-
-    console.log("_syntacticSimilarity", _syntacticSimilarity)
-
-    return _syntacticSimilarity
-};
 
 // Provider will be exported wrapped in ConfigProvider component.
 const DictionaryProvider = ({ children }) => {
@@ -389,16 +214,6 @@ const DictionaryProvider = ({ children }) => {
         return function cleanup() {
             subscription.unsubscribe();
         };
-    }, []);
-
-    React.useEffect(() => {
-        const setTensorflowBackend = async () => {
-            if (hasWebGLSupport()) {
-                await tf.setBackend('webgl');
-            }
-
-        }
-        setTensorflowBackend()
     }, []);
 
     const contextValue = React.useMemo(() => ({

@@ -1,0 +1,45 @@
+# Amplify ignore file - exclude from deployment
+# See: https://docs.aws.amazon.com/amplify/latest/userguide/build-settings.html
+
+# Dependencies
+node_modules/
+.npm/
+
+# Development cache
+.next/dev/
+.next/cache/webpack/
+.next/cache/turbopack/
+
+# Testing
+cypress/
+.storybook/
+**/*.stories.*
+**/*.story.*
+**/*.mdx
+**/*.test.js
+**/*.test.tsx
+**/*.spec.js
+**/*.spec.tsx
+test/
+coverage/
+
+# Documentation
+docs/
+mocks/
+*.md
+!README.md
+
+# Development files
+.vscode/
+.idea/
+*.log
+.DS_Store
+.env.local
+.env.development.local
+
+# Amplify build artifacts
+amplify/mock-data/
+amplify/#current-cloud-backend/
+
+# Source maps (optional - comment out if you need them in production)
+# **/*.map
