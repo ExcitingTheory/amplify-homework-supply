@@ -22,7 +22,7 @@ import { UnitProvider } from '../../../context/unitContext';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
-  title: 'Editor3/Plugins/YouTubePlugin',
+  title: '🔌 Editor Plugins/YouTube',
   component: YouTubePlugin,
   parameters: {
     layout: 'fullscreen',

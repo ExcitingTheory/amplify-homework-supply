@@ -1,5 +1,6 @@
 // Import page components
 // Note: These are wrapped with MyAuth so we need to provide mock auth context
+import React from 'react';
 import IndexPage from '../../pages/index.js';
 import ProfilePage from '../../pages/profile.js';
 import SectionsPage from '../../pages/sections.js';
@@ -27,7 +28,7 @@ import { FilesProvider } from '../../src/context/fileContext';
  */
 
 const meta = {
-  title: 'Pages/Application Pages',
+  title: '📄 Pages/Application Pages',
   parameters: {
     layout: 'fullscreen',
     nextjs: {
@@ -77,7 +78,7 @@ export default meta;
  */
 export const Index = {
   decorators: [
-    (Story) => {
+    (Story: React.FC) => {
       setMockUser({
         username: 'student-alice-sub',
         userId: 'student-alice-sub',
@@ -95,8 +96,8 @@ export const Index = {
       );
     },
   ],
-  render: () => <IndexPage args={{
-    user: {
+  render: () => <IndexPage
+    user={{
       username: 'student-alice-sub',
       userId: 'student-alice-sub',
       attributes: {
@@ -104,9 +105,9 @@ export const Index = {
         email: 'alice@example.com',
       },
       groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
-    },
-    signOut: () => console.log('Sign out clicked'),
-  }} />,
+    }}
+    signOut={() => console.log('Sign out clicked')}
+  />,
   parameters: {
     docs: {
       description: {
@@ -126,7 +127,7 @@ export const Index = {
  */
 export const Profile = {
   decorators: [
-    (Story) => {
+    (Story: React.FC) => {
       setMockUser({
         username: 'student-alice-sub',
         attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
@@ -155,7 +156,7 @@ export const Profile = {
  */
 export const Sections = {
   decorators: [
-    (Story) => {
+    (Story: React.FC) => {
       setMockUser({
         username: 'student-alice-sub',
         attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
@@ -186,7 +187,7 @@ export const Sections = {
  */
 export const Units = {
   decorators: [
-    (Story) => {
+    (Story: React.FC) => {
       setMockUser({
         username: 'teacher-1',
         attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
@@ -218,7 +219,7 @@ export const Units = {
  */
 export const SectionDetail = {
   decorators: [
-    (Story, context) => {
+    (Story: React.FC, context: any) => {
       setMockUser({
         username: 'teacher-1',
         attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
@@ -236,7 +237,13 @@ export const SectionDetail = {
       return <FilesProvider><Story /></FilesProvider>;
     },
   ],
-  render: () => <SectionDetailPage />,
+  render: () => <SectionDetailPage
+    user={{
+      username: 'teacher-1',
+      attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
+    }}
+    signOut={() => console.log('Sign out clicked')}
+  />,
   parameters: {
     nextRouter: {
       pathname: '/section/[id]',
@@ -258,7 +265,7 @@ export const SectionDetail = {
  */
 export const SectionDetailStudent = {
   decorators: [
-    (Story, context) => {
+    (Story: React.FC, context: any) => {
       setMockUser({
         username: 'student-alice-sub',
         attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' },
@@ -276,7 +283,13 @@ export const SectionDetailStudent = {
       return <FilesProvider><Story /></FilesProvider>;
     },
   ],
-  render: () => <SectionDetailPage />,
+  render: () => <SectionDetailPage
+    user={{
+      username: 'student-alice-sub',
+      attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' },
+    }}
+    signOut={() => console.log('Sign out clicked')}
+  />,
   parameters: {
     nextRouter: {
       pathname: '/section/[id]',
@@ -303,7 +316,7 @@ export const SectionDetailStudent = {
  */
 export const UnitDetail = {
   decorators: [
-    (Story) => {
+    (Story: React.FC) => {
       setMockUser({
         username: 'teacher-1',
         attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
@@ -339,7 +352,7 @@ export const UnitDetail = {
  */
 export const Workbook = {
   decorators: [
-    (Story) => {
+    (Story: React.FC) => {
       setMockUser({
         username: 'student-alice-sub',
         attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
@@ -370,7 +383,7 @@ export const Workbook = {
  */
 export const IndexNoSections = {
   decorators: [
-    (Story) => {
+    (Story: React.FC) => {
       setMockUser({
         username: 'new-student',
         attributes: { sub: 'new-student', email: 'new.student@example.com' },
@@ -380,10 +393,10 @@ export const IndexNoSections = {
       return <FilesProvider><Story /></FilesProvider>;
     },
   ],
-  render: () => <IndexPage args={{
-    user: { username: 'new-student', attributes: { sub: 'new-student', email: 'new.student@example.com' } },
-    signOut: () => console.log('Sign out'),
-  }} />,
+  render: () => <IndexPage
+    user={{ username: 'new-student', attributes: { sub: 'new-student', email: 'new.student@example.com' } }}
+    signOut={() => console.log('Sign out')}
+  />,
   parameters: {
     docs: {
       description: {
@@ -400,7 +413,7 @@ export const IndexNoSections = {
  */
 export const UnitsEmptyState = {
   decorators: [
-    (Story) => {
+    (Story: React.FC) => {
       setMockUser({
         username: 'new-teacher',
         attributes: { sub: 'new-teacher', email: 'new.teacher@example.com' },
@@ -427,7 +440,7 @@ export const UnitsEmptyState = {
  */
 export const SectionsEmptyState = {
   decorators: [
-    (Story) => {
+    (Story: React.FC) => {
       setMockUser({
         username: 'new-student',
         attributes: { sub: 'new-student', email: 'new.student@example.com' },
@@ -454,7 +467,7 @@ export const SectionsEmptyState = {
  */
 export const ProfilePasswordChange = {
   decorators: [
-    (Story) => {
+    (Story: React.FC) => {
       setMockUser({
         username: 'student-alice-sub',
         attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
@@ -480,7 +493,7 @@ export const ProfilePasswordChange = {
  */
 export const WorkbookTimedExercise = {
   decorators: [
-    (Story) => {
+    (Story: React.FC) => {
       setMockUser({
         username: 'student-alice-sub',
         attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
@@ -511,7 +524,7 @@ export const WorkbookTimedExercise = {
  */
 export const IndexAssignments = {
   decorators: [
-    (Story) => {
+    (Story: React.FC) => {
       setMockUser({
         username: 'student-alice-sub',
         attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
@@ -521,14 +534,14 @@ export const IndexAssignments = {
       return <FilesProvider><Story /></FilesProvider>;
     },
   ],
-  render: () => <IndexPage args={{
-    user: {
+  render: () => <IndexPage
+    user={{
       username: 'student-alice-sub',
       attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
       groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
-    },
-    signOut: () => console.log('Sign out'),
-  }} />,
+    }}
+    signOut={() => console.log('Sign out')}
+  />,
   parameters: {
     docs: {
       description: {

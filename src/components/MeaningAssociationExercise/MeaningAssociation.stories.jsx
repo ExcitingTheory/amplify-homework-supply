@@ -7,7 +7,7 @@ import DictionaryContext from '../../context/dictionaryContext';
 import UnitContext from '../../context/unitContext';
 
 export default {
-  title: 'Exercises/MeaningAssociation',
+  title: '🧩 Components/Meaning Association Exercise',
   parameters: {
     layout: 'padded',
   },

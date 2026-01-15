@@ -15,7 +15,7 @@ const generateWaveformData = (length = 100) => {
 };
 
 export default {
-  title: 'Components/RecordingStudio2',
+  title: '🎙️ Recording Audio/Recording Studio (Legacy)',
   component: RecordingStudio2,
   parameters: {
     layout: 'centered',

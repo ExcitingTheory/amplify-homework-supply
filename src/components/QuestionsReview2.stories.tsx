@@ -37,7 +37,7 @@ const createQuestionLoader = (documentId: string, questions: any[]) => {
 };
 
 const meta: Meta<typeof QuestionsReview2> = {
-    title: 'Components/QuestionsReview2',
+    title: '📁 Managing Content/Questions Review',
     component: QuestionsReview2,
     parameters: {
         layout: 'padded',

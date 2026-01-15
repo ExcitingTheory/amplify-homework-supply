@@ -23,7 +23,7 @@ import { UnitProvider } from '../../../context/unitContext';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
-  title: 'Editor3/Plugins/ColorPicker',
+  title: '🔌 Editor Plugins/Color Picker',
   component: ColorPicker,
   parameters: {
     layout: 'centered',

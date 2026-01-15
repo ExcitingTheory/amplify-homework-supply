@@ -8,8 +8,6 @@ const config: StorybookConfig = {
     "../src/stories/GettingStarted.mdx",
     "../src/stories/Onboarding.mdx",
     "../src/stories/TechnicalOverview.mdx",
-    "../src/stories/Configure.mdx",
-    "../src/**/*.mdx",
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)",
     "../pages/**/*.stories.@(js|jsx|mjs|ts|tsx)"
   ],
@@ -18,8 +16,9 @@ const config: StorybookConfig = {
     "@storybook/addon-vitest",
     "@storybook/addon-a11y",
     "@storybook/addon-links",
-    "@storybook/addon-docs"
+    "@storybook/addon-docs",
     // "@storybook/addon-onboarding" // Disabled - using custom branding instead
+    "./code/myOnboarding"
   ],
   "framework": {
     name: "@storybook/nextjs",
@@ -51,6 +50,20 @@ const config: StorybookConfig = {
     const mocksDir = path.resolve(process.cwd(), '.storybook/__mocks__');
     const storybookComponentsDir = path.resolve(process.cwd(), '.storybook/components');
     
+    // Configure externals to prevent bundling Node.js built-in modules and server-side dependencies
+    config.externals = {
+      ...config.externals,
+      'child_process': 'commonjs child_process',
+      'worker_threads': 'commonjs worker_threads',
+      'inspector': 'commonjs inspector',
+      '@swc/wasm': 'commonjs @swc/wasm',
+      'uglify-js': 'commonjs uglify-js',
+      'esbuild': 'commonjs esbuild',
+      'webpack': 'commonjs webpack',
+      'terser-webpack-plugin': 'commonjs terser-webpack-plugin',
+      'jest-worker': 'commonjs jest-worker',
+    };
+    
     // Add AWS Amplify mock aliases
     const mockAliases = {
       'aws-amplify$': path.join(mocksDir, 'aws-amplify.js'),
@@ -79,11 +92,36 @@ const config: StorybookConfig = {
       ...config.resolve.alias,
     };
     
+    // Add fallback for Node.js core modules
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+      crypto: false,
+      stream: false,
+      http: false,
+      https: false,
+      zlib: false,
+      child_process: false,
+      worker_threads: false,
+      inspector: false,
+      module: false,
+    };
+    
     // Ensure node_modules are resolved
     config.resolve.modules = [
       ...(config.resolve.modules || []),
       'node_modules',
       path.resolve(process.cwd(), 'node_modules'),
+    ];
+    
+    // Add ignore plugin to suppress warnings about optional dependencies
+    config.ignoreWarnings = [
+      /Critical dependency: the request of a dependency is an expression/,
+      /Can't resolve '(child_process|worker_threads|inspector)'/,
+      /Can't resolve '@swc/,
+      /Can't resolve 'uglify-js'/,
+      /Module not found.*@swc/,
     ];
     
     console.log('[Storybook Config] Mock aliases configured:', Object.keys(mockAliases));

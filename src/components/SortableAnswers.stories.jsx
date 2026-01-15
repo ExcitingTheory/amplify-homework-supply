@@ -2,7 +2,7 @@ import React from 'react';
 import SortableAnswers from './SortableAnswers';
 
 export default {
-  title: 'Components/SortableAnswers',
+  title: '🧩 Components/Sortable Answers',
   component: SortableAnswers,
   parameters: {
     layout: 'padded',

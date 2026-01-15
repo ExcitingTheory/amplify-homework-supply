@@ -2,7 +2,7 @@ import React from 'react';
 import SafeHydrate from './SafeHydrate';
 
 export default {
-  title: 'Components/SafeHydrate',
+  title: '🧩 Components/Safe Hydrate',
   component: SafeHydrate,
   parameters: {
     layout: 'centered',

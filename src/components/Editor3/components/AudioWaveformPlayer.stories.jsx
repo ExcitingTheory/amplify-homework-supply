@@ -12,7 +12,7 @@ import { MOCK_AUDIO_BASE64, mockWaveformData } from '../../../../.storybook/__mo
 
 
 export default {
-  title: 'Components/AudioWaveformPlayer',
+  title: '🧩 Components/Audio Waveform Player',
   component: AudioWaveformPlayer,
   parameters: {
     layout: 'padded',

@@ -5,7 +5,7 @@ import ImageMaskEditor from './ImageMaskEditor';
 import { EnhancedImageGenerator, EnhancedAudioGenerator } from './EnhancedGenerators';
 
 export default {
-    title: 'Components/Enhanced Generation',
+    title: '💬 AI Assistant/Content Generation',
     parameters: {
         layout: 'centered',
         docs: {

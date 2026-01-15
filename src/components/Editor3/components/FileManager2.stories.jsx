@@ -6,7 +6,7 @@ import FilesContext, { FilesProvider } from '../../../context/fileContext';
 import UnitContext from '../../../context/unitContext';
 import SettingsContext from '../../../context/settingsContext';
 export default {
-  title: 'Editor/FileManager2',
+  title: '📁 Managing Content/File Manager',
   component: FileManager2,
   parameters: {
     layout: 'padded',

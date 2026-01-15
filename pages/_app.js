@@ -45,15 +45,15 @@ const clientSideEmotionCache = createEmotionCache();
 
 // investigate:
 // remote console logging to capture errors in production
-// const logger = new Logger('CloudWatchLogger');
-// const AmazonCloudWatchLogsProvider = new AWSCloudWatchProvider({
-//   logGroupName: 'amplify-homework-supply-logs',
-//   logStreamName: `frontend-${new Date().toISOString().split('T')[0]}`, // Daily log streams
-//   region: amplifyconfig.aws_project_region,
-//   level: 'ERROR', // Log only errors
-//   logger: logger,
-// });
-// Amplify.addPluggable(new AmazonCloudWatchLogsProvider());
+const logger = new Logger('CloudWatchLogger');
+const AmazonCloudWatchLogsProvider = new AWSCloudWatchProvider({
+  logGroupName: 'amplify-homework-supply-logs',
+  logStreamName: `frontend-${new Date().toISOString().split('T')[0]}`, // Daily log streams
+  region: amplifyconfig.aws_project_region,
+  level: 'ERROR', // Log only errors
+  logger: logger,
+});
+Amplify.addPluggable(new AmazonCloudWatchLogsProvider());
 
 
 export default function MyApp(props) {

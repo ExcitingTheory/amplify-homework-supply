@@ -76,7 +76,7 @@ seedMockWords([
 ]);
 
 export default {
-  title: 'Components/Answer/Audio and Drawing',
+  title: '🔌 Editor Plugins/Answer (Audio & Drawing)',
   component: AnswerPlugin,
   parameters: {
     layout: 'fullscreen',
