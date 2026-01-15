@@ -6,12 +6,11 @@ import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
 import MainToolbar from '../src/components/MainToolbar';
 
+/**
+ * Privacy Policy page that displays the privacy policy information.
+ * This page is accessible to all users and does not require authentication.
+ */
 function PrivacyPolicy() {
-  /**
-   * Privacy Policy page that displays the privacy policy information.
-   * This page is accessible to all users and does not require authentication.
-   */
-
   return (
     <>
       <AppBar
@@ -50,7 +49,7 @@ function PrivacyPolicy() {
             </Typography>
 
             <Typography variant="body2" color="text.secondary" paragraph>
-              Last updated: {new Date().toLocaleDateString()}
+              Last updated: January 15, 2026
             </Typography>
 
             <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4, mb: 2 }}>
