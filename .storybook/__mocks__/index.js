@@ -43,3 +43,5 @@ export const MOCK_DATA = {
   QUESTIONS: MOCK_QUESTIONS,
   CHAT: MOCK_CHAT_STREAMS,
 };
+
+export const MOCK_URLS = MOCK_URLS

@@ -63,21 +63,21 @@ function messageToStreamEvents(message) {
       });
       
       // Stream tool arguments
-      const argsStr = JSON.stringify(part.input || {});
-      events.push({
-        toolCallId: part.toolCallId,
-        argsTextDelta: argsStr
-      });
+      // const argsStr = JSON.stringify(part.input || {});
+      // events.push({
+      //   toolCallId: part.toolCallId,
+      //   argsTextDelta: argsStr
+      // });
       
-      // Tool result (if available)
-      if (part.state === 'output-available' && part.output) {
-        events.push({
-          type: 'tool-result',
-          toolCallId: part.toolCallId,
-          toolName: toolName,
-          args: part.input || {},
-          result: part.output
-        });
+      // // Tool result (if available)
+      // if (part.state === 'output-available' && part.output) {
+      //   events.push({
+      //     type: 'tool-result',
+      //     toolCallId: part.toolCallId,
+      //     toolName: toolName,
+      //     args: part.input || {},
+      //     result: part.output
+      //   });
       }
     }
   }

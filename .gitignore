@@ -20,6 +20,15 @@ yarn-error.log*
 
 amplify/mock-api-resources
 
+
+
+debug-storybook.log
+
+
+.env
+*storybook.log
+storybook-static
+
 #amplify-do-not-edit-begin
 amplify/\#current-cloud-backend
 amplify/.config/local-*
@@ -41,11 +50,3 @@ amplifytools.xcconfig
 .secret-*
 **.sample
 #amplify-do-not-edit-end
-
-
-debug-storybook.log
-
-
-.env
-*storybook.log
-storybook-static

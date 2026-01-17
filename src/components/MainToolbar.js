@@ -3,8 +3,7 @@
  * @category Components
  * @description MainToolbar component
  * 
- * MainToolbar component for the app.
- * 
+ * MainToolbar component for the app
  * @todo Add a dropdown for the user.
  * @todo Add a dropdown for the settings.
  * @todo Add a dropdown for the help.
