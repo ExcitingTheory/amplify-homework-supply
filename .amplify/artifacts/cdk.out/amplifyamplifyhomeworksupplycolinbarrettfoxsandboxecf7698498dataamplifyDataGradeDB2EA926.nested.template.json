@@ -1,0 +1,2221 @@
+{
+ "Parameters": {
+  "DynamoDBModelTableReadIOPS": {
+   "Type": "Number",
+   "Default": 5,
+   "Description": "The number of read IOPS the table should support."
+  },
+  "DynamoDBModelTableWriteIOPS": {
+   "Type": "Number",
+   "Default": 5,
+   "Description": "The number of write IOPS the table should support."
+  },
+  "DynamoDBBillingMode": {
+   "Type": "String",
+   "Default": "PAY_PER_REQUEST",
+   "AllowedValues": [
+    "PAY_PER_REQUEST",
+    "PROVISIONED"
+   ],
+   "Description": "Configure @model types to create DynamoDB tables with PAY_PER_REQUEST or PROVISIONED billing modes."
+  },
+  "DynamoDBEnablePointInTimeRecovery": {
+   "Type": "String",
+   "Default": "false",
+   "AllowedValues": [
+    "true",
+    "false"
+   ],
+   "Description": "Whether to enable Point in Time Recovery on the table."
+  },
+  "DynamoDBEnableServerSideEncryption": {
+   "Type": "String",
+   "Default": "true",
+   "AllowedValues": [
+    "true",
+    "false"
+   ],
+   "Description": "Enable server side encryption powered by KMS."
+  },
+  "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataAmplifyTableManagerNestedStackAmplifyTableManagerNestedStackResourceCA710B92Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplify66A0D31E": {
+   "Type": "String"
+  },
+  "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId": {
+   "Type": "String"
+  },
+  "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName": {
+   "Type": "String"
+  },
+  "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthauthenticatedUserRole39740107Ref": {
+   "Type": "String"
+  },
+  "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthunauthenticatedUserRole98532356Ref": {
+   "Type": "String"
+  },
+  "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthIdentityPool545C855DRef": {
+   "Type": "String"
+  }
+ },
+ "Conditions": {
+  "HasEnvironmentParameter": {
+   "Fn::Not": [
+    {
+     "Fn::Equals": [
+      "NONE",
+      "NONE"
+     ]
+    }
+   ]
+  },
+  "ShouldUsePayPerRequestBilling": {
+   "Fn::Equals": [
+    {
+     "Ref": "DynamoDBBillingMode"
+    },
+    "PAY_PER_REQUEST"
+   ]
+  },
+  "ShouldUsePointInTimeRecovery": {
+   "Fn::Equals": [
+    {
+     "Ref": "DynamoDBEnablePointInTimeRecovery"
+    },
+    "true"
+   ]
+  },
+  "CDKMetadataAvailable": {
+   "Fn::Or": [
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "af-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-3"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-4"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-northwest-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-2"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "il-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "sa-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-1"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Equals": [
+      {
+       "Ref": "AWS::Region"
+      },
+      "us-west-2"
+     ]
+    }
+   ]
+  }
+ },
+ "Resources": {
+  "GradeTable": {
+   "Type": "Custom::AmplifyDynamoDBTable",
+   "Properties": {
+    "ServiceToken": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataAmplifyTableManagerNestedStackAmplifyTableManagerNestedStackResourceCA710B92Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplify66A0D31E"
+    },
+    "tableName": {
+     "Fn::Join": [
+      "",
+      [
+       "Grade-",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+       },
+       "-NONE"
+      ]
+     ]
+    },
+    "attributeDefinitions": [
+     {
+      "attributeName": "id",
+      "attributeType": "S"
+     },
+     {
+      "attributeName": "unitID",
+      "attributeType": "S"
+     }
+    ],
+    "keySchema": [
+     {
+      "attributeName": "id",
+      "keyType": "HASH"
+     }
+    ],
+    "globalSecondaryIndexes": [
+     {
+      "indexName": "gsi-Unit.grades",
+      "keySchema": [
+       {
+        "attributeName": "unitID",
+        "keyType": "HASH"
+       }
+      ],
+      "projection": {
+       "projectionType": "ALL"
+      },
+      "provisionedThroughput": {
+       "Fn::If": [
+        "ShouldUsePayPerRequestBilling",
+        {
+         "Ref": "AWS::NoValue"
+        },
+        {
+         "ReadCapacityUnits": {
+          "Ref": "DynamoDBModelTableReadIOPS"
+         },
+         "WriteCapacityUnits": {
+          "Ref": "DynamoDBModelTableWriteIOPS"
+         }
+        }
+       ]
+      }
+     }
+    ],
+    "provisionedThroughput": {
+     "Fn::If": [
+      "ShouldUsePayPerRequestBilling",
+      {
+       "Ref": "AWS::NoValue"
+      },
+      {
+       "ReadCapacityUnits": {
+        "Ref": "DynamoDBModelTableReadIOPS"
+       },
+       "WriteCapacityUnits": {
+        "Ref": "DynamoDBModelTableWriteIOPS"
+       }
+      }
+     ]
+    },
+    "sseSpecification": {
+     "sseEnabled": false
+    },
+    "streamSpecification": {
+     "streamViewType": "NEW_AND_OLD_IMAGES"
+    },
+    "deletionProtectionEnabled": false,
+    "allowDestructiveGraphqlSchemaUpdates": true,
+    "replaceTableUponGsiUpdate": true,
+    "pointInTimeRecoverySpecification": {
+     "Fn::If": [
+      "ShouldUsePointInTimeRecovery",
+      {
+       "PointInTimeRecoveryEnabled": true
+      },
+      {
+       "Ref": "AWS::NoValue"
+      }
+     ]
+    },
+    "billingMode": {
+     "Fn::If": [
+      "ShouldUsePayPerRequestBilling",
+      "PAY_PER_REQUEST",
+      {
+       "Ref": "AWS::NoValue"
+      }
+     ]
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/GradeTable/Default/Default"
+   }
+  },
+  "GradeIAMRole46B43565": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "appsync.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Policies": [
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": [
+          "dynamodb:BatchGetItem",
+          "dynamodb:BatchWriteItem",
+          "dynamodb:PutItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:GetItem",
+          "dynamodb:Scan",
+          "dynamodb:Query",
+          "dynamodb:UpdateItem",
+          "dynamodb:ConditionCheckItem",
+          "dynamodb:DescribeTable",
+          "dynamodb:GetRecords",
+          "dynamodb:GetShardIterator"
+         ],
+         "Effect": "Allow",
+         "Resource": [
+          {
+           "Fn::Sub": [
+            "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${tablename}",
+            {
+             "tablename": {
+              "Fn::Join": [
+               "",
+               [
+                "Grade-",
+                {
+                 "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+                },
+                "-NONE"
+               ]
+              ]
+             }
+            }
+           ]
+          },
+          {
+           "Fn::Sub": [
+            "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${tablename}/*",
+            {
+             "tablename": {
+              "Fn::Join": [
+               "",
+               [
+                "Grade-",
+                {
+                 "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+                },
+                "-NONE"
+               ]
+              ]
+             }
+            }
+           ]
+          }
+         ]
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "DynamoDBAccess"
+     }
+    ],
+    "RoleName": {
+     "Fn::Join": [
+      "",
+      [
+       "GradeIAMRolef2e93b-",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+       },
+       "-NONE"
+      ]
+     ]
+    },
+    "Tags": [
+     {
+      "Key": "amplify:deployment-type",
+      "Value": "sandbox"
+     },
+     {
+      "Key": "amplify:friendly-name",
+      "Value": "amplifyData"
+     },
+     {
+      "Key": "created-by",
+      "Value": "amplify"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/GradeIAMRole/Resource"
+   }
+  },
+  "GradeDataSource": {
+   "Type": "AWS::AppSync::DataSource",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DynamoDBConfig": {
+     "AwsRegion": {
+      "Ref": "AWS::Region"
+     },
+     "TableName": {
+      "Fn::Select": [
+       1,
+       {
+        "Fn::Split": [
+         "/",
+         {
+          "Fn::Select": [
+           5,
+           {
+            "Fn::Split": [
+             ":",
+             {
+              "Fn::GetAtt": [
+               "GradeTable",
+               "TableArn"
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    },
+    "Name": "GradeTable",
+    "ServiceRoleArn": {
+     "Fn::GetAtt": [
+      "GradeIAMRole46B43565",
+      "Arn"
+     ]
+    },
+    "Type": "AMAZON_DYNAMODB"
+   },
+   "DependsOn": [
+    "GradeIAMRole46B43565"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/GradeDataSource/Resource"
+   }
+  },
+  "QuerygetGradeauth0FunctionQuerygetGradeauth0FunctionAppSyncFunctionD50B03A7": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "QuerygetGradeauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/cb5efc48e2167c89f2e65c1a40a52d5e59a315fe9dfebaaece49d66fb34bbace.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/QuerygetGradeauth0Function/QuerygetGradeauth0Function.AppSyncFunction"
+   }
+  },
+  "QuerygetGradepostAuth0FunctionQuerygetGradepostAuth0FunctionAppSyncFunction2CA277DC": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "QuerygetGradepostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/QuerygetGradepostAuth0Function/QuerygetGradepostAuth0Function.AppSyncFunction"
+   }
+  },
+  "QueryGetGradeDataResolverFnQueryGetGradeDataResolverFnAppSyncFunction08DFE972": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "GradeDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "QueryGetGradeDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/08f4d557693d96c1a4efba0f9dc91330e4b19772fd5477c156468843e3d9cb5e.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/4c6a2d29f01c6091bd1d9afe16e5849d456c96f17c3b215938c8067399532719.vtl"
+    }
+   },
+   "DependsOn": [
+    "GradeDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/QueryGetGradeDataResolverFn/QueryGetGradeDataResolverFn.AppSyncFunction"
+   }
+  },
+  "GetGradeResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "FieldName": "getGrade",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "QuerygetGradeauth0FunctionQuerygetGradeauth0FunctionAppSyncFunctionD50B03A7",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "QuerygetGradepostAuth0FunctionQuerygetGradepostAuth0FunctionAppSyncFunction2CA277DC",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "QueryGetGradeDataResolverFnQueryGetGradeDataResolverFnAppSyncFunction08DFE972",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Query\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"getGrade\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+       {
+        "Fn::Select": [
+         1,
+         {
+          "Fn::Split": [
+           "/",
+           {
+            "Fn::Select": [
+             5,
+             {
+              "Fn::Split": [
+               ":",
+               {
+                "Fn::GetAtt": [
+                 "GradeTable",
+                 "TableArn"
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthauthenticatedUserRole39740107Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthunauthenticatedUserRole98532356Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthIdentityPool545C855DRef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Query"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/queryGetGradeResolver"
+   }
+  },
+  "QuerylistGradesauth0FunctionQuerylistGradesauth0FunctionAppSyncFunctionC236545A": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "QuerylistGradesauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/cb5efc48e2167c89f2e65c1a40a52d5e59a315fe9dfebaaece49d66fb34bbace.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/QuerylistGradesauth0Function/QuerylistGradesauth0Function.AppSyncFunction"
+   }
+  },
+  "QuerylistGradespostAuth0FunctionQuerylistGradespostAuth0FunctionAppSyncFunction741B2399": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "QuerylistGradespostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/QuerylistGradespostAuth0Function/QuerylistGradespostAuth0Function.AppSyncFunction"
+   }
+  },
+  "QueryListGradesDataResolverFnQueryListGradesDataResolverFnAppSyncFunction66C85310": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "GradeDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "QueryListGradesDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/9fcbe070ecd3023c5bf5b966fa9584757db9762eef123bad0820bd87591b2174.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/cc01911d0269d4080ea57505dc445dfc315ef7ad85d3d9d4ea1357858bff451d.vtl"
+    }
+   },
+   "DependsOn": [
+    "GradeDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/QueryListGradesDataResolverFn/QueryListGradesDataResolverFn.AppSyncFunction"
+   }
+  },
+  "ListGradeResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "FieldName": "listGrades",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "QuerylistGradesauth0FunctionQuerylistGradesauth0FunctionAppSyncFunctionC236545A",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "QuerylistGradespostAuth0FunctionQuerylistGradespostAuth0FunctionAppSyncFunction741B2399",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "QueryListGradesDataResolverFnQueryListGradesDataResolverFnAppSyncFunction66C85310",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Query\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"listGrades\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+       {
+        "Fn::Select": [
+         1,
+         {
+          "Fn::Split": [
+           "/",
+           {
+            "Fn::Select": [
+             5,
+             {
+              "Fn::Split": [
+               ":",
+               {
+                "Fn::GetAtt": [
+                 "GradeTable",
+                 "TableArn"
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthauthenticatedUserRole39740107Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthunauthenticatedUserRole98532356Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthIdentityPool545C855DRef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Query"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/queryListGradesResolver"
+   }
+  },
+  "MutationcreateGradeinit0FunctionMutationcreateGradeinit0FunctionAppSyncFunction2821D7DF": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationcreateGradeinit0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/a183ddccbd956316c38ef97177b8f088ef0826f62023323f5ae6053d348ccffc.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/MutationcreateGradeinit0Function/MutationcreateGradeinit0Function.AppSyncFunction"
+   }
+  },
+  "MutationcreateGradeauth0FunctionMutationcreateGradeauth0FunctionAppSyncFunction0485CC94": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationcreateGradeauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/7520bc4243134de12d50a50868d3b26c0cea15134cd0cab7861698f2cc296d3c.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/MutationcreateGradeauth0Function/MutationcreateGradeauth0Function.AppSyncFunction"
+   }
+  },
+  "MutationcreateGradepostAuth0FunctionMutationcreateGradepostAuth0FunctionAppSyncFunctionDAF3946F": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationcreateGradepostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/MutationcreateGradepostAuth0Function/MutationcreateGradepostAuth0Function.AppSyncFunction"
+   }
+  },
+  "MutationCreateGradeDataResolverFnMutationCreateGradeDataResolverFnAppSyncFunction4D43EF59": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "GradeDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationCreateGradeDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/07ac0f4266218d3bf95eb2d716f897ea3ad7cc50822214d3d4ffb29a7c3e667b.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/f4a52b72209a9dfa197b5e7367a5c378c5bb86de6e29ddd9e48b49a3fe54b249.vtl"
+    }
+   },
+   "DependsOn": [
+    "GradeDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/MutationCreateGradeDataResolverFn/MutationCreateGradeDataResolverFn.AppSyncFunction"
+   }
+  },
+  "CreateGradeResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "FieldName": "createGrade",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "MutationcreateGradeinit0FunctionMutationcreateGradeinit0FunctionAppSyncFunction2821D7DF",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationcreateGradeauth0FunctionMutationcreateGradeauth0FunctionAppSyncFunction0485CC94",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationcreateGradepostAuth0FunctionMutationcreateGradepostAuth0FunctionAppSyncFunctionDAF3946F",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationCreateGradeDataResolverFnMutationCreateGradeDataResolverFnAppSyncFunction4D43EF59",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Mutation\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"createGrade\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+       {
+        "Fn::Select": [
+         1,
+         {
+          "Fn::Split": [
+           "/",
+           {
+            "Fn::Select": [
+             5,
+             {
+              "Fn::Split": [
+               ":",
+               {
+                "Fn::GetAtt": [
+                 "GradeTable",
+                 "TableArn"
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthauthenticatedUserRole39740107Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthunauthenticatedUserRole98532356Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthIdentityPool545C855DRef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Mutation"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/mutationCreateGradeResolver"
+   }
+  },
+  "MutationupdateGradeinit0FunctionMutationupdateGradeinit0FunctionAppSyncFunction17816F87": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationupdateGradeinit0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/06db846fd14e6fc371f22b12b5545ba8e2dbfeda85d8c8d586c71c282166657b.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/MutationupdateGradeinit0Function/MutationupdateGradeinit0Function.AppSyncFunction"
+   }
+  },
+  "MutationupdateGradeauth0FunctionMutationupdateGradeauth0FunctionAppSyncFunction746A0B12": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "GradeDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationupdateGradeauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/1f5fed297da9c32ae3af922bf3a38ccf23b956078887d16891ec06c20c64722c.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/e2270f6057b117d4fb011f50a89341bac8cf129a0c74a64582b2d0e6a2e36909.vtl"
+    }
+   },
+   "DependsOn": [
+    "GradeDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/MutationupdateGradeauth0Function/MutationupdateGradeauth0Function.AppSyncFunction"
+   }
+  },
+  "MutationupdateGradepostAuth0FunctionMutationupdateGradepostAuth0FunctionAppSyncFunction5A9C0A7D": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationupdateGradepostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/MutationupdateGradepostAuth0Function/MutationupdateGradepostAuth0Function.AppSyncFunction"
+   }
+  },
+  "MutationUpdateGradeDataResolverFnMutationUpdateGradeDataResolverFnAppSyncFunctionAD93081E": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "GradeDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationUpdateGradeDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/474bf0776ec2164a13191d1a0a9e057154931e4918fea5086f49850d02a5371b.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/f4a52b72209a9dfa197b5e7367a5c378c5bb86de6e29ddd9e48b49a3fe54b249.vtl"
+    }
+   },
+   "DependsOn": [
+    "GradeDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/MutationUpdateGradeDataResolverFn/MutationUpdateGradeDataResolverFn.AppSyncFunction"
+   }
+  },
+  "UpdateGradeResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "FieldName": "updateGrade",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "MutationupdateGradeinit0FunctionMutationupdateGradeinit0FunctionAppSyncFunction17816F87",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationupdateGradeauth0FunctionMutationupdateGradeauth0FunctionAppSyncFunction746A0B12",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationupdateGradepostAuth0FunctionMutationupdateGradepostAuth0FunctionAppSyncFunction5A9C0A7D",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationUpdateGradeDataResolverFnMutationUpdateGradeDataResolverFnAppSyncFunctionAD93081E",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Mutation\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"updateGrade\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+       {
+        "Fn::Select": [
+         1,
+         {
+          "Fn::Split": [
+           "/",
+           {
+            "Fn::Select": [
+             5,
+             {
+              "Fn::Split": [
+               ":",
+               {
+                "Fn::GetAtt": [
+                 "GradeTable",
+                 "TableArn"
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthauthenticatedUserRole39740107Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthunauthenticatedUserRole98532356Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthIdentityPool545C855DRef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Mutation"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/mutationUpdateGradeResolver"
+   }
+  },
+  "MutationdeleteGradeauth0FunctionMutationdeleteGradeauth0FunctionAppSyncFunction0DE3FCEF": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "GradeDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationdeleteGradeauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/1f5fed297da9c32ae3af922bf3a38ccf23b956078887d16891ec06c20c64722c.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/30c0eb2742fee58d98334b204c8878f416a1ac3a5de78960b5232996b72ecd9b.vtl"
+    }
+   },
+   "DependsOn": [
+    "GradeDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/MutationdeleteGradeauth0Function/MutationdeleteGradeauth0Function.AppSyncFunction"
+   }
+  },
+  "MutationdeleteGradepostAuth0FunctionMutationdeleteGradepostAuth0FunctionAppSyncFunctionEEF9AC25": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationdeleteGradepostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/MutationdeleteGradepostAuth0Function/MutationdeleteGradepostAuth0Function.AppSyncFunction"
+   }
+  },
+  "MutationDeleteGradeDataResolverFnMutationDeleteGradeDataResolverFnAppSyncFunction3939CBF3": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Fn::GetAtt": [
+      "GradeDataSource",
+      "Name"
+     ]
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "MutationDeleteGradeDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/4f7907d1209a2c9953a0c053df402c634e359546d70c7cc5c2e8e21ea734880f.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/f4a52b72209a9dfa197b5e7367a5c378c5bb86de6e29ddd9e48b49a3fe54b249.vtl"
+    }
+   },
+   "DependsOn": [
+    "GradeDataSource"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/MutationDeleteGradeDataResolverFn/MutationDeleteGradeDataResolverFn.AppSyncFunction"
+   }
+  },
+  "DeleteGradeResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "FieldName": "deleteGrade",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "MutationdeleteGradeauth0FunctionMutationdeleteGradeauth0FunctionAppSyncFunction0DE3FCEF",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationdeleteGradepostAuth0FunctionMutationdeleteGradepostAuth0FunctionAppSyncFunctionEEF9AC25",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "MutationDeleteGradeDataResolverFnMutationDeleteGradeDataResolverFnAppSyncFunction3939CBF3",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Mutation\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"deleteGrade\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+       {
+        "Fn::Select": [
+         1,
+         {
+          "Fn::Split": [
+           "/",
+           {
+            "Fn::Select": [
+             5,
+             {
+              "Fn::Split": [
+               ":",
+               {
+                "Fn::GetAtt": [
+                 "GradeTable",
+                 "TableArn"
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthauthenticatedUserRole39740107Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthunauthenticatedUserRole98532356Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthIdentityPool545C855DRef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Mutation"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/mutationDeleteGradeResolver"
+   }
+  },
+  "SubscriptiononCreateGradeauth0FunctionSubscriptiononCreateGradeauth0FunctionAppSyncFunction1408D15A": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptiononCreateGradeauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/6fe1962f58cfd6abcc999561e4db08b5cd427dd8e2aaf14b73db8d66e7e45c72.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/SubscriptiononCreateGradeauth0Function/SubscriptiononCreateGradeauth0Function.AppSyncFunction"
+   }
+  },
+  "SubscriptiononCreateGradepostAuth0FunctionSubscriptiononCreateGradepostAuth0FunctionAppSyncFunctionF51A67B3": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptiononCreateGradepostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/SubscriptiononCreateGradepostAuth0Function/SubscriptiononCreateGradepostAuth0Function.AppSyncFunction"
+   }
+  },
+  "SubscriptionOnCreateGradeDataResolverFnSubscriptionOnCreateGradeDataResolverFnAppSyncFunctionEF3DE289": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptionOnCreateGradeDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/fe3c43ada4b9d681a5e2312663ef7a73386424d73b73e51f8e2e9d4b50f7c502.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/e0cff47fb007f0bbf2a4e43ca256d6aa7ec109821769fd79fa7c5e83f0e7f9fc.vtl"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/SubscriptionOnCreateGradeDataResolverFn/SubscriptionOnCreateGradeDataResolverFn.AppSyncFunction"
+   }
+  },
+  "SubscriptiononCreateGradeResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "FieldName": "onCreateGrade",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "SubscriptiononCreateGradeauth0FunctionSubscriptiononCreateGradeauth0FunctionAppSyncFunction1408D15A",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "SubscriptiononCreateGradepostAuth0FunctionSubscriptiononCreateGradepostAuth0FunctionAppSyncFunctionF51A67B3",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "SubscriptionOnCreateGradeDataResolverFnSubscriptionOnCreateGradeDataResolverFnAppSyncFunctionEF3DE289",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Subscription\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"onCreateGrade\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"NONE\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthauthenticatedUserRole39740107Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthunauthenticatedUserRole98532356Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthIdentityPool545C855DRef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Subscription"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/subscriptionOnCreateGradeResolver"
+   }
+  },
+  "SubscriptiononUpdateGradeauth0FunctionSubscriptiononUpdateGradeauth0FunctionAppSyncFunction96C60DB0": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptiononUpdateGradeauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/6fe1962f58cfd6abcc999561e4db08b5cd427dd8e2aaf14b73db8d66e7e45c72.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/SubscriptiononUpdateGradeauth0Function/SubscriptiononUpdateGradeauth0Function.AppSyncFunction"
+   }
+  },
+  "SubscriptiononUpdateGradepostAuth0FunctionSubscriptiononUpdateGradepostAuth0FunctionAppSyncFunction5D3614A0": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptiononUpdateGradepostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/SubscriptiononUpdateGradepostAuth0Function/SubscriptiononUpdateGradepostAuth0Function.AppSyncFunction"
+   }
+  },
+  "SubscriptionOnUpdateGradeDataResolverFnSubscriptionOnUpdateGradeDataResolverFnAppSyncFunction0A9BBD09": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptionOnUpdateGradeDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/fe3c43ada4b9d681a5e2312663ef7a73386424d73b73e51f8e2e9d4b50f7c502.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/e0cff47fb007f0bbf2a4e43ca256d6aa7ec109821769fd79fa7c5e83f0e7f9fc.vtl"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/SubscriptionOnUpdateGradeDataResolverFn/SubscriptionOnUpdateGradeDataResolverFn.AppSyncFunction"
+   }
+  },
+  "SubscriptiononUpdateGradeResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "FieldName": "onUpdateGrade",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "SubscriptiononUpdateGradeauth0FunctionSubscriptiononUpdateGradeauth0FunctionAppSyncFunction96C60DB0",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "SubscriptiononUpdateGradepostAuth0FunctionSubscriptiononUpdateGradepostAuth0FunctionAppSyncFunction5D3614A0",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "SubscriptionOnUpdateGradeDataResolverFnSubscriptionOnUpdateGradeDataResolverFnAppSyncFunction0A9BBD09",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Subscription\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"onUpdateGrade\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"NONE\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthauthenticatedUserRole39740107Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthunauthenticatedUserRole98532356Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthIdentityPool545C855DRef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Subscription"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/subscriptionOnUpdateGradeResolver"
+   }
+  },
+  "SubscriptiononDeleteGradeauth0FunctionSubscriptiononDeleteGradeauth0FunctionAppSyncFunction0E4671E5": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptiononDeleteGradeauth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/6fe1962f58cfd6abcc999561e4db08b5cd427dd8e2aaf14b73db8d66e7e45c72.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/SubscriptiononDeleteGradeauth0Function/SubscriptiononDeleteGradeauth0Function.AppSyncFunction"
+   }
+  },
+  "SubscriptiononDeleteGradepostAuth0FunctionSubscriptiononDeleteGradepostAuth0FunctionAppSyncFunction72D088DE": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptiononDeleteGradepostAuth0Function",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/c1721bcd774e27c514d3454b5be4f9bdd094c0161b57ddf053d618e3b0086a77.vtl"
+    },
+    "ResponseMappingTemplate": "$util.toJson({})"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/SubscriptiononDeleteGradepostAuth0Function/SubscriptiononDeleteGradepostAuth0Function.AppSyncFunction"
+   }
+  },
+  "SubscriptionOnDeleteGradeDataResolverFnSubscriptionOnDeleteGradeDataResolverFnAppSyncFunction66F928D3": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "SubscriptionOnDeleteGradeDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/fe3c43ada4b9d681a5e2312663ef7a73386424d73b73e51f8e2e9d4b50f7c502.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/e0cff47fb007f0bbf2a4e43ca256d6aa7ec109821769fd79fa7c5e83f0e7f9fc.vtl"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/SubscriptionOnDeleteGradeDataResolverFn/SubscriptionOnDeleteGradeDataResolverFn.AppSyncFunction"
+   }
+  },
+  "SubscriptiononDeleteGradeResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "FieldName": "onDeleteGrade",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "SubscriptiononDeleteGradeauth0FunctionSubscriptiononDeleteGradeauth0FunctionAppSyncFunction0E4671E5",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "SubscriptiononDeleteGradepostAuth0FunctionSubscriptiononDeleteGradepostAuth0FunctionAppSyncFunction72D088DE",
+        "FunctionId"
+       ]
+      },
+      {
+       "Fn::GetAtt": [
+        "SubscriptionOnDeleteGradeDataResolverFnSubscriptionOnDeleteGradeDataResolverFnAppSyncFunction66F928D3",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Subscription\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"onDeleteGrade\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"NONE\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthauthenticatedUserRole39740107Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthunauthenticatedUserRole98532356Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthIdentityPool545C855DRef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Subscription"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/subscriptionOnDeleteGradeResolver"
+   }
+  },
+  "GradeOwnerDataResolverFnGradeOwnerDataResolverFnAppSyncFunctionFFB4EAFF": {
+   "Type": "AWS::AppSync::FunctionConfiguration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "DataSourceName": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPINONEDS8EC13B3BName"
+    },
+    "FunctionVersion": "2018-05-29",
+    "Name": "GradeOwnerDataResolverFn",
+    "RequestMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/041534e5fd916595f752318f161512d7c7f83b9f2cf32d0f0be381c12253ff68.vtl"
+    },
+    "ResponseMappingTemplateS3Location": {
+     "Fn::Sub": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/064303962e481067b44300212516363b99aaee539b6bafaf756fdd83ff0b60f0.vtl"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/GradeOwnerDataResolverFn/GradeOwnerDataResolverFn.AppSyncFunction"
+   }
+  },
+  "GradeownerResolver": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+    },
+    "FieldName": "owner",
+    "Kind": "PIPELINE",
+    "PipelineConfig": {
+     "Functions": [
+      {
+       "Fn::GetAtt": [
+        "GradeOwnerDataResolverFnGradeOwnerDataResolverFnAppSyncFunctionFFB4EAFF",
+        "FunctionId"
+       ]
+      }
+     ]
+    },
+    "RequestMappingTemplate": {
+     "Fn::Join": [
+      "",
+      [
+       "$util.qr($ctx.stash.put(\"typeName\", \"Grade\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"owner\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"NONE\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n\n$util.qr($ctx.stash.put(\"authRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthauthenticatedUserRole39740107Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":sts::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":assumed-role/",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthunauthenticatedUserRole98532356Ref"
+       },
+       "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"",
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authNestedStackauthNestedStackResource9C01F639Outputsamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498authamplifyAuthIdentityPool545C855DRef"
+       },
+       "\"))\n$util.qr($ctx.stash.put(\"adminRoles\", []))\n$util.toJson({})"
+      ]
+     ]
+    },
+    "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+    "TypeName": "Grade"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/gradeOwnerResolver"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1WOwW6DMAyGn6X34HWgTdpxBfW4TbB7ZRKDUiBBsdOqQrz7FDp12un3J3+y/xzy4gX2O7xyps2QjbaF5YNYyDSCelBl574w4ERCIUHpnbFivVM1sY9Bkyoji5/+sHOPGa98WszN4eRNC9/YjnRAJmVxgqX24932I60K55lvTsNSbXrVVijYPE7+p2N0OpUovetsHwNujX4/jxcKq+LihMwkDO8pFBdwiHogSQXW5H5GmaOobd0I9tb1q3LeEJz56ZLv4fkNXndntjYL0YmdCOp7/gAEQOAMNgEAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "amplify-amplifyhomeworksupply-colinbarrettfox-sandbox-ecf7698498/data/amplifyData/Grade/CDKMetadata/Default"
+   },
+   "Condition": "CDKMetadataAvailable"
+  }
+ },
+ "Outputs": {
+  "GetAttGradeTableStreamArn": {
+   "Description": "Your DynamoDB table StreamArn.",
+   "Value": {
+    "Fn::GetAtt": [
+     "GradeTable",
+     "TableStreamArn"
+    ]
+   },
+   "Export": {
+    "Name": {
+     "Fn::Join": [
+      ":",
+      [
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+       },
+       "GetAtt:GradeTable:StreamArn"
+      ]
+     ]
+    }
+   }
+  },
+  "GetAttGradeTableName": {
+   "Description": "Your DynamoDB table name.",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "Grade-",
+      {
+       "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+      },
+      "-NONE"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": {
+     "Fn::Join": [
+      ":",
+      [
+       {
+        "Ref": "referencetoamplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGraphQLAPI13BDF92DApiId"
+       },
+       "GetAtt:GradeTable:Name"
+      ]
+     ]
+    }
+   }
+  },
+  "amplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGradeGradeDataSourceFACAD3B4Name": {
+   "Value": {
+    "Fn::GetAtt": [
+     "GradeDataSource",
+     "Name"
+    ]
+   }
+  },
+  "amplifyamplifyhomeworksupplycolinbarrettfoxsandboxecf7698498dataamplifyDataGradeGradeTableF4DD45B0TableArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "GradeTable",
+     "TableArn"
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,508 @@
+type Unit @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, operations: [read], groups: ["Learners"]},
+  {allow: groups, groups: ["Admins"]}])
+{
+  number: Float
+  name: String
+  description: String
+  data: AWSJSON
+  status: UnitStatus
+  timeLimitSeconds: Int
+  assignments: [Assignment] @hasMany(references: ["unitID"])
+  grades: [Grade] @hasMany(references: ["unitID"])
+  unitFiles: [UnitFile] @hasMany(references: ["unitID"])
+  unitWords: [UnitWord] @hasMany(references: ["unitID"])
+  questionUnits: [QuestionUnit] @hasMany(references: ["unitID"])
+  unitDocuments: [UnitDocument] @hasMany(references: ["unitID"])
+  agentJobs: [AgentJob] @hasMany(references: ["unitID"])
+  featuredImage: String
+  thumbnail: String
+  embedding: UnitEmbedding
+  moderation: UnitModeration
+  publishedAt: AWSTimestamp
+  isDraft: Boolean
+}
+
+type Assignment @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]},
+  {allow: private}])
+{
+  dueDate: AWSDateTime
+  status: AssignmentStatus
+  sectionID: ID!
+  unitID: ID!
+  section: Section @belongsTo(references: ["sectionID"])
+  unit: Unit @belongsTo(references: ["unitID"])
+  learner: String
+  owner: String
+}
+
+type Grade @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]},
+  {allow: private}])
+{
+  percentComplete: Float
+  accuracy: Float
+  timerStarted: Boolean
+  complete: Boolean
+  data: AWSJSON
+  feedback: AWSJSON
+  files: [String]
+  unitVersion: Int
+  unitID: ID!
+  unit: Unit @belongsTo(references: ["unitID"])
+  instructor: String
+  identityId: String
+  moderation: GradeModeration
+}
+
+type Section @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]},
+  {allow: private}])
+{
+  name: String
+  description: String
+  status: SectionStatus
+  code: String
+  assignments: [Assignment] @hasMany(references: ["sectionID"])
+  featuredImage: String
+  thumbnail: String
+  backgroundColor: String
+  embedding: SectionEmbedding
+  learner: String
+  owner: String
+  identityId: String
+}
+
+type Question @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, operations: [read], groups: ["Learners"]},
+  {allow: groups, groups: ["Admins"]}])
+{
+  owner: String
+  identityId: String
+  prompt: String
+  answer: String
+  hint: String
+  choices: AWSJSON
+  audio: [String]
+  audioWaveformData: AWSJSON
+  answerAudio: [String]
+  answerAudioWaveformData: AWSJSON
+  generated: Boolean
+  model: String
+  promptHex: String
+  byPromptHex: String
+  thumbnail: String
+  difficulty: String
+  metadata: String
+  importedAt: AWSDateTime
+  embedding: QuestionEmbedding
+  moderation: QuestionModeration
+  questionUnits: [QuestionUnit] @hasMany(references: ["questionID"])
+  questionWords: [QuestionWord] @hasMany(references: ["questionID"])
+  questionFiles: [QuestionFile] @hasMany(references: ["questionID"])
+  documentQuestions: [DocumentQuestion] @hasMany(references: ["questionID"])
+}
+
+type File @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, operations: [read], groups: ["Learners"]},
+  {allow: groups, groups: ["Admins"]}])
+{
+  owner: String
+  identityId: String
+  name: String
+  description: String
+  prompt: String
+  model: String
+  variant: String
+  mimeType: String
+  level: FileLevel
+  path: String
+  size: Int
+  duration: Int
+  generated: Boolean
+  hex: String
+  byHex: String
+  thumbnail: String
+  waveformData: AWSJSON
+  documentID: ID
+  document: Document @belongsTo(references: ["documentID"])
+  parsedContentID: ID
+  unitFiles: [UnitFile] @hasMany(references: ["fileID"])
+  wordFiles: [WordFile] @hasMany(references: ["fileID"])
+  questionFiles: [QuestionFile] @hasMany(references: ["fileID"])
+  chatFiles: [AssistantChatFile] @hasMany(references: ["fileID"])
+  parsedContents: [ParsedContent] @hasMany(references: ["fileID"])
+  embedding: FileEmbedding
+}
+
+type Word @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, operations: [read], groups: ["Learners"]},
+  {allow: groups, groups: ["Admins"]}])
+{
+  owner: String
+  identityId: String
+  phrase: String
+  pronunciation: String
+  definition: String
+  rubyTags: String
+  audio: [String]
+  waveformData: AWSJSON
+  definitionAudio: [String]
+  definitionWaveformData: AWSJSON
+  importedAt: AWSDateTime
+  embedding: WordEmbedding
+  moderation: WordModeration
+  unitWords: [UnitWord] @hasMany(references: ["wordID"])
+  wordFiles: [WordFile] @hasMany(references: ["wordID"])
+  questionWords: [QuestionWord] @hasMany(references: ["wordID"])
+  documentWords: [DocumentWord] @hasMany(references: ["wordID"])
+}
+
+type UnitFile @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]}])
+{
+  unitID: ID!
+  unit: Unit @belongsTo(references: ["unitID"])
+  fileID: ID!
+  file: File @belongsTo(references: ["fileID"])
+}
+
+type UnitWord @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]}])
+{
+  unitID: ID!
+  unit: Unit @belongsTo(references: ["unitID"])
+  wordID: ID!
+  word: Word @belongsTo(references: ["wordID"])
+}
+
+type QuestionUnit @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]}])
+{
+  questionID: ID!
+  question: Question @belongsTo(references: ["questionID"])
+  unitID: ID!
+  unit: Unit @belongsTo(references: ["unitID"])
+}
+
+type UnitDocument @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]}])
+{
+  unitID: ID!
+  unit: Unit @belongsTo(references: ["unitID"])
+  documentID: ID!
+  document: Document @belongsTo(references: ["documentID"])
+}
+
+type QuestionFile @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]}])
+{
+  questionID: ID!
+  question: Question @belongsTo(references: ["questionID"])
+  fileID: ID!
+  file: File @belongsTo(references: ["fileID"])
+}
+
+type WordFile @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]}])
+{
+  wordID: ID!
+  word: Word @belongsTo(references: ["wordID"])
+  fileID: ID!
+  file: File @belongsTo(references: ["fileID"])
+}
+
+type QuestionWord @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]}])
+{
+  questionID: ID!
+  question: Question @belongsTo(references: ["questionID"])
+  wordID: ID!
+  word: Word @belongsTo(references: ["wordID"])
+}
+
+type DocumentWord @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]}])
+{
+  documentID: ID!
+  document: Document @belongsTo(references: ["documentID"])
+  wordID: ID!
+  word: Word @belongsTo(references: ["wordID"])
+}
+
+type DocumentQuestion @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]}])
+{
+  documentID: ID!
+  document: Document @belongsTo(references: ["documentID"])
+  questionID: ID!
+  question: Question @belongsTo(references: ["questionID"])
+}
+
+type AssistantChatFile @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]}])
+{
+  chatID: ID!
+  chat: AssistantChat @belongsTo(references: ["chatID"])
+  fileID: ID!
+  file: File @belongsTo(references: ["fileID"])
+}
+
+type Document @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, operations: [read], groups: ["Learners"]},
+  {allow: groups, groups: ["Admins"]}])
+{
+  owner: String
+  identityId: String
+  learner: String
+  filename: String!
+  s3Key: String!
+  status: String!
+  extractedText: String
+  pageCount: Int
+  fileSize: Int
+  mimeType: String
+  uploadedAt: AWSDateTime
+  resumeState: AWSJSON
+  files: [File] @hasMany(references: ["documentID"])
+  parsedContent: [ParsedContent] @hasMany(references: ["documentID"])
+  agentJobs: [AgentJob] @hasMany(references: ["documentID"])
+  unitDocuments: [UnitDocument] @hasMany(references: ["documentID"])
+  documentWords: [DocumentWord] @hasMany(references: ["documentID"])
+  documentQuestions: [DocumentQuestion] @hasMany(references: ["documentID"])
+  metadata: AWSJSON
+}
+
+type ParsedContent @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, operations: [read], groups: ["Learners"]},
+  {allow: groups, groups: ["Admins"]}])
+{
+  owner: String
+  identityId: String
+  documentID: ID!
+  document: Document @belongsTo(references: ["documentID"])
+  fileID: ID
+  file: File @belongsTo(references: ["fileID"])
+  vocabularyJSON: AWSJSON
+  summariesJSON: AWSJSON
+  objectivesJSON: AWSJSON
+  conceptsJSON: AWSJSON
+  questionsJSON: AWSJSON
+  responseId: String
+  modelUsed: String
+  tokensUsed: Int
+  processingTime: Int
+  createdAt: AWSDateTime
+  importedAt: AWSDateTime
+  metadata: AWSJSON
+}
+
+type AgentJob @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, operations: [read], groups: ["Learners"]},
+  {allow: groups, groups: ["Admins"]},
+  {allow: private}])
+{
+  type: String!
+  status: String!
+  documentID: ID
+  document: Document @belongsTo(references: ["documentID"])
+  unitID: ID
+  unit: Unit @belongsTo(references: ["unitID"])
+  responseId: String
+  webhookData: AWSJSON
+  error: AWSJSON
+  startedAt: AWSDateTime
+  completedAt: AWSDateTime
+  modelUsed: String
+  tokensUsed: Int
+  estimatedCost: Float
+  retryCount: Int
+  metadata: AWSJSON
+  identityId: String
+}
+
+type AssistantChat @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]}])
+{
+  owner: String
+  model: String
+  threadInstructions: String
+  additionalInstructions: String
+  threadId: String
+  moderationFlag: Boolean
+  messages: AWSJSON
+  draft: String
+  archived: Boolean
+  inputTokens: String
+  outputTokens: String
+  chatFiles: [AssistantChatFile] @hasMany(references: ["chatID"])
+}
+
+type Settings @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]},
+  {allow: private}])
+{
+  owner: String
+  identityId: String
+  autoAnalyzeDocuments: Boolean
+  documentAnalysisModel: String
+  editorTheme: String
+  editorFontSize: Int
+  defaultAIModel: String
+  assistantVoice: String
+  emailNotifications: Boolean
+  webhookNotifications: Boolean
+  language: String
+  timezone: String
+  metadata: AWSJSON
+  updatedAt: AWSDateTime
+}
+
+type AIFeedback @model @auth(rules: [{allow: owner, ownerField: "owner"},
+  {allow: groups, groups: ["Admins"]},
+  {allow: private}])
+{
+  owner: String
+  identityId: String
+  contentType: AIFeedbackContentType
+  feedbackType: AIFeedbackFeedbackType
+  reasons: AIFeedbackReasons
+  comment: String
+  model: String
+  prompt: String
+  generatedContent: String
+  unitID: ID
+  gradeID: ID
+  documentID: ID
+  messageId: String
+  sessionId: String
+  metadata: AWSJSON
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum UnitStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+type UnitEmbedding 
+{
+  embedding: AWSJSON
+  model: String
+  dimensions: Int
+  version: AWSTimestamp
+  wordCount: Int
+}
+
+type UnitModeration 
+{
+  status: String
+  flags: AWSJSON
+  checkedAt: AWSDateTime
+}
+
+enum AssignmentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+type GradeModeration 
+{
+  status: String
+  flags: AWSJSON
+  checkedAt: AWSDateTime
+}
+
+enum SectionStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+type SectionEmbedding 
+{
+  embedding: AWSJSON
+  model: String
+  dimensions: Int
+  version: AWSTimestamp
+  wordCount: Int
+}
+
+type QuestionEmbedding 
+{
+  embedding: AWSJSON
+  model: String
+  dimensions: Int
+  version: AWSTimestamp
+  wordCount: Int
+}
+
+type QuestionModeration 
+{
+  status: String
+  flags: AWSJSON
+  checkedAt: AWSDateTime
+}
+
+enum FileLevel {
+  PUBLIC
+  PRIVATE
+  PROTECTED
+}
+
+type FileEmbedding 
+{
+  embedding: AWSJSON
+  model: String
+  dimensions: Int
+  version: AWSTimestamp
+  wordCount: Int
+}
+
+type WordEmbedding 
+{
+  embedding: AWSJSON
+  model: String
+  dimensions: Int
+  version: AWSTimestamp
+  wordCount: Int
+}
+
+type WordModeration 
+{
+  status: String
+  flags: AWSJSON
+  checkedAt: AWSDateTime
+}
+
+enum AIFeedbackContentType {
+  CHAT_MESSAGE
+  CONTENT_COMPLETION
+  AUDIO_GENERATION
+  IMAGE_GENERATION
+  DOCUMENT_ANALYSIS
+  VOCABULARY_EXTRACTION
+  TRANSCRIPTION
+  IMAGE_DESCRIPTION
+  GRADING_FEEDBACK
+  BLOCK_SUGGESTION
+}
+
+enum AIFeedbackFeedbackType {
+  POSITIVE
+  NEGATIVE
+}
+
+enum AIFeedbackReasons {
+  INCORRECT
+  INCOMPLETE
+  INAPPROPRIATE
+  NOT_HELPFUL
+  IRRELEVANT
+  POOR_QUALITY
+  OTHER
+}
