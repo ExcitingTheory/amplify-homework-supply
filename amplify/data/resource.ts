@@ -8,6 +8,9 @@ import { a, defineData, type ClientSchema } from '@aws-amplify/backend';
  * - ModerationInfo type consolidates moderation fields
  * - File-based organization by domain
  * 
+ * Note: Streaming operations (chatStream, contentCompletionStream, suggestBlocksStream)
+ * are handled via HTTP API endpoints in amplify/backend.ts, not GraphQL mutations.
+ * 
  * Gen 2 Notes:
  * - Use hasOne/belongsTo for one-to-many relationships
  * - Many-to-many: explicit join tables (UnitFile, UnitWord, etc.)
@@ -63,30 +66,73 @@ const ModerationInfo = a.customType({
   checkedAt: a.datetime(),
 });
 
+// @ts-ignore - used via a.ref() string references in schema returns
 const Choice = a.customType({
   choice: a.string(),
   correct: a.boolean(),
 });
-
-const StudentInfo = a.customType({
-  id: a.id().required(),
-  name: a.string(),
-  email: a.string(),
-});
-
-const PageEmbedding = a.customType({
-  page: a.integer().required(),
-  embedding: a.float().array().required(),
-  text: a.string(),
-});
-
-
 
 // ============================================================================
 // MAIN SCHEMA DEFINITION
 // ============================================================================
 
 const schema = a.schema({
+  // ========================================================================
+  // CUSTOM TYPES FOR LAMBDA FUNCTION RETURNS
+  // ========================================================================
+
+  StudentInfo: a.customType({
+    id: a.id().required(),
+    name: a.string(),
+    email: a.string(),
+  }),
+
+  PageEmbedding: a.customType({
+    page: a.integer().required(),
+    embedding: a.float().array().required(),
+    text: a.string(),
+  }),
+
+  EmbeddingResult: a.customType({
+    embedding: a.float().array().required(),
+    model: a.string().required(),
+    dimensions: a.integer().required(),
+    tokenCount: a.integer().required(),
+    error: a.string(),
+  }),
+
+  ModerationResult: a.customType({
+    flagged: a.boolean().required(),
+    categories: a.json().required(), // OpenAI moderation categories
+    categoryScores: a.json().required(),
+    model: a.string().required(),
+    error: a.string(),
+  }),
+
+  AnalyzeDocumentResult: a.customType({
+    success: a.boolean().required(),
+    fileID: a.id().required(),
+    documentID: a.id(),
+    responseId: a.string(),
+    pageCount: a.integer(),
+    progress: a.string(),
+    message: a.string(),
+  }),
+
+  CancelDocumentAnalysisResult: a.customType({
+    success: a.boolean().required(),
+    fileID: a.id().required(),
+    documentID: a.id(),
+    message: a.string(),
+  }),
+
+  GenerateEmbeddingsResult: a.customType({
+    success: a.boolean().required(),
+    fileID: a.id().required(),
+    documentID: a.id(),
+    embeddingCount: a.integer(),
+    message: a.string(),
+  }),
   // ========================================================================
   // CORE MODELS
   // ========================================================================
@@ -108,6 +154,12 @@ const schema = a.schema({
       questionUnits: a.hasMany('QuestionUnit', ['unitID']),
       unitDocuments: a.hasMany('UnitDocument', ['unitID']),
       agentJobs: a.hasMany('AgentJob', ['unitID']),
+      // Dynamic group authorization - students and instructors can read
+      // Format: ['section-{sectionId}-instructors', 'section-{sectionId}-learners']
+      readableGroups: a.string().array(),
+      // Dynamic group authorization - only instructors can update
+      // Format: ['section-{sectionId}-instructors']
+      writableGroups: a.string().array(),
       // Metadata
       featuredImage: a.string(),
       thumbnail: a.string(),
@@ -120,6 +172,8 @@ const schema = a.schema({
       allow.owner(),
       allow.group('Learners').to(['read']),
       allow.group('Admins'),
+      allow.groupsDefinedIn('readableGroups').to(['read']),
+      allow.groupsDefinedIn('writableGroups').to(['update']),
     ]),
 
   Assignment: a
@@ -131,14 +185,25 @@ const schema = a.schema({
       unitID: a.id().required(),
       section: a.belongsTo('Section', ['sectionID']),
       unit: a.belongsTo('Unit', ['unitID']),
+      // Dynamic group authorization - students and instructors can read
+      // Format: ['section-{sectionId}-instructors', 'section-{sectionId}-learners']
+      readableGroups: a.string().array(),
+      // Dynamic group authorization - only instructors can update
+      // Format: ['section-{sectionId}-instructors']
+      writableGroups: a.string().array(),
       // Tracking
       learner: a.string(),
       owner: a.string(),
     })
     .authorization((allow) => [
+      // Student owns their assignment
       allow.owner(),
+      // Admins have full access
       allow.group('Admins'),
-      allow.authenticated(),
+      // Dynamic group authorization: instructors and learners can read
+      allow.groupsDefinedIn('readableGroups').to(['read']),
+      // Dynamic group authorization: only instructors can update
+      allow.groupsDefinedIn('writableGroups').to(['update']),
     ]),
 
   Grade: a
@@ -156,15 +221,23 @@ const schema = a.schema({
       // Foreign keys
       unitID: a.id().required(),
       unit: a.belongsTo('Unit', ['unitID']),
+      sectionID: a.id(), // Section this grade is for (for section-based authorization)
+      // Dynamic group authorization - single instructor group that can grade this submission
+      // Format: 'section-{sectionId}-instructors'
+      instructorGroup: a.string(),
       instructor: a.string(),
       // Metadata
       identityId: a.string(),
       moderation: ModerationInfo,
     })
     .authorization((allow) => [
+      // Student owns their grade
       allow.owner(),
+      // Admins have full access
       allow.group('Admins'),
-      allow.authenticated(),
+      // Dynamic group authorization: only instructors of the section can read/update
+      // Single group with access to this grade
+      allow.groupDefinedIn('instructorGroup').to(['read', 'update']),
     ]),
 
   Section: a
@@ -175,6 +248,12 @@ const schema = a.schema({
       code: a.string(),
       // Relationships
       assignments: a.hasMany('Assignment', ['sectionID']),
+      // Dynamic group authorization - students and instructors can read
+      // Format: ['section-{sectionId}-instructors', 'section-{sectionId}-learners']
+      readableGroups: a.string().array(),
+      // Dynamic group authorization - only instructors can update
+      // Format: ['section-{sectionId}-instructors']
+      writableGroups: a.string().array(),
       // Metadata
       featuredImage: a.string(),
       thumbnail: a.string(),
@@ -188,6 +267,8 @@ const schema = a.schema({
       allow.owner(),
       allow.group('Admins'),
       allow.authenticated(),
+      allow.groupsDefinedIn('readableGroups').to(['read']),
+      allow.groupsDefinedIn('writableGroups').to(['update']),
     ]),
 
   // ========================================================================
@@ -235,22 +316,46 @@ const schema = a.schema({
       allow.group('Admins'),
     ]),
 
-  File: a
+  /**
+   * File Model - Associates S3 storage with database records for file metadata tracking
+   * 
+   * Stores metadata for files uploaded to Storage, enabling:
+   * - File ownership and protection level tracking
+   * - Associations with Units, Words, Questions, Documents
+   * - Embedding and moderation metadata
+   * 
+   * Integration with Storage:
+   * - path field points to S3 location (e.g., "public/units/file-123.json")
+   * - level field (PUBLIC/PROTECTED/PRIVATE) determines S3 access pattern
+   * - owner field auto-populated by Cognito at creation
+   * 
+   * Owner Authorization Pattern:
+   * - File owner can create/read/update/delete their files
+   * - Learners group can read all files (for embedded content access)
+   * - Admins have full access
+   * - Storage layer enforces identity-based path access (protected/{identityId}/*)
+   * 
+   * Frontend workflow:
+   * 1. Upload to Storage: uploadData({ path: `public/file-${id}.ext`, data })
+   * 2. Create File record: client.models.File.create({ path, owner, level, ... })
+   * 3. Get signed URL: getUrl({ path: file.path })
+   * 4. Associate: Create join record (UnitFile, WordFile, etc.)
+   */  File: a
     .model({
-      // Ownership
-      owner: a.string(),
-      identityId: a.string(),
+      // Ownership - auto-populated by Cognito, controls Data model access
+      owner: a.string().required(),
+      identityId: a.string().required(), // Cognito Identity ID for protected/{identityId}/* paths
       // File metadata
       name: a.string(),
       description: a.string(),
-      // Generation metadata
+      // Generation metadata - if generated by AI
       prompt: a.string(),
       model: a.string(),
       variant: a.string(),
       // File details
       mimeType: a.string(),
-      level: FileProtectionLevels,
-      path: a.string(), // S3 path
+      level: FileProtectionLevels, // PUBLIC, PROTECTED, PRIVATE - determines S3 path prefix
+      path: a.string().required(), // Full S3 path (e.g., "public/units/file-123.json")
       size: a.integer(),
       duration: a.integer(),
       generated: a.boolean(),
@@ -258,21 +363,23 @@ const schema = a.schema({
       byHex: a.string(),
       thumbnail: a.string(),
       waveformData: a.json(),
-      // Relationships
+      // Relationships - enable querying files by associated model
       documentID: a.id(),
       document: a.belongsTo('Document', ['documentID']),
-      parsedContentID: a.id(), // Reference to primary ParsedContent (no relationship declaration)
       unitFiles: a.hasMany('UnitFile', ['fileID']),
       wordFiles: a.hasMany('WordFile', ['fileID']),
       questionFiles: a.hasMany('QuestionFile', ['fileID']),
       chatFiles: a.hasMany('AssistantChatFile', ['fileID']),
       parsedContents: a.hasMany('ParsedContent', ['fileID']),
-      // Metadata
+      // Metadata for semantic search
       embedding: EmbeddingInfo,
     })
     .authorization((allow) => [
+      // Owner has full control
       allow.owner(),
+      // Learners can read files (for embedded content, shared resources)
       allow.group('Learners').to(['read']),
+      // Admins have full access
       allow.group('Admins'),
     ]),
 
@@ -407,39 +514,73 @@ const schema = a.schema({
   // ANALYSIS MODELS
   // ========================================================================
 
-  Document: a
+  /**
+   * Document Model - Tracks PDF/document analysis processing pipeline
+   * 
+   * Lifecycle:
+   * 1. User uploads PDF → File record created, Document created (status: 'uploaded')
+   * 2. Lambda triggered → Text extraction (status: 'extracting' → 'extracted')
+   * 3. Lambda sends to OpenAI → Analysis (status: 'analyzing')
+   * 4. Results saved → ParsedContent records with vocabulary, questions, summaries (status: 'completed')
+   * 5. On error → status: 'failed', resumeState cleared
+   * 
+   * Async Processing:
+   * - Initial request returns immediately with status 'uploaded'
+   * - Lambda invokes itself asynchronously with isAsyncInvocation: true
+   * - Lambda handles timeouts via resumeState for large PDFs
+   * - Client polls Document.status or subscribes via subscription
+   * 
+   * Owner Authorization:
+   * - Document owner (student uploading) can read/update/delete their documents
+   * - Learners can read all documents (collaborative learning)
+   * - Admins have full access
+   */  Document: a
     .model({
-      // Ownership
-      owner: a.string(),
+      // Ownership - auto-populated by Cognito, tracks document creator
+      owner: a.string().required(),
       identityId: a.string(),
-      learner: a.string(),
+      learner: a.string(), // Alternate learner reference
+      // Section context - for section-based authorization
+      sectionID: a.id(), // Section this document is associated with (optional for backwards compatibility)
+      // Dynamic group authorization - contains group names with read access to this document
+      // Format: ['section-{sectionId}-instructors', 'section-{sectionId}-learners']
+      readableGroups: a.string().array(),
+      // Dynamic group authorization - contains group names with write access to this document
+      // Format: ['section-{sectionId}-instructors']
+      writableGroups: a.string().array(),
       // Document metadata
       filename: a.string().required(),
-      s3Key: a.string().required(),
-      status: a.string().required(), // uploaded, extracting, extracted, analyzing, completed, failed
+      s3Key: a.string().required(), // S3 path to original PDF
+      status: a.string().required(), // uploaded, extracting, extracted, analyzing, completed, failed, cancelled
       // Content
-      extractedText: a.string(),
+      extractedText: a.string(), // Full text extracted from PDF
       pageCount: a.integer(),
       fileSize: a.integer(),
       mimeType: a.string(),
       uploadedAt: a.datetime(),
-      // Processing
-      resumeState: a.json(), // For resuming long-running operations
-      // Note: pageEmbeddings kept in separate ParsedContent table for storage
+      // Processing State - for resuming long-running operations on timeout
+      resumeState: a.json(), // { lastProcessedPage, accumulatedPages, totalPages }
+      // Note: pageEmbeddings kept in separate ParsedContent table to avoid item size limits
       // Relationships
-      files: a.hasMany('File', ['documentID']), // Bidirectional for File.document
-      parsedContent: a.hasMany('ParsedContent', ['documentID']),
-      agentJobs: a.hasMany('AgentJob', ['documentID']),
-      unitDocuments: a.hasMany('UnitDocument', ['documentID']),
-      documentWords: a.hasMany('DocumentWord', ['documentID']),
-      documentQuestions: a.hasMany('DocumentQuestion', ['documentID']),
+      files: a.hasMany('File', ['documentID']), // Metadata records for uploaded files
+      parsedContent: a.hasMany('ParsedContent', ['documentID']), // Extracted vocabulary, questions, summaries
+      agentJobs: a.hasMany('AgentJob', ['documentID']), // Track OpenAI API calls and costs
+      unitDocuments: a.hasMany('UnitDocument', ['documentID']), // Associate documents with curriculum units
+      documentWords: a.hasMany('DocumentWord', ['documentID']), // Extracted vocabulary from document
+      documentQuestions: a.hasMany('DocumentQuestion', ['documentID']), // Generated comprehension questions
       // Metadata
       metadata: a.json(),
     })
     .authorization((allow) => [
+      // Document owner (student) can manage their documents
       allow.owner(),
-      allow.group('Learners').to(['read']),
+      // Admins have full access
       allow.group('Admins'),
+      // Dynamic group authorization: section instructors and learners can read
+      // This enables collaborative document analysis within sections
+      allow.groupsDefinedIn('readableGroups').to(['read']),
+      // Dynamic group authorization: only instructors can update
+      allow.groupsDefinedIn('writableGroups').to(['update']),
     ]),
 
   ParsedContent: a
@@ -598,6 +739,360 @@ const schema = a.schema({
       allow.group('Admins'),
       allow.authenticated(),
     ]),
+
+  // ========================================================================
+  // CUSTOM QUERIES & MUTATIONS (Phase D - Lambda Integration)
+  // ========================================================================
+
+  // OpenAI & Verification Queries
+  verifyDefinition: a
+    .query()
+    .arguments({
+      phrase: a.string().required(),
+      expected: a.string().required(),
+      definition: a.string().required(),
+      model: a.string(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  verifyWord: a
+    .query()
+    .arguments({
+      word: a.string().required(),
+      expected: a.string().required(),
+      definition: a.string().required(),
+      model: a.string(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  verifyShortAnswer: a
+    .query()
+    .arguments({
+      expected: a.string().required(),
+      answer: a.string().required(),
+      prompt: a.string().required(),
+      model: a.string(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  transcribe: a
+    .query()
+    .arguments({
+      audio: a.string().required(),
+      model: a.string(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  verifyAudio: a
+    .query()
+    .arguments({
+      expected: a.string().required(),
+      audio: a.string().required(),
+      model: a.string(),
+      chatModel: a.string().required(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  verifyAudioUrl: a
+    .query()
+    .arguments({
+      expected: a.string().required(),
+      audioUrl: a.string().required(),
+      model: a.string().required(),
+      chatModel: a.string().required(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  transcribeUrl: a
+    .query()
+    .arguments({
+      audioUrl: a.string().required(),
+      model: a.string(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  processImage: a
+    .query()
+    .arguments({
+      image: a.string().required(),
+      model: a.string(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  processImageUrl: a
+    .query()
+    .arguments({
+      imageUrl: a.string().required(),
+      model: a.string(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  verifyImage: a
+    .query()
+    .arguments({
+      expected: a.string().required(),
+      image: a.string().required(),
+      model: a.string(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  verifyImageUrl: a
+    .query()
+    .arguments({
+      expected: a.string().required(),
+      imageUrl: a.string().required(),
+      model: a.string(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  // Chat & Content Mutations
+  chat: a
+    .mutation()
+    .arguments({
+      messages: a.string().required(),
+      model: a.string(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  generateAudio: a
+    .mutation()
+    .arguments({
+      phrase: a.string().required(),
+      voice: a.string(),
+      model: a.string(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  generateAudioFile: a
+    .mutation()
+    .arguments({
+      phrase: a.string().required(),
+      voice: a.string().required(),
+      model: a.string().required(),
+    })
+    .returns(a.ref('File'))
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  generateImage: a
+    .mutation()
+    .arguments({
+      phrase: a.string().required(),
+      model: a.string(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  generateImageFile: a
+    .mutation()
+    .arguments({
+      phrase: a.string().required(),
+      model: a.string(),
+    })
+    .returns(a.ref('File'))
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('openaiHandler')),
+
+  // Document Analysis Mutations
+  analyzeDocument: a
+    .mutation()
+    .arguments({
+      fileID: a.id().required(),
+    })
+    .returns(a.ref('AnalyzeDocumentResult'))
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('documentAnalysisHandler')),
+
+  cancelDocumentAnalysis: a
+    .mutation()
+    .arguments({
+      fileID: a.id().required(),
+    })
+    .returns(a.ref('CancelDocumentAnalysisResult'))
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('documentAnalysisHandler')),
+
+  // Embeddings Mutations
+  generateEmbeddings: a
+    .mutation()
+    .arguments({
+      fileID: a.id().required(),
+    })
+    .returns(a.ref('GenerateEmbeddingsResult'))
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('embeddingsHandler')),
+
+  generateEmbedding: a
+    .mutation()
+    .arguments({
+      content: a.string().required(),
+      model: a.string(),
+      dimensions: a.integer(),
+    })
+    .returns(a.ref('EmbeddingResult'))
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('embeddingsHandler')),
+
+  // Content & AI Mutations
+  contentCompletion: a
+    .mutation()
+    .arguments({
+      prompt: a.string().required(),
+      context: a.json(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('aiHandler')),
+
+  suggestBlocks: a
+    .mutation()
+    .arguments({
+      unitStructure: a.json().required(),
+      currentContext: a.json(),
+      userHistory: a.json(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('aiHandler')),
+
+  // Moderation Mutation
+  moderateContent: a
+    .mutation()
+    .arguments({
+      content: a.string().required(),
+    })
+    .returns(a.ref('ModerationResult'))
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('moderationHandler')),
+
+  // Unit Prediction Mutations
+  predictUnitData: a
+    .mutation()
+    .arguments({
+      unitID: a.id().required(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('aiHandler')),
+
+  predictUnitByData: a
+    .mutation()
+    .arguments({
+      data: a.string().required(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('aiHandler')),
+
+  // Assistant Editor Mutations
+  initAssistantEditor: a
+    .mutation()
+    .arguments({
+      model: a.string().required(),
+      additionalInstructions: a.string().required(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('assistantHandler')),
+
+  updateAssistantEditor: a
+    .mutation()
+    .arguments({
+      assistantId: a.string().required(),
+      additionalInstructions: a.string().required(),
+      model: a.string(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('assistantHandler')),
+
+  deleteAssistantEditor: a
+    .mutation()
+    .arguments({
+      assistantId: a.string().required(),
+      threadId: a.string().required(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('assistantHandler')),
+
+  useAssistantEditor: a
+    .mutation()
+    .arguments({
+      threadInstructions: a.string().required(),
+      assistantId: a.string().required(),
+      threadId: a.string().required(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('assistantHandler')),
+
+  chatAssistantThread: a
+    .mutation()
+    .arguments({
+      assistantId: a.string().required(),
+      messages: a.string().required(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('assistantHandler')),
+
+  // Section Management Mutations
+  createSectionGroup: a
+    .mutation()
+    .arguments({
+      name: a.string().required(),
+      description: a.string().required(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('sectionHandler')),
+
+  addSelfToSection: a
+    .mutation()
+    .arguments({
+      code: a.string().required(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('sectionHandler')),
+
+  // Section Management Queries
+  listSectionStudents: a
+    .query()
+    .arguments({
+      sectionCode: a.string().required(),
+    })
+    .returns(a.ref('StudentInfo').array())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function('sectionHandler')),
 });
 
 export type Schema = ClientSchema<typeof schema>;

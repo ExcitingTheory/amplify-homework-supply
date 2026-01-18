@@ -84,7 +84,6 @@ export default function MyApp(props) {
    * 
    * TODO: Add a custom 404 page
    * TODO: Add a custom Terms of Service page
-   * TODO: Add a custom Privacy Policy page
    * TODO: Add a generic error page
    * 
    */

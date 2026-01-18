@@ -16,7 +16,28 @@
     "user_verification_types": [
       "email"
     ],
-    "groups": [],
+    "groups": [
+      {
+        "Learners": {
+          "precedence": 0
+        }
+      },
+      {
+        "Instructors": {
+          "precedence": 1
+        }
+      },
+      {
+        "Moderators": {
+          "precedence": 2
+        }
+      },
+      {
+        "Admins": {
+          "precedence": 3
+        }
+      }
+    ],
     "mfa_configuration": "OPTIONAL",
     "password_policy": {
       "min_length": 8,
@@ -205,6 +226,22 @@
                 ]
               }
             },
+            "readableGroups": {
+              "name": "readableGroups",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "writableGroups": {
+              "name": "writableGroups",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
             "featuredImage": {
               "name": "featuredImage",
               "isArray": false,
@@ -315,6 +352,26 @@
                       "delete",
                       "read"
                     ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "read"
+                    ],
+                    "groupsField": "readableGroups",
+                    "groupField": "groups"
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "update"
+                    ],
+                    "groupsField": "writableGroups",
+                    "groupField": "groups"
                   }
                 ]
               }
@@ -396,6 +453,22 @@
                 ]
               }
             },
+            "readableGroups": {
+              "name": "readableGroups",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "writableGroups": {
+              "name": "writableGroups",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
             "learner": {
               "name": "learner",
               "isArray": false,
@@ -465,13 +538,24 @@
                     ]
                   },
                   {
-                    "allow": "private",
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
                     "operations": [
-                      "create",
-                      "update",
-                      "delete",
                       "read"
-                    ]
+                    ],
+                    "groupsField": "readableGroups",
+                    "groupField": "groups"
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "update"
+                    ],
+                    "groupsField": "writableGroups",
+                    "groupField": "groups"
                   }
                 ]
               }
@@ -572,6 +656,20 @@
                 ]
               }
             },
+            "sectionID": {
+              "name": "sectionID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "instructorGroup": {
+              "name": "instructorGroup",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
             "instructor": {
               "name": "instructor",
               "isArray": false,
@@ -650,13 +748,15 @@
                     ]
                   },
                   {
-                    "allow": "private",
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
                     "operations": [
-                      "create",
-                      "update",
-                      "delete",
-                      "read"
-                    ]
+                      "read",
+                      "update"
+                    ],
+                    "groupsField": "instructorGroup",
+                    "groupField": "groups"
                   }
                 ]
               }
@@ -723,6 +823,22 @@
                   "sectionID"
                 ]
               }
+            },
+            "readableGroups": {
+              "name": "readableGroups",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "writableGroups": {
+              "name": "writableGroups",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
             },
             "featuredImage": {
               "name": "featuredImage",
@@ -837,6 +953,26 @@
                       "delete",
                       "read"
                     ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "read"
+                    ],
+                    "groupsField": "readableGroups",
+                    "groupField": "groups"
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "update"
+                    ],
+                    "groupsField": "writableGroups",
+                    "groupField": "groups"
                   }
                 ]
               }
@@ -1157,14 +1293,14 @@
               "name": "owner",
               "isArray": false,
               "type": "String",
-              "isRequired": false,
+              "isRequired": true,
               "attributes": []
             },
             "identityId": {
               "name": "identityId",
               "isArray": false,
               "type": "String",
-              "isRequired": false,
+              "isRequired": true,
               "attributes": []
             },
             "name": {
@@ -1222,7 +1358,7 @@
               "name": "path",
               "isArray": false,
               "type": "String",
-              "isRequired": false,
+              "isRequired": true,
               "attributes": []
             },
             "size": {
@@ -1295,13 +1431,6 @@
                   "documentID"
                 ]
               }
-            },
-            "parsedContentID": {
-              "name": "parsedContentID",
-              "isArray": false,
-              "type": "ID",
-              "isRequired": false,
-              "attributes": []
             },
             "unitFiles": {
               "name": "unitFiles",
@@ -2907,7 +3036,7 @@
               "name": "owner",
               "isArray": false,
               "type": "String",
-              "isRequired": false,
+              "isRequired": true,
               "attributes": []
             },
             "identityId": {
@@ -2923,6 +3052,29 @@
               "type": "String",
               "isRequired": false,
               "attributes": []
+            },
+            "sectionID": {
+              "name": "sectionID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "readableGroups": {
+              "name": "readableGroups",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "writableGroups": {
+              "name": "writableGroups",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
             },
             "filename": {
               "name": "filename",
@@ -3134,17 +3286,6 @@
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
-                    "operations": [
-                      "read"
-                    ],
-                    "groups": [
-                      "Learners"
-                    ]
-                  },
-                  {
-                    "groupClaim": "cognito:groups",
-                    "provider": "userPools",
-                    "allow": "groups",
                     "groups": [
                       "Admins"
                     ],
@@ -3154,6 +3295,26 @@
                       "delete",
                       "read"
                     ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "read"
+                    ],
+                    "groupsField": "readableGroups",
+                    "groupField": "groups"
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "update"
+                    ],
+                    "groupsField": "writableGroups",
+                    "groupField": "groups"
                   }
                 ]
               }
@@ -4215,6 +4376,267 @@
         }
       },
       "nonModels": {
+        "StudentInfo": {
+          "name": "StudentInfo",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "name": {
+              "name": "name",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "email": {
+              "name": "email",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            }
+          }
+        },
+        "PageEmbedding": {
+          "name": "PageEmbedding",
+          "fields": {
+            "page": {
+              "name": "page",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "embedding": {
+              "name": "embedding",
+              "isArray": true,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": false
+            },
+            "text": {
+              "name": "text",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            }
+          }
+        },
+        "EmbeddingResult": {
+          "name": "EmbeddingResult",
+          "fields": {
+            "embedding": {
+              "name": "embedding",
+              "isArray": true,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": false
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "dimensions": {
+              "name": "dimensions",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "tokenCount": {
+              "name": "tokenCount",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": true,
+              "attributes": []
+            },
+            "error": {
+              "name": "error",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            }
+          }
+        },
+        "ModerationResult": {
+          "name": "ModerationResult",
+          "fields": {
+            "flagged": {
+              "name": "flagged",
+              "isArray": false,
+              "type": "Boolean",
+              "isRequired": true,
+              "attributes": []
+            },
+            "categories": {
+              "name": "categories",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": true,
+              "attributes": []
+            },
+            "categoryScores": {
+              "name": "categoryScores",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": true,
+              "attributes": []
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "error": {
+              "name": "error",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            }
+          }
+        },
+        "AnalyzeDocumentResult": {
+          "name": "AnalyzeDocumentResult",
+          "fields": {
+            "success": {
+              "name": "success",
+              "isArray": false,
+              "type": "Boolean",
+              "isRequired": true,
+              "attributes": []
+            },
+            "fileID": {
+              "name": "fileID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "documentID": {
+              "name": "documentID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "responseId": {
+              "name": "responseId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "pageCount": {
+              "name": "pageCount",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
+            "progress": {
+              "name": "progress",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "message": {
+              "name": "message",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            }
+          }
+        },
+        "CancelDocumentAnalysisResult": {
+          "name": "CancelDocumentAnalysisResult",
+          "fields": {
+            "success": {
+              "name": "success",
+              "isArray": false,
+              "type": "Boolean",
+              "isRequired": true,
+              "attributes": []
+            },
+            "fileID": {
+              "name": "fileID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "documentID": {
+              "name": "documentID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "message": {
+              "name": "message",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            }
+          }
+        },
+        "GenerateEmbeddingsResult": {
+          "name": "GenerateEmbeddingsResult",
+          "fields": {
+            "success": {
+              "name": "success",
+              "isArray": false,
+              "type": "Boolean",
+              "isRequired": true,
+              "attributes": []
+            },
+            "fileID": {
+              "name": "fileID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "documentID": {
+              "name": "documentID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "embeddingCount": {
+              "name": "embeddingCount",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
+            "message": {
+              "name": "message",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            }
+          }
+        },
         "UnitEmbedding": {
           "name": "UnitEmbedding",
           "fields": {
@@ -4519,8 +4941,803 @@
             }
           }
         }
+      },
+      "queries": {
+        "verifyDefinition": {
+          "name": "verifyDefinition",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "phrase": {
+              "name": "phrase",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "expected": {
+              "name": "expected",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "definition": {
+              "name": "definition",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            }
+          }
+        },
+        "verifyWord": {
+          "name": "verifyWord",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "word": {
+              "name": "word",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "expected": {
+              "name": "expected",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "definition": {
+              "name": "definition",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            }
+          }
+        },
+        "verifyShortAnswer": {
+          "name": "verifyShortAnswer",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "expected": {
+              "name": "expected",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "answer": {
+              "name": "answer",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "prompt": {
+              "name": "prompt",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            }
+          }
+        },
+        "transcribe": {
+          "name": "transcribe",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "audio": {
+              "name": "audio",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            }
+          }
+        },
+        "verifyAudio": {
+          "name": "verifyAudio",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "expected": {
+              "name": "expected",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "audio": {
+              "name": "audio",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            },
+            "chatModel": {
+              "name": "chatModel",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
+        },
+        "verifyAudioUrl": {
+          "name": "verifyAudioUrl",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "expected": {
+              "name": "expected",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "audioUrl": {
+              "name": "audioUrl",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "chatModel": {
+              "name": "chatModel",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
+        },
+        "transcribeUrl": {
+          "name": "transcribeUrl",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "audioUrl": {
+              "name": "audioUrl",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            }
+          }
+        },
+        "processImage": {
+          "name": "processImage",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "image": {
+              "name": "image",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            }
+          }
+        },
+        "processImageUrl": {
+          "name": "processImageUrl",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "imageUrl": {
+              "name": "imageUrl",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            }
+          }
+        },
+        "verifyImage": {
+          "name": "verifyImage",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "expected": {
+              "name": "expected",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "image": {
+              "name": "image",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            }
+          }
+        },
+        "verifyImageUrl": {
+          "name": "verifyImageUrl",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "expected": {
+              "name": "expected",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "imageUrl": {
+              "name": "imageUrl",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            }
+          }
+        },
+        "listSectionStudents": {
+          "name": "listSectionStudents",
+          "isArray": true,
+          "type": {
+            "nonModel": "StudentInfo"
+          },
+          "isRequired": false,
+          "isArrayNullable": true,
+          "arguments": {
+            "sectionCode": {
+              "name": "sectionCode",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
+        }
+      },
+      "mutations": {
+        "chat": {
+          "name": "chat",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "messages": {
+              "name": "messages",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            }
+          }
+        },
+        "generateAudio": {
+          "name": "generateAudio",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "phrase": {
+              "name": "phrase",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "voice": {
+              "name": "voice",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            }
+          }
+        },
+        "generateAudioFile": {
+          "name": "generateAudioFile",
+          "isArray": false,
+          "type": {
+            "model": "File"
+          },
+          "isRequired": false,
+          "arguments": {
+            "phrase": {
+              "name": "phrase",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "voice": {
+              "name": "voice",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
+        },
+        "generateImage": {
+          "name": "generateImage",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "phrase": {
+              "name": "phrase",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            }
+          }
+        },
+        "generateImageFile": {
+          "name": "generateImageFile",
+          "isArray": false,
+          "type": {
+            "model": "File"
+          },
+          "isRequired": false,
+          "arguments": {
+            "phrase": {
+              "name": "phrase",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            }
+          }
+        },
+        "analyzeDocument": {
+          "name": "analyzeDocument",
+          "isArray": false,
+          "type": {
+            "nonModel": "AnalyzeDocumentResult"
+          },
+          "isRequired": false,
+          "arguments": {
+            "fileID": {
+              "name": "fileID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true
+            }
+          }
+        },
+        "cancelDocumentAnalysis": {
+          "name": "cancelDocumentAnalysis",
+          "isArray": false,
+          "type": {
+            "nonModel": "CancelDocumentAnalysisResult"
+          },
+          "isRequired": false,
+          "arguments": {
+            "fileID": {
+              "name": "fileID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true
+            }
+          }
+        },
+        "generateEmbeddings": {
+          "name": "generateEmbeddings",
+          "isArray": false,
+          "type": {
+            "nonModel": "GenerateEmbeddingsResult"
+          },
+          "isRequired": false,
+          "arguments": {
+            "fileID": {
+              "name": "fileID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true
+            }
+          }
+        },
+        "generateEmbedding": {
+          "name": "generateEmbedding",
+          "isArray": false,
+          "type": {
+            "nonModel": "EmbeddingResult"
+          },
+          "isRequired": false,
+          "arguments": {
+            "content": {
+              "name": "content",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            },
+            "dimensions": {
+              "name": "dimensions",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false
+            }
+          }
+        },
+        "contentCompletion": {
+          "name": "contentCompletion",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "prompt": {
+              "name": "prompt",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "context": {
+              "name": "context",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": false
+            }
+          }
+        },
+        "suggestBlocks": {
+          "name": "suggestBlocks",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "unitStructure": {
+              "name": "unitStructure",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": true
+            },
+            "currentContext": {
+              "name": "currentContext",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": false
+            },
+            "userHistory": {
+              "name": "userHistory",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": false
+            }
+          }
+        },
+        "moderateContent": {
+          "name": "moderateContent",
+          "isArray": false,
+          "type": {
+            "nonModel": "ModerationResult"
+          },
+          "isRequired": false,
+          "arguments": {
+            "content": {
+              "name": "content",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
+        },
+        "predictUnitData": {
+          "name": "predictUnitData",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "unitID": {
+              "name": "unitID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true
+            }
+          }
+        },
+        "predictUnitByData": {
+          "name": "predictUnitByData",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "data": {
+              "name": "data",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
+        },
+        "initAssistantEditor": {
+          "name": "initAssistantEditor",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "additionalInstructions": {
+              "name": "additionalInstructions",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
+        },
+        "updateAssistantEditor": {
+          "name": "updateAssistantEditor",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "assistantId": {
+              "name": "assistantId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "additionalInstructions": {
+              "name": "additionalInstructions",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "model": {
+              "name": "model",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            }
+          }
+        },
+        "deleteAssistantEditor": {
+          "name": "deleteAssistantEditor",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "assistantId": {
+              "name": "assistantId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "threadId": {
+              "name": "threadId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
+        },
+        "useAssistantEditor": {
+          "name": "useAssistantEditor",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "threadInstructions": {
+              "name": "threadInstructions",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "assistantId": {
+              "name": "assistantId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "threadId": {
+              "name": "threadId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
+        },
+        "chatAssistantThread": {
+          "name": "chatAssistantThread",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "assistantId": {
+              "name": "assistantId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "messages": {
+              "name": "messages",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
+        },
+        "createSectionGroup": {
+          "name": "createSectionGroup",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "name": {
+              "name": "name",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "description": {
+              "name": "description",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
+        },
+        "addSelfToSection": {
+          "name": "addSelfToSection",
+          "isArray": false,
+          "type": "String",
+          "isRequired": false,
+          "arguments": {
+            "code": {
+              "name": "code",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
+        }
       }
     }
   },
-  "version": "1.4"
+  "storage": {
+    "aws_region": "us-east-1",
+    "bucket_name": "amplify-amplifyhomeworksu-homeworksupplystoragebuc-iw3jdwi4bahq",
+    "buckets": [
+      {
+        "name": "homeworkSupplyStorage",
+        "bucket_name": "amplify-amplifyhomeworksu-homeworksupplystoragebuc-iw3jdwi4bahq",
+        "aws_region": "us-east-1",
+        "paths": {
+          "public/*": {
+            "guest": [
+              "get",
+              "list"
+            ],
+            "authenticated": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ]
+          },
+          "protected/*": {
+            "authenticated": [
+              "get",
+              "list"
+            ]
+          },
+          "protected/${cognito-identity.amazonaws.com:sub}/*": {
+            "entityidentity": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ]
+          },
+          "private/${cognito-identity.amazonaws.com:sub}/*": {
+            "entityidentity": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "version": "1.4",
+  "custom": {
+    "STREAM_API": {
+      "endpoint": "https://uk0xbhnlh2.execute-api.us-east-1.amazonaws.com/",
+      "region": "us-east-1",
+      "apiName": "homeworkSupplyStreamApi"
+    }
+  }
 }

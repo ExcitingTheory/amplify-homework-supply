@@ -1,9 +1,0 @@
-{
-  "httpMethod": "POST",
-  "path": "/chat",
-  "queryStringParameters": {},
-  "headers": {
-    "Content-Type": "application/json"
-  },
-  "body": "{\"messages\":[{\"id\":\"msg-1\",\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"text\":\"Hello! Can you help me create a lesson about photosynthesis?\"}]},{\"id\":\"msg-2\",\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"text\":\"Of course! I'd be happy to help you create an engaging lesson about photosynthesis. Let me search for any existing materials we have on this topic.\"}]},{\"id\":\"msg-3\",\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"text\":\"Great! I need an explanation section for middle school students.\"}]}],\"context\":{\"unit\":{\"name\":\"Biology Basics\",\"description\":\"Introduction to cellular biology\"},\"files\":[],\"questionBank\":[],\"dictionary\":[],\"sections\":[]}}"
-}
