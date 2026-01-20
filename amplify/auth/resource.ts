@@ -14,18 +14,25 @@ import { sectionHandler } from '../functions/section/resource';
  * Authentication configuration for Amplify Gen 2
  * Migrated from Gen 1 Cognito user pool configuration
  * 
- * User groups: ADMINS, INSTRUCTORS, LEARNERS
+ * User groups: Admins, Instructors, Learners, Moderators
  * 
  * Authorization Rules:
- * - ADMINS: Full access to all resources
- * - INSTRUCTORS: Can create content, manage sections and students
- * - LEARNERS: Read-only access to published content, can submit work
+ * - Admins: Full access to all resources
+ * - Moderators: Can manage content and moderate user submissions
+ * - Instructors: Can create content, manage sections and students
+ * - Learners: Read-only access to published content, can submit work
  */
 
 export const auth = defineAuth({
   loginWith: {
     email: {
       verificationEmailSubject: 'Verify your email for Homework Supply',
+    },
+  },
+  userAttributes: {
+    locale: {
+      required: false,
+      mutable: true,
     },
   },
   multifactor: {

@@ -16,7 +16,7 @@ import { defineFunction, secret } from '@aws-amplify/backend';
 export const openaiHandler = defineFunction({
   // entry: './handler.ts',
   timeoutSeconds: 300,
-  memoryMB: 512,
+  memoryMB: 3008,
   environment: {
     OPENAI_API_KEY: secret('OPENAI_API_KEY'),
   },

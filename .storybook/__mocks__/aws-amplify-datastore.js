@@ -6,9 +6,15 @@
  * the DataStore class and its methods.
  */
 
-import { MOCK_AUDIO_BASE64, mockWaveformData } from './media';
-import { allChatData } from '../../.storybook/__mocks__/chatDataLoader';
-import chatBot20 from './ui-data/chat-bot-2.0.json';
+import { MOCK_AUDIO_BASE64, mockWaveformData } from './media.js';
+import { allChatData } from './chatDataLoader.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const chatBot20 = JSON.parse(readFileSync(join(__dirname, './ui-data/chat-bot-2.0.json'), 'utf-8'));
 
 
 // Mock unit storage
@@ -379,12 +385,22 @@ export const seedMockSettings = (settingsData) => {
 // Helper to seed mock assistant chats data for stories
 export const seedMockAssistantChats = (chatsArray) => {
   console.log('[Mock DataStore] Seeding assistant chats:', chatsArray.length);
-  console.log('[Mock DataStore] Total assistant chats in store:', Object.keys(chatsArray).length);
+  console.log('[Mock DataStore] Chat data sample:', chatsArray);
+  
+  // Clear existing chats first
+  Object.keys(mockAssistantChats).forEach(key => delete mockAssistantChats[key]);
+  
+  // Store each chat in the mockAssistantChats object so it persists in the mock store
+  chatsArray.forEach(chat => {
+    mockAssistantChats[chat.id] = chat;
+  });
+  
+  console.log('[Mock DataStore] Total assistant chats in store after seeding:', Object.keys(mockAssistantChats).length);
   
   // Notify all AssistantChat subscribers about the new data
   activeSubscriptions.AssistantChat.forEach(callback => {
     console.log('[Mock DataStore] Notifying AssistantChat subscriber with', chatsArray.length, 'chats');
-    callback({ items: chatsArray, isSynced: true });
+    callback({ items: Object.values(mockAssistantChats), isSynced: true });
   });
 };
 
@@ -1585,5 +1601,11 @@ export class DataStore {
         };
       }
     };
+  }
+
+  // Mock configure method - required by Amplify but no-op in Storybook
+  static configure(config) {
+    console.log('[Mock DataStore] configure() called with config:', config ? 'provided' : 'none');
+    return config;
   }
 }

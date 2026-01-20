@@ -1,0 +1,24 @@
+{
+  "Statement": [
+    {
+      "Action": [
+        "cognito-idp:AdminCreateUser",
+        "cognito-idp:AdminAddUserToGroup"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:cognito-idp:us-east-1:759854655984:userpool/us-east-1_kXcgFvxrJ"
+    },
+    {
+      "Action": [
+        "ssm:PutParameter",
+        "ssm:GetParameter"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:ssm:*:*:parameter/amplify/amplifyhomeworksupply/colinbarrettfox-sandbox-ecf7698498/*",
+        "arn:aws:ssm:*:*:parameter/amplify/shared/amplify-homework-supply/*"
+      ]
+    }
+  ],
+  "Version": "2012-10-17"
+}

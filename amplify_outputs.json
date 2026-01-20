@@ -1,9 +1,9 @@
 {
   "auth": {
-    "user_pool_id": "us-east-1_kXcgFvxrJ",
+    "user_pool_id": "us-east-1_CU7FBwKrA",
     "aws_region": "us-east-1",
-    "user_pool_client_id": "1dhinbb8lcm0kgpqga9gd302lj",
-    "identity_pool_id": "us-east-1:8e99dbf1-e14e-479d-a5f3-a06f95193ee9",
+    "user_pool_client_id": "2fvjpl0ffgkbqt4917k8gm405j",
+    "identity_pool_id": "us-east-1:a06324d5-28a1-4fab-8ac9-688ffb36107a",
     "mfa_methods": [
       "TOTP"
     ],
@@ -49,9 +49,9 @@
     "unauthenticated_identities_enabled": true
   },
   "data": {
-    "url": "https://cb4rfhbj2bf2jaly7faxhpgx3y.appsync-api.us-east-1.amazonaws.com/graphql",
+    "url": "https://uuudviqibbh2riarteayw4iiqi.appsync-api.us-east-1.amazonaws.com/graphql",
     "aws_region": "us-east-1",
-    "api_key": "da2-erdx2vhpezf4ldj6pauz2yjc7u",
+    "api_key": "da2-n2s5k6xpdjdnjlgmegjlezvtfy",
     "default_authorization_type": "AMAZON_COGNITO_USER_POOLS",
     "authorization_types": [
       "API_KEY",
@@ -1066,6 +1066,34 @@
               "isRequired": false,
               "attributes": []
             },
+            "documentID": {
+              "name": "documentID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "fileID": {
+              "name": "fileID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "filename": {
+              "name": "filename",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "page": {
+              "name": "page",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
             "generated": {
               "name": "generated",
               "isArray": false,
@@ -1403,6 +1431,14 @@
               "isRequired": false,
               "attributes": []
             },
+            "thumbnailKeys": {
+              "name": "thumbnailKeys",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
             "waveformData": {
               "name": "waveformData",
               "isArray": false,
@@ -1675,6 +1711,34 @@
               "name": "definitionWaveformData",
               "isArray": false,
               "type": "AWSJSON",
+              "isRequired": false,
+              "attributes": []
+            },
+            "documentID": {
+              "name": "documentID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "fileID": {
+              "name": "fileID",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": false,
+              "attributes": []
+            },
+            "filename": {
+              "name": "filename",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "page": {
+              "name": "page",
+              "isArray": false,
+              "type": "Int",
               "isRequired": false,
               "attributes": []
             },
@@ -5687,11 +5751,11 @@
   },
   "storage": {
     "aws_region": "us-east-1",
-    "bucket_name": "amplify-amplifyhomeworksu-homeworksupplystoragebuc-iw3jdwi4bahq",
+    "bucket_name": "amplify-amplifyhomeworksu-homeworksupplystoragebuc-lwtr0wqqzm6b",
     "buckets": [
       {
         "name": "homeworkSupplyStorage",
-        "bucket_name": "amplify-amplifyhomeworksu-homeworksupplystoragebuc-iw3jdwi4bahq",
+        "bucket_name": "amplify-amplifyhomeworksu-homeworksupplystoragebuc-lwtr0wqqzm6b",
         "aws_region": "us-east-1",
         "paths": {
           "public/*": {
@@ -5735,7 +5799,7 @@
   "version": "1.4",
   "custom": {
     "STREAM_API": {
-      "endpoint": "https://uk0xbhnlh2.execute-api.us-east-1.amazonaws.com/",
+      "endpoint": "https://g3o5hj6m5a.execute-api.us-east-1.amazonaws.com/",
       "region": "us-east-1",
       "apiName": "homeworkSupplyStreamApi"
     }

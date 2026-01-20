@@ -13,6 +13,7 @@ import ChatSidebar from '../../ChatSidebar';
 import TableOfContents from './TableOfContents';
 import BlockSuggestionMenu from './BlockSuggestionMenu';
 
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 
 import DictionaryIcon from '@mui/icons-material/LibraryBooks';
 import ChatIcon from '@mui/icons-material/Chat';

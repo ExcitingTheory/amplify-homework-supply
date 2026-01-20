@@ -7,7 +7,7 @@ import {
   PayloadFormatVersion,
 } from 'aws-cdk-lib/aws-apigatewayv2';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
-import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Policy, PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import { auth } from './auth/resource';
 import { data } from './data/resource';
 import { storage } from './storage/resource';
@@ -44,6 +44,8 @@ export const backend = defineBackend({
   assistantHandler,
   moderationHandler,
 });
+
+// Wbesocket API for lambdba realtime function
 
 /**
  * HTTP API for streaming endpoints
@@ -130,6 +132,61 @@ const apiPolicy = new Policy(apiStack, 'StreamApiPolicy', {
 
 // Attach policy to authenticated role
 backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(apiPolicy);
+
+// IAM policies for self-invoking Lambdas
+// Lambda functions need to be able to invoke themselves asynchronously
+const lambdaStack = backend.createStack('lambda-permissions-stack');
+
+// embeddings function self-invoke
+// Policy allows the embeddings Lambda to invoke itself (and all versions/qualifiers with wildcard)
+const embeddingsSelfInvokePolicy = new Policy(lambdaStack, 'EmbeddingsSelfInvokePolicy', {
+  statements: [
+    new PolicyStatement({
+      effect: Effect.ALLOW,
+      actions: ['lambda:InvokeFunction'],
+      resources: [
+        // Include function ARN and all versions/qualifiers (denoted by :*)
+        `${backend.embeddingsHandler.resources.lambda.functionArn}`,
+        `${backend.embeddingsHandler.resources.lambda.functionArn}:*`,
+      ],
+    }),
+  ],
+});
+
+// openai function self-invoke
+const openaiSelfInvokePolicy = new Policy(lambdaStack, 'OpenaiSelfInvokePolicy', {
+  statements: [
+    new PolicyStatement({
+      effect: Effect.ALLOW,
+      actions: ['lambda:InvokeFunction'],
+      resources: [
+        `${backend.openaiHandler.resources.lambda.functionArn}`,
+        `${backend.openaiHandler.resources.lambda.functionArn}:*`,
+      ],
+    }),
+  ],
+});
+
+// documentAnalysis function self-invoke
+const documentAnalysisSelfInvokePolicy = new Policy(lambdaStack, 'DocumentAnalysisSelfInvokePolicy', {
+  statements: [
+    new PolicyStatement({
+      effect: Effect.ALLOW,
+      actions: ['lambda:InvokeFunction'],
+      resources: [
+        `${backend.documentAnalysisHandler.resources.lambda.functionArn}`,
+        `${backend.documentAnalysisHandler.resources.lambda.functionArn}:*`,
+      ],
+    }),
+  ],
+});
+
+// Attach policies to Lambda execution roles
+// The assumed-role ARN pattern (arn:aws:sts::account:assumed-role/RoleName/FunctionName)
+// uses the role's identity-based policies to allow actions
+backend.embeddingsHandler.resources.lambda.role?.attachInlinePolicy(embeddingsSelfInvokePolicy);
+backend.openaiHandler.resources.lambda.role?.attachInlinePolicy(openaiSelfInvokePolicy);
+backend.documentAnalysisHandler.resources.lambda.role?.attachInlinePolicy(documentAnalysisSelfInvokePolicy);
 
 // Export API endpoint
 backend.addOutput({

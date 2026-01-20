@@ -15,7 +15,7 @@ import { defineFunction, secret } from '@aws-amplify/backend';
 export const documentAnalysisHandler = defineFunction({
   // entry: './handler.ts',
   timeoutSeconds: 900,
-  memoryMB: 512,
+  memoryMB: 3008,
   environment: {
     OPENAI_API_KEY: secret('OPENAI_API_KEY'),
   },

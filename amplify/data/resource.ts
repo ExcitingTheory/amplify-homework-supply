@@ -290,6 +290,11 @@ const schema = a.schema({
       audioWaveformData: a.json(),
       answerAudio: a.string().array(),
       answerAudioWaveformData: a.json(),
+      // Source tracking - where the question came from
+      documentID: a.id(), // Source document if imported from PDF
+      fileID: a.id(), // Source file if from specific file
+      filename: a.string(), // Original filename for display
+      page: a.integer(), // Page number in source document
       // Generation metadata
       generated: a.boolean(),
       model: a.string(),
@@ -361,7 +366,8 @@ const schema = a.schema({
       generated: a.boolean(),
       hex: a.string(),
       byHex: a.string(),
-      thumbnail: a.string(),
+      thumbnail: a.string(), // S3 key for first page thumbnail (deprecated - use thumbnailKeys)
+      thumbnailKeys: a.string().array(), // S3 keys for all page thumbnails
       waveformData: a.json(),
       // Relationships - enable querying files by associated model
       documentID: a.id(),
@@ -398,6 +404,11 @@ const schema = a.schema({
       waveformData: a.json(),
       definitionAudio: a.string().array(),
       definitionWaveformData: a.json(),
+      // Source tracking - where the word came from
+      documentID: a.id(), // Source document if imported from PDF
+      fileID: a.id(), // Source file if from specific file
+      filename: a.string(), // Original filename for display
+      page: a.integer(), // Page number in source document
       // Metadata
       importedAt: a.datetime(),
       // Embeddings
