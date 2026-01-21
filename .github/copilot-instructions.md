@@ -41,10 +41,10 @@ const subscription = DataStore.observeQuery(Grade).subscribe(({ items }) => {
 
 **Core Models** (see [docs/API.md](docs/API.md) and [amplify/backend/api/japanese5/schema.graphql](amplify/backend/api/japanese5/schema.graphql)):
 - `Unit` - Learning modules with Lexical JSON content in `data` field
-- `Assignment` - Units assigned to students with due dates
+- `Assignment` - Units assigned to a Section with due dates
 - `Grade` - Student submissions with `data` JSON (question responses) and `accuracy` fields
 - `Section` - Student groups (classes) with join codes
-- `Word` - Japanese vocabulary with phonetic, definition, audio files
+- `Word` - Vocabulary with phonetic, definition, audio files
 - `Question` - Practice questions with audio, images, answers
 - `File` - S3 objects with metadata (audio/video/images/PDFs)
 - `Document` - PDF analysis results with extracted text and vocabulary
@@ -147,8 +147,8 @@ Messages from `useChat` hook have a simple structure - **DO NOT modify message p
 1. Check git history: `git log --oneline -- src/components/ChatSidebar.js`
 2. View current working code: `git show HEAD:src/components/ChatSidebar.js`
 3. Verify mock data format in `.storybook/__mocks__/ui-data/` matches actual data structure
-4. The app uses a simplified message format, NOT AI SDK v6's `message.parts` array format
-5. Mock data is extracted from working component - use it as-is
+4. `message.parts` array format
+
 **Embeddings** (Lambda functions `generateEmbedding` and `generateEmbeddings`):
 - Uses `text-embedding-3-small` model
 - Stored in model fields like `embedding`, `embeddingModel`, `embeddingDimensions`
@@ -209,14 +209,10 @@ const result = await uploadData({
 2. View working version from specific commit: `git show <commit>:<filepath>`
 3. Search for existing patterns: `grep -r "pattern" src/`
 4. Verify mock data matches actual data structure in `.storybook/__mocks__/`
-5. When user says "data is already in correct format", believe them - don't refactor without proof of issue
 
 **REST API Calls**:
 - Always use Amplify's `post()` from `aws-amplify/api` for REST calls to Lambda functions, which handles auth tokens automatically.
-- AdminQueries is the default API name for Amplify Gen 1 REST functions managed by Auth and we should never use it for other APIs.
 - completions is an example of a custom API name that can be used for other REST APIs we create.
-
-
 
 **Authentication Context**: Always check `session.username` exists before DataStore operations that require auth:
 ```javascript
@@ -229,6 +225,7 @@ if (!session.username) return; // Wait for auth
 **Observe Query Subscriptions**: Don't create duplicate subscriptions - check if a Context already provides the data. See `DATASTORE_OPTIMIZATION_CHANGES.md` for patterns.
 
 **Editor Content Saving**: Don't directly mutate `unit.data` - always use `saveEditorContent()` from UnitContext which handles JSON serialization and DataStore.copyOf.
+**Editor Content**: Use the Lexical state management to make changes, not direct DOM manipulation.
 
 **Grade Data Structure**: `Grade.data` is a JSON string that when parsed becomes an object keyed by block IDs:
 ```javascript
@@ -279,8 +276,7 @@ Component development uses Storybook with mocked AWS services:
 ## Optimistic Concurrency Control
 
 - Amplify DataStore uses Optimistic Concurrency Control (OCC) to prevent overwriting newer data. Always save the latest `_version + 1` before updating records. 
-- We will use that version that we saved to determine if we need to update the component state after a save. The best example of this is in the Workbook Grade flow or in the Editor's [src/components/Editor3/plugins/DataPlugin.js](src/components/Editor3/plugins/DataPlugin.js) where we check if the version has changed before updating local state after a save.
+- Next version number that we saved is used to evaluate when to update the component state after a save triggers a subscription. The best example of this is in the Workbook Grade flow or in the Editor's [src/components/Editor3/plugins/DataPlugin.js](src/components/Editor3/plugins/DataPlugin.js) where we check if the version has changed before updating local state after a save.
 - This must happen as a prediction, do not re-query DataStore after every save to get the latest version as that will lead to infinite loops and performance issues.
-- We should use inequality (>) instead of equality (!==, or >=) to check if the version changed unexpectedly. This is because it will make a render loop if the is not the same but won't if it is greater than expected.
-
+- We should use inequality (>) instead of including equality (!==, or >=) to check if the version changed unexpectedly. It will make a render loop if we get a number equal or less than but won't if it is greater than expected.
 

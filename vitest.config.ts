@@ -6,41 +6,38 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     setupFiles: ['./test/setup.ts'],
+    testTimeout: 30000, // 30 seconds for integration tests
+    hookTimeout: 30000,
     include: [
-      'amplify/functions/__tests__/**/*.test.{ts,tsx}',
-      'src/**/__tests__/**/*.test.{ts,tsx}',
-      'test/**/*.test.{ts,tsx}',
-      '.storybook/__tests__/**/*.test.{js,ts}'
+      'test/**/*.test.ts',
+      'src/**/*.test.ts',
+      'amplify/functions/**/*.test.ts',
+      '.storybook/**/*.test.js',
     ],
     exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/.next/**',
-      '**/cypress/**',
-      'amplify/#current-cloud-backend/**',
-      '**/*.stories.{js,jsx,ts,tsx}'
+      'node_modules',
+      'dist',
+      '.amplify',
+      '.next',
+      'out',
+      'build',
     ],
-    testTimeout: 30000,
-    hookTimeout: 30000,
-    teardownTimeout: 10000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       exclude: [
-        '**/node_modules/**',
-        '**/test/**',
-        '**/*.stories.{js,jsx,ts,tsx}',
-        '**/.storybook/**',
-        '**/dist/**',
-        '**/.next/**'
-      ]
-    }
+        'node_modules/',
+        'test/',
+        '.storybook/',
+        '**/*.test.ts',
+        '**/*.test.js',
+      ],
+    },
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@amplify': path.resolve(__dirname, './amplify')
+      '@storybook/__mocks__': path.resolve(__dirname, './.storybook/__mocks__'),
     },
-    extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json']
-  }
+  },
 });

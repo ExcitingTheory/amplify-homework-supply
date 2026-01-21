@@ -20,8 +20,9 @@ import { UnitProvider } from '../context/unitContext';
 import FilesContext from '../context/fileContext';
 import { TabProvider } from '../context/tabContext';
 import { DemoBanner } from '../../.storybook/components/DemoBanner';
-import { allChatData } from '../../.storybook/__mocks__/chatDataLoader';
 import { seedMockAssistantChats } from '../../.storybook/__mocks__/aws-amplify-datastore';
+import { allChatData } from '../../.storybook/__mocks__/chatDataLoader';
+import { create } from 'domain';
 
 export default {
   title: '💬 AI Assistant/Chat Sidebar',

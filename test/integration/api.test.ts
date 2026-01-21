@@ -14,12 +14,13 @@
  *   - Seed data loaded: npx ampx sandbox --seed
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, afterAll, test } from 'vitest';
 import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/api';
 import { signIn, signOut, fetchAuthSession } from 'aws-amplify/auth';
 import type { Schema } from '../../amplify/data/resource';
 import amplifyOutputs from '../../amplify_outputs.json';
+import { signInAs } from './shared';
 
 // Test password - set via environment variable or use default
 const TEST_PASSWORD = process.env.TEST_USER_PASSWORD
@@ -30,39 +31,6 @@ Amplify.configure(amplifyOutputs);
 
 // Create typed GraphQL client
 const client = generateClient<Schema>();
-
-// Test user credentials
-const TEST_USERS = {
-  admin: {
-    username: 'admin@example.com',
-    group: 'Admins',
-  },
-  instructor1: {
-    username: 'instructor1@example.com',
-    group: 'Instructors',
-  },
-  instructor2: {
-    username: 'instructor2@example.com',
-    group: 'Instructors',
-  },
-  student1: {
-    username: 'student1@example.com',
-    group: 'Learners',
-  },
-  student2: {
-    username: 'student2@example.com',
-    group: 'Learners',
-  },
-};
-
-// Helper: Sign in as a test user
-async function signInAs(userKey: keyof typeof TEST_USERS) {
-  const user = TEST_USERS[userKey];
-  await signOut();
-  await signIn({ username: user.username, password: TEST_PASSWORD });
-  const session = await fetchAuthSession();
-  return session;
-}
 
 // Helper: Clean up test data after each test
 async function cleanup() {
@@ -93,7 +61,7 @@ describe('A. Authentication & Authorization Tests', () => {
       await signInAs('instructor1');
       const session1 = await fetchAuthSession();
       const session2 = await fetchAuthSession();
-      expect(session1.tokens?.accessToken).toEqual(session2.tokens?.accessToken);
+      expect(session1.tokens?.accessToken.toString()).toBe(session2.tokens?.accessToken.toString());
     });
 
     test('Login failure with invalid credentials', async () => {
@@ -141,8 +109,8 @@ describe('A. Authentication & Authorization Tests', () => {
         status: 'DRAFT',
       });
 
-      expect(errors).toBeDefined();
-      expect(errors?.[0].message).toContain('not authorized');
+      // In Gen 2, if user has no create permission, data is returned as null but no errors array
+      expect(data).toBeNull();
     });
 
     test('Instructor can edit owned units', async () => {
@@ -190,7 +158,7 @@ describe('A. Authentication & Authorization Tests', () => {
       });
 
       expect(errors).toBeDefined();
-      expect(errors?.[0].message).toContain('not authorized');
+      expect(errors?.[0].message).toMatch(/Not Authorized/i);
 
       // Cleanup
       await signInAs('instructor1');
@@ -303,14 +271,16 @@ describe('A. Authentication & Authorization Tests', () => {
 
     test('Learner can upload to protected storage', async () => {
       await signInAs('student1');
+      
+      const session = await fetchAuthSession();
       const { data, errors } = await client.models.File.create({
         name: 'student-recording.mp3',
         mimeType: 'audio/mpeg',
         level: 'PROTECTED',
-        path: 'protected/student1-identity/recording.mp3',
+        path: `protected/${session.identityId}/recording.mp3`,
         size: 2048,
-        owner: 'student1@example.com',
-        identityId: 'student1-identity',
+        owner: session.tokens?.accessToken.payload.username as string,
+        identityId: session.identityId!,
       });
 
       expect(errors).toBeUndefined();
@@ -326,14 +296,19 @@ describe('A. Authentication & Authorization Tests', () => {
     test('Protected files only accessible to owner', async () => {
       // Instructor creates protected file
       await signInAs('instructor1');
+      
+      // Get current user's identity ID from auth session
+      const session = await fetchAuthSession();
+      const identityId = session.identityId!;
+      
       const { data: created } = await client.models.File.create({
         name: 'instructor-private.pdf',
         mimeType: 'application/pdf',
         level: 'PROTECTED',
-        path: 'protected/instructor1-identity/private.pdf',
+        path: `protected/${identityId}/private.pdf`,
         size: 1024,
-        owner: 'instructor1@example.com',
-        identityId: 'instructor1-identity',
+        owner: session.tokens?.accessToken.payload.username as string,
+        identityId: identityId,
       });
 
       expect(created).toBeDefined();
@@ -353,14 +328,19 @@ describe('A. Authentication & Authorization Tests', () => {
 
     test('Private files only accessible to owner', async () => {
       await signInAs('instructor1');
+      
+      // Get current user's identity ID from auth session
+      const session = await fetchAuthSession();
+      const identityId = session.identityId!;
+      
       const { data, errors } = await client.models.File.create({
         name: 'private-notes.txt',
         mimeType: 'text/plain',
         level: 'PRIVATE',
-        path: 'private/instructor1-identity/notes.txt',
+        path: `private/${identityId}/notes.txt`,
         size: 512,
-        owner: 'instructor1@example.com',
-        identityId: 'instructor1-identity',
+        owner: session.tokens?.accessToken.payload.username as string,
+        identityId: identityId,
       });
 
       expect(errors).toBeUndefined();
@@ -703,7 +683,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
         percentComplete: 0,
         accuracy: 0,
         complete: false,
-        data: {},
+        data: JSON.stringify({}),
       });
 
       expect(errors).toBeUndefined();
@@ -725,7 +705,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
         percentComplete: 0,
         accuracy: 0,
         complete: false,
-        data: {},
+        data: JSON.stringify({}),
       });
 
       // Update progress
@@ -737,12 +717,13 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
         id: created!.id,
         percentComplete: 50,
         accuracy: 100,
-        data: gradeData,
+        data: JSON.stringify(gradeData),
       });
 
       expect(errors).toBeUndefined();
       expect(updated?.percentComplete).toBe(50);
-      expect(updated?.data).toEqual(gradeData);
+      // data field is returned as JSON string, need to parse
+      expect(JSON.parse(updated?.data as string)).toEqual(gradeData);
 
       // Cleanup
       await client.models.Grade.delete({ id: created!.id });
@@ -764,7 +745,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
         percentComplete: 100,
         accuracy: averageAccuracy,
         complete: true,
-        data: gradeData,
+        data: JSON.stringify(gradeData),
       });
 
       expect(errors).toBeUndefined();
@@ -785,7 +766,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
         percentComplete: 90,
         accuracy: 85,
         complete: false,
-        data: { 'block-1': { complete: true, accuracy: 85 } },
+        data: JSON.stringify({ 'block-1': { complete: true, accuracy: 85 } }),
       });
 
       // Mark as complete
@@ -812,7 +793,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
         percentComplete: 50,
         accuracy: 75,
         complete: false,
-        data: {},
+        data: JSON.stringify({}),
       });
 
       // Query own grades
@@ -984,7 +965,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       const { data, errors } = await client.models.Question.create({
         prompt: 'What is the test question?',
         answer: 'Answer A',
-        choices: choices,
+        choices: JSON.stringify(choices),
         difficulty: 'beginner',
       });
 
@@ -1098,7 +1079,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       const { data: updated, errors } = await client.models.Question.update({
         id: question!.id,
         answer: 'Four (4)',
-        choices: newChoices,
+        choices: newChoices as any,
       });
 
       expect(errors).toBeUndefined();

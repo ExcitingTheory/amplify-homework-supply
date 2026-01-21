@@ -322,7 +322,7 @@ function QuestionCard({
                                 label={item.filename.length > 20 ? `${item.filename.slice(0, 17)}...` : item.filename}
                                 size="small" 
                                 variant="outlined"
-                                color="primary"
+                                color="default"
                                 sx={{ fontSize: '0.65rem', height: '20px', maxWidth: '150px' }}
                             />
                         </Tooltip>
@@ -334,6 +334,18 @@ function QuestionCard({
                             variant="outlined"
                             sx={{ fontSize: '0.65rem', height: '20px' }}
                         />
+                    )}
+                    {existsInQuestionBank && (
+                        <Tooltip title="Already in question bank">
+                            <Chip 
+                                icon={<CheckCircleIcon />}
+                                label="Exists" 
+                                size="small" 
+                                color="success"
+                                variant="outlined"
+                                sx={{ fontSize: '0.65rem', height: '20px' }}
+                            />
+                        </Tooltip>
                     )}
                     {item.hasAudio && (
                         <Tooltip title="Has audio">
@@ -802,5 +814,4 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
     );
 };
 
-export { QuestionCard };
 export default QuestionsReview2;

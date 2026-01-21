@@ -16,7 +16,9 @@ export const aiHandler = defineFunction({
   // entry: './handler.ts',
   timeoutSeconds: 60,
   memoryMB: 256,
+  resourceGroupName: 'data',  // Assign to data stack - used as GraphQL resolver
   environment: {
     OPENAI_API_KEY: secret('OPENAI_API_KEY'),
   },
+
 });

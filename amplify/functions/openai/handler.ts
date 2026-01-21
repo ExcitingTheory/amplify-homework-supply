@@ -13,12 +13,13 @@
 
 import type { Handler } from 'aws-lambda';
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
-import { CognitoIdentityClient, GetIdCommand } from '@aws-sdk/client-cognito-identity';
-import { GraphQLClient } from 'graphql-request';
+import { type Schema } from '../../data/resource';
+import { Amplify } from 'aws-amplify';
+import { generateClient } from 'aws-amplify/data';
 
 const lambdaClient = new LambdaClient();
-const cognitoIdentityClient = new CognitoIdentityClient();
 let openaiInstance: any = null;
+let dataClient: ReturnType<typeof generateClient<Schema>> | null = null;
 
 async function getOpenAI(): Promise<any> {
   if (!openaiInstance) {
@@ -30,85 +31,61 @@ async function getOpenAI(): Promise<any> {
   return openaiInstance;
 }
 
-function getGraphQLClient(authToken: string): GraphQLClient {
-  const apiEndpoint = process.env.API_ENDPOINT;
-  if (!apiEndpoint) throw new Error('API_ENDPOINT environment variable not set');
-  
-  return new GraphQLClient(apiEndpoint, {
-    headers: { 'Authorization': `Bearer ${authToken}` }
-  });
-}
-
-async function getIdentityId(userPoolId: string, authToken: string): Promise<string> {
-  const identityPoolId = process.env.IDENTITY_POOL_ID;
-  if (!identityPoolId) throw new Error('IDENTITY_POOL_ID environment variable not set');
-  
-  const command = new GetIdCommand({
-    IdentityPoolId: identityPoolId,
-    Logins: {
-      [`cognito-idp.${process.env.AWS_REGION}.amazonaws.com/${userPoolId}`]: authToken,
-    },
-  });
-  
-  const response = await cognitoIdentityClient.send(command);
-  if (!response.IdentityId) throw new Error('Failed to retrieve identity ID from Cognito');
-  
-  return response.IdentityId;
+async function getDataClient() {
+  if (!dataClient) {
+    // Lambda resolvers get API_ENDPOINT and AWS_REGION automatically
+    Amplify.configure({
+      API: {
+        GraphQL: {
+          endpoint: process.env.API_ENDPOINT || '',
+          region: process.env.AWS_REGION || 'us-east-1',
+          defaultAuthMode: 'iam', // Lambda uses IAM auth
+        },
+      },
+    });
+    dataClient = generateClient<Schema>();
+  }
+  return dataClient;
 }
 
 /**
  * Authorization check utility
  * Verifies user is authenticated and extracts claims
  */
-function requireAuth(event: any, context: any) {
-  const userId = event.requestContext?.authorizer?.claims?.sub;
-  const authToken = event.request?.authToken || context.authorizer?.token;
+function requireAuth(event: any) {
+  const userId = event.identity?.sub;
+  const username = event.identity?.username;
+  // For S3 protected/private access, we need the Cognito Identity Pool ID
+  // This is different from the user pool sub - it's in the cognito:username claim or identity sourceIp context
+  const identityId = event.identity?.cognitoIdentityId || event.identity?.claims?.['cognito:username'] || userId;
   
-  if (!userId || !authToken) {
+  if (!userId) {
+    console.error('[OpenAI Handler] No user identity found in event:', JSON.stringify(event, null, 2));
     throw new Error('Unauthorized: User authentication required');
   }
   
-  return { userId, authToken };
+  console.log('[OpenAI Handler] Auth:', { userId, username, identityId });
+  
+  return { userId, username: username || userId, identityId };
 }
-
-const createFileMutation = `
-  mutation CreateFile(
-    $input: CreateFileInput!
-  ) {
-    createFile(input: $input) {
-      id
-      name
-      type
-      s3Key
-      createdAt
-      status
-    }
-  }
-`;
-
-const updateFileMutation = `
-  mutation UpdateFile(
-    $input: UpdateFileInput!
-  ) {
-    updateFile(input: $input) {
-      id
-      status
-    }
-  }
-`;
 
 export const handler: Handler = async (event: any, context: any) => {
   // Extract which operation is being called from the AppSync context
-  const operationName = context?.['x-operation-name'] || event.info?.fieldName;
+  // In Gen 2, AppSync passes fieldName via event.info.fieldName
+  const operationName = event.info?.fieldName || event.fieldName;
+  
+  if (!operationName) {
+    console.error('[OpenAI Handler] No operation name found in event:', JSON.stringify(event, null, 2));
+    throw new Error('Unable to determine operation name from event');
+  }
   
   console.log(`[OpenAI Handler] ${operationName}`, event.arguments);
 
   try {
     // Require authentication for all operations
-    const { userId, authToken } = requireAuth(event, context);
+    const { userId, username, identityId } = requireAuth(event);
     const userPoolId = process.env.USER_POOL_ID;
     const args = event.arguments || {};
-    const graphqlClient = getGraphQLClient(authToken);
 
     switch (operationName) {
       case 'chat':
@@ -116,13 +93,13 @@ export const handler: Handler = async (event: any, context: any) => {
       case 'generateAudio':
         return await handleGenerateAudio(args);
       case 'generateAudioFile':
-        return await handleGenerateAudioFile(args, graphqlClient, userId, userPoolId, authToken);
+        return await handleGenerateAudioFile(args, userId, identityId);
       case 'generateAudioFileAsync':
         return await handleGenerateAudioFileAsync(args);
       case 'generateImage':
         return await handleGenerateImage(args);
       case 'generateImageFile':
-        return await handleGenerateImageFile(args, graphqlClient, userId, userPoolId, authToken);
+        return await handleGenerateImageFile(args, userId, identityId);
       case 'generateImageFileAsync':
         return await handleGenerateImageFileAsync(args);
       case 'verifyDefinition':
@@ -200,34 +177,30 @@ async function handleGenerateAudio(args: any): Promise<string> {
   }
 }
 
-async function handleGenerateAudioFile(args: any, client: GraphQLClient | null, userId: string, userPoolId: string | undefined, authToken: string): Promise<any> {
+async function handleGenerateAudioFile(args: any, userId: string, identityId: string): Promise<any> {
   const { phrase, voice = 'alloy', model = 'tts-1' } = args;
   
   try {
-    // Create File model with pending status first
-    if (!client) throw new Error('GraphQL client not available for file creation');
-    if (!userId) throw new Error('User ID not available');
-    if (!userPoolId) throw new Error('User pool ID not available');
-    if (!authToken) throw new Error('Auth token not available');
-    
-    // Get identity ID from Cognito Identity Pool
-    const identityId = await getIdentityId(userPoolId, authToken);
+    const client = await getDataClient();
     
     const timestamp = Date.now();
     const fileName = `generated-audio-${timestamp}.mp3`;
-    const s3Key = `public/audio/${timestamp}/${fileName}`;
+    const s3Path = `public/audio/${timestamp}/${fileName}`;
     
-    const fileResponse: any = await client.request(createFileMutation, {
-      input: {
-        name: fileName,
-        type: 'audio/mpeg',
-        s3Key,
-        status: 'pending',
-        identityId,
-      }
+    // Create File record with pending status
+    const { data: file, errors } = await client.models.File.create({
+      name: fileName,
+      mimeType: 'audio/mpeg',
+      path: s3Path,
+      owner: userId,
+      identityId: identityId,
     });
     
-    const fileId = fileResponse.createFile.id;
+    if (errors || !file) {
+      throw new Error(`Failed to create File record: ${JSON.stringify(errors)}`);
+    }
+    
+    const fileId = file.id;
     
     // Invoke Lambda asynchronously to generate the actual audio
     await lambdaClient.send(new InvokeCommand({
@@ -239,7 +212,6 @@ async function handleGenerateAudioFile(args: any, client: GraphQLClient | null, 
         phrase,
         voice,
         model,
-        authToken,
       }),
     }));
     
@@ -247,7 +219,7 @@ async function handleGenerateAudioFile(args: any, client: GraphQLClient | null, 
       id: fileId,
       filename: fileName,
       fileType: 'audio/mpeg',
-      s3Key,
+      path: s3Path,
       status: 'pending',
       contentType: 'audio/mpeg',
     };
@@ -258,9 +230,9 @@ async function handleGenerateAudioFile(args: any, client: GraphQLClient | null, 
 }
 
 async function handleGenerateAudioFileAsync(args: any): Promise<void> {
-  const { fileId, phrase, voice = 'alloy', model = 'tts-1', authToken } = args;
+  const { fileId, phrase, voice = 'alloy', model = 'tts-1' } = args;
   const openai = await getOpenAI();
-  const client = getGraphQLClient(authToken);
+  const client = await getDataClient();
   
   try {
     // Generate audio
@@ -273,27 +245,21 @@ async function handleGenerateAudioFileAsync(args: any): Promise<void> {
     const buffer = await response.arrayBuffer();
     const base64Audio = Buffer.from(buffer).toString('base64');
     
-    // Update File with completed status and data
-    await client.request(updateFileMutation, {
-      input: {
-        id: fileId,
-        status: 'completed',
-        data: base64Audio,
-      }
+    // Update File with completed data
+    await client.models.File.update({
+      id: fileId,
+      description: 'Generated audio - completed',
     });
     
     console.log(`[Audio Generation Complete] ${fileId}`);
   } catch (error) {
     console.error('[Generate Audio File Async Error]:', error);
-    // Update File with error status
+    // Update File with error description
     try {
-      const client = getGraphQLClient(args.authToken);
-      await client.request(updateFileMutation, {
-        input: {
-          id: fileId,
-          status: 'error',
-          error: String(error),
-        }
+      const client = await getDataClient();
+      await client.models.File.update({
+        id: fileId,
+        description: `Error: ${String(error).substring(0, 200)}`,
       });
     } catch (updateError) {
       console.error('[Update File Status Error]:', updateError);
@@ -321,34 +287,30 @@ async function handleGenerateImage(args: any): Promise<string> {
   }
 }
 
-async function handleGenerateImageFile(args: any, client: GraphQLClient | null, userId: string, userPoolId: string | undefined, authToken: string): Promise<any> {
+async function handleGenerateImageFile(args: any, userId: string, identityId: string): Promise<any> {
   const { phrase, model = 'dall-e-3' } = args;
   
   try {
-    // Create File model with pending status first
-    if (!client) throw new Error('GraphQL client not available for file creation');
-    if (!userId) throw new Error('User ID not available');
-    if (!userPoolId) throw new Error('User pool ID not available');
-    if (!authToken) throw new Error('Auth token not available');
-    
-    // Get identity ID from Cognito Identity Pool
-    const identityId = await getIdentityId(userPoolId, authToken);
+    const client = await getDataClient();
     
     const timestamp = Date.now();
     const fileName = `generated-image-${timestamp}.png`;
-    const s3Key = `public/images/${timestamp}/${fileName}`;
+    const s3Path = `public/images/${timestamp}/${fileName}`;
     
-    const fileResponse: any = await client.request(createFileMutation, {
-      input: {
-        name: fileName,
-        type: 'image/png',
-        s3Key,
-        status: 'pending',
-        identityId,
-      }
+    // Create File record with pending status
+    const { data: file, errors } = await client.models.File.create({
+      name: fileName,
+      mimeType: 'image/png',
+      path: s3Path,
+      owner: userId,
+      identityId: identityId,
     });
     
-    const fileId = fileResponse.createFile.id;
+    if (errors || !file) {
+      throw new Error(`Failed to create File record: ${JSON.stringify(errors)}`);
+    }
+    
+    const fileId = file.id;
     
     // Invoke Lambda asynchronously to generate the actual image
     await lambdaClient.send(new InvokeCommand({
@@ -359,7 +321,6 @@ async function handleGenerateImageFile(args: any, client: GraphQLClient | null, 
         fileId,
         phrase,
         model,
-        authToken,
       }),
     }));
     
@@ -367,7 +328,7 @@ async function handleGenerateImageFile(args: any, client: GraphQLClient | null, 
       id: fileId,
       filename: fileName,
       fileType: 'image/png',
-      s3Key,
+      path: s3Path,
       status: 'pending',
     };
   } catch (error) {
@@ -377,9 +338,9 @@ async function handleGenerateImageFile(args: any, client: GraphQLClient | null, 
 }
 
 async function handleGenerateImageFileAsync(args: any): Promise<void> {
-  const { fileId, phrase, model = 'dall-e-3', authToken } = args;
+  const { fileId, phrase, model = 'dall-e-3' } = args;
   const openai = await getOpenAI();
-  const client = getGraphQLClient(authToken);
+  const client = await getDataClient();
   
   try {
     // Generate image
@@ -393,27 +354,21 @@ async function handleGenerateImageFileAsync(args: any): Promise<void> {
     
     const base64 = response.data[0]?.b64_json || '';
     
-    // Update File with completed status and data
-    await client.request(updateFileMutation, {
-      input: {
-        id: fileId,
-        status: 'completed',
-        data: base64,
-      }
+    // Update File with completed data
+    await client.models.File.update({
+      id: fileId,
+      description: 'Generated image - completed',
     });
     
     console.log(`[Image Generation Complete] ${fileId}`);
   } catch (error) {
     console.error('[Generate Image File Async Error]:', error);
-    // Update File with error status
+    // Update File with error description
     try {
-      const client = getGraphQLClient(args.authToken);
-      await client.request(updateFileMutation, {
-        input: {
-          id: fileId,
-          status: 'error',
-          error: String(error),
-        }
+      const client = await getDataClient();
+      await client.models.File.update({
+        id: fileId,
+        description: `Error: ${String(error).substring(0, 200)}`,
       });
     } catch (updateError) {
       console.error('[Update File Status Error]:', updateError);

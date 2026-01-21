@@ -9,7 +9,7 @@
  * - allow.field('sectionID').group('section-{id}-learners').to(['read'])
  */
 
-import { CognitoIdentityProviderClient, AdminAddUserToGroupCommand, AdminRemoveUserFromGroupCommand, CreateGroupCommand, DeleteGroupCommand } from '@aws-sdk/client-cognito-identity-provider';
+import { CognitoIdentityProviderClient, AdminAddUserToGroupCommand, AdminRemoveUserFromGroupCommand, CreateGroupCommand, DeleteGroupCommand, ListUsersInGroupCommand } from '@aws-sdk/client-cognito-identity-provider';
 
 export class GroupManager {
   private cognitoClient: CognitoIdentityProviderClient;
@@ -195,6 +195,30 @@ export class GroupManager {
       if (error.name !== 'GroupNotFoundException') {
         throw error;
       }
+    }
+  }
+
+  /**
+   * List all learners in a section
+   * @param sectionId - Section ID
+   * @returns Array of user objects
+   */
+  async listLearnersInSection(sectionId: string): Promise<any[]> {
+    const groupName = this.getLearnerGroupName(sectionId);
+    
+    try {
+      const response = await this.cognitoClient.send(new ListUsersInGroupCommand({
+        GroupName: groupName,
+        UserPoolId: this.userPoolId,
+      }));
+      
+      return response.Users || [];
+    } catch (error: any) {
+      if (error.name === 'GroupNotFoundException') {
+        console.log(`[GroupManager] Group not found: ${groupName}`);
+        return [];
+      }
+      throw error;
     }
   }
 

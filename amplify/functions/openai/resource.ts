@@ -16,7 +16,8 @@ import { defineFunction, secret } from '@aws-amplify/backend';
 export const openaiHandler = defineFunction({
   // entry: './handler.ts',
   timeoutSeconds: 300,
-  memoryMB: 3008,
+  memoryMB: 512,
+  resourceGroupName: 'data',  // Assign to data stack - used as GraphQL resolver
   environment: {
     OPENAI_API_KEY: secret('OPENAI_API_KEY'),
   },

@@ -36,7 +36,6 @@ import {
     Alert,
     Chip,
     Portal,
-    Divider,
 } from "@mui/material";
 import { useVirtualizer } from '@tanstack/react-virtual';
 import React from "react";
@@ -49,7 +48,6 @@ import UploadFile from '@mui/icons-material/UploadFile';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
@@ -68,13 +66,13 @@ import { fetchAuthSession } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import { calculateWaveformData } from '../../../utils/calculateWaveformData';
 import { uploadFile, uploadAndAnalyzePDF, analyzePDF, cancelPDFAnalysis, generateEmbeddings } from '../../../utils/fileUploadUtils';
-import {
-    saveEmbeddings,
-    loadAllEmbeddings,
-    loadEmbeddingsByDocument,
+import { 
+    saveEmbeddings, 
+    loadAllEmbeddings, 
+    loadEmbeddingsByDocument, 
     deleteEmbeddings,
     getEmbeddingsTimestamp,
-    loadEmbeddingsFromS3
+    loadEmbeddingsFromS3 
 } from '../../../utils/vectorStoreDB';
 import * as EmbeddingWorker from '../../../utils/embeddingWorkerManager';
 
@@ -209,7 +207,7 @@ export class CourseVectorStore {
         if (this.loadPromise) {
             return this.loadPromise;
         }
-
+        
         this.loadPromise = (async () => {
             try {
                 const embeddings = await loadAllEmbeddings();
@@ -225,7 +223,7 @@ export class CourseVectorStore {
                 this.loadPromise = null;
             }
         })();
-
+        
         return this.loadPromise;
     }
 
@@ -274,7 +272,7 @@ export class CourseVectorStore {
         // Separate items with and without embeddings
         const itemsWithEmbeddings = results.filter(item => queryVector && item.vector);
         const itemsWithoutEmbeddings = results.filter(item => !(queryVector && item.vector));
-
+        
         console.log(`[VectorStore.search] Processing ${itemsWithEmbeddings.length} items with embeddings, ${itemsWithoutEmbeddings.length} without`);
 
         // Compute vector similarities using worker (for large batches)
@@ -286,11 +284,11 @@ export class CourseVectorStore {
                 try {
                     // Calculate similarities in the worker
                     const similarities = await Promise.all(
-                        itemsWithEmbeddings.map(item =>
+                        itemsWithEmbeddings.map(item => 
                             EmbeddingWorker.cosineSimilarity(queryVector, item.vector)
                         )
                     );
-
+                    
                     vectorResults = itemsWithEmbeddings.map((item, i) => ({
                         ...item,
                         similarity: similarities[i]
@@ -309,11 +307,11 @@ export class CourseVectorStore {
         // Compute text similarities for items without embeddings
         const textResults = itemsWithoutEmbeddings.map(item => {
             let similarity = 0;
-
+            
             if (queryText && item.text) {
                 const queryLower = queryText.toLowerCase();
                 const textLower = item.text.toLowerCase();
-
+                
                 // Simple text matching score
                 if (textLower.includes(queryLower)) {
                     // Exact phrase match
@@ -325,7 +323,7 @@ export class CourseVectorStore {
                     similarity = matchedWords.length / Math.max(queryWords.length, 1) * 0.6;
                 }
             }
-
+            
             return {
                 ...item,
                 similarity
@@ -906,7 +904,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
     })() : null;
 
     // Parse JSON content for documents
-
+   
     const highlightText = (text) => {
         if (!search || !text) return text;
         return highlightMatches(text, search);
@@ -952,40 +950,40 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
             {/* Document Parsed Content */}
             {isDocument && parsedContent && (
                 <Box sx={{ position: 'relative', zIndex: 1 }}>
-                    <Tabs
-                        value={activeTab}
+                    <Tabs 
+                        value={activeTab} 
                         scrollButtons="auto"
                         variant="scrollable"
                         onChange={(e, newValue) => setActiveTab(newValue)}
-                        sx={{
-                            position: 'relative',
+                        sx={{ 
+                            position: 'relative', 
                             zIndex: 2,
                             backgroundColor: 'background.paper',
                             borderRadius: '4px 4px 0 0'
                         }}
                     >
-                        <Tab
-                            icon={<MenuBookIcon />}
+                        <Tab 
+                            icon={<MenuBookIcon />} 
                             label={`(${parsedContent.vocabularyJSON.length})`}
                             iconPosition="start"
                         />
-                        <Tab
-                            icon={<QuizIcon />}
+                        <Tab 
+                            icon={<QuizIcon />} 
                             label={`(${parsedContent.questionsJSON.length})`}
                             iconPosition="start"
                         />
-                        <Tab
-                            icon={<SummarizeIcon />}
+                        <Tab 
+                            icon={<SummarizeIcon />} 
                             label={`(${parsedContent.summariesJSON.length})`}
                             iconPosition="start"
                         />
-                        <Tab
-                            icon={<FlagIcon />}
+                        <Tab 
+                            icon={<FlagIcon />} 
                             label={`(${parsedContent.objectivesJSON.length})`}
                             iconPosition="start"
                         />
-                        <Tab
-                            icon={<LightbulbIcon />}
+                        <Tab 
+                            icon={<LightbulbIcon />} 
                             label={`(${parsedContent.conceptsJSON.length})`}
                             iconPosition="start"
                         />
@@ -1048,12 +1046,12 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
                         <Box sx={{ mt: 2 }}>
                             {parsedContent.summariesJSON.length > 0 ? (
                                 parsedContent.summariesJSON.map((item, index) => (
-                                    <Box
-                                        key={index}
-                                        sx={{
-                                            mb: 2,
-                                            p: 2,
-                                            border: 2,
+                                    <Box 
+                                        key={index} 
+                                        sx={{ 
+                                            mb: 2, 
+                                            p: 2, 
+                                            border: 2, 
                                             borderColor: 'primary.main',
                                             borderRadius: 1,
                                             backgroundColor: 'primary.light',
@@ -1067,7 +1065,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
                                             {highlightText(item.content)}
                                         </Typography>
                                         {item.page_range && (
-                                            <Chip
+                                            <Chip 
                                                 label={`Pages: ${item.page_range}`}
                                                 size="small"
                                                 color="primary"
@@ -1089,12 +1087,12 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
                         <Box sx={{ mt: 2 }}>
                             {parsedContent.objectivesJSON.length > 0 ? (
                                 parsedContent.objectivesJSON.map((item, index) => (
-                                    <Box
-                                        key={index}
-                                        sx={{
-                                            mb: 2,
-                                            p: 2,
-                                            border: 2,
+                                    <Box 
+                                        key={index} 
+                                        sx={{ 
+                                            mb: 2, 
+                                            p: 2, 
+                                            border: 2, 
                                             borderColor: 'secondary.main',
                                             borderRadius: 1,
                                             backgroundColor: 'secondary.light',
@@ -1127,12 +1125,12 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
                         <Box sx={{ mt: 2 }}>
                             {parsedContent.conceptsJSON.length > 0 ? (
                                 parsedContent.conceptsJSON.map((item, index) => (
-                                    <Box
-                                        key={index}
-                                        sx={{
-                                            mb: 2,
-                                            p: 2,
-                                            border: 2,
+                                    <Box 
+                                        key={index} 
+                                        sx={{ 
+                                            mb: 2, 
+                                            p: 2, 
+                                            border: 2, 
                                             borderColor: 'success.main',
                                             borderRadius: 1,
                                             backgroundColor: 'success.light',
@@ -1811,16 +1809,11 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
 // Header Components for File List
 // =============================================================================
 
-const ProtectionLevelHeader = React.memo(function ProtectionLevelHeader({
-    label,
-    totalFiles,
-    isExpanded = true,
-    onToggleExpand = () => { }
-}) {
+const ProtectionLevelHeader = React.memo(function ProtectionLevelHeader({ label, totalFiles }) {
     return (
         <Box sx={{
             position: 'sticky',
-            top: 0,
+            top: 88, // Below toolbar (52) + tabs (36)
             height: '100%',
             minHeight: 48,
             px: 2,
@@ -1832,20 +1825,8 @@ const ProtectionLevelHeader = React.memo(function ProtectionLevelHeader({
             flexShrink: 0,
             zIndex: 98,
             borderBottom: '1px solid',
-            borderColor: 'divider',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            '&:hover': {
-                bgcolor: 'primary.dark'
-            }
-        }}
-            onClick={onToggleExpand}
-        >
-            {/* Expand/Collapse Icon */}
-            <Box sx={{ display: 'flex', alignItems: 'center', transition: 'transform 0.2s' }}>
-                {isExpanded ? <ExpandMoreIcon /> : <ExpandLessIcon />}
-            </Box>
-
+            borderColor: 'divider'
+        }}>
             <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'inherit', fontSize: '0.875rem' }}>
                 {label}
             </Typography>
@@ -1864,7 +1845,7 @@ const ProtectionLevelHeader = React.memo(function ProtectionLevelHeader({
     );
 });
 
-const FileTypeSubheader = React.memo(function FileTypeSubheader({ label, fileType, isExpanded, onToggleExpand }) {
+const FileTypeSubheader = React.memo(function FileTypeSubheader({ label, fileType }) {
     const getIconForType = (type) => {
         switch (type) {
             case 'images': return '🖼️';
@@ -1877,30 +1858,21 @@ const FileTypeSubheader = React.memo(function FileTypeSubheader({ label, fileTyp
     };
 
     return (
-        <Box
-            onClick={onToggleExpand}
-            sx={{
-                height: '100%',
-                minHeight: 36,
-                px: 2,
-                bgcolor: 'grey.100',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                borderBottom: '1px solid',
-                borderColor: 'divider',
-                flexShrink: 0,
-                cursor: 'pointer',
-                userSelect: 'none',
-                '&:hover': {
-                    bgcolor: 'grey.200'
-                }
-            }}>
-            <ExpandMoreIcon sx={{
-                fontSize: '1.2rem',
-                transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)',
-                transition: 'transform 0.2s ease'
-            }} />
+        <Box sx={{
+            position: 'sticky',
+            top: 136, // Below toolbar (52) + tabs (36) + protection header (48)
+            height: '100%',
+            minHeight: 36,
+            px: 2,
+            bgcolor: 'grey.100',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            flexShrink: 0,
+            zIndex: 97
+        }}>
             <Box component="span" sx={{ fontSize: '1rem', lineHeight: 1 }}>
                 {getIconForType(fileType)}
             </Box>
@@ -1912,385 +1884,256 @@ const FileTypeSubheader = React.memo(function FileTypeSubheader({ label, fileTyp
 });
 
 // =============================================================================
-// FileDetailsPanel - Shows file details and actions in right panel header
+// FileRowComponent - Renders individual file rows based on file type
 // =============================================================================
 
-const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentStatus, editor }) {
-    const { setConfirmDialog } = useFileManager();
-    const [imageUrl, setImageUrl] = React.useState(null);
-    const [audioUrl, setAudioUrl] = React.useState(null);
-    const [videoUrl, setVideoUrl] = React.useState(null);
-
-    // Load signed URLs for media files
+const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, index }) {
+    const [editor] = useLexicalComposerContext();
+    const {
+        search,
+        expandedItems,
+        selectedItems,
+        expandedFileContent,
+        parsedContentData,
+        documentStatuses,
+        toggleFileContentExpansion,
+        handleToggleSelect,
+        handleFileNameUpdate,
+        setConfirmDialog,
+        setGenerator,
+        setSelectedDocument,
+        remove
+    } = useFileManager();
+    
+    const tabContext = useTabContext();
+    const fileItemRef = React.useRef(null);
+    const [isHighlighted, setIsHighlighted] = React.useState(false);
+    
+    // Derive state values early (before using in effects)
+    const isExpanded = expandedItems.has(file.id);
+    const isSelected = Boolean(selectedItems?.has(file.id));
+    const parsedContent = parsedContentData[file.id];
+    const documentStatus = documentStatuses[file.documentID];
+    const isContentExpanded = expandedFileContent.has(file.id);
+    
+    // Register ref for scrolling
     React.useEffect(() => {
-        const loadUrls = async () => {
-            try {
-                if (file.mimeType?.startsWith('image/')) {
-                    const url = await getCachedUrl(file.path, file.level?.toLowerCase() || 'protected', file.identityId);
-                    setImageUrl(url);
-                } else if (file.mimeType?.startsWith('audio/')) {
-                    const url = await getCachedUrl(file.path, file.level?.toLowerCase() || 'protected', file.identityId);
-                    setAudioUrl(url);
-                } else if (file.mimeType?.startsWith('video/')) {
-                    const url = await getCachedUrl(file.path, file.level?.toLowerCase() || 'protected', file.identityId);
-                    setVideoUrl(url);
-                }
-            } catch (error) {
-                console.error('Error loading file URL:', error);
+        if (tabContext?.registerItemRef && file?.id) {
+            tabContext.registerItemRef('file', file.id, fileItemRef);
+        }
+        return () => {
+            if (tabContext?.unregisterItemRef && file?.id) {
+                tabContext.unregisterItemRef('file', file.id);
             }
         };
-
-        loadUrls();
-    }, [file.id, file.path, file.level, file.identityId, file.mimeType]);
-
-    const handleMenuAction = async (action) => {
-        switch (action) {
-            case 'insert-image':
-                if (editor) {
-                    editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
-                        altText: file.name,
-                        path: file.path,
-                        identityId: file.identityId,
-                    });
-                }
-                break;
-            case 'insert-audio':
-                if (editor) {
-                    editor.dispatchCommand(INSERT_PLAYLIST_COMMAND, [file.id]);
-                }
-                break;
-            case 'download':
-                try {
-                    const url = await getCachedUrl(file.path, 'protected', file.identityId);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = file.name;
-                    link.target = '_blank';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                } catch (error) {
-                    console.error('Error downloading file:', error);
-                }
-                break;
-            case 'delete':
-                setConfirmDialog({
-                    open: true,
-                    message: `Delete ${file.name}?`,
-                    severity: 'warning',
-                    onConfirm: async () => {
-                        await deleteFileCompletely(file);
-                        setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
-                    }
-                });
-                break;
-            case 're-analyze':
-                if (file.documentID) {
-                    if (file.mimeType === 'application/pdf') {
-                        try {
-                            console.log('[FileManager2] Re-analyzing PDF:', file.name);
-                            await analyzePDF(file.id, true);
-                            console.log('[FileManager2] Re-generating embeddings for:', file.name);
-                            await generateEmbeddings(file.id);
-                        } catch (error) {
-                            console.error('Error re-analyzing document:', error);
-                        }
-                    } else {
-                        console.log('[FileManager2] Re-generating embeddings for:', file.name);
-                        await generateEmbeddings(file.id);
-                    }
-                }
-                break;
+    }, [file?.id, tabContext]);
+    
+    // Highlight when focused from search results
+    React.useEffect(() => {
+        if (tabContext?.focusItem?.type === 'file' && tabContext.focusItem.id === file?.id) {
+            setIsHighlighted(true);
+            // Auto-expand when focused
+            if (!isContentExpanded) {
+                toggleFileContentExpansion(file.id);
+            }
+            // Remove highlight after 3 seconds
+            const timer = setTimeout(() => setIsHighlighted(false), 3000);
+            return () => clearTimeout(timer);
         }
-    };
+    }, [tabContext?.focusItem, file?.id, isContentExpanded, toggleFileContentExpansion]);
+    const isEvenRow = index % 2 === 0;
+
+    // Common action buttons for all file types
+    const renderActionButtons = () => (
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <Tooltip title="Select">
+                        <Checkbox
+                            size="small"
+                            checked={isSelected}
+                            onChange={(e) => {
+                                handleToggleSelect(file.id);
+                            }}
+                            sx={{ p: 0.25 }}
+                        />
+                    </Tooltip>
+            {/* Expand/Collapse Content Button */}
+            <IconButton
+                size="small"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFileContentExpansion(file.id);
+                }}
+                title={isContentExpanded ? 'Collapse' : 'Expand details'}
+            >
+                {isContentExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+
+            {/* Insert Button - varies by file type */}
+            {editor && fileType === 'images' && (
+                <IconButton
+                    size="small"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
+                            altText: file.name,
+                            path: file.path,
+                            identityId: file.identityId,
+                        });
+                    }}
+                    title="Insert into editor"
+                >
+                    <AddIcon />
+                </IconButton>
+            )}
+            {editor && fileType === 'audio' && (
+                <IconButton
+                    size="small"
+                    onClick={async (e) => {
+                        e.stopPropagation();
+                        editor.dispatchCommand(INSERT_PLAYLIST_COMMAND, [file.id]);
+                    }}
+                    title="Insert into editor"
+                >
+                    <AddIcon />
+                </IconButton>
+            //     (isContentExpanded ?? <RecordingStudio3
+            //         file={file}
+            //         open={isContentExpanded}
+            //         onClose={() => toggleFileContentExpansion(file.id)}
+            //     />
+            // )
+
+            )}
+            
+            {/* Download Button */}
+            <IconButton
+                size="small"
+                onClick={async (e) => {
+                    e.stopPropagation();
+                    try {
+                        const url = await getCachedUrl(file.path, 'protected', file.identityId);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = file.name;
+                        link.target = '_blank';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    } catch (error) {
+                        console.error('Error downloading file:', error);
+                    }
+                }}
+                title="Download file"
+            >
+                <DownloadIcon />
+            </IconButton>
+            
+            {/* Delete Button */}
+            <IconButton
+                size="small"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    console.log('[FileRowComponent] Delete button clicked for file:', file.name);
+                    setConfirmDialog({
+                        open: true,
+                        message: `Are you sure you want to delete ${file.path}?`,
+                        severity: 'warning',
+                        onConfirm: async () => {
+                            await deleteFileCompletely(file);
+                            setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                        }
+                    });
+                    console.log('[FileRowComponent] confirmDialog state should be open now');
+                }}
+                title="Delete file"
+            >
+                <DeleteIcon />
+            </IconButton>
+        </Box>
+    );
 
     return (
-        <Box
+        <Box 
+            ref={fileItemRef}
             sx={{
+                backgroundColor: isHighlighted
+                    ? 'rgba(25, 118, 210, 0.15)' // Primary blue highlight
+                    : isSelected ? 'action.selected' : isEvenRow ? 'grey.50' : 'background.paper',
                 borderBottom: '1px solid',
-                borderColor: 'divider',
-                p: 2,
-                flexShrink: 0
-            }}
-        >
-            {/* File Preview, Audio Player, or Video Player */}
-            <Box
-                sx={{
-                    width: '100%',
-                    minHeight: '200px',
-                    mb: 2,
-                    bgcolor: 'grey.100',
-                    borderRadius: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden',
-                    flexShrink: 0,
-                    p: 2
-                }}
-            >
-                {file.mimeType?.startsWith('image/') ? (
-                    imageUrl ? (
-                        <Box
-                            component="img"
-                            src={imageUrl}
-                            alt={file.name}
-                            sx={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover'
-                            }}
-                            onError={(e) => {
-                                e.target.style.display = 'none';
-                            }}
-                        />
-                    ) : (
-                        <CircularProgress />
-                    )
-                ) : file.mimeType?.startsWith('audio/') ? (
-                    file.waveformData ? (
-                        <AudioWaveformPlayer
-                            audioUrl={audioUrl}
-                            waveformData={JSON.parse(file.waveformData)}
-                            width={300}
-                            height={100}
-                            title={file.name}
-                            showDuration={true}
-                        />
-                    ) : (
-                        <Box sx={{ textAlign: 'center', color: 'action.disabled', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                            <AudioFileIcon sx={{ fontSize: '64px' }} />
-                            <Typography variant="caption">No waveform available</Typography>
-                        </Box>
-                    )
-                ) : file.mimeType?.startsWith('video/') ? (
-                    videoUrl ? (
-                        <video
-                            controls
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'contain'
-                            }}
-                        >
-                            <source src={videoUrl} type={file.mimeType} />
-                            Your browser does not support the video tag.
-                        </video>
-                    ) : (
-                        <CircularProgress />
-                    )
-                ) : (
-                    <Box sx={{ textAlign: 'center', color: 'action.disabled' }}>
-                        {file.mimeType === 'application/pdf' && <PictureAsPdfIcon sx={{ fontSize: '64px' }} />}
-                        {file.mimeType !== 'application/pdf' && <DescriptionIcon sx={{ fontSize: '64px' }} />}
-                    </Box>
-                )}
+                borderColor: isHighlighted ? 'primary.main' : 'divider',
+                borderLeftWidth: isHighlighted ? '4px' : 0,
+                borderLeftStyle: isHighlighted ? 'solid' : 'none',
+                borderLeftColor: isHighlighted ? 'primary.main' : 'transparent',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%'
+            }}>
+            {/* Row 1: Preview/Icon and Actions */}
+            <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                py: 1,
+                px: 2,
+                borderBottom: '1px solid',
+                borderColor: 'divider'
+            }}>
+                <ListItemImage file={file} />
+                {renderActionButtons()}
             </Box>
 
-            <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, wordBreak: 'break-word' }}>
-                    {file.name}
-                </Typography>
+            {/* Row 2: Filename */}
+            <Box sx={{
+                px: 2,
+                py: 1,
+                borderBottom: '1px solid',
+                borderColor: 'divider'
+            }}>
+                <FileNameField
+                    value={file.name}
+                    fileId={file.id}
+                    onSave={handleFileNameUpdate}
+                    searchTerm={search}
+                />
             </Box>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+
+            {/* Row 3: Metadata */}
+            <Box sx={{
+                px: 2,
+                py: 1
+            }}>
                 <Typography variant="caption" color="text.secondary">
                     {(file.size / 1000).toFixed(2)} KB
                 </Typography>
                 {documentStatus && (
-                    <Chip
-                        label={documentStatus.status}
-                        size="small"
-                        variant="outlined"
-                    />
-                )}
-                <Box sx={{ ml: 'auto', display: 'flex', gap: 0.5, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                    {editor && file.mimeType?.startsWith('image/') && (
-                        <Tooltip title="Insert into editor">
-                            <IconButton size="small" onClick={() => handleMenuAction('insert-image')}>
-                                <AddIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    )}
-                    {editor && (file.mimeType?.startsWith('audio/') || file.mimeType === 'application/octet-stream') && (
-                        <Tooltip title="Insert into editor">
-                            <IconButton size="small" onClick={() => handleMenuAction('insert-audio')}>
-                                <AddIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    )}
-                    <Tooltip title="Download">
-                        <IconButton size="small" onClick={() => handleMenuAction('download')}>
-                            <DownloadIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                    {documentStatus && (
-                        <Tooltip title="Re-analyze">
-                            <IconButton size="small" onClick={() => handleMenuAction('re-analyze')}>
-                                <RefreshIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    )}
-                    <Tooltip title="Delete">
-                        <IconButton size="small" onClick={() => handleMenuAction('delete')} sx={{ color: 'error.main' }}>
-                            <DeleteIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                </Box>
-            </Box>
-        </Box>
-    );
-});
-
-// =============================================================================
-// FileRowComponent - Renders individual file rows based on file type
-// =============================================================================
-
-const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, index, isSelected, onSelect, allFiles, selectedItems, setSelectedItems }) {
-    const [isEditing, setIsEditing] = React.useState(false);
-    const [editedName, setEditedName] = React.useState(file.name);
-    const [isSaving, setIsSaving] = React.useState(false);
-    const { handleFileNameUpdate } = useFileManager();
-    const isEvenRow = index % 2 === 0;
-
-    const handleSaveFileName = async () => {
-        if (!editedName.trim() || editedName === file.name) {
-            setIsEditing(false);
-            setEditedName(file.name);
-            return;
-        }
-
-        try {
-            setIsSaving(true);
-            await handleFileNameUpdate(file.id, editedName);
-            setIsEditing(false);
-        } catch (error) {
-            console.error('Error updating filename:', error);
-            setEditedName(file.name);
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    const handleCancelEdit = () => {
-        setIsEditing(false);
-        setEditedName(file.name);
-    };
-
-    const handleKeyDown = (e) => {
-        if (e.key === 'Enter') {
-            handleSaveFileName();
-        } else if (e.key === 'Escape') {
-            handleCancelEdit();
-        }
-    };
-
-    const handleRowClick = React.useCallback((e) => {
-        if (isEditing) return;
-
-        // Shift-click: range select
-        if (e.shiftKey) {
-            const selectedArray = Array.from(selectedItems);
-            if (selectedArray.length === 0) {
-                // No previous selection, just select this file
-                setSelectedItems(new Set([file.id]));
-            } else {
-                // Find range between last selected and current file
-                const lastSelectedId = selectedArray[selectedArray.length - 1];
-                const lastSelectedIndex = allFiles.findIndex(f => f.id === lastSelectedId);
-                const currentIndex = allFiles.findIndex(f => f.id === file.id);
-                
-                const start = Math.min(lastSelectedIndex, currentIndex);
-                const end = Math.max(lastSelectedIndex, currentIndex);
-                
-                const rangeSet = new Set(selectedArray);
-                for (let i = start; i <= end; i++) {
-                    rangeSet.add(allFiles[i].id);
-                }
-                setSelectedItems(rangeSet);
-            }
-        } else {
-            // Single click: select only this file
-            setSelectedItems(new Set([file.id]));
-        }
-    }, [isEditing, selectedItems, setSelectedItems, allFiles, file.id]);
-
-    const handleFileNameClick = React.useCallback((e) => {
-        e.stopPropagation();
-        setSelectedItems(new Set([file.id]));
-        setIsEditing(true);
-    }, [file.id, setSelectedItems]);
-
-    const typographySx = React.useMemo(() => ({
-        fontWeight: 500,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-        cursor: 'pointer',
-        '&:hover': {
-            textDecoration: 'underline',
-            color: 'primary.main'
-        }
-    }), []);
-
-    return (
-        <Box
-            onClick={handleRowClick}
-            sx={{
-                backgroundColor: isSelected ? 'primary.100' : isEvenRow ? 'grey.100' : 'background.paper',
-                borderBottom: '1px solid',
-                borderColor: 'divider',
-                transition: 'all 0.2s ease',
-                cursor: isEditing ? 'text' : 'pointer',
-                p: 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.75,
-                '&:hover': {
-                    backgroundColor: isSelected ? 'primary.100' : 'action.hover'
-                }
-            }}>
-            {/* File Icon */}
-            <Box sx={{ flexShrink: 0, width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {fileType === 'images' && <ImageIcon sx={{ fontSize: '20px', color: isSelected ? 'primary.main' : 'inherit', transition: 'color 0.2s' }} />}
-                {fileType === 'audio' && <AudioFileIcon sx={{ fontSize: '20px', color: isSelected ? 'primary.main' : 'inherit', transition: 'color 0.2s' }} />}
-                {fileType === 'documents' && <PictureAsPdfIcon sx={{ fontSize: '20px', color: isSelected ? 'primary.main' : 'inherit', transition: 'color 0.2s' }} />}
-                {fileType === 'video' && <ArticleIcon sx={{ fontSize: '20px', color: isSelected ? 'primary.main' : 'inherit', transition: 'color 0.2s' }} />}
-                {fileType === 'other' && <DescriptionIcon sx={{ fontSize: '20px', color: isSelected ? 'primary.main' : 'inherit', transition: 'color 0.2s' }} />}
-            </Box>
-
-            {/* File Name */}
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-                {isEditing ? (
-                    <TextField
-                        size="small"
-                        value={editedName}
-                        onChange={(e) => setEditedName(e.target.value)}
-                        onBlur={handleSaveFileName}
-                        onKeyDown={handleKeyDown}
-                        autoFocus
-                        disabled={isSaving}
-                        fullWidth
-                    />
-                ) : (
-                    <Typography
-                        variant="body2"
-                        onClick={handleFileNameClick}
-                        sx={typographySx}
-                    >
-                        {file.name}
+                    <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                        • Status: {documentStatus.status}
                     </Typography>
                 )}
             </Box>
+
+            {/* Expanded Content */}
+            {isContentExpanded && (
+                <>
+                    {/* Metadata Editor for all files */}
+                    <MetadataEditor
+                        file={file}
+                        onUpdate={(updatedFile) => {
+                            console.log('File metadata updated:', updatedFile);
+                        }}
+                    />
+                    
+                    {/* Parsed Content for documents or analysis results */}
+                    <ExpandedFileContent
+                        file={file}
+                        parsedContent={parsedContent}
+                        search={search}
+                        editor={editor}
+                    />
+                </>
+            )}
         </Box>
-    );
-}, (prevProps, nextProps) => {
-    // Custom comparison - only re-render if these specific props change
-    return (
-        prevProps.file.id === nextProps.file.id &&
-        prevProps.fileType === nextProps.fileType &&
-        prevProps.index === nextProps.index &&
-        prevProps.isSelected === nextProps.isSelected
-        // Don't compare allFiles, selectedItems, or setSelectedItems to avoid re-renders on scroll
     );
 });
 
@@ -2346,7 +2189,7 @@ const ListItemImage = React.memo(function ListItemImage({ file }) {
  */
 async function deleteFileCompletely(file) {
     if (!file) return;
-
+    
     try {
         // Delete associated Document if it exists
         if (file.documentID) {
@@ -2356,11 +2199,11 @@ async function deleteFileCompletely(file) {
                 console.log('Deleted associated Document:', file.documentID);
             }
         }
-
+        
         // Delete the File model from DataStore
         await DataStore.delete(file);
         console.log('Deleted File model:', file.id);
-
+        
         // Delete from S3
         await remove({ key: file.path });
         console.log('Deleted S3 file:', file.path);
@@ -2371,7 +2214,6 @@ async function deleteFileCompletely(file) {
 }
 
 export default function FileManager2() {
-    console.log('[FileManager2] Component render started');
     const [editor] = useLexicalComposerContext();
     const [search, setSearch] = React.useState('');
     const [searchMode, setSearchMode] = React.useState('hybrid'); // 'keyword', 'semantic', 'hybrid'
@@ -2396,66 +2238,6 @@ export default function FileManager2() {
         return new Set();
     });
 
-    // Track collapsed protection levels - all expanded by default
-    const [collapsedProtectionLevels, setCollapsedProtectionLevels] = React.useState(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('fileManager2_collapsedProtectionLevels');
-            if (saved) {
-                try {
-                    return new Set(JSON.parse(saved));
-                } catch (e) {
-                    return new Set();
-                }
-            }
-        }
-        return new Set();
-    });
-
-    const handleToggleProtectionLevelCollapse = (protectionLevel) => {
-        setCollapsedProtectionLevels(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(protectionLevel)) {
-                newSet.delete(protectionLevel);
-            } else {
-                newSet.add(protectionLevel);
-            }
-            if (typeof window !== 'undefined') {
-                localStorage.setItem('fileManager2_collapsedProtectionLevels', JSON.stringify(Array.from(newSet)));
-            }
-            return newSet;
-        });
-    };
-
-    // Track collapsed file types - all expanded by default
-    const [collapsedFileTypes, setCollapsedFileTypes] = React.useState(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('fileManager2_collapsedFileTypes');
-            if (saved) {
-                try {
-                    return new Set(JSON.parse(saved));
-                } catch (e) {
-                    return new Set();
-                }
-            }
-        }
-        return new Set();
-    });
-
-    const handleToggleFileTypeCollapse = (fileTypeKey) => {
-        setCollapsedFileTypes(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(fileTypeKey)) {
-                newSet.delete(fileTypeKey);
-            } else {
-                newSet.add(fileTypeKey);
-            }
-            if (typeof window !== 'undefined') {
-                localStorage.setItem('fileManager2_collapsedFileTypes', JSON.stringify(Array.from(newSet)));
-            }
-            return newSet;
-        });
-    };
-
     // Persist expanded items to localStorage
     React.useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -2470,7 +2252,7 @@ export default function FileManager2() {
     const [parsedContentData, setParsedContentData] = React.useState({}); // Cache for parsed content
     const [semanticResults, setSemanticResults] = React.useState(null); // {fileId: {maxScore, pages: [{page, score}]}}
     const [fileEmbeddings, setFileEmbeddings] = React.useState({}); // Cache embeddings
-
+    
     // Use vector store from FilesContext (shared across entire app, initialized early)
     const { vectorStore, vectorStoreReady } = React.useContext(FilesContext);
     const loadedVersions = React.useRef(new Map()); // Track loaded document versions
@@ -2516,27 +2298,27 @@ export default function FileManager2() {
         });
     };
 
-    // // Expand/Collapse handlers
-    // const handleExpandAll = () => {
-    //     const allFileIds = new Set(files.map(f => f.id));
-    //     setExpandedItems(allFileIds);
-    // };
+    // Expand/Collapse handlers
+    const handleExpandAll = () => {
+        const allFileIds = new Set(files.map(f => f.id));
+        setExpandedItems(allFileIds);
+    };
 
-    // const handleCollapseAll = () => {
-    //     setExpandedItems(new Set());
-    // };
+    const handleCollapseAll = () => {
+        setExpandedItems(new Set());
+    };
 
-    // const handleToggleExpand = (fileId) => {
-    //     setExpandedItems(prev => {
-    //         const newSet = new Set(prev);
-    //         if (newSet.has(fileId)) {
-    //             newSet.delete(fileId);
-    //         } else {
-    //             newSet.add(fileId);
-    //         }
-    //         return newSet;
-    //     });
-    // };
+    const handleToggleExpand = (fileId) => {
+        setExpandedItems(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(fileId)) {
+                newSet.delete(fileId);
+            } else {
+                newSet.add(fileId);
+            }
+            return newSet;
+        });
+    };
 
     // Handle filename updates
     const handleFileNameUpdate = async (fileId, newName) => {
@@ -2647,11 +2429,6 @@ export default function FileManager2() {
     const [suggestionTab, setSuggestionTab] = React.useState(0);
 
     const { files, documents, session } = React.useContext(FilesContext);
-
-    // Debug: log files received
-    React.useEffect(() => {
-        console.log('[FileManager2] Files received from context:', files?.length || 0, files);
-    }, [files]);
     const documentStatuses = documents || {};
     const { identityId } = session || {};
     const { unit } = React.useContext(UnitContext);
@@ -2853,28 +2630,20 @@ export default function FileManager2() {
     // Helper function to organize files by protection level
     const organizeFilesByProtectionLevel = (files) => {
         const organized = {
-            'PRIVATE': { images: [], audio: [], documents: [], video: [], other: [] },
-            'PUBLIC': { images: [], audio: [], documents: [], video: [], other: [] },
-            'PROTECTED': { images: [], audio: [], documents: [], video: [], other: [] },
-            'UNSET': { images: [], audio: [], documents: [], video: [], other: [] }
+            'PRIVATE': { images: [], audio: [], documents: [], other: [] },
+            'PUBLIC': { images: [], audio: [], documents: [], other: [] },
+            'PROTECTED': { images: [], audio: [], documents: [], other: [] },
+            'UNSET': { images: [], audio: [], documents: [], other: [] }
         };
 
         files.forEach(file => {
-            // Default to UNSET if no level property
             const level = file.level || 'UNSET';
             const mimeType = file.mimeType || '';
-
-            // Make sure the level exists in organized
-            if (!organized[level]) {
-                organized[level] = { images: [], audio: [], documents: [], video: [], other: [] };
-            }
 
             if (mimeType.includes('image')) {
                 organized[level].images.push(file);
             } else if (mimeType.includes('audio')) {
                 organized[level].audio.push(file);
-            } else if (mimeType.includes('video')) {
-                organized[level].video.push(file);
             } else if (
                 mimeType === 'application/pdf' ||
                 mimeType === 'text/plain' ||
@@ -2885,7 +2654,6 @@ export default function FileManager2() {
             ) {
                 organized[level].documents.push(file);
             } else {
-                // Default to 'other' for unrecognized types
                 organized[level].other.push(file);
             }
         });
@@ -2908,44 +2676,33 @@ export default function FileManager2() {
 
             if (totalFiles === 0) return;
 
-            const isCollapsed = collapsedProtectionLevels.has(protectionLevel);
-
             // Add protection level header
             items.push({
                 type: 'protection-header',
                 level: protectionLevel,
                 label: protectionLevel,
                 id: `header-${protectionLevel}`,
-                totalFiles,
-                isExpanded: !isCollapsed,
-                onToggleExpand: () => handleToggleProtectionLevelCollapse(protectionLevel)
+                totalFiles
             });
-
-            // If collapsed, skip rendering files
-            if (isCollapsed) return;
 
             // For each file type (images, audio, documents, video, other)
             ['images', 'audio', 'documents', 'video', 'other'].forEach(fileType => {
                 const fileTypeFiles = filesByType[fileType] || [];
+                const shouldShow = fileTypeFiles.length > 0 && (
+                    generator === 'all' ||
+                    generator === fileType.slice(0, -1) ||  // 'image', 'audio', etc.
+                    (generator === 'document' && fileType === 'documents')
+                );
 
-                if (fileTypeFiles.length > 0) {
+                if (shouldShow) {
                     // Add file type subheader
                     const label = fileType.charAt(0).toUpperCase() + fileType.slice(1);
-                    const fileTypeKey = `${protectionLevel}-${fileType}`;
-                    const isFileTypeCollapsed = collapsedFileTypes.has(fileTypeKey);
-
                     items.push({
                         type: 'filetype-subheader',
                         fileType,
                         label: `${label} (${fileTypeFiles.length})`,
-                        id: `subheader-${protectionLevel}-${fileType}`,
-                        fileTypeKey,
-                        isExpanded: !isFileTypeCollapsed,
-                        onToggleExpand: () => handleToggleFileTypeCollapse(fileTypeKey)
+                        id: `subheader-${protectionLevel}-${fileType}`
                     });
-
-                    // If collapsed, skip rendering files
-                    if (isFileTypeCollapsed) return;
 
                     // Add individual files
                     fileTypeFiles.forEach(file => {
@@ -2961,7 +2718,7 @@ export default function FileManager2() {
         });
 
         return items;
-    }, [organizedFiles, collapsedProtectionLevels, handleToggleProtectionLevelCollapse, collapsedFileTypes, handleToggleFileTypeCollapse]);
+    }, [organizedFiles, generator]);
 
     // Setup parent ref for virtualized scrolling
     const parentRef = React.useRef(null);
@@ -2984,6 +2741,553 @@ export default function FileManager2() {
         },
         overscan: 3,
     });
+
+    // Note: Vector store initialization now happens in FilesContext on app mount
+    // FileManager2 no longer manages vector store population when using shared instance from context
+
+    // Populate vector store from document page embeddings (incremental updates + IndexedDB persistence)
+    // DISABLED: Vector store is now managed by FilesContext
+    /*
+    React.useEffect(() => {
+        const isInitialLoad = loadedVersions.current.size === 0;
+        
+        // Track which documents are being processed in this effect run to avoid duplicates
+        const processingDocuments = new Set();
+        
+        // Detailed logging of files and their document statuses
+        console.log(`[FileManager2] Files data:`, files.map(f => ({
+            id: f.id,
+            name: f.name,
+            documentID: f.documentID,
+            hasDocumentID: !!f.documentID,
+            mimeType: f.mimeType
+        })));
+        
+        console.log(`[FileManager2] documentStatuses object:`, documentStatuses);
+        
+        // Check each file's status in detail
+        files.forEach(f => {
+            if (f.documentID) {
+                const status = documentStatuses[f.documentID];
+                console.log(`[FileManager2] Status for file ${f.name} (docID: ${f.documentID}):`, {
+                    hasStatus: !!status,
+                    statusKeys: status ? Object.keys(status) : [],
+                    fullStatus: status,
+                    hasPageEmbeddings: !!status?.pageEmbeddings,
+                    pageEmbeddingsLength: status?.pageEmbeddings?.length,
+                    pageEmbeddingsType: typeof status?.pageEmbeddings,
+                    hasEmbeddingsS3Key: !!status?.embeddingsS3Key,
+                    embeddingsS3Key: status?.embeddingsS3Key
+                });
+            }
+        });
+        
+        console.log(`[FileManager2] Vector store population effect triggered`, {
+            isInitialLoad,
+            vectorStoreLoaded: vectorStore.loaded,
+            filesCount: files.length,
+            currentVectorStoreSize: vectorStore.items.length,
+            filesWithDocuments: files.filter(f => f.documentID).length,
+            filesWithEmbeddings: files.filter(f => documentStatuses[f.documentID]?.pageEmbeddings).length,
+            filesWithS3Keys: files.filter(f => documentStatuses[f.documentID]?.embeddingsS3Key).length,
+            documentStatusKeys: Object.keys(documentStatuses)
+        });
+
+        // Note: IndexedDB loading now happens in early initialization effect above
+        
+        files.forEach(async (file) => {
+            const docStatus = documentStatuses[file.documentID];
+            let pageEmbeddings = docStatus?.pageEmbeddings;
+            const embeddingsS3Key = docStatus?.embeddingsS3Key;
+            const currentVersion = docStatus?._version || file._version;
+            const loadedVersion = loadedVersions.current.get(file.id);
+
+            console.log(`[FileManager2] Processing file ${file.name}`, {
+                fileId: file.id,
+                documentID: file.documentID,
+                hasDocStatus: !!docStatus,
+                hasPageEmbeddings: !!pageEmbeddings,
+                pageEmbeddingsCount: pageEmbeddings?.length,
+                hasS3Key: !!embeddingsS3Key,
+                s3Key: embeddingsS3Key,
+                currentVersion,
+                loadedVersion,
+                isInitialLoad,
+                willSkip: !isInitialLoad && loadedVersion === currentVersion
+            });
+
+            // Skip if already loaded and version unchanged
+            if (!isInitialLoad && loadedVersion === currentVersion) {
+                console.log(`[FileManager2] Skipping file ${file.name} - already loaded with same version`);
+                return;
+            }
+            
+            // Skip if already processing this document in this effect run (prevents duplicates)
+            if (file.documentID && processingDocuments.has(file.documentID)) {
+                console.log(`[FileManager2] Skipping file ${file.name} - document ${file.documentID} already processing in this run`);
+                return;
+            }
+            
+            if (file.documentID) {
+                processingDocuments.add(file.documentID);
+            }
+
+            // Remove old entries for this file if updating
+            if (!isInitialLoad) {
+                vectorStore.items = vectorStore.items.filter(
+                    item => item.metadata?.fileId !== file.id
+                );
+            }
+
+            // If no pageEmbeddings in DynamoDB but S3 key exists, check if we need to load from S3
+            if (!pageEmbeddings && embeddingsS3Key && file.documentID) {
+                // First check if embeddings are already in memory
+                const existingInMemory = vectorStore.items.filter(
+                    item => item.documentId === file.documentID || item.metadata?.documentId === file.documentID
+                );
+                
+                if (existingInMemory.length > 0) {
+                    console.log(`[FileManager2] Skipping S3 load - ${existingInMemory.length} embeddings already in memory for document ${file.documentID}`);
+                    
+                    // Update loaded version
+                    if (currentVersion) {
+                        loadedVersions.current.set(file.id, currentVersion);
+                    }
+                    return;
+                }
+                
+                // Check if embeddings are already in IndexedDB
+                try {
+                    const cachedInIndexedDB = await loadEmbeddingsByDocument(file.documentID);
+                    
+                    if (cachedInIndexedDB && cachedInIndexedDB.length > 0) {
+                        console.log(`[FileManager2] Loading ${cachedInIndexedDB.length} embeddings from IndexedDB cache for document ${file.documentID} (skipping S3)`);
+                        
+                        // Add to vector store in memory
+                        cachedInIndexedDB.forEach(emb => {
+                            vectorStore.add(emb);
+                        });
+                        
+                        // Update loaded version
+                        if (currentVersion) {
+                            loadedVersions.current.set(file.id, currentVersion);
+                        }
+                        
+                        return; // Skip S3 download
+                    }
+                } catch (error) {
+                    console.warn(`[FileManager2] Error checking IndexedDB cache for document ${file.documentID}:`, error);
+                    // Continue to S3 download on error
+                }
+                
+                // Only download from S3 if not in memory or IndexedDB
+                try {
+                    console.log(`[FileManager2] Downloading embeddings from S3 for document ${file.documentID}`, {
+                        s3Key: embeddingsS3Key,
+                        fileId: file.id,
+                        fileName: file.name
+                    });
+                    
+                    // Load from S3 and save to IndexedDB
+                    await loadEmbeddingsFromS3(
+                        embeddingsS3Key,
+                        file.documentID,
+                        {
+                            fileId: file.id,
+                            fileName: file.name,
+                            mimeType: file.mimeType,
+                        }
+                    );
+                    
+                    // Load the newly cached embeddings from IndexedDB
+                    const cachedEmbeddings = await loadEmbeddingsByDocument(file.documentID);
+                    
+                    console.log(`[FileManager2] Adding ${cachedEmbeddings.length} S3 embeddings to vector store`, {
+                        documentId: file.documentID,
+                        fileId: file.id,
+                        embeddings: cachedEmbeddings.map(e => ({ id: e.id, page: e.page, hasVector: !!e.vector }))
+                    });
+                    
+                    // Add to vector store in memory
+                    cachedEmbeddings.forEach(emb => {
+                        vectorStore.add(emb);
+                    });
+                    
+                    console.log(`[FileManager2] Loaded ${cachedEmbeddings.length} embeddings from S3`);
+                    
+                    // Update loaded version
+                    if (currentVersion) {
+                        loadedVersions.current.set(file.id, currentVersion);
+                    }
+                    
+                    return; // Skip normal processing
+                } catch (error) {
+                    console.error(`[FileManager2] Failed to load S3 embeddings for ${file.documentID}:`, error);
+                    // Continue with normal flow in case of error
+                }
+            }
+
+            // Add page-level embeddings for PDFs (from DynamoDB)
+            if (pageEmbeddings && Array.isArray(pageEmbeddings) && file.documentID) {
+                console.log(`[FileManager2] Processing ${pageEmbeddings.length} page embeddings from DynamoDB`, {
+                    documentId: file.documentID,
+                    fileId: file.id,
+                    fileName: file.name,
+                    pagesWithEmbeddings: pageEmbeddings.filter(p => p.embedding).length
+                });
+                
+                // Check if we need to update IndexedDB
+                const shouldUpdateDB = !isInitialLoad || !vectorStore.loaded;
+                
+                let addedCount = 0;
+                pageEmbeddings.forEach(pageData => {
+                    if (pageData.embedding) {
+                        vectorStore.add({
+                            id: `${file.id}-page-${pageData.page}`,
+                            documentId: file.documentID,
+                            page: pageData.page,
+                            text: pageData.text || '',
+                            vector: pageData.embedding,
+                            metadata: {
+                                fileId: file.id,
+                                documentId: file.documentID,
+                                page: pageData.page,
+                                fileName: file.name,
+                                mimeType: file.mimeType,
+                            },
+                        });
+                        addedCount++;
+                    }
+                });
+                
+                console.log(`[FileManager2] Added ${addedCount} page embeddings to vector store`);
+
+                // Save to IndexedDB for persistence
+                if (shouldUpdateDB) {
+                    vectorStore.saveToIndexedDB(
+                        file.documentID,
+                        pageEmbeddings,
+                        {
+                            fileId: file.id,
+                            fileName: file.name,
+                            mimeType: file.mimeType,
+                        }
+                    ).catch(error => {
+                        console.error('[FileManager2] Failed to save embeddings to IndexedDB:', error);
+                    });
+                }
+            }
+
+            // Add file-level embedding for non-PDF files
+            const fileEmbedding = file.embedding || fileEmbeddings[file.id];
+            if (fileEmbedding && !pageEmbeddings) {
+                console.log(`[FileManager2] Adding file-level embedding`, {
+                    fileId: file.id,
+                    fileName: file.name,
+                    documentId: file.documentID,
+                    hasEmbedding: !!fileEmbedding,
+                    embeddingLength: fileEmbedding?.length
+                });
+                
+                vectorStore.add({
+                    id: file.id,
+                    documentId: file.documentID || file.id,
+                    page: null,
+                    text: file.description || file.name,
+                    vector: fileEmbedding,
+                    metadata: {
+                        fileId: file.id,
+                        documentId: file.documentID,
+                        page: null,
+                        fileName: file.name,
+                        mimeType: file.mimeType,
+                    },
+                });
+            }
+
+            // Log if no embeddings were added for this file
+            if (!pageEmbeddings && !embeddingsS3Key && !fileEmbedding) {
+                console.log(`[FileManager2] No embeddings available for file ${file.name}`, {
+                    fileId: file.id,
+                    documentID: file.documentID,
+                    hasDocStatus: !!docStatus,
+                    mimeType: file.mimeType
+                });
+            }
+            
+            // Update loaded version
+            if (currentVersion) {
+                loadedVersions.current.set(file.id, currentVersion);
+            }
+        });
+
+        // Remove embeddings for deleted files (both from memory and IndexedDB)
+        const currentFileIds = new Set(files.map(f => f.id));
+        const currentDocIds = new Set(files.filter(f => f.documentID).map(f => f.documentID));
+        
+        loadedVersions.current.forEach((version, fileId) => {
+            if (!currentFileIds.has(fileId)) {
+                // Find the documentId for this file before deletion
+                const itemsToDelete = vectorStore.items.filter(item => item.metadata?.fileId === fileId);
+                const documentIds = new Set(itemsToDelete.map(item => item.documentId).filter(Boolean));
+                
+                // Remove from memory
+                vectorStore.items = vectorStore.items.filter(
+                    item => item.metadata?.fileId !== fileId
+                );
+                loadedVersions.current.delete(fileId);
+                
+                // Remove from IndexedDB
+                documentIds.forEach(docId => {
+                    if (!currentDocIds.has(docId)) {
+                        vectorStore.deleteFromIndexedDB(docId).catch(error => {
+                            console.error(`[FileManager2] Failed to delete embeddings for doc ${docId}:`, error);
+                        });
+                    }
+                });
+            }
+        });
+        
+        // Log final state after processing
+        console.log(`[FileManager2] Vector store population complete`, {
+            totalEmbeddings: vectorStore.items.length,
+            loadedFiles: loadedVersions.current.size,
+            vectorStoreLoaded: vectorStore.loaded
+        });
+    }, [files, documentStatuses, fileEmbeddings]); // Removed vectorStore from deps - it's a stable reference
+    */
+
+    // Load ParsedContent for all documents on mount
+    // DISABLED: Parsed content management moved to FilesContext with vector store
+    /*
+    React.useEffect(() => {
+        const loadAllParsedContent = async () => {
+            try {
+                const parsedContents = await DataStore.query(ParsedContent);
+                console.log('[FileManager2] Loaded ParsedContent records:', parsedContents.length);
+                
+                const newParsedContentData = {};
+                parsedContents.forEach(pc => {
+                    // Find the file with this documentID
+                    const file = files.find(f => f.documentID === pc.documentID);
+                    if (file) {
+                        newParsedContentData[file.id] = pc;
+                        console.log('[FileManager2] Mapped ParsedContent to file:', file.name, {
+                            vocabularyJSON: pc.vocabularyJSON,
+                            conceptsJSON: pc.conceptsJSON,
+                            objectivesJSON: pc.objectivesJSON,
+                            questionsJSON: pc.questionsJSON,
+                            summariesJSON: pc.summariesJSON
+                        });
+                    }
+                });
+                
+                if (Object.keys(newParsedContentData).length > 0) {
+                    setParsedContentData(newParsedContentData);
+                    console.log('[FileManager2] Set parsedContentData for', Object.keys(newParsedContentData).length, 'files');
+                }
+            } catch (error) {
+                console.error('[FileManager2] Error loading ParsedContent:', error);
+            }
+        };
+
+        if (files.length > 0) {
+            loadAllParsedContent();
+        }
+    }, [files]);
+    */
+
+    // Populate vector store with parsed content text for hybrid search
+    // DISABLED: Parsed content vector store population moved to FilesContext
+    /*
+    React.useEffect(() => {
+        console.log('[FileManager2] Vector store effect - parsedContentData keys:', Object.keys(parsedContentData));
+        Object.entries(parsedContentData).forEach(([fileId, parsedContent]) => {
+            const file = files.find(f => f.id === fileId);
+            if (!file || !parsedContent) return;
+
+            // Parse JSON strings
+            let vocabulary = [];
+            let summaries = [];
+            let objectives = [];
+            let concepts = [];
+            let questions = [];
+
+            try {
+                vocabulary = parsedContent.vocabularyJSON.length > 0 ? parsedContent.vocabularyJSON : [];
+                if (!Array.isArray(vocabulary)) vocabulary = [];
+            } catch (e) {
+                console.error('[FileManager2] Failed to parse vocabularyJSON:', e);
+            }
+
+            try {
+                summaries = parsedContent.summariesJSON.length > 0 ? parsedContent.summariesJSON : [];
+            } catch (e) {}
+
+            try {
+                objectives = parsedContent.objectivesJSON.length > 0 ? parsedContent.objectivesJSON : [];
+            } catch (e) {}
+
+            try {
+                concepts = parsedContent.conceptsJSON.length > 0 ? parsedContent.conceptsJSON : [];
+            } catch (e) {}
+
+            try {
+                questions = parsedContent.questionsJSON.length > 0 ? parsedContent.questionsJSON : [];
+            } catch (e) {}
+
+            console.log(`[FileManager2] Parsed content for ${file.name}:`, {
+                vocabulary: vocabulary.length,
+                summaries: summaries.length,
+                objectives: objectives.length,
+                concepts: concepts.length,
+                questions: questions.length
+            });
+
+            // Create searchable text entries for vocabulary
+            if (vocabulary.length > 0) {
+                vocabulary.forEach((vocab, index) => {
+                    const text = `${vocab.term || ''} ${vocab.definition || ''} ${vocab.context || ''}`.trim();
+                    if (text) {
+                        const existingItemId = `${fileId}-vocab-${index}`;
+                        const existsInStore = vectorStore.items.some(item => item.id === existingItemId);
+                        
+                        if (!existsInStore) {
+                            vectorStore.items.push({
+                                id: existingItemId,
+                                documentId: file.documentID,
+                                page: vocab.page || null,
+                                text: text,
+                                vector: null, // No embedding for parsed content (text-only search)
+                                metadata: {
+                                    fileId: file.id,
+                                    documentId: file.documentID,
+                                    fileName: file.name,
+                                    type: 'vocabulary',
+                                    term: vocab.term,
+                                },
+                            });
+                        }
+                    }
+                });
+            }
+
+            // Create searchable text entries for summaries
+            if (summaries.length > 0) {
+                summaries.forEach((summary, index) => {
+                    const text = `${summary.title || ''} ${summary.content || ''}`.trim();
+                    if (text) {
+                        const existingItemId = `${fileId}-summary-${index}`;
+                        const existsInStore = vectorStore.items.some(item => item.id === existingItemId);
+                        
+                        if (!existsInStore) {
+                            vectorStore.items.push({
+                                id: existingItemId,
+                                documentId: file.documentID,
+                                page: null,
+                                text: text,
+                                vector: null,
+                                metadata: {
+                                    fileId: file.id,
+                                    documentId: file.documentID,
+                                    fileName: file.name,
+                                    type: 'summary',
+                                    title: summary.title,
+                                },
+                            });
+                        }
+                    }
+                });
+            }
+
+            // Create searchable text entries for objectives
+            if (objectives.length > 0) {
+                objectives.forEach((objective, index) => {
+                    const text = objective.objective || '';
+                    if (text) {
+                        const existingItemId = `${fileId}-objective-${index}`;
+                        const existsInStore = vectorStore.items.some(item => item.id === existingItemId);
+                        
+                        if (!existsInStore) {
+                            vectorStore.items.push({
+                                id: existingItemId,
+                                documentId: file.documentID,
+                                page: null,
+                                text: text,
+                                vector: null,
+                                metadata: {
+                                    fileId: file.id,
+                                    documentId: file.documentID,
+                                    fileName: file.name,
+                                    type: 'objective',
+                                    bloomLevel: objective.bloom_level,
+                                },
+                            });
+                        }
+                    }
+                });
+            }
+
+            // Create searchable text entries for concepts
+            if (concepts.length > 0) {
+                concepts.forEach((concept, index) => {
+                    const text = `${concept.concept || ''} ${concept.description || ''}`.trim();
+                    if (text) {
+                        const existingItemId = `${fileId}-concept-${index}`;
+                        const existsInStore = vectorStore.items.some(item => item.id === existingItemId);
+                        
+                        if (!existsInStore) {
+                            vectorStore.items.push({
+                                id: existingItemId,
+                                documentId: file.documentID,
+                                page: null,
+                                text: text,
+                                vector: null,
+                                metadata: {
+                                    fileId: file.id,
+                                    documentId: file.documentID,
+                                    fileName: file.name,
+                                    type: 'concept',
+                                    concept: concept.concept,
+                                },
+                            });
+                        }
+                    }
+                });
+            }
+
+            // Create searchable text entries for questions
+            if (questions.length > 0) {
+                questions.forEach((question, index) => {
+                    const text = `${question.question || ''} ${question.expectedAnswer || ''} ${question.hint || ''}`.trim();
+                    if (text) {
+                        const existingItemId = `${fileId}-question-${index}`;
+                        const existsInStore = vectorStore.items.some(item => item.id === existingItemId);
+                        
+                        if (!existsInStore) {
+                            vectorStore.items.push({
+                                id: existingItemId,
+                                documentId: file.documentID,
+                                page: null,
+                                text: text,
+                                vector: null,
+                                metadata: {
+                                    fileId: file.id,
+                                    documentId: file.documentID,
+                                    fileName: file.name,
+                                    type: 'question',
+                                    questionType: question.type,
+                                },
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        console.log(`[FileManager2] Vector store now contains ${vectorStore.items.length} items (including parsed content)`);
+    }, [parsedContentData, files, vectorStore]);
+    */
 
     // Note: Settings are now provided by SettingsContext
     // Get settings from context instead of local subscription
@@ -3147,7 +3451,7 @@ export default function FileManager2() {
                     // If PDF and auto-analyze is enabled, trigger both analysis and embeddings in parallel
                     if (file.type === 'application/pdf' && settings?.autoAnalyzeDocuments && result.documentModel) {
                         console.log('Auto-analyzing and generating embeddings for file:', result.fileModel.id);
-
+                        
                         // Run both in parallel - don't await
                         Promise.all([
                             analyzePDF(result.fileModel.id),
@@ -3183,7 +3487,7 @@ export default function FileManager2() {
 
             const successes = fileKeys.filter(result => result.status === 'fulfilled');
             console.log(`[FileManager2] Upload complete. ${successes.length} succeeded, ${failures.length} failed`);
-
+            
             // timeout to allow for the UI to update
             setTimeout(() => {
                 setFilesToUpload([]);
@@ -3241,9 +3545,9 @@ export default function FileManager2() {
     // Vector store search function exposed to other components
     const performVectorSearch = React.useCallback(async (query, options = {}) => {
         const { topK = 10, filters = {}, includeText = true } = options;
-
+        
         console.log(`[FileManager2.performVectorSearch] Query: "${query}", topK: ${topK}`);
-
+        
         if (!query.trim()) {
             return { results: [], query };
         }
@@ -3324,511 +3628,647 @@ export default function FileManager2() {
         remove
     };
 
-    try {
-        return (
-            <VectorStoreContext.Provider value={vectorStoreContextValue}>
-                <FileManagerProvider value={fileManagerContextValue}>
-                    <Box
-                        sx={{
-                            height: '100%',
-                            minHeight: 0,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            borderRadius: 1,
-                        }}
-                        onDragOver={handleDragOver}
-                        onDragLeave={() => setIsDragging(false)}
-                        onDrop={handleDrop}
-                    >
-                    <Box
-                        sx={{
-                            bgcolor: 'background.paper',
-                            borderBottom: '1px solid',
-                            borderColor: 'divider',
-                            display: 'flex',
-                            gap: 0,
-                            alignItems: 'center',
-                            px: 1,
-                            py: 0.5,
-                        }}
-                    >
-                        <Box sx={{ display: 'flex', gap: 0, alignItems: 'center' }}>
-                            <Tooltip title="Select All">
-                                <span>
-                                    <Checkbox
-                                        size="small"
-                                        checked={Boolean(
-                                            files &&
-                                            files.length > 0 &&
-                                            selectedItems.size === files.length
-                                        )}
-                                        indeterminate={
-                                            selectedItems.size > 0 &&
-                                            selectedItems.size < files.length
-                                        }
-                                        onChange={(e) => {
-                                            if (e.target.checked) {
-                                                handleSelectAll();
-                                            } else {
-                                                handleDeselectAll();
-                                            }
-                                        }}
-                                        disabled={!files || files.length === 0}
-                                        sx={{ p: 0.25 }}
-                                    />
-                                </span>
-                            </Tooltip>
-                        </Box>
-
-                        {/* Search Bar */}
-                        <TextField
-                            value={search}
-                            onInput={handleSearch}
+    return (
+        <VectorStoreContext.Provider value={vectorStoreContextValue}>
+        <FileManagerProvider value={fileManagerContextValue}>
+        <Box
+            sx={{
+                height: '100%',
+                minHeight: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                border: isDragging ? '2px dashed #1976d2' : '2px dashed transparent',
+                borderRadius: 1,
+            }}
+            onDragOver={handleDragOver}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={handleDrop}
+        >
+            {/* Sticky Toolbar - QuestionEditor2 Style */}
+            <Box
+                sx={{
+                    position: 'sticky',
+                    top: 0,
+                    bgcolor: 'background.paper',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    display: 'flex',
+                    gap: 0,
+                    alignItems: 'center',
+                    px: 1,
+                    py: 0.5,
+                    zIndex: 100,
+                }}
+            >
+                <Box sx={{ display: 'flex', gap: 0, alignItems: 'center' }}>
+                    <Tooltip title="Select All">
+                        <Checkbox
                             size="small"
-                            placeholder="Search files..."
-                            sx={{ flex: 1, minWidth: '100px', mx: 1 }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon fontSize="small" />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-
-                        <Tooltip title="Upload Files">
-                            <IconButton
-                                onClick={() => {
-                                    document.getElementById('file-upload-input')?.click();
-                                }}
-                                color="primary"
-                                size="small"
-                            >
-                                <UploadFile fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title="Actions">
-                            <span>
-                                <IconButton
-                                    onClick={(e) =>
-                                        setContextMenu(contextMenu ? null : { mouseX: e.clientX, mouseY: e.clientY })
-                                    }
-                                    size="small"
-                                    disabled={selectedItems.size === 0}
-                                >
-                                    <MoreVertIcon />
-                                </IconButton>
-                            </span>
-                        </Tooltip>
-                        <Menu
-                            open={contextMenu !== null}
-                            onClose={() => setContextMenu(null)}
-                            anchorReference="anchorPosition"
-                            anchorPosition={
-                                contextMenu !== null
-                                    ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
-                                    : undefined
+                            checked={Boolean(
+                                files &&
+                                files.length > 0 &&
+                                selectedItems.size === files.length
+                            )}
+                            indeterminate={
+                                selectedItems.size > 0 &&
+                                selectedItems.size < files.length
                             }
-                        >
-                            {/**
-                 *  Deselect all action
-                 */}
-                            <MenuItem
-                                onClick={() => {
+                            onChange={(e) => {
+                                if (e.target.checked) {
+                                    handleSelectAll();
+                                } else {
                                     handleDeselectAll();
-                                    setContextMenu(null);
-                                }}
-                            >
-                                Deselect All
-                            </MenuItem>
-
-                            {/**
-                 * Delete selected files action
-                 */}
-                            <MenuItem
-                                onClick={() => {
-                                    setContextMenu(null);
-                                    setConfirmDialog({
-                                        open: true,
-                                        message: `Delete ${selectedItems.size} selected file(s)?`,
-                                        severity: 'error',
-                                        onConfirm: async () => {
-                                            for (const fileId of selectedItems) {
-                                                const file = files.find(f => f.id === fileId);
-                                                if (file) {
-                                                    await deleteFileCompletely(file);
-                                                }
-                                            }
-                                            setSelectedItems(new Set());
-                                            setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
-                                        }
-                                    });
-                                }}
-                            >
-                                <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
-                                Delete Selected ({selectedItems.size})
-                            </MenuItem>
-
-                            {/**
-                 * Rerun the document analysis pipeline for selected documents
-                 */}
-                            <MenuItem
-                                onClick={() => {
-                                    setContextMenu(null);
-                                    selectedItems.forEach(async (fileId) => {
-                                        const file = files.find(f => f.id === fileId);
-                                        if (file && file.documentID) {
-                                            //. check if document is a pdf
-                                            if (file.mimeType == 'application/pdf') {
-                                                try {
-                                                    console.log('[FileManager2] Re-analyzing PDF:', file.name);
-                                                    await analyzePDF(file.id, true); // force re-analysis
-                                                    console.log('[FileManager2] Re-generating embeddings for:', file.name);
-                                                    await generateEmbeddings(file.id);
-                                                } catch (error) {
-                                                    console.error('Error re-analyzing document:', error);
-                                                }
-                                            } else {
-                                                console.log('[FileManager2] Re-generating embeddings for:', file.name);
-                                                await generateEmbeddings(file.id);
-                                            }
-                                        }
-
-                                    });
-                                }}
-                            >
-                                <AutorenewIcon fontSize="small" sx={{ mr: 1 }} />
-                                Re-analyze Selected ({selectedItems.size})
-                            </MenuItem>
-                        </Menu>
-                    </Box>
-
-                    {/* Context Menu for Actions */}
-
-
-
-                    {/* Scrollable Content Area */}
-                    <Box sx={{
-                        width: '100%',
-                        flex: 1,
-                        overflow: 'auto',
-                        minHeight: 0,
-                        display: 'flex',
-                        flexDirection: 'row'
-                    }}>
-                        {/* Tree View: Files organized by Protection Level → File Type */}
-                        {!files?.length ? (
-                            <Box sx={{
-                                width: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                p: 3,
-                                color: 'text.secondary'
-                            }}>
-                                <Typography>No files available. Upload files to get started.</Typography>
-                            </Box>
-                        ) : (<>
-                            <Box
-                                ref={parentRef}
-                                sx={{
-                                    flex: '0 0 35%',
-                                    borderRight: '1px solid',
-                                    borderColor: 'divider',
-                                    overflow: 'auto',
-                                    overflowX: 'hidden',
-                                    height: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    minWidth: 0,
-                                    scrollbarWidth: 'thin',
-                                    scrollbarColor: 'rgba(0,0,0,0.3) transparent',
-                                    '&::-webkit-scrollbar': {
-                                        width: '8px',
-                                    },
-                                    '&::-webkit-scrollbar-track': {
-                                        background: 'transparent',
-                                    },
-                                    '&::-webkit-scrollbar-thumb': {
-                                        background: 'rgba(0,0,0,0.2)',
-                                        borderRadius: '4px',
-                                        '&:hover': {
-                                            background: 'rgba(0,0,0,0.3)',
-                                        }
-                                    }
-                                }}
-                            >
-                                <div style={{
-                                    height: `${virtualizer.getTotalSize()}px`,
-                                    width: '100%',
-                                    position: 'relative',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    boxSizing: 'border-box'
-                                }}>
-                                    {(() => {
-                                        const virtualItems = virtualizer.getVirtualItems();
-                                        return virtualItems.map(virtualRow => {
-                                            const item = fileListItems[virtualRow.index];
-
-                                            return (
-                                                <div
-                                                    key={item.id}
-                                                    data-index={virtualRow.index}
-                                                    ref={virtualizer.measureElement}
-                                                    style={{
-                                                        position: 'absolute',
-                                                        top: 0,
-                                                        left: 0,
-                                                        width: '100%',
-                                                        transform: `translateY(${virtualRow.start}px)`
-                                                    }}
-                                                >
-                                                    {item.type === 'protection-header' && (
-                                                        <Box
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                item.onToggleExpand?.();
-                                                            }}
-                                                            sx={{
-                                                                px: 2,
-                                                                py: 1.5,
-                                                                bgcolor: 'primary.50',
-                                                                borderBottom: '1px solid',
-                                                                borderColor: 'divider',
-                                                                fontWeight: 600,
-                                                                fontSize: '0.95rem',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                gap: 1,
-                                                                color: 'primary.main',
-                                                                cursor: 'pointer',
-                                                                transition: 'all 0.2s ease',
-                                                                '&:hover': {
-                                                                    bgcolor: 'primary.100'
-                                                                }
-                                                            }}
-                                                        >
-                                                            {/* Expand/Collapse Icon */}
-                                                            <Box sx={{ display: 'flex', alignItems: 'center', transition: 'transform 0.2s', transform: item.isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}>
-                                                                <ExpandMoreIcon fontSize="small" />
-                                                            </Box>
-                                                            <FolderIcon fontSize="small" />
-                                                            {item.label}
-                                                            <Chip
-                                                                label={item.totalFiles}
-                                                                size="small"
-                                                                variant="outlined"
-                                                                sx={{ ml: 'auto', height: '20px', fontSize: '0.7rem' }}
-                                                                onClick={(e) => e.stopPropagation()}
-                                                            />
-                                                        </Box>
-                                                    )}
-
-                                                    {item.type === 'filetype-subheader' && (
-                                                        <FileTypeSubheader
-                                                            label={item.label}
-                                                            fileType={item.fileType}
-                                                            isExpanded={item.isExpanded}
-                                                            onToggleExpand={item.onToggleExpand}
-                                                        />
-                                                    )}
-
-                                                    {item.type === 'file' && (
-                                                        <FileRowComponent
-                                                            file={item.file}
-                                                            fileType={item.fileType}
-                                                            index={virtualRow.index}
-                                                            isSelected={selectedItems.has(item.file.id)}
-                                                            allFiles={filteredFiles}
-                                                            selectedItems={selectedItems}
-                                                            setSelectedItems={setSelectedItems}
-                                                        />
-                                                    )}
-                                                </div>
-                                            );
-                                        });
-                                    })()}
-                                </div>
-                            </Box>
-
-                        <Box
-                            sx={{
-                                flex: '0 0 65%',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                overflow: 'auto',
-                                overflowX: 'hidden',
-                                bgcolor: 'background.paper',
-                                minWidth: 0
+                                }
                             }}
+                            disabled={!files || files.length === 0}
+                            sx={{ p: 0.25 }}
+                        />
+                    </Tooltip>
+
+                    <Tooltip title={expandedItems.size === 0 ? 'Expand All' : 'Collapse All'}>
+                        <IconButton
+                            size="small"
+                            onClick={expandedItems.size === 0 ? handleExpandAll : handleCollapseAll}
+                            disabled={!files || files.length === 0}
                         >
-                            {selectedItems.size === 0 ? (
-                                <Box
+                            {expandedItems.size === 0 ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+
+                <TextField
+                    defaultValue=""
+                    onInput={handleSearch}
+                    type="text"
+                    size="small"
+                    fullWidth
+                    placeholder="Search files, content, vocabulary, questions..."
+                    label="Search"
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <Select
+                                    value={searchMode}
+                                    onChange={(e) => setSearchMode(e.target.value)}
+                                    variant="standard"
+                                    disableUnderline
+                                    size="small"
                                     sx={{
-                                        flex: 1,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        color: 'text.secondary'
+                                        minWidth: 40,
+                                        '& .MuiSelect-select': {
+                                            py: 0,
+                                            pr: '24px !important',
+                                        },
+                                    }}
+                                    renderValue={(value) => {
+                                        if (value === 'keyword') return <SearchIcon fontSize="small" />;
+                                        if (value === 'semantic') return <AutoAwesomeIcon fontSize="small" />;
+                                        return <Badge badgeContent="AI" color="primary"><SearchIcon fontSize="small" /></Badge>;
                                     }}
                                 >
-                                    <Typography variant="body2">
-                                        Select a file to view details and metadata
-                                    </Typography>
-                                </Box>
-                            ) : (
-                                /* Show file details and preview */
-                                (() => {
-                                    const firstSelectedId = Array.from(selectedItems)[0];
-                                    const selectedFile = files.find(f => f.id === firstSelectedId);
-                                    if (!selectedFile) return null;
+                                    <MenuItem value="keyword">
+                                        <SearchIcon fontSize="small" sx={{ mr: 1 }} />
+                                        Keyword
+                                    </MenuItem>
+                                    <MenuItem value="semantic">
+                                        <AutoAwesomeIcon fontSize="small" sx={{ mr: 1 }} />
+                                        Semantic
+                                    </MenuItem>
+                                    <MenuItem value="hybrid">
+                                        <Badge badgeContent="AI" color="primary" sx={{ mr: 1 }}>
+                                            <SearchIcon fontSize="small" />
+                                        </Badge>
+                                        Hybrid
+                                    </MenuItem>
+                                </Select>
+                            </InputAdornment>
+                        ),
+                    }}
+                />
 
-                                    const documentStatus = documentStatuses[selectedFile.documentID];
+                <Tooltip title="Upload Files">
+                    <IconButton
+                        onClick={() => {
+                            document.getElementById('file-upload-input')?.click();
+                        }}
+                        color="primary"
+                        size="small"
+                    >
+                        <UploadFile fontSize="small" />
+                    </IconButton>
+                </Tooltip>
 
-                                    return (
-                                        <>
-                                            <FileDetailsPanel
-                                                file={selectedFile}
-                                                documentStatus={documentStatus}
-                                                editor={editor}
-                                            />
-                                            {/* File Content */}
-                                            <Box sx={{ flex: 1, overflow: 'auto' }}>
-                                                <ExpandedFileContent
-                                                    file={selectedFile}
-                                                    parsedContent={parsedContentData[selectedFile.id]}
-                                                    search={search}
-                                                    editor={editor}
-                                                />
-                                            </Box>
-                                        </>
-                                    );
-                                })()
-                            )}
-                        </Box></>
-                        )}
-
-                        {/* Generation Modals */}
-                        {generator === 'image' && (
-                            <ImageGeneratorButton
-                                open={newFileFormOpen}
-                                onSuccess={() => {
-                                    setNewFileFormOpen(false);
-                                    setNewImageFileFormOpen(false);
-                                }}
-                            />
-                        )}
-                        {generator === 'audio' && (
-                            <AudioGeneratorButton
-                                open={newFileFormOpen}
-                                onSuccess={() => {
-                                    setNewFileFormOpen(false);
-                                    setNewAudioFileFormOpen(false);
-                                }}
-                            />
-                        )}
-
-                        {/* File Upload Input */}
-                        <input
-                            id="file-upload-input"
-                            type="file"
-                            multiple
-                            accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.txt,.md,.csv,.xls,.xlsx,.ppt,.pptx"
-                            hidden
-                            onChange={(e) => {
-                                const files = Array.from(e.target.files || []);
-                                console.log('[FileManager2] Files selected:', files.length, files.map(f => f.name));
-                                setFilesToUpload(files.map((f, index) => ({ file: f, index })));
-                                setFileOperations(files.map((f) => ({ name: f.name, progress: '0%' })));
-                            }}
-                        />
-
-                        {/* File Operations Display */}
-                        {
-                            fileOperations.length > 0 && (
-                                <Box sx={{ p: 1 }}>
-                                    {fileOperations.map((fileOperation, index) => (
-                                        <Box
-                                            key={index}
-                                            sx={{
-                                                display: 'flex',
-                                                flexDirection: 'row',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                                py: 0.5,
-                                            }}
-                                        >
-                                            <Typography variant="body2">{fileOperation.name}</Typography>
-                                            <Typography variant="body2">{fileOperation.progress}</Typography>
-                                        </Box>
-                                    ))}
-                                </Box>
-                            )
+                <Tooltip title="Actions">
+                    <IconButton
+                        onClick={(e) =>
+                            setContextMenu(contextMenu ? null : { mouseX: e.clientX, mouseY: e.clientY })
                         }
+                        size="small"
+                        disabled={selectedItems.size === 0}
+                    >
+                        <MoreVertIcon />
+                    </IconButton>
+                </Tooltip>
+            </Box>
 
-                    </Box>
+            {/* Context Menu for Actions */}
+            <Menu
+                open={contextMenu !== null}
+                onClose={() => setContextMenu(null)}
+                anchorReference="anchorPosition"
+                anchorPosition={
+                    contextMenu !== null
+                        ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+                        : undefined
+                }
+            >
+                {/**
+                 *  Deselect all action
+                 */}
+                <MenuItem
+                    onClick={() => {
+                        handleDeselectAll();
+                        setContextMenu(null);
+                    }}
+                >
+                    Deselect All
+                </MenuItem>
 
-                    <Portal>
-                        <Snackbar
-                            open={confirmDialog.open}
-                            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                            onClose={(event, reason) => {
-                                if (reason === 'clickaway') {
-                                    return;
+                {/**
+                 * Delete selected files action
+                 */}
+                <MenuItem
+                    onClick={() => {
+                        setContextMenu(null);
+                        setConfirmDialog({
+                            open: true,
+                            message: `Delete ${selectedItems.size} selected file(s)?`,
+                            severity: 'error',
+                            onConfirm: async () => {
+                                for (const fileId of selectedItems) {
+                                    const file = files.find(f => f.id === fileId);
+                                    if (file) {
+                                        await deleteFileCompletely(file);
+                                    }
                                 }
-                                console.log('[Snackbar] onClose triggered');
+                                setSelectedItems(new Set());
+                                setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                            }
+                        });
+                    }}
+                >
+                    <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+                    Delete Selected ({selectedItems.size})
+                </MenuItem>
+                
+                {/**
+                 * Rerun the document analysis pipeline for selected documents
+                 */}
+                <MenuItem
+                    onClick={() => {
+                        setContextMenu(null);
+                        selectedItems.forEach(async (fileId) => {
+                            const file = files.find(f => f.id === fileId);
+                            if (file && file.documentID) {
+                                //. check if document is a pdf
+                                if (file.mimeType == 'application/pdf') {
+                                try {
+                                    console.log('[FileManager2] Re-analyzing PDF:', file.name);
+                                    await analyzePDF(file.id, true); // force re-analysis
+                                    console.log('[FileManager2] Re-generating embeddings for:', file.name);
+                                    await generateEmbeddings(file.id);
+                                } catch (error) {
+                                    console.error('Error re-analyzing document:', error);
+                                }
+                            } else {
+                                console.log('[FileManager2] Re-generating embeddings for:', file.name);
+                                await generateEmbeddings(file.id);
+                            }
+                        }
+                        
+                        });
+                    }}
+                >
+                <AutorenewIcon fontSize="small" sx={{ mr: 1 }} />
+                    Re-analyze Selected ({selectedItems.size})
+                </MenuItem>
+            </Menu>
+
+            {/* Tabs for filtering files and generating content */}
+            <Tabs
+                value={generator}
+                onChange={(e, newValue) => {
+                    setGenerator(newValue);
+                }}
+                variant="scrollable"
+                scrollButtons="auto"
+                allowScrollButtonsMobile
+                sx={{
+                    position: 'sticky',
+                    top: 52,
+                    bgcolor: 'background.paper',
+                    zIndex: 99,
+                    borderBottom: 1,
+                    borderColor: 'divider',
+                    width: '100%',
+                    padding: 0,
+                    minHeight: 36,
+                    '& .MuiTab-root': {
+                        padding: '6px 12px',
+                        minWidth: 60,
+                        minHeight: 36,
+                        fontSize: '0.8rem',
+                    },
+                    '& .MuiTabs-flexContainer': {
+                        gap: 0,
+                        justifyContent: 'flex-start',
+                    },
+                    '& .MuiTabs-scrollButtons': {
+                        width: 32,
+                        '&.Mui-disabled': {
+                            opacity: 0.3,
+                        },
+                    },
+                }}
+            >
+                <Tab
+                    label={
+                        <Tooltip title="All Files">
+                            <FolderIcon fontSize="small" />
+                        </Tooltip>
+                    }
+                    value="all"
+                />
+                <Tab
+                    label={
+                        <Tooltip title="Images">
+                            <ImageIcon fontSize="small" />
+                        </Tooltip>
+                    }
+                    value="image"
+                />
+                <Tab
+                    label={
+                        <Tooltip title="Audio">
+                            <AudioFileIcon fontSize="small" />
+                        </Tooltip>
+                    }
+                    value="audio"
+                />
+                <Tab
+                    label={
+                        <Tooltip title="Documents">
+                            <PictureAsPdfIcon fontSize="small" />
+                        </Tooltip>
+                    }
+                    value="document"
+                />
+            </Tabs>
+
+            {/* Scrollable Content Area */}
+            <Box sx={{ width: '100%' }}>
+                {/* Hidden - Suggestions removed */}
+                {generator === 'suggestions_removed' && (
+                    <Box sx={{ width: '100%' }}>
+                        {/* Document search bar */}
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                gap: 1,
+                                px: 1,
+                                py: 1,
+                                bgcolor: 'background.paper',
+                                borderBottom: '1px solid #e0e0e0'
                             }}
                         >
-                            <Alert
-                                severity={confirmDialog.severity}
-                                sx={{
-                                    width: '100%',
-                                    minWidth: '300px',
-                                    boxShadow: 3
-                                }}
-                                action={
-                                    <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
-                                        <Button
-                                            color="inherit"
-                                            size="small"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                console.log('[Snackbar] Confirm clicked');
-                                                if (confirmDialog.onConfirm) {
-                                                    confirmDialog.onConfirm();
+                            <TextField
+                                value={search}
+                                onInput={handleSearch}
+                                size="small"
+                                fullWidth
+                                placeholder="Search documents..."
+                                label="Search Documents"
+                            />
+                        </Box>
+
+                        {/* Suggestion type tabs */}
+                        <Tabs
+                            value={suggestionTab}
+                            onChange={(e, newValue) => setSuggestionTab(newValue)}
+                            variant="fullWidth"
+                            sx={{ borderBottom: 1, borderColor: 'divider', px: 1 }}
+                        >
+                            <Tab label="Vocabulary" />
+                            <Tab label="Questions" />
+                        </Tabs>
+
+                        {/* Document list */}
+                        <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+                            {files
+                                .filter(file =>
+                                    file.documentID && (
+                                        file.mimeType === 'application/pdf' ||
+                                        file.mimeType === 'text/plain' ||
+                                        file.mimeType === 'text/markdown' ||
+                                        file.mimeType === 'text/csv'
+                                    ) && (!search || file.name.toLowerCase().includes(search.toLowerCase()))
+                                )
+                                .map((file) => {
+                                    const docStatus = documentStatuses[file.documentID];
+                                    const statusInfo = getDocumentStatusInfo(docStatus?.status || 'uploaded');
+                                    const isSelected = selectedDocument === file.documentID;
+
+                                    return (
+                                        <ListItem
+                                            key={file.id}
+                                            button
+                                            selected={isSelected}
+                                            onClick={() => {
+                                                setSelectedDocument(file.documentID);
+                                            }}
+                                            sx={{
+                                                borderLeft: isSelected ? '4px solid' : '4px solid transparent',
+                                                borderColor: isSelected ? 'primary.main' : 'transparent',
+                                                bgcolor: isSelected ? 'action.selected' : 'transparent',
+                                                '&:hover': {
+                                                    bgcolor: isSelected ? 'action.selected' : 'action.hover',
+                                                },
+                                            }}
+                                        >
+                                            <ListItemAvatar>
+                                                <PictureAsPdfIcon color={statusInfo.color} />
+                                            </ListItemAvatar>
+                                            <ListItemText
+                                                primary={file.name}
+                                                secondary={
+                                                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            {(file.size / 1000).toFixed(2)} KB
+                                                        </Typography>
+                                                        {docStatus?.pageCount && (
+                                                            <Typography variant="caption" color="text.secondary">
+                                                                • {docStatus.pageCount} pages
+                                                            </Typography>
+                                                        )}
+                                                        <Chip
+                                                            size="small"
+                                                            label={statusInfo.label}
+                                                            color={statusInfo.chipColor}
+                                                            icon={statusInfo.icon}
+                                                            sx={{ height: 18, fontSize: '0.65rem', ml: 0.5 }}
+                                                        />
+                                                    </Box>
                                                 }
+                                            />
+                                        </ListItem>
+                                    );
+                                })}
+                            {files.filter(file =>
+                                file.documentID && (
+                                    file.mimeType === 'application/pdf' ||
+                                    file.mimeType === 'text/plain' ||
+                                    file.mimeType === 'text/markdown' ||
+                                    file.mimeType === 'text/csv'
+                                ) && (!search || file.name.toLowerCase().includes(search.toLowerCase()))
+                            ).length === 0 && (
+                                    <ListItem>
+                                        <ListItemText
+                                            primary={
+                                                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+                                                    {search ? 'No documents match your search' : 'No documents available'}
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
+                                )}
+                        </List>
+
+                        {/* Show suggestions if document is selected */}
+                        {selectedDocument && (
+                            <>
+                                {/* Vocabulary Tab */}
+                                {suggestionTab === 0 && (
+                                    <SuggestedVocabulary
+                                        documentId={selectedDocument}
+                                        unitId={unit?.id}
+                                        enableInlineEditing={true}
+                                        onImport={(count) => {
+                                            console.log(`Imported ${count} vocabulary items`);
+                                        }}
+                                    />
+                                )}
+
+                                {/* Questions Tab */}
+                                {suggestionTab === 1 && (
+                                    <SuggestedQuestions
+                                        documentId={selectedDocument}
+                                        unitId={unit?.id}
+                                        enableInlineEditing={true}
+                                        onImport={(count) => {
+                                            console.log(`Imported ${count} questions`);
+                                        }}
+                                    />
+                                )}
+                            </>
+                        )}
+                    </Box>
+                )}
+
+
+                {/* File Tree - shows all files organized by protection level first */}
+                {/* VIRTUALIZED LIST RENDERING */}
+                {generator !== 'suggestions_removed' && (
+                    <Box
+                        ref={parentRef}
+                        sx={{
+                            flex: 1,
+                            minHeight: 0,
+                            overflow: 'auto',
+                            position: 'relative'
+                        }}
+                        onDragOver={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }}
+                        onDrop={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            // Drag and drop is handled by DragDropPastePlugin in the editor
+                            console.log('File drop detected in FileManager2');
+                        }}
+                    >
+                        <div style={{
+                            height: `${virtualizer.getTotalSize()}px`,
+                            width: '100%',
+                            position: 'relative'
+                        }}>
+                            {(() => {
+                                const virtualItems = virtualizer.getVirtualItems();
+                                return virtualItems.map(virtualRow => {
+                                    const item = fileListItems[virtualRow.index];
+
+                                    return (
+                                        <div
+                                            key={virtualRow.key}
+                                            data-index={virtualRow.index}
+                                            ref={virtualizer.measureElement}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                transform: `translateY(${virtualRow.start}px)`
                                             }}
-                                            variant="outlined"
                                         >
-                                            Confirm
-                                        </Button>
-                                        <Button
-                                            color="inherit"
-                                            size="small"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                console.log('[Snackbar] Cancel clicked');
-                                                setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
-                                            }}
-                                            variant="contained"
-                                        >
-                                            Cancel
-                                        </Button>
-                                    </Box>
-                                }
+                                        {item.type === 'protection-header' && (
+                                            <ProtectionLevelHeader
+                                                label={item.label}
+                                                totalFiles={item.totalFiles}
+                                            />
+                                        )}
+
+                                        {item.type === 'filetype-subheader' && (
+                                            <FileTypeSubheader
+                                                label={item.label}
+                                                fileType={item.fileType}
+                                            />
+                                        )}
+
+                                        {item.type === 'file' && (
+                                            <FileRowComponent
+                                                file={item.file}
+                                                fileType={item.fileType}
+                                                index={virtualRow.index}
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            });
+                            })()}
+                        </div>
+                    </Box>
+                )}
+                {/* END VIRTUALIZED LIST RENDERING */}
+            </Box>
+
+            {/* Generation Modals */}
+            {generator === 'image' && (
+                <ImageGeneratorButton
+                    open={newFileFormOpen}
+                    onSuccess={() => {
+                        setNewFileFormOpen(false);
+                        setNewImageFileFormOpen(false);
+                    }}
+                />
+            )}
+            {generator === 'audio' && (
+                <AudioGeneratorButton
+                    open={newFileFormOpen}
+                    onSuccess={() => {
+                        setNewFileFormOpen(false);
+                        setNewAudioFileFormOpen(false);
+                    }}
+                />
+            )}
+
+            {/* File Upload Input */}
+            <input
+                id="file-upload-input"
+                type="file"
+                multiple
+                accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.txt,.md,.csv,.xls,.xlsx,.ppt,.pptx"
+                hidden
+                onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    console.log('[FileManager2] Files selected:', files.length, files.map(f => f.name));
+                    setFilesToUpload(files.map((f, index) => ({ file: f, index })));
+                    setFileOperations(files.map((f) => ({ name: f.name, progress: '0%' })));
+                }}
+            />
+
+            {/* File Operations Display */}
+            {
+                fileOperations.length > 0 && (
+                    <Box sx={{ p: 1 }}>
+                        {fileOperations.map((fileOperation, index) => (
+                            <Box
+                                key={index}
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    py: 0.5,
+                                }}
                             >
-                                {confirmDialog.message}
-                            </Alert>
-                        </Snackbar>
-                    </Portal>
-                </Box>
-            </FileManagerProvider>
+                                <Typography variant="body2">{fileOperation.name}</Typography>
+                                <Typography variant="body2">{fileOperation.progress}</Typography>
+                            </Box>
+                        ))}
+                    </Box>
+                )
+            }
+
+        </Box>
+        
+        {/* Confirmation Snackbar - Rendered in Portal to escape container overflow */}
+        <Portal>
+            <Snackbar
+                open={confirmDialog.open}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                onClose={(event, reason) => {
+                    if (reason === 'clickaway') {
+                        return;
+                    }
+                    console.log('[Snackbar] onClose triggered');
+                }}
+            >
+                <Alert
+                    severity={confirmDialog.severity}
+                    sx={{ 
+                        width: '100%',
+                        minWidth: '300px',
+                        boxShadow: 3
+                    }}
+                    action={
+                        <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
+                            <Button
+                                color="inherit"
+                                size="small"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    console.log('[Snackbar] Confirm clicked');
+                                    if (confirmDialog.onConfirm) {
+                                        confirmDialog.onConfirm();
+                                    }
+                                }}
+                                variant="outlined"
+                            >
+                                Confirm
+                            </Button>
+                            <Button
+                                color="inherit"
+                                size="small"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    console.log('[Snackbar] Cancel clicked');
+                                    setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                                }}
+                                variant="contained"
+                            >
+                                Cancel
+                            </Button>
+                        </Box>
+                    }
+                >
+                    {confirmDialog.message}
+                </Alert>
+            </Snackbar>
+        </Portal>
+        </FileManagerProvider>
         </VectorStoreContext.Provider>
-        );
-    } catch (err) {
-        console.error('[FileManager2] Render error:', err);
-        return <Box>Error rendering FileManager: {err?.message}</Box>;
-    }
-}   
+    );
+}

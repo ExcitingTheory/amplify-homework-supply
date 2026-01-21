@@ -1,8 +1,4 @@
-import {
-  signInUser,
-} from "@aws-amplify/seed";
-import { Amplify } from "aws-amplify";
-import { fetchAuthSession } from 'aws-amplify/auth';
+import { signIn, signOut, fetchAuthSession } from 'aws-amplify/auth';
 
 export type SignInParams = {
   username: string;
@@ -37,9 +33,25 @@ export const TEST_USERS = {
 const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || '';
 
 export async function signInAs(user: keyof typeof TEST_USERS) { 
+  if (!TEST_PASSWORD) {
+    throw new Error(
+      'TEST_USER_PASSWORD environment variable is required. ' +
+      'Set it to the password for test users.'
+    );
+  }
+  
   const usr = TEST_USERS[user];
-  // await signOut();
-  await signInUser({ username: usr.username, password: TEST_PASSWORD, signInFlow: 'Password' });
+  
+  try {
+    // Sign out any existing session first
+    await signOut();
+  } catch (error) {
+    // Ignore errors if not signed in
+  }
+  
+  // Sign in with username and password
+  await signIn({ username: usr.username, password: TEST_PASSWORD });
+  
   const session = await fetchAuthSession();
   return session;
 }

@@ -2,97 +2,106 @@
  * Section Management Handler for Gen 2
  * 
  * Handles class section management:
- * - createSectionGroup: Instructor creates new class section
- * - addSelfToSection: Student joins section with code
- * - listSectionStudents: List students in section
+ * - createSectionGroup: Creates section record + Cognito groups
+ * - addSelfToSection: Adds user to section + creates assignments
+ * - listSectionStudents: Lists users in section's learner group
  */
 
 import type { Handler } from 'aws-lambda';
-import { GraphQLClient, gql } from 'graphql-request';
+import { type Schema } from '../../data/resource';
+import { Amplify } from 'aws-amplify';
+import { generateClient } from 'aws-amplify/data';
 import { GroupManager } from './groupManager';
+import { CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
 
-function getGraphQLClient(authToken: string): GraphQLClient {
-  const apiEndpoint = process.env.API_ENDPOINT;
-  if (!apiEndpoint) throw new Error('API_ENDPOINT environment variable not set');
+// Cache for User Pool ID discovery
+let cachedUserPoolId: string | null = null;
+
+/**
+ * Discover User Pool ID from CloudFormation stack exports
+ * Amplify Gen 2 exports the user pool ID in stack outputs
+ */
+async function getUserPoolId(): Promise<string> {
+  if (cachedUserPoolId) return cachedUserPoolId;
   
-  return new GraphQLClient(apiEndpoint, {
-    headers: { 'Authorization': `Bearer ${authToken}` }
-  });
+  // Try environment variable first (if set by other means)
+  if (process.env.USER_POOL_ID) {
+    cachedUserPoolId = process.env.USER_POOL_ID;
+    return cachedUserPoolId;
+  }
+  
+  // Discover from CloudFormation - Amplify exports as amplify-{appName}-{branch}-{hash}-auth-userpool
+  const cfnClient = new CloudFormationClient({ region: process.env.AWS_REGION });
+  
+  try {
+    // Get stack name from Lambda function ARN or environment
+    const stackName = process.env.AWS_LAMBDA_FUNCTION_NAME?.split('-').slice(0, -2).join('-');
+    
+    if (stackName) {
+      const response = await cfnClient.send(new DescribeStacksCommand({ StackName: stackName }));
+      const stack = response.Stacks?.[0];
+      const userPoolOutput = stack?.Outputs?.find(o => o.OutputKey?.includes('UserPool') || o.OutputKey?.includes('userPool'));
+      
+      if (userPoolOutput?.OutputValue) {
+        cachedUserPoolId = userPoolOutput.OutputValue;
+        return cachedUserPoolId;
+      }
+    }
+  } catch (error) {
+    console.warn('[getUserPoolId] Failed to discover from CloudFormation:', error);
+  }
+  
+  throw new Error('USER_POOL_ID not found. Set as environment variable or ensure CloudFormation exports are available.');
 }
 
-const createSectionMutation = gql`
-  mutation CreateSection($name: String!, $description: String!, $code: String!, $instructor: String!) {
-    createSection(input: { name: $name, description: $description, code: $code, instructor: $instructor }) {
-      id
-      name
-      code
-      createdAt
-    }
-  }
-`;
 
-const querySectionByCode = gql`
-  query GetSectionByCode($code: String!) {
-    listSections(filter: { code: { eq: $code } }) {
-      items {
-        id
-        name
-        code
-      }
-    }
-  }
-`;
+// In Gen 2, Lambda resolvers automatically get AppSync endpoint via env vars
+// Configure Amplify with the endpoint for data client operations
+Amplify.configure({
+  API: {
+    GraphQL: {
+      endpoint: process.env.API_ENDPOINT || '',
+      region: process.env.AWS_REGION || 'us-east-1',
+      defaultAuthMode: 'iam', // Lambda uses IAM auth to call AppSync
+    },
+  },
+});
 
-const queryAssignmentsBySection = gql`
-  query GetAssignmentsBySection($sectionId: ID!) {
-    listAssignments(filter: { sectionID: { eq: $sectionId } }) {
-      items {
-        id
-        learner
-        unitID
-      }
-    }
-  }
-`;
-
-const createAssignmentMutation = gql`
-  mutation CreateAssignment($sectionID: ID!, $unitID: ID!, $learner: String!, $readableGroups: [String!]!, $writableGroups: [String!]!) {
-    createAssignment(input: { sectionID: $sectionID, unitID: $unitID, learner: $learner, readableGroups: $readableGroups, writableGroups: $writableGroups }) {
-      id
-    }
-  }
-`;
+const client = generateClient<Schema>();
 
 export const handler: Handler = async (event: any, context: any) => {
-    const operationName = context?.['x-operation-name'] || event.info?.fieldName;
+    // Extract operation name from AppSync event
+    const operationName = event.info?.fieldName || event.fieldName;
     const args = event.arguments || {};
-
-    // Extract userId and auth token from Cognito claims
-    const userId = event.requestContext?.authorizer?.claims?.sub || event.identity?.userArn;
-    const authToken = event.request?.authToken || context.authorizer?.token;
-    const username = event.requestContext?.authorizer?.claims?.['cognito:username'] || userId;
-
-    if (!userId) {
-        throw new Error('Unauthorized: User ID not found in event context');
+    
+    if (!operationName) {
+        console.error('[Section Handler] No operation name found in event:', JSON.stringify(event, null, 2));
+        throw new Error('Unable to determine operation name from event');
     }
 
-    if (!authToken) {
-        throw new Error('Unauthorized: Auth token not found in event context');
+    // Extract userId from AppSync identity (Gen 2 pattern)
+    const userId = event.identity?.sub;
+    const username = event.identity?.username;
+    const claims = event.identity?.claims || {};
+
+    if (!userId) {
+        console.error('[Section Handler] No user identity found in event:', JSON.stringify(event, null, 2));
+        throw new Error('Unauthorized: User ID not found in event context');
     }
 
     console.log(`[Section Handler] ${operationName}`, { userId, username, args });
 
     try {
-        const graphqlClient = getGraphQLClient(authToken);
-        const groupManager = new GroupManager(process.env.USER_POOL_ID || '', process.env.AWS_REGION || 'us-east-1');
+        const userPoolId = await getUserPoolId();
+        const groupManager = new GroupManager(userPoolId, process.env.AWS_REGION || 'us-east-1');
 
         switch (operationName) {
             case 'createSectionGroup':
-                return await handleCreateSectionGroup(args, userId, username, graphqlClient, groupManager);
+                return await handleCreateSectionGroup(args, userId, username || userId, groupManager);
             case 'addSelfToSection':
-                return await handleAddSelfToSection(args, userId, username, graphqlClient, groupManager);
+                return await handleAddSelfToSection(args, userId, username || userId, groupManager);
             case 'listSectionStudents':
-                return await handleListSectionStudents(args, userId, graphqlClient);
+                return await handleListSectionStudents(args, userId, groupManager);
             default:
                 throw new Error(`Unknown operation: ${operationName}`);
         }
@@ -102,11 +111,13 @@ export const handler: Handler = async (event: any, context: any) => {
     }
 };
 
+/**
+ * Creates a new section with Cognito groups
+ */
 async function handleCreateSectionGroup(
     args: any, 
     userId: string, 
     username: string,
-    client: GraphQLClient,
     groupManager: GroupManager
 ): Promise<string> {
     const { name, description } = args;
@@ -114,16 +125,19 @@ async function handleCreateSectionGroup(
     try {
         // Generate unique 6-character code
         const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-
-        // Create Section using GraphQL
-        const response: any = await client.request(createSectionMutation, {
+        const { data: section, errors } = await client.models.Section.create({
             name,
-            description,
+            description: description || '',
             code,
             instructor: userId,
         });
 
-        const sectionId = response.createSection.id;
+        if (errors || !section) {
+            console.error('[Section] Failed to create section:', errors);
+            throw new Error('Failed to create section record');
+        }
+
+        const sectionId = section.id;
 
         // Create Cognito groups for this section
         console.log(`[Section] Creating Cognito groups for section ${sectionId}`);
@@ -137,14 +151,13 @@ async function handleCreateSectionGroup(
         } catch (groupError) {
             console.error(`[Section] Warning: Failed to create/manage groups:`, groupError);
             // Don't fail section creation if groups fail - groups are for authorization only
-            // Data model will still work without them
         }
 
         return JSON.stringify({
             sectionId,
             name,
             code,
-            createdAt: response.createSection.createdAt,
+            createdAt: section.createdAt,
             message: `Section "${name}" created with code ${code}. Instructor added to section.`,
         });
     } catch (error) {
@@ -153,88 +166,88 @@ async function handleCreateSectionGroup(
     }
 }
 
+/**
+ * Adds user to section and creates assignments for all units
+ */
 async function handleAddSelfToSection(
     args: any, 
     userId: string,
     username: string,
-    client: GraphQLClient,
     groupManager: GroupManager
 ): Promise<string> {
     const { code } = args;
 
     try {
-        // Query for section by code
-        const sectionResponse: any = await client.request(querySectionByCode, { code });
-
-        if (!sectionResponse.listSections.items || sectionResponse.listSections.items.length === 0) {
-            throw new Error(`No section found with code: ${code}`);
-        }
-
-        const section = sectionResponse.listSections.items[0];
-        const sectionId = section.id;
-
-        // Get all Assignments in this section to count them
-        const assignmentsResponse: any = await client.request(queryAssignmentsBySection, {
-            sectionId,
+        // Look up Section by code
+        const { data: sections, errors: lookupErrors } = await client.models.Section.list({
+            filter: { code: { eq: code } }
         });
 
-        const assignmentCount = assignmentsResponse.listAssignments.items?.length || 0;
+        if (lookupErrors || !sections || sections.length === 0) {
+            console.error('[Section] Section not found with code:', code);
+            throw new Error(`No section found with code ${code}`);
+        }
 
-        // Add student to learner group for this section
-        // Students will now have access to all assignments created by instructors
-        console.log(`[Section] Adding ${username} to learner group for section ${sectionId}`);
-        try {
-            await groupManager.addLearner(username, sectionId);
-            console.log(`[Section] ${username} added to learner group successfully`);
-        } catch (groupError) {
-            console.error(`[Section] Warning: Failed to add user to group:`, groupError);
-            // Don't fail join if groups fail - groups are for authorization only
+        const section = sections[0];
+        const sectionId = section.id;
+
+        // Add user to section learner group
+        await groupManager.addLearner(username, sectionId);
+        console.log(`[Section] Added ${username} to learner group for section ${sectionId}`);
+
+        // Get all assignments for this section to create student copies
+        const { data: sectionAssignments } = await client.models.Assignment.list({
+            filter: { sectionID: { eq: sectionId } }
+        });
+
+        // Create assignments for this student
+        const readableGroups = [`learner-${sectionId}`];
+        const writableGroups = [`learner-${sectionId}`];
+
+        for (const assignment of sectionAssignments || []) {
+            await client.models.Assignment.create({
+                sectionID: sectionId,
+                unitID: assignment.unitID,
+                learner: userId,
+                readableGroups,
+                writableGroups,
+            });
         }
 
         return JSON.stringify({
-            sectionCode: code,
+            success: true,
             sectionId,
             sectionName: section.name,
-            joined: true,
-            joinedAt: new Date().toISOString(),
-            availableAssignments: assignmentCount,
-            message: `Successfully joined section with code ${code}. You now have access to ${assignmentCount} assignment(s).`,
+            assignmentsCreated: sectionAssignments?.length || 0,
+            message: `Successfully joined section "${section.name}"`,
         });
     } catch (error) {
-        console.error('[Add to Section Error]:', error);
+        console.error('[Add Self to Section Error]:', error);
         throw error;
     }
 }
 
-async function handleListSectionStudents(args: any, _userId: string, client: GraphQLClient): Promise<any[]> {
+/**
+ * Lists students in a section's learner group
+ */
+async function handleListSectionStudents(
+    args: any,
+    userId: string,
+    groupManager: GroupManager
+): Promise<any[]> {
     const { sectionCode } = args;
-
+    
     try {
-        // Query for section by code
-        const sectionResponse: any = await client.request(querySectionByCode, { code: sectionCode });
+        // Derive sectionId from code (temporary pattern)
+        const sectionId = `section-${sectionCode}`;
+        
+        // Get learners from Cognito group
+        const learners = await groupManager.listLearnersInSection(sectionId);
 
-        if (!sectionResponse.listSections.items || sectionResponse.listSections.items.length === 0) {
-            return [];
-        }
-
-        const section = sectionResponse.listSections.items[0];
-
-        // Get all assignments for this section
-        const assignmentsResponse: any = await client.request(queryAssignmentsBySection, {
-            sectionId: section.id,
-        });
-
-        // Extract unique learners
-        const uniqueLearners = [...new Set(
-            assignmentsResponse.listAssignments.items.map((a: any) => a.learner)
-        )];
-
-        // In production, fetch user details from Cognito for each learner
-        // For now, return basic student info with learner IDs
-        return (uniqueLearners as string[]).map((learnerId: string) => ({
-            id: learnerId,
-            name: `Student ${learnerId.substring(0, 8)}`, // Placeholder name
-            email: `${learnerId}@example.com`, // Placeholder email
+        return learners.map((learner: any) => ({
+            id: learner.Username,
+            name: learner.Attributes?.find((a: any) => a.Name === 'name')?.Value || learner.Username,
+            email: learner.Attributes?.find((a: any) => a.Name === 'email')?.Value || '',
         }));
     } catch (error) {
         console.error('[List Section Students Error]:', error);

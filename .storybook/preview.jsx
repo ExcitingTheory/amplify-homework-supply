@@ -290,23 +290,23 @@ const preview = {
   loaders: [
     async ({ parameters }) => {
       // Clear previous mock data before each story (unless disabled)
-      // if (parameters?.clearMockData !== true) {
-      //   console.log('[Preview] Skipped clearing mock data (clearMockData=true)');
-      // } else {
-      //   // clearMockData();
-      //   console.log('[Preview] Cleared mock data for story');
-      // }
+      if (parameters?.clearMockData !== true) {
+        console.log('[Preview] Skipped clearing mock data (clearMockData=true)');
+      } else {
+        clearMockData();
+        console.log('[Preview] Cleared mock data for story');
+      }
 
-      // if (parameters?.initializeMockData === false) {
-      //   // Optionally initialize default mock data here
-      //   console.log('[Preview] Skipped initializing default mock data (initializeMockData=false)');
+      if (parameters?.initializeMockData === false) {
+        // Optionally initialize default mock data here
+        console.log('[Preview] Skipped initializing default mock data (initializeMockData=false)');
         
-      // } else {
+      } else {
         
-      //   console.log('[Preview] Initialized default mock data for story');
-      //   initializeMockData();
-      // }
-      // return null; // Return null instead of empty object to avoid extra div
+        console.log('[Preview] Initialized default mock data for story');
+        initializeMockData();
+      }
+      return null; // Return null instead of empty object to avoid extra div
     },
   ],
 };

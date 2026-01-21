@@ -310,7 +310,7 @@ export const EmptyEditorTextFormatting = {
 export const EmptyEditorCustomBlocks = {
   loaders: [
     async () => {
-      // clearMockData();
+      clearMockData();
       initializeMockData();
       seedMockUnit({
         id: 'empty-editor-custom-blocksid',
@@ -516,7 +516,7 @@ export const EmptyEditorCustomBlocks = {
 export const EditorWithContent = {
   loaders: [
     async () => {
-      // clearMockData();
+      clearMockData();
       initializeMockData();
       seedMockUnit({
         id: 'editor-with-content-id',
@@ -1848,7 +1848,7 @@ export const KitchenSink = {
   loaders: [
     async () => {
 
-      // clearMockData();
+      clearMockData();
       
       // Seed the kitchen sink lesson unit
 

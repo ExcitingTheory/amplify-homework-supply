@@ -1,4 +1,11 @@
 import { a, defineData, type ClientSchema } from '@aws-amplify/backend';
+import { openaiHandler } from '../functions/openai/resource';
+import { sectionHandler } from '../functions/section/resource';
+import { embeddingsHandler } from '../functions/embeddings/resource';
+import { moderationHandler } from '../functions/moderation/resource';
+import { documentAnalysisHandler } from '../functions/documentAnalysis/resource';
+import { aiHandler } from '../functions/ai/resource';
+import { assistantHandler } from '../functions/assistant/resource';
 
 /**
  * Amplify Gen 2 Data Schema
@@ -169,9 +176,13 @@ const schema = a.schema({
       isDraft: a.boolean(),
     })
     .authorization((allow) => [
+      // Owners (creators - typically Instructors) have full control
       allow.owner(),
-      allow.group('Learners').to(['read']),
+      // Instructors can create and manage units
+      allow.group('Instructors'),
+      // Admins have full access
       allow.group('Admins'),
+      // Dynamic groups for section-based access
       allow.groupsDefinedIn('readableGroups').to(['read']),
       allow.groupsDefinedIn('writableGroups').to(['update']),
     ]),
@@ -246,6 +257,7 @@ const schema = a.schema({
       description: a.string(),
       status: PublishedStatus,
       code: a.string(),
+      instructor: a.string(), // User ID of instructor
       // Relationships
       assignments: a.hasMany('Assignment', ['sectionID']),
       // Dynamic group authorization - students and instructors can read
@@ -290,11 +302,6 @@ const schema = a.schema({
       audioWaveformData: a.json(),
       answerAudio: a.string().array(),
       answerAudioWaveformData: a.json(),
-      // Source tracking - where the question came from
-      documentID: a.id(), // Source document if imported from PDF
-      fileID: a.id(), // Source file if from specific file
-      filename: a.string(), // Original filename for display
-      page: a.integer(), // Page number in source document
       // Generation metadata
       generated: a.boolean(),
       model: a.string(),
@@ -366,8 +373,7 @@ const schema = a.schema({
       generated: a.boolean(),
       hex: a.string(),
       byHex: a.string(),
-      thumbnail: a.string(), // S3 key for first page thumbnail (deprecated - use thumbnailKeys)
-      thumbnailKeys: a.string().array(), // S3 keys for all page thumbnails
+      thumbnail: a.string(),
       waveformData: a.json(),
       // Relationships - enable querying files by associated model
       documentID: a.id(),
@@ -383,6 +389,8 @@ const schema = a.schema({
     .authorization((allow) => [
       // Owner has full control
       allow.owner(),
+      // Instructors can create and manage files
+      allow.group('Instructors'),
       // Learners can read files (for embedded content, shared resources)
       allow.group('Learners').to(['read']),
       // Admins have full access
@@ -404,11 +412,6 @@ const schema = a.schema({
       waveformData: a.json(),
       definitionAudio: a.string().array(),
       definitionWaveformData: a.json(),
-      // Source tracking - where the word came from
-      documentID: a.id(), // Source document if imported from PDF
-      fileID: a.id(), // Source file if from specific file
-      filename: a.string(), // Original filename for display
-      page: a.integer(), // Page number in source document
       // Metadata
       importedAt: a.datetime(),
       // Embeddings
@@ -766,7 +769,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   verifyWord: a
     .query()
@@ -778,7 +781,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   verifyShortAnswer: a
     .query()
@@ -790,7 +793,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   transcribe: a
     .query()
@@ -800,7 +803,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   verifyAudio: a
     .query()
@@ -812,7 +815,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   verifyAudioUrl: a
     .query()
@@ -824,7 +827,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   transcribeUrl: a
     .query()
@@ -834,7 +837,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   processImage: a
     .query()
@@ -844,7 +847,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   processImageUrl: a
     .query()
@@ -854,7 +857,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   verifyImage: a
     .query()
@@ -865,7 +868,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   verifyImageUrl: a
     .query()
@@ -876,7 +879,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   // Chat & Content Mutations
   chat: a
@@ -887,7 +890,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   generateAudio: a
     .mutation()
@@ -898,7 +901,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   generateAudioFile: a
     .mutation()
@@ -909,7 +912,7 @@ const schema = a.schema({
     })
     .returns(a.ref('File'))
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   generateImage: a
     .mutation()
@@ -919,7 +922,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   generateImageFile: a
     .mutation()
@@ -929,7 +932,7 @@ const schema = a.schema({
     })
     .returns(a.ref('File'))
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('openaiHandler')),
+    .handler(a.handler.function(openaiHandler)),
 
   // Document Analysis Mutations
   analyzeDocument: a
@@ -939,7 +942,7 @@ const schema = a.schema({
     })
     .returns(a.ref('AnalyzeDocumentResult'))
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('documentAnalysisHandler')),
+    .handler(a.handler.function(documentAnalysisHandler)),
 
   cancelDocumentAnalysis: a
     .mutation()
@@ -948,7 +951,7 @@ const schema = a.schema({
     })
     .returns(a.ref('CancelDocumentAnalysisResult'))
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('documentAnalysisHandler')),
+    .handler(a.handler.function(documentAnalysisHandler)),
 
   // Embeddings Mutations
   generateEmbeddings: a
@@ -958,7 +961,7 @@ const schema = a.schema({
     })
     .returns(a.ref('GenerateEmbeddingsResult'))
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('embeddingsHandler')),
+    .handler(a.handler.function(embeddingsHandler)),
 
   generateEmbedding: a
     .mutation()
@@ -969,7 +972,7 @@ const schema = a.schema({
     })
     .returns(a.ref('EmbeddingResult'))
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('embeddingsHandler')),
+    .handler(a.handler.function(embeddingsHandler)),
 
   // Content & AI Mutations
   contentCompletion: a
@@ -980,7 +983,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('aiHandler')),
+    .handler(a.handler.function(aiHandler)),
 
   suggestBlocks: a
     .mutation()
@@ -991,7 +994,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('aiHandler')),
+    .handler(a.handler.function(aiHandler)),
 
   // Moderation Mutation
   moderateContent: a
@@ -1001,7 +1004,7 @@ const schema = a.schema({
     })
     .returns(a.ref('ModerationResult'))
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('moderationHandler')),
+    .handler(a.handler.function(moderationHandler)),
 
   // Unit Prediction Mutations
   predictUnitData: a
@@ -1011,7 +1014,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('aiHandler')),
+    .handler(a.handler.function(aiHandler)),
 
   predictUnitByData: a
     .mutation()
@@ -1020,7 +1023,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('aiHandler')),
+    .handler(a.handler.function(aiHandler)),
 
   // Assistant Editor Mutations
   initAssistantEditor: a
@@ -1031,7 +1034,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('assistantHandler')),
+    .handler(a.handler.function(assistantHandler)),
 
   updateAssistantEditor: a
     .mutation()
@@ -1042,7 +1045,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('assistantHandler')),
+    .handler(a.handler.function(assistantHandler)),
 
   deleteAssistantEditor: a
     .mutation()
@@ -1052,7 +1055,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('assistantHandler')),
+    .handler(a.handler.function(assistantHandler)),
 
   useAssistantEditor: a
     .mutation()
@@ -1063,7 +1066,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('assistantHandler')),
+    .handler(a.handler.function(assistantHandler)),
 
   chatAssistantThread: a
     .mutation()
@@ -1073,7 +1076,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('assistantHandler')),
+    .handler(a.handler.function(assistantHandler)),
 
   // Section Management Mutations
   createSectionGroup: a
@@ -1084,7 +1087,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('sectionHandler')),
+    .handler(a.handler.function(sectionHandler)),
 
   addSelfToSection: a
     .mutation()
@@ -1093,7 +1096,7 @@ const schema = a.schema({
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('sectionHandler')),
+    .handler(a.handler.function(sectionHandler)),
 
   // Section Management Queries
   listSectionStudents: a
@@ -1103,7 +1106,7 @@ const schema = a.schema({
     })
     .returns(a.ref('StudentInfo').array())
     .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function('sectionHandler')),
+    .handler(a.handler.function(sectionHandler)),
 });
 
 export type Schema = ClientSchema<typeof schema>;

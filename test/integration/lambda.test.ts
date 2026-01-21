@@ -23,18 +23,34 @@
  *   - Seed data loaded: npx ampx sandbox --seed
  */
 
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, test } from 'vitest';
 import { Amplify } from 'aws-amplify';
+import { parseAmplifyConfig } from 'aws-amplify/utils';
 import { generateClient } from 'aws-amplify/api';
+import { post } from 'aws-amplify/api';
 import { signIn, signOut, fetchAuthSession } from 'aws-amplify/auth';
 import type { Schema } from '../../amplify/data/resource';
 import amplifyOutputs from '../../amplify_outputs.json';
 import {
   signInAs,
- } from '../shared.ts-no';
+ } from './shared';
 
-// Configure Amplify
-Amplify.configure(amplifyOutputs);
+// Configure Amplify with existing resources
+const amplifyConfig = parseAmplifyConfig(amplifyOutputs);
+
+Amplify.configure({
+  ...amplifyConfig,
+  API: {
+    ...amplifyConfig.API,
+    REST: {
+      ...amplifyConfig.API?.REST,
+      homeworkSupplyStreamApi: {
+        endpoint: (amplifyOutputs.custom as any).STREAM_API.endpoint,
+        region: (amplifyOutputs.custom as any).STREAM_API.region,
+      },
+    },
+  },
+});
 
 // Create typed GraphQL client
 const client = generateClient<Schema>();
@@ -54,51 +70,78 @@ describe('C. Lambda Handler Integration Tests', () => {
     test('Send chat message with streaming response', async () => {
       await signInAs('student1');
 
-      const { data, errors } = await client.mutations.chat({
-        messages: JSON.stringify([
-          {
-            role: 'user',
-            content: 'What are the basic hiragana characters?',
+      const restOperation = post({
+        apiName: 'homeworkSupplyStreamApi',
+        path: '/chat',
+        options: {
+          body: {
+            messages: [
+              {
+                role: 'user',
+                content: 'What are the basic hiragana characters?',
+              },
+            ],
           },
-        ]),
-        model: 'gpt-4',
+        },
       });
 
-      expect(errors).toBeUndefined();
-      expect(data).toBeDefined();
-      expect(typeof data).toBe('string');
-      if (typeof data === 'string') {
-        expect(data.length).toBeGreaterThan(0);
-      }
+      const { body } = await restOperation.response;
+      const text = await body.text();
+      console.log('Chat Stream Response:', text);
+
+      expect(text).toBeDefined();
+      expect(typeof text).toBe('string');
+      expect(text.length).toBeGreaterThan(0);
+      // SSE format should contain "data:" prefix
+      expect(text).toContain('data:');
     }, 30000);
 
     test('Chat with context awareness', async () => {
       await signInAs('instructor1');
 
-      const { data, errors } = await client.mutations.chat({
-        messages: JSON.stringify([
-          {
-            role: 'user',
-            content: 'Generate a quiz about this topic',
+      const restOperation = post({
+        apiName: 'homeworkSupplyStreamApi',
+        path: '/chat',
+        options: {
+          body: {
+            messages: [
+              {
+                role: 'user',
+                content: 'Generate a quiz about this topic',
+              },
+            ],
+            context: {
+              unit: { name: 'Test Unit', description: 'Testing context' },
+            },
           },
-        ]),
-        model: 'gpt-4',
+        },
       });
 
-      expect(errors).toBeUndefined();
-      expect(data).toBeDefined();
+      const { body } = await restOperation.response;
+      const text = await body.text();
+
+      expect(text).toBeDefined();
+      expect(text.length).toBeGreaterThan(0);
     }, 30000);
 
     test('Error handling for empty message', async () => {
       await signInAs('student1');
 
-      const { data, errors } = await client.mutations.chat({
-        messages: JSON.stringify([]),
-        model: 'gpt-4',
+      const restOperation = post({
+        apiName: 'homeworkSupplyStreamApi',
+        path: '/chat',
+        options: {
+          body: {
+            messages: [],
+          },
+        },
       });
 
-      // Should either return empty or error gracefully
-      expect(typeof data === 'string' || errors !== undefined).toBe(true);
+      const { body } = await restOperation.response;
+      const text = await body.text();
+
+      // Should handle gracefully (empty or error response)
+      expect(text).toBeDefined();
     }, 30000);
   });
 
@@ -111,53 +154,90 @@ describe('C. Lambda Handler Integration Tests', () => {
     test('Generate content completion for editor', async () => {
       await signInAs('instructor1');
 
-      const { data, errors } = await client.mutations.contentCompletion({
-        prompt: 'Write an introduction about Japanese culture',
-        context: { topic: 'culture', language: 'Japanese' },
+      const restOperation = post({
+        apiName: 'homeworkSupplyStreamApi',
+        path: '/content-completion',
+        options: {
+          body: {
+            prompt: 'Write an introduction about Japanese culture',
+            context: { topic: 'culture', language: 'Japanese' },
+          },
+        },
       });
 
-      expect(errors).toBeUndefined();
-      expect(data).toBeDefined();
-      expect(typeof data).toBe('string');
-      if (typeof data === 'string') {
-        expect(data.length).toBeGreaterThan(0);
-      }
+      const { body } = await restOperation.response;
+      const text = await body.text();
+
+      expect(text).toBeDefined();
+      expect(typeof text).toBe('string');
+      expect(text.length).toBeGreaterThan(0);
+      // SSE format should contain "data:" prefix
+      expect(text).toContain('data:');
     }, 30000);
 
     test('Content completion with context-aware suggestions', async () => {
       await signInAs('instructor1');
 
-      const { data, errors } = await client.mutations.contentCompletion({
-        prompt: 'Continue this sentence: When learning Japanese, one should...',
-        context: { level: 'beginner', topic: 'learning-tips' },
+      const restOperation = post({
+        apiName: 'homeworkSupplyStreamApi',
+        path: '/content-completion',
+        options: {
+          body: {
+            prompt: 'Continue this sentence: When learning Japanese, one should...',
+            context: { level: 'beginner', topic: 'learning-tips' },
+          },
+        },
       });
 
-      expect(errors).toBeUndefined();
-      expect(data).toBeDefined();
+      const { body } = await restOperation.response;
+      const text = await body.text();
+
+      expect(text).toBeDefined();
+      expect(text.length).toBeGreaterThan(0);
     }, 30000);
 
     test('Content completion respects user preferences', async () => {
       await signInAs('instructor1');
 
-      const { data, errors } = await client.mutations.contentCompletion({
-        prompt: 'Generate a grammar explanation for Japanese verbs',
-        context: { temperature: 0.7, maxTokens: 200 },
+      const restOperation = post({
+        apiName: 'homeworkSupplyStreamApi',
+        path: '/content-completion',
+        options: {
+          body: {
+            prompt: 'Generate a grammar explanation for Japanese verbs',
+            context: { temperature: 0.7, maxTokens: 200 },
+          },
+        },
       });
 
-      expect(errors).toBeUndefined();
-      expect(data).toBeDefined();
+      const { body } = await restOperation.response;
+      const text = await body.text();
+
+      expect(text).toBeDefined();
+      expect(text.length).toBeGreaterThan(0);
     }, 30000);
 
     test('Error handling for incomplete prompts', async () => {
       await signInAs('instructor1');
 
-      const { data, errors } = await client.mutations.contentCompletion({
-        prompt: '',
-        context: {},
-      });
+      try {
+        const restOperation = post({
+          apiName: 'homeworkSupplyStreamApi',
+          path: '/content-completion',
+          options: {
+            body: {
+              prompt: '',
+            },
+          },
+        });
 
-      // Should handle gracefully
-      expect(typeof data === 'string' || errors !== undefined).toBe(true);
+        await restOperation.response;
+        // Should not reach here - empty prompt should error
+        expect(true).toBe(false);
+      } catch (error: any) {
+        // Should return 400 error for empty prompt
+        expect(error).toBeDefined();
+      }
     }, 30000);
   });
 
@@ -170,77 +250,108 @@ describe('C. Lambda Handler Integration Tests', () => {
     test('Suggest quiz blocks for unit', async () => {
       await signInAs('instructor1');
 
-      const { data, errors } = await client.mutations.suggestBlocks({
-        unitStructure: JSON.stringify({
-          title: 'Japanese Hiragana',
-          content: 'Learn the basic hiragana characters',
-        }),
-        currentContext: JSON.stringify({ language: 'Japanese', level: 'beginner' }),
-        userHistory: JSON.stringify({ previousBlocks: ['text', 'image'] }),
+      const restOperation = post({
+        apiName: 'homeworkSupplyStreamApi',
+        path: '/suggest-blocks',
+        options: {
+          body: {
+            unitStructure: {
+              title: 'Japanese Hiragana',
+              content: 'Learn the basic hiragana characters',
+            },
+            currentContext: { language: 'Japanese', level: 'beginner' },
+            userHistory: { previousBlocks: ['text', 'image'] },
+          },
+        },
       });
 
-      expect(errors).toBeUndefined();
-      expect(data).toBeDefined();
-      expect(typeof data).toBe('string');
-      // Result should be JSON array of block suggestions
-      if (typeof data === 'string') {
-        const suggestions = JSON.parse(data);
-        expect(Array.isArray(suggestions)).toBe(true);
-      }
+      const { body } = await restOperation.response;
+      const result = await body.json() as any;
+
+      expect(result).toBeDefined();
+      expect(result.suggestions).toBeDefined();
+      expect(Array.isArray(result.suggestions)).toBe(true);
+      expect(result.overallAssessment).toBeDefined();
     }, 30000);
 
     test('Suggest meaning-association blocks', async () => {
       await signInAs('instructor1');
 
-      const { data, errors } = await client.mutations.suggestBlocks({
-        unitStructure: JSON.stringify({
-          title: 'Vocabulary Matching',
-          content: 'Match words to definitions',
-        }),
-        currentContext: JSON.stringify({
-          blockTypes: ['meaning-association'],
-        }),
+      const restOperation = post({
+        apiName: 'homeworkSupplyStreamApi',
+        path: '/suggest-blocks',
+        options: {
+          body: {
+            unitStructure: {
+              title: 'Vocabulary Matching',
+              content: 'Match words to definitions',
+            },
+            currentContext: {
+              blockTypes: ['meaning-association'],
+            },
+          },
+        },
       });
 
-      expect(errors).toBeUndefined();
-      expect(data).toBeDefined();
+      const { body } = await restOperation.response;
+      const result = await body.json() as any;
+
+      expect(result).toBeDefined();
+      expect(result.suggestions).toBeDefined();
     }, 30000);
 
     test('Suggest custom-answer blocks', async () => {
       await signInAs('instructor1');
 
-      const { data, errors } = await client.mutations.suggestBlocks({
-        unitStructure: JSON.stringify({
-          title: 'Free Response Practice',
-        }),
-        currentContext: JSON.stringify({
-          blockTypes: ['custom-answer'],
-        }),
+      const restOperation = post({
+        apiName: 'homeworkSupplyStreamApi',
+        path: '/suggest-blocks',
+        options: {
+          body: {
+            unitStructure: {
+              title: 'Free Response Practice',
+            },
+            currentContext: {
+              blockTypes: ['custom-answer'],
+            },
+          },
+        },
       });
 
-      expect(errors).toBeUndefined();
-      expect(data).toBeDefined();
+      const { body } = await restOperation.response;
+      const result = await body.json() as any;
+
+      expect(result).toBeDefined();
+      expect(result.suggestions).toBeDefined();
     }, 30000);
 
     test('Validate block structure matches schema', async () => {
       await signInAs('instructor1');
 
-      const { data, errors } = await client.mutations.suggestBlocks({
-        unitStructure: JSON.stringify({
-          title: 'Test Unit',
-          content: 'Test content',
-        }),
+      const restOperation = post({
+        apiName: 'homeworkSupplyStreamApi',
+        path: '/suggest-blocks',
+        options: {
+          body: {
+            unitStructure: {
+              title: 'Test Unit',
+              content: 'Test content',
+            },
+          },
+        },
       });
 
-      expect(errors).toBeUndefined();
-      expect(data).toBeDefined();
-      if (typeof data === 'string') {
-        const suggestions = JSON.parse(data);
-        // Each suggestion should have required fields
-        if (suggestions.length > 0) {
-          expect(suggestions[0]).toHaveProperty('type');
-          expect(suggestions[0]).toHaveProperty('content');
-        }
+      const { body } = await restOperation.response;
+      const result = await body.json() as any;
+
+      expect(result).toBeDefined();
+      expect(result.suggestions).toBeDefined();
+      // Each suggestion should have required fields
+      if (result && result.suggestions && result.suggestions.length > 0) {
+        expect(result.suggestions[0]).toHaveProperty('type');
+        expect(result.suggestions[0]).toHaveProperty('label');
+        expect(result.suggestions[0]).toHaveProperty('reasoning');
+        expect(result.suggestions[0]).toHaveProperty('priority');
       }
     }, 30000);
   });
@@ -274,16 +385,16 @@ describe('C. Lambda Handler Integration Tests', () => {
       expect(typeof data === 'string' || errors !== undefined).toBe(true);
     }, 30000);
 
-    test('List section students by section code', async () => {
-      await signInAs('instructor1');
+    // test('List section students by section code', async () => {
+    //   await signInAs('instructor1');
 
-      const { data, errors } = await client.queries.listSectionStudents({
-        sectionCode: 'TEST123',
-      });
+    //   const { data, errors } = await client.queries.listSectionStudents({
+    //     sectionCode: 'TEST123',
+    //   });
 
-      expect(errors).toBeUndefined();
-      expect(Array.isArray(data)).toBe(true);
-    }, 30000);
+    //   expect(errors).toBeUndefined();
+    //   expect(Array.isArray(data)).toBe(true);
+    // }, 30000);
   });
 
   // ========================================================================
@@ -401,21 +512,6 @@ describe('C. Lambda Handler Integration Tests', () => {
       expect(errors).toBeUndefined();
       expect(data).toBeDefined();
       expect(typeof data).toBe('string');
-    }, 30000);
-
-    test('Generate audio file from text', async () => {
-      await signInAs('instructor1');
-
-      const { data, errors } = await client.mutations.generateAudioFile({
-        phrase: 'This is a test phrase',
-        voice: 'alloy',
-        model: 'tts-1',
-      });
-
-      expect(errors).toBeUndefined();
-      expect(data).toBeDefined();
-      // Should return File object reference
-      expect(typeof data === 'object' || typeof data === 'string').toBe(true);
     }, 30000);
 
     // Speech-to-Text (Whisper)

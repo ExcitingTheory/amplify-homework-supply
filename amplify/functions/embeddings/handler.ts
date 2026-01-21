@@ -26,22 +26,31 @@ async function getOpenAI(): Promise<any> {
  * Authorization check utility
  * Verifies user is authenticated
  */
-function requireAuth(event: any, context: any) {
-  const userId = event.requestContext?.authorizer?.claims?.sub;
+function requireAuth(event: any) {
+  // AppSync provides identity in event.identity, not requestContext
+  const userId = event.identity?.sub;
+  const username = event.identity?.username;
 
   if (!userId) {
+    console.error('[Embeddings Handler] No user identity found in event:', JSON.stringify(event, null, 2));
     throw new Error('Unauthorized: User authentication required');
   }
 
-  return { userId };
+  return { userId, username: username || userId };
 }
 
 export const handler: Handler = async (event: any, context: any) => {
-  const operationName = context?.['x-operation-name'] || event.info?.fieldName;
+  // Extract operation name from AppSync event
+  const operationName = event.info?.fieldName || event.fieldName;
   const args = event.arguments || {};
+  
+  if (!operationName) {
+    console.error('[Embeddings Handler] No operation name found in event:', JSON.stringify(event, null, 2));
+    throw new Error('Unable to determine operation name from event');
+  }
 
   // Require authentication for all operations
-  const { userId } = requireAuth(event, context);
+  const { userId } = requireAuth(event);
 
   console.log(`[Embeddings Handler] ${operationName}`, args);
 

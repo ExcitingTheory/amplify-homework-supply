@@ -34,7 +34,6 @@ import {
     ExpandLess as ExpandLessIcon,
     LibraryBooks as LibraryBooksIcon,
     Info as InfoIcon,
-    Mic as MicIcon,
 } from '@mui/icons-material';
 import { DataStore } from 'aws-amplify/datastore';
 import { ParsedContent, Document } from '../models';
@@ -57,7 +56,6 @@ import SearchHighlightPlugin from './Editor3/plugins/SearchHighlightPlugin';
 
 // Virtual scrolling
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Icon } from '@aws-amplify/ui-react';
 
 interface VocabularyItem {
     word: string;
@@ -65,7 +63,6 @@ interface VocabularyItem {
     context?: string;
     page?: number;
     phonetic?: string;
-    audio?: string[];
     // Source tracking
     documentID?: string;
     fileID?: string;
@@ -212,8 +209,6 @@ interface VocabularyCardProps {
     onToggleSelect: (index: number) => void;
     onToggleExpand: (index: number) => void;
     onUpdate: (index: number, field: string, value: string) => Promise<void>;
-    onOpenRubyEditor?: () => void;
-    onOpenAudioStudio?: () => void;
 }
 
 function VocabularyCard({
@@ -227,8 +222,6 @@ function VocabularyCard({
     onToggleSelect,
     onToggleExpand,
     onUpdate,
-    onOpenRubyEditor,
-    onOpenAudioStudio,
 }: VocabularyCardProps) {
     const isEvenRow = index % 2 === 0;
 
@@ -337,7 +330,7 @@ function VocabularyCard({
                                 label={item.filename.length > 20 ? `${item.filename.slice(0, 17)}...` : item.filename}
                                 size="small" 
                                 variant="outlined"
-                                color="primary"
+                                color="default"
                                 sx={{ fontSize: '0.65rem', height: '20px', maxWidth: '150px' }}
                             />
                         </Tooltip>
@@ -350,54 +343,21 @@ function VocabularyCard({
                             sx={{ fontSize: '0.7rem', height: '20px' }}
                         />
                     )}
-                    {item.phonetic && (
-                        <Tooltip title={onOpenRubyEditor ? "Open ruby tag editor" : "Has phonetic notation"}>
-                            <Box component="span" display="inline-block">
-                                <Chip
-                                    icon={<LibraryBooksIcon fontSize="small" />}
-                                    label={item.phonetic}
-                                    size="small"
-                                    variant="outlined"
-                                    onClick={onOpenRubyEditor ? (e) => {            
-                                        e.stopPropagation();
-                                        onOpenRubyEditor();
-                                    } : undefined}
-                                    sx={{ 
-                                        fontSize: '0.65rem', 
-                                        height: '20px',
-                                        maxWidth: '200px',
-                                        cursor: onOpenRubyEditor ? 'pointer' : 'default',
-                                        '&:hover': onOpenRubyEditor ? {
-                                            backgroundColor: 'action.hover',
-                                        } : undefined,
-                                    }}
-                                />
-                            </Box>
+                    {existsInDictionary && (
+                        <Tooltip title="Already in dictionary">
+                            <Chip 
+                                icon={<CheckCircleIcon />}
+                                label="Exists" 
+                                size="small" 
+                                color="success"
+                                variant="outlined"
+                                sx={{ fontSize: '0.7rem', height: '20px' }}
+                            />
                         </Tooltip>
                     )}
-                    {item.audio && item.audio.length > 0 && (
-                        <Tooltip title={onOpenAudioStudio ? "Open audio studio" : `${item.audio.length} audio file(s)`}>        
-                            <Box component="span" display="inline-block">
-                                <Chip
-                                    icon={<MicIcon fontSize="small" />}
-                                    label={item.audio.length}
-                                    size="small"
-                                    variant="outlined"
-                                    color="secondary"
-                                    onClick={onOpenAudioStudio ? (e) => {
-                                        e.stopPropagation();
-                                        onOpenAudioStudio();
-                                    } : undefined}
-                                    sx={{ 
-                                        fontSize: '0.65rem', 
-                                        height: '20px',
-                                        cursor: onOpenAudioStudio ? 'pointer' : 'default',
-                                        '&:hover': onOpenAudioStudio ? {
-                                            backgroundColor: 'action.hover',
-                                        } : undefined,
-                                    }}
-                                />
-                            </Box>
+                    {item.phonetic && (
+                        <Tooltip title="Has phonetic notation">
+                            <LibraryBooksIcon fontSize="small" color="action" />
                         </Tooltip>
                     )}
                 </Box>
@@ -456,9 +416,6 @@ function VocabularyCard({
         </ListItem>
     );
 }
-
-// Export VocabularyCard for reuse in other components
-export { VocabularyCard };
 
 // =============================================================================
 // VocabularyReview2 - Main component with virtual scrolling

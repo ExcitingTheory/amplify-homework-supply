@@ -15,8 +15,10 @@ import { defineFunction, secret } from '@aws-amplify/backend';
 export const documentAnalysisHandler = defineFunction({
   // entry: './handler.ts',
   timeoutSeconds: 900,
-  memoryMB: 3008,
+  memoryMB: 512,
+  resourceGroupName: 'data',  // Assign to data stack - used as GraphQL resolver
   environment: {
     OPENAI_API_KEY: secret('OPENAI_API_KEY'),
   },
+
 });

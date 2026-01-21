@@ -20,4 +20,5 @@ export const suggestBlocksStreamHandler = defineFunction({
   environment: {
     OPENAI_API_KEY: secret('OPENAI_API_KEY'),
   },
+  resourceGroupName: 'data',  // HTTP API is on data stack
 });

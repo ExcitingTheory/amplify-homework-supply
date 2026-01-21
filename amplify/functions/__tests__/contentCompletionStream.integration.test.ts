@@ -2,7 +2,7 @@
  * Integration tests for contentCompletionStream handler
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 describe('contentCompletionStream handler integration tests', () => {
   beforeEach(() => {

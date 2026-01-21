@@ -8,7 +8,6 @@ import { uploadData } from 'aws-amplify/storage';
 // Lexical imports
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin, createEmptyHistoryState } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
@@ -31,7 +30,6 @@ import {
   Box,
   Button,
   Checkbox,
-  Chip,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -62,9 +60,6 @@ import DictionaryContext from '../context/dictionaryContext';
 import FilesContext from '../context/fileContext';
 import UnitContext from '../context/unitContext';
 import { useTabContext } from '../context/tabContext';
-
-// Import QuestionCard from QuestionsReview2
-import { QuestionCard } from './QuestionsReview2';
 
 // GraphQL imports
 import { createQuestion, updateQuestion, deleteQuestion } from '../graphql/mutations';
@@ -200,10 +195,6 @@ class QuestionDecoratorNode extends DecoratorNode {
   __audioFiles;
   __identityId;
   __index;
-  __documentID;
-  __fileID;
-  __filename;
-  __page;
 
   static getType() {
     return 'question-decorator';
@@ -228,10 +219,6 @@ class QuestionDecoratorNode extends DecoratorNode {
       node.__audioFiles,
       node.__identityId,
       node.__index,
-      node.__documentID,
-      node.__fileID,
-      node.__filename,
-      node.__page,
       node.__key
     );
   }
@@ -254,10 +241,6 @@ class QuestionDecoratorNode extends DecoratorNode {
     audioFiles = {},
     identityId = '',
     index = 0,
-    documentID = null,
-    fileID = null,
-    filename = null,
-    page = null,
     key
   ) {
     super(key);
@@ -278,10 +261,6 @@ class QuestionDecoratorNode extends DecoratorNode {
     this.__audioFiles = audioFiles;
     this.__identityId = identityId;
     this.__index = index;
-    this.__documentID = documentID;
-    this.__fileID = fileID;
-    this.__filename = filename;
-    this.__page = page;
   }
 
   static importJSON(serializedNode) {
@@ -512,10 +491,6 @@ class QuestionDecoratorNode extends DecoratorNode {
         audioFiles={this.__audioFiles}
         identityId={this.__identityId}
         index={this.__index}
-        documentID={this.__documentID}
-        fileID={this.__fileID}
-        filename={this.__filename}
-        page={this.__page}
         nodeKey={this.__key}
       />
     );
@@ -547,11 +522,7 @@ function $createQuestionDecoratorNode(
   onToggleSelect,
   audioFiles,
   identityId,
-  index,
-  documentID = null,
-  fileID = null,
-  filename = null,
-  page = null
+  index
 ) {
   return new QuestionDecoratorNode(
     questionId,
@@ -570,11 +541,7 @@ function $createQuestionDecoratorNode(
     onToggleSelect,
     audioFiles,
     identityId,
-    index,
-    documentID,
-    fileID,
-    filename,
-    page
+    index
   );
 }
 
@@ -604,10 +571,6 @@ function QuestionRowComponent({
   audioFiles,
   identityId,
   index,
-  documentID,
-  fileID,
-  filename,
-  page,
   nodeKey,
 }) {
   const [isDragging, setIsDragging] = React.useState(false);
@@ -615,6 +578,7 @@ function QuestionRowComponent({
   const [audioFilesToUpload, setAudioFilesToUpload] = React.useState([]);
   const { unit } = React.useContext(UnitContext);
 
+  const isEvenRow = index % 2 === 0;
   const audioUrls = audio || [];
   const hasAudio = audioUrls.length > 0;
 
@@ -737,38 +701,254 @@ function QuestionRowComponent({
     }
   }, [tabContext?.focusItem, questionId, onToggleExpand, isExpanded]);
 
-  // Adapt question data to QuestionItem interface
-  const questionItem = {
-    prompt: prompt || '',
-    answer: answer || '',
-    hint: hint,
-    hasAudio: hasAudio,
-    documentID: documentID,
-    fileID: fileID,
-    filename: filename,
-    page: page,
+  return (
+    <ListItem
+      ref={questionItemRef}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      onDragLeave={handleDragLeave}
+      sx={{
+        backgroundColor: isHighlighted 
+          ? 'rgba(33, 150, 243, 0.15)' // Blue highlight (info color)
+          : isEvenRow ? 'background.paper' : 'grey.50',
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        padding: 0,
+        margin: 0,
+        borderBottom: '1px solid',
+        borderColor: isHighlighted ? 'info.main' : 'divider',
+        borderLeftWidth: isHighlighted ? '4px' : 0,
+        borderLeftStyle: isHighlighted ? 'solid' : 'none',
+        borderLeftColor: isHighlighted ? 'info.main' : 'transparent',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          backgroundColor: isHighlighted ? 'rgba(33, 150, 243, 0.25)' : 'action.hover',
+        },
+      }}
+    >
+      {/* Header with controls */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0,
+          justifyContent: 'space-between',
+          padding: 1,
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          //   minHeight: 24,
+        }}
+      >
+        <Box sx={{ display: 'flex', gap: 0, alignItems: 'center' }}>
+          <Checkbox
+            size="small"
+            checked={isSelected}
+            onChange={(e) => {
+              e.stopPropagation();
+              if (onToggleSelect) onToggleSelect();
+            }}
+            sx={{ p: 0.25 }}
+          />
+          <IconButton
+            size="small"
+            title={isExpanded ? 'Collapse' : 'Expand'}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onToggleExpand) onToggleExpand();
+            }}
+            sx={{ paddingLeft: 1 }}
+          >
+            {!isExpanded ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
+          </IconButton>
+        </Box>
+      </Box>
+
+      {/* Prompt field with nested editor */}
+      <NestedQuestionField
+        value={prompt}
+        field="prompt"
+        questionId={questionId}
+        version={version}
+        onSave={onUpdate}
+        sharedHistory={sharedHistory}
+        searchTerm={searchTerm}
+      />
+
+      {/* Expanded content */}
+      {isExpanded && (
+        <Box sx={{ px: 1, py: 1, width: '100%', position: 'relative' }}>
+          {isDragging && (
+            <Box
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onDragLeave={handleDragLeave}
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                zIndex: 100,
+                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(3px)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                color: '#000',
+                fontSize: '2rem',
+                fontWeight: 'bold',
+                textAlign: 'center',
+              }}
+            >
+              {`Upload Ogg Audio for ${prompt} (${hint})`}
+            </Box>
+          )}
+          <NestedQuestionField
+            value={hint}
+            field="hint"
+            questionId={questionId}
+            version={version}
+            onSave={onUpdate}
+            sharedHistory={sharedHistory}
+            searchTerm={searchTerm}
+            label="Hint: "
+          />
+
+          <NestedQuestionField
+            value={answer}
+            field="answer"
+            questionId={questionId}
+            version={version}
+            onSave={onUpdate}
+            sharedHistory={sharedHistory}
+            searchTerm={searchTerm}
+            label="Answer: "
+          />
+        </Box>
+      )}
+    </ListItem>
+  );
+}
+
+// =============================================================================
+// NestedQuestionField - Individual field editor with Lexical
+// =============================================================================
+
+function NestedQuestionField({
+  value,
+  field,
+  questionId,
+  version,
+  onSave,
+  sharedHistory,
+  searchTerm,
+  placeholder,
+  label = '',
+}) {
+  const [localValue, setLocalValue] = React.useState(value);
+  const saveTimeoutRef = React.useRef(null);
+
+  React.useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  const initialConfig = {
+    namespace: `QuestionField-${field}-${questionId}`,
+    nodes: [MarkNode],
+    theme: {
+      mark: 'search-highlight',
+    },
+    onError: (error) => console.error('Lexical error:', error),
+    editorState: () => {
+      const root = $getRoot();
+      root.clear();
+      const paragraph = $createParagraphNode();
+      const text = $createTextNode(value || '');
+      paragraph.append(text);
+      root.append(paragraph);
+    },
   };
 
-  const handleUpdateWrapper = async (itemIndex, field, newValue) => {
-    if (onUpdate) {
-      await onUpdate(questionId, { [field]: newValue }, version);
-    }
+  const handleChange = (editorState) => {
+    editorState.read(() => {
+      const text = $getRoot().getTextContent();
+      setLocalValue(text);
+
+      // Debounced save
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+
+      saveTimeoutRef.current = setTimeout(async () => {
+        if (text !== value && onSave) {
+          await onSave(questionId, { [field]: text }, version);
+        }
+      }, 1000);
+    });
   };
+
+  // Highlight search terms
+  const highlightedValue = React.useMemo(() => {
+    if (!searchTerm || !localValue) return localValue;
+    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const parts = localValue.split(regex);
+    return parts;
+  }, [localValue, searchTerm]);
 
   return (
-    <Box ref={questionItemRef}>
-      <QuestionCard
-        item={questionItem}
-        index={index}
-        isSelected={isSelected}
-        isExpanded={isExpanded}
-        existsInQuestionBank={true}
-        alreadyImported={true}
-        searchTerm={searchTerm}
-        onToggleSelect={() => onToggleSelect(index)}
-        onToggleExpand={() => onToggleExpand(index)}
-        onUpdate={handleUpdateWrapper}
-      />
+    <Box
+      sx={{
+        margin: 0,
+        padding: 0,
+        '& .question-field-editor': {
+          cursor: 'text',
+          // add chunky dashed border when not focused
+          border: '3px dashed',
+          borderColor: 'divider',
+          borderRadius: 1,
+          padding: 1,
+          margin: 1,
+          '&::before': label ? {
+            content: `"${label}"`,
+            fontWeight: 600,
+            color: 'text.secondary',
+          } : {},
+        },
+      }}
+    >
+      <LexicalComposer initialConfig={initialConfig}>
+        <RichTextPlugin
+          contentEditable={
+            <ContentEditable
+              className="question-field-editor"
+              style={{
+                minHeight: '1.2rem',
+                fontSize: field === 'hint' ? '0.8125rem' : '0.875rem',
+                fontStyle: field === 'hint' ? 'italic' : 'normal',
+                color: field === 'hint' ? '#666' : 'inherit',
+              }}
+            />
+          }
+          placeholder={
+            <div
+              style={{
+                position: 'absolute',
+                top: '8px',
+                left: label ? '50px' : '12px',
+                color: '#999',
+                fontSize: '0.875rem',
+                pointerEvents: 'none',
+              }}
+            >
+              {placeholder}
+            </div>
+          }
+          ErrorBoundary={LexicalErrorBoundary}
+        />
+        {sharedHistory && <HistoryPlugin externalHistoryState={sharedHistory} />}
+        <OnChangePlugin onChange={handleChange} />
+        {searchTerm && searchTerm.length >= 2 && <SearchHighlightPlugin searchTerm={searchTerm} />}
+      </LexicalComposer>
     </Box>
   );
 }
@@ -834,11 +1014,7 @@ function QuestionsPlugin({
           () => onToggleSelect(id),
           audioFiles,
           identityId,
-          index,
-          question.documentID,
-          question.fileID,
-          question.filename,
-          question.page
+          index
         );
         root.append(node);
       });

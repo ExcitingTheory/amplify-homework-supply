@@ -4,6 +4,7 @@
  * Unit tests for Yjs provider functionality
  */
 
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as Y from 'yjs'
 import { Awareness } from 'y-protocols/awareness'
 import { YjsDocProvider } from '../YjsProvider'
@@ -26,22 +27,22 @@ describe('YjsDocProvider', () => {
   describe('Basic Operations', () => {
     it('should create a Y.Map', () => {
       const ymap = provider.getMap('test')
-      expect(ymap).to.be.instanceOf(Y.Map)
+      expect(ymap).toBeInstanceOf(Y.Map)
     })
 
     it('should create a Y.Array', () => {
       const yarray = provider.getArray('test')
-      expect(yarray).to.be.instanceOf(Y.Array)
+      expect(yarray).toBeInstanceOf(Y.Array)
     })
 
     it('should create a Y.Text', () => {
       const ytext = provider.getText('test')
-      expect(ytext).to.be.instanceOf(Y.Text)
+      expect(ytext).toBeInstanceOf(Y.Text)
     })
 
     it('should get underlying Y.Doc', () => {
       const ydoc = provider.getDoc()
-      expect(ydoc).to.be.instanceOf(Y.Doc)
+      expect(ydoc).toBeInstanceOf(Y.Doc)
     })
   })
 
@@ -52,8 +53,8 @@ describe('YjsDocProvider', () => {
       ymap.set('key1', 'value1')
       ymap.set('key2', 42)
 
-      expect(ymap.get('key1')).to.equal('value1')
-      expect(ymap.get('key2')).to.equal(42)
+      expect(ymap.get('key1')).toBe('value1')
+      expect(ymap.get('key2')).toBe(42)
     })
 
     it('should observe Y.Map changes', (done) => {
@@ -67,7 +68,7 @@ describe('YjsDocProvider', () => {
       ymap.set('key', 'value')
 
       setTimeout(() => {
-        expect(callCount).to.be.greaterThan(0)
+        expect(callCount).toBeGreaterThan(0)
         unobserve()
         done()
       }, 100)
@@ -80,8 +81,8 @@ describe('YjsDocProvider', () => {
 
       yarray.push(['item1', 'item2'])
 
-      expect(yarray.length).to.equal(2)
-      expect(yarray.toArray()).to.deep.equal(['item1', 'item2'])
+      expect(yarray.length).toBe(2)
+      expect(yarray.toArray()).toEqual(['item1', 'item2'])
     })
 
     it('should insert items in Y.Array', () => {
@@ -90,7 +91,7 @@ describe('YjsDocProvider', () => {
       yarray.push(['a', 'c'])
       yarray.insert(1, ['b'])
 
-      expect(yarray.toArray()).to.deep.equal(['a', 'b', 'c'])
+      expect(yarray.toArray()).toEqual(['a', 'b', 'c'])
     })
 
     it('should delete items from Y.Array', () => {
@@ -99,7 +100,7 @@ describe('YjsDocProvider', () => {
       yarray.push(['a', 'b', 'c'])
       yarray.delete(1, 1)
 
-      expect(yarray.toArray()).to.deep.equal(['a', 'c'])
+      expect(yarray.toArray()).toEqual(['a', 'c'])
     })
   })
 
@@ -109,7 +110,7 @@ describe('YjsDocProvider', () => {
 
       ytext.insert(0, 'Hello')
 
-      expect(ytext.toString()).to.equal('Hello')
+      expect(ytext.toString()).toBe('Hello')
     })
 
     it('should delete text', () => {
@@ -118,7 +119,7 @@ describe('YjsDocProvider', () => {
       ytext.insert(0, 'Hello World')
       ytext.delete(5, 6)
 
-      expect(ytext.toString()).to.equal('Hello')
+      expect(ytext.toString()).toBe('Hello')
     })
 
     it('should format text', () => {
@@ -128,14 +129,14 @@ describe('YjsDocProvider', () => {
       ytext.format(0, 5, { bold: true })
 
       // Note: format returns void, we're just testing it doesn't throw
-      expect(ytext.length).to.equal(5)
+      expect(ytext.length).toBe(5)
     })
   })
 
   describe('Awareness', () => {
     it('should get awareness', () => {
       const awareness = provider.getAwareness()
-      expect(awareness).to.be.instanceOf(Awareness)
+      expect(awareness).toBeInstanceOf(Awareness)
     })
 
     it('should set and get local state', () => {
@@ -145,15 +146,15 @@ describe('YjsDocProvider', () => {
       provider.setAwareness(state)
       const localState = awareness.getLocalState()
 
-      expect(localState).to.deep.equal(state)
+      expect(localState).toEqual(state)
     })
 
     it('should get connected clients', () => {
       const awareness = provider.getAwareness()
       const clients = provider.getConnectedClients()
 
-      expect(Array.isArray(clients)).to.be.true
-      expect(clients.length).to.be.greaterThan(0) // At least current client
+      expect(Array.isArray(clients)).toBe(true)
+      expect(clients.length).toBeGreaterThan(0) // At least current client
     })
   })
 
@@ -163,8 +164,8 @@ describe('YjsDocProvider', () => {
       ymap.set('key', 'value')
 
       const state = provider.getState()
-      expect(state).to.be.instanceOf(Uint8Array)
-      expect(state.length).to.be.greaterThan(0)
+      expect(state).toBeInstanceOf(Uint8Array)
+      expect(state.length).toBeGreaterThan(0)
     })
 
     it('should get state vector', () => {
@@ -172,7 +173,7 @@ describe('YjsDocProvider', () => {
       ymap.set('key', 'value')
 
       const vector = provider.getStateVector()
-      expect(vector).to.be.instanceOf(Uint8Array)
+      expect(vector).toBeInstanceOf(Uint8Array)
     })
 
     it('should apply updates', () => {
@@ -198,7 +199,7 @@ describe('YjsDocProvider', () => {
       provider2.applyUpdate(state)
       const ymap2 = provider2.getMap('data')
 
-      expect(ymap2.get('key')).to.be.equal('value')
+      expect(ymap2.get('key')).toBe('value')
 
       provider1.destroy()
       provider2.destroy()
@@ -220,7 +221,7 @@ describe('YjsDocProvider', () => {
       })
 
       setTimeout(() => {
-        expect(eventFired).to.be.true
+        expect(eventFired).toBe(true)
         unsubscribe()
         done()
       }, 100)
@@ -235,7 +236,7 @@ describe('YjsDocProvider', () => {
 
       provider.clear()
 
-      expect(ymap.size).to.be.equal(0)
+      expect(ymap.size).toBe(0)
     })
 
     it('should destroy provider gracefully', () => {
@@ -244,7 +245,7 @@ describe('YjsDocProvider', () => {
 
       expect(() => {
         provider.destroy()
-      }).not.to.throw()
+      }).not.toThrow()
     })
   })
 })

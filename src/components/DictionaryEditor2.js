@@ -64,9 +64,6 @@ import FilesContext from '../context/fileContext';
 import UnitContext from '../context/unitContext';
 import { useTabContext } from '../context/tabContext';
 
-// Import VocabularyCard from VocabularyReview2
-import { VocabularyCard } from './VocabularyReview2';
-
 // GraphQL imports
 import { generateClient } from 'aws-amplify/api';
 import { createWord, updateWord as updateWordMutation, deleteWord as deleteWordMutation } from '../graphql/mutations';
@@ -542,10 +539,6 @@ class WordDecoratorNode extends DecoratorNode {
     __audioFiles;
     __identityId;
     __index;
-    __documentID;
-    __fileID;
-    __filename;
-    __page;
 
     static getType() {
         return 'word-decorator';
@@ -572,10 +565,6 @@ class WordDecoratorNode extends DecoratorNode {
             node.__audioFiles,
             node.__identityId,
             node.__index,
-            node.__documentID,
-            node.__fileID,
-            node.__filename,
-            node.__page,
             node.__key
         );
     }
@@ -600,10 +589,6 @@ class WordDecoratorNode extends DecoratorNode {
         audioFiles = {},
         identityId = '',
         index = 0,
-        documentID = null,
-        fileID = null,
-        filename = null,
-        page = null,
         key
     ) {
         super(key);
@@ -626,10 +611,6 @@ class WordDecoratorNode extends DecoratorNode {
         this.__audioFiles = audioFiles;
         this.__identityId = identityId;
         this.__index = index;
-        this.__documentID = documentID;
-        this.__fileID = fileID;
-        this.__filename = filename;
-        this.__page = page;
     }
 
     static importJSON(serializedNode) {
@@ -864,10 +845,6 @@ class WordDecoratorNode extends DecoratorNode {
                 audioFiles={this.__audioFiles}
                 identityId={this.__identityId}
                 index={this.__index}
-                documentID={this.__documentID}
-                fileID={this.__fileID}
-                filename={this.__filename}
-                page={this.__page}
                 nodeKey={this.__key}
             />
         );
@@ -901,11 +878,7 @@ function $createWordDecoratorNode(
     onOpenRubyDialog,
     audioFiles,
     identityId,
-    index,
-    documentID = null,
-    fileID = null,
-    filename = null,
-    page = null
+    index
 ) {
     return new WordDecoratorNode(
         wordId,
@@ -926,11 +899,7 @@ function $createWordDecoratorNode(
         onOpenRubyDialog,
         audioFiles,
         identityId,
-        index,
-        documentID,
-        fileID,
-        filename,
-        page
+        index
     );
 }
 
@@ -962,10 +931,6 @@ function WordRowComponent({
     audioFiles,
     identityId,
     index,
-    documentID,
-    fileID,
-    filename,
-    page,
     nodeKey,
 }) {
     const [isDragging, setIsDragging] = React.useState(false);
@@ -1104,59 +1069,192 @@ function WordRowComponent({
         }
     }, [tabContext?.focusItem, wordId, onToggleExpand, isExpanded]);
 
-    // Adapt word data to VocabularyItem interface
-    const vocabularyItem = {
-        word: phrase || '',
-        definition: definition || '',
-        context: pronunciation, // Use pronunciation field for phonetic context
-        phonetic: pronunciation,
-        audio: audio,
-        documentID: documentID,
-        fileID: fileID,
-        filename: filename,
-        page: page,
-    };
-
-    const handleUpdateWrapper = async (itemIndex, field, newValue) => {
-        if (onUpdate) {
-            // Map VocabularyCard field names to Word model field names
-            const fieldMapping = {
-                word: 'phrase',
-                definition: 'definition',
-                context: 'pronunciation',
-                phonetic: 'pronunciation',
-            };
-            const mappedField = fieldMapping[field] || field;
-            await onUpdate(wordId, { [mappedField]: newValue }, version);
-        }
-    };
-
     return (
-        <Box ref={wordItemRef}>
-            <VocabularyCard
-                item={vocabularyItem}
-                index={index}
-                isSelected={isSelected}
-                isExpanded={isExpanded}
-                existsInDictionary={true}
-                alreadyImported={true}
-                searchTerm={searchTerm}
-                onToggleSelect={() => onToggleSelect(wordId)}
-                onToggleExpand={() => onToggleExpand(wordId)}
-                onUpdate={handleUpdateWrapper}
-                onOpenRubyEditor={() => setRubyDialogOpen(true)}
-                onOpenAudioStudio={() => setRecordingDialogOpen(true)}
-            />
+        <ListItem
+            ref={wordItemRef}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onDragLeave={handleDragLeave}
+            sx={{
+                backgroundColor: isHighlighted 
+                    ? 'rgba(255, 235, 59, 0.3)' // Yellow highlight
+                    : isEvenRow ? 'background.paper' : 'grey.50',
+                flexDirection: 'column',
+                alignItems: 'stretch',
+                padding: 0,
+                margin: 0,
+                borderBottom: '1px solid',
+                borderColor: isHighlighted ? 'primary.main' : 'divider',
+                borderLeftWidth: isHighlighted ? '4px' : 0,
+                borderLeftStyle: isHighlighted ? 'solid' : 'none',
+                borderLeftColor: isHighlighted ? 'primary.main' : 'transparent',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                    backgroundColor: isHighlighted ? 'rgba(255, 235, 59, 0.4)' : 'action.hover',
+                },
+            }}
+        >
+            {/* Header with controls */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0,
+                    justifyContent: 'space-between',
+                    padding: 1,
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    //   minHeight: 24,
+                }}
+            >
+                <Box sx={{ display: 'flex', gap: 0, alignItems: 'center' }}>
+                    <Checkbox
+                        size="small"
+                        checked={isSelected}
+                        onChange={(e) => {
+                            e.stopPropagation();
+                            if (onToggleSelect) onToggleSelect(wordId);
+                        }}
+                        sx={{ p: 0.25 }}
+                    />
+                    <IconButton
+                        size="small"
+                        title={isExpanded ? 'Collapse' : 'Expand'}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (onToggleExpand) onToggleExpand(wordId);
+                        }}
+                        sx={{ paddingLeft: 1 }}
+                    >
+                        {!isExpanded ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
+                    </IconButton>
+                </Box>
 
-            {/* Ruby Dialog */}
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    <Tooltip title="Ruby Tags">
+                        <IconButton
+                            size="small"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setRubyDialogOpen(true);
+                            }}
+                            color={rubyTags ? "secondary" : "default"}
+                        >
+                            <RubyIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="Recording Studio">
+                        <IconButton
+                            size="small"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setRecordingDialogOpen(true);
+                            }}
+                            color={hasAudio ? "primary" : "default"}
+                        >
+                            <MicIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+            </Box>
+
+            {/* Phrase field - shown when collapsed */}
+            {!isExpanded && (<>
+                <NestedWordField
+                    value={phrase}
+                    field="phrase"
+                    wordId={wordId}
+                    version={version}
+                    onSave={onUpdate}
+                    sharedHistory={sharedHistory}
+                    searchTerm={searchTerm}
+                />
+                <NestedWordField
+                    value={definition}
+                    field="definition"
+                    wordId={wordId}
+                    version={version}
+                    onSave={onUpdate}
+                    sharedHistory={sharedHistory}
+                    searchTerm={searchTerm}
+                />
+            </>)}
+
+            {/* Expanded content - Word Data */}
+            {isExpanded && (
+                <Box sx={{ width: '100%', position: 'relative' }}>
+                    {isDragging && (
+                        <Box
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                            onDragLeave={handleDragLeave}
+                            sx={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                zIndex: 100,
+                                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                                backdropFilter: 'blur(3px)',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                color: '#000',
+                                fontSize: '2rem',
+                                fontWeight: 'bold',
+                                textAlign: 'center',
+                            }}
+                        >
+                            {`Upload Ogg Audio for ${phrase} (${pronunciation})`}
+                        </Box>
+                    )}
+
+                    <NestedWordField
+                        value={phrase}
+                        field="phrase"
+                        wordId={wordId}
+                        version={version}
+                        onSave={onUpdate}
+                        sharedHistory={sharedHistory}
+                        searchTerm={searchTerm}
+                        label="Phrase: "
+                    />
+                    <NestedWordField
+                        value={pronunciation}
+                        field="pronunciation"
+                        wordId={wordId}
+                        version={version}
+                        onSave={onUpdate}
+                        sharedHistory={sharedHistory}
+                        searchTerm={searchTerm}
+                        label="Pronunciation: "
+                    />
+                    <NestedWordField
+                        value={definition}
+                        field="definition"
+                        wordId={wordId}
+                        version={version}
+                        onSave={onUpdate}
+                        sharedHistory={sharedHistory}
+                        searchTerm={searchTerm}
+                        label="Definition: "
+                    />
+                </Box>)}
+
+
+
+
+            {/* Ruby Tags Dialog */}
             <Dialog
                 open={rubyDialogOpen}
                 onClose={() => setRubyDialogOpen(false)}
-                maxWidth="lg"
+                maxWidth="md"
                 fullWidth
             >
                 <DialogTitle>
-                    Ruby Tag Editor - {phrase}
+                    Ruby Tags - {phrase}
                 </DialogTitle>
                 <DialogContent>
                     <RubyTagEditor
@@ -1171,55 +1269,74 @@ function WordRowComponent({
             <Dialog
                 open={recordingDialogOpen}
                 onClose={() => setRecordingDialogOpen(false)}
-                maxWidth="md"
+                maxWidth="lg"
                 fullWidth
             >
                 <DialogTitle>
-                    Audio Recording Studio - {phrase}
+                    Recording Studio - {phrase}
                 </DialogTitle>
                 <DialogContent>
                     <RecordingStudioEnhanced
-                        onSave={async (files) => {
-                            const _audio = [];
-                            for (let i = 0; i < files.length; i++) {
-                                const file = files[i];
-                                const name = `${unit.id}_${wordId}_${Date.now()}_${i}.ogg`;
-                                
-                                try {
-                                    const result = await uploadData({
-                                        key: `audio/${identityId}/${name}`,
-                                        data: file,
-                                        options: {
-                                            contentType: 'audio/ogg',
-                                        },
-                                    }).result;
-
-                                    _audio.push(result.key);
-                                } catch (error) {
-                                    console.error('Error uploading file:', error);
-                                }
-                            }
-
-                            if (_audio.length > 0 && onUpdate) {
-                                const audioUrls = audio || [];
-                                const newAudio = deduplicateUrls([...audioUrls, ..._audio]);
-                                await onUpdate(wordId, { audio: newAudio }, version);
-                            }
-
+                        gradeId={unit?.id}
+                        nodeKey={wordId}
+                        onRecordingComplete={(audioData) => {
+                            console.log('Recording complete:', audioData);
                             setRecordingDialogOpen(false);
                         }}
-                        onCancel={() => setRecordingDialogOpen(false)}
+                        metadata={{
+                            wordId: wordId,
+                            phrase: phrase,
+                            pronunciation: pronunciation,
+                            definition: definition,
+                        }}
+                        initialTracks={[
+                            { id: 'phrase', prompt: 'Phrase', voice: 'alloy' },
+                            { id: 'pronunciation', prompt: 'Pronunciation', voice: 'shimmer' },
+                            { id: 'definition', prompt: 'Definition', voice: 'nova' },
+                        ]}
                     />
                 </DialogContent>
             </Dialog>
-        </Box>
+
+            {/* Recording Studio Dialog */}
+            <Dialog
+                open={recordingDialogOpen}
+                onClose={() => setRecordingDialogOpen(false)}
+                maxWidth="lg"
+                fullWidth
+            >
+                <DialogTitle>
+                    Recording Studio - {phrase}
+                </DialogTitle>
+                <DialogContent>
+                    <RecordingStudioEnhanced
+                        gradeId={unit?.id}
+                        nodeKey={wordId}
+                        onRecordingComplete={(audioData) => {
+                            console.log('Recording complete:', audioData);
+                            setRecordingDialogOpen(false);
+                        }}
+                        metadata={{
+                            wordId: wordId,
+                            phrase: phrase,
+                            pronunciation: pronunciation,
+                            definition: definition,
+                        }}
+                        initialTracks={[
+                            { id: 'phrase', prompt: 'Phrase', voice: 'alloy' },
+                            { id: 'pronunciation', prompt: 'Pronunciation', voice: 'shimmer' },
+                            { id: 'definition', prompt: 'Definition', voice: 'nova' },
+                        ]}
+                    />
+                </DialogContent>
+            </Dialog>
+
+        </ListItem>
     );
 }
 
 
 
-// =============================================================================
-// WordsPlugin - Manages word nodes and synchronization
 // =============================================================================
 // NestedWordField - Individual field editor with Lexical
 // =============================================================================
@@ -1389,11 +1506,7 @@ function WordsPlugin({
                     onOpenRubyDialog,
                     audioFiles,
                     identityId,
-                    index,
-                    word.documentID,
-                    word.fileID,
-                    word.filename,
-                    word.page
+                    index
                 );
                 root.append(node);
             });

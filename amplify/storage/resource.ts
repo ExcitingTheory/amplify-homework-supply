@@ -22,7 +22,7 @@ import { defineStorage, defineFunction } from '@aws-amplify/backend';
  * - Correspond to readableGroups/writableGroups in data model for group-based access
  * 
  * Frontend patterns:
- * - Upload: uploadData({ path: `private/file-${id}.ext`, data })
+ * - Upload: uploadData({ path: `public/file-${id}.ext`, data })
  * - Retrieve: getUrl({ path: file.path })
  * - Delete: remove({ path: file.path })
  * 
