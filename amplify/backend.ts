@@ -74,6 +74,30 @@ backend.sectionHandler.resources.lambda.role?.attachInlinePolicy(cognitoPolicy);
 // Set USER_POOL_ID environment variable for section handler
 backend.sectionHandler.addEnvironment('USER_POOL_ID', backend.auth.resources.userPool.userPoolId);
 
+// Grant OpenAI handler permission to invoke itself for async operations (audio generation)
+const openaiSelfInvokePolicy = new Policy(backend.openaiHandler.resources.lambda.stack, 'OpenAISelfInvokePolicy', {
+  statements: [
+    new PolicyStatement({
+      actions: ['lambda:InvokeFunction'],
+      resources: [backend.openaiHandler.resources.lambda.functionArn],
+    }),
+  ],
+});
+
+backend.openaiHandler.resources.lambda.role?.attachInlinePolicy(openaiSelfInvokePolicy);
+
+// Grant Embeddings handler permission to invoke itself for async operations if needed
+const embeddingsSelfInvokePolicy = new Policy(backend.embeddingsHandler.resources.lambda.stack, 'EmbeddingsSelfInvokePolicy', {
+  statements: [
+    new PolicyStatement({
+      actions: ['lambda:InvokeFunction'],
+      resources: [backend.embeddingsHandler.resources.lambda.functionArn],
+    }),
+  ],
+});
+
+backend.embeddingsHandler.resources.lambda.role?.attachInlinePolicy(embeddingsSelfInvokePolicy);
+
 /**
  * HTTP API for streaming endpoints
  * 

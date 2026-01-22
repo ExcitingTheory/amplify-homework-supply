@@ -1,8 +1,8 @@
 /**
- * Featured Images (Cropped) - Smaller versions for card thumbnails
+ * Featured Images (Cropped) - HTTP URLs for card thumbnails
  * 
- * These are 300x200 cropped versions of the full featured images
- * Total size: ~0.1 MB (much smaller than original 100 MB)
+ * These point to the same images as full-size versions
+ * Modern browsers handle image scaling efficiently, so we don't need separate cropped versions
  * 
  * Use these for:
  * - Card thumbnails on dashboard
@@ -11,19 +11,26 @@
  * - Any UI where full resolution isn't needed
  */
 
-const croppedImagesData = require('./featuredImagesCropped.json');
+import {
+  MOCK_IMAGE_URL_1,
+  MOCK_IMAGE_URL_2,
+  MOCK_IMAGE_URL_3,
+  MOCK_IMAGE_URL_4,
+  MOCK_IMAGE_URL_5,
+  MOCK_IMAGE_URL_6,
+} from './media.js';
 
 // Export with descriptive names matching the full-size versions
 export const FEATURED_IMAGES_CROPPED = {
   // Japanese/Asian themed images
-  JAPANESE_CLASSROOM: croppedImagesData['1141381388'], // 26.2 KB - classroom/education scene
-  JAPANESE_CULTURE: croppedImagesData['1185684766'],   // 15.7 KB - cultural/traditional scene
-  JAPANESE_MODERN: croppedImagesData['1312074290'],     // 24.1 KB - modern Japan scene
+  JAPANESE_CLASSROOM: MOCK_IMAGE_URL_1, // piano-10046998_1280.jpg
+  JAPANESE_CULTURE: MOCK_IMAGE_URL_2,   // animals-10008941_1280.jpg
+  JAPANESE_MODERN: MOCK_IMAGE_URL_3,     // namibia-9992336_1280.jpg
   
   // General education themed
-  EDUCATION_GENERAL: croppedImagesData['1355927036'],   // 10.9 KB - general education
-  LEARNING_SCENE: croppedImagesData['1485922241'],      // 10.0 KB - learning/study scene
-  ACADEMIC: croppedImagesData['243766495'],              // 26.8 KB - academic setting
+  EDUCATION_GENERAL: MOCK_IMAGE_URL_4,   // sand-4753305_1280.jpg
+  LEARNING_SCENE: MOCK_IMAGE_URL_5,      // rhinoceros-10074916_1280.jpg
+  ACADEMIC: MOCK_IMAGE_URL_6,              // beef-9706049_1280.jpg
 };
 
 // Create convenient arrays for random selection

@@ -802,5 +802,4 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
     );
 };
 
-export { QuestionCard };
 export default QuestionsReview2;

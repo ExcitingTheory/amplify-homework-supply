@@ -1,13 +1,17 @@
 // Custom Onboarding Addon Preset
+const path = require('path');
+
 module.exports = {
   name: '@storybook/addon-onboarding-custom',
   
-  managerEntries: [
+  managerEntries: (entry = []) => [
+    ...entry,
     // Manager (Storybook UI) side
-    require.resolve('./manager.tsx'),
+    path.join(__dirname, 'manager.tsx'),
   ],
   
-  previewAnnotations: [
-    require.resolve('./preview.tsx'),
+  previewAnnotations: (entry = []) => [
+    ...entry,
+    path.join(__dirname, 'preview.tsx'),
   ],
 };

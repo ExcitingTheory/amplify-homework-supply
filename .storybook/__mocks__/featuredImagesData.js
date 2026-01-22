@@ -1,23 +1,30 @@
 /**
- * Featured Images - Base64 encoded stock photos for Units and Sections
+ * Featured Images - HTTP URLs to stock photos for Units and Sections
  * 
- * High-quality images converted from /Downloads/media folder
+ * High-quality images served from /story-mocks/
  * These are used as featured images for mock Units and Sections in Storybook
  */
 
-const featuredImagesData = require('./featuredImages.json');
+import {
+  MOCK_IMAGE_URL_1,
+  MOCK_IMAGE_URL_2,
+  MOCK_IMAGE_URL_3,
+  MOCK_IMAGE_URL_4,
+  MOCK_IMAGE_URL_5,
+  MOCK_IMAGE_URL_6,
+} from './media.js';
 
 // Export with descriptive names for different content types
 export const FEATURED_IMAGES = {
   // Japanese/Asian themed images
-  JAPANESE_CLASSROOM: featuredImagesData['1141381388'], // 11 MB - classroom/education scene
-  JAPANESE_CULTURE: featuredImagesData['1185684766'],   // 17 MB - cultural/traditional scene
-  JAPANESE_MODERN: featuredImagesData['1312074290'],     // 16 MB - modern Japan scene
+  JAPANESE_CLASSROOM: MOCK_IMAGE_URL_1, // piano-10046998_1280.jpg
+  JAPANESE_CULTURE: MOCK_IMAGE_URL_2,   // animals-10008941_1280.jpg
+  JAPANESE_MODERN: MOCK_IMAGE_URL_3,     // namibia-9992336_1280.jpg
   
   // General education themed
-  EDUCATION_GENERAL: featuredImagesData['1355927036'],   // 1.6 MB - general education
-  LEARNING_SCENE: featuredImagesData['1485922241'],      // 15 MB - learning/study scene
-  ACADEMIC: featuredImagesData['243766495'],              // 15 MB - academic setting
+  EDUCATION_GENERAL: MOCK_IMAGE_URL_4,   // sand-4753305_1280.jpg
+  LEARNING_SCENE: MOCK_IMAGE_URL_5,      // rhinoceros-10074916_1280.jpg
+  ACADEMIC: MOCK_IMAGE_URL_6,              // beef-9706049_1280.jpg
 };
 
 // Create convenient arrays for random selection

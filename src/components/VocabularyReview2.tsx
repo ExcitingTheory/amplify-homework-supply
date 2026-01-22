@@ -457,8 +457,7 @@ export function VocabularyCard({
     );
 }
 
-// Export VocabularyCard for reuse in other components
-export { VocabularyCard };
+// Export VocabularyCard for reuse in other components - already exported above as named export
 
 // =============================================================================
 // VocabularyReview2 - Main component with virtual scrolling
