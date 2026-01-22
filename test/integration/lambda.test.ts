@@ -33,6 +33,9 @@ import type { Schema } from '../../amplify/data/resource';
 import amplifyOutputs from '../../amplify_outputs.json';
 import {
   signInAs,
+  parseSSEStream,
+  extractTextFromSSE,
+  isSSEStreamComplete,
  } from './shared';
 
 // Configure Amplify with existing resources
@@ -84,16 +87,23 @@ describe('C. Lambda Handler Integration Tests', () => {
           },
         },
       });
-
+      
       const { body } = await restOperation.response;
-      const text = await body.text();
-      console.log('Chat Stream Response:', text);
+      const sseText = await body.text();
+      console.log('Chat Stream Response (first 200 chars):', sseText.substring(0, 200));
 
-      expect(text).toBeDefined();
-      expect(typeof text).toBe('string');
-      expect(text.length).toBeGreaterThan(0);
-      // SSE format should contain "data:" prefix
-      expect(text).toContain('data:');
+      expect(sseText).toBeDefined();
+      expect(sseText.length).toBeGreaterThan(0);
+      
+      // Parse SSE events
+      const events = parseSSEStream(sseText);
+      console.log('Parsed SSE events:', events.length);
+      expect(events.length).toBeGreaterThan(0);
+      
+      // Extract text content
+      const textContent = extractTextFromSSE(sseText);
+      console.log('Extracted text:', textContent.substring(0, 100));
+      expect(textContent.length).toBeGreaterThan(0);
     }, 30000);
 
     test('Chat with context awareness', async () => {
@@ -166,13 +176,14 @@ describe('C. Lambda Handler Integration Tests', () => {
       });
 
       const { body } = await restOperation.response;
-      const text = await body.text();
+      const sseText = await body.text();
 
-      expect(text).toBeDefined();
-      expect(typeof text).toBe('string');
-      expect(text.length).toBeGreaterThan(0);
-      // SSE format should contain "data:" prefix
-      expect(text).toContain('data:');
+      expect(sseText).toBeDefined();
+      const events = parseSSEStream(sseText);
+      expect(events.length).toBeGreaterThan(0);
+      
+      const textContent = extractTextFromSSE(sseText);
+      expect(textContent.length).toBeGreaterThan(0);
     }, 30000);
 
     test('Content completion with context-aware suggestions', async () => {
@@ -190,10 +201,14 @@ describe('C. Lambda Handler Integration Tests', () => {
       });
 
       const { body } = await restOperation.response;
-      const text = await body.text();
+      const sseText = await body.text();
 
-      expect(text).toBeDefined();
-      expect(text.length).toBeGreaterThan(0);
+      expect(sseText).toBeDefined();
+      const events = parseSSEStream(sseText);
+      expect(events.length).toBeGreaterThan(0);
+      
+      const textContent = extractTextFromSSE(sseText);
+      expect(textContent.length).toBeGreaterThan(0);
     }, 30000);
 
     test('Content completion respects user preferences', async () => {
@@ -211,10 +226,14 @@ describe('C. Lambda Handler Integration Tests', () => {
       });
 
       const { body } = await restOperation.response;
-      const text = await body.text();
+      const sseText = await body.text();
 
-      expect(text).toBeDefined();
-      expect(text.length).toBeGreaterThan(0);
+      expect(sseText).toBeDefined();
+      const events = parseSSEStream(sseText);
+      expect(events.length).toBeGreaterThan(0);
+      
+      const textContent = extractTextFromSSE(sseText);
+      expect(textContent.length).toBeGreaterThan(0);
     }, 30000);
 
     test('Error handling for incomplete prompts', async () => {
@@ -723,7 +742,10 @@ describe('C. Lambda Handler Integration Tests', () => {
       });
 
       if (data && typeof data === 'object') {
-        expect(['status', 'flags', 'checkedAt'].some(f => f in data)).toBe(true);
+        // Check for actual response fields from OpenAI moderation API
+        expect(['flagged', 'categories', 'categoryScores', 'model'].some(f => f in data)).toBe(true);
+        expect(data).toHaveProperty('flagged');
+        expect(typeof data.flagged).toBe('boolean');
       }
     }, 30000);
 
@@ -746,9 +768,12 @@ describe('C. Lambda Handler Integration Tests', () => {
       });
 
       expect(errors).toBeUndefined();
-      // Result should contain status field
+      // Result should contain moderation fields
       if (data && typeof data === 'object') {
-        expect(data).toHaveProperty('status');
+        expect(data).toHaveProperty('flagged');
+        expect(data).toHaveProperty('categories');
+        expect(data).toHaveProperty('categoryScores');
+        expect(data).toHaveProperty('model');
       }
     }, 30000);
 

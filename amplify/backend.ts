@@ -7,6 +7,7 @@ import {
   PayloadFormatVersion,
 } from 'aws-cdk-lib/aws-apigatewayv2';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
+import { HttpUserPoolAuthorizer } from 'aws-cdk-lib/aws-apigatewayv2-authorizers';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { auth } from './auth/resource';
 import { data } from './data/resource';
@@ -47,8 +48,31 @@ export const backend = defineBackend({
   websocketHandler,
 });
 
-// Note: Cognito permissions for section handler are granted via inline policy in the function's execution role
-// This avoids circular dependency between auth and data stacks
+// Grant Cognito permissions to section handler via IAM policy (not via auth.access() to avoid circular dependency)
+const cognitoPolicy = new Policy(backend.sectionHandler.resources.lambda.stack, 'SectionHandlerCognitoPolicy', {
+  statements: [
+    new PolicyStatement({
+      actions: [
+        'cognito-idp:AdminAddUserToGroup',
+        'cognito-idp:AdminRemoveUserFromGroup',
+        'cognito-idp:AdminGetUser',
+        'cognito-idp:AdminListGroupsForUser',
+        'cognito-idp:ListUsersInGroup',
+        'cognito-idp:GetGroup',
+        'cognito-idp:ListGroups',
+        'cognito-idp:ListUsers',
+        'cognito-idp:CreateGroup',
+        'cognito-idp:DeleteGroup',
+      ],
+      resources: [backend.auth.resources.userPool.userPoolArn],
+    }),
+  ],
+});
+
+backend.sectionHandler.resources.lambda.role?.attachInlinePolicy(cognitoPolicy);
+
+// Set USER_POOL_ID environment variable for section handler
+backend.sectionHandler.addEnvironment('USER_POOL_ID', backend.auth.resources.userPool.userPoolId);
 
 /**
  * HTTP API for streaming endpoints
@@ -61,9 +85,18 @@ export const backend = defineBackend({
  * All endpoints require Cognito User Pool authentication via Bearer token
  */
 
-// Create streaming API on the data stack to avoid circular dependency
-// (auth stack has sectionHandler which would create auth -> streaming -> auth cycle)
-const apiStack = backend.data.resources.cfnResources.cfnGraphqlApi.stack;
+// Create streaming API on its own stack to avoid cross-stack cycles with data/auth/storage
+const apiStack = backend.createStack('StreamApiStack');
+
+// Create Cognito User Pool authorizer for HTTP API
+const httpAuthorizer = new HttpUserPoolAuthorizer(
+  'StreamApiAuthorizer',
+  backend.auth.resources.userPool,
+  {
+    userPoolClients: [backend.auth.resources.userPoolClient],
+    identitySource: ['$request.header.Authorization'],
+  }
+);
 
 // HTTP API with Cognito authorization
 const httpApi = new HttpApi(apiStack, 'StreamHttpApi', {
@@ -102,23 +135,26 @@ const suggestBlocksIntegration = new HttpLambdaIntegration(
   }
 );
 
-// Routes (Bearer token auth validated in handler)
+// Routes with Cognito User Pool authorization
 httpApi.addRoutes({
   path: '/chat',
   methods: [HttpMethod.POST],
   integration: chatStreamIntegration,
+  authorizer: httpAuthorizer,
 });
 
 httpApi.addRoutes({
   path: '/content-completion',
   methods: [HttpMethod.POST],
   integration: contentCompletionIntegration,
+  authorizer: httpAuthorizer,
 });
 
 httpApi.addRoutes({
   path: '/suggest-blocks',
   methods: [HttpMethod.POST],
   integration: suggestBlocksIntegration,
+  authorizer: httpAuthorizer,
 });
 
 // Export API endpoint in Amplify custom outputs

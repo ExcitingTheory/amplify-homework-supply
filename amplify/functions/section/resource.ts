@@ -17,4 +17,5 @@ export const sectionHandler = defineFunction({
   // entry: './handler.ts',
   timeoutSeconds: 60,
   memoryMB: 256,
+  resourceGroupName: 'data', // Place with data resolvers to avoid cross-stack cycles
 });

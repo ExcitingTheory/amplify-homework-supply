@@ -8,6 +8,7 @@
 import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 import { IndexeddbPersistence } from 'y-indexeddb'
+import { Awareness } from 'y-protocols/awareness'
 
 export interface YjsProviderConfig {
   wsUrl?: string
@@ -23,6 +24,7 @@ export class YjsDocProvider {
   private docName: string
   private wsProvider: WebsocketProvider | null = null
   private indexeddb: IndexeddbPersistence | null = null
+  private awareness: Awareness
   private config: Required<YjsProviderConfig>
 
   private defaultConfig: Required<Omit<YjsProviderConfig, 'docName'>> = {
@@ -39,6 +41,9 @@ export class YjsDocProvider {
     this.docName = config.docName
     this.ydoc = new Y.Doc()
     this.config = { ...this.defaultConfig, ...config }
+    
+    // Create standalone awareness (always available, even without WebSocket)
+    this.awareness = new Awareness(this.ydoc)
 
     // Set up IndexedDB persistence
     if (this.config.persistence) {
@@ -60,6 +65,7 @@ export class YjsDocProvider {
         {
           resyncInterval: this.config.resyncInterval,
           maxBackoffTime: this.config.maxBackoffTime,
+          awareness: this.awareness, // Use our awareness instance
         }
       )
 
@@ -115,36 +121,29 @@ export class YjsDocProvider {
   /**
    * Get awareness for presence tracking
    */
-  getAwareness() {
-    return (this.wsProvider as any)?.awareness
+  getAwareness(): Awareness {
+    return this.awareness
   }
 
   /**
    * Set local awareness state (user presence, cursor position, etc.)
    */
   setAwareness(state: Record<string, any>): void {
-    const awareness = (this.wsProvider as any)?.awareness
-    if (awareness) {
-      awareness.setLocalState(state)
-    }
+    this.awareness.setLocalState(state)
   }
 
   /**
    * Get awareness state for a specific client
    */
   getClientState(clientId: number): Record<string, any> | null {
-    const awareness = (this.wsProvider as any)?.awareness
-    if (!awareness) return null
-    return awareness.getStates().get(clientId) || null
+    return this.awareness.getStates().get(clientId) || null
   }
 
   /**
    * Get all connected clients
    */
   getConnectedClients(): number[] {
-    const awareness = (this.wsProvider as any)?.awareness
-    if (!awareness) return []
-    return Array.from(awareness.getStates().keys())
+    return Array.from(this.awareness.getStates().keys())
   }
 
   /**
@@ -200,11 +199,9 @@ export class YjsDocProvider {
    * Subscribe to awareness changes
    */
   onAwarenessChange(callback: (changes: any) => void): () => void {
-    const awareness = (this.wsProvider as any)?.awareness
-    if (!awareness) return () => {}
-    awareness.on('change', callback)
+    this.awareness.on('change', callback)
     return () => {
-      awareness.off('change', callback)
+      this.awareness.off('change', callback)
     }
   }
 
@@ -247,6 +244,7 @@ export class YjsDocProvider {
     if (this.indexeddb) {
       this.indexeddb.destroy()
     }
+    this.awareness.destroy()
     this.ydoc.destroy()
   }
 }

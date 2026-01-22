@@ -22,6 +22,7 @@ import { UnitProvider } from '../../../context/unitContext';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 import DictionaryContext from '../../../context/dictionaryContext';
 import { DndWrapper } from '../../MeaningAssociationExercise/DndWrapper';
+import { MOCK_AUDIO_URL_1, MOCK_AUDIO_URL_2, MOCK_AUDIO_URL_3 } from '../../../../.storybook/__mocks__/media';
 
 export default {
   title: '🔌 Editor Plugins/Meaning Association',
@@ -35,11 +36,6 @@ const onError = (error) => {
   console.error(error);
 };
 
-// Minimal valid WAV file base64 data (short beep sound, ~1 second)
-const base64Audio1 = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-const base64Audio2 = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-const base64Audio3 = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-
 // Sample dictionary data with audio
 const mockDictionary = {
   'word-1': {
@@ -47,28 +43,28 @@ const mockDictionary = {
     phrase: 'hello',
     pronunciation: 'heh-LOH',
     definition: 'a greeting or expression of goodwill',
-    audio: [base64Audio1],
+    audio: [MOCK_AUDIO_URL_1],
   },
   'word-2': {
     id: 'word-2',
     phrase: 'goodbye',
     pronunciation: 'good-BYE',
     definition: 'a parting phrase',
-    audio: [base64Audio2],
+    audio: [MOCK_AUDIO_URL_2],
   },
   'word-3': {
     id: 'word-3',
     phrase: 'thank you',
     pronunciation: 'THANK yoo',
     definition: 'an expression of gratitude',
-    audio: [base64Audio3],
+    audio: [MOCK_AUDIO_URL_3],
   },
   'word-4': {
     id: 'word-4',
     phrase: 'please',
     pronunciation: 'PLEEZ',
     definition: 'used to make a polite request',
-    audio: [base64Audio1],
+    audio: [MOCK_AUDIO_URL_1],
   },
 };
 

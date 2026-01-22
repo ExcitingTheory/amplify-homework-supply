@@ -67,7 +67,18 @@ Amplify.configure({
   },
 });
 
-const client = generateClient<Schema>();
+// Initialize client lazily to ensure environment variables are set
+let client: any = null;
+
+function getClient() {
+  if (!client) {
+    if (!process.env.API_ENDPOINT) {
+      throw new Error('API_ENDPOINT environment variable not set. Lambda must be configured as AppSync resolver.');
+    }
+    client = generateClient<Schema>();
+  }
+  return client;
+}
 
 export const handler: Handler = async (event: any, context: any) => {
     // Extract operation name from AppSync event
@@ -125,7 +136,8 @@ async function handleCreateSectionGroup(
     try {
         // Generate unique 6-character code
         const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-        const { data: section, errors } = await client.models.Section.create({
+        const dataClient = getClient();
+        const { data: section, errors } = await dataClient.models.Section.create({
             name,
             description: description || '',
             code,
@@ -179,7 +191,8 @@ async function handleAddSelfToSection(
 
     try {
         // Look up Section by code
-        const { data: sections, errors: lookupErrors } = await client.models.Section.list({
+        const dataClient = getClient();
+        const { data: sections, errors: lookupErrors } = await dataClient.models.Section.list({
             filter: { code: { eq: code } }
         });
 
@@ -196,7 +209,7 @@ async function handleAddSelfToSection(
         console.log(`[Section] Added ${username} to learner group for section ${sectionId}`);
 
         // Get all assignments for this section to create student copies
-        const { data: sectionAssignments } = await client.models.Assignment.list({
+        const { data: sectionAssignments } = await dataClient.models.Assignment.list({
             filter: { sectionID: { eq: sectionId } }
         });
 
@@ -205,7 +218,7 @@ async function handleAddSelfToSection(
         const writableGroups = [`learner-${sectionId}`];
 
         for (const assignment of sectionAssignments || []) {
-            await client.models.Assignment.create({
+            await dataClient.models.Assignment.create({
                 sectionID: sectionId,
                 unitID: assignment.unitID,
                 learner: userId,

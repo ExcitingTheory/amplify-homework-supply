@@ -422,7 +422,7 @@ const mockGradeWithAnswers = {
     'drawing-q1': {
       complete: true,
       drawingData: '{"elements": [], "appState": {}}',
-      imageBase64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      imageBase64: '', // Placeholder - use actual image data in production
       attempts: 1,
     },
   },

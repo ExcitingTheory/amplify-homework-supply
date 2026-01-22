@@ -51,6 +51,12 @@ export default function StoryProgressPlugin() {
                     Object.keys(grade.data).some(key => !isNaN(Number(key)));
                 console.log('[StoryProgressPlugin] hasExerciseData:', hasExerciseData);
                 
+                // Early return if no grade available yet
+                if (!grade) {
+                    console.log('[StoryProgressPlugin] Grade not yet loaded, will retry on next update');
+                    return;
+                }
+                
                 if (!hasExerciseData) {
                     const gradeData = {};
                     

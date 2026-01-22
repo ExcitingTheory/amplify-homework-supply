@@ -222,6 +222,14 @@ function detectPromptInjection(message: string): boolean {
 
 export const handler: APIGatewayProxyHandlerV2 = async (event: any) => {
   try {
+    const requestContext = event.requestContext as any;
+    console.log('[Chat] Request received:', {
+      path: event.rawPath,
+      method: event.requestContext?.http?.method,
+      hasAuth: !!requestContext?.authorizer,
+      userId: requestContext?.authorizer?.jwt?.claims?.sub,
+    });
+    
     const { messages, context: chatContext } = JSON.parse(event.body || '{}');
 
     console.log('[Chat] Received request with', messages?.length || 0, 'messages', 'context:', {

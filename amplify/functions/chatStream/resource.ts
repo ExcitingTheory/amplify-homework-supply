@@ -19,11 +19,9 @@ import { defineFunction, secret } from '@aws-amplify/backend';
  */
 
 export const chatStreamHandler = defineFunction({
-  // entry: './handler.ts',
   timeoutSeconds: 300,
   memoryMB: 512,
   environment: {
     OPENAI_API_KEY: secret('OPENAI_API_KEY'),
   },
-  resourceGroupName: 'data',  // HTTP API is on data stack
 });

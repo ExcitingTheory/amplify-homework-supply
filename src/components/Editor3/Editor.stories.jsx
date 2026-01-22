@@ -1519,8 +1519,8 @@ const kitchenSinkEditorState = {
       {
         type: 'image',
         version: 1,
-        src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-        altText: 'Sample image placeholder',
+        src: MOCK_IMAGE_URL_1,
+        altText: 'Sample image - piano',
         width: 400,
         height: 300,
         maxWidth: 500,

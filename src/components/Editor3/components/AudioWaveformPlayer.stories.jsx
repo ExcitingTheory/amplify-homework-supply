@@ -8,7 +8,7 @@ import { userEvent, within, waitFor, expect } from 'storybook/test';
 import { AudioPlayerProvider } from '../context/AudioPlayerContext';
 import AudioWaveformPlayer from './AudioWaveformPlayer';
 import { Box } from '@mui/material';
-import { MOCK_AUDIO_BASE64, mockWaveformData } from '../../../../.storybook/__mocks__/media';
+import { MOCK_AUDIO_URL_1, mockWaveformData } from '../../../../.storybook/__mocks__/media';
 
 
 export default {
@@ -30,7 +30,7 @@ export default {
 
 export const WithWaveformData = {
   args: {
-    audioUrl: MOCK_AUDIO_BASE64,
+    audioUrl: MOCK_AUDIO_URL_1,
     waveformData: mockWaveformData,
     width: 600,
     height: 80,
@@ -48,7 +48,7 @@ export const WithWaveformData = {
 
 export const CompactPlayer = {
   args: {
-    audioUrl: MOCK_AUDIO_BASE64,
+    audioUrl: MOCK_AUDIO_URL_1,
     waveformData: mockWaveformData,
     width: 400,
     height: 60,
@@ -65,7 +65,7 @@ export const CompactPlayer = {
 
 export const WithTitle = {
   args: {
-    audioUrl: MOCK_AUDIO_BASE64,
+    audioUrl: MOCK_AUDIO_URL_1,
     waveformData: mockWaveformData,
     width: 600,
     height: 80,
@@ -83,7 +83,7 @@ export const WithTitle = {
 
 export const NoDuration = {
   args: {
-    audioUrl: MOCK_AUDIO_BASE64,
+    audioUrl: MOCK_AUDIO_URL_1,
     waveformData: mockWaveformData,
     width: 600,
     height: 80,
@@ -101,7 +101,7 @@ export const NoDuration = {
 export const VariousSizes = () => (
   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
     <AudioWaveformPlayer
-      audioUrl={MOCK_AUDIO_BASE64}
+      audioUrl={MOCK_AUDIO_URL_1}
       waveformData={mockWaveformData}
       width={300}
       height={50}
@@ -109,14 +109,14 @@ export const VariousSizes = () => (
       showDuration={false}
     />
     <AudioWaveformPlayer
-      audioUrl={MOCK_AUDIO_BASE64}
+      audioUrl={MOCK_AUDIO_URL_1}
       waveformData={mockWaveformData}
       width={450}
       height={70}
       title="Medium (450x70)"
     />
     <AudioWaveformPlayer
-      audioUrl={MOCK_AUDIO_BASE64}
+      audioUrl={MOCK_AUDIO_URL_1}
       waveformData={mockWaveformData}
       width={700}
       height={100}
@@ -146,7 +146,7 @@ export const MultiplePlayersInList = () => {
       {recordings.map((recording) => (
         <AudioWaveformPlayer
           key={recording.id}
-          audioUrl={MOCK_AUDIO_BASE64}
+          audioUrl={MOCK_AUDIO_URL_1}
           waveformData={recording.waveform}
           width={600}
           height={70}

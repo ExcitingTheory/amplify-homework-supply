@@ -1,0 +1,305 @@
+import { Meta, StoryObj } from '@storybook/react';
+import { useState, useEffect } from 'react';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Container,
+  Stack,
+  Typography,
+  Alert,
+} from '@mui/material';
+import { getOnboardingEmitter } from '../../.storybook/code/onboarding-events';
+import { ONBOARDING_TASKS, getTasksForPersona } from '../../.storybook/code/onboarding-tasks';
+import { useCompleteTask, useTrackTask, useOnboardingStatus } from '../../.storybook/code/useOnboarding';
+
+const meta: Meta = {
+  title: 'Onboarding/Task Completion Examples',
+  tags: ['autodocs'],
+};
+
+export default meta;
+
+/**
+ * Example: Detect when user completes a task by reaching a screen
+ * This story shows how useCompleteTask automatically marks tasks as complete
+ */
+export const AutoDetectTaskCompletion: StoryObj = {
+  render: () => {
+    // This automatically marks the task as complete when the component mounts
+    useCompleteTask('instructor-setup-class', 'instructor');
+
+    return (
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Alert severity="success" sx={{ mb: 3 }}>
+          ✓ Task marked as complete! Check the Onboarding panel.
+        </Alert>
+        <Card>
+          <CardContent>
+            <Typography variant="h5">Set Up Your First Class</Typography>
+            <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
+              This screen represents the "Set Up Your First Class" workflow. Just by viewing this
+              story, the task has been marked as complete in the onboarding panel.
+            </Typography>
+          </CardContent>
+        </Card>
+      </Container>
+    );
+  },
+};
+
+/**
+ * Example: Manual task tracking with startTask and completeTask
+ * User must click the button to complete the task
+ */
+export const ManualTaskTracking: StoryObj = {
+  render: () => {
+    const { completeTask, startTask } = useTrackTask('learner-join-class', 'learner');
+    const [started, setStarted] = useState(false);
+    const [completed, setCompleted] = useState(false);
+
+    const handleStart = () => {
+      startTask();
+      setStarted(true);
+    };
+
+    const handleComplete = () => {
+      completeTask({ method: 'manual_button_click' });
+      setCompleted(true);
+    };
+
+    return (
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        {completed && <Alert severity="success">✓ Task completed!</Alert>}
+        {started && !completed && <Alert severity="info">In progress...</Alert>}
+
+        <Card sx={{ mt: 2 }}>
+          <CardContent>
+            <Typography variant="h5" sx={{ mb: 2 }}>
+              Join Your First Class
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
+              This example demonstrates manual task tracking. Click "Start Task" to begin tracking,
+              then "Complete Task" when done.
+            </Typography>
+
+            <Stack direction="row" spacing={2}>
+              <Button variant="outlined" onClick={handleStart} disabled={started}>
+                Start Task
+              </Button>
+              <Button variant="contained" onClick={handleComplete} disabled={!started || completed}>
+                Complete Task
+              </Button>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Container>
+    );
+  },
+};
+
+/**
+ * Example: Display current onboarding status
+ * Shows the persona, completed tasks, and completion percentage
+ */
+export const DisplayOnboardingStatus: StoryObj = {
+  render: () => {
+    const status = useOnboardingStatus();
+    const [stats, setStats] = useState<any>(null);
+
+    useEffect(() => {
+      if (status.persona) {
+        const tasks = getTasksForPersona(status.persona);
+        setStats({
+          persona: status.persona,
+          completionPercentage: status.getCompletionPercentage(tasks),
+          tasks: tasks,
+          completedTasks: tasks.filter((t) => status.isCompleted(t.id)),
+        });
+      }
+    }, [status]);
+
+    if (!stats) {
+      return (
+        <Container maxWidth="md" sx={{ py: 4 }}>
+          <Alert severity="warning">
+            No persona selected. Please select a persona in the Onboarding panel first.
+          </Alert>
+        </Container>
+      );
+    }
+
+    return (
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Stack spacing={2}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">Your Onboarding Status</Typography>
+              <Stack spacing={1} sx={{ mt: 2 }}>
+                <Typography>
+                  <strong>Role:</strong> {stats.persona.charAt(0).toUpperCase() + stats.persona.slice(1)}
+                </Typography>
+                <Typography>
+                  <strong>Completion:</strong> {stats.completionPercentage}%
+                </Typography>
+                <Typography>
+                  <strong>Tasks Completed:</strong> {stats.completedTasks.length} /{' '}
+                  {stats.tasks.length}
+                </Typography>
+              </Stack>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Completed Tasks
+              </Typography>
+              {stats.completedTasks.length > 0 ? (
+                <Stack spacing={1}>
+                  {stats.completedTasks.map((task: any) => (
+                    <Box
+                      key={task.id}
+                      sx={{
+                        p: 1.5,
+                        bgcolor: 'success.light',
+                        borderRadius: 1,
+                        display: 'flex',
+                        gap: 1,
+                      }}
+                    >
+                      <Typography sx={{ color: 'success.main' }}>✓</Typography>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {task.title}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          {task.description}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ))}
+                </Stack>
+              ) : (
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  No tasks completed yet. Complete tasks to see them here.
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => {
+              status.reset();
+              setStats(null);
+            }}
+          >
+            Reset All Progress
+          </Button>
+        </Stack>
+      </Container>
+    );
+  },
+};
+
+/**
+ * Example: Event emission and listening
+ * Shows how to emit custom events and listen for them
+ */
+export const EventEmissionExample: StoryObj = {
+  render: () => {
+    const emitter = getOnboardingEmitter();
+    const [events, setEvents] = useState<any[]>([]);
+    const [persona, setPersona] = useState<string | null>(null);
+
+    useEffect(() => {
+      const unsubscribe = emitter.on((event) => {
+        console.log('[Onboarding Event]', event);
+        setEvents((prev) => [...prev, event].slice(-10)); // Keep last 10 events
+      });
+
+      setPersona(emitter.getPersona());
+
+      return unsubscribe;
+    }, [emitter]);
+
+    const handleEmitEvent = (taskId: string) => {
+      if (persona) {
+        emitter.emit({
+          type: 'task-completed',
+          taskId,
+          persona: persona as any,
+          timestamp: Date.now(),
+          metadata: { manual: true },
+        });
+      }
+    };
+
+    return (
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Stack spacing={2}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">Event Monitor</Typography>
+              <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
+                Current Persona: {persona ? persona.toUpperCase() : 'None selected'}
+              </Typography>
+
+              <Stack direction="row" spacing={1} sx={{ mt: 2, mb: 2 }}>
+                {['instructor-setup-class', 'learner-join-class', 'developer-explore-components'].map(
+                  (taskId) => (
+                    <Button
+                      key={taskId}
+                      size="small"
+                      variant="outlined"
+                      onClick={() => handleEmitEvent(taskId)}
+                      disabled={!persona}
+                    >
+                      Emit {taskId}
+                    </Button>
+                  )
+                )}
+              </Stack>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent>
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                Recent Events (Last 10)
+              </Typography>
+              <Box
+                sx={{
+                  bgcolor: '#f5f5f5',
+                  p: 2,
+                  borderRadius: 1,
+                  maxHeight: 300,
+                  overflow: 'auto',
+                  fontFamily: 'monospace',
+                  fontSize: '0.75rem',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-all',
+                }}
+              >
+                {events.length > 0 ? (
+                  events.map((event, index) => (
+                    <Box key={index} sx={{ mb: 1, pb: 1, borderBottom: '1px solid #e0e0e0' }}>
+                      {JSON.stringify(event, null, 2)}
+                    </Box>
+                  ))
+                ) : (
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                    No events yet. Emit events above or complete tasks to see them here.
+                  </Typography>
+                )}
+              </Box>
+            </CardContent>
+          </Card>
+        </Stack>
+      </Container>
+    );
+  },
+};

@@ -16,7 +16,7 @@ export const embeddingsHandler = defineFunction({
   // entry: './handler.ts',
   timeoutSeconds: 300,
   memoryMB: 512,
-  resourceGroupName: 'data',  // Assign to data stack - used as GraphQL resolver 
+  resourceGroupName: 'data',
   environment: {
     OPENAI_API_KEY: secret('OPENAI_API_KEY'),
   },

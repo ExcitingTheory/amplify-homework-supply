@@ -1,78 +1,120 @@
 /**
  * Test to verify that model classes are being loaded correctly in Storybook
- * Run this with: node .storybook/__tests__/model-verification.test.js
  */
 
-// Simulate the webpack alias by requiring our mock
-const DataStoreMock = require('../__mocks__/aws-amplify-datastore.js');
+import { describe, it, expect, beforeEach } from 'vitest';
+
+// Simulate the webpack alias by importing our mock
+import * as DataStoreMock from '../__mocks__/aws-amplify-datastore.js';
 
 // Import the schema like the real models/index.js does
-const { schema } = require('../../src/models/schema.js');
+import { schema } from '../../src/models/schema.js';
 
-console.log('\n=== Model Verification Test ===\n');
+describe('Model Verification', () => {
+  let models;
+  let Unit;
+  let Grade;
 
-// Test 1: Verify initSchema exists
-console.log('✓ Test 1: initSchema exists:', typeof DataStoreMock.initSchema === 'function');
-
-// Test 2: Call initSchema with the real schema
-const models = DataStoreMock.initSchema(schema);
-console.log('✓ Test 2: initSchema returns models:', Object.keys(models).length > 0);
-console.log('  Models created:', Object.keys(models).join(', '));
-
-// Test 3: Verify Unit model exists and has required methods
-const { Unit, Grade } = models;
-console.log('\n✓ Test 3: Unit model exists:', !!Unit);
-console.log('  Unit.name:', Unit?.name);
-console.log('  Unit.copyOf exists:', typeof Unit?.copyOf === 'function');
-
-// Test 4: Create a Unit instance
-try {
-  const unit = new Unit({
-    id: 'test-1',
-    name: 'Test Unit',
-    description: 'A test unit',
-    data: { root: { children: [] } },
-    _version: 1,
-    owner: 'test-owner'
+  beforeEach(() => {
+    models = DataStoreMock.initSchema(schema);
+    Unit = models.Unit;
+    Grade = models.Grade;
   });
-  console.log('\n✓ Test 4: Can create Unit instance:', !!unit);
-  console.log('  Unit instance:', { id: unit.id, name: unit.name });
-} catch (error) {
-  console.log('\n✗ Test 4: Failed to create Unit instance:', error.message);
-}
 
-// Test 5: Test copyOf method
-try {
-  const original = new Unit({
-    id: 'test-2',
-    name: 'Original',
-    description: 'Original description',
-    _version: 1
+  describe('DataStore Mock', () => {
+    it('should have initSchema function', () => {
+      expect(typeof DataStoreMock.initSchema).toBe('function');
+    });
+
+    it('should return models from initSchema', () => {
+      expect(Object.keys(models).length).toBeGreaterThan(0);
+      expect(models).toHaveProperty('Unit');
+      expect(models).toHaveProperty('Grade');
+    });
+
+    it('should have DataStore class with required methods', () => {
+      expect(DataStoreMock.DataStore).toBeDefined();
+      expect(typeof DataStoreMock.DataStore.observeQuery).toBe('function');
+      expect(typeof DataStoreMock.DataStore.save).toBe('function');
+      expect(typeof DataStoreMock.DataStore.query).toBe('function');
+    });
+
+    it('should have helper functions', () => {
+      expect(typeof DataStoreMock.seedMockUnit).toBe('function');
+      expect(typeof DataStoreMock.clearMockData).toBe('function');
+      expect(DataStoreMock.SortDirection).toBeDefined();
+    });
   });
-  
-  const updated = Unit.copyOf(original, draft => {
-    draft.name = 'Updated';
-    draft.description = 'Updated description';
+
+  describe('Unit Model', () => {
+    it('should exist with correct name', () => {
+      expect(Unit).toBeDefined();
+      expect(Unit.name).toBe('Unit');
+    });
+
+    it('should have copyOf method', () => {
+      expect(typeof Unit.copyOf).toBe('function');
+    });
+
+    it('should create Unit instance', () => {
+      const unit = new Unit({
+        id: 'test-1',
+        name: 'Test Unit',
+        description: 'A test unit',
+        data: { root: { children: [] } },
+        _version: 1,
+        owner: 'test-owner'
+      });
+
+      expect(unit).toBeDefined();
+      expect(unit.id).toBe('test-1');
+      expect(unit.name).toBe('Test Unit');
+      expect(unit.description).toBe('A test unit');
+    });
+
+    it('should update instance with copyOf', () => {
+      const original = new Unit({
+        id: 'test-2',
+        name: 'Original',
+        description: 'Original description',
+        _version: 1
+      });
+
+      const updated = Unit.copyOf(original, draft => {
+        draft.name = 'Updated';
+        draft.description = 'Updated description';
+      });
+
+      expect(original.name).toBe('Original');
+      expect(original.description).toBe('Original description');
+      expect(updated.name).toBe('Updated');
+      expect(updated.description).toBe('Updated description');
+    });
   });
-  
-  console.log('\n✓ Test 5: copyOf works correctly:');
-  console.log('  Original name:', original.name);
-  console.log('  Updated name:', updated.name);
-  console.log('  Original unchanged:', original.name === 'Original');
-} catch (error) {
-  console.log('\n✗ Test 5: copyOf failed:', error.message);
-}
 
-// Test 6: Verify DataStore mock methods exist
-console.log('\n✓ Test 6: DataStore class exists:', !!DataStoreMock.DataStore);
-console.log('  DataStore.observeQuery:', typeof DataStoreMock.DataStore.observeQuery === 'function');
-console.log('  DataStore.save:', typeof DataStoreMock.DataStore.save === 'function');
-console.log('  DataStore.query:', typeof DataStoreMock.DataStore.query === 'function');
+  describe('Grade Model', () => {
+    it('should exist with correct name', () => {
+      expect(Grade).toBeDefined();
+      expect(Grade.name).toBe('Grade');
+    });
 
-// Test 7: Verify helper functions exist
-console.log('\n✓ Test 7: Helper functions exist:');
-console.log('  seedMockUnit:', typeof DataStoreMock.seedMockUnit === 'function');
-console.log('  clearMockData:', typeof DataStoreMock.clearMockData === 'function');
-console.log('  SortDirection:', !!DataStoreMock.SortDirection);
+    it('should have copyOf method', () => {
+      expect(typeof Grade.copyOf).toBe('function');
+    });
 
-console.log('\n=== All Tests Passed! ===\n');
+    it('should create Grade instance', () => {
+      const grade = new Grade({
+        id: 'grade-1',
+        data: '{}',
+        complete: false,
+        accuracy: 0,
+        _version: 1
+      });
+
+      expect(grade).toBeDefined();
+      expect(grade.id).toBe('grade-1');
+      expect(grade.complete).toBe(false);
+      expect(grade.accuracy).toBe(0);
+    });
+  });
+});

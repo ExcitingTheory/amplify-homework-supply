@@ -1,0 +1,36 @@
+.onboarding-panel {
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+
+  /* Custom scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.onboarding-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.onboarding-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.onboarding-panel::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.onboarding-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Task card animations */
+.onboarding-panel .MuiCard-root {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.onboarding-panel .MuiCard-root:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}

@@ -62,12 +62,12 @@ Frontend Layer
   └─ Y.WebsocketProvider (sync)
          ↓
 Sync Layer (WebSocket server)
-  ├─ Message broker (Redis/Cognito tokens)
-  └─ Room management (per document)
+  ├─ Message broker (SQS/Redis for queuing updates)
+  └─ Room management (per document + learner + code each learner or instructor has their own room)
          ↓
 Backend (Amplify Gen 2)
   ├─ GraphQL API (mutations for final state)
-  ├─ Lambda (WebSocket handler)
+  ├─ Lambda (WebSocket handler, streaming API)
   └─ DynamoDB (source of truth)
 ```
 

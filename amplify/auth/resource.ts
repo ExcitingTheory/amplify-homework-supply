@@ -1,5 +1,4 @@
 import { defineAuth } from '@aws-amplify/backend';
-import { sectionHandler } from '../functions/section/resource';
 
 /**
  * Authentication configuration for Amplify Gen 2
@@ -11,6 +10,9 @@ import { sectionHandler } from '../functions/section/resource';
  * - ADMINS: Full access to all resources
  * - INSTRUCTORS: Can create content, manage sections and students
  * - LEARNERS: Read-only access to published content, can submit work
+ * 
+ * Note: Cognito permissions for section handler are granted via IAM policy in backend.ts
+ * to avoid circular dependency between auth and data stacks
  */
 
 export const auth = defineAuth({
@@ -24,15 +26,4 @@ export const auth = defineAuth({
     totp: true,
   },
   groups: ['Learners', 'Instructors', 'Moderators', 'Admins'],
-  access: (allow) => [
-    allow.resource(sectionHandler).to([
-      'manageGroupMembership',
-      'listUsersInGroup',
-      'listGroupsForUser',
-      'getGroup',
-      'listGroups',
-      'getUser',
-      'listUsers',
-    ]),
-  ],
 });

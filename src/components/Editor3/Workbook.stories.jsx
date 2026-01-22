@@ -1,6 +1,7 @@
 import React from 'react';
 import { Workbook } from './index';
 import { seedMockUnit, seedMockGrade } from '../../../.storybook/__mocks__/aws-amplify-datastore';
+import { MOCK_IMAGE_URL_1 } from '../../../.storybook/__mocks__/media';
 import { userEvent, within, waitFor, expect } from 'storybook/test';
 
 export default {
@@ -216,6 +217,9 @@ export const WorkbookWithContent = {
     },
   ],
   render: () => <Workbook />,
+  parameters: {
+    unitId: 'workbook-with-content-id',
+  },
 };
 
 const workbookWithProgressState = {
@@ -462,14 +466,14 @@ export const WorkbookWithProgress = {
         data: workbookWithProgressState,
         wordIDs: ['vocab-word-1', 'vocab-word-2', 'vocab-word-3'],
         _version: 1,
-        owner: 'mock-user-sub',
+        owner: 'student-alice-sub',
       });
       
       // Seed empty grade - will be populated by StoryProgressPlugin after editor loads
       seedMockGrade({
         id: 'grade-progress-1',
         unitID: 'workbook-with-progress-id',
-        owner: 'mock-user-sub',
+        owner: 'student-alice-sub',
         percentComplete: 0,
         accuracy: 0,
         complete: false,
@@ -489,7 +493,7 @@ export const WorkbookWithProgress = {
           waveformData: JSON.stringify(mockWaveformData.slice(0, 20)),
           definitionAudio: [MOCK_AUDIO_BASE64],
           definitionWaveformData: JSON.stringify(mockWaveformData.slice(20, 40)),
-          owner: 'mock-user-sub',
+          owner: 'student-alice-sub',
           _version: 1,
         },
         {
@@ -501,7 +505,7 @@ export const WorkbookWithProgress = {
           waveformData: JSON.stringify(mockWaveformData.slice(40, 60)),
           definitionAudio: [MOCK_AUDIO_BASE64],
           definitionWaveformData: JSON.stringify(mockWaveformData.slice(60, 80)),
-          owner: 'mock-user-sub',
+          owner: 'student-alice-sub',
           _version: 1,
         },
         {
@@ -513,7 +517,7 @@ export const WorkbookWithProgress = {
           waveformData: JSON.stringify(mockWaveformData.slice(80, 100)),
           definitionAudio: [MOCK_AUDIO_BASE64],
           definitionWaveformData: JSON.stringify(mockWaveformData.slice(100, 120)),
-          owner: 'mock-user-sub',
+          owner: 'student-alice-sub',
           _version: 1,
         },
         {
@@ -525,7 +529,7 @@ export const WorkbookWithProgress = {
           waveformData: JSON.stringify(mockWaveformData.slice(120, 140)),
           definitionAudio: [MOCK_AUDIO_BASE64],
           definitionWaveformData: JSON.stringify(mockWaveformData.slice(140, 160)),
-          owner: 'mock-user-sub',
+          owner: 'student-alice-sub',
           _version: 1,
         },
         {
@@ -537,7 +541,7 @@ export const WorkbookWithProgress = {
           waveformData: JSON.stringify(mockWaveformData.slice(160, 180)),
           definitionAudio: [MOCK_AUDIO_BASE64],
           definitionWaveformData: JSON.stringify(mockWaveformData.slice(180, 200)),
-          owner: 'mock-user-sub',
+          owner: 'student-alice-sub',
           _version: 1,
         },
       ]);
@@ -1356,7 +1360,7 @@ const kitchenSinkWorkbookState = {
       {
         type: 'image',
         version: 1,
-        src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+        src: MOCK_IMAGE_URL_1,
         altText: 'Example diagram for learning',
         width: 600,
         height: 400,

@@ -318,25 +318,36 @@ const FilesProvider = ({ children }) => {
   React.useEffect(() => {
     // Prevent duplicate subscriptions
     if (filesFetchedRef.current) {
+      console.log('[FilesContext] fetchFiles already called, skipping');
       return;
     }
 
     async function fetchFiles() {
+      console.log('[FilesContext] fetchFiles called');
       try {
         // Check if user is authenticated first
-        const { username: myUserId, userId, signInDetails } = await getCurrentUser();
-        const { identityId } = await fetchAuthSession();
+        const user = await getCurrentUser();
+        console.log('[FilesContext] getCurrentUser returned:', user?.username);
+        const authSession = await fetchAuthSession();
+        console.log('[FilesContext] fetchAuthSession returned:', authSession?.identityId);
+        const { username: myUserId, userId, signInDetails } = user;
+        const { identityId } = authSession;
 
         if (!myUserId) {
+          console.log('[FilesContext] No myUserId, returning');
           return;
         }
 
         // Mark as fetched before subscribing
         filesFetchedRef.current = true;
+        console.log('[FilesContext] About to subscribe to File model');
 
         // Query all files regardless of owner - we'll track by identityId for lookup
         subscriptionRef.current = DataStore.observeQuery(File).subscribe(({ items, isSynced }) => {
-          console.log('[FilesContext] DataStore subscription triggered with', items.length, 'files, isSynced:', isSynced);
+          console.log('[FilesContext] DataStore.observeQuery(File) subscription triggered:');
+          console.log('  - items.length:', items?.length);
+          console.log('  - isSynced:', isSynced);
+          console.log('  - items:', items);
           const _playlistFiltered = {}
           const _pdfsFiltered = {}
 

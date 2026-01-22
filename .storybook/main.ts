@@ -17,7 +17,7 @@ const config: StorybookConfig = {
     "@storybook/addon-links",
     "@storybook/addon-docs",
     // "@storybook/addon-onboarding" // Disabled - using custom branding instead
-    "./code/myOnboarding"
+    './.storybook/code/myOnboarding/preset.js'
   ],
   "framework": {
     name: "@storybook/nextjs",

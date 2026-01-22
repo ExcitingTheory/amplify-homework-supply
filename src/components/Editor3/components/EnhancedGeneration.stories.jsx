@@ -3,6 +3,7 @@ import { Box, Typography, Button } from '@mui/material';
 import UnifiedGenerateModal from './UnifiedGenerateModal';
 import ImageMaskEditor from './ImageMaskEditor';
 import { EnhancedImageGenerator, EnhancedAudioGenerator } from './EnhancedGenerators';
+import { MOCK_AUDIO_URL_1, MOCK_IMAGE_URL_1 } from '../../../../.storybook/__mocks__/media';
 
 export default {
     title: '💬 AI Assistant/Content Generation',
@@ -20,7 +21,7 @@ export default {
 const mockGenerateImage = async (prompt) => {
     await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API delay
     
-    const mockImageUrl = `https://via.placeholder.com/800x600/FF6B6B/FFFFFF?text=${encodeURIComponent(prompt.substring(0, 30))}`;
+    const mockImageUrl = MOCK_IMAGE_URL_1;
     
     return {
         url: mockImageUrl,
@@ -49,7 +50,7 @@ const mockGenerateAudio = async (prompt) => {
                     controls
                     style={{ width: '100%' }}
                 >
-                    <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=" type="audio/wav" />
+                    <source src={MOCK_AUDIO_URL_1} type="audio/mpeg" />
                 </audio>
             </Box>
         ),
@@ -124,7 +125,7 @@ export const ImageMaskEditorDemo = () => {
         console.log('Mask data:', data);
     };
 
-    const sampleImage = 'https://via.placeholder.com/800x600/4ECDC4/FFFFFF?text=Sample+Image';
+    const sampleImage = MOCK_IMAGE_URL_1;
 
     return (
         <Box sx={{ p: 3, maxWidth: 900 }}>

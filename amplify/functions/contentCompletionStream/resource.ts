@@ -13,11 +13,9 @@ import { defineFunction, secret } from '@aws-amplify/backend';
  */
 
 export const contentCompletionStreamHandler = defineFunction({
-  // entry: './handler.ts',
   timeoutSeconds: 120,
   memoryMB: 256,
   environment: {
     OPENAI_API_KEY: secret('OPENAI_API_KEY'),
   },
-  resourceGroupName: 'data',  // HTTP API is on data stack
 });

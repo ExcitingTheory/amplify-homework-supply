@@ -59,7 +59,7 @@ describe('chatStream handler integration tests', () => {
     // The actual regex from the handler that has the negative lookahead
     const injectionPattern = /act as (a |an )?(?!teaching assistant|tutor|kai)/i;
 
-    // These SHOULD match the negative lookahead (allowed to say)
+    // These SHOULD match the negative lookahead (allowed to say, but kai has been asked not to break character)
     const legitimatePrompts = [
       'act as a teaching assistant',
       'act as tutor',

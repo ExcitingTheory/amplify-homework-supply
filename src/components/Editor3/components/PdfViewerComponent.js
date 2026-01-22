@@ -8,7 +8,8 @@
  */
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Box, IconButton, Typography, Paper, ButtonGroup } from '@mui/material';
+import { Box, IconButton, Typography, Paper, ButtonGroup, CircularProgress } from '@mui/material';
+import { Document, Page, pdfjs } from 'react-pdf';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import { mergeRegister } from '@lexical/utils';
@@ -36,6 +37,9 @@ import {
 } from '@mui/icons-material';
 import getCachedUrl from '../../../utils/getCachedUrl';
 
+// Configure PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
 /**
  * PdfViewerComponent - Displays PDF documents with controls.
  * 
@@ -61,6 +65,21 @@ export default function PdfViewerComponent({
     const [scale, setScale] = useState(1.0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [pageWidth, setPageWidth] = useState(600);
+
+    // Callback when PDF document loads successfully
+    const onDocumentLoadSuccess = useCallback(({ numPages: pages }) => {
+        setNumPages(pages);
+        setLoading(false);
+        setError(null);
+    }, []);
+
+    // Callback when PDF document fails to load
+    const onDocumentLoadError = useCallback((error) => {
+        console.error('Error loading PDF:', error);
+        setError('Failed to load PDF');
+        setLoading(false);
+    }, []);
 
     // Delete handler
     const onDelete = useCallback(
@@ -223,10 +242,12 @@ export default function PdfViewerComponent({
 
     const handleZoomIn = () => {
         setScale(prev => Math.min(prev + 0.25, 3.0));
+        setPageWidth(prev => Math.min(prev * 1.25, 1200));
     };
 
     const handleZoomOut = () => {
         setScale(prev => Math.max(prev - 0.25, 0.5));
+        setPageWidth(prev => Math.max(prev * 0.8, 300));
     };
 
     const handlePrevPage = () => {
@@ -394,16 +415,41 @@ export default function PdfViewerComponent({
                 }}
             >
                 {pdfUrl ? (
-                    <iframe
-                        src={`${pdfUrl}#page=${currentPage}&zoom=${scale * 100}`}
-                        style={{
-                            width: '100%',
-                            minHeight: '600px',
-                            border: 'none',
-                            backgroundColor: 'white',
-                        }}
-                        title={filename}
-                    />
+                    <Document
+                        file={pdfUrl}
+                        onLoadSuccess={onDocumentLoadSuccess}
+                        onLoadError={onDocumentLoadError}
+                        loading={
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 4 }}>
+                                <CircularProgress />
+                                <Typography variant="body2" color="text.secondary">
+                                    Loading PDF...
+                                </Typography>
+                            </Box>
+                        }
+                    >
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                bgcolor: 'white',
+                                boxShadow: 2,
+                                '& .react-pdf__Page': {
+                                    maxWidth: '100%',
+                                },
+                                '& .react-pdf__Page__canvas': {
+                                    maxWidth: '100%',
+                                    height: 'auto !important',
+                                },
+                            }}
+                        >
+                            <Page
+                                pageNumber={currentPage}
+                                width={pageWidth}
+                                scale={scale}
+                            />
+                        </Box>
+                    </Document>
                 ) : (
                     <Typography variant="body2" color="text.secondary">
                         No PDF to display

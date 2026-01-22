@@ -35,16 +35,14 @@ async function getOpenAI(): Promise<any> {
  */
 export const handler: APIGatewayProxyHandlerV2 = async (event): Promise<any> => {
   try {
-    // Extract and validate authorization
-    const authHeader = event.headers?.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
-      return {
-        statusCode: 401,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'Missing or invalid authorization' }),
-      };
-    }
-
+    const requestContext = event.requestContext as any;
+    console.log('[ContentCompletion] Request received:', {
+      path: event.rawPath,
+      method: event.requestContext?.http?.method,
+      hasAuth: !!requestContext?.authorizer,
+      userId: requestContext?.authorizer?.jwt?.claims?.sub,
+    });
+    
     const body = event.body ? JSON.parse(event.body) : {};
     const { prompt, context } = body;
 

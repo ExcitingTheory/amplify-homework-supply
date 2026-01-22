@@ -11,18 +11,16 @@ import { AudioPlayerProvider } from '../context/AudioPlayerContext';
 import ChatSidebar from '../../ChatSidebar';
 import TableOfContents from './TableOfContents';
 
-
 import DictionaryIcon from '@mui/icons-material/LibraryBooks';
 import ChatIcon from '@mui/icons-material/Chat';
 import FolderIcon from '@mui/icons-material/Folder';
 import ConfigIcon from '@mui/icons-material/Settings';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import TocIcon from '@mui/icons-material/Toc';
+import { QuestionMarkOutlined } from '@mui/icons-material';
 
-import FileManager from './FileManager2';
 import ConfigurationManager from './ConfigurationManager';
 import AssignmentConfiguration from './AssignmentConfiguration';
-import { QuestionMarkOutlined } from '@mui/icons-material';
 
 function TabPanel(props) {
   const { children, value, index, overflowY, ...other } = props;

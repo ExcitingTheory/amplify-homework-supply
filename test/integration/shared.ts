@@ -55,3 +55,51 @@ export async function signInAs(user: keyof typeof TEST_USERS) {
   const session = await fetchAuthSession();
   return session;
 }
+
+// Helper: Parse SSE (Server-Sent Events) format
+export interface SSEEvent {
+  type?: string;
+  textDelta?: string;
+  toolCallId?: string;
+  toolName?: string;
+  args?: any;
+  argsTextDelta?: string;
+  result?: any;
+  finishReason?: string;
+  [key: string]: any;
+}
+
+export function parseSSEStream(sseText: string): SSEEvent[] {
+  const events: SSEEvent[] = [];
+  const lines = sseText.split('\n');
+  
+  for (const line of lines) {
+    if (line.startsWith('data: ')) {
+      try {
+        const jsonStr = line.substring(6); // Remove 'data: ' prefix
+        const event = JSON.parse(jsonStr);
+        events.push(event);
+      } catch (error) {
+        console.warn('[parseSSEStream] Failed to parse SSE line:', line, error);
+      }
+    }
+  }
+  
+  return events;
+}
+
+// Helper: Extract full text content from SSE stream
+export function extractTextFromSSE(sseText: string): string {
+  const events = parseSSEStream(sseText);
+  return events
+    .filter(e => e.type === 'text-delta' && e.textDelta)
+    .map(e => e.textDelta)
+    .join('');
+}
+
+// Helper: Check if SSE stream completed successfully
+export function isSSEStreamComplete(sseText: string): boolean {
+  const events = parseSSEStream(sseText);
+  const lastEvent = events[events.length - 1];
+  return lastEvent?.type === 'finish' && lastEvent?.finishReason === 'stop';
+}

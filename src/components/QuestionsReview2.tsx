@@ -66,7 +66,7 @@ import SearchHighlightPlugin from './Editor3/plugins/SearchHighlightPlugin';
 // Virtual scrolling
 import { useVirtualizer } from '@tanstack/react-virtual';
 
-interface QuestionItem {
+export interface QuestionItem {
     prompt: string;
     answer: string;
     hint?: string;
@@ -211,7 +211,7 @@ function NestedQuestionField({
 // QuestionCard - Individual question item with Lexical editing
 // =============================================================================
 
-interface QuestionCardProps {
+export interface QuestionCardProps {
     item: QuestionItem;
     index: number;
     isSelected: boolean;
@@ -224,7 +224,7 @@ interface QuestionCardProps {
     onUpdate: (index: number, field: string, value: string) => Promise<void>;
 }
 
-function QuestionCard({
+export function QuestionCard({
     item,
     index,
     isSelected,
@@ -322,7 +322,7 @@ function QuestionCard({
                                 label={item.filename.length > 20 ? `${item.filename.slice(0, 17)}...` : item.filename}
                                 size="small" 
                                 variant="outlined"
-                                color="default"
+                                color="primary"
                                 sx={{ fontSize: '0.65rem', height: '20px', maxWidth: '150px' }}
                             />
                         </Tooltip>
@@ -334,18 +334,6 @@ function QuestionCard({
                             variant="outlined"
                             sx={{ fontSize: '0.65rem', height: '20px' }}
                         />
-                    )}
-                    {existsInQuestionBank && (
-                        <Tooltip title="Already in question bank">
-                            <Chip 
-                                icon={<CheckCircleIcon />}
-                                label="Exists" 
-                                size="small" 
-                                color="success"
-                                variant="outlined"
-                                sx={{ fontSize: '0.65rem', height: '20px' }}
-                            />
-                        </Tooltip>
                     )}
                     {item.hasAudio && (
                         <Tooltip title="Has audio">
@@ -814,4 +802,5 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
     );
 };
 
+export { QuestionCard };
 export default QuestionsReview2;

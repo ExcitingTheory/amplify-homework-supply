@@ -682,7 +682,7 @@ export default function Editor() {
 export function Workbook() {
   const theme = useTheme();
   const [openTab, setOpenTab] = React.useState(false);
-  const [tabValue, setTabValue] = React.useState(5);
+  const [tabValue, setTabValue] = React.useState(0);
   const drawerRef = React.useRef(null);
   const [actualDrawerWidth, setActualDrawerWidth] = React.useState(drawerWidth);
   const [currentDrawerWidth, setCurrentDrawerWidth] = React.useState(drawerWidth);
