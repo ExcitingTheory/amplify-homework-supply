@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Section, Grade, Assignment, Unit } from "../../src/models";
+import { DataStore } from 'aws-amplify/datastore';
 import { generateClient } from 'aws-amplify/api';
 import { fetchUserAttributes, getCurrentUser } from "aws-amplify/auth";
 import { createSectionGroup } from '../../src/graphql/mutations';

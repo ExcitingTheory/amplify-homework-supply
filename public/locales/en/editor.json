@@ -1,30 +1,395 @@
 {
   "toolbar": {
-    "bold": "Bold",
-    "italic": "Italic",
-    "underline": "Underline",
-    "strikethrough": "Strikethrough",
-    "heading": "Heading",
-    "paragraph": "Paragraph",
-    "bullet_list": "Bullet List",
-    "numbered_list": "Numbered List",
-    "align_left": "Align Left",
-    "align_center": "Align Center",
-    "align_right": "Align Right",
-    "insert_link": "Insert Link",
-    "insert_image": "Insert Image",
-    "insert_table": "Insert Table",
-    "insert_code": "Insert Code Block"
+    "bold": {
+      "value": "Bold",
+      "context": "This text appears as a button label in the rich text editor toolbar when instructors are creating or editing educational content. Users see this when hovering over or interacting with the bold formatting button in the ToolBarPlugin interface.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "The ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with text formatting controls including bold, italic, underline, and other rich text options. Instructors use this toolbar when authoring educational content and units."
+      },
+      "usage": "Button label for applying bold text formatting in the rich text editor toolbar",
+      "impact": "Medium - Essential for content creation as bold formatting is commonly used to emphasize key vocabulary words and important concepts in Japanese language learning materials",
+      "userType": "instructors",
+      "tone": "casual",
+      "alternativeTerms": [
+        "Strong",
+        "Heavy",
+        "Thick",
+        "Emphasized"
+      ]
+    },
+    "italic": {
+      "value": "Italic",
+      "context": "This text appears as a tooltip or label for the italic formatting button in the rich text editor toolbar. Users see this when hovering over or accessing the italic text formatting control while creating or editing educational content.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with text formatting controls including bold, italic, underline, and other rich text options. This toolbar appears whenever users are editing educational content in units or lessons.",
+        "usage": "Button tooltip or accessibility label for the italic text formatting control in the editor toolbar.",
+        "impact": "Medium - Essential for text formatting functionality, helping users understand and access italic styling options for educational content creation.",
+        "userType": "instructors",
+        "tone": "technical",
+        "alternativeTerms": [
+          "Italics",
+          "Slanted",
+          "Emphasis",
+          "Oblique"
+        ]
+      }
+    },
+    "underline": {
+      "value": "Underline",
+      "context": "This text appears as a formatting option in the rich text editor toolbar when instructors are creating educational content or students are taking notes. Users see this button alongside other text formatting controls like bold and italic.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "The ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with controls for text formatting including underline, strikethrough, and other formatting options. It appears whenever users are actively editing content in the platform's rich text editor.",
+        "usage": "Button in the editor toolbar that applies underline formatting to selected text when clicked.",
+        "impact": "Important because underline is a standard text formatting tool that instructors need for emphasizing key concepts and students need for highlighting important information.",
+        "userType": "all",
+        "tone": "technical",
+        "alternativeTerms": [
+          "Underscore",
+          "Underscored text",
+          "Underlined"
+        ]
+      }
+    },
+    "strikethrough": {
+      "value": "Strikethrough",
+      "context": "This text appears as a tooltip or button label in the rich text editor toolbar when instructors are creating or editing learning content. Users see this option alongside other text formatting controls like bold, italic, and underline to apply strikethrough formatting to selected text.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with text formatting controls including strikethrough, used when instructors are authoring educational content. The toolbar appears above the editor and contains various formatting options for creating rich learning materials."
+      },
+      "usage": "Button or menu item that users click to apply strikethrough formatting to selected text in the editor",
+      "impact": "Medium - While not critical for basic functionality, strikethrough formatting helps instructors create engaging content by showing corrections, edits, or crossed-out information in educational materials",
+      "userType": "instructors",
+      "tone": "technical",
+      "alternativeTerms": [
+        "Strike through",
+        "Cross out",
+        "Line through",
+        "Crossed text"
+      ]
+    },
+    "heading": {
+      "value": "Heading",
+      "context": "This text appears as a button label in the rich text editor toolbar, allowing instructors to format selected text or create new heading blocks while authoring educational content. Users see this option when they want to create structured headings (H1, H2, H3, etc.) to organize their lesson content.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with controls for text formatting, block types including headings, alignment, links, and custom educational nodes. This toolbar appears when instructors are creating or editing educational units and lessons."
+      },
+      "usage": "Toolbar button label that users click to apply heading formatting to text blocks.",
+      "impact": "High - Essential for content structure and organization, enabling instructors to create well-formatted educational materials with proper hierarchy.",
+      "userType": "instructors",
+      "tone": "technical",
+      "alternativeTerms": [
+        "Title",
+        "Header",
+        "Section Title",
+        "Chapter Head"
+      ]
+    },
+    "paragraph": {
+      "value": "Paragraph",
+      "context": "This text appears as a block type option in the rich text editor's toolbar when instructors are creating educational content. Users see this when selecting what type of content block to insert, specifically for regular paragraph text formatting.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with controls for text formatting, block types, alignment, and custom educational nodes. It appears when instructors are authoring lesson content and need to format text or insert different content blocks.",
+        "usage": "Block type selector option in the editor toolbar for creating paragraph content",
+        "impact": "Medium - Essential for content creation as it allows instructors to structure text content properly in their lessons",
+        "userType": "instructors",
+        "tone": "technical",
+        "alternativeTerms": [
+          "Text block",
+          "Regular text",
+          "Body text",
+          "Standard text"
+        ]
+      }
+    },
+    "bullet_list": {
+      "value": "Bullet List",
+      "context": "This text appears as a formatting option in the rich text editor toolbar when instructors are creating or editing learning content. Users see this button when they want to create unordered lists with bullet points in their educational materials.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with controls for text formatting, block types including lists, alignment, and custom educational nodes. This toolbar appears whenever users are authoring content in the editor.",
+        "usage": "Toolbar button that creates or converts text to an unordered list format with bullet points",
+        "impact": "Important - Essential formatting tool that enables instructors to structure educational content clearly with organized lists for better readability",
+        "userType": "instructors",
+        "tone": "casual",
+        "alternativeTerms": [
+          "Unordered List",
+          "Bulleted List",
+          "Item List"
+        ]
+      }
+    },
+    "numbered_list": {
+      "value": "Numbered List",
+      "context": "This text appears as a toolbar button in the rich text editor when instructors are creating or editing educational content. Users see this option in the formatting toolbar to convert selected text or create new numbered lists for structured content like steps, procedures, or ordered information.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with controls for text formatting, block types including lists, alignment, links, and custom educational nodes. It appears whenever users are authoring content in the editor.",
+        "usage": "Toolbar button that creates or formats content as a numbered list when clicked.",
+        "impact": "Important - Essential for content structure and organization, allowing instructors to create clear, sequenced information that enhances learning comprehension.",
+        "userType": "instructors",
+        "tone": "casual",
+        "alternativeTerms": [
+          "Ordered List",
+          "Sequential List",
+          "Enumerated List"
+        ]
+      }
+    },
+    "align_left": {
+      "value": "Align Left",
+      "context": "This text appears as a tooltip or button label in the rich text editor's formatting toolbar. Users see it when hovering over or interacting with the left text alignment control while creating or editing educational content.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with controls for text formatting, block types, and alignment options. Instructors use this toolbar when creating educational content and lesson materials.",
+        "usage": "Button or tooltip in the editor toolbar for left-aligning text content."
+      },
+      "impact": "Medium - This formatting control helps instructors create properly aligned content, though not critical for basic functionality.",
+      "userType": "instructors",
+      "tone": "technical",
+      "alternativeTerms": [
+        "Left Align",
+        "Align to Left",
+        "Left Alignment"
+      ]
+    },
+    "align_center": {
+      "value": "Align Center",
+      "context": "This text appears as a toolbar button in the rich text editor when instructors are creating or editing educational content. Users see this option in the formatting toolbar alongside other alignment controls to center-align text, images, or other content blocks within their learning materials.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with formatting controls including text alignment options. This toolbar appears when instructors are authoring educational content and includes alignment controls among other formatting tools."
+      },
+      "usage": "Toolbar button that centers content alignment when clicked by content creators.",
+      "impact": "Medium - Essential for content formatting and visual presentation, helping instructors create well-structured learning materials.",
+      "userType": "instructors",
+      "tone": "technical",
+      "alternativeTerms": [
+        "Center Align",
+        "Center Text",
+        "Center Alignment",
+        "Middle Align"
+      ]
+    },
+    "align_right": {
+      "value": "Align Right",
+      "context": "This text appears as a toolbar button in the rich text editor when instructors are creating or editing educational content. Users see this option in the formatting toolbar alongside other alignment controls to position text and content elements.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with formatting controls including text alignment options. This toolbar appears when instructors are authoring educational content and need to format text layout."
+      },
+      "usage": "Toolbar button that users click to right-align selected text or content blocks.",
+      "impact": "Medium - Essential formatting tool that helps instructors create properly aligned educational materials and maintain consistent content presentation.",
+      "userType": "instructors",
+      "tone": "technical",
+      "alternativeTerms": [
+        "Right Align",
+        "Align to Right",
+        "Right Justify"
+      ]
+    },
+    "insert_link": {
+      "value": "Insert Link",
+      "context": "This text appears as a toolbar button in the rich text editor when instructors are creating or editing educational content. Users see this button in the formatting toolbar alongside other content insertion options like images, videos, and quizzes.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with controls for text formatting, block types, alignment, links and embeds, and custom educational nodes. It serves as the main formatting interface for content creation.",
+        "usage": "Toolbar button that opens link insertion functionality when clicked",
+        "impact": "High - Essential for instructors to add hyperlinks to external resources, references, and supplementary materials in their lessons",
+        "userType": "instructors",
+        "tone": "technical",
+        "alternativeTerms": [
+          "Add Link",
+          "Create Link",
+          "Embed Link"
+        ]
+      }
+    },
+    "insert_image": {
+      "value": "Insert Image",
+      "context": "This text appears as a button or menu option in the rich text editor toolbar when instructors are creating or editing educational content. Users see this when they want to add images to their lessons, exercises, or other learning materials.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "The ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with various formatting controls including media insertion capabilities. It handles image insertion along with other rich content elements like links, embeds, and custom educational nodes.",
+        "usage": "Button in the editor toolbar that triggers image upload or insertion functionality.",
+        "impact": "High - Essential for content creation as images are crucial for effective language learning materials and visual instruction.",
+        "userType": "instructors",
+        "tone": "casual",
+        "alternativeTerms": [
+          "Add Image",
+          "Upload Image",
+          "Import Image",
+          "Embed Image"
+        ]
+      }
+    },
+    "insert_table": {
+      "value": "Insert Table",
+      "context": "This text appears as a button or menu item in the rich text editor toolbar when instructors are creating educational content. Users see this option when they want to add a structured table to organize information, vocabulary lists, or comparison data within their lesson units.",
+      "component": {
+        "location": "src/components/Editor3/plugins/TablePlugin.js",
+        "description": "TablePlugin provides table creation and management functionality with configurable rows and columns. It offers table insertion capabilities and modal UI for creating structured data layouts within educational content."
+      },
+      "usage": "Toolbar button that opens a table creation modal when clicked",
+      "impact": "Important - enables instructors to create structured layouts for vocabulary tables, comparison charts, and organized data presentation which enhances learning materials",
+      "userType": "instructors",
+      "tone": "polite-formal",
+      "alternativeTerms": [
+        "Add Table",
+        "Create Table",
+        "Table Tool",
+        "Insert Grid"
+      ]
+    },
+    "insert_code": {
+      "value": "Insert Code Block",
+      "context": "This text appears as a toolbar button in the rich text editor when instructors are creating or editing educational content. Users see this option in the formatting toolbar alongside other content insertion tools like images, tables, and quizzes.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with controls for text formatting, block types, alignment, links, embeds, and custom educational nodes. It offers formatting controls including headings, lists, quotes, and code blocks for rich content creation.",
+        "usage": "Toolbar button that instructors click to insert a formatted code block into their lesson content.",
+        "impact": "Important - Enables instructors to include programming examples, technical instructions, or formatted code snippets in their Japanese language lessons.",
+        "userType": "instructors",
+        "tone": "technical",
+        "alternativeTerms": [
+          "Add Code Block",
+          "Insert Code",
+          "Code Block",
+          "Add Code Section"
+        ]
+      }
+    }
   },
   "blocks": {
-    "answer": "Answer Block",
-    "quiz": "Quiz Block",
-    "custom_answer": "Custom Answer",
-    "meaning_association": "Meaning Association"
+    "answer": {
+      "value": "Answer Block",
+      "context": "This label appears in the editor toolbar when instructors are creating learning content and need to insert an interactive answer block. Students will see these answer blocks as input fields where they provide responses to vocabulary exercises or questions during their learning activities.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "The ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with controls for custom educational nodes including answer blocks. It allows instructors to insert various interactive elements including answer fields for student responses.",
+        "alternativeLocation": "src/components/Editor3/plugins/AnswerPlugin.js"
+      },
+      "usage": "Button or menu item label in the editor toolbar for inserting answer input fields",
+      "impact": "High - Essential for instructors to create interactive exercises where students input translations or vocabulary responses",
+      "userType": "instructors",
+      "tone": "technical",
+      "alternativeTerms": [
+        "Response Field",
+        "Input Block",
+        "Answer Field",
+        "Student Response"
+      ]
+    },
+    "quiz": {
+      "value": "Quiz Block",
+      "context": "This text appears in the editor toolbar when instructors are creating educational content and can select different block types to add to their lessons. It specifically labels the quiz block option that allows educators to insert interactive assessment components into their learning units.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "The ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with controls for custom educational nodes including quizzes, answers, and word blocks. Instructors use this toolbar to insert different types of interactive content blocks into their lessons.",
+        "alternativeLocation": "src/components/Editor3/plugins/QuizPlugin.js"
+      },
+      "usage": "Button or dropdown menu item label in the editor toolbar for inserting quiz assessments.",
+      "impact": "High - This label is essential for instructors to identify and create quiz assessments, which are core interactive elements for student learning and evaluation.",
+      "userType": "instructors",
+      "tone": "technical",
+      "alternativeTerms": [
+        "Quiz Component",
+        "Assessment Block",
+        "Quiz Element",
+        "Quiz Section"
+      ]
+    },
+    "custom_answer": {
+      "value": "Custom Answer",
+      "context": "This text appears as a block type option in the rich text editor when instructors are creating educational content. It's displayed in the toolbar or block insertion menu when educators want to create flexible question-answer exercises with custom prompts and validation.",
+      "component": {
+        "location": "src/components/Editor3/plugins/CustomAnswerPlugin.js",
+        "description": "Creates custom question-answer exercises that allow educators to create flexible Q&A exercises with custom questions, validation rules, and prompting strategies. This plugin enables instructors to build interactive learning activities where students provide answers to custom prompts."
+      },
+      "usage": "Block type label or button text in the editor toolbar for inserting custom answer exercises",
+      "impact": "High - Essential for instructors to identify and create personalized interactive assessment content",
+      "userType": "instructors",
+      "tone": "technical",
+      "alternativeTerms": [
+        "Custom Response",
+        "Free Form Answer",
+        "Open Answer",
+        "Custom Question"
+      ]
+    },
+    "meaning_association": {
+      "value": "Meaning Association",
+      "context": "This text appears as a block type option in the editor toolbar and block suggestion menus when instructors are creating educational content. Users see this when selecting what type of interactive exercise to add to their lesson units.",
+      "component": {
+        "location": "src/components/Editor3/plugins/MeaningAssociationPlugin.js",
+        "description": "Creates vocabulary matching exercises where learners match words with their definitions or meanings. Supports Easy, Hard, and Learn modes for different difficulty levels."
+      },
+      "usage": "Button or menu item label that instructors click to insert a vocabulary matching exercise block",
+      "impact": "High - This is a core educational content type that enables vocabulary learning through interactive matching exercises",
+      "userType": "instructors",
+      "tone": "technical",
+      "alternativeTerms": [
+        "Word Matching",
+        "Vocabulary Matching",
+        "Definition Pairing",
+        "Semantic Matching"
+      ]
+    }
   },
   "placeholders": {
-    "type_here": "Type here...",
-    "enter_text": "Enter text",
-    "search_words": "Search words..."
+    "type_here": {
+      "value": "Type here...",
+      "context": "This placeholder text appears in empty input fields throughout the rich text editor interface, guiding users to begin typing their content. It displays in text areas, answer fields, and other editable input components when they are empty and waiting for user input.",
+      "component": {
+        "location": "src/components/Editor3/plugins/ToolBarPlugin.js",
+        "description": "The ToolBarPlugin provides a comprehensive toolbar for the Lexical editor with various formatting controls and educational content creation tools. Users interact with this toolbar when creating or editing learning materials in the rich text editor.",
+        "description_secondary": "Also used across various input fields in CustomAnswerPlugin, AnswerPlugin, and other editor plugins that require text input from users."
+      },
+      "usage": "Placeholder text displayed in empty input fields and text areas to prompt user input",
+      "impact": "Medium - Provides clear visual guidance for users to understand where they can input text, improving the overall user experience",
+      "userType": "all",
+      "tone": "casual",
+      "alternativeTerms": [
+        "Enter text",
+        "Start typing",
+        "Write here",
+        "Input text"
+      ]
+    },
+    "enter_text": {
+      "value": "Enter text",
+      "context": "UI text for placeholders.enter_text in editor namespace. [NEEDS_CONTEXT: Describe where this appears in the UI and when users see it]",
+      "component": {
+        "location": "[NEEDS_LOCATION: Specify component file path]",
+        "description": "[NEEDS_DESCRIPTION: Describe component functionality and user interaction]"
+      },
+      "usage": "[NEEDS_USAGE: Describe specific UI element type and user action]",
+      "impact": "[NEEDS_IMPACT: Specify importance level and explain why this matters to users]",
+      "userType": "all",
+      "tone": "polite-formal",
+      "alternativeTerms": []
+    },
+    "search_words": {
+      "value": "Search words...",
+      "context": "This placeholder text appears in a search input field within the editor interface, helping users locate specific vocabulary words or content within the dictionary or word database. Users see this when they interact with word search functionality during content creation or editing.",
+      "component": {
+        "location": "src/components/Editor3/plugins/WordBlockPlugin.js",
+        "description": "WordBlockPlugin displays vocabulary word information in interactive cards and provides word search functionality. It creates searchable word blocks that display a vocabulary word's phrase, pronunciation, and definition from the dictionary context.",
+        "usage": "Input field placeholder text that appears when users click to search for vocabulary words"
+      },
+      "impact": "Important - this guides users in understanding the search functionality and helps them efficiently find vocabulary words needed for content creation",
+      "userType": "instructors",
+      "tone": "casual",
+      "alternativeTerms": [
+        "Find words...",
+        "Look up words...",
+        "Enter word search..."
+      ]
+    }
   }
 }

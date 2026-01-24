@@ -1,0 +1,18 @@
+{
+  "generic": "エラーが発生しました",
+  "network": "ネットワークエラーです。接続を確認してください。",
+  "auth": {
+    "invalid_credentials": "ユーザー名またはパスワードが無効です",
+    "session_expired": "セッションが期限切れです。再度サインインしてください。"
+  },
+  "validation": {
+    "required": "この項目は必須です",
+    "invalid_email": "無効なメールアドレスです",
+    "password_mismatch": "パスワードが一致しません"
+  },
+  "file": {
+    "upload_failed": "ファイルのアップロードに失敗しました",
+    "invalid_type": "無効なファイル形式です",
+    "too_large": "ファイルサイズが大きすぎます"
+  }
+}

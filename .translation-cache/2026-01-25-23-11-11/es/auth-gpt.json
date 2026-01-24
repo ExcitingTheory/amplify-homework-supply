@@ -1,0 +1,11 @@
+{
+  "sign_in": "Iniciar sesión",
+  "sign_out": "Cerrar sesión",
+  "sign_up": "Registrarse",
+  "username": "Nombre de usuario",
+  "password": "Contraseña",
+  "email": "Correo electrónico",
+  "forgot_password": "¿Olvidó su contraseña?",
+  "reset_password": "Restablecer contraseña",
+  "confirm_password": "Confirmar contraseña"
+}

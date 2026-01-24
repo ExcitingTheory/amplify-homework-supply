@@ -1,0 +1,30 @@
+{
+  "toolbar": {
+    "bold": "Fett",
+    "italic": "Kursiv",
+    "underline": "Unterstreichen",
+    "strikethrough": "Durchgestrichen",
+    "heading": "Überschrift",
+    "paragraph": "Absatz",
+    "bullet_list": "Aufzählungsliste",
+    "numbered_list": "Nummerierte Liste",
+    "align_left": "Linksbündig",
+    "align_center": "Zentriert",
+    "align_right": "Rechtsbündig",
+    "insert_link": "Link einfügen",
+    "insert_image": "Bild einfügen",
+    "insert_table": "Tabelle einfügen",
+    "insert_code": "Codeblock einfügen"
+  },
+  "blocks": {
+    "answer": "Antwortblock",
+    "quiz": "Quizblock",
+    "custom_answer": "Benutzerdefinierte Antwort",
+    "meaning_association": "Bedeutungszuordnung"
+  },
+  "placeholders": {
+    "type_here": "Hier eingeben...",
+    "enter_text": "Text eingeben",
+    "search_words": "Wörter suchen..."
+  }
+}

@@ -22,6 +22,7 @@ import CircleIcon from '@mui/icons-material/Circle';
 import PersonIcon from '@mui/icons-material/Person';
 import SchoolIcon from '@mui/icons-material/School';
 import CodeIcon from '@mui/icons-material/Code';
+import { useTheme } from '@mui/material/styles';
 import { getOnboardingEmitter, UserPersona } from '../code/onboarding-events';
 import { ONBOARDING_TASKS, getTasksForPersona, getTasksByCategory } from '../code/onboarding-tasks';
 
@@ -56,6 +57,7 @@ const PERSONAS: PersonaOption[] = [
 ];
 
 const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
+  const theme = useTheme();
   const [selectedPersona, setSelectedPersona] = useState<UserPersona | null>(null);
   const [tabValue, setTabValue] = useState(0);
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
@@ -64,6 +66,8 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   const emitter = getOnboardingEmitter();
 
   useEffect(() => {
+    console.log('[OnboardingPanel] Panel mounted - select a persona to begin');
+    
     // Load initial state
     const persona = emitter.getPersona();
     if (persona) {
@@ -123,68 +127,74 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     }
   };
 
-  if (!selectedPersona) {
+  const renderContent = () => {
+    if (!selectedPersona) {
+      return renderPersonaSelection();
+    }
+    return renderTaskView();
+  };
+
+  const renderPersonaSelection = () => (
+    <Paper className="onboarding-panel" sx={{ bgcolor: 'background.paper' }}>
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'text.primary' }}>
+          Welcome to Homework Supply
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
+          Select your role to see personalized onboarding tasks
+        </Typography>
+
+        <Stack spacing={2}>
+          {PERSONAS.map((persona) => (
+            <Card
+              key={persona.id}
+              sx={{
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                borderLeft: `4px solid ${persona.color}`,
+                '&:hover': {
+                  boxShadow: 3,
+                },
+              }}
+              onClick={() => handlePersonaSelect(persona.id)}
+            >
+              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ color: persona.color, fontSize: 32 }}>{persona.icon}</Box>
+                <Box>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    {persona.label}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                    Click to start onboarding
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          ))}
+        </Stack>
+
+        <Divider sx={{ my: 3 }} />
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          You can switch roles anytime by selecting a different persona below.
+        </Typography>
+      </Box>
+    </Paper>
+  );
+
+  const renderTaskView = () => {
+    const persona = PERSONAS.find((p) => p.id === selectedPersona)!;
+    const tasks = getTasksForPersona(selectedPersona);
+    const tasksByCategory = getTasksByCategory(selectedPersona);
+    const categories = Object.keys(tasksByCategory);
+
     return (
-      <Paper className="onboarding-panel">
-        <Box sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-            Welcome to Homework Supply
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-            Select your role to see personalized onboarding tasks
-          </Typography>
-
-          <Stack spacing={2}>
-            {PERSONAS.map((persona) => (
-              <Card
-                key={persona.id}
-                sx={{
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    boxShadow: 3,
-                    transform: 'translateY(-2px)',
-                  },
-                }}
-                onClick={() => handlePersonaSelect(persona.id)}
-              >
-                <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box sx={{ color: persona.color, fontSize: 32 }}>{persona.icon}</Box>
-                  <Box>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                      {persona.label}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      Click to start onboarding
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
-          </Stack>
-
-          <Divider sx={{ my: 3 }} />
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            You can switch roles anytime by selecting a different persona below.
-          </Typography>
-        </Box>
-      </Paper>
-    );
-  }
-
-  const persona = PERSONAS.find((p) => p.id === selectedPersona)!;
-  const tasks = getTasksForPersona(selectedPersona);
-  const tasksByCategory = getTasksByCategory(selectedPersona);
-  const categories = Object.keys(tasksByCategory);
-
-  return (
-    <Paper className="onboarding-panel">
+    <Paper className="onboarding-panel" sx={{ bgcolor: 'background.paper' }}>
       <Box sx={{ p: 2 }}>
         {/* Header */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <Box sx={{ color: persona.color, fontSize: 24 }}>{persona.icon}</Box>
           <Box sx={{ flex: 1 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
               {persona.label} Onboarding
             </Typography>
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -326,6 +336,19 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
         </Stack>
       </Box>
     </Paper>
+    );
+  };
+
+  return (
+    <Box sx={{ 
+      height: '100%',
+      bgcolor: '#292929', // Storybook dark theme background
+      border: '1px solid #3d3d3d', // Storybook border color
+      borderRadius: 1,
+      overflow: 'hidden',
+    }}>
+      {renderContent()}
+    </Box>
   );
 };
 

@@ -526,7 +526,7 @@ export const EditorWithContent = {
         id: 'editor-with-content-id',
         name: 'Sample Unit with Content',
         description: 'This unit has some sample content',
-        data: sampleEditorState,
+        data: JSON.stringify(sampleEditorState),
         _version: 1,
         owner: 'mock-user-sub',
       });
@@ -2002,7 +2002,7 @@ export const KitchenSink = {
         id: KITCHEN_SINK_ID,
         name: 'Kitchen Sink - All Editor Blocks',
         description: 'Comprehensive example showing all available editor block types',
-        data: kitchenSinkEditorState,
+        data: JSON.stringify(kitchenSinkEditorState),
         _version: 1,
         wordIDs: ['word-1', 'word-2', 'word-3', 'word-4', 'word-5', 'word-6'],
         fileIDs: ['audio-1', 'audio-2', 'audio-3'],

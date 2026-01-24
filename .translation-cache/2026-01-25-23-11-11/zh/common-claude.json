@@ -1,0 +1,69 @@
+{
+  "app": {
+    "name": "作业补给站",
+    "tagline": "日语学习平台"
+  },
+  "actions": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "submit": "提交",
+    "close": "关闭",
+    "create": "创建",
+    "upload": "上传",
+    "download": "下载",
+    "share": "分享",
+    "copy": "复制",
+    "send": "发送",
+    "add": "添加",
+    "remove": "移除",
+    "update": "更新",
+    "confirm": "确认",
+    "clear": "清空",
+    "reset": "重置",
+    "retry": "重试",
+    "back": "返回",
+    "next": "下一步",
+    "finish": "完成",
+    "continue": "继续"
+  },
+  "navigation": {
+    "home": "首页",
+    "units": "单元",
+    "sections": "章节",
+    "grades": "成绩",
+    "profile": "个人资料",
+    "workbook": "练习册"
+  },
+  "status": {
+    "loading": "加载中...",
+    "saving": "保存中...",
+    "success": "成功",
+    "error": "错误",
+    "processing": "处理中...",
+    "uploading": "上传中...",
+    "downloading": "下载中...",
+    "complete": "已完成",
+    "incomplete": "未完成",
+    "pending": "待处理"
+  },
+  "time": {
+    "created": "创建时间",
+    "updated": "更新时间",
+    "due": "截止时间",
+    "completed": "完成时间"
+  },
+  "common": {
+    "yes": "是",
+    "no": "否",
+    "ok": "确定",
+    "search": "搜索",
+    "filter": "筛选",
+    "sort": "排序",
+    "view": "查看",
+    "settings": "设置",
+    "help": "帮助",
+    "about": "关于"
+  }
+}

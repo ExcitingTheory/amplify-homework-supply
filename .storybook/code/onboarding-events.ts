@@ -82,6 +82,7 @@ class OnboardingEventEmitter {
       persona,
       timestamp: Date.now(),
     });
+    this.persistToLocalStorage();
   }
 
   /**

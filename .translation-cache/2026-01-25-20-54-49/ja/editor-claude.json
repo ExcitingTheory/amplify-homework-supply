@@ -1,0 +1,30 @@
+{
+  "toolbar": {
+    "bold": "太字",
+    "italic": "斜体",
+    "underline": "下線",
+    "strikethrough": "取り消し線",
+    "heading": "見出し",
+    "paragraph": "段落",
+    "bullet_list": "箇条書き",
+    "numbered_list": "番号付きリスト",
+    "align_left": "左揃え",
+    "align_center": "中央揃え",
+    "align_right": "右揃え",
+    "insert_link": "リンクを挿入",
+    "insert_image": "画像を挿入",
+    "insert_table": "表を挿入",
+    "insert_code": "コードブロックを挿入"
+  },
+  "blocks": {
+    "answer": "回答ブロック",
+    "quiz": "クイズブロック",
+    "custom_answer": "カスタム回答",
+    "meaning_association": "意味関連付け"
+  },
+  "placeholders": {
+    "type_here": "ここに入力...",
+    "enter_text": "テキストを入力",
+    "search_words": "単語を検索..."
+  }
+}

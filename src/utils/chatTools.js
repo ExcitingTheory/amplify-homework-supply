@@ -305,7 +305,7 @@ export const toolDefinitions = [
     type: 'function',
     function: {
       name: 'generate_unit_content',
-      description: 'Generate markdown content suggestions that can be inserted into the current unit. Creates educational content like explanations, examples, practice sections, etc.',
+      description: 'Generate markdown content suggestions that can be inserted into the current unit. Creates educational content like explanations, examples, practice sections, etc. Returns preview for user confirmation first.',
       parameters: {
         type: 'object',
         properties: {
@@ -326,6 +326,11 @@ export const toolDefinitions = [
             type: 'boolean',
             description: 'Whether to include markdown formatting in the response',
             default: true
+          },
+          confirmed: {
+            type: 'boolean',
+            description: 'Set to true when user has confirmed the parameters',
+            default: false
           }
         },
         required: ['contentType', 'topic']
@@ -874,18 +879,17 @@ export async function executeDeleteAssignment({ assignmentId }) {
   }
 }
 
-export async function executeGenerateUnitContent({ contentType, topic, instructions, includeMarkdown = true }) {
+export async function executeGenerateUnitContent({ contentType, topic, instructions, includeMarkdown = true, confirmed = false }) {
   try {
-    // This tool returns a structured response that guides GPT-4 to generate content
-    // The actual content generation happens via GPT-4's response, not here
-    
-    let template = '';
-    let guidance = '';
-    
-    switch (contentType) {
-      case 'explanation':
-        guidance = `Generate a clear, educational explanation about "${topic}". ${instructions || 'Include relevant details and context.'}`;
-        template = includeMarkdown ? `
+    // If not confirmed, return preview data for user confirmation
+    if (!confirmed) {
+      let template = '';
+      let guidance = '';
+      
+      switch (contentType) {
+        case 'explanation':
+          guidance = `Generate a clear, educational explanation about "${topic}". ${instructions || 'Include relevant details and context.'}`;
+          template = includeMarkdown ? `
 ## ${topic}
 
 [Your explanation here]
@@ -895,11 +899,11 @@ export async function executeGenerateUnitContent({ contentType, topic, instructi
 - Point 2
 - Point 3
 ` : `${topic}\n\n[Your explanation here]\n\nKey Points:\n- Point 1\n- Point 2`;
-        break;
-        
-      case 'example':
-        guidance = `Generate practical examples demonstrating "${topic}". ${instructions || 'Include 2-3 clear examples with explanations.'}`;
-        template = includeMarkdown ? `
+          break;
+          
+        case 'example':
+          guidance = `Generate practical examples demonstrating "${topic}". ${instructions || 'Include 2-3 clear examples with explanations.'}`;
+          template = includeMarkdown ? `
 ### Examples: ${topic}
 
 **Example 1:**
@@ -910,11 +914,11 @@ export async function executeGenerateUnitContent({ contentType, topic, instructi
 [Example text]
 - Explanation: [Details]
 ` : `Examples: ${topic}\n\nExample 1: [text]\nExplanation: [details]`;
-        break;
-        
-      case 'practice':
-        guidance = `Generate practice exercises for "${topic}". ${instructions || 'Include 3-5 practice problems or activities.'}`;
-        template = includeMarkdown ? `
+          break;
+          
+        case 'practice':
+          guidance = `Generate practice exercises for "${topic}". ${instructions || 'Include 3-5 practice problems or activities.'}`;
+          template = includeMarkdown ? `
 ### Practice: ${topic}
 
 1. [Exercise 1]
@@ -926,11 +930,11 @@ export async function executeGenerateUnitContent({ contentType, topic, instructi
 3. [Exercise 3]
    - Answer: [Answer]
 ` : `Practice: ${topic}\n\n1. [Exercise 1]\n2. [Exercise 2]`;
-        break;
-        
-      case 'quiz':
-        guidance = `Generate quiz questions about "${topic}". ${instructions || 'Create 4-5 multiple choice or short answer questions.'}`;
-        template = includeMarkdown ? `
+          break;
+          
+        case 'quiz':
+          guidance = `Generate quiz questions about "${topic}". ${instructions || 'Create 4-5 multiple choice or short answer questions.'}`;
+          template = includeMarkdown ? `
 ### Quiz: ${topic}
 
 **Question 1:** [Question text]
@@ -943,11 +947,11 @@ export async function executeGenerateUnitContent({ contentType, topic, instructi
 **Question 2:** [Question text]
 - **Answer:** [Answer]
 ` : `Quiz: ${topic}\n\nQ1: [Question]\nAnswer: [Answer]`;
-        break;
-        
-      case 'summary':
-        guidance = `Generate a concise summary of "${topic}". ${instructions || 'Highlight the main points in a clear, organized way.'}`;
-        template = includeMarkdown ? `
+          break;
+          
+        case 'summary':
+          guidance = `Generate a concise summary of "${topic}". ${instructions || 'Highlight the main points in a clear, organized way.'}`;
+          template = includeMarkdown ? `
 ## Summary: ${topic}
 
 [Summary paragraph]
@@ -957,11 +961,11 @@ export async function executeGenerateUnitContent({ contentType, topic, instructi
 2. [Point 2]
 3. [Point 3]
 ` : `Summary: ${topic}\n\n[Summary]\n\nMain points:\n1. [Point 1]`;
-        break;
-        
-      case 'vocabulary_section':
-        guidance = `Generate a vocabulary section for "${topic}". ${instructions || 'Include 5-10 relevant terms with definitions.'}`;
-        template = includeMarkdown ? `
+          break;
+          
+        case 'vocabulary_section':
+          guidance = `Generate a vocabulary section for "${topic}". ${instructions || 'Include 5-10 relevant terms with definitions.'}`;
+          template = includeMarkdown ? `
 ### Vocabulary: ${topic}
 
 | Term | Reading | Meaning |
@@ -969,26 +973,42 @@ export async function executeGenerateUnitContent({ contentType, topic, instructi
 | [Term] | [Reading] | [Definition] |
 | [Term] | [Reading] | [Definition] |
 ` : `Vocabulary: ${topic}\n\n[Term] - [Reading] - [Definition]`;
-        break;
-        
-      case 'custom':
-        guidance = `Generate custom content about "${topic}". ${instructions || 'Create appropriate educational content.'}`;
-        template = includeMarkdown ? `## ${topic}\n\n[Your content here]` : `${topic}\n\n[Content]`;
-        break;
-        
-      default:
-        guidance = `Generate content about "${topic}". ${instructions || ''}`;
-        template = includeMarkdown ? `## ${topic}\n\n[Content]` : topic;
+          break;
+          
+        case 'custom':
+          guidance = `Generate custom content about "${topic}". ${instructions || 'Create appropriate educational content.'}`;
+          template = includeMarkdown ? `## ${topic}\n\n[Your content here]` : `${topic}\n\n[Content]`;
+          break;
+          
+        default:
+          guidance = `Generate content about "${topic}". ${instructions || ''}`;
+          template = includeMarkdown ? `## ${topic}\n\n[Content]` : topic;
+      }
+      
+      return {
+        success: true,
+        requiresConfirmation: true,
+        contentType,
+        topic,
+        instructions,
+        guidance,
+        template,
+        includeMarkdown,
+        message: `Ready to generate ${contentType} content about "${topic}". Confirm to proceed.`
+      };
     }
     
+    // If confirmed, this would trigger actual AI content generation
+    // The AI will see this success response and generate the actual markdown content
     return {
       success: true,
+      confirmed: true,
       contentType,
       topic,
-      guidance,
-      template,
+      instructions,
       includeMarkdown,
-      message: `Ready to generate ${contentType} content about "${topic}". Use the template as a guide.`
+      message: `Generating ${contentType} content about "${topic}"...`,
+      needsGeneration: true, // Signal to AI to generate actual content
     };
   } catch (error) {
     console.error('Generate unit content error:', error);

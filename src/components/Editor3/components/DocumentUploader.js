@@ -20,7 +20,8 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { uploadData } from 'aws-amplify/storage';
 import { generateClient } from 'aws-amplify/api';
 import { getAmplifyClient } from '../../../utils/amplifyClient';
-import type { Schema } from '../../../../amplify/data/resource';
+// Note: Type import commented out for .js file
+// import type { Schema } from '../../../../amplify/data/resource';
 import UnitContext from '../../../context/unitContext';
 import FilesContext from '../../../context/fileContext';
 

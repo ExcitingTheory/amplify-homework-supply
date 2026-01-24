@@ -1,5 +1,9 @@
 import type { StorybookConfig } from '@storybook/nextjs';
-import path from 'path';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const config: StorybookConfig = {
   "stories": [
@@ -8,7 +12,8 @@ const config: StorybookConfig = {
     "../src/stories/Onboarding.mdx",
     "../src/stories/TechnicalOverview.mdx",
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)",
-    "../pages/**/*.stories.@(js|jsx|mjs|ts|tsx)"
+    "../pages/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    "../.storybook/**/*.stories.@(js|jsx|mjs|ts|tsx)"
   ],
   "addons": [
     "@chromatic-com/storybook",
@@ -17,7 +22,8 @@ const config: StorybookConfig = {
     "@storybook/addon-links",
     "@storybook/addon-docs",
     // "@storybook/addon-onboarding" // Disabled - using custom branding instead
-    './.storybook/code/myOnboarding/preset.js'
+    path.resolve(__dirname, 'code/myOnboarding/preset.js'),
+    path.resolve(__dirname, 'addons/translation-mode/preset.js')
   ],
   "framework": {
     name: "@storybook/nextjs",

@@ -312,7 +312,7 @@ const ImageComponent = React.memo(function ImageComponent({
                             <AutoLinkPlugin />
                             <RichTextPlugin
                                 contentEditable={
-                                    <ContentEditable className="ImageNode__contentEditable" />
+                                    <ContentEditable className="ImageNode__contentEditable" aria-label="Image caption" />
                                 }
                                 placeholder={
                                     <Placeholder className="ImageNode__placeholder">

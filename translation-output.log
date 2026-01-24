@@ -1,0 +1,2054 @@
+===================================
+Multi-Model Translation Workflow
+===================================
+
+Namespaces: auth chat common editor errors grades units
+Target Languages: ja es fr zh de
+Source Language: en
+Mode: FORCE REGENERATION (--force)
+
+This will:
+  - Translate 7 namespaces
+  - To 5 languages
+  - Using 3 AI models (Claude, GPT-4o, Gemini)
+  - Total: 35 translation jobs
+
+
+Starting translation workflow...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[1/35] Translating: auth → ja
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating auth to ja...
+Processing 9 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for auth!
+Cache: .translation-cache/2026-01-26/ja
+Total tokens: Claude=2761, GPT=2515, Gemini=900
+Translation complete!
+Proof: {
+  namespace: 'auth',
+  sourceLang: 'en',
+  targetLang: 'ja',
+  timestamp: '2026-01-26T08:43:15.466Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01Sfn2ZMZhnsWvYeAHpiRwKA',
+      fingerprint: '900c86ec6798eb47aee6db1c2f909c45ade4843cbd9f542adaee74c15f68826e'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CSxhMNf9abvfN2vXRqCL2xeDY2c',
+      fingerprint: '869b85a30c6bce9365f00a3950b3614044b2a04d32f83818e10a87903e95d590'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: '921e4b9f-e4fc-4a3c-af5a-262c15952baa',
+      fingerprint: 'aabde8da642f7a96360316261c65b2e06347c39f7bdc2abd0de5b8ed3c46c0b0'
+    }
+  ],
+  consensusFingerprint: '900c86ec6798eb47aee6db1c2f909c45ade4843cbd9f542adaee74c15f68826e',
+  consensus: {
+    source: {
+      sign_in: 'Sign In',
+      sign_out: 'Sign Out',
+      sign_up: 'Sign Up',
+      username: 'Username',
+      password: 'Password',
+      email: 'Email',
+      forgot_password: 'Forgot Password?',
+      reset_password: 'Reset Password',
+      confirm_password: 'Confirm Password'
+    },
+    claude: {
+      sign_in: 'サインイン',
+      sign_out: 'サインアウト',
+      sign_up: '新規登録',
+      username: 'ユーザー名',
+      password: 'パスワード',
+      email: 'メールアドレス',
+      forgot_password: 'パスワードを忘れた？',
+      reset_password: 'パスワードをリセット',
+      confirm_password: 'パスワード（確認）'
+    },
+    gpt: {
+      sign_in: 'サインイン',
+      sign_out: 'サインアウト',
+      sign_up: '新規登録',
+      username: 'ユーザー名',
+      password: 'パスワード',
+      email: 'メールアドレス',
+      forgot_password: 'パスワードを忘れた場合',
+      reset_password: 'パスワードをリセット',
+      confirm_password: 'パスワード確認'
+    },
+    gemini: {
+      sign_in: 'サインイン',
+      sign_out: 'サインアウト',
+      sign_up: 'サインアップ',
+      username: 'ユーザー名',
+      password: 'パスワード',
+      email: 'メールアドレス',
+      forgot_password: 'パスワードを忘れましたか？',
+      reset_password: 'パスワードをリセット',
+      confirm_password: 'パスワードの確認'
+    },
+    final: {
+      sign_in: 'サインイン',
+      sign_out: 'サインアウト',
+      sign_up: '新規登録',
+      username: 'ユーザー名',
+      password: 'パスワード',
+      email: 'メールアドレス',
+      forgot_password: 'パスワードを忘れた？',
+      reset_password: 'パスワードをリセット',
+      confirm_password: 'パスワード（確認）'
+    }
+  }
+}
+✅ Success: auth → ja
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[2/35] Translating: auth → es
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating auth to es...
+Processing 9 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for auth!
+Cache: .translation-cache/2026-01-26/es
+Total tokens: Claude=2760, GPT=2503, Gemini=900
+Translation complete!
+Proof: {
+  namespace: 'auth',
+  sourceLang: 'en',
+  targetLang: 'es',
+  timestamp: '2026-01-26T08:44:22.329Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01LfYtVHR5jzZB319DPyp74s',
+      fingerprint: '4a881d45222cd43597ff94d7160744c2a2a375873a109c346b5cf76d4e74a47f'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CU2rliUcAK195Bl0Yt5EPUuVXVV',
+      fingerprint: '93c8dbaf890ce07309095c42b626eecf0e6998d0db201b3a3b7b693ec92c4b2b'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: '60e9491c-58a2-41fe-a74c-0e5b50b69cfe',
+      fingerprint: '28fba3fb2bedf1c9a40cacda917062f56946a85e877a2412359230931e482cb2'
+    }
+  ],
+  consensusFingerprint: '93c8dbaf890ce07309095c42b626eecf0e6998d0db201b3a3b7b693ec92c4b2b',
+  consensus: {
+    source: {
+      sign_in: 'Sign In',
+      sign_out: 'Sign Out',
+      sign_up: 'Sign Up',
+      username: 'Username',
+      password: 'Password',
+      email: 'Email',
+      forgot_password: 'Forgot Password?',
+      reset_password: 'Reset Password',
+      confirm_password: 'Confirm Password'
+    },
+    claude: {
+      sign_in: 'Iniciar sesión',
+      sign_out: 'Cerrar Sesión',
+      sign_up: 'Registrarse',
+      username: 'Nombre de usuario',
+      password: 'Contraseña',
+      email: 'Correo electrónico',
+      forgot_password: '¿Olvidaste tu contraseña?',
+      reset_password: 'Restablecer Contraseña',
+      confirm_password: 'Confirmar contraseña'
+    },
+    gpt: {
+      sign_in: 'Iniciar sesión',
+      sign_out: 'Cerrar sesión',
+      sign_up: 'Registrarse',
+      username: 'Nombre de usuario',
+      password: 'Contraseña',
+      email: 'Correo electrónico',
+      forgot_password: '¿Olvidaste tu contraseña?',
+      reset_password: 'Restablecer Contraseña',
+      confirm_password: 'Confirmar contraseña'
+    },
+    gemini: {
+      sign_in: 'Iniciar sesión',
+      sign_out: 'Cerrar sesión',
+      sign_up: 'Registrarse',
+      username: 'Nombre de usuario',
+      password: 'Contraseña',
+      email: 'Correo electrónico',
+      forgot_password: '¿Olvidaste la contraseña?',
+      reset_password: 'Restablecer contraseña',
+      confirm_password: 'Confirmar contraseña'
+    },
+    final: {
+      sign_in: 'Iniciar sesión',
+      sign_out: 'Cerrar sesión',
+      sign_up: 'Registrarse',
+      username: 'Nombre de usuario',
+      password: 'Contraseña',
+      email: 'Correo electrónico',
+      forgot_password: '¿Olvidaste tu contraseña?',
+      reset_password: 'Restablecer Contraseña',
+      confirm_password: 'Confirmar contraseña'
+    }
+  }
+}
+✅ Success: auth → es
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[3/35] Translating: auth → fr
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating auth to fr...
+Processing 9 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for auth!
+Cache: .translation-cache/2026-01-26/fr
+Total tokens: Claude=2760, GPT=2509, Gemini=900
+Translation complete!
+Proof: {
+  namespace: 'auth',
+  sourceLang: 'en',
+  targetLang: 'fr',
+  timestamp: '2026-01-26T08:45:29.880Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01HEqvLj6GyfRsqZrsxSLXta',
+      fingerprint: 'f1558ed1d5a3eaf3e280d5a47b92bf570b180491ccad3d5c5b0ee4080cbdafe1'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CV7vRVxhl1WRLp9fQJw75RSE7p1',
+      fingerprint: 'f1558ed1d5a3eaf3e280d5a47b92bf570b180491ccad3d5c5b0ee4080cbdafe1'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: 'e9b920fa-6db5-4707-b52e-118f1ffd9787',
+      fingerprint: '90409e47ea74b12ad236dd07fb53c1d6f1b6e02a990ce3c309aa0de810508a1d'
+    }
+  ],
+  consensusFingerprint: 'f1558ed1d5a3eaf3e280d5a47b92bf570b180491ccad3d5c5b0ee4080cbdafe1',
+  consensus: {
+    source: {
+      sign_in: 'Sign In',
+      sign_out: 'Sign Out',
+      sign_up: 'Sign Up',
+      username: 'Username',
+      password: 'Password',
+      email: 'Email',
+      forgot_password: 'Forgot Password?',
+      reset_password: 'Reset Password',
+      confirm_password: 'Confirm Password'
+    },
+    claude: {
+      sign_in: 'Se connecter',
+      sign_out: 'Se déconnecter',
+      sign_up: "S'inscrire",
+      username: "Nom d'utilisateur",
+      password: 'Mot de passe',
+      email: 'E-mail',
+      forgot_password: 'Mot de passe oublié ?',
+      reset_password: 'Réinitialiser le mot de passe',
+      confirm_password: 'Confirmer le mot de passe'
+    },
+    gpt: {
+      sign_in: 'Se connecter',
+      sign_out: 'Se déconnecter',
+      sign_up: "S'inscrire",
+      username: "Nom d'utilisateur",
+      password: 'Mot de passe',
+      email: 'E-mail',
+      forgot_password: 'Mot de passe oublié ?',
+      reset_password: 'Réinitialiser le mot de passe',
+      confirm_password: 'Confirmer le mot de passe'
+    },
+    gemini: {
+      sign_in: 'Se connecter',
+      sign_out: 'Se déconnecter',
+      sign_up: "S'inscrire",
+      username: "Nom d'utilisateur",
+      password: 'Mot de passe',
+      email: 'Courriel',
+      forgot_password: 'Mot de passe oublié ?',
+      reset_password: 'Réinitialiser le mot de passe',
+      confirm_password: 'Confirmer le mot de passe'
+    },
+    final: {
+      sign_in: 'Se connecter',
+      sign_out: 'Se déconnecter',
+      sign_up: "S'inscrire",
+      username: "Nom d'utilisateur",
+      password: 'Mot de passe',
+      email: 'E-mail',
+      forgot_password: 'Mot de passe oublié ?',
+      reset_password: 'Réinitialiser le mot de passe',
+      confirm_password: 'Confirmer le mot de passe'
+    }
+  }
+}
+✅ Success: auth → fr
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[4/35] Translating: auth → zh
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating auth to zh...
+Processing 9 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for auth!
+Cache: .translation-cache/2026-01-26/zh
+Total tokens: Claude=2747, GPT=2490, Gemini=900
+Translation complete!
+Proof: {
+  namespace: 'auth',
+  sourceLang: 'en',
+  targetLang: 'zh',
+  timestamp: '2026-01-26T08:46:37.292Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_015TNFBH7Rzwkx4dYntkzNfE',
+      fingerprint: 'acfa474f4226b72916242622eb0c6d75be05706a3966b23c306018a7c7d7d558'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CWDK7bwTirL0tCY0qHPj13s3Qkb',
+      fingerprint: 'b4060d916bcc64eff851b446503c4b3b0a7627eb873b6a9e3fb3ee09351364fa'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: '9fd924d5-272d-4141-a616-5ce65e0b31f4',
+      fingerprint: 'dd406aa1b078c6bfcb7a0f4ae66b5c7af1cb217e0632538c2b818c5393169178'
+    }
+  ],
+  consensusFingerprint: '79ada0d389bf8741d462702ddd4c252365590c2e3f349d6bb2e5feabc6128c60',
+  consensus: {
+    source: {
+      sign_in: 'Sign In',
+      sign_out: 'Sign Out',
+      sign_up: 'Sign Up',
+      username: 'Username',
+      password: 'Password',
+      email: 'Email',
+      forgot_password: 'Forgot Password?',
+      reset_password: 'Reset Password',
+      confirm_password: 'Confirm Password'
+    },
+    claude: {
+      sign_in: '登录',
+      sign_out: '退出登录',
+      sign_up: '注册',
+      username: '用户名',
+      password: '密码',
+      email: '邮箱地址',
+      forgot_password: '忘记密码？',
+      reset_password: '重置密码',
+      confirm_password: '确认密码'
+    },
+    gpt: {
+      sign_in: '登录',
+      sign_out: '退出',
+      sign_up: '注册',
+      username: '用户名',
+      password: '密码',
+      email: '电子邮件',
+      forgot_password: '忘记密码？',
+      reset_password: '重置密码',
+      confirm_password: '确认密码'
+    },
+    gemini: {
+      sign_in: '登录',
+      sign_out: '登出',
+      sign_up: '注册',
+      username: '用户名',
+      password: '密码',
+      email: '电子邮件',
+      forgot_password: '忘记密码？',
+      reset_password: '重置密码',
+      confirm_password: '确认密码'
+    },
+    final: {
+      sign_in: '登录',
+      sign_out: '退出登录',
+      sign_up: '注册',
+      username: '用户名',
+      password: '密码',
+      email: '电子邮件',
+      forgot_password: '忘记密码？',
+      reset_password: '重置密码',
+      confirm_password: '确认密码'
+    }
+  }
+}
+✅ Success: auth → zh
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[5/35] Translating: auth → de
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating auth to de...
+Processing 9 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for auth!
+Cache: .translation-cache/2026-01-26/de
+Total tokens: Claude=2755, GPT=2499, Gemini=900
+Translation complete!
+Proof: {
+  namespace: 'auth',
+  sourceLang: 'en',
+  targetLang: 'de',
+  timestamp: '2026-01-26T08:47:44.707Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_018jsJA9YyCRNY3K97Vji2x6',
+      fingerprint: 'a7ac5c61fbebcde070a6d5ebe6fa5c613358ca1853d33928ede27b4b60cf19aa'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CXM6I6wIzn7fIHwllQ89Eb4yaTU',
+      fingerprint: 'a7ac5c61fbebcde070a6d5ebe6fa5c613358ca1853d33928ede27b4b60cf19aa'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: '6c2e34e7-461d-433e-9f7e-6635dcbf74d4',
+      fingerprint: 'a7ac5c61fbebcde070a6d5ebe6fa5c613358ca1853d33928ede27b4b60cf19aa'
+    }
+  ],
+  consensusFingerprint: 'a7ac5c61fbebcde070a6d5ebe6fa5c613358ca1853d33928ede27b4b60cf19aa',
+  consensus: {
+    source: {
+      sign_in: 'Sign In',
+      sign_out: 'Sign Out',
+      sign_up: 'Sign Up',
+      username: 'Username',
+      password: 'Password',
+      email: 'Email',
+      forgot_password: 'Forgot Password?',
+      reset_password: 'Reset Password',
+      confirm_password: 'Confirm Password'
+    },
+    claude: {
+      sign_in: 'Anmelden',
+      sign_out: 'Abmelden',
+      sign_up: 'Registrieren',
+      username: 'Benutzername',
+      password: 'Passwort',
+      email: 'E-Mail-Adresse',
+      forgot_password: 'Passwort vergessen?',
+      reset_password: 'Passwort zurücksetzen',
+      confirm_password: 'Passwort bestätigen'
+    },
+    gpt: {
+      sign_in: 'Anmelden',
+      sign_out: 'Abmelden',
+      sign_up: 'Registrieren',
+      username: 'Benutzername',
+      password: 'Passwort',
+      email: 'E-Mail-Adresse',
+      forgot_password: 'Passwort vergessen?',
+      reset_password: 'Passwort zurücksetzen',
+      confirm_password: 'Passwort bestätigen'
+    },
+    gemini: {
+      sign_in: 'Anmelden',
+      sign_out: 'Abmelden',
+      sign_up: 'Registrieren',
+      username: 'Benutzername',
+      password: 'Passwort',
+      email: 'E-Mail-Adresse',
+      forgot_password: 'Passwort vergessen?',
+      reset_password: 'Passwort zurücksetzen',
+      confirm_password: 'Passwort bestätigen'
+    },
+    final: {
+      sign_in: 'Anmelden',
+      sign_out: 'Abmelden',
+      sign_up: 'Registrieren',
+      username: 'Benutzername',
+      password: 'Passwort',
+      email: 'E-Mail-Adresse',
+      forgot_password: 'Passwort vergessen?',
+      reset_password: 'Passwort zurücksetzen',
+      confirm_password: 'Passwort bestätigen'
+    }
+  }
+}
+✅ Success: auth → de
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[6/35] Translating: chat → ja
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating chat to ja...
+Processing 6 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for chat!
+Cache: .translation-cache/2026-01-26/ja
+Total tokens: Claude=718, GPT=614, Gemini=600
+Translation complete!
+Proof: {
+  namespace: 'chat',
+  sourceLang: 'en',
+  targetLang: 'ja',
+  timestamp: '2026-01-26T08:48:31.386Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01ThnP1vwTnoUDnza2G5TMJk',
+      fingerprint: '2671376064f8337777853191578182fb97e255d53930aa541fe8b31852850f42'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CYLBs3hqfYtKz9kOoc9X1EIPdW1',
+      fingerprint: '1721ef34fa56f04010b46530fe1b2eb0581d90d66614f16a657e7a47108f237b'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: 'e6e0976f-ecb8-43a7-b9ed-c7804646c9bf',
+      fingerprint: '0ef76c47f9103ea0a5fd5ef90f8684765c98c9c474f0a85653ed1acdc0173745'
+    }
+  ],
+  consensusFingerprint: '60f6674229906fe7ac805d6bbca3855d9875b0c476ce0d366873f36afe0c998d',
+  consensus: {
+    source: {
+      title: 'Chat',
+      send_message: 'Send message',
+      type_message: 'Type a message...',
+      upload_file: 'Upload File',
+      analyzing: 'Analyzing...',
+      chat_with_ai: 'Chat with AI'
+    },
+    claude: {
+      title: 'チャット',
+      send_message: 'メッセージを送信する',
+      type_message: 'メッセージを入力してください...',
+      upload_file: 'ファイルをアップロード',
+      analyzing: '解析中...',
+      chat_with_ai: 'AIとチャット'
+    },
+    gpt: {
+      title: 'チャット',
+      send_message: 'メッセージを送信します',
+      type_message: 'メッセージを入力してください…',
+      upload_file: 'ファイルをアップロードします',
+      analyzing: '分析しています...',
+      chat_with_ai: 'AIとチャットします'
+    },
+    gemini: {
+      title: 'チャット です',
+      send_message: 'メッセージを送信します',
+      type_message: 'メッセージを入力してください...',
+      upload_file: 'ファイルをアップロードします',
+      analyzing: '分析中です...',
+      chat_with_ai: 'AIとチャットする'
+    },
+    final: {
+      title: 'チャット',
+      send_message: 'メッセージを送信します',
+      type_message: 'メッセージを入力してください...',
+      upload_file: 'ファイルをアップロードします',
+      analyzing: '解析中...',
+      chat_with_ai: 'AIとチャット'
+    }
+  }
+}
+✅ Success: chat → ja
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[7/35] Translating: chat → es
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating chat to es...
+Processing 6 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for chat!
+Cache: .translation-cache/2026-01-26/es
+Total tokens: Claude=704, GPT=601, Gemini=600
+Translation complete!
+Proof: {
+  namespace: 'chat',
+  sourceLang: 'en',
+  targetLang: 'es',
+  timestamp: '2026-01-26T08:49:17.783Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01J8vEzZeVDaJmPy9CrkBPFm',
+      fingerprint: '724d7bed710b07074edb6155c9bfa1b262d3f38975c97aced34377b242374de2'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CZ5r0U1uCN0l5FZeqL0vS6mqGzQ',
+      fingerprint: '724d7bed710b07074edb6155c9bfa1b262d3f38975c97aced34377b242374de2'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: 'c09df111-890d-4b7f-af02-5208683dd0d9',
+      fingerprint: '724d7bed710b07074edb6155c9bfa1b262d3f38975c97aced34377b242374de2'
+    }
+  ],
+  consensusFingerprint: '724d7bed710b07074edb6155c9bfa1b262d3f38975c97aced34377b242374de2',
+  consensus: {
+    source: {
+      title: 'Chat',
+      send_message: 'Send message',
+      type_message: 'Type a message...',
+      upload_file: 'Upload File',
+      analyzing: 'Analyzing...',
+      chat_with_ai: 'Chat with AI'
+    },
+    claude: {
+      title: 'Chat',
+      send_message: 'Enviar mensaje',
+      type_message: 'Escribe un mensaje...',
+      upload_file: 'Subir archivo',
+      analyzing: 'Analizando...',
+      chat_with_ai: 'Chatear con IA'
+    },
+    gpt: {
+      title: 'Chat',
+      send_message: 'Enviar mensaje',
+      type_message: 'Escribe un mensaje...',
+      upload_file: 'Subir archivo',
+      analyzing: 'Analizando...',
+      chat_with_ai: 'Chatear con IA'
+    },
+    gemini: {
+      title: 'Chat',
+      send_message: 'Enviar mensaje',
+      type_message: 'Escribe un mensaje...',
+      upload_file: 'Subir archivo',
+      analyzing: 'Analizando...',
+      chat_with_ai: 'Chatear con IA'
+    },
+    final: {
+      title: 'Chat',
+      send_message: 'Enviar mensaje',
+      type_message: 'Escribe un mensaje...',
+      upload_file: 'Subir archivo',
+      analyzing: 'Analizando...',
+      chat_with_ai: 'Chatear con IA'
+    }
+  }
+}
+✅ Success: chat → es
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[8/35] Translating: chat → fr
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating chat to fr...
+Processing 6 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for chat!
+Cache: .translation-cache/2026-01-26/fr
+Total tokens: Claude=714, GPT=608, Gemini=600
+Translation complete!
+Proof: {
+  namespace: 'chat',
+  sourceLang: 'en',
+  targetLang: 'fr',
+  timestamp: '2026-01-26T08:50:04.425Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01DtqBgUVBv1syjiJpAhaiH8',
+      fingerprint: '8f94410846aea100e628524f517292120263ba0c2115744d69168e75e63527e8'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CZqS7RfLIWtqfracaTA8DaJEDEf',
+      fingerprint: '82ba1e52c8b87f8d1678a724c822a5483f74867bc892e5ebc1d65109d811345c'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: 'efeca5f8-d738-4ff9-8629-008de41cc276',
+      fingerprint: '72653d88ba21d75100488f214f87a1ff27cb873553c43aae4e443ede4c604493'
+    }
+  ],
+  consensusFingerprint: 'cf98f7642749387a3d6f90b889adf4f3bd2e5b5e3e9ca5cffc99017961badf26',
+  consensus: {
+    source: {
+      title: 'Chat',
+      send_message: 'Send message',
+      type_message: 'Type a message...',
+      upload_file: 'Upload File',
+      analyzing: 'Analyzing...',
+      chat_with_ai: 'Chat with AI'
+    },
+    claude: {
+      title: 'Chat',
+      send_message: 'Envoyer un message',
+      type_message: 'Saisissez un message...',
+      upload_file: 'Télécharger un fichier',
+      analyzing: 'Analyse en cours...',
+      chat_with_ai: "Discuter avec l'IA"
+    },
+    gpt: {
+      title: 'Discussion',
+      send_message: 'Envoyer un message',
+      type_message: 'Tapez un message...',
+      upload_file: 'Téléverser le fichier',
+      analyzing: 'Analyse en cours...',
+      chat_with_ai: "Discuter avec l'IA"
+    },
+    gemini: {
+      title: 'Discussion',
+      send_message: 'Envoyer le message',
+      type_message: 'Saisissez un message...',
+      upload_file: 'Télécharger un fichier',
+      analyzing: 'Analyse en cours...',
+      chat_with_ai: "Discuter avec l'IA"
+    },
+    final: {
+      title: 'Discussion',
+      send_message: 'Envoyer un message',
+      type_message: 'Saisissez un message...',
+      upload_file: 'Télécharger un fichier',
+      analyzing: 'Analyse en cours...',
+      chat_with_ai: "Discuter avec l'IA"
+    }
+  }
+}
+✅ Success: chat → fr
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[9/35] Translating: chat → zh
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating chat to zh...
+Processing 6 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for chat!
+Cache: .translation-cache/2026-01-26/zh
+Total tokens: Claude=710, GPT=596, Gemini=600
+Translation complete!
+Proof: {
+  namespace: 'chat',
+  sourceLang: 'en',
+  targetLang: 'zh',
+  timestamp: '2026-01-26T08:50:51.035Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_012bX3WGcbBxKTqk7fAhoPwq',
+      fingerprint: '9c031e9291615e8edae1a49cb5af196125ad690e119f26608da4ec1fafc22a1c'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CabT8TwG4hQUalQTuRA6N2emAGV',
+      fingerprint: '9c031e9291615e8edae1a49cb5af196125ad690e119f26608da4ec1fafc22a1c'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: 'ee9fed53-bcf3-4b92-a6d5-4c6a4647a0f1',
+      fingerprint: 'dd837dc26bb42b9456a374e150a3a0f555850ec1d4373cc8a3d3d23136b0ffea'
+    }
+  ],
+  consensusFingerprint: '9c031e9291615e8edae1a49cb5af196125ad690e119f26608da4ec1fafc22a1c',
+  consensus: {
+    source: {
+      title: 'Chat',
+      send_message: 'Send message',
+      type_message: 'Type a message...',
+      upload_file: 'Upload File',
+      analyzing: 'Analyzing...',
+      chat_with_ai: 'Chat with AI'
+    },
+    claude: {
+      title: '聊天',
+      send_message: '发送消息',
+      type_message: '输入消息...',
+      upload_file: '上传文件',
+      analyzing: '正在分析...',
+      chat_with_ai: '与AI聊天'
+    },
+    gpt: {
+      title: '聊天',
+      send_message: '发送消息',
+      type_message: '输入消息...',
+      upload_file: '上传文件',
+      analyzing: '正在分析...',
+      chat_with_ai: '与AI聊天'
+    },
+    gemini: {
+      title: '聊天',
+      send_message: '发送消息',
+      type_message: '输入消息...',
+      upload_file: '上传文件',
+      analyzing: '正在分析...',
+      chat_with_ai: '与AI对话'
+    },
+    final: {
+      title: '聊天',
+      send_message: '发送消息',
+      type_message: '输入消息...',
+      upload_file: '上传文件',
+      analyzing: '正在分析...',
+      chat_with_ai: '与AI聊天'
+    }
+  }
+}
+✅ Success: chat → zh
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[10/35] Translating: chat → de
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating chat to de...
+Processing 6 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for chat!
+Cache: .translation-cache/2026-01-26/de
+Total tokens: Claude=704, GPT=603, Gemini=600
+Translation complete!
+Proof: {
+  namespace: 'chat',
+  sourceLang: 'en',
+  targetLang: 'de',
+  timestamp: '2026-01-26T08:51:37.721Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_013icN3rTtnSzqTt8A92CvKD',
+      fingerprint: 'ff002d8460d954322df870687f53f330a4646bcc69563bd7da38d92df293f442'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CbMj2kZWsKvgF4EYgeudahb9Kgm',
+      fingerprint: '211129a332b1a2bd3e101c2f213be13272fedc3461621de743b7bde086519f97'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: '5f74967e-e9be-4b93-ab5c-596bc932b7cb',
+      fingerprint: '14bc58cdcf362c0ccba7dda06aa51500bb939fa8f74b0adf4f3a82b04e1af52e'
+    }
+  ],
+  consensusFingerprint: '2ca45cb23cf44b5823d4353b2ff436b45942945f7f18bcf6c670d55f9a8048a9',
+  consensus: {
+    source: {
+      title: 'Chat',
+      send_message: 'Send message',
+      type_message: 'Type a message...',
+      upload_file: 'Upload File',
+      analyzing: 'Analyzing...',
+      chat_with_ai: 'Chat with AI'
+    },
+    claude: {
+      title: 'Chat',
+      send_message: 'Nachricht senden',
+      type_message: 'Nachricht eingeben...',
+      upload_file: 'Datei hochladen',
+      analyzing: 'Analysiere...',
+      chat_with_ai: 'Chat mit KI'
+    },
+    gpt: {
+      title: 'Chat',
+      send_message: 'Nachricht senden',
+      type_message: 'Nachricht eingeben...',
+      upload_file: 'Datei hochladen',
+      analyzing: 'Analysieren...',
+      chat_with_ai: 'Mit KI chatten'
+    },
+    gemini: {
+      title: 'Chat',
+      send_message: 'Nachricht senden',
+      type_message: 'Gib eine Nachricht ein...',
+      upload_file: 'Datei hochladen',
+      analyzing: 'Analysiere...',
+      chat_with_ai: 'Mit KI chatten'
+    },
+    final: {
+      title: 'Chat',
+      send_message: 'Nachricht senden',
+      type_message: 'Nachricht eingeben...',
+      upload_file: 'Datei hochladen',
+      analyzing: 'Analysiere...',
+      chat_with_ai: 'Mit KI chatten'
+    }
+  }
+}
+✅ Success: chat → de
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[11/35] Translating: common → ja
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating common to ja...
+Processing 6 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for common!
+Cache: .translation-cache/2026-01-26/ja
+Total tokens: Claude=702, GPT=606, Gemini=600
+Translation complete!
+Proof: {
+  namespace: 'common',
+  sourceLang: 'en',
+  targetLang: 'ja',
+  timestamp: '2026-01-26T08:52:24.306Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01BmoSRyptJTbN4G7CVyN5e1',
+      fingerprint: 'e64158460f5e31e150eb8be633a339b39c95b813f46baf66d0b930efa85c1425'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2Cc6LqLZGpoIEik4EgrmjfQJfWNe',
+      fingerprint: 'e64158460f5e31e150eb8be633a339b39c95b813f46baf66d0b930efa85c1425'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: '015c0f73-7028-4cdf-a32c-a68820f63471',
+      fingerprint: '4b161c4f9ab936a91db425b933d094be35cec55c49b81e2171a5bef1b212910c'
+    }
+  ],
+  consensusFingerprint: 'e64158460f5e31e150eb8be633a339b39c95b813f46baf66d0b930efa85c1425',
+  consensus: {
+    source: {
+      app: [Object],
+      actions: [Object],
+      navigation: [Object],
+      status: [Object],
+      time: [Object],
+      common: [Object]
+    },
+    claude: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '[object Object]',
+      time: '[object Object]',
+      common: '[object Object]'
+    },
+    gpt: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '[object Object]',
+      time: '[object Object]',
+      common: '[object Object]'
+    },
+    gemini: {
+      app: '[object Object] です',
+      actions: '[object Object] です',
+      navigation: '[object Object]です',
+      status: '[object Object] です',
+      time: '[object Object]です',
+      common: '[オブジェクト Object] です'
+    },
+    final: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '[object Object]',
+      time: '[object Object]',
+      common: '[object Object]'
+    }
+  }
+}
+✅ Success: common → ja
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[12/35] Translating: common → es
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating common to es...
+Processing 6 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for common!
+Cache: .translation-cache/2026-01-26/es
+Total tokens: Claude=702, GPT=606, Gemini=600
+Translation complete!
+Proof: {
+  namespace: 'common',
+  sourceLang: 'en',
+  targetLang: 'es',
+  timestamp: '2026-01-26T08:53:10.583Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_013waY9PUvFYM3GwoX3XN28v',
+      fingerprint: 'e64158460f5e31e150eb8be633a339b39c95b813f46baf66d0b930efa85c1425'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CcqDhuGHmvz4GnLIz4EEm330F5h',
+      fingerprint: '462edb023f097d9a0d5aa5c77b01d980a5fda5a7a0ace5c5613647ef6c837aa1'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: '68cd9f1a-e545-48f3-896e-886670ecd3ec',
+      fingerprint: 'aa55f7df8c4e7dde3f26a1709508e0113d3305b7923103509a5c3d430cb80930'
+    }
+  ],
+  consensusFingerprint: 'e64158460f5e31e150eb8be633a339b39c95b813f46baf66d0b930efa85c1425',
+  consensus: {
+    source: {
+      app: [Object],
+      actions: [Object],
+      navigation: [Object],
+      status: [Object],
+      time: [Object],
+      common: [Object]
+    },
+    claude: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '[object Object]',
+      time: '[object Object]',
+      common: '[object Object]'
+    },
+    gpt: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '"[object Object]"',
+      time: '[object Object]',
+      common: '[object Object]'
+    },
+    gemini: {
+      app: '[object Object]',
+      actions: '[objeto Objeto]',
+      navigation: '[objeto Objeto]',
+      status: '[objeto Objeto]',
+      time: '[object Object]',
+      common: '[objeto Objeto]'
+    },
+    final: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '[object Object]',
+      time: '[object Object]',
+      common: '[object Object]'
+    }
+  }
+}
+✅ Success: common → es
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[13/35] Translating: common → fr
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating common to fr...
+Processing 6 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for common!
+Cache: .translation-cache/2026-01-26/fr
+Total tokens: Claude=702, GPT=606, Gemini=600
+Translation complete!
+Proof: {
+  namespace: 'common',
+  sourceLang: 'en',
+  targetLang: 'fr',
+  timestamp: '2026-01-26T08:53:57.533Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_014rjyQ8HEerWXHAMDE8T5fQ',
+      fingerprint: 'e64158460f5e31e150eb8be633a339b39c95b813f46baf66d0b930efa85c1425'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CdbDsqG5t1mq8x0IP9hCmiIB6OB',
+      fingerprint: 'e64158460f5e31e150eb8be633a339b39c95b813f46baf66d0b930efa85c1425'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: '8060eff7-9a33-4acb-ae67-96943e622d60',
+      fingerprint: '0a6eadb11cfa2be1b6696d23b2c611de02e8922c20eece1366fa898d720024fd'
+    }
+  ],
+  consensusFingerprint: 'e64158460f5e31e150eb8be633a339b39c95b813f46baf66d0b930efa85c1425',
+  consensus: {
+    source: {
+      app: [Object],
+      actions: [Object],
+      navigation: [Object],
+      status: [Object],
+      time: [Object],
+      common: [Object]
+    },
+    claude: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '[object Object]',
+      time: '[object Object]',
+      common: '[object Object]'
+    },
+    gpt: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '[object Object]',
+      time: '[object Object]',
+      common: '[object Object]'
+    },
+    gemini: {
+      app: '[object Object]',
+      actions: '"[object Object]"',
+      navigation: '[objet Objet]',
+      status: '[object Object]',
+      time: '"[object Object]"',
+      common: '[object Object]'
+    },
+    final: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '[object Object]',
+      time: '[object Object]',
+      common: '[object Object]'
+    }
+  }
+}
+✅ Success: common → fr
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[14/35] Translating: common → zh
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating common to zh...
+Processing 6 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for common!
+Cache: .translation-cache/2026-01-26/zh
+Total tokens: Claude=702, GPT=606, Gemini=600
+Translation complete!
+Proof: {
+  namespace: 'common',
+  sourceLang: 'en',
+  targetLang: 'zh',
+  timestamp: '2026-01-26T08:54:43.903Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01AbojiJ6dmcrRKWCpHxBWBy',
+      fingerprint: 'e64158460f5e31e150eb8be633a339b39c95b813f46baf66d0b930efa85c1425'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CeLeEpTKTrmZyJNk0jv8KxUjKVE',
+      fingerprint: 'e64158460f5e31e150eb8be633a339b39c95b813f46baf66d0b930efa85c1425'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: '2095a8a2-f115-49d5-beed-fdff746ddc57',
+      fingerprint: '1b3a2848b7f47b472a4b42d6c233331414691b85832c0217ff7cfd7ba014984b'
+    }
+  ],
+  consensusFingerprint: 'e64158460f5e31e150eb8be633a339b39c95b813f46baf66d0b930efa85c1425',
+  consensus: {
+    source: {
+      app: [Object],
+      actions: [Object],
+      navigation: [Object],
+      status: [Object],
+      time: [Object],
+      common: [Object]
+    },
+    claude: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '[object Object]',
+      time: '[object Object]',
+      common: '[object Object]'
+    },
+    gpt: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '[object Object]',
+      time: '[object Object]',
+      common: '[object Object]'
+    },
+    gemini: {
+      app: '[对象 对象]',
+      actions: '[object Object]',
+      navigation: '[对象 Object]',
+      status: '[object Object]',
+      time: '[对象 Object]',
+      common: '[object Object]'
+    },
+    final: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '[object Object]',
+      time: '[object Object]',
+      common: '[object Object]'
+    }
+  }
+}
+✅ Success: common → zh
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[15/35] Translating: common → de
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating common to de...
+Processing 6 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for common!
+Cache: .translation-cache/2026-01-26/de
+Total tokens: Claude=702, GPT=606, Gemini=600
+Translation complete!
+Proof: {
+  namespace: 'common',
+  sourceLang: 'en',
+  targetLang: 'de',
+  timestamp: '2026-01-26T08:55:30.783Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01R87EbX6ZZmupbcrpGwkYoW',
+      fingerprint: 'e64158460f5e31e150eb8be633a339b39c95b813f46baf66d0b930efa85c1425'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2Cf7vJVd1sKXu2s3drG39KXYryjB',
+      fingerprint: 'e64158460f5e31e150eb8be633a339b39c95b813f46baf66d0b930efa85c1425'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: 'ddd1e4cb-06e6-4cb1-a0da-513997801bfb',
+      fingerprint: '9bb9f307076acb8ae85e2fdb08b2b12ddea85fd9ff68b645ca1823c0f8d94f9f'
+    }
+  ],
+  consensusFingerprint: 'e64158460f5e31e150eb8be633a339b39c95b813f46baf66d0b930efa85c1425',
+  consensus: {
+    source: {
+      app: [Object],
+      actions: [Object],
+      navigation: [Object],
+      status: [Object],
+      time: [Object],
+      common: [Object]
+    },
+    claude: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '[object Object]',
+      time: '[object Object]',
+      common: '[object Object]'
+    },
+    gpt: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '[object Object]',
+      time: '[object Object]',
+      common: '[object Object]'
+    },
+    gemini: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '[object Object]',
+      time: '"[object Object]"',
+      common: '[Objekt Objekt]'
+    },
+    final: {
+      app: '[object Object]',
+      actions: '[object Object]',
+      navigation: '[object Object]',
+      status: '[object Object]',
+      time: '[object Object]',
+      common: '[object Object]'
+    }
+  }
+}
+✅ Success: common → de
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[16/35] Translating: editor → ja
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating editor to ja...
+Processing 3 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for editor!
+Cache: .translation-cache/2026-01-26/ja
+Total tokens: Claude=352, GPT=303, Gemini=300
+Translation complete!
+Proof: {
+  namespace: 'editor',
+  sourceLang: 'en',
+  targetLang: 'ja',
+  timestamp: '2026-01-26T08:55:56.419Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01N9zDvSPPjzFi2b6u4RFmmZ',
+      fingerprint: 'e2dfc4a357c8032688d1357ca1bea7924f1a1035a073d9880b33f0a3c835ef82'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CfoPrZ0l20y9Eg31cuWsjI49dCI',
+      fingerprint: '4cea80466889b0bacb385204c805c1697fd51175757101ed8b4654ba81ee35fb'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: '0c0b3091-85cc-47de-9b4c-11d57277edef',
+      fingerprint: 'b1060a9189de4fe4d88af067a30aa6a14a98b691e1ef6d1ad45682509cad3240'
+    }
+  ],
+  consensusFingerprint: 'e2dfc4a357c8032688d1357ca1bea7924f1a1035a073d9880b33f0a3c835ef82',
+  consensus: {
+    source: { toolbar: [Object], blocks: [Object], placeholders: [Object] },
+    claude: {
+      toolbar: '[object Object]',
+      blocks: '[object Object]',
+      placeholders: '[object Object]'
+    },
+    gpt: {
+      toolbar: '[object Object]',
+      blocks: '[object Object]',
+      placeholders: '"[object Object]"'
+    },
+    gemini: {
+      toolbar: '[object Object] です',
+      blocks: '[object Object] です',
+      placeholders: '[object Object] です'
+    },
+    final: {
+      toolbar: '[object Object]',
+      blocks: '[object Object]',
+      placeholders: '[object Object]'
+    }
+  }
+}
+✅ Success: editor → ja
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[17/35] Translating: editor → es
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating editor to es...
+Processing 3 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for editor!
+Cache: .translation-cache/2026-01-26/es
+Total tokens: Claude=352, GPT=303, Gemini=300
+Translation complete!
+Proof: {
+  namespace: 'editor',
+  sourceLang: 'en',
+  targetLang: 'es',
+  timestamp: '2026-01-26T08:56:22.021Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01LaRZZBuPuQhLPqy1uJW2GL',
+      fingerprint: 'e2dfc4a357c8032688d1357ca1bea7924f1a1035a073d9880b33f0a3c835ef82'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CgDq5N7GrP5QleL8e8wSe62lchZ',
+      fingerprint: 'e2dfc4a357c8032688d1357ca1bea7924f1a1035a073d9880b33f0a3c835ef82'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: 'b6cbdaae-8dff-46eb-a4a4-813eb188aec3',
+      fingerprint: '8db908e6f3ea55ebe40ecd95e528ecec443337ed889f7c17b1f79f40d83ad323'
+    }
+  ],
+  consensusFingerprint: 'e2dfc4a357c8032688d1357ca1bea7924f1a1035a073d9880b33f0a3c835ef82',
+  consensus: {
+    source: { toolbar: [Object], blocks: [Object], placeholders: [Object] },
+    claude: {
+      toolbar: '[object Object]',
+      blocks: '[object Object]',
+      placeholders: '[object Object]'
+    },
+    gpt: {
+      toolbar: '[object Object]',
+      blocks: '[object Object]',
+      placeholders: '[object Object]'
+    },
+    gemini: {
+      toolbar: '[objeto Objeto]',
+      blocks: '[object Object]',
+      placeholders: '[objeto Objeto]'
+    },
+    final: {
+      toolbar: '[object Object]',
+      blocks: '[object Object]',
+      placeholders: '[object Object]'
+    }
+  }
+}
+✅ Success: editor → es
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[18/35] Translating: editor → fr
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating editor to fr...
+Processing 3 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for editor!
+Cache: .translation-cache/2026-01-26/fr
+Total tokens: Claude=352, GPT=303, Gemini=300
+Translation complete!
+Proof: {
+  namespace: 'editor',
+  sourceLang: 'en',
+  targetLang: 'fr',
+  timestamp: '2026-01-26T08:56:47.690Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_0182hzezAEB8PoPv5gX2X7Kn',
+      fingerprint: 'e2dfc4a357c8032688d1357ca1bea7924f1a1035a073d9880b33f0a3c835ef82'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2Cgd123ywhwUaeSQYItvkjnxSfeC',
+      fingerprint: 'ea6d82906122d844ce7a74ade6dc3bf89e75d59e0adc3fc380e56e334edbedc2'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: '791374a3-68d4-4223-80f3-a87116016a03',
+      fingerprint: 'e2dfc4a357c8032688d1357ca1bea7924f1a1035a073d9880b33f0a3c835ef82'
+    }
+  ],
+  consensusFingerprint: 'e2dfc4a357c8032688d1357ca1bea7924f1a1035a073d9880b33f0a3c835ef82',
+  consensus: {
+    source: { toolbar: [Object], blocks: [Object], placeholders: [Object] },
+    claude: {
+      toolbar: '[object Object]',
+      blocks: '[object Object]',
+      placeholders: '[object Object]'
+    },
+    gpt: {
+      toolbar: '"[object Object]"',
+      blocks: '[object Object]',
+      placeholders: '[object Object]'
+    },
+    gemini: {
+      toolbar: '[object Object]',
+      blocks: '[object Object]',
+      placeholders: '[object Object]'
+    },
+    final: {
+      toolbar: '[object Object]',
+      blocks: '[object Object]',
+      placeholders: '[object Object]'
+    }
+  }
+}
+✅ Success: editor → fr
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[19/35] Translating: editor → zh
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating editor to zh...
+Processing 3 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for editor!
+Cache: .translation-cache/2026-01-26/zh
+Total tokens: Claude=352, GPT=303, Gemini=300
+Translation complete!
+Proof: {
+  namespace: 'editor',
+  sourceLang: 'en',
+  targetLang: 'zh',
+  timestamp: '2026-01-26T08:57:13.556Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01LPXfHdpZvzyopKazqyy4sS',
+      fingerprint: 'e2dfc4a357c8032688d1357ca1bea7924f1a1035a073d9880b33f0a3c835ef82'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2Ch3sp4SAjvEvkZZKGkwMQxb93z4',
+      fingerprint: '4cea80466889b0bacb385204c805c1697fd51175757101ed8b4654ba81ee35fb'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: 'b7f68870-858c-47df-9e0c-b0031af19219',
+      fingerprint: '951feaef506fac21de091f788e307c67e5e3abf16c5d150cb4c713ec22ebe4eb'
+    }
+  ],
+  consensusFingerprint: 'e2dfc4a357c8032688d1357ca1bea7924f1a1035a073d9880b33f0a3c835ef82',
+  consensus: {
+    source: { toolbar: [Object], blocks: [Object], placeholders: [Object] },
+    claude: {
+      toolbar: '[object Object]',
+      blocks: '[object Object]',
+      placeholders: '[object Object]'
+    },
+    gpt: {
+      toolbar: '[object Object]',
+      blocks: '[object Object]',
+      placeholders: '"[object Object]"'
+    },
+    gemini: {
+      toolbar: '[对象 对象]',
+      blocks: '[对象 对象]',
+      placeholders: '[对象 Object]'
+    },
+    final: {
+      toolbar: '[object Object]',
+      blocks: '[object Object]',
+      placeholders: '[object Object]'
+    }
+  }
+}
+✅ Success: editor → zh
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[20/35] Translating: editor → de
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating editor to de...
+Processing 3 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for editor!
+Cache: .translation-cache/2026-01-26/de
+Total tokens: Claude=352, GPT=303, Gemini=300
+Translation complete!
+Proof: {
+  namespace: 'editor',
+  sourceLang: 'en',
+  targetLang: 'de',
+  timestamp: '2026-01-26T08:57:39.486Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01HEphXse4QPKqwUzQC6gGJk',
+      fingerprint: 'e2dfc4a357c8032688d1357ca1bea7924f1a1035a073d9880b33f0a3c835ef82'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2ChTySDpj22TBsLflDIM95Df0Ax5',
+      fingerprint: 'e2dfc4a357c8032688d1357ca1bea7924f1a1035a073d9880b33f0a3c835ef82'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: 'a1f6b02c-b2b0-4870-b2f7-2c011764ec5a',
+      fingerprint: '0cb0613c60f2773c811c4153955f6d31488829ffafa3b91bb4ed119581be7e47'
+    }
+  ],
+  consensusFingerprint: 'e2dfc4a357c8032688d1357ca1bea7924f1a1035a073d9880b33f0a3c835ef82',
+  consensus: {
+    source: { toolbar: [Object], blocks: [Object], placeholders: [Object] },
+    claude: {
+      toolbar: '[object Object]',
+      blocks: '[object Object]',
+      placeholders: '[object Object]'
+    },
+    gpt: {
+      toolbar: '[object Object]',
+      blocks: '[object Object]',
+      placeholders: '[object Object]'
+    },
+    gemini: {
+      toolbar: '[object Object]',
+      blocks: '[Objekt Objekt]',
+      placeholders: '[Objekt Objekt]'
+    },
+    final: {
+      toolbar: '[object Object]',
+      blocks: '[object Object]',
+      placeholders: '[object Object]'
+    }
+  }
+}
+✅ Success: editor → de
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[21/35] Translating: errors → ja
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating errors to ja...
+Processing 5 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for errors!
+Cache: .translation-cache/2026-01-26/ja
+Total tokens: Claude=607, GPT=520, Gemini=500
+Translation complete!
+Proof: {
+  namespace: 'errors',
+  sourceLang: 'en',
+  targetLang: 'ja',
+  timestamp: '2026-01-26T08:58:19.102Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01Bh1vZRrS2mSsfBvaQJhN2E',
+      fingerprint: 'f30f6aacba8e39fb5c8358ebd6f5990096e1cd0d91478f6878717213aac82a31'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2ChvMlKAZAMDuW2xaDEUyYk0hIas',
+      fingerprint: '44d04462052af81a51e7b6b5668afe91a5b9e0f681f2b1cf703e679ea0198da9'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: '8cf1a90b-3622-4798-9877-062afdee5333',
+      fingerprint: 'f56d29269eb04cac517be78e190e67fd556b715b7b5533a35ae485876c605648'
+    }
+  ],
+  consensusFingerprint: 'f30f6aacba8e39fb5c8358ebd6f5990096e1cd0d91478f6878717213aac82a31',
+  consensus: {
+    source: {
+      generic: 'An error occurred',
+      network: 'Network error. Please check your connection.',
+      auth: [Object],
+      validation: [Object],
+      file: [Object]
+    },
+    claude: {
+      generic: 'エラーが発生しました',
+      network: 'ネットワークエラーです。接続を確認してください。',
+      auth: '[object Object]',
+      validation: '[object Object]',
+      file: '[object Object]'
+    },
+    gpt: {
+      generic: 'エラーが発生しました',
+      network: 'ネットワークエラーです。接続を確認してください。',
+      auth: '"[object Object]"',
+      validation: '[object Object]',
+      file: '[object Object]'
+    },
+    gemini: {
+      generic: 'エラーが発生しました。',
+      network: 'ネットワークエラーです。接続を確認してください。',
+      auth: '[オブジェクト Object] です',
+      validation: '[object Object] です',
+      file: '[オブジェクト オブジェクト] です'
+    },
+    final: {
+      generic: 'エラーが発生しました',
+      network: 'ネットワークエラーです。接続を確認してください。',
+      auth: '[object Object]',
+      validation: '[object Object]',
+      file: '[object Object]'
+    }
+  }
+}
+✅ Success: errors → ja
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[22/35] Translating: errors → es
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating errors to es...
+Processing 5 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for errors!
+Cache: .translation-cache/2026-01-26/es
+Total tokens: Claude=601, GPT=518, Gemini=500
+Translation complete!
+Proof: {
+  namespace: 'errors',
+  sourceLang: 'en',
+  targetLang: 'es',
+  timestamp: '2026-01-26T08:58:58.753Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01HpvdH5MqNE7pdxc5n6GBQH',
+      fingerprint: 'a7fa199f9a0ce075cdcb134b99457d9f7586abc4afc652409109471f1d8ced33'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CiY5zZLkliBlYQHOfKbvoaKsqg8',
+      fingerprint: 'bb7e874ee3452a6902d22595e72aed8f32ea38f0ec640a1ce9901c27f74ef6d2'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: '1cb6adb4-4854-41fc-a11d-ac2bc3020371',
+      fingerprint: '62572641bdacfb7888f63a69b0564d6433ac94d5f34ac93bc4c71d789ce5824c'
+    }
+  ],
+  consensusFingerprint: 'a7fa199f9a0ce075cdcb134b99457d9f7586abc4afc652409109471f1d8ced33',
+  consensus: {
+    source: {
+      generic: 'An error occurred',
+      network: 'Network error. Please check your connection.',
+      auth: [Object],
+      validation: [Object],
+      file: [Object]
+    },
+    claude: {
+      generic: 'Se ha producido un error',
+      network: 'Error de red. Por favor, verifique su conexión.',
+      auth: '[object Object]',
+      validation: '[object Object]',
+      file: '[object Object]'
+    },
+    gpt: {
+      generic: '"Se produjo un error"',
+      network: 'Error de red. Por favor, revise su conexión.',
+      auth: '"[object Object]"',
+      validation: '[object Object]',
+      file: '[object Object]'
+    },
+    gemini: {
+      generic: 'Ocurrió un error.',
+      network: 'Error de red. Por favor, compruebe su conexión.',
+      auth: '"[objeto Objecto]"',
+      validation: '[object Object]',
+      file: '[objeto Object]'
+    },
+    final: {
+      generic: 'Se ha producido un error',
+      network: 'Error de red. Por favor, verifique su conexión.',
+      auth: '[object Object]',
+      validation: '[object Object]',
+      file: '[object Object]'
+    }
+  }
+}
+✅ Success: errors → es
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[23/35] Translating: errors → fr
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating errors to fr...
+Processing 5 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for errors!
+Cache: .translation-cache/2026-01-26/fr
+Total tokens: Claude=607, GPT=516, Gemini=500
+Translation complete!
+Proof: {
+  namespace: 'errors',
+  sourceLang: 'en',
+  targetLang: 'fr',
+  timestamp: '2026-01-26T08:59:38.479Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01G4uYjauD5szzCrUyM9Viyc',
+      fingerprint: '60bc3d96e3ee67abfec404666e8b425adfc188db55ae0f9383f6d29021260666'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CjCT7uVcJsArSWsRowbgOZ48qd5',
+      fingerprint: '60bc3d96e3ee67abfec404666e8b425adfc188db55ae0f9383f6d29021260666'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: 'dedc1670-7909-411c-be61-27e995b3cf78',
+      fingerprint: '9de8e058fff5778a849f16cb882452546e7d29905b60959ff8bebea3f5400e0c'
+    }
+  ],
+  consensusFingerprint: '60bc3d96e3ee67abfec404666e8b425adfc188db55ae0f9383f6d29021260666',
+  consensus: {
+    source: {
+      generic: 'An error occurred',
+      network: 'Network error. Please check your connection.',
+      auth: [Object],
+      validation: [Object],
+      file: [Object]
+    },
+    claude: {
+      generic: "Une erreur s'est produite",
+      network: 'Erreur réseau. Veuillez vérifier votre connexion.',
+      auth: '[object Object]',
+      validation: '[object Object]',
+      file: '[object Object]'
+    },
+    gpt: {
+      generic: "Une erreur s'est produite",
+      network: 'Erreur réseau. Veuillez vérifier votre connexion.',
+      auth: '[object Object]',
+      validation: '[object Object]',
+      file: '[object Object]'
+    },
+    gemini: {
+      generic: 'Une erreur est survenue.',
+      network: 'Erreur réseau. Veuillez vérifier votre connexion.',
+      auth: '[object Object]',
+      validation: '[object Object]',
+      file: '[object Object]'
+    },
+    final: {
+      generic: "Une erreur s'est produite",
+      network: 'Erreur réseau. Veuillez vérifier votre connexion.',
+      auth: '[object Object]',
+      validation: '[object Object]',
+      file: '[object Object]'
+    }
+  }
+}
+✅ Success: errors → fr
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[24/35] Translating: errors → zh
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating errors to zh...
+Processing 5 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for errors!
+Cache: .translation-cache/2026-01-26/zh
+Total tokens: Claude=602, GPT=511, Gemini=500
+Translation complete!
+Proof: {
+  namespace: 'errors',
+  sourceLang: 'en',
+  targetLang: 'zh',
+  timestamp: '2026-01-26T09:05:47.119Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_012EDdNfYaacxSkS7oWpWMGF',
+      fingerprint: '6c74febc673f565aee1c2ea8ce4e94a269f2f767fac405c58e2f755751f931d3'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CjqSzUQYVJE6FwJGaSbj7MXrBdz',
+      fingerprint: '003410fd79920ff4efdc9d6771158406bf110ddf2bad829afffb61531f0686b8'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: '44a2ae48-8b73-4a03-8ff1-150815f5424f',
+      fingerprint: '5d9b0122839c3179ea44c43aa073bf178f17c552a48f7465ccd1d47d2246c51f'
+    }
+  ],
+  consensusFingerprint: '6c74febc673f565aee1c2ea8ce4e94a269f2f767fac405c58e2f755751f931d3',
+  consensus: {
+    source: {
+      generic: 'An error occurred',
+      network: 'Network error. Please check your connection.',
+      auth: [Object],
+      validation: [Object],
+      file: [Object]
+    },
+    claude: {
+      generic: '发生错误',
+      network: '网络错误。请检查您的网络连接。',
+      auth: '[object Object]',
+      validation: '[object Object]',
+      file: '[object Object]'
+    },
+    gpt: {
+      generic: '发生错误',
+      network: '网络错误。请检查您的连接。',
+      auth: '[object Object]',
+      validation: '[object Object]',
+      file: '"[object Object]"'
+    },
+    gemini: {
+      generic: '发生错误',
+      network: '网络错误。请检查您的网络连接。',
+      auth: '[object Object]',
+      validation: '[对象 Object]',
+      file: '[object Object]'
+    },
+    final: {
+      generic: '发生错误',
+      network: '网络错误。请检查您的网络连接。',
+      auth: '[object Object]',
+      validation: '[object Object]',
+      file: '[object Object]'
+    }
+  }
+}
+✅ Success: errors → zh
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[25/35] Translating: errors → de
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating errors to de...
+Processing 5 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...
+  ✓ All models completed successfully
+✅ Translation complete for errors!
+Cache: .translation-cache/2026-01-26/de
+Total tokens: Claude=614, GPT=519, Gemini=500
+Translation complete!
+Proof: {
+  namespace: 'errors',
+  sourceLang: 'en',
+  targetLang: 'de',
+  timestamp: '2026-01-26T09:06:27.004Z',
+  models: [
+    {
+      name: 'claude-sonnet-4-20250514',
+      provider: 'anthropic',
+      requestId: 'msg_01Prnarcb6jn9vLQMRvBreT6',
+      fingerprint: '547bed27c5582548d384e19cb0bfe39a6ea35834de8a26be0cc6c12fb9acae7d'
+    },
+    {
+      name: 'gpt-4o',
+      provider: 'openai',
+      requestId: 'chatcmpl-D2CpnINxRsXznvsTtmYg9nuEOiyCc',
+      fingerprint: '547bed27c5582548d384e19cb0bfe39a6ea35834de8a26be0cc6c12fb9acae7d'
+    },
+    {
+      name: 'gemini-2.0-flash-exp',
+      provider: 'google',
+      requestId: '9caa9b17-415a-4cf3-a396-d13a38e4763e',
+      fingerprint: 'ad73f6c27a5a9e398c5c7a911a5a172de593c91c79f974b35f663422a371a350'
+    }
+  ],
+  consensusFingerprint: '547bed27c5582548d384e19cb0bfe39a6ea35834de8a26be0cc6c12fb9acae7d',
+  consensus: {
+    source: {
+      generic: 'An error occurred',
+      network: 'Network error. Please check your connection.',
+      auth: [Object],
+      validation: [Object],
+      file: [Object]
+    },
+    claude: {
+      generic: 'Ein Fehler ist aufgetreten',
+      network: 'Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.',
+      auth: '[object Object]',
+      validation: '[object Object]',
+      file: '[object Object]'
+    },
+    gpt: {
+      generic: 'Ein Fehler ist aufgetreten',
+      network: 'Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.',
+      auth: '[object Object]',
+      validation: '[object Object]',
+      file: '[object Object]'
+    },
+    gemini: {
+      generic: 'Es ist ein Fehler aufgetreten.',
+      network: 'Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.',
+      auth: '[Objekt Objekt]',
+      validation: '"[object Object]"',
+      file: '[object Object]'
+    },
+    final: {
+      generic: 'Ein Fehler ist aufgetreten',
+      network: 'Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.',
+      auth: '[object Object]',
+      validation: '[object Object]',
+      file: '[object Object]'
+    }
+  }
+}
+✅ Success: errors → de
+
+  Waiting 10 seconds to respect API rate limits...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[26/35] Translating: grades → ja
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Translating grades to ja...
+Processing 8 keys with metadata-driven translation...
+  Starting parallel translation with 3 models...

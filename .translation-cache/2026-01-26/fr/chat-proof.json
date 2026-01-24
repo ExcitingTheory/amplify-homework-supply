@@ -1,0 +1,69 @@
+{
+  "namespace": "chat",
+  "sourceLang": "en",
+  "targetLang": "fr",
+  "timestamp": "2026-01-26T11:27:37.635Z",
+  "models": [
+    {
+      "name": "claude-sonnet-4-20250514",
+      "provider": "anthropic",
+      "requestId": "msg_01BfVW5wYhtYYmpdz4wfBrtJ",
+      "fingerprint": "8f94410846aea100e628524f517292120263ba0c2115744d69168e75e63527e8"
+    },
+    {
+      "name": "gpt-4o",
+      "provider": "openai",
+      "requestId": "chatcmpl-D2F27bk3wyoHhhoBuF57GznlanxCH",
+      "fingerprint": "5a545a7bda91b6d658954cfcfc8939318462d871faaab6cf35fae27eb957e956"
+    },
+    {
+      "name": "gemma-3-12b-it",
+      "provider": "google-gemma",
+      "requestId": "d0bed25f-adf8-4b03-93d0-6fe733780fbc",
+      "fingerprint": "2ed83db4a85b80634bf8fb5274de06d9051a9d6014ec1a9fbc2757eb4e3e5726"
+    }
+  ],
+  "consensusFingerprint": "6d88ddf8088d8c494d1ac41d7050a7131c44a6677d291a4babfe75a6ae0f1832",
+  "consensus": {
+    "source": {
+      "title": "Chat",
+      "send_message": "Send message",
+      "type_message": "Type a message...",
+      "upload_file": "Upload File",
+      "analyzing": "Analyzing...",
+      "chat_with_ai": "Chat with AI"
+    },
+    "claude": {
+      "title": "Chat",
+      "send_message": "Envoyer un message",
+      "type_message": "Saisissez un message...",
+      "upload_file": "Télécharger un fichier",
+      "analyzing": "Analyse en cours...",
+      "chat_with_ai": "Discuter avec l'IA"
+    },
+    "gpt": {
+      "title": "Discussion",
+      "send_message": "Envoyer un message",
+      "type_message": "Tapez un message...",
+      "upload_file": "Téléverser un fichier",
+      "analyzing": "Analyse en cours...",
+      "chat_with_ai": "Discuter avec l'IA"
+    },
+    "translategemma": {
+      "title": "Discussion",
+      "send_message": "Envoyer un message",
+      "type_message": "Tapez un message...",
+      "upload_file": "Téléverser le fichier",
+      "analyzing": "Analyse...",
+      "chat_with_ai": "Discuter avec l'IA"
+    },
+    "final": {
+      "title": "Discussion",
+      "send_message": "Envoyer un message",
+      "type_message": "Tapez un message...",
+      "upload_file": "Télécharger un fichier",
+      "analyzing": "Analyse en cours...",
+      "chat_with_ai": "Discuter avec l'IA"
+    }
+  }
+}

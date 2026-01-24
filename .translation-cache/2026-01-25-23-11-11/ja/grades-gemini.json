@@ -1,0 +1,10 @@
+{
+  "title": "成績",
+  "accuracy": "正確性",
+  "complete": "完了",
+  "incomplete": "未完了",
+  "view_grade": "成績を表示",
+  "submit_grade": "成績を提出",
+  "no_grades": "利用可能な成績はありません",
+  "percentage": "{{value}}%"
+}

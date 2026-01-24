@@ -1,0 +1,27 @@
+{
+  "namespace": "common",
+  "sourceLang": "en",
+  "targetLang": "ja",
+  "timestamp": "2026-01-26T07:07:13.313Z",
+  "models": [
+    {
+      "name": "claude-sonnet-4-20250514",
+      "provider": "anthropic",
+      "requestId": "msg_01ADMt1kZDM6kTG2hi23Sgu9",
+      "fingerprint": "3caddafe7f36ffd1c156521717e4e1cac227e19d2adf81a9b9fc636e76064665"
+    },
+    {
+      "name": "gpt-4o-2024-08-06",
+      "provider": "openai",
+      "requestId": "chatcmpl-D2AygJDyEdA338I1g84f5pDpbqNZt",
+      "fingerprint": "0bb75842bcd5296f5cfacc64b0f82a8f3a1de468e1a9b0f7838131476cba4ec5"
+    },
+    {
+      "name": "gemini-2.0-flash-exp",
+      "provider": "google",
+      "requestId": "42d978f4-5c15-40f2-b482-a48dc4750894",
+      "fingerprint": "82b195f32715fa400538179f45ad408094e65414d555be018b3e814cdbca0f44"
+    }
+  ],
+  "consensusFingerprint": "3caddafe7f36ffd1c156521717e4e1cac227e19d2adf81a9b9fc636e76064665"
+}

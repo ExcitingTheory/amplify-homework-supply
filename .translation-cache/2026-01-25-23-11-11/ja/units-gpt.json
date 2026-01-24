@@ -1,0 +1,12 @@
+{
+  "title": "単位",
+  "create_unit": "新しい単位を作成",
+  "edit_unit": "単位を編集",
+  "delete_unit": "単位を削除",
+  "unit_name": "単位名",
+  "unit_description": "単位の説明",
+  "published": "公開済み",
+  "draft": "下書き",
+  "assign_to_section": "セクションに割り当て",
+  "no_units": "利用可能な単位はありません"
+}

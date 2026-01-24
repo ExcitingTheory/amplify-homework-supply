@@ -78,7 +78,7 @@ function messageToStreamEvents(message) {
       //     args: part.input || {},
       //     result: part.output
       //   });
-      }
+      // }
     }
   }
   
@@ -88,22 +88,26 @@ function messageToStreamEvents(message) {
 /**
  * Load and convert chat data to stream events
  */
-const [chatData1, chatData2, chatData3] = allChatData;
+const chatData = allChatData;
 
 // ==================== STREAMS FROM ACTUAL CHAT DATA ====================
 
 /**
- * Hiragana content search - derived from chat-bot-2.3.json
+ * Hiragana content search - derived from chat messages
+ * Use the last message which typically contains tool results
  */
-export const MOCK_CHAT_HIRAGANA_SEARCH = chatData3?.message 
-  ? messageToStreamEvents(chatData3.message)
+const lastMessage = chatData.messages?.[chatData.messages.length - 1];
+export const MOCK_CHAT_HIRAGANA_SEARCH = lastMessage
+  ? messageToStreamEvents(lastMessage)
   : [];
 
 /**
- * Simple user message - derived from chat-bot-2.0.json
+ * Simple user message - derived from chat messages
+ * Use the first message which is typically a user query
  */
-export const MOCK_CHAT_USER_QUERY = chatData1 
-  ? messageToStreamEvents(chatData1)
+const firstMessage = chatData.messages?.[0];
+export const MOCK_CHAT_USER_QUERY = firstMessage
+  ? messageToStreamEvents(firstMessage)
   : [];
 
 // ==================== SIMPLE TEXT MESSAGES ====================

@@ -1,2 +1,2 @@
 // Export main preset
-module.exports = require('./preset.js');
+export { default } from './preset.js';

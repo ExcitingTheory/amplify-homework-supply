@@ -1,0 +1,69 @@
+{
+  "namespace": "chat",
+  "sourceLang": "en",
+  "targetLang": "es",
+  "timestamp": "2026-01-26T11:26:46.474Z",
+  "models": [
+    {
+      "name": "claude-sonnet-4-20250514",
+      "provider": "anthropic",
+      "requestId": "msg_01AuEk1TdHowsQESeUJdAxxh",
+      "fingerprint": "724d7bed710b07074edb6155c9bfa1b262d3f38975c97aced34377b242374de2"
+    },
+    {
+      "name": "gpt-4o",
+      "provider": "openai",
+      "requestId": "chatcmpl-D2F1L2bUBS1sMpqpSbCi7R4harGzZ",
+      "fingerprint": "724d7bed710b07074edb6155c9bfa1b262d3f38975c97aced34377b242374de2"
+    },
+    {
+      "name": "gemma-3-12b-it",
+      "provider": "google-gemma",
+      "requestId": "3aa7ca08-3510-4c31-9183-e8b87df43fb3",
+      "fingerprint": "066a6d57ea2b421c281edf4e5cfb6df52f8a9b0fb2e609952c4b6192aeb69ca7"
+    }
+  ],
+  "consensusFingerprint": "724d7bed710b07074edb6155c9bfa1b262d3f38975c97aced34377b242374de2",
+  "consensus": {
+    "source": {
+      "title": "Chat",
+      "send_message": "Send message",
+      "type_message": "Type a message...",
+      "upload_file": "Upload File",
+      "analyzing": "Analyzing...",
+      "chat_with_ai": "Chat with AI"
+    },
+    "claude": {
+      "title": "Chat",
+      "send_message": "Enviar mensaje",
+      "type_message": "Escribe un mensaje...",
+      "upload_file": "Subir archivo",
+      "analyzing": "Analizando...",
+      "chat_with_ai": "Chatear con IA"
+    },
+    "gpt": {
+      "title": "Chat",
+      "send_message": "Enviar mensaje",
+      "type_message": "Escribe un mensaje...",
+      "upload_file": "Subir archivo",
+      "analyzing": "Analizando...",
+      "chat_with_ai": "Chatear con IA"
+    },
+    "translategemma": {
+      "title": "Chat",
+      "send_message": "Enviar mensaje",
+      "type_message": "Escriba un mensaje...",
+      "upload_file": "Subir archivo",
+      "analyzing": "Analizando...",
+      "chat_with_ai": "Chatea con IA"
+    },
+    "final": {
+      "title": "Chat",
+      "send_message": "Enviar mensaje",
+      "type_message": "Escribe un mensaje...",
+      "upload_file": "Subir archivo",
+      "analyzing": "Analizando...",
+      "chat_with_ai": "Chatear con IA"
+    }
+  }
+}

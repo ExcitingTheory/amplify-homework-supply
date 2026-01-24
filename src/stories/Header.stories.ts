@@ -1,3 +1,14 @@
+/**
+ * @fileoverview Storybook stories for Header component
+ * 
+ * Example header stories demonstrating:
+ * - Logged in user state
+ * - Logged out user state
+ * - Authentication action handlers (login, logout, create account)
+ * 
+ * @module stories/Header.stories
+ */
+
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
 import { fn } from 'storybook/test';

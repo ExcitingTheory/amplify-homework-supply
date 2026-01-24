@@ -1,0 +1,69 @@
+{
+  "app": {
+    "name": "Homework Supply",
+    "tagline": "Plattform zum Erlernen der japanischen Sprache"
+  },
+  "actions": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "submit": "Einreichen",
+    "close": "Schließen",
+    "create": "Erstellen",
+    "upload": "Hochladen",
+    "download": "Herunterladen",
+    "share": "Teilen",
+    "copy": "Kopieren",
+    "send": "Senden",
+    "add": "Hinzufügen",
+    "remove": "Entfernen",
+    "update": "Aktualisieren",
+    "confirm": "Bestätigen",
+    "clear": "Löschen",
+    "reset": "Zurücksetzen",
+    "retry": "Erneut versuchen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "finish": "Fertigstellen",
+    "continue": "Fortfahren"
+  },
+  "navigation": {
+    "home": "Startseite",
+    "units": "Einheiten",
+    "sections": "Abschnitte",
+    "grades": "Noten",
+    "profile": "Profil",
+    "workbook": "Arbeitsbuch"
+  },
+  "status": {
+    "loading": "Wird geladen...",
+    "saving": "Wird gespeichert...",
+    "success": "Erfolg",
+    "error": "Fehler",
+    "processing": "Wird verarbeitet...",
+    "uploading": "Wird hochgeladen...",
+    "downloading": "Wird heruntergeladen...",
+    "complete": "Vollständig",
+    "incomplete": "Unvollständig",
+    "pending": "Ausstehend"
+  },
+  "time": {
+    "created": "Erstellt",
+    "updated": "Aktualisiert",
+    "due": "Fällig",
+    "completed": "Abgeschlossen"
+  },
+  "common": {
+    "yes": "Ja",
+    "no": "Nein",
+    "ok": "OK",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "sort": "Sortieren",
+    "view": "Ansehen",
+    "settings": "Einstellungen",
+    "help": "Hilfe",
+    "about": "Über"
+  }
+}

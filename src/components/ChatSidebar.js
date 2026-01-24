@@ -54,19 +54,28 @@ import { toolDefinitions, executeTool, setVectorStoreSearch } from '../utils/cha
 import AIFeedbackWidget from './AIFeedbackWidget';
 import SearchResults from './ChatSidebar/SearchResults';
 import { TextStreamChatTransport } from 'ai';
+import { VirtualizedMessageList } from './ChatSidebar/VirtualizedMessageList';
+import { LexicalMessageRenderer } from './ChatSidebar/LexicalMessageRenderer';
+import ToolCallPreview from './ChatSidebar/ToolCallPreview';
+import ContentPreview from './ChatSidebar/ContentPreview';
 
 const ChatSidebar = () => {
     // Utility function to deep clone messages to prevent frozen object errors
     // The AI SDK mutates message objects during streaming, so they must be mutable
     const deepCloneMessages = useCallback((messages) => {
-        if (!messages || messages.length === 0) return [];
+        if (!messages || !Array.isArray(messages) || messages.length === 0) {
+            console.log('[ChatSidebar] deepCloneMessages: returning empty array');
+            return [];
+        }
 
         // Use structuredClone if available (better performance, handles more types)
         // Otherwise fallback to JSON stringify/parse
         try {
-            return typeof structuredClone !== 'undefined'
+            const cloned = typeof structuredClone !== 'undefined'
                 ? structuredClone(messages)
                 : JSON.parse(JSON.stringify(messages));
+            console.log('[ChatSidebar] deepCloneMessages: cloned', messages.length, 'messages');
+            return cloned;
         } catch (error) {
             console.error('[ChatSidebar] Error cloning messages:', error);
             // Last resort: return empty array to prevent crashes
@@ -227,16 +236,18 @@ const ChatSidebar = () => {
         if (chatChanged) {
             dispatch({ type: ACTIONS.SET_LAST_CHAT_ID, payload: assistantChat.id });
 
-            // Load messages
-            const messages = assistantChat.messages || [];
-            setMessages(deepCloneMessages(messages));
+            // Load messages - ensure it's always an array
+            const rawMessages = assistantChat.messages || [];
+            const messagesArray = Array.isArray(rawMessages) ? rawMessages : [];
+            console.log('[ChatSidebar] Loading messages for chat:', assistantChat.id, 'count:', messagesArray.length);
+            setMessages(deepCloneMessages(messagesArray));
 
             // Load draft (only on chat change, not version updates)
             dispatch({ type: ACTIONS.SET_INPUT, payload: assistantChat.draft || '' });
 
             // Load files
-            assistantChat.files?.toArray()
-                .then(files => dispatch({ type: ACTIONS.SET_UPLOADED_FILES, payload: files || [] }))
+            assistantChat.chatFiles?.()
+                .then(result => dispatch({ type: ACTIONS.SET_UPLOADED_FILES, payload: result?.data || [] }))
                 .catch(err => console.error('[ChatSidebar] Error loading files:', err));
         }
     }, [assistantChat?.id, assistantChat?._version, isLoadingChat]);
@@ -1053,14 +1064,13 @@ const ChatSidebar = () => {
 
                 {/* Messages */}
                 <Box
-                    ref={chatContainerRef}
                     sx={{
                         flex: 1,
-                        overflowY: 'auto',
                         display: 'flex',
                         flexDirection: 'column',
-                        p: 1,
                         bgcolor: 'grey.50',
+                        minHeight: 0,
+                        overflow: 'hidden',
                     }}
                 >
 
@@ -1292,36 +1302,12 @@ const ChatSidebar = () => {
                         </Box>
 
                     ) : (
-                        /* Show normal chat messages */
-                        <div key={assistantChat ? assistantChat.id : 'no-history'}>
-                            {messages.length === 0 && (
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        height: '100%',
-                                        color: 'text.secondary',
-                                        textAlign: 'center',
-                                        p: 3,
-                                    }}
-                                >
-                                    <ChatIcon sx={{ fontSize: 48, mb: 2, opacity: 0.3 }} />
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            wordWrap: 'break-word',
-                                            textAlign: 'center',
-                                            whiteSpace: 'normal'
-                                        }}
-                                    >
-                                        Ask me anything about your curriculum, files, or content!
-                                    </Typography>
-                                </Box>
-                            )}
-                            {messages.map((message, index) => {
-
+                        /* Show normal chat messages with virtualization */
+                        <VirtualizedMessageList
+                            key={assistantChat ? assistantChat.id : 'no-history'}
+                            messages={messages}
+                            useLexicalRenderer={true}
+                            renderMessage={(message, index) => {
                                 // Extract text content from message.parts (AI SDK v6 format)
                                 let textContent = '';
                                 if (message.parts && Array.isArray(message.parts)) {
@@ -1365,19 +1351,10 @@ const ChatSidebar = () => {
                                                     })
                                                 }}
                                             >
-                                                <Box
-                                                    component="pre"
-                                                    sx={{
-                                                        m: 0,
-                                                        whiteSpace: 'pre-wrap',
-                                                        wordWrap: 'break-word',
-                                                        fontFamily: 'inherit',
-                                                        fontSize: '0.9rem',
-                                                        lineHeight: 1.5,
-                                                    }}
-                                                >
-                                                    {textContent}
-                                                </Box>
+                                                <LexicalMessageRenderer
+                                                    content={textContent}
+                                                    isStreaming={message.isStreaming || false}
+                                                />
 
                                                 {/* AI Feedback Widget for assistant messages with text */}
                                                 {message.role === 'assistant' && (
@@ -1624,94 +1601,122 @@ const ChatSidebar = () => {
                                                 </Box>
                                             );
                                         })}
+
+                                        {/* Loading indicator for last message */}
+                                        {index === messages.length - 1 && isLoading && message.role !== 'assistant' && (
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 1,
+                                                    p: 2,
+                                                    alignSelf: 'flex-start',
+                                                    m: 0.75,
+                                                }}
+                                            >
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        gap: 0.5,
+                                                        p: '0.75rem 1rem',
+                                                        borderRadius: '1rem',
+                                                        bgcolor: '#f3f4f6',
+                                                        border: '1px solid #e5e7eb',
+                                                    }}
+                                                >
+                                                    <Box
+                                                        sx={{
+                                                            width: 8,
+                                                            height: 8,
+                                                            borderRadius: '50%',
+                                                            bgcolor: '#9ca3af',
+                                                            animation: 'typing 1s infinite',
+                                                            animationDelay: '0s',
+                                                            '@keyframes typing': {
+                                                                '0%, 60%, 100%': {
+                                                                    transform: 'translateY(0)',
+                                                                    opacity: 0.7,
+                                                                },
+                                                                '30%': {
+                                                                    transform: 'translateY(-7px)',
+                                                                    opacity: 1,
+                                                                },
+                                                            },
+                                                        }}
+                                                    />
+                                                    <Box
+                                                        sx={{
+                                                            width: 8,
+                                                            height: 8,
+                                                            borderRadius: '50%',
+                                                            bgcolor: '#9ca3af',
+                                                            animation: 'typing 1s infinite',
+                                                            animationDelay: '0.2s',
+                                                            '@keyframes typing': {
+                                                                '0%, 60%, 100%': {
+                                                                    transform: 'translateY(0)',
+                                                                    opacity: 0.7,
+                                                                },
+                                                                '30%': {
+                                                                    transform: 'translateY(-7px)',
+                                                                    opacity: 1,
+                                                                },
+                                                            },
+                                                        }}
+                                                    />
+                                                    <Box
+                                                        sx={{
+                                                            width: 8,
+                                                            height: 8,
+                                                            borderRadius: '50%',
+                                                            bgcolor: '#9ca3af',
+                                                            animation: 'typing 1s infinite',
+                                                            animationDelay: '0.4s',
+                                                            '@keyframes typing': {
+                                                                '0%, 60%, 100%': {
+                                                                    transform: 'translateY(0)',
+                                                                    opacity: 0.7,
+                                                                },
+                                                                '30%': {
+                                                                    transform: 'translateY(-7px)',
+                                                                    opacity: 1,
+                                                                },
+                                                            },
+                                                        }}
+                                                    />
+                                                </Box>
+                                            </Box>
+                                        )}
                                     </Box>
                                 );
-                            })}
-                            {isLoading && messages.length > 0 && messages[messages.length - 1]?.role !== 'assistant' && (
+                            }}
+                            emptyState={
                                 <Box
                                     sx={{
                                         display: 'flex',
+                                        flexDirection: 'column',
                                         alignItems: 'center',
-                                        gap: 1,
-                                        p: 2,
-                                        alignSelf: 'flex-start',
-                                        m: 0.75,
+                                        justifyContent: 'center',
+                                        height: '100%',
+                                        color: 'text.secondary',
+                                        textAlign: 'center',
+                                        p: 3,
                                     }}
                                 >
-                                    <Box
+                                    <ChatIcon sx={{ fontSize: 48, mb: 2, opacity: 0.3 }} />
+                                    <Typography
+                                        variant="body2"
                                         sx={{
-                                            display: 'flex',
-                                            gap: 0.5,
-                                            p: '0.75rem 1rem',
-                                            borderRadius: '1rem',
-                                            bgcolor: '#f3f4f6',
-                                            border: '1px solid #e5e7eb',
+                                            wordWrap: 'break-word',
+                                            textAlign: 'center',
+                                            whiteSpace: 'normal'
                                         }}
                                     >
-                                        <Box
-                                            sx={{
-                                                width: 8,
-                                                height: 8,
-                                                borderRadius: '50%',
-                                                bgcolor: '#9ca3af',
-                                                animation: 'typing 1s infinite',
-                                                animationDelay: '0s',
-                                                '@keyframes typing': {
-                                                    '0%, 60%, 100%': {
-                                                        transform: 'translateY(0)',
-                                                        opacity: 0.7,
-                                                    },
-                                                    '30%': {
-                                                        transform: 'translateY(-7px)',
-                                                        opacity: 1,
-                                                    },
-                                                },
-                                            }}
-                                        />
-                                        <Box
-                                            sx={{
-                                                width: 8,
-                                                height: 8,
-                                                borderRadius: '50%',
-                                                bgcolor: '#9ca3af',
-                                                animation: 'typing 1s infinite',
-                                                animationDelay: '0.2s',
-                                                '@keyframes typing': {
-                                                    '0%, 60%, 100%': {
-                                                        transform: 'translateY(0)',
-                                                        opacity: 0.7,
-                                                    },
-                                                    '30%': {
-                                                        transform: 'translateY(-7px)',
-                                                        opacity: 1,
-                                                    },
-                                                },
-                                            }}
-                                        />
-                                        <Box
-                                            sx={{
-                                                width: 8,
-                                                height: 8,
-                                                borderRadius: '50%',
-                                                bgcolor: '#9ca3af',
-                                                animation: 'typing 1s infinite',
-                                                animationDelay: '0.4s',
-                                                '@keyframes typing': {
-                                                    '0%, 60%, 100%': {
-                                                        transform: 'translateY(0)',
-                                                        opacity: 0.7,
-                                                    },
-                                                    '30%': {
-                                                        transform: 'translateY(-7px)',
-                                                        opacity: 1,
-                                                    },
-                                                },
-                                            }}
-                                        />
-                                    </Box>
+                                        Ask me anything about your curriculum, files, or content!
+                                    </Typography>
                                 </Box>
-                            )}
-                        </div>
+                            }
+                        />
                     )}
                 </Box>
 

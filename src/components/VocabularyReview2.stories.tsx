@@ -1,3 +1,16 @@
+/**
+ * @fileoverview Storybook stories for VocabularyReview2 component
+ * 
+ * Interactive stories demonstrating vocabulary review functionality with:
+ * - Mock parsed content from PDF analysis
+ * - Virtual scrolling with large vocabularies
+ * - Search/filter interactions
+ * - Import workflow demonstrations
+ * - Lexical inline editing
+ * 
+ * @module components/VocabularyReview2.stories
+ */
+
 import type { Meta, StoryObj } from '@storybook/react';
 import VocabularyReview2 from './VocabularyReview2';
 import { Box, Paper } from '@mui/material';

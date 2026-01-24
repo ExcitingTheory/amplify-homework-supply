@@ -360,11 +360,12 @@ const seedMockData = async () => {
     {
       id: 'mock-parsed-content-1',
       documentID: MOCK_DOCUMENT_ID_1,
-      vocabularyJSON: mockParsedContentJapanese.vocabularyJSON,
-      summariesJSON: mockParsedContentJapanese.summariesJSON,
-      objectivesJSON: mockParsedContentJapanese.objectivesJSON,
-      conceptsJSON: mockParsedContentJapanese.conceptsJSON,
-      questionsJSON: mockParsedContentJapanese.questionsJSON,
+      fileID: MOCK_FILE_ID_PDF_1,
+      vocabularyJSON: JSON.stringify(mockParsedContentJapanese.vocabularyJSON),
+      summariesJSON: JSON.stringify(mockParsedContentJapanese.summariesJSON),
+      objectivesJSON: JSON.stringify(mockParsedContentJapanese.objectivesJSON),
+      conceptsJSON: JSON.stringify(mockParsedContentJapanese.conceptsJSON),
+      questionsJSON: JSON.stringify(mockParsedContentJapanese.questionsJSON),
       responseId: 'chatcmpl-mock-response-1',
       modelUsed: 'gpt-4',
       tokensUsed: 2500,
@@ -377,11 +378,12 @@ const seedMockData = async () => {
     {
       id: 'mock-parsed-content-2',
       documentID: MOCK_DOCUMENT_ID_2,
-      vocabularyJSON: mockParsedContentFrench.vocabularyJSON,
-      summariesJSON: mockParsedContentFrench.summariesJSON,
-      objectivesJSON: mockParsedContentFrench.objectivesJSON,
-      conceptsJSON: mockParsedContentFrench.conceptsJSON,
-      questionsJSON: mockParsedContentFrench.questionsJSON,
+      fileID: MOCK_FILE_ID_PDF_2,
+      vocabularyJSON: JSON.stringify(mockParsedContentFrench.vocabularyJSON),
+      summariesJSON: JSON.stringify(mockParsedContentFrench.summariesJSON),
+      objectivesJSON: JSON.stringify(mockParsedContentFrench.objectivesJSON),
+      conceptsJSON: JSON.stringify(mockParsedContentFrench.conceptsJSON),
+      questionsJSON: JSON.stringify(mockParsedContentFrench.questionsJSON),
       responseId: 'chatcmpl-mock-response-2',
       modelUsed: 'gpt-4',
       tokensUsed: 1800,
@@ -453,7 +455,19 @@ const FileManagerWrapper = ({ children, showDebug = false }) => {
             overflow: 'hidden' 
           }}>
             {showDebug && <FilesDebug />}
-            {children}
+            {/* Suspense boundary required for React.use() in FileManager2 */}
+            <React.Suspense fallback={
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                flex: 1 
+              }}>
+                <Typography>Loading files...</Typography>
+              </Box>
+            }>
+              {children}
+            </React.Suspense>
           </Box>
         </LexicalComposer>
       </UnitContext.Provider>

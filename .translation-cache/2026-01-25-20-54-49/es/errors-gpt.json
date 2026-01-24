@@ -1,0 +1,18 @@
+{
+  "generic": "Se produjo un error",
+  "network": "Error de red. Verifique su conexión.",
+  "auth": {
+    "invalid_credentials": "Usuario o contraseña incorrectos",
+    "session_expired": "Su sesión ha caducado. Inicie sesión nuevamente."
+  },
+  "validation": {
+    "required": "Este campo es requerido",
+    "invalid_email": "Correo electrónico inválido",
+    "password_mismatch": "Las contraseñas no coinciden"
+  },
+  "file": {
+    "upload_failed": "Falló la carga del archivo",
+    "invalid_type": "Tipo de archivo inválido",
+    "too_large": "El archivo es demasiado grande"
+  }
+}

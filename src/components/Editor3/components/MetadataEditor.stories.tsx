@@ -1,3 +1,17 @@
+/**
+ * @fileoverview Storybook stories for MetadataEditor component
+ * 
+ * Demonstrates file metadata editing with:
+ * - Lexical-powered inline editing
+ * - Character count validation
+ * - Auto-save with debouncing
+ * - Read-only AI generation metadata display
+ * - Different file types and states
+ * - Unsaved changes indicators
+ * 
+ * @module Editor3/components/MetadataEditor.stories
+ */
+
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import MetadataEditor from './MetadataEditor';

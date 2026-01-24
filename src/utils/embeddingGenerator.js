@@ -16,7 +16,8 @@
 
 import { generateClient } from 'aws-amplify/api';
 import { getAmplifyClient } from './amplifyClient';
-import type { Schema } from '../../amplify/data/resource';
+// Note: Type import commented out for .js file
+// import type { Schema } from '../../amplify/data/resource';
 import { 
   extractPlainText, 
   extractForEmbedding, 
@@ -199,7 +200,7 @@ export function getEmbeddingCacheStats() {
  * @param {object} options - Embedding options
  * @returns {Promise<Array<number>>} Embedding vector
  */
-async function generateEmbedding(text, options = {}) {
+export async function generateEmbedding(text, options = {}) {
   const {
     model = 'text-embedding-3-small',
     dimensions = 512,

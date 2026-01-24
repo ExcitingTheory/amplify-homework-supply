@@ -1,4 +1,13 @@
 /**
+ * @fileoverview headlessEditorToCanvas - Convert Lexical editor content to canvas images
+ * 
+ * Utility for rendering Lexical editor content to modern image formats (WebP, AVIF)
+ * with PNG fallback for compatibility. Used for generating thumbnails and previews.
+ * 
+ * @module utils/headlessEditorToCanvas
+ */
+
+/**
  * Converts headless editor content to a canvas-compatible format. Return modern image format and png fallback.
  *
  * @param headlessContent - The content from the headless editor.

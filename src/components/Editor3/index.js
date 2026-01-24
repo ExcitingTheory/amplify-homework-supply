@@ -617,6 +617,7 @@ export default function Editor() {
                   contentEditable={
                     <ContentEditable
                       className="editor"
+                      aria-label="Main editor content"
                       aria-placeholder="Enter some text..."
                       style={{
                         height: 'calc(100vh - var(--app-bar-height, 11rem))',
@@ -845,6 +846,7 @@ export function Workbook() {
                     }}
                   >
                     <ContentEditable
+                      aria-label="Workbook content"
                       style={{
                         width: '100%',
                         maxWidth: '100%',

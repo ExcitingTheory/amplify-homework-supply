@@ -16,23 +16,27 @@ import {
 export const post = ({ apiName, path, options }) => {
   console.log('[Mock REST API] POST:', { apiName, path, body: options?.body });
   
+  let responsePromise;
+  
   // Route to appropriate handler
   if (path === '/complete') {
-    return handleContentCompletion(options?.body);
+    responsePromise = handleContentCompletion(options?.body).then(result => result.response);
   } else if (path === '/suggest-blocks') {
-    return handleSuggestBlocks(options?.body);
+    responsePromise = handleSuggestBlocks(options?.body).then(result => result.response);
   } else if (path === '/chat') {
-    return handleChat(options?.body);
-  }
-  
-  // Default handler
-  return {
-    response: Promise.resolve({
+    responsePromise = handleChat(options?.body).then(result => result.response);
+  } else {
+    // Default handler
+    responsePromise = Promise.resolve({
       statusCode: 404,
       body: {
         text: () => Promise.resolve(JSON.stringify({ error: 'Not found' })),
       },
-    }),
+    });
+  }
+  
+  return {
+    response: responsePromise,
   };
 };
 

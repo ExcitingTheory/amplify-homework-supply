@@ -556,6 +556,7 @@ function InlineEditorField({
                     contentEditable={
                         <ContentEditable
                             className="inline-editor"
+                            aria-label={label || "File metadata field"}
                             style={{
                                 fontSize: '0.875rem',
                                 lineHeight: '1.4',
@@ -708,6 +709,7 @@ function FileNameField({ value, fileId, onSave, searchTerm }) {
             ref={editableRef}
             contentEditable
             suppressContentEditableWarning
+            aria-label="File name"
             onInput={handleInput}
             onClick={handleClick}
             onKeyDown={handleKeyDown}
@@ -2372,6 +2374,89 @@ async function deleteFileCompletely(file) {
     }
 }
 
+/**
+ * Component to handle selected file view with lazy-loaded parsedContent
+ * Extracted to separate component so React.use() can properly work with Suspense
+ */
+function SelectedFileView({ selectedFile, documentStatus, search, editor }) {
+    // Await lazy-loaded parsedContent relationship using React.use()
+    // This MUST be at component level (not in IIFE) for Suspense to work
+    // Per Amplify Gen 2 API: hasMany returns a function -> Promise<{data: Array}>
+    const parsedContentResult = selectedFile.parsedContent 
+        ? React.use(selectedFile.parsedContent()) 
+        : null;
+    const parsedContent = parsedContentResult?.data?.[0];
+
+    return (
+        <>
+            <FileDetailsPanel
+                file={selectedFile}
+                documentStatus={documentStatus}
+                editor={editor}
+            />
+            {/* File Content */}
+            <Box sx={{ flex: 1, overflow: 'auto' }}>
+                <ExpandedFileContent
+                    file={selectedFile}
+                    parsedContent={parsedContent}
+                    search={search}
+                    editor={editor}
+                />
+            </Box>
+        </>
+    );
+}
+
+/**
+ * Component to render selected file details panel
+ * Handles finding the selected file and wrapping with Suspense
+ */
+function SelectedFileDetailsPanel({ selectedItems, files, documentStatuses, search, editor }) {
+    if (selectedItems.size === 0) {
+        return (
+            <Box
+                sx={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'text.secondary'
+                }}
+            >
+                <Typography variant="body2">
+                    Select a file to view details and metadata
+                </Typography>
+            </Box>
+        );
+    }
+
+    const firstSelectedId = Array.from(selectedItems)[0];
+    const selectedFile = files.find(f => f.id === firstSelectedId);
+    if (!selectedFile) return null;
+
+    const documentStatus = documentStatuses[selectedFile.documentID];
+    
+    return (
+        <React.Suspense fallback={
+            <Box sx={{ 
+                flex: 1, 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center' 
+            }}>
+                <CircularProgress size={24} />
+            </Box>
+        }>
+            <SelectedFileView
+                selectedFile={selectedFile}
+                documentStatus={documentStatus}
+                search={search}
+                editor={editor}
+            />
+        </React.Suspense>
+    );
+}
+
 export default function FileManager2() {
     console.log('[FileManager2] Component render started');
     const [editor] = useLexicalComposerContext();
@@ -2468,8 +2553,6 @@ export default function FileManager2() {
     const [contextMenu, setContextMenu] = React.useState(null);
     const [confirmDialog, setConfirmDialog] = React.useState({ open: false, message: '', onConfirm: null, severity: 'warning' });
     const [editingFileId, setEditingFileId] = React.useState(null);
-    const [expandedFileContent, setExpandedFileContent] = React.useState(new Set()); // Files with expanded content view
-    const [parsedContentData, setParsedContentData] = React.useState({}); // Cache for parsed content
     const [semanticResults, setSemanticResults] = React.useState(null); // {fileId: {maxScore, pages: [{page, score}]}}
     const [fileEmbeddings, setFileEmbeddings] = React.useState({}); // Cache embeddings
 
@@ -2586,44 +2669,7 @@ export default function FileManager2() {
         };
     }, [editingFileId]);
 
-    // Handle file content expansion
-    const toggleFileContentExpansion = async (fileId) => {
-        setExpandedFileContent(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(fileId)) {
-                newSet.delete(fileId);
-            } else {
-                newSet.add(fileId);
-                // Load parsed content for documents if not already loaded
-                loadParsedContentForFile(fileId);
-            }
-            return newSet;
-        });
-    };
 
-    // Load parsed content for a document
-    const loadParsedContentForFile = async (fileId) => {
-        try {
-            const file = files.find(f => f.id === fileId);
-            if (!file) return;
-
-            // For documents, load ParsedContent
-            if (file.documentID) {
-                const client = getAmplifyClient();
-                const { data: parsedContents } = await client.models.ParsedContent.list({
-                    filter: { documentID: { eq: file.documentID } }
-                });
-                if (parsedContents.length > 0) {
-                    setParsedContentData(prev => ({
-                        ...prev,
-                        [fileId]: parsedContents[0]
-                    }));
-                }
-            }
-        } catch (error) {
-            console.error('Error loading parsed content:', error);
-        }
-    };
 
     const [isDragging, setIsDragging] = React.useState(false);
     const [fileOperations, setFileOperations] = React.useState([]);
@@ -2689,8 +2735,9 @@ export default function FileManager2() {
                 }
             });
 
-            // Check parsed content if available
-            const parsedContent = parsedContentData[file.id];
+            // Check parsed content if available (parsedContent is a hasMany array, take first item)
+            const parsedContent = file.parsedContent?.[0] || file.document?.parsedContent?.[0];
+            console.log('[SimpleTextSearch] Parsed content for file', file.id, parsedContent);
             if (parsedContent) {
                 // Search vocabulary
                 (parsedContent.vocabulary || []).forEach(v => {
@@ -2761,7 +2808,7 @@ export default function FileManager2() {
         });
 
         setSemanticResults(Object.keys(results).length > 0 ? results : null);
-    }, [files, parsedContentData]);
+    }, [files]);
 
     // Enhanced text search function (no external API calls)
     const performSemanticSearch = React.useCallback(async (query) => {
@@ -3319,10 +3366,7 @@ export default function FileManager2() {
         search,
         expandedItems,
         selectedItems,
-        expandedFileContent,
-        parsedContentData,
         documentStatuses,
-        toggleFileContentExpansion,
         handleToggleSelect,
         handleFileNameUpdate,
         setConfirmDialog,
@@ -3671,49 +3715,13 @@ export default function FileManager2() {
                                 minWidth: 0
                             }}
                         >
-                            {selectedItems.size === 0 ? (
-                                <Box
-                                    sx={{
-                                        flex: 1,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        color: 'text.secondary'
-                                    }}
-                                >
-                                    <Typography variant="body2">
-                                        Select a file to view details and metadata
-                                    </Typography>
-                                </Box>
-                            ) : (
-                                /* Show file details and preview */
-                                (() => {
-                                    const firstSelectedId = Array.from(selectedItems)[0];
-                                    const selectedFile = files.find(f => f.id === firstSelectedId);
-                                    if (!selectedFile) return null;
-
-                                    const documentStatus = documentStatuses[selectedFile.documentID];
-
-                                    return (
-                                        <>
-                                            <FileDetailsPanel
-                                                file={selectedFile}
-                                                documentStatus={documentStatus}
-                                                editor={editor}
-                                            />
-                                            {/* File Content */}
-                                            <Box sx={{ flex: 1, overflow: 'auto' }}>
-                                                <ExpandedFileContent
-                                                    file={selectedFile}
-                                                    parsedContent={parsedContentData[selectedFile.id]}
-                                                    search={search}
-                                                    editor={editor}
-                                                />
-                                            </Box>
-                                        </>
-                                    );
-                                })()
-                            )}
+                            <SelectedFileDetailsPanel
+                                selectedItems={selectedItems}
+                                files={files}
+                                documentStatuses={documentStatuses}
+                                search={search}
+                                editor={editor}
+                            />
                         </Box></>
                         )}
 

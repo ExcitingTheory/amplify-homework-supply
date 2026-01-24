@@ -1,3 +1,18 @@
+/**
+ * @fileoverview Storybook stories demonstrating onboarding task completion patterns
+ * 
+ * Interactive examples showing:
+ * - Auto-detection of task completion
+ * - Manual task tracking
+ * - Multi-step task flows
+ * - Progress indicators
+ * - Persona-specific onboarding experiences
+ * 
+ * Uses custom hooks (useCompleteTask, useTrackTask) to manage onboarding state.
+ * 
+ * @module stories/OnboardingExamples.stories
+ */
+
 import { Meta, StoryObj } from '@storybook/react';
 import { useState, useEffect } from 'react';
 import {
@@ -123,6 +138,39 @@ export const DisplayOnboardingStatus: StoryObj = {
     if (!stats) {
       return (
         <Container maxWidth="md" sx={{ py: 4 }}>
+          <Alert 
+            severity="info" 
+            sx={{ 
+              mb: 2,
+              '& .MuiAlert-message': { width: '100%' }
+            }}
+          >
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+              📍 Where to find the Onboarding Panel:
+            </Typography>
+            <Typography variant="body2" component="div">
+              👉 Look at the <strong>bottom of the screen</strong> for tabs like:
+              <Box component="span" sx={{ 
+                display: 'inline-block', 
+                mx: 1, 
+                px: 1, 
+                py: 0.5, 
+                bgcolor: 'primary.main', 
+                color: 'white', 
+                borderRadius: 1,
+                fontSize: '0.85rem'
+              }}>
+                Controls | Actions | <strong>Onboarding</strong>
+              </Box>
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              👉 Click the <strong>"Onboarding"</strong> tab to open the panel
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              👉 If you don't see it, press <kbd>A</kbd> to toggle the addon panel
+            </Typography>
+          </Alert>
+          
           <Alert severity="warning">
             No persona selected. Please select a persona in the Onboarding panel first.
           </Alert>

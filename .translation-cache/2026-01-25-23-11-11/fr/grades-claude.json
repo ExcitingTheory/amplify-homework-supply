@@ -1,0 +1,10 @@
+{
+  "title": "Notes",
+  "accuracy": "Précision",
+  "complete": "Terminé",
+  "incomplete": "Incomplet",
+  "view_grade": "Voir la note",
+  "submit_grade": "Soumettre la note",
+  "no_grades": "Aucune note disponible",
+  "percentage": "{{value}} %"
+}

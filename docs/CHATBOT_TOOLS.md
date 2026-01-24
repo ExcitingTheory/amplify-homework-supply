@@ -136,12 +136,12 @@ The Edge Runtime used by `/api/chat` cannot import Amplify DataStore. Tool execu
 #### `generate_unit_content`
 - **Purpose**: Generate markdown content suggestions that can be inserted into the current unit
 - **Parameters**:
-  - `contentType` (enum, required): Type of content - 'explanation', 'example', 'practice', 'quiz', 'summary', 'vocabulary_section', 'custom'
+  - `contentType` (enum, required): Type of content as custom or stock lexical plugin/node - 'answer', 'custom_answer', 'word_block', 'meaning_Association', 'quiz', 'playlist', plus normal text editor content types like 'p', 'h1', 'h2', 'ul', 'ol', 'code_block', etc.
   - `topic` (string, required): Topic or subject for the content
   - `instructions` (string): Specific instructions or requirements
   - `includeMarkdown` (boolean, default: true): Whether to format with markdown
-- **Returns**: Structured template and guidance for content generation
-- **Behavior**: Provides a template structure, then AI generates the actual content
+- **Returns**: the insert into unit content template structure
+- **Behavior**: Provides a template structure, then AI generates the actual markdown or lexical insert arguments and insert command selection. User can copy/paste into editor, or use a future "Insert" button.
 - **Example**: "Generate practice exercises about past tense verbs"
 - **Use Cases**:
   - **Explanation**: Educational explanations with key points

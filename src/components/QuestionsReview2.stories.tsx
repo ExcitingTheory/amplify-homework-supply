@@ -1,3 +1,16 @@
+/**
+ * @fileoverview Storybook stories for QuestionsReview2 component
+ * 
+ * Interactive stories demonstrating question review functionality with:
+ * - Mock parsed content from PDF analysis
+ * - Virtual scrolling with large question sets
+ * - Search/filter interactions
+ * - Import workflow demonstrations
+ * - Lexical inline editing for questions and answers
+ * 
+ * @module components/QuestionsReview2.stories
+ */
+
 import type { Meta, StoryObj } from '@storybook/react';
 import QuestionsReview2 from './QuestionsReview2';
 import { Box, Paper, Typography } from '@mui/material';

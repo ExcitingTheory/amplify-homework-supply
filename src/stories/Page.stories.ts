@@ -1,3 +1,14 @@
+/**
+ * @fileoverview Storybook stories for Page component
+ * 
+ * Example page stories with interaction testing:
+ * - Logged out state
+ * - Logged in state with user interactions
+ * - Component testing patterns with play functions
+ * 
+ * @module stories/Page.stories
+ */
+
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
 import { expect, userEvent, within } from 'storybook/test';

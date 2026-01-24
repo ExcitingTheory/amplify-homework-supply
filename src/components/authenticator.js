@@ -1,3 +1,13 @@
+/**
+ * @fileoverview Authenticator - AWS Amplify authentication component wrapper
+ * 
+ * Provides sign in, sign up, and password reset flows using AWS Cognito.
+ * Displays email/password form with custom field configuration. Used throughout
+ * the app to gate access to authenticated content.
+ * 
+ * @module Authenticator
+ */
+
 import React from 'react';
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';

@@ -6,8 +6,8 @@ Japanese language learning platform built with Next.js, AWS Amplify Gen 1, and O
 
 **Stack**: Next.js 20 + AWS Amplify Gen 1 (GraphQL/DataStore) + Material UI + Lexical Editor + OpenAI  
 **Database**: DynamoDB via Amplify DataStore with real-time sync  
-**Auth**: AWS Cognito with user groups (Admins, Instructors, Learners)  
-**Storage**: S3 for files (audio/video/PDFs), organized by protection level  
+**Auth**: AWS Cognito with user groups (Admins,Moderators, Instructors, Learners)m owner-based auth, and dynamic group auth by creating Cognito groups and including them in the model fields (we use both read and write groups) and @auth directives
+**Storage**: S3 for files (audio/video/PDFs), organized by protection level, however we can use base64 and http(s) URLs for testing without S3 uploads
 **AI Features**: OpenAI API (GPT-4, Whisper, TTS) via Lambda + Vercel AI SDK for streaming chat
 
 ### Key Architectural Patterns
@@ -125,19 +125,22 @@ await DataStore.delete(unit);
 - System messages built with current context (unit, files, dictionary)
 - Streams GPT-4 responses via `OpenAIStream` + `StreamingTextResponse`
 **CRITICAL - Chat Message Format**:
-Messages from `useChat` hook have a simple structure - **DO NOT modify message parsing without checking current code**:
+Messages from `useChat` hook use `message.parts` array - **DO NOT modify message parsing without checking current code**:
 ```javascript
 {
   id: string,
   role: 'user' | 'assistant',
-  content: string,  // Direct text content - use this, not parts array
-  toolInvocations: [  // Tool calls if present
+  parts: [  // Array of message parts - ALWAYS use this format
     {
-      toolName: string,
+      type: 'text',
+      text: string  // Extract text from parts, not from message.content
+    },
+    {
+      type: 'tool-search_content' | 'tool-*',  // Tool calls
       toolCallId: string,
-      state: 'call' | 'result',
-      args: object,
-      result: object
+      state: 'output-available' | 'call',
+      input: object,  // Tool arguments
+      output: object  // Tool results (when state is 'output-available')
     }
   ]
 }
@@ -147,7 +150,8 @@ Messages from `useChat` hook have a simple structure - **DO NOT modify message p
 1. Check git history: `git log --oneline -- src/components/ChatSidebar.js`
 2. View current working code: `git show HEAD:src/components/ChatSidebar.js`
 3. Verify mock data format in `.storybook/__mocks__/ui-data/` matches actual data structure
-4. `message.parts` array format
+4. Extract text: `message.parts.filter(p => p.type === 'text').map(p => p.text).join('')`
+5. Extract tools: `message.parts.filter(p => p.type?.startsWith('tool-'))`
 
 **Embeddings** (Lambda functions `generateEmbedding` and `generateEmbeddings`):
 - Uses `text-embedding-3-small` model

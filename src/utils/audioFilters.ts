@@ -1,8 +1,20 @@
 /**
- * Audio plugin filters
+ * @fileoverview audioFilters - Audio processing filters for quality enhancement
  * 
+ * Collection of audio processing utilities including:
+ * - Low-pass and high-pass filters
+ * - Normalization
+ * - Click/pop removal
+ * - Bass and treble boosters
+ * - Echo and reverb effects
+ * - Clarity enhancement
+ * - Noise gating
+ * 
+ * Used for improving audio quality in student recordings and TTS output.
+ * Currently contains placeholder implementations pending real audio processing logic.
+ * 
+ * @module utils/audioFilters
  */
-
 
 export const audioFilters = {
   /**

@@ -1,10 +1,145 @@
 {
-  "title": "Grades",
-  "accuracy": "Accuracy",
-  "complete": "Complete",
-  "incomplete": "Incomplete",
-  "view_grade": "View Grade",
-  "submit_grade": "Submit Grade",
-  "no_grades": "No grades available",
-  "percentage": "{{value}}%"
+  "title": {
+    "value": "Grades",
+    "context": "This text appears as a main navigation label or page heading in the grading section of the platform. Students see this when viewing their assignment scores and feedback, while instructors see it when accessing the grading dashboard to evaluate student work.",
+    "component": {
+      "location": "src/pages/grades/index.js",
+      "description": "The grades component displays academic performance data including assignment scores, quiz results, and overall progress tracking. It provides different views for students to see their grades and for instructors to manage grading workflows."
+    },
+    "usage": "Navigation menu item or page heading that users click or see when accessing grade-related features",
+    "impact": "High - This is a core academic feature that directly relates to learning outcomes and student progress tracking",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Scores",
+      "Results",
+      "Marks",
+      "Assessment Results"
+    ]
+  },
+  "accuracy": {
+    "value": "Accuracy",
+    "context": "This text appears in the grading section where performance metrics are displayed to show how precisely a student answered questions or completed exercises. Users see this label when viewing detailed grade breakdowns or assessment results.",
+    "component": {
+      "location": "src/components/grades/GradeMetrics.js",
+      "description": "Component that displays various performance metrics and statistics for student assessments. It shows detailed breakdown of grades including accuracy percentages, completion rates, and other performance indicators."
+    },
+    "usage": "Label text for a performance metric displaying the percentage or measure of correct responses.",
+    "impact": "Important - helps students understand their performance quality and areas for improvement in their Japanese language learning.",
+    "userType": "all",
+    "tone": "technical",
+    "alternativeTerms": [
+      "Precision",
+      "Correctness",
+      "Score"
+    ]
+  },
+  "complete": {
+    "value": "Complete",
+    "context": "This text appears as a status indicator or action label within the grading system interface. Users see it when assignments or tasks have been finished and submitted, or when instructors need to mark work as completed.",
+    "component": {
+      "location": "src/components/grades/GradeStatus.js",
+      "description": "Component that displays and manages completion status for assignments and grading activities. It shows completion states and allows status updates for both student submissions and instructor grading workflows."
+    },
+    "usage": "Status label or button text indicating finished state of assignments or grading tasks.",
+    "impact": "High - Critical for users to understand assignment completion status and progress tracking in the learning platform.",
+    "userType": "all",
+    "tone": "casual",
+    "alternativeTerms": [
+      "Finished",
+      "Done",
+      "Completed",
+      "Fulfilled"
+    ]
+  },
+  "incomplete": {
+    "value": "Incomplete",
+    "context": "This status label appears in the grading interface when a student has not finished an assignment or assessment. It is displayed in grade books, progress tracking views, and assignment status indicators to show that work is still pending completion.",
+    "component": {
+      "location": "src/components/grades/GradeStatus.js",
+      "description": "Displays the completion status of student assignments and assessments in grade management interfaces. Shows various status states including incomplete, complete, and graded to help instructors track student progress."
+    },
+    "usage": "Status label or badge displayed next to student assignments in grade tracking interfaces.",
+    "impact": "High - Critical for instructors to quickly identify which students need to complete their work and for students to understand their assignment status.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Unfinished",
+      "Pending",
+      "In Progress",
+      "Not Completed"
+    ]
+  },
+  "view_grade": {
+    "value": "View Grade",
+    "context": "This text appears as a clickable element in the student's assignment or quiz results interface, allowing them to access detailed grading information. Students see this after completing and submitting graded assignments or assessments in their Japanese learning units.",
+    "component": {
+      "location": "src/components/grades/GradeViewButton.js",
+      "description": "Component that renders an interactive element for students to access their detailed grade information and feedback. This appears in grade summary lists, assignment completion screens, and student dashboard areas where graded work is displayed."
+    },
+    "usage": "Button or link text that students click to open detailed grade information and instructor feedback.",
+    "impact": "High - Essential for students to access their performance feedback and understand their learning progress in Japanese language assignments.",
+    "userType": "students",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "See Grade",
+      "Check Grade",
+      "Review Grade",
+      "Grade Details"
+    ]
+  },
+  "submit_grade": {
+    "value": "Submit Grade",
+    "context": "This text appears on a button that instructors click to finalize and submit a student's grade after reviewing their assignment or quiz. It is typically located in the grading interface where instructors can view student submissions and assign scores.",
+    "component": {
+      "location": "src/components/grades/GradeSubmissionForm.js",
+      "description": "This component renders the grading interface where instructors can review student work and assign grades. It provides form controls for entering scores and comments before finalizing the grade submission."
+    },
+    "usage": "Primary action button that instructors click to finalize and record a student's grade",
+    "impact": "Critical - this is essential for instructors to complete the grading workflow and provide feedback to students",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Submit Score",
+      "Record Grade",
+      "Finalize Grade",
+      "Save Grade"
+    ]
+  },
+  "no_grades": {
+    "value": "No grades available",
+    "context": "This message appears in the grades section when a student or instructor views an assignment or quiz that hasn't been graded yet, or when there are no graded assignments to display. Users see this as an empty state message in place of grade listings or score displays.",
+    "component": {
+      "location": "src/components/grades/GradesList.js",
+      "description": "This component displays a list of grades for assignments and quizzes, showing an empty state when no graded items exist. It provides feedback to users when the grades data is empty or still being processed."
+    },
+    "usage": "Empty state message displayed in the grades listing area when no grade data is available",
+    "impact": "Medium - helps users understand why they don't see grades rather than showing a blank interface",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "No scores available",
+      "No results to display",
+      "Grades not found",
+      "No grade data"
+    ]
+  },
+  "percentage": {
+    "value": "{{value}}%",
+    "context": "This percentage format appears throughout the grades section to display numerical grade values and scores. Students see this when viewing their assignment results, quiz scores, and overall progress metrics, while instructors see it when reviewing student performance and assignment completion rates.",
+    "component": {
+      "location": "src/components/grades/GradeDisplay.js",
+      "description": "A grade display component that formats and shows percentage-based scores and completion rates. It renders numerical values with the percentage symbol for consistent grade presentation across the platform."
+    },
+    "usage": "Text label displaying formatted percentage values in grade summaries and score displays.",
+    "impact": "High - Essential for clearly communicating academic performance and progress to both students and instructors.",
+    "userType": "all",
+    "tone": "technical",
+    "alternativeTerms": [
+      "percent",
+      "rate",
+      "score format",
+      "percentage value"
+    ]
+  }
 }

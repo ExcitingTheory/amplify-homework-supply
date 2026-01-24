@@ -1,0 +1,18 @@
+{
+  "generic": "Une erreur s'est produite",
+  "network": "Erreur réseau. Veuillez vérifier votre connexion.",
+  "auth": {
+    "invalid_credentials": "Nom d'utilisateur ou mot de passe invalide",
+    "session_expired": "Votre session a expiré. Veuillez vous connecter à nouveau."
+  },
+  "validation": {
+    "required": "Ce champ est obligatoire",
+    "invalid_email": "Adresse e-mail invalide",
+    "password_mismatch": "Les mots de passe ne correspondent pas"
+  },
+  "file": {
+    "upload_failed": "Échec du téléchargement du fichier",
+    "invalid_type": "Type de fichier invalide",
+    "too_large": "Le fichier est trop volumineux"
+  }
+}

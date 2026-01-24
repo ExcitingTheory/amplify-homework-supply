@@ -1,0 +1,10 @@
+{
+  "title": "Calificaciones",
+  "accuracy": "Precisión",
+  "complete": "Completo",
+  "incomplete": "Incompleto",
+  "view_grade": "Ver Calificación",
+  "submit_grade": "Enviar Calificación",
+  "no_grades": "No hay calificaciones disponibles",
+  "percentage": "{{value}}%"
+}

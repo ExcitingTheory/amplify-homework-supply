@@ -6,8 +6,8 @@
 import { useState, useCallback } from 'react';
 import { mockChatAPI } from './chat-api';
 
-export function useChat({ api, body, onError }) {
-  const [messages, setMessages] = useState([]);
+export function useChat({ api, body, onError, initialMessages = [] }) {
+  const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 

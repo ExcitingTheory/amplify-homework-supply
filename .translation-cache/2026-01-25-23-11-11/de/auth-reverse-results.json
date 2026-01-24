@@ -1,0 +1,113 @@
+{
+  "claude": {
+    "forward": {
+      "sign_in": "Anmelden",
+      "sign_out": "Abmelden",
+      "sign_up": "Registrieren",
+      "username": "Benutzername",
+      "password": "Passwort",
+      "email": "E-Mail",
+      "forgot_password": "Passwort vergessen?",
+      "reset_password": "Passwort zurücksetzen",
+      "confirm_password": "Passwort bestätigen"
+    },
+    "reversedBy": {
+      "gpt": {
+        "sign_in": "Sign In",
+        "sign_out": "Sign Out",
+        "sign_up": "Sign Up",
+        "username": "Username",
+        "password": "Password",
+        "email": "Email",
+        "forgot_password": "Forgot Password?",
+        "reset_password": "Reset Password",
+        "confirm_password": "Confirm Password"
+      },
+      "gemini": {
+        "sign_in": "Sign In",
+        "sign_out": "Sign Out",
+        "sign_up": "Sign Up",
+        "username": "Username",
+        "password": "Password",
+        "email": "Email",
+        "forgot_password": "Forgot password?",
+        "reset_password": "Reset password",
+        "confirm_password": "Confirm password"
+      }
+    }
+  },
+  "gpt": {
+    "forward": {
+      "sign_in": "Anmelden",
+      "sign_out": "Abmelden",
+      "sign_up": "Registrieren",
+      "username": "Benutzername",
+      "password": "Passwort",
+      "email": "E-Mail",
+      "forgot_password": "Passwort vergessen?",
+      "reset_password": "Passwort zurücksetzen",
+      "confirm_password": "Passwort bestätigen"
+    },
+    "reversedBy": {
+      "claude": {
+        "sign_in": "Sign In",
+        "sign_out": "Sign Out",
+        "sign_up": "Sign Up",
+        "username": "Username",
+        "password": "Password",
+        "email": "Email",
+        "forgot_password": "Forgot Password?",
+        "reset_password": "Reset Password",
+        "confirm_password": "Confirm Password"
+      },
+      "gemini": {
+        "sign_in": "Sign in",
+        "sign_out": "Sign out",
+        "sign_up": "Sign up",
+        "username": "Username",
+        "password": "Password",
+        "email": "Email",
+        "forgot_password": "Forgot password?",
+        "reset_password": "Reset password",
+        "confirm_password": "Confirm password"
+      }
+    }
+  },
+  "gemini": {
+    "forward": {
+      "sign_in": "Anmelden",
+      "sign_out": "Abmelden",
+      "sign_up": "Registrieren",
+      "username": "Benutzername",
+      "password": "Passwort",
+      "email": "E-Mail",
+      "forgot_password": "Passwort vergessen?",
+      "reset_password": "Passwort zurücksetzen",
+      "confirm_password": "Passwort bestätigen"
+    },
+    "reversedBy": {
+      "claude": {
+        "sign_in": "Sign In",
+        "sign_out": "Sign Out",
+        "sign_up": "Sign Up",
+        "username": "Username",
+        "password": "Password",
+        "email": "Email",
+        "forgot_password": "Forgot Password?",
+        "reset_password": "Reset Password",
+        "confirm_password": "Confirm Password"
+      },
+      "gpt": {
+        "sign_in": "Sign In",
+        "sign_out": "Sign Out",
+        "sign_up": "Sign Up",
+        "username": "Username",
+        "password": "Password",
+        "email": "Email",
+        "forgot_password": "Forgot Password?",
+        "reset_password": "Reset Password",
+        "confirm_password": "Confirm Password"
+      }
+    }
+  }
+}

@@ -344,7 +344,10 @@ const FilesProvider = ({ children }) => {
         const client = getAmplifyClient();
 
         // Query all files regardless of owner - we'll track by identityId for lookup
-        subscriptionRef.current = client.models.File.observeQuery().subscribe({
+        // Include parsedContent relationship for PDFs
+        subscriptionRef.current = client.models.File.observeQuery({
+          selectionSet: ['*', 'document.*', 'parsedContent.*']
+        }).subscribe({
           next: ({ items, isSynced }) => {
             console.log('[FilesContext] File observeQuery subscription triggered:');
             console.log('  - items.length:', items?.length);

@@ -1,0 +1,12 @@
+{
+  "title": "Unidades",
+  "create_unit": "Crear Nueva Unidad",
+  "edit_unit": "Editar Unidad",
+  "delete_unit": "Eliminar Unidad",
+  "unit_name": "Nombre de la Unidad",
+  "unit_description": "Descripción de la Unidad",
+  "published": "Publicado",
+  "draft": "Borrador",
+  "assign_to_section": "Asignar a Sección",
+  "no_units": "No hay unidades disponibles"
+}

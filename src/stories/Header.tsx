@@ -1,3 +1,12 @@
+/**
+ * @fileoverview Header - Storybook example header component
+ * 
+ * Demo header component showing authentication UI with login/logout
+ * functionality. Part of Storybook's component-driven development examples.
+ * 
+ * @module stories/Header
+ */
+
 import { Button } from './Button';
 import './header.css';
 

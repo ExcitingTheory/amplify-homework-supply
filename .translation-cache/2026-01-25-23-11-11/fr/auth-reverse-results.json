@@ -1,0 +1,113 @@
+{
+  "claude": {
+    "forward": {
+      "sign_in": "Se connecter",
+      "sign_out": "Se déconnecter",
+      "sign_up": "S'inscrire",
+      "username": "Nom d'utilisateur",
+      "password": "Mot de passe",
+      "email": "E-mail",
+      "forgot_password": "Mot de passe oublié ?",
+      "reset_password": "Réinitialiser le mot de passe",
+      "confirm_password": "Confirmer le mot de passe"
+    },
+    "reversedBy": {
+      "gpt": {
+        "sign_in": "Sign In",
+        "sign_out": "Sign Out",
+        "sign_up": "Sign Up",
+        "username": "Username",
+        "password": "Password",
+        "email": "Email",
+        "forgot_password": "Forgot Password?",
+        "reset_password": "Reset Password",
+        "confirm_password": "Confirm Password"
+      },
+      "gemini": {
+        "sign_in": "Sign In",
+        "sign_out": "Sign Out",
+        "sign_up": "Sign Up",
+        "username": "Username",
+        "password": "Password",
+        "email": "Email",
+        "forgot_password": "Forgot Password?",
+        "reset_password": "Reset Password",
+        "confirm_password": "Confirm Password"
+      }
+    }
+  },
+  "gpt": {
+    "forward": {
+      "sign_in": "Se connecter",
+      "sign_out": "Se déconnecter",
+      "sign_up": "S'inscrire",
+      "username": "Nom d'utilisateur",
+      "password": "Mot de passe",
+      "email": "Email",
+      "forgot_password": "Mot de passe oublié ?",
+      "reset_password": "Réinitialiser le mot de passe",
+      "confirm_password": "Confirmer le mot de passe"
+    },
+    "reversedBy": {
+      "claude": {
+        "sign_in": "Sign in",
+        "sign_out": "Sign out",
+        "sign_up": "Sign up",
+        "username": "Username",
+        "password": "Password",
+        "email": "Email",
+        "forgot_password": "Forgot password?",
+        "reset_password": "Reset password",
+        "confirm_password": "Confirm password"
+      },
+      "gemini": {
+        "sign_in": "Sign In",
+        "sign_out": "Sign Out",
+        "sign_up": "Sign Up",
+        "username": "Username",
+        "password": "Password",
+        "email": "Email",
+        "forgot_password": "Forgot Password?",
+        "reset_password": "Reset Password",
+        "confirm_password": "Confirm Password"
+      }
+    }
+  },
+  "gemini": {
+    "forward": {
+      "sign_in": "Se connecter",
+      "sign_out": "Se déconnecter",
+      "sign_up": "S'inscrire",
+      "username": "Nom d'utilisateur",
+      "password": "Mot de passe",
+      "email": "Adresse e-mail",
+      "forgot_password": "Mot de passe oublié ?",
+      "reset_password": "Réinitialiser le mot de passe",
+      "confirm_password": "Confirmer le mot de passe"
+    },
+    "reversedBy": {
+      "claude": {
+        "sign_in": "Sign in",
+        "sign_out": "Sign out",
+        "sign_up": "Sign up",
+        "username": "Username",
+        "password": "Password",
+        "email": "Email address",
+        "forgot_password": "Forgot password?",
+        "reset_password": "Reset password",
+        "confirm_password": "Confirm password"
+      },
+      "gpt": {
+        "sign_in": "Sign In",
+        "sign_out": "Sign Out",
+        "sign_up": "Sign Up",
+        "username": "Username",
+        "password": "Password",
+        "email": "Email Address",
+        "forgot_password": "Forgot Password?",
+        "reset_password": "Reset Password",
+        "confirm_password": "Confirm Password"
+      }
+    }
+  }
+}

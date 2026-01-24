@@ -1,0 +1,69 @@
+{
+  "app": {
+    "name": "宿題サプライ",
+    "tagline": "日本語学習プラットフォーム"
+  },
+  "actions": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "submit": "送信",
+    "close": "閉じる",
+    "create": "作成",
+    "upload": "アップロード",
+    "download": "ダウンロード",
+    "share": "共有",
+    "copy": "コピー",
+    "send": "送信",
+    "add": "追加",
+    "remove": "削除",
+    "update": "更新",
+    "confirm": "確認",
+    "clear": "クリア",
+    "reset": "リセット",
+    "retry": "再試行",
+    "back": "戻る",
+    "next": "次へ",
+    "finish": "完了",
+    "continue": "続ける"
+  },
+  "navigation": {
+    "home": "ホーム",
+    "units": "ユニット",
+    "sections": "セクション",
+    "grades": "成績",
+    "profile": "プロフィール",
+    "workbook": "ワークブック"
+  },
+  "status": {
+    "loading": "読み込み中...",
+    "saving": "保存中...",
+    "success": "成功",
+    "error": "エラー",
+    "processing": "処理中...",
+    "uploading": "アップロード中...",
+    "downloading": "ダウンロード中...",
+    "complete": "完了",
+    "incomplete": "未完了",
+    "pending": "保留中"
+  },
+  "time": {
+    "created": "作成日",
+    "updated": "更新日",
+    "due": "期限",
+    "completed": "完了日"
+  },
+  "common": {
+    "yes": "はい",
+    "no": "いいえ",
+    "ok": "OK",
+    "search": "検索",
+    "filter": "フィルター",
+    "sort": "ソート",
+    "view": "表示",
+    "settings": "設定",
+    "help": "ヘルプ",
+    "about": "情報"
+  }
+}

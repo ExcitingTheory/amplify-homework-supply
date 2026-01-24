@@ -1,0 +1,30 @@
+{
+  "toolbar": {
+    "bold": "粗体",
+    "italic": "斜体",
+    "underline": "下划线",
+    "strikethrough": "删除线",
+    "heading": "标题",
+    "paragraph": "段落",
+    "bullet_list": "项目符号列表",
+    "numbered_list": "编号列表",
+    "align_left": "左对齐",
+    "align_center": "居中对齐",
+    "align_right": "右对齐",
+    "insert_link": "插入链接",
+    "insert_image": "插入图片",
+    "insert_table": "插入表格",
+    "insert_code": "插入代码块"
+  },
+  "blocks": {
+    "answer": "答案块",
+    "quiz": "测验块",
+    "custom_answer": "自定义答案",
+    "meaning_association": "含义联想"
+  },
+  "placeholders": {
+    "type_here": "在此处输入...",
+    "enter_text": "输入文本",
+    "search_words": "搜索词汇..."
+  }
+}

@@ -1,0 +1,32 @@
+.onboarding-sidebar {
+  margin: 12px;
+  padding: 16px;
+  border: 2px solid rgb(234, 179, 8);
+  border-radius: 8px;
+  background-color: var(--sb-sidebar-bg, rgba(250, 250, 250, 0.98));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Smooth transitions */
+.onboarding-sidebar * {
+  transition: all 0.2s ease;
+}
+
+/* Role selection header */
+.onboarding-role-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--sb-sidebar-text, rgba(0, 0, 0, 0.8));
+}
+
+.onboarding-role-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

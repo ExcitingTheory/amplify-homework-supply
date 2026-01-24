@@ -1,0 +1,11 @@
+{
+  "sign_in": "サインイン",
+  "sign_out": "サインアウト",
+  "sign_up": "サインアップ",
+  "username": "ユーザー名",
+  "password": "パスワード",
+  "email": "メールアドレス",
+  "forgot_password": "パスワードをお忘れですか？",
+  "reset_password": "パスワードをリセット",
+  "confirm_password": "パスワードを確認"
+}

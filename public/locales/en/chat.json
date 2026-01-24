@@ -1,8 +1,110 @@
 {
-  "title": "Chat",
-  "send_message": "Send message",
-  "type_message": "Type a message...",
-  "upload_file": "Upload File",
-  "analyzing": "Analyzing...",
-  "chat_with_ai": "Chat with AI"
+  "title": {
+    "value": "Chat",
+    "context": "This appears as a title or heading for the chat interface where users can interact with AI assistants. Users see this when accessing the chat functionality, likely in a sidebar or dedicated chat section of the platform.",
+    "component": {
+      "location": "src/components/ChatSidebar/",
+      "description": "The chat interface provides AI-powered conversation capabilities with features like virtualized message rendering, tool call previews, and content generation. Users can chat with AI assistants, preview generated content, and insert AI responses directly into their work.",
+      "usage": "Page title, section heading, or navigation label for the chat feature",
+      "impact": "High - This is the primary identifier for a major platform feature that helps users understand they can access AI chat functionality",
+      "userType": "all",
+      "tone": "casual",
+      "alternativeTerms": [
+        "Conversation",
+        "Messages",
+        "AI Assistant",
+        "Discussion"
+      ]
+    }
+  },
+  "send_message": {
+    "value": "Send message",
+    "context": "This text appears on a button in the chat interface that users click to send their typed message to the AI assistant. It's located at the bottom of the chat input area and becomes active when users have entered text in the message field.",
+    "component": {
+      "location": "src/components/ChatSidebar/",
+      "description": "Part of the chat sidebar interface that provides AI assistance to users while they work on content creation or learning activities. The chat system supports real-time messaging with markdown rendering and streaming AI responses for enhanced learning support.",
+      "usage": "Button label that triggers sending a chat message to the AI assistant"
+    },
+    "impact": "Critical - this is the primary action for communicating with the AI assistant, essential for users to get help and support while learning",
+    "userType": "all",
+    "tone": "casual",
+    "alternativeTerms": [
+      "Submit",
+      "Post message",
+      "Send",
+      "Submit message"
+    ]
+  },
+  "type_message": {
+    "value": "Type a message...",
+    "context": "This placeholder text appears in the chat input field when users are interacting with AI features in the chat sidebar. Users see this prompt when the input field is empty and ready to accept their message or question.",
+    "component": {
+      "location": "src/components/ChatSidebar/ChatInput.tsx",
+      "description": "Chat input component that allows users to send messages to AI assistants for help with Japanese language learning. The component handles user input and message submission in the chat interface."
+    },
+    "usage": "Input field placeholder text that guides users to start typing their message",
+    "impact": "Medium - Provides clear guidance for user interaction but platform remains functional without it",
+    "userType": "all",
+    "tone": "casual",
+    "alternativeTerms": [
+      "Enter a message...",
+      "Write a message...",
+      "Start typing..."
+    ]
+  },
+  "upload_file": {
+    "value": "Upload File",
+    "context": "This text appears as a button or action label in the chat interface, allowing users to attach files to their chat messages or conversations. Users see this when they want to share documents, images, or other files with the AI assistant or during chat interactions.",
+    "component": {
+      "location": "src/components/ChatSidebar/",
+      "description": "Part of the chat interface system that handles file attachments and media sharing within conversations. The chat sidebar provides various tools and actions for enhanced communication with AI features.",
+      "usage": "Button or clickable element that triggers file selection dialog for uploading attachments"
+    },
+    "impact": "High - Essential for users who need to share visual content, documents, or media files to get contextual help from the AI assistant",
+    "userType": "all",
+    "tone": "casual",
+    "alternativeTerms": [
+      "Attach File",
+      "Add File",
+      "Choose File",
+      "Select File"
+    ]
+  },
+  "analyzing": {
+    "value": "Analyzing...",
+    "context": "This loading message appears in the chat interface when the AI is processing user input or analyzing content before providing a response. Users see this brief status indicator while waiting for AI operations to complete during their conversation.",
+    "component": {
+      "location": "src/components/ChatSidebar/LexicalMessageRenderer.jsx",
+      "description": "Read-only Lexical editor surface that renders chat messages with markdown support and streaming capabilities. This component displays the analyzing status during real-time AI response streaming before the actual content appears.",
+      "component": "LexicalMessageRenderer"
+    },
+    "usage": "Loading status text displayed in chat message bubbles during AI processing",
+    "impact": "Medium - Provides important feedback to users that their request is being processed, preventing confusion during AI response delays",
+    "userType": "all",
+    "tone": "casual",
+    "alternativeTerms": [
+      "Processing",
+      "Thinking",
+      "Loading",
+      "Working"
+    ]
+  },
+  "chat_with_ai": {
+    "value": "Chat with AI",
+    "context": "This text appears as a label or heading for the AI chat functionality within the chat sidebar. Users see this when accessing the AI-powered chat feature that helps with Japanese language learning tasks and content creation.",
+    "component": {
+      "location": "src/components/ChatSidebar/",
+      "description": "The chat sidebar provides AI-powered assistance through a virtualized message interface with markdown support, real-time streaming responses, and tool integration. Users can interact with AI to get help with language learning, content generation, and editing tasks.",
+      "usage": "Label or heading text identifying the AI chat functionality",
+      "impact": "High - This is a primary feature identifier that helps users understand they can interact with AI assistance for their learning activities",
+      "userType": "all",
+      "tone": "casual",
+      "alternativeTerms": [
+        "AI Chat",
+        "Talk to AI",
+        "AI Assistant",
+        "Converse with AI"
+      ]
+    }
+  }
 }

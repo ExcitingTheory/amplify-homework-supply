@@ -1,0 +1,18 @@
+{
+  "generic": "Ein Fehler ist aufgetreten",
+  "network": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.",
+  "auth": {
+    "invalid_credentials": "Ungültiger Benutzername oder Passwort",
+    "session_expired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an."
+  },
+  "validation": {
+    "required": "Dieses Feld ist erforderlich",
+    "invalid_email": "Ungültige E-Mail-Adresse",
+    "password_mismatch": "Die Passwörter stimmen nicht überein"
+  },
+  "file": {
+    "upload_failed": "Dateiupload fehlgeschlagen",
+    "invalid_type": "Ungültiger Dateityp",
+    "too_large": "Datei ist zu groß"
+  }
+}

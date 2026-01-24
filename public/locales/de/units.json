@@ -1,0 +1,12 @@
+{
+  "title": "Einheiten",
+  "create_unit": "Neue Einheit erstellen",
+  "edit_unit": "Einheit bearbeiten",
+  "delete_unit": "Einheit löschen",
+  "unit_name": "Einheitenname",
+  "unit_description": "Einheitenbeschreibung",
+  "published": "Veröffentlicht",
+  "draft": "Entwurf",
+  "assign_to_section": "Zu Abschnitt zuweisen",
+  "no_units": "Keine Einheiten verfügbar"
+}

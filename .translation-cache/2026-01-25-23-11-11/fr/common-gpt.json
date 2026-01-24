@@ -1,0 +1,69 @@
+{
+  "app": {
+    "name": "Fournitures pour devoirs",
+    "tagline": "Plateforme d'apprentissage de la langue japonaise"
+  },
+  "actions": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "submit": "Soumettre",
+    "close": "Fermer",
+    "create": "Créer",
+    "upload": "Téléverser",
+    "download": "Télécharger",
+    "share": "Partager",
+    "copy": "Copier",
+    "send": "Envoyer",
+    "add": "Ajouter",
+    "remove": "Retirer",
+    "update": "Mettre à jour",
+    "confirm": "Confirmer",
+    "clear": "Effacer",
+    "reset": "Réinitialiser",
+    "retry": "Réessayer",
+    "back": "Retour",
+    "next": "Suivant",
+    "finish": "Terminer",
+    "continue": "Continuer"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "units": "Unités",
+    "sections": "Sections",
+    "grades": "Notes",
+    "profile": "Profil",
+    "workbook": "Cahier d'exercices"
+  },
+  "status": {
+    "loading": "Chargement...",
+    "saving": "Enregistrement...",
+    "success": "Succès",
+    "error": "Erreur",
+    "processing": "Traitement...",
+    "uploading": "Téléversement...",
+    "downloading": "Téléchargement...",
+    "complete": "Terminé",
+    "incomplete": "Incomplet",
+    "pending": "En attente"
+  },
+  "time": {
+    "created": "Créé",
+    "updated": "Mis à jour",
+    "due": "Dû",
+    "completed": "Complété"
+  },
+  "common": {
+    "yes": "Oui",
+    "no": "Non",
+    "ok": "OK",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "view": "Voir",
+    "settings": "Paramètres",
+    "help": "Aide",
+    "about": "À propos"
+  }
+}

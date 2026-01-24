@@ -4,6 +4,7 @@
  */
 
 import { mockFiles, mockDocuments, mockParsedContent } from './ui-data/files';
+import { allChatData } from './chatDataLoader';
 
 /**
  * Mock in-memory data stores
@@ -26,6 +27,30 @@ const dataStores = {
   AssistantChat: new Map(),
   AssistantChatFile: new Map(),
   Settings: new Map(),
+};
+
+/**
+ * Store active subscriptions for each model
+ * This allows us to notify subscribers when data changes
+ */
+const activeSubscriptions = {
+  File: [],
+  Document: [],
+  Unit: [],
+  Word: [],
+  Question: [],
+  Grade: [],
+  Section: [],
+  Assignment: [],
+  UnitWord: [],
+  UnitFile: [],
+  UnitDocument: [],
+  QuestionUnit: [],
+  ParsedContent: [],
+  AIFeedback: [],
+  AssistantChat: [],
+  AssistantChatFile: [],
+  Settings: [],
 };
 
 /**
@@ -89,6 +114,11 @@ const relationships = {
       unitWords: { targetModel: 'UnitWord', foreignKey: 'unitID' },
     },
   },
+  AssistantChat: {
+    hasMany: {
+      chatFiles: { targetModel: 'AssistantChatFile', foreignKey: 'chatID' },
+    },
+  },
 };
 
 /**
@@ -101,18 +131,43 @@ const addRelationshipAccessors = (item, modelName) => {
 
   const modelRelationships = relationships[modelName];
   const enhancedItem = { ...item };
+  
+  // Parse JSON fields for ParsedContent model
+  if (modelName === 'ParsedContent') {
+    try {
+      enhancedItem.vocabularyJSON = typeof item.vocabularyJSON === 'string' 
+        ? JSON.parse(item.vocabularyJSON) 
+        : (item.vocabularyJSON || []);
+      enhancedItem.summariesJSON = typeof item.summariesJSON === 'string'
+        ? JSON.parse(item.summariesJSON)
+        : (item.summariesJSON || []);
+      enhancedItem.objectivesJSON = typeof item.objectivesJSON === 'string'
+        ? JSON.parse(item.objectivesJSON)
+        : (item.objectivesJSON || []);
+      enhancedItem.conceptsJSON = typeof item.conceptsJSON === 'string'
+        ? JSON.parse(item.conceptsJSON)
+        : (item.conceptsJSON || []);
+      enhancedItem.questionsJSON = typeof item.questionsJSON === 'string'
+        ? JSON.parse(item.questionsJSON)
+        : (item.questionsJSON || []);
+    } catch (e) {
+      console.error('[Mock Data] Error parsing ParsedContent JSON fields:', e);
+    }
+  }
 
   // Add belongsTo accessors (properties that return Promises)
   if (modelRelationships.belongsTo) {
     Object.entries(modelRelationships.belongsTo).forEach(([relationName, config]) => {
       const foreignKeyValue = item[config.foreignKey];
       if (foreignKeyValue) {
+        const targetModel = config.targetModel;
+        
         // Create property that returns a Promise (mimics Amplify Gen2 lazy loading)
         Object.defineProperty(enhancedItem, relationName, {
-          get: () => {
+          get() {
             return Promise.resolve().then(() => {
-              const relatedItem = dataStores[config.targetModel].get(foreignKeyValue);
-              return relatedItem ? addRelationshipAccessors(relatedItem, config.targetModel) : null;
+              const relatedItem = dataStores[targetModel].get(foreignKeyValue);
+              return relatedItem ? addRelationshipAccessors(relatedItem, targetModel) : null;
             });
           },
           enumerable: true,
@@ -122,16 +177,23 @@ const addRelationshipAccessors = (item, modelName) => {
     });
   }
 
-  // Add hasMany accessors (properties that return Promise<Array>)
+  // Add hasMany accessors per official Amplify Gen 2 API:
+  // Lazy load: await item.relationship() returns Promise<{data: Array, errors: []}>
   if (modelRelationships.hasMany) {
     Object.entries(modelRelationships.hasMany).forEach(([relationName, config]) => {
+      const targetModel = config.targetModel;
+      const foreignKey = config.foreignKey;
+      const itemId = item.id;
+      
+      // Return a function that returns Promise<{data: Array}>
       Object.defineProperty(enhancedItem, relationName, {
-        get: () => {
-          return Promise.resolve().then(() => {
-            const allItems = Array.from(dataStores[config.targetModel].values());
-            const filtered = allItems.filter(relatedItem => relatedItem[config.foreignKey] === item.id);
-            return filtered.map(relatedItem => addRelationshipAccessors(relatedItem, config.targetModel));
-          });
+        get() {
+          return async () => {
+            const allItems = Array.from(dataStores[targetModel].values());
+            const filtered = allItems.filter(relatedItem => relatedItem[foreignKey] === itemId);
+            const enhancedFiltered = filtered.map(relatedItem => addRelationshipAccessors(relatedItem, targetModel));
+            return { data: enhancedFiltered, errors: [] };
+          };
         },
         enumerable: true,
         configurable: true,
@@ -155,6 +217,11 @@ const createObservableQuery = (modelName) => {
         // Add relationship accessors to all items
         const enhancedItems = items.map(item => addRelationshipAccessors(item, modelName));
         
+        // Store subscription so we can notify it when data changes
+        const subscription = { next, error };
+        activeSubscriptions[modelName].push(subscription);
+        console.log(`[Mock Data] ${modelName} subscription added. Total subscriptions: ${activeSubscriptions[modelName].length}`);
+        
         // Call next immediately with synced data
         setTimeout(() => {
           next({
@@ -166,7 +233,11 @@ const createObservableQuery = (modelName) => {
         // Return unsubscribe function
         return {
           unsubscribe: () => {
-            console.log(`[Mock Data] ${modelName} subscription unsubscribed`);
+            const index = activeSubscriptions[modelName].indexOf(subscription);
+            if (index > -1) {
+              activeSubscriptions[modelName].splice(index, 1);
+              console.log(`[Mock Data] ${modelName} subscription unsubscribed. Remaining: ${activeSubscriptions[modelName].length}`);
+            }
           },
         };
       } catch (err) {
@@ -477,8 +548,52 @@ export const seedMockQuestionUnits = (questionUnitsArray) => {
 };
 
 export const seedMockAssistantChats = (chatsArray) => {
-  console.log(`[Mock Data] seedMockAssistantChats: Adding ${chatsArray.length} assistant chats`);
+  console.log(`[Mock Data] seedMockAssistantChats: Replacing with ${chatsArray.length} assistant chats`);
+  
+  // Clear existing chats first to prevent story contamination
+  dataStores.AssistantChat.clear();
+  
   chatsArray.forEach(chat => {
     dataStores.AssistantChat.set(chat.id, chat);
   });
+  
+  // Notify all active AssistantChat subscriptions
+  if (activeSubscriptions.AssistantChat.length > 0) {
+    console.log(`[Mock Data] Notifying ${activeSubscriptions.AssistantChat.length} AssistantChat subscriptions`);
+    const items = Array.from(dataStores.AssistantChat.values());
+    const enhancedItems = items.map(item => addRelationshipAccessors(item, 'AssistantChat'));
+    
+    activeSubscriptions.AssistantChat.forEach(subscription => {
+      setTimeout(() => {
+        subscription.next({
+          items: enhancedItems,
+          isSynced: true,
+        });
+      }, 0);
+    });
+  }
+};
+/**
+ * Initialize default mock data for Storybook
+ * Call this from preview.jsx to seed Gen 2 mock data
+ */
+export const initializeMockData = () => {
+  console.log('[Mock Data Gen 2] Initializing mock data');
+  
+  // Seed AssistantChat data
+  if (allChatData) {
+    seedMockAssistantChats([allChatData]);
+    console.log('[Mock Data Gen 2] Seeded AssistantChat:', allChatData.id);
+  }
+  
+  // Seed Files and Documents
+  if (mockFiles && mockFiles.length > 0) {
+    seedMockFiles(mockFiles);
+    console.log('[Mock Data Gen 2] Seeded Files:', mockFiles.length);
+  }
+  
+  if (mockDocuments && mockDocuments.length > 0) {
+    seedMockDocuments(mockDocuments);
+    console.log('[Mock Data Gen 2] Seeded Documents:', mockDocuments.length);
+  }
 };

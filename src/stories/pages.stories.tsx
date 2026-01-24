@@ -1,3 +1,20 @@
+/**
+ * @fileoverview Storybook stories for Next.js application pages
+ * 
+ * Full-page stories demonstrating complete workflows:
+ * - Index (Home/Dashboard)
+ * - Profile management
+ * - Sections (class management)
+ * - Units (lesson content)
+ * - Section Detail (class overview)
+ * - Unit Detail (Lexical editor)
+ * - Workbook (student assignment view)
+ * 
+ * All pages use mocked AWS Amplify services and authentication.
+ * 
+ * @module stories/pages.stories
+ */
+
 // Import page components
 // Note: These are wrapped with MyAuth so we need to provide mock auth context
 import React from 'react';

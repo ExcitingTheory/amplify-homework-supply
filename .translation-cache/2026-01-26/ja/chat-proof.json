@@ -1,0 +1,69 @@
+{
+  "namespace": "chat",
+  "sourceLang": "en",
+  "targetLang": "ja",
+  "timestamp": "2026-01-26T11:25:57.605Z",
+  "models": [
+    {
+      "name": "claude-sonnet-4-20250514",
+      "provider": "anthropic",
+      "requestId": "msg_01KoRUUQRs4JYxzRULnydsYQ",
+      "fingerprint": "f3778a3d5c1a48ddd14ca536eb4b569581b60bf47b0aff5a2d6889d08f6640aa"
+    },
+    {
+      "name": "gpt-4o",
+      "provider": "openai",
+      "requestId": "chatcmpl-D2F0ZYZwe1qhysIyzvvfoJ6vYUUkP",
+      "fingerprint": "a41fe58f72d247ad3806b8eb97f58194af70626adab3a0f31d1aacb2f5b512e8"
+    },
+    {
+      "name": "gemma-3-12b-it",
+      "provider": "google-gemma",
+      "requestId": "fbc46c51-7fd1-49a4-a217-8d96ae8f23a8",
+      "fingerprint": "9edd62f72c9a75b43a033bbc9fde714b40aace415daa3a6d8f64fef92bfee60e"
+    }
+  ],
+  "consensusFingerprint": "f7fa21a2b00bc17ec8daa1c541faf921867d85b17a94da22e98dccfbb680e640",
+  "consensus": {
+    "source": {
+      "title": "Chat",
+      "send_message": "Send message",
+      "type_message": "Type a message...",
+      "upload_file": "Upload File",
+      "analyzing": "Analyzing...",
+      "chat_with_ai": "Chat with AI"
+    },
+    "claude": {
+      "title": "チャット",
+      "send_message": "メッセージを送信する",
+      "type_message": "メッセージを入力してください...",
+      "upload_file": "ファイルをアップロード",
+      "analyzing": "分析中...",
+      "chat_with_ai": "AIとチャット"
+    },
+    "gpt": {
+      "title": "チャット",
+      "send_message": "メッセージを送信します",
+      "type_message": "メッセージを入力してください…",
+      "upload_file": "ファイルをアップロードします",
+      "analyzing": "分析中です…",
+      "chat_with_ai": "AIとチャットします"
+    },
+    "translategemma": {
+      "title": "チャット",
+      "send_message": "メッセージを送信します。",
+      "type_message": "メッセージを入力してください...",
+      "upload_file": "ファイルをアップロードします",
+      "analyzing": "分析中です。",
+      "chat_with_ai": "AIとチャット"
+    },
+    "final": {
+      "title": "チャット",
+      "send_message": "メッセージを送信する",
+      "type_message": "メッセージを入力してください...",
+      "upload_file": "ファイルをアップロードします",
+      "analyzing": "分析中...",
+      "chat_with_ai": "AIとチャット"
+    }
+  }
+}

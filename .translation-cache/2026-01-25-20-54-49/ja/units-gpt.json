@@ -1,0 +1,12 @@
+{
+  "title": "ユニット",
+  "create_unit": "新規ユニット作成",
+  "edit_unit": "ユニット編集",
+  "delete_unit": "ユニット削除",
+  "unit_name": "ユニット名",
+  "unit_description": "ユニットの説明",
+  "published": "公開済み",
+  "draft": "下書き",
+  "assign_to_section": "セクションに割り当てる",
+  "no_units": "ユニットはありません"
+}

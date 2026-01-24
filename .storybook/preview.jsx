@@ -32,10 +32,15 @@ import { AudioPlayerProvider } from '../src/components/Editor3/context/AudioPlay
 
 // Import mock helpers
 import { clearMockData, initializeMockData } from './__mocks__/aws-amplify-datastore';
+import { initializeMockData as initializeGen2MockData } from './__mocks__/aws-amplify-data';
 import { mockChatAPI } from './__mocks__/chat-api';
 
 // Import Next.js router mock
 import { RouterContext, createMockRouter } from './__mocks__/next-router';
+
+// Import translation mode addon
+import { withTranslationMode } from './addons/translation-mode';
+import { globalTypes } from './addons/translation-mode/globalTypes';
 
 // Mock fetch for /api/chat endpoint
 const originalFetch = global.fetch;
@@ -103,6 +108,7 @@ const theme = createTheme({
 
 /** @type { import('@storybook/nextjs').Preview } */
 const preview = {
+  globalTypes,
   parameters: {
     actions: { args: {
       onClick: fn(),
@@ -197,6 +203,7 @@ const preview = {
     },
   tags: ['autodocs'],
   decorators: [
+    withTranslationMode,
     (Story, context) => {
       // Try to get unitId from story args or parameters
       const unitId = context?.args?.unitId || context?.parameters?.unitId || 'mock-unit-id';
@@ -301,7 +308,8 @@ const preview = {
       if (parameters?.initializeMockData === false) {
         console.log('[Preview] Skipped initializing default mock data (initializeMockData=false)');
       } else {
-        initializeMockData();
+        initializeMockData();  // DataStore mock (old Gen 1)
+        initializeGen2MockData();  // Gen 2 client mock
         console.log('[Preview] Initialized default mock data for story');
       }
       return null; // Return null instead of empty object to avoid extra div
