@@ -9,7 +9,7 @@ import { shuffle } from './utils';
 import {DragBox} from './DragBox'
 
 import { Word } from '../../models';
-import { DataStore } from 'aws-amplify/datastore';
+
 
 
 

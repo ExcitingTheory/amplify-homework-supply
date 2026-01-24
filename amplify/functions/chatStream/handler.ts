@@ -241,20 +241,20 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: any) => {
     });
 
     // Check last user message for prompt injection attempts
-    const lastUserMessage = messages.filter((m: any) => m.role === 'user').pop();
+    const lastUserMessage = messages?.filter((m: any) => m.role === 'user').pop();
     if (lastUserMessage) {
       // Extract content from either content string or parts array
       let messageContent = '';
       if (typeof lastUserMessage.content === 'string') {
         messageContent = lastUserMessage.content;
       } else if (lastUserMessage.parts && Array.isArray(lastUserMessage.parts)) {
-        messageContent = lastUserMessage.parts
-          .filter((part: any) => part.type === 'text')
-          .map((part: any) => part.text)
-          .join('');
+        const textParts = lastUserMessage.parts.filter((part: any) => part.type === 'text');
+        if (textParts && Array.isArray(textParts)) {
+          messageContent = textParts.map((part: any) => part.text).join('');
+        }
       }
 
-      if (detectPromptInjection(messageContent)) {
+      if (messageContent && detectPromptInjection(messageContent)) {
         console.warn('[Chat] Potential prompt injection detected:', messageContent.substring(0, 100));
         // Don't reject - let the system prompt handle it, but log for monitoring
       }

@@ -26,7 +26,7 @@ import {
     Class as SectionIcon,
     Article as UnitIcon,
 } from '@mui/icons-material';
-import { DataStore } from 'aws-amplify/datastore';
+import { getAmplifyClient } from '../../utils/amplifyClient';
 import { Unit, UnitWord, QuestionUnit } from '../../models';
 
 /**
@@ -321,19 +321,22 @@ export default function SearchResults({
         setLinkingStates(prev => ({ ...prev, [key]: 'loading' }));
 
         try {
-            const unit = await DataStore.query(Unit, unitId);
+            const client = getAmplifyClient();
+            const { data: unit } = await client.models.Unit.get({ id: unitId });
             if (!unit) {
                 throw new Error('Unit not found');
             }
 
             if (itemType === 'word') {
                 // Check if already linked
-                const existing = await DataStore.query(UnitWord, uw =>
-                    uw.and(uw => [
-                        uw.unitID.eq(unitId),
-                        uw.wordID.eq(item.id)
-                    ])
-                );
+                const { data: existing } = await client.models.UnitWord.list({
+                    filter: {
+                        and: [
+                            { unitID: { eq: unitId } },
+                            { wordID: { eq: item.id } }
+                        ]
+                    }
+                });
 
                 if (existing.length > 0) {
                     setLinkingStates(prev => ({ ...prev, [key]: 'linked' }));
@@ -341,20 +344,22 @@ export default function SearchResults({
                 }
 
                 // Create link
-                await DataStore.save(new UnitWord({
+                await client.models.UnitWord.create({
                     unitID: unitId,
                     wordID: item.id
-                }));
+                });
 
                 setLinkingStates(prev => ({ ...prev, [key]: 'linked' }));
             } else if (itemType === 'question') {
                 // Check if already linked
-                const existing = await DataStore.query(QuestionUnit, uq =>
-                    uq.and(uq => [
-                        uq.unitID.eq(unitId),
-                        uq.questionID.eq(item.id)
-                    ])
-                );
+                const { data: existing } = await client.models.QuestionUnit.list({
+                    filter: {
+                        and: [
+                            { unitID: { eq: unitId } },
+                            { questionID: { eq: item.id } }
+                        ]
+                    }
+                });
 
                 if (existing.length > 0) {
                     setLinkingStates(prev => ({ ...prev, [key]: 'linked' }));
@@ -362,10 +367,10 @@ export default function SearchResults({
                 }
 
                 // Create link
-                await DataStore.save(new QuestionUnit({
+                await client.models.QuestionUnit.create({
                     unitID: unitId,
                     questionID: item.id
-                }));
+                });
 
                 setLinkingStates(prev => ({ ...prev, [key]: 'linked' }));
             }

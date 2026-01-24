@@ -3,8 +3,8 @@
  * Handles duplicate detection, Word creation, and Unit linking
  */
 
-import { DataStore } from 'aws-amplify/datastore';
-import { Word, UnitWord, ParsedContent } from '../models';
+import { getAmplifyClient } from './amplifyClient';
+// Type import removed - not needed in runtime JS
 
 /**
  * Check if a word already exists in the dictionary
@@ -13,14 +13,15 @@ import { Word, UnitWord, ParsedContent } from '../models';
  * @returns {Promise<Word|null>} Existing word or null
  */
 export async function findExistingWord(phrase, owner) {
+    const client = getAmplifyClient();
     const normalizedPhrase = phrase.trim().toLowerCase();
     
-    const existingWords = await DataStore.query(Word, (w) => 
-        w.phrase.eq(phrase)
-    );
+    const { data: existingWords } = await client.models.Word.list({
+        filter: { phrase: { eq: phrase } }
+    });
     
     // Filter by owner or find closest match
-    const exactMatch = existingWords.find(w => 
+    const exactMatch = existingWords?.find(w => 
         w.phrase.trim().toLowerCase() === normalizedPhrase
     );
     
@@ -35,18 +36,17 @@ export async function findExistingWord(phrase, owner) {
  * @returns {Promise<Word>} Created word
  */
 export async function createWord(vocabularyItem, owner, identityId) {
+    const client = getAmplifyClient();
     const { word, definition, context, page } = vocabularyItem;
     
-    const newWord = await DataStore.save(
-        new Word({
-            phrase: word,
-            definition: definition,
-            owner: owner,
-            identityId: identityId,
-            // Store context and page in a structured way if needed
-            // Could add these fields to the Word model if desired
-        })
-    );
+    const { data: newWord } = await client.models.Word.create({
+        phrase: word,
+        definition: definition,
+        owner: owner,
+        identityId: identityId,
+        // Store context and page in a structured way if needed
+        // Could add these fields to the Word model if desired
+    });
     
     return newWord;
 }
@@ -60,26 +60,27 @@ export async function createWord(vocabularyItem, owner, identityId) {
  */
 export async function linkWordToUnit(wordId, unitId, owner) {
     // Check if relationship already exists
-    const existing = await DataStore.query(UnitWord, (uw) =>
-        uw.and(uw => [
-            uw.wordId.eq(wordId),
-            uw.unitId.eq(unitId)
-        ])
-    );
+    const client = getAmplifyClient();
+    // Check if relationship already exists
+    const { data: existing } = await client.models.UnitWord.list({
+        filter: {
+            and: [
+                { wordID: { eq: wordId } },
+                { unitID: { eq: unitId } }
+            ]
+        }
+    });
     
-    if (existing.length > 0) {
+    if (existing && existing.length > 0) {
         console.log(`Word ${wordId} already linked to Unit ${unitId}`);
         return existing[0];
     }
     
-    const unitWord = await DataStore.save(
-        new UnitWord({
-            wordId: wordId,
-            unitId: unitId,
-            owner: owner,
-        })
-    );
-    
+    const { data: unitWord } = await client.models.UnitWord.create({
+        wordID: wordId,
+        unitID: unitId,
+        owner: owner,
+    });
     return unitWord;
 }
 
@@ -102,8 +103,9 @@ export async function importVocabularyToUnit(
     onProgress = null
 ) {
     try {
+        const client = getAmplifyClient();
         // Fetch the ParsedContent record
-        const parsedContent = await DataStore.query(ParsedContent, parsedContentId);
+        const { data: parsedContent } = await client.models.ParsedContent.get({ id: parsedContentId });
         
         if (!parsedContent) {
             throw new Error(`ParsedContent not found: ${parsedContentId}`);
@@ -187,14 +189,13 @@ export async function importVocabularyToUnit(
             }
         }
         
-        // Update ParsedContent to mark as imported
-        if (results.imported > 0 || results.skipped > 0) {
-            await DataStore.save(
-                ParsedContent.copyOf(parsedContent, updated => {
-                    updated.approved = true;
-                    updated.importedAt = new Date().toISOString();
-                })
-            );
+        // Mark ParsedContent as imported
+        if (parsedContent) {
+            await client.models.ParsedContent.update({
+                id: parsedContent.id,
+                approved: true,
+                importedAt: new Date().toISOString(),
+            });
         }
         
         if (onProgress) {
@@ -227,7 +228,8 @@ export async function importVocabularyToUnit(
  */
 export async function getVocabularyImportStatus(parsedContentId) {
     try {
-        const parsedContent = await DataStore.query(ParsedContent, parsedContentId);
+        const client = getAmplifyClient();
+        const { data: parsedContent } = await client.models.ParsedContent.get({ id: parsedContentId });
         
         if (!parsedContent) {
             return {
@@ -268,7 +270,8 @@ export async function getVocabularyImportStatus(parsedContentId) {
  */
 export async function updateVocabularyItem(parsedContentId, itemIndex, updates) {
     try {
-        const parsedContent = await DataStore.query(ParsedContent, parsedContentId);
+        const client = getAmplifyClient();
+        const { data: parsedContent } = await client.models.ParsedContent.get({ id: parsedContentId });
         
         if (!parsedContent) {
             throw new Error(`ParsedContent not found: ${parsedContentId}`);
@@ -289,11 +292,10 @@ export async function updateVocabularyItem(parsedContentId, itemIndex, updates) 
         };
         
         // Save updated ParsedContent
-        await DataStore.save(
-            ParsedContent.copyOf(parsedContent, updated => {
-                updated.vocabularyJSON = JSON.stringify(vocabularyItems);
-            })
-        );
+        await client.models.ParsedContent.update({
+            id: parsedContent.id,
+            vocabularyJSON: JSON.stringify(vocabularyItems),
+        });
         
         return true;
         

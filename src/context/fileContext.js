@@ -1,9 +1,8 @@
 import React, { createContext } from "react";
-import { DataStore } from "aws-amplify/datastore";
 import { list } from "aws-amplify/storage";
 import { getCurrentUser } from "aws-amplify/auth";
+import { getAmplifyClient } from '../utils/amplifyClient';
 
-import { File, Unit, Document } from "../models";
 import { Hub, Cache } from "aws-amplify/utils";
 
 import { fetchAuthSession } from "aws-amplify/auth";
@@ -342,62 +341,69 @@ const FilesProvider = ({ children }) => {
         filesFetchedRef.current = true;
         console.log('[FilesContext] About to subscribe to File model');
 
+        const client = getAmplifyClient();
+
         // Query all files regardless of owner - we'll track by identityId for lookup
-        subscriptionRef.current = DataStore.observeQuery(File).subscribe(({ items, isSynced }) => {
-          console.log('[FilesContext] DataStore.observeQuery(File) subscription triggered:');
-          console.log('  - items.length:', items?.length);
-          console.log('  - isSynced:', isSynced);
-          console.log('  - items:', items);
-          const _playlistFiltered = {}
-          const _pdfsFiltered = {}
+        subscriptionRef.current = client.models.File.observeQuery().subscribe({
+          next: ({ items, isSynced }) => {
+            console.log('[FilesContext] File observeQuery subscription triggered:');
+            console.log('  - items.length:', items?.length);
+            console.log('  - isSynced:', isSynced);
+            console.log('  - items:', items);
+            const _playlistFiltered = {}
+            const _pdfsFiltered = {}
 
-          items.forEach((item) => {
-            // Include all audio files in playlist, not just specific MIME types
-            if (item.mimeType && item.mimeType.startsWith('audio/')) {
-              _playlistFiltered[item.id] = item
-            }
-            if (item.mimeType === 'application/pdf') {
-              _pdfsFiltered[item.id] = item
-            }
-          })
+            items.forEach((item) => {
+              // Include all audio files in playlist, not just specific MIME types
+              if (item.mimeType && item.mimeType.startsWith('audio/')) {
+                _playlistFiltered[item.id] = item
+              }
+              if (item.mimeType === 'application/pdf') {
+                _pdfsFiltered[item.id] = item
+              }
+            })
 
-          // Only update if different to prevent rerenders
-          setMyPlaylistFiles(prev => {
-            if (Object.keys(prev).length !== Object.keys(_playlistFiltered).length) {
-              return _playlistFiltered;
-            }
-            const hasChanges = Object.keys(_playlistFiltered).some(
-              key => !prev[key] || prev[key].updatedAt !== _playlistFiltered[key].updatedAt
-            );
-            return hasChanges ? _playlistFiltered : prev;
-          });
-          
-          setMyPdfs(prev => {
-            if (Object.keys(prev).length !== Object.keys(_pdfsFiltered).length) {
-              return _pdfsFiltered;
-            }
-            const hasChanges = Object.keys(_pdfsFiltered).some(
-              key => !prev[key] || prev[key].updatedAt !== _pdfsFiltered[key].updatedAt
-            );
-            return hasChanges ? _pdfsFiltered : prev;
-          });
-          
-          setMyFiles(prev => {
-            if (prev.length !== items.length) {
-              console.log('[FilesContext] Files count changed:', prev.length, '→', items.length);
-              setFilesVersion(v => v + 1);
-              return items;
-            }
-            const hasChanges = items.some((item, i) => 
-              !prev[i] || prev[i].id !== item.id || prev[i].updatedAt !== item.updatedAt
-            );
-            if (hasChanges) {
-              console.log('[FilesContext] Files have changes, updating state');
-              setFilesVersion(v => v + 1);
-              return items;
-            }
-            return prev;
-          });
+            // Only update if different to prevent rerenders
+            setMyPlaylistFiles(prev => {
+              if (Object.keys(prev).length !== Object.keys(_playlistFiltered).length) {
+                return _playlistFiltered;
+              }
+              const hasChanges = Object.keys(_playlistFiltered).some(
+                key => !prev[key] || prev[key].updatedAt !== _playlistFiltered[key].updatedAt
+              );
+              return hasChanges ? _playlistFiltered : prev;
+            });
+            
+            setMyPdfs(prev => {
+              if (Object.keys(prev).length !== Object.keys(_pdfsFiltered).length) {
+                return _pdfsFiltered;
+              }
+              const hasChanges = Object.keys(_pdfsFiltered).some(
+                key => !prev[key] || prev[key].updatedAt !== _pdfsFiltered[key].updatedAt
+              );
+              return hasChanges ? _pdfsFiltered : prev;
+            });
+            
+            setMyFiles(prev => {
+              if (prev.length !== items.length) {
+                console.log('[FilesContext] Files count changed:', prev.length, '→', items.length);
+                setFilesVersion(v => v + 1);
+                return items;
+              }
+              const hasChanges = items.some((item, i) => 
+                !prev[i] || prev[i].id !== item.id || prev[i].updatedAt !== item.updatedAt
+              );
+              if (hasChanges) {
+                console.log('[FilesContext] Files have changes, updating state');
+                setFilesVersion(v => v + 1);
+                return items;
+              }
+              return prev;
+            });
+          },
+          error: (error) => {
+            console.error('[FilesContext] File subscription error:', error);
+          }
         });
       } catch (error) {
         // Handle authentication errors gracefully
@@ -418,21 +424,28 @@ const FilesProvider = ({ children }) => {
 
   // Subscribe to Document status changes
   React.useEffect(() => {
-    documentSubscriptionRef.current = DataStore.observeQuery(Document).subscribe(({ items }) => {
-      const statusMap = {};
-      items.forEach(doc => {
-        statusMap[doc.id] = {
-          id: doc.id,
-          s3Key: doc.s3Key,
-          status: doc.status,
-          pageCount: doc.pageCount,
-          extractedText: doc.extractedText,
-          pageEmbeddings: doc.pageEmbeddings,
-          embeddingsS3Key: doc.embeddingsS3Key, // ← ADDED: S3 key for embeddings backup
-          metadata: doc.metadata,
-          _version: doc._version, // Track version for cache invalidation
-        };
-      });
+    const client = getAmplifyClient();
+    documentSubscriptionRef.current = client.models.Document.observeQuery().subscribe({
+      next: ({ items }) => {
+        const statusMap = {};
+        items.forEach(doc => {
+          // Parse pageEmbeddings if it's a string
+          const pageEmbeddings = typeof doc.pageEmbeddings === 'string' 
+            ? JSON.parse(doc.pageEmbeddings)
+            : doc.pageEmbeddings;
+
+          statusMap[doc.id] = {
+            id: doc.id,
+            s3Key: doc.s3Key,
+            status: doc.status,
+            pageCount: doc.pageCount,
+            extractedText: doc.extractedText,
+            pageEmbeddings: pageEmbeddings,
+            embeddingsS3Key: doc.embeddingsS3Key, // ← ADDED: S3 key for embeddings backup
+            metadata: doc.metadata,
+            _version: doc._version, // Track version for cache invalidation
+          };
+        });
       
       // Only update if there are actual changes
       setDocuments(prev => {
@@ -461,6 +474,10 @@ const FilesProvider = ({ children }) => {
         
         return hasChanges ? statusMap : prev;
       });
+    },
+      error: (error) => {
+        console.error('[FilesContext] Document subscription error:', error);
+      }
     });
 
     return () => {

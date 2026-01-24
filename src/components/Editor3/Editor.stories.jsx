@@ -111,6 +111,8 @@ const sampleEditorState = {
 export const EmptyEditorTextFormatting = {
   loaders: [
     async () => {
+      clearMockData();
+      
       seedMockUnit({
         id: 'empty-editor-text-formatting-id',
         name: 'Empty Editor: Text Formatting',
@@ -124,6 +126,7 @@ export const EmptyEditorTextFormatting = {
   render: () => <Editor />,
   parameters: {
     unitId: 'empty-editor-text-formatting-id',
+    initializeMockData: false,
   },
   play: async ({ canvas, userEvent }) => {
     // Wait for editor to load
@@ -311,7 +314,7 @@ export const EmptyEditorCustomBlocks = {
   loaders: [
     async () => {
       clearMockData();
-      initializeMockData();
+      
       seedMockUnit({
         id: 'empty-editor-custom-blocksid',
         name: 'Empty Editor: Custom Blocks',
@@ -325,6 +328,7 @@ export const EmptyEditorCustomBlocks = {
   render: () => <Editor />,
   parameters: {
     unitId: 'empty-editor-custom-blocksid',
+    initializeMockData: false,
   },
   play: async ({ canvas, userEvent }) => {
     // Wait for editor to load
@@ -517,7 +521,7 @@ export const EditorWithContent = {
   loaders: [
     async () => {
       clearMockData();
-      initializeMockData();
+      
       seedMockUnit({
         id: 'editor-with-content-id',
         name: 'Sample Unit with Content',
@@ -531,6 +535,7 @@ export const EditorWithContent = {
   render: () => <Editor />,
   parameters: {
     unitId: 'editor-with-content-id',
+    initializeMockData: false,
   },
 };
 
@@ -2009,5 +2014,6 @@ export const KitchenSink = {
   render: () => <Editor />,
   parameters: {
     unitId: KITCHEN_SINK_ID,
+    initializeMockData: false, // Story provides its own complete mock data
   },
 };

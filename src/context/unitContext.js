@@ -1,11 +1,10 @@
 import * as React from "react";
 import { useState, useRef, createContext } from "react";
-import { DataStore, SortDirection } from "aws-amplify/datastore";
 import { fetchUserAttributes } from "aws-amplify/auth";
-import { Unit, Grade } from "../models"
 import { useRouter } from 'next/router';
 import { Hub, Cache } from "aws-amplify/utils";
 import { moderateContent, buildModerationFields } from '../utils/moderateContent';
+import { getAmplifyClient } from '../utils/amplifyClient';
 
 import getCachedUrl from '../utils/getCachedUrl'
 // Provider and Consumer are connected through their "parent" context
@@ -171,21 +170,26 @@ const UnitProvider = ({ children, id }) => {
       throw new Error("User not authenticated - cannot create grade");
     }
 
+    const client = getAmplifyClient();
     const currentUnit = unitRef.current;
-    const _grade = await DataStore.save(
-      new Grade({
-        unitID: id,
-        // use the unit owner as the instructor
-        instructor: currentUnit?.owner || '',
-        // Don't manually set owner - DataStore will auto-populate based on auth
-        unitVersion: currentUnit?._version || 0,
-        complete: unitIsComplete,
-        accuracy: unitAccuracy
-      })
-    );
+    
+    const { data: _grade, errors } = await client.models.Grade.create({
+      unitID: id,
+      // use the unit owner as the instructor
+      instructor: currentUnit?.owner || '',
+      // Owner will be auto-populated by Amplify based on auth
+      unitVersion: currentUnit?._version || 0,
+      complete: unitIsComplete,
+      accuracy: unitAccuracy
+    });
 
-    setGrade(_grade)
-    return _grade
+    if (errors) {
+      console.error('[createGrade] Error creating grade:', errors);
+      throw new Error('Failed to create grade');
+    }
+
+    setGrade(_grade);
+    return _grade;
   }, [id]);
 
   const saveGrade = React.useCallback(async (data) => {
@@ -224,49 +228,46 @@ const UnitProvider = ({ children, id }) => {
 
       if (!grade) {
         const newGrade = await createGrade(unitAccuracy, unitIsComplete)
-        // Use the newly created grade for the copyOf operation
+        // Use the newly created grade for the update operation
         if (newGrade && newGrade.id) {
-          await DataStore.save(
-            Grade.copyOf(newGrade, updated => {
-              updated.data = data
-              updated.accuracy = unitAccuracy
-              updated.complete = unitIsComplete // The entire assignment is completed
-              // Add moderation fields
-              updated.moderationStatus = moderationFields.moderationStatus;
-              updated.moderationFlags = moderationFields.moderationFlags;
-              updated.moderationCheckedAt = moderationFields.moderationCheckedAt;
-            })
-          );
+          const client = getAmplifyClient();
+          await client.models.Grade.update({
+            id: newGrade.id,
+            data: JSON.stringify(data),
+            accuracy: unitAccuracy,
+            complete: unitIsComplete,
+            moderationStatus: moderationFields.moderationStatus,
+            moderationFlags: moderationFields.moderationFlags ? JSON.stringify(moderationFields.moderationFlags) : null,
+            moderationCheckedAt: moderationFields.moderationCheckedAt,
+          });
         }
       } else if (grade && grade.id) {
         // Only proceed if grade is a valid model instance
-        await DataStore.save(
-          Grade.copyOf(grade, updated => {
-            updated.data = data
-            updated.accuracy = unitAccuracy
-            updated.complete = unitIsComplete // The entire assignment is completed
-            // Add moderation fields
-            updated.moderationStatus = moderationFields.moderationStatus;
-            updated.moderationFlags = moderationFields.moderationFlags;
-            updated.moderationCheckedAt = moderationFields.moderationCheckedAt;
-          })
-        );
+        const client = getAmplifyClient();
+        await client.models.Grade.update({
+          id: grade.id,
+          data: JSON.stringify(data),
+          accuracy: unitAccuracy,
+          complete: unitIsComplete,
+          moderationStatus: moderationFields.moderationStatus,
+          moderationFlags: moderationFields.moderationFlags ? JSON.stringify(moderationFields.moderationFlags) : null,
+          moderationCheckedAt: moderationFields.moderationCheckedAt,
+        });
       } else {
         console.error("Invalid grade object:", grade)
         // Create a new grade if the existing one is invalid
         const newGrade = await createGrade(unitAccuracy, unitIsComplete)
         if (newGrade && newGrade.id) {
-          await DataStore.save(
-            Grade.copyOf(newGrade, updated => {
-              updated.data = data
-              updated.accuracy = unitAccuracy
-              updated.complete = unitIsComplete
-              // Add moderation fields
-              updated.moderationStatus = moderationFields.moderationStatus;
-              updated.moderationFlags = moderationFields.moderationFlags;
-              updated.moderationCheckedAt = moderationFields.moderationCheckedAt;
-            })
-          );
+          const client = getAmplifyClient();
+          await client.models.Grade.update({
+            id: newGrade.id,
+            data: JSON.stringify(data),
+            accuracy: unitAccuracy,
+            complete: unitIsComplete,
+            moderationStatus: moderationFields.moderationStatus,
+            moderationFlags: moderationFields.moderationFlags ? JSON.stringify(moderationFields.moderationFlags) : null,
+            moderationCheckedAt: moderationFields.moderationCheckedAt,
+          });
         }
       }
       if(unitIsComplete && !timeLimitSeconds) {
@@ -304,54 +305,60 @@ const UnitProvider = ({ children, id }) => {
     }
 
     const username = session.username;
+    const client = getAmplifyClient();
 
-    // Single subscription for all grades, filter client-side
-    const subscription = DataStore.observeQuery(
-      Grade,
-      g => g.and(g => [
-        g.owner.eq(username),
-        g.unitID.eq(id),
-        g.unitVersion.eq(unitVersion)
-      ]), {
-      sort: g => g.createdAt(SortDirection.DESCENDING)
-    }
-    ).subscribe(snapshot => {
-      const { items } = snapshot;
-      
-      // Filter client-side
-      const incompleteGrades = items.filter(grade => !grade.complete);
-      const completedGrades = items.filter(grade => grade.complete);
-      
-      // Handle current grade (most recent incomplete)
-      const currentGrade = incompleteGrades[0];
-      
-      setGrade(currentGrade);
-      setUsername(username);
-      
-      // Calculate finished questions from the current grade data
-      if (currentGrade?.data) {
-        let _finishedQuestions = 0;
-        Object.entries(currentGrade.data).forEach(([key, value]) => {
-          if (value?.complete === true) {
-            _finishedQuestions++;
-          }
-        });
-        setFinishedQuestions(_finishedQuestions);
-      } else {
-        setFinishedQuestions(0);
+    // Subscribe to grades for this unit and user
+    const subscription = client.models.Grade.observeQuery({
+      filter: {
+        owner: { eq: username },
+        unitID: { eq: id },
+        unitVersion: { eq: unitVersion }
+      },
+      sortDirection: 'DESC',
+      sortField: 'createdAt'
+    }).subscribe({
+      next: ({ items }) => {
+        // Filter client-side
+        const incompleteGrades = items.filter(grade => !grade.complete);
+        const completedGrades = items.filter(grade => grade.complete);
+        
+        // Handle current grade (most recent incomplete)
+        const currentGrade = incompleteGrades[0];
+        
+        setGrade(currentGrade);
+        setUsername(username);
+        
+        // Calculate finished questions from the current grade data
+        if (currentGrade?.data) {
+          let _finishedQuestions = 0;
+          const gradeData = typeof currentGrade.data === 'string' 
+            ? JSON.parse(currentGrade.data) 
+            : currentGrade.data;
+          Object.entries(gradeData).forEach(([key, value]) => {
+            if (value?.complete === true) {
+              _finishedQuestions++;
+            }
+          });
+          setFinishedQuestions(_finishedQuestions);
+        } else {
+          setFinishedQuestions(0);
+        }
+        
+        // Handle recent grades (top 5 completed, sorted by accuracy then date)
+        const sortedCompletedGrades = completedGrades
+          .sort((a, b) => {
+            if (b.accuracy !== a.accuracy) {
+              return (b.accuracy || 0) - (a.accuracy || 0);
+            }
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          })
+          .slice(0, 5);
+        
+        setRecentGrades(sortedCompletedGrades);
+      },
+      error: (error) => {
+        console.error('[UnitContext] Grade subscription error:', error);
       }
-      
-      // Handle recent grades (top 5 completed, sorted by accuracy then date)
-      const sortedCompletedGrades = completedGrades
-        .sort((a, b) => {
-          if (b.accuracy !== a.accuracy) {
-            return (b.accuracy || 0) - (a.accuracy || 0);
-          }
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        })
-        .slice(0, 5);
-      
-      setRecentGrades(sortedCompletedGrades);
     });
 
     return () => {
@@ -363,104 +370,129 @@ const UnitProvider = ({ children, id }) => {
   React.useEffect(() => {
     if (!id) return
 
-    const subscription = DataStore.observeQuery(Unit,
-      s => s.id.eq(id)
-    ).subscribe(async ({ items }) => {
-      const _newUnit = items[0]
-      
-      if (!_newUnit) {
-        setUnit({});
-        return;
+    const client = getAmplifyClient();
+
+    const subscription = client.models.Unit.observeQuery({
+      filter: {
+        id: { eq: id }
       }
-
-      // Only update if version has actually changed
-      if (versionRef.current === _newUnit?._version) {
-        return;
-      }
-
-      const _files = {}
-      const _dictionary = {}
-      const _questionBank = {}
-      const _playlistUrls = {}
-      const urlsWork = []
-      const urlsIds = []
-
-      const _unitWords = await _newUnit.words.toArray()
-      const _unitFiles = await _newUnit.files.toArray()
-      const _unitQuestions = await _newUnit.questions.toArray()
-
-      const _unitWordsWork = _unitWords.map(async w => {
-        // console.log('wordwordwordword', w)
-        return await w.word 
-      })
-
-      const _unitFilesWork = _unitFiles.map(async f => {
-        // console.log('wordwordwordword', f)
-        return await f.file 
-      })
-
-      const _unitQuestionsWork = _unitQuestions.map(async q => {
-        // console.log('wordwordwordword', f)
-        return await q.question
-      })
-
-      const _words = await Promise.allSettled(_unitWordsWork)
-      const _unitsFiles = await Promise.allSettled(_unitFilesWork)
-      const _questions = await Promise.allSettled(_unitQuestionsWork)
-
-      _words.forEach(w => {
-        if (w.status === 'fulfilled' && w.value) {
-          const _w = w.value
-          _dictionary[_w.id] = _w
+    }).subscribe({
+      next: async ({ items }) => {
+        const _newUnit = items[0]
+        
+        if (!_newUnit) {
+          setUnit({});
+          return;
         }
-      })
 
-      _unitsFiles.forEach(async f => {
-        if (f.status === 'fulfilled' && f.value) {
-          const _f = f.value
-          _files[_f.id] = _f
+        // Only update if version has actually changed
+        if (versionRef.current === _newUnit?._version) {
+          return;
         }
-      })
 
-      _questions.forEach(q => {
-        if (q.status === 'fulfilled' && q.value) {
-          const _q = q.value
-          _questionBank[_q.id] = _q
-        }
-      })
+        const _files = {}
+        const _dictionary = {}
+        const _questionBank = {}
+        const _playlistUrls = {}
 
-      const _urlsOutput = await Promise.allSettled(urlsWork)
+        // Load related words via join table
+        const { data: _unitWords } = await client.models.UnitWord.list({
+          filter: { unitID: { eq: id } }
+        });
 
-      _urlsOutput.forEach((item, key) => {
-        if (item.status === 'fulfilled') {
-          const _url = item.value
-          const urlsId = urlsIds[key]
-          _playlistUrls[urlsId] = _url
-        }
-      })
+        // Load related files via join table
+        const { data: _unitFiles } = await client.models.UnitFile.list({
+          filter: { unitID: { eq: id } }
+        });
 
-      const blocks = _newUnit?.data?.root?.children || []
-      const _rubric = []
+        // Load related questions via join table
+        const { data: _unitQuestions } = await client.models.QuestionUnit.list({
+          filter: { unitID: { eq: id } }
+        });
 
-      if (blocks.length > 0) {
-        blocks.forEach(block => {
-          if (gradedBlockTypes.includes(block['type'])) {
-            _rubric.push(block['key'])
+        // Fetch full Word objects
+        const _unitWordsWork = (_unitWords || []).map(async uw => {
+          if (uw.wordID) {
+            const { data } = await client.models.Word.get({ id: uw.wordID });
+            return data;
+          }
+          return null;
+        });
+
+        // Fetch full File objects
+        const _unitFilesWork = (_unitFiles || []).map(async uf => {
+          if (uf.fileID) {
+            const { data } = await client.models.File.get({ id: uf.fileID });
+            return data;
+          }
+          return null;
+        });
+
+        // Fetch full Question objects
+        const _unitQuestionsWork = (_unitQuestions || []).map(async uq => {
+          if (uq.questionID) {
+            const { data } = await client.models.Question.get({ id: uq.questionID });
+            return data;
+          }
+          return null;
+        });
+
+        const _words = await Promise.allSettled(_unitWordsWork)
+        const _unitsFiles = await Promise.allSettled(_unitFilesWork)
+        const _questions = await Promise.allSettled(_unitQuestionsWork)
+
+        _words.forEach(w => {
+          if (w.status === 'fulfilled' && w.value) {
+            const _w = w.value
+            _dictionary[_w.id] = _w
           }
         })
+
+        _unitsFiles.forEach(f => {
+          if (f.status === 'fulfilled' && f.value) {
+            const _f = f.value
+            _files[_f.id] = _f
+          }
+        })
+
+        _questions.forEach(q => {
+          if (q.status === 'fulfilled' && q.value) {
+            const _q = q.value
+            _questionBank[_q.id] = _q
+          }
+        })
+
+        // Parse unit data (Gen2 stores JSON as string)
+        const unitData = typeof _newUnit?.data === 'string' 
+          ? JSON.parse(_newUnit.data) 
+          : _newUnit?.data;
+
+        const blocks = unitData?.root?.children || []
+        const _rubric = []
+
+        if (blocks.length > 0) {
+          blocks.forEach(block => {
+            if (gradedBlockTypes.includes(block['type'])) {
+              _rubric.push(block['key'])
+            }
+          })
+        }
+
+        // Update all state - version check ensures data has changed
+        unitRef.current = _newUnit;
+        setUnit(_newUnit);
+        setDictionary(_dictionary);
+        setFiles(_files);
+        setPlaylistUrls(_playlistUrls);
+        setQuestionBank(_questionBank);
+        setRubric(_rubric);
+
+        editorStateRef.current = unitData;
+        versionRef.current = _newUnit?._version
+      },
+      error: (error) => {
+        console.error('[UnitContext] Unit subscription error:', error);
       }
-
-      // Update all state - version check ensures data has changed
-      unitRef.current = _newUnit;
-      setUnit(_newUnit);
-      setDictionary(_dictionary);
-      setFiles(_files);
-      setPlaylistUrls(_playlistUrls);
-      setQuestionBank(_questionBank);
-      setRubric(_rubric);
-
-      editorStateRef.current = _newUnit?.data;
-      versionRef.current = _newUnit?._version
     });
     
     return () => {
@@ -494,17 +526,15 @@ const UnitProvider = ({ children, id }) => {
         });
       }
 
-      // Save without optimistic version update
-      // Version will be updated by DataStore subscription when save completes
-      await DataStore.save(
-        Unit.copyOf(currentUnit, updated => {
-          updated.data = newContent;
-          // Add moderation fields
-          updated.moderationStatus = moderationFields.moderationStatus;
-          updated.moderationFlags = moderationFields.moderationFlags;
-          updated.moderationCheckedAt = moderationFields.moderationCheckedAt;
-        })
-      );
+      // Save with Gen2 client
+      const client = getAmplifyClient();
+      await client.models.Unit.update({
+        id: currentUnit.id,
+        data: newContent,
+        moderationStatus: moderationFields.moderationStatus,
+        moderationFlags: moderationFields.moderationFlags ? JSON.stringify(moderationFields.moderationFlags) : null,
+        moderationCheckedAt: moderationFields.moderationCheckedAt,
+      });
     } catch (errors) {
       console.error('[saveEditorContent] Save failed:', errors);
     }
@@ -518,8 +548,8 @@ const UnitProvider = ({ children, id }) => {
      */
     const currentUnit = unitRef.current;
     try {
-      const deleted = await DataStore.delete(currentUnit);
-      // console.log('deleted', deleted)
+      const client = getAmplifyClient();
+      await client.models.Unit.delete({ id: currentUnit.id });
       router.push(`/units`)
     } catch (errors) {
       console.error(errors)
@@ -529,11 +559,11 @@ const UnitProvider = ({ children, id }) => {
   const saveDescription = React.useCallback(async (description) => {
     const currentUnit = unitRef.current;
     try {
-      await DataStore.save(
-        Unit.copyOf(currentUnit, updated => {
-          updated.description = description;
-        })
-      );
+      const client = getAmplifyClient();
+      await client.models.Unit.update({
+        id: currentUnit.id,
+        description: description,
+      });
     } catch (errors) {
       console.error(errors)
     }
@@ -542,11 +572,11 @@ const UnitProvider = ({ children, id }) => {
   const saveName = React.useCallback(async (name) => {
     const currentUnit = unitRef.current;
     try {
-      await DataStore.save(
-        Unit.copyOf(currentUnit, updated => {
-          updated.name = name;
-        })
-      );
+      const client = getAmplifyClient();
+      await client.models.Unit.update({
+        id: currentUnit.id,
+        name: name,
+      });
     } catch (errors) {
       console.error(errors)
     }
@@ -585,11 +615,11 @@ const UnitProvider = ({ children, id }) => {
     }
 
     try {
-      await DataStore.save(
-        Unit.copyOf(currentUnit, updated => {
-          updated.status = status;
-        })
-      );
+      const client = getAmplifyClient();
+      await client.models.Unit.update({
+        id: currentUnit.id,
+        status: status,
+      });
     } catch (error) {
       console.log('error', error);
     }

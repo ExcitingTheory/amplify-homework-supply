@@ -20,8 +20,8 @@ import {
 import { BlockWithAlignableContents } from '@lexical/react/LexicalBlockWithAlignableContents';
 import React, { lazy, Suspense, useContext } from 'react';
 import { useEffect } from 'react';
-import { DataStore } from 'aws-amplify/datastore';
-import { UnitFile, File } from '../../../models';
+import { getAmplifyClient } from '../../../utils/amplifyClient';
+// Type import removed - not needed in runtime JS
 import UnitContext from '../../../context/unitContext';
 
 import PlaylistEditor from '../components/PlaylistEditor';
@@ -261,24 +261,25 @@ export default function PlaylistPlugin() {
   const createUnitFileRelationship = async (fileId) => {
     try {
       if (!unit) return;
+      const client = getAmplifyClient();
       
       // Check if UnitFile relationship already exists
-      const existingUnitFiles = await DataStore.query(UnitFile, (uf) => 
-        uf.and(uf => [
-          uf.unitId.eq(unit.id),
-          uf.fileId.eq(fileId)
-        ])
-      );
+      const { data: existingUnitFiles } = await client.models.UnitFile.list({
+        filter: {
+          and: [
+            { unitID: { eq: unit.id } },
+            { fileID: { eq: fileId } }
+          ]
+        }
+      });
       
-      if (existingUnitFiles.length === 0) {
-        const file = await DataStore.query(File, fileId);
+      if (existingUnitFiles && existingUnitFiles.length === 0) {
+        const { data: file } = await client.models.File.get({ id: fileId });
         if (file) {
-          await DataStore.save(
-            new UnitFile({
-              unit,
-              file,
-            })
-          );
+          await client.models.UnitFile.create({
+            unitID: unit.id,
+            fileID: fileId,
+          });
         }
       }
     } catch (error) {

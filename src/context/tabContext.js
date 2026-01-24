@@ -1,9 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { DataStore } from "aws-amplify/datastore";
-import { generateClient } from 'aws-amplify/api';
-import { AssistantChat } from '../models';
+import { getAmplifyClient } from '../utils/amplifyClient';
 
-const client = generateClient();
+const client = getAmplifyClient();
 
 /**
  * Context for managing tab state across the editor
@@ -82,84 +80,88 @@ export function TabProvider({ children, value }) {
             
             try {
                 // Observe AssistantChat sorted by createdAt
-                chatSubscription = DataStore.observeQuery(
-                    AssistantChat,
-                    undefined,
-                    { sort: (s) => s.createdAt('DESCENDING') }
-                ).subscribe(({ items, isSynced }) => {
-                    console.log('[TabContext] AssistantChat query update:', items.length, 'items', isSynced ? '(synced)' : '(not synced)');
+                chatSubscription = client.models.AssistantChat.observeQuery({
+                    sortDirection: 'DESC',
+                    sortField: 'createdAt'
+                }).subscribe({
+                    next: ({ items, isSynced }) => {
+                        console.log('[TabContext] AssistantChat query update:', items.length, 'items', isSynced ? '(synced)' : '(not synced)');
 
-                    if (!isSynced) {
-                        console.log('[TabContext] Waiting for AssistantChat sync...');
-                        return;
-                    }
-                    
-                    // Mark subscription as initialized only after first sync
-                    if (isSynced && !subscriptionInitializedRef.current) {
-                        subscriptionInitializedRef.current = true;
-                        setSubscriptionReady(true);
-                        console.log('[TabContext] AssistantChat subscription initialized');
-                    }
-                    
-                    if (isSubscribed) {
-                        // Update chat histories list
-                        setChatHistories(items);
-                        console.log('[TabContext] AssistantChat list updated:', items.length, 'chats', items);
+                        if (!isSynced) {
+                            console.log('[TabContext] Waiting for AssistantChat sync...');
+                            return;
+                        }
                         
-                        // Update current chat
-                        setAssistantChat(prevCurrent => {
-                            if (items.length > 0) {
-                                // Find the most recent non-archived chat
-                                const nonArchivedChats = items.filter(item => !item.archived);
-                                const mostRecentChat = nonArchivedChats[0]; // Already sorted by createdAt DESC
-                                
-                                if (!prevCurrent) {
-                                    // No current chat, set to most recent non-archived
-                                    if (mostRecentChat) {
-                                        chatVersionRef.current = mostRecentChat._version;
-                                        console.log('[TabContext] Setting initial chat:', mostRecentChat.id, 'version:', mostRecentChat._version);
-                                        return mostRecentChat;
-                                    }
-                                    // No non-archived chats available - will be handled by creation effect
-                                    console.log('[TabContext] No non-archived chats available');
-                                    return null;
-                                }
-                                
-                                // If current chat is archived, switch to most recent non-archived or null
-                                if (prevCurrent.archived) {
-                                    if (mostRecentChat) {
-                                        chatVersionRef.current = mostRecentChat._version;
-                                        console.log('[TabContext] Current chat archived, switching to:', mostRecentChat.id, 'version:', mostRecentChat._version);
-                                        return mostRecentChat;
-                                    } else {
-                                        // All chats are archived - set to null, creation effect will make a new one
-                                        console.log('[TabContext] All chats archived, clearing current chat - new one will be created');
-                                        chatVersionRef.current = undefined;
+                        // Mark subscription as initialized only after first sync
+                        if (isSynced && !subscriptionInitializedRef.current) {
+                            subscriptionInitializedRef.current = true;
+                            setSubscriptionReady(true);
+                            console.log('[TabContext] AssistantChat subscription initialized');
+                        }
+                        
+                        if (isSubscribed) {
+                            // Update chat histories list
+                            setChatHistories(items);
+                            console.log('[TabContext] AssistantChat list updated:', items.length, 'chats', items);
+                            
+                            // Update current chat
+                            setAssistantChat(prevCurrent => {
+                                if (items.length > 0) {
+                                    // Find the most recent non-archived chat
+                                    const nonArchivedChats = items.filter(item => !item.archived);
+                                    const mostRecentChat = nonArchivedChats[0]; // Already sorted by createdAt DESC
+                                    
+                                    if (!prevCurrent) {
+                                        // No current chat, set to most recent non-archived
+                                        if (mostRecentChat) {
+                                            chatVersionRef.current = mostRecentChat._version;
+                                            console.log('[TabContext] Setting initial chat:', mostRecentChat.id, 'version:', mostRecentChat._version);
+                                            return mostRecentChat;
+                                        }
+                                        // No non-archived chats available - will be handled by creation effect
+                                        console.log('[TabContext] No non-archived chats available');
                                         return null;
                                     }
+                                    
+                                    // If current chat is archived, switch to most recent non-archived or null
+                                    if (prevCurrent.archived) {
+                                        if (mostRecentChat) {
+                                            chatVersionRef.current = mostRecentChat._version;
+                                            console.log('[TabContext] Current chat archived, switching to:', mostRecentChat.id, 'version:', mostRecentChat._version);
+                                            return mostRecentChat;
+                                        } else {
+                                            // All chats are archived - set to null, creation effect will make a new one
+                                            console.log('[TabContext] All chats archived, clearing current chat - new one will be created');
+                                            chatVersionRef.current = undefined;
+                                            return null;
+                                        }
+                                    }
+                                    
+                                    // Find updated version of current chat
+                                    const updatedCurrent = items.find(item => item.id === prevCurrent.id);
+                                    // Only update if version has actually changed (like Grade pattern)
+                                    if (updatedCurrent && chatVersionRef.current !== updatedCurrent._version) {
+                                        const prevVersion = chatVersionRef.current;
+                                        chatVersionRef.current = updatedCurrent._version;
+                                        console.log('[TabContext] Updating current chat version:', updatedCurrent.id, prevVersion, '→', updatedCurrent._version);
+                                        return updatedCurrent;
+                                    }
+                                } else {
+                                    // No chats at all - clear current chat so creation effect triggers
+                                    console.log('[TabContext] No chats found, clearing current chat - new one will be created');
+                                    chatVersionRef.current = undefined;
+                                    return null;
                                 }
-                                
-                                // Find updated version of current chat
-                                const updatedCurrent = items.find(item => item.id === prevCurrent.id);
-                                // Only update if version has actually changed (like Grade pattern)
-                                if (updatedCurrent && chatVersionRef.current !== updatedCurrent._version) {
-                                    const prevVersion = chatVersionRef.current;
-                                    chatVersionRef.current = updatedCurrent._version;
-                                    console.log('[TabContext] Updating current chat version:', updatedCurrent.id, prevVersion, '→', updatedCurrent._version);
-                                    return updatedCurrent;
-                                }
-                            } else {
-                                // No chats at all - clear current chat so creation effect triggers
-                                console.log('[TabContext] No chats found, clearing current chat - new one will be created');
-                                chatVersionRef.current = undefined;
-                                return null;
-                            }
-                            return prevCurrent;
-                        });
+                                return prevCurrent;
+                            });
+                        }
+                    },
+                    error: (error) => {
+                        console.error('[TabContext] AssistantChat subscription error:', error);
                     }
                 });
             } catch (error) {
-                console.error('[TabContext] Error setting up DataStore subscription:', error);
+                console.error('[TabContext] Error setting up AssistantChat subscription:', error);
             }
         };
         
@@ -205,12 +207,12 @@ export function TabProvider({ children, value }) {
             console.log('[TabContext] Creating AssistantChat');
             
             try {
-                await DataStore.save(new AssistantChat({
+                await client.models.AssistantChat.create({
                     model: 'gpt-4',
                     messages: JSON.stringify([]),
                     threadInstructions: '',
                     additionalInstructions: '',
-                }));
+                });
                 console.log('[TabContext] Created AssistantChat, waiting for subscription');
             } catch (error) {
                 console.error('[TabContext] Error creating chat:', error);

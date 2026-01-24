@@ -34,9 +34,8 @@ import { $isPlaylistNode } from '../plugins/PlaylistPlugin';
 
 
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { File, UnitFile } from '../../../models';
 
-import { DataStore } from 'aws-amplify/datastore';
+import { getAmplifyClient } from '../../../utils/amplifyClient';
 import FileContext from '../../../context/fileContext';
 import UnitContext from '../../../context/unitContext';
 
@@ -163,14 +162,14 @@ export default function PlaylistEditor({
                 const node = $getNodeByKey(nodeKey);
                 if ($isPlaylistNode(node)) {
                     node.remove();
-                    // Remove relationship to word
+                    // Remove relationship to file
+                    const client = getAmplifyClient();
                     const _operations = [];
                     fileIDs.forEach((id) => {
                         _operations.push(
-                            DataStore.delete(UnitFile, id)
+                            client.models.UnitFile.delete({ id })
                         );
-                    }
-                    );
+                    });
                     await Promise.allSettled(_operations);
                 }
             }
@@ -185,16 +184,15 @@ export default function PlaylistEditor({
             const node = $getNodeByKey(nodeKey);
             if ($isPlaylistNode(node)) {
                 node.appendId(id);
-                // Add relationship to word
-                console.log('addFileID', id)
-                const file = await DataStore.query(File, id);
+                // Add relationship to file
+                console.log('addFileID', id);
+                const client = getAmplifyClient();
+                const { data: file } = await client.models.File.get({ id });
                 if (file) {
-                    await DataStore.save(
-                        new UnitFile({
-                            unit,
-                            file,
-                        })
-                    );
+                    await client.models.UnitFile.create({
+                        unitID: unit.id,
+                        fileID: file.id,
+                    });
                 }
             }
         });
@@ -206,11 +204,12 @@ export default function PlaylistEditor({
             const node = $getNodeByKey(nodeKey);
             if ($isPlaylistNode(node)) {
                 node.removeIntersection(ids);
-                // Remove relationship to word
+                // Remove relationship to file
+                const client = getAmplifyClient();
                 const _operations = [];
                 ids.forEach((id) => {
                     _operations.push(
-                        DataStore.delete(UnitFile, id)
+                        client.models.UnitFile.delete({ id })
                     );
                 });
                 await Promise.allSettled(_operations);

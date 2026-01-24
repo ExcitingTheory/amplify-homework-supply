@@ -1,6 +1,6 @@
 'use strict';
 import React from 'react';
-import { DataStore } from 'aws-amplify/datastore';
+import { getAmplifyClient } from '../utils/amplifyClient';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -72,22 +72,26 @@ export const SectionAssigner = ({ setOpenAssignmentDialog, openAssignmentDialog,
 
     console.log('assignment', assignment);
 
-    await DataStore.save(new Assignment(assignment));
+    const client = getAmplifyClient();
+    await client.models.Assignment.create(assignment);
 
     // add to the dynamic group list if it doesn't exist
-    const learners = ContentModel.learners || []  ;
+    const learners = ContentModel.learners || [];
 
     if (!learners.includes(sectionMap[section].learner)) {
       learners.push(sectionMap[section].learner);
-      await DataStore.save(Unit.copyOf(ContentModel, updated => {
-        updated.learners = learners;
-      }));
+      const client = getAmplifyClient();
+      await client.models.Unit.update({
+        id: ContentModel.id,
+        learners: learners
+      });
     }
   };
 
   const deleteAssignment = async (assignment) => {
     console.log('deleteAssignment', assignment);
-    await DataStore.delete(assignment);
+    const client = getAmplifyClient();
+    await client.models.Assignment.delete({ id: assignment.id });
   };
 
 

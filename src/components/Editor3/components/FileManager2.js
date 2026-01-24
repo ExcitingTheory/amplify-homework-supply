@@ -62,7 +62,7 @@ import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import FilesContext from "../../../context/fileContext";
 import SettingsContext from "../../../context/settingsContext";
 
-import { DataStore } from 'aws-amplify/datastore';
+import { getAmplifyClient } from '../../../utils/amplifyClient';
 import { uploadData, remove } from 'aws-amplify/storage';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
@@ -744,15 +744,15 @@ function MetadataEditor({ file, onUpdate, onClose }) {
 
     const handleSave = async () => {
         try {
-            const updatedFile = await DataStore.save(
-                FileModel.copyOf(file, updated => {
-                    updated.name = formData.name;
-                    updated.description = formData.description;
-                    updated.prompt = formData.prompt;
-                    updated.model = formData.model;
-                    updated.variant = formData.variant;
-                })
-            );
+            const client = getAmplifyClient();
+            const { data: updatedFile } = await client.models.File.update({
+                id: file.id,
+                name: formData.name,
+                description: formData.description,
+                prompt: formData.prompt,
+                model: formData.model,
+                variant: formData.variant
+            });
             onUpdate?.(updatedFile);
             setEditing(false);
         } catch (error) {
@@ -2340,7 +2340,7 @@ const ListItemImage = React.memo(function ListItemImage({ file }) {
 });
 
 /**
- * Helper function to completely delete a file from both DataStore and S3
+ * Helper function to completely delete a file from both Gen2 client and S3
  * @param {FileModel} file - The file model to delete
  * @returns {Promise<void>}
  */
@@ -2350,15 +2350,17 @@ async function deleteFileCompletely(file) {
     try {
         // Delete associated Document if it exists
         if (file.documentID) {
-            const document = await DataStore.query(Document, file.documentID);
+            const client = getAmplifyClient();
+            const { data: document } = await client.models.Document.get({ id: file.documentID });
             if (document) {
-                await DataStore.delete(document);
+                await client.models.Document.delete({ id: file.documentID });
                 console.log('Deleted associated Document:', file.documentID);
             }
         }
 
-        // Delete the File model from DataStore
-        await DataStore.delete(file);
+        // Delete the File model from Gen2 client
+        const client = getAmplifyClient();
+        await client.models.File.delete({ id: file.id });
         console.log('Deleted File model:', file.id);
 
         // Delete from S3
@@ -2556,9 +2558,11 @@ export default function FileManager2() {
             // If new name doesn't have extension, append the original extension
             const finalName = newHasExtension ? newNameTrimmed : newNameTrimmed + extension;
 
-            await DataStore.save(FileModel.copyOf(fileToUpdate, updated => {
-                updated.name = finalName;
-            }));
+            const client = getAmplifyClient();
+            await client.models.File.update({
+                id: fileToUpdate.id,
+                name: finalName
+            });
 
             console.log('File name updated successfully');
             setEditingFileId(null);
@@ -2605,7 +2609,10 @@ export default function FileManager2() {
 
             // For documents, load ParsedContent
             if (file.documentID) {
-                const parsedContents = await DataStore.query(ParsedContent, c => c.documentID.eq(file.documentID));
+                const client = getAmplifyClient();
+                const { data: parsedContents } = await client.models.ParsedContent.list({
+                    filter: { documentID: { eq: file.documentID } }
+                });
                 if (parsedContents.length > 0) {
                     setParsedContentData(prev => ({
                         ...prev,

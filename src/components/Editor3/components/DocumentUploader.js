@@ -17,10 +17,10 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import { DataStore } from 'aws-amplify/datastore';
 import { uploadData } from 'aws-amplify/storage';
 import { generateClient } from 'aws-amplify/api';
-import { Document } from '../../../models';
+import { getAmplifyClient } from '../../../utils/amplifyClient';
+import type { Schema } from '../../../../amplify/data/resource';
 import UnitContext from '../../../context/unitContext';
 import FilesContext from '../../../context/fileContext';
 
@@ -134,7 +134,8 @@ export default function DocumentUploader({ extractionType = 'vocabulary', onUplo
             });
 
             // Create Document record
-            const documentModel = await DataStore.save(new Document({
+            const amplifyClient = getAmplifyClient();
+            const { data: documentModel } = await amplifyClient.models.Document.create({
                 filename: file.name,
                 s3Key: filename,
                 status: 'uploaded',
@@ -147,7 +148,7 @@ export default function DocumentUploader({ extractionType = 'vocabulary', onUplo
                     extractionType,
                     originalName: file.name,
                 })
-            }));
+            });
 
             // Trigger analysis
             try {
@@ -187,9 +188,10 @@ export default function DocumentUploader({ extractionType = 'vocabulary', onUplo
 
     const removeDoc = async (docId) => {
         try {
-            const doc = await DataStore.query(Document, docId);
+            const client = getAmplifyClient();
+            const { data: doc } = await client.models.Document.get({ id: docId });
             if (doc) {
-                await DataStore.delete(doc);
+                await client.models.Document.delete({ id: docId });
                 setUploadedDocs(prev => prev.filter(d => d.id !== docId));
             }
         } catch (error) {

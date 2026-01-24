@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Unit } from "../src/models";
-import { DataStore } from 'aws-amplify/datastore';
+import { getAmplifyClient } from "../src/utils/amplifyClient";
 import {
     Button,
     Box,
@@ -88,24 +87,29 @@ function Units() {
 
     // Consolidated Unit observer - handles published, archived, and draft units with client-side filtering
     useEffect(() => {
-        fetchAllUnits()
-        async function fetchAllUnits() {
-            const unitData = await DataStore.query(Unit)
-            
-            // Filter client-side by status
-            const published = unitData.filter(u => u.status === 'PUBLISHED')
-            const archived = unitData.filter(u => u.status === 'ARCHIVED')
-            const draft = unitData.filter(u => u.status !== 'ARCHIVED' && u.status !== 'PUBLISHED')
-            
-            setPublishedUnits(published)
-            setArchivedUnits(archived)
-            setDraftUnits(draft)
-        }
-        const subscription = DataStore.observe(Unit).subscribe(() => fetchAllUnits())
+        const client = getAmplifyClient();
+        
+        const subscription = client.models.Unit.observeQuery().subscribe({
+            next: ({ items }) => {
+                console.log('[Units] Unit subscription update:', items.length, 'units');
+                
+                // Filter client-side by status
+                const published = items.filter(u => u.status === 'PUBLISHED');
+                const archived = items.filter(u => u.status === 'ARCHIVED');
+                const draft = items.filter(u => u.status !== 'ARCHIVED' && u.status !== 'PUBLISHED');
+                
+                setPublishedUnits(published);
+                setArchivedUnits(archived);
+                setDraftUnits(draft);
+            },
+            error: (error) => {
+                console.error('[Units] Unit subscription error:', error);
+            }
+        });
 
         return function cleanup() {
             subscription.unsubscribe();
-        }
+        };
     }, [])
 
 
@@ -120,22 +124,24 @@ function Units() {
         } = await fetchAuthSession();
 
         try {
-            const newUnit = await DataStore.save(
-                new Unit({
-                    name: '',
-                    description: '',
-                    identityId
-                })
-            );
-            console.log('newUnit', newUnit)
-            router.push(`/unit/${newUnit.id}`)
-            // setIsWorking(false)
+            const client = getAmplifyClient();
+            const response = await client.models.Unit.create({
+                name: '',
+                description: '',
+                identityId
+            });
+            
+            if (response.errors) {
+                console.error('Error creating unit:', response.errors);
+                throw new Error(response.errors[0].message);
+            }
+            
+            console.log('newUnit', response.data);
+            router.push(`/unit/${response.data.id}`);
         } catch (errors) {
-            console.error(errors)
-            //   throw new Error(errors[0].message)
+            console.error(errors);
+            setIsWorking(false);
         }
-
-        //   setOpen(false);
     }
 
 

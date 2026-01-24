@@ -111,8 +111,6 @@ import CustomAnswerPlugin, { CustomAnswerNode } from './plugins/CustomAnswerPlug
 import BlockSuggestionPlugin from './plugins/BlockSuggestionPlugin.js';
 import { SuggestionProvider } from './context/SuggestionContext';
 import AIContentCompletionPlugin from './plugins/AIContentCompletionPlugin.js';
-import { DataStore } from 'aws-amplify/datastore';
-import { Unit } from '../../models';
 
 // FileMetadata node imports
 import { FileMetadataNode } from './nodes/FileMetadataNode';

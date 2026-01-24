@@ -3,7 +3,7 @@
  * Defines available tools for the AI chatbot to call
  */
 
-import { DataStore } from 'aws-amplify/datastore';
+import { getAmplifyClient } from './amplifyClient';
 import { Unit, Section, Assignment, Word, Question, File as FileModel } from '../models';
 import { generateEmbedding } from '../graphql/mutations';
 import { generateClient } from 'aws-amplify/api';
@@ -380,7 +380,8 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
         const results = [...mappedResults];
         
         // Add word search
-        const words = await DataStore.query(Word);
+        const client = getAmplifyClient();
+        const { data: words } = await client.models.Word.list();
         console.log(`[executeSearchContent] Found ${words.length} total words`);
         
         let keywordMatches = 0;
@@ -401,7 +402,7 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
         console.log(`[executeSearchContent] Words keyword matches: ${keywordMatches}`);
         
         // Add question search
-        const questions = await DataStore.query(Question);
+        const { data: questions } = await client.models.Question.list();
         console.log(`[executeSearchContent] Found ${questions.length} total questions`);
         
         keywordMatches = 0;
@@ -458,7 +459,8 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
     // Search Files
     if (type === 'all' || type === 'files') {
       console.log('[executeSearchContent] Searching files...');
-      const files = await DataStore.query(FileModel);
+      const client = getAmplifyClient();
+      const { data: files } = await client.models.File.list();
       console.log(`[executeSearchContent] Found ${files.length} total files`);
       
       const filesWithEmbeddings = files.filter(f => f.embedding);
@@ -478,7 +480,7 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
     // Search Words
     if (type === 'all' || type === 'words') {
       console.log('[executeSearchContent] Searching words...');
-      const words = await DataStore.query(Word);
+      const { data: words } = await client.models.Word.list();
       console.log(`[executeSearchContent] Found ${words.length} total words`);
       
       const wordsWithEmbeddings = words.filter(w => w.embedding);
@@ -510,7 +512,7 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
     // Search Questions
     if (type === 'all' || type === 'questions') {
       console.log('[executeSearchContent] Searching questions...');
-      const questions = await DataStore.query(Question);
+      const { data: questions } = await client.models.Question.list();
       console.log(`[executeSearchContent] Found ${questions.length} total questions`);
       
       const questionsWithEmbeddings = questions.filter(q => q.embedding);
@@ -569,11 +571,12 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
 
 export async function executeCreateSection({ name, description, learner }) {
   try {
-    const newSection = await DataStore.save(new Section({
+    const client = getAmplifyClient();
+    const { data: newSection } = await client.models.Section.create({
       name,
       description: description || '',
       learner: learner || ''
-    }));
+    });
 
     return {
       success: true,
@@ -592,12 +595,13 @@ export async function executeCreateSection({ name, description, learner }) {
 
 export async function executeCreateUnit({ name, description, timeLimitSeconds }) {
   try {
-    const newUnit = await DataStore.save(new Unit({
+    const client = getAmplifyClient();
+    const { data: newUnit } = await client.models.Unit.create({
       name,
       description: description || '',
       timeLimitSeconds: timeLimitSeconds || null,
       data: JSON.stringify({ root: { children: [], direction: null, format: '', indent: 0, type: 'root', version: 1 } })
-    }));
+    });
 
     return {
       success: true,
@@ -616,9 +620,10 @@ export async function executeCreateUnit({ name, description, timeLimitSeconds })
 
 export async function executeCreateAssignment({ unitId, sectionId, dueDate, learner }) {
   try {
+    const client = getAmplifyClient();
     // Validate unit and section exist
-    const unit = await DataStore.query(Unit, unitId);
-    const section = await DataStore.query(Section, sectionId);
+    const { data: unit } = await client.models.Unit.get({ id: unitId });
+    const { data: section } = await client.models.Section.get({ id: sectionId });
 
     if (!unit) {
       return { success: false, error: 'Unit not found' };
@@ -627,21 +632,22 @@ export async function executeCreateAssignment({ unitId, sectionId, dueDate, lear
       return { success: false, error: 'Section not found' };
     }
 
-    const newAssignment = await DataStore.save(new Assignment({
+    const { data: newAssignment } = await client.models.Assignment.create({
       unitID: unitId,
       sectionID: sectionId,
       dueDate,
       learner: learner || section.learner,
       status: 'PUBLISHED'
-    }));
+    });
 
     // Add learner to unit's dynamic group if not already present
     const learners = unit.learners || [];
     if (!learners.includes(section.learner)) {
       learners.push(section.learner);
-      await DataStore.save(Unit.copyOf(unit, updated => {
-        updated.learners = learners;
-      }));
+      await client.models.Unit.update({
+        id: unit.id,
+        learners: learners
+      });
     }
 
     return {
@@ -662,14 +668,16 @@ export async function executeCreateAssignment({ unitId, sectionId, dueDate, lear
 
 export async function executeAddTimerToUnit({ unitId, seconds }) {
   try {
-    const unit = await DataStore.query(Unit, unitId);
+    const client = getAmplifyClient();
+    const { data: unit } = await client.models.Unit.get({ id: unitId });
     if (!unit) {
       return { success: false, error: 'Unit not found' };
     }
 
-    await DataStore.save(Unit.copyOf(unit, updated => {
-      updated.timeLimitSeconds = seconds;
-    }));
+    await client.models.Unit.update({
+      id: unit.id,
+      timeLimitSeconds: seconds
+    });
 
     return {
       success: true,
@@ -684,12 +692,13 @@ export async function executeAddTimerToUnit({ unitId, seconds }) {
 
 export async function executeCreateVocabularyWord({ phrase, phonetic, definition, unitId }) {
   try {
-    const newWord = await DataStore.save(new Word({
+    const client = getAmplifyClient();
+    const { data: newWord } = await client.models.Word.create({
       phrase,
       phonetic: phonetic || '',
       definition,
       unitID: unitId || null
-    }));
+    });
 
     return {
       success: true,
@@ -708,11 +717,12 @@ export async function executeCreateVocabularyWord({ phrase, phonetic, definition
 
 export async function executeCreateQuestion({ prompt, answer, unitId }) {
   try {
-    const newQuestion = await DataStore.save(new Question({
+    const client = getAmplifyClient();
+    const { data: newQuestion } = await client.models.Question.create({
       prompt,
       answer,
       unitID: unitId || null
-    }));
+    });
 
     return {
       success: true,
@@ -730,7 +740,8 @@ export async function executeCreateQuestion({ prompt, answer, unitId }) {
 
 export async function executeListSections() {
   try {
-    const sections = await DataStore.query(Section);
+    const client = getAmplifyClient();
+    const { data: sections } = await client.models.Section.list();
     
     return {
       success: true,
@@ -751,7 +762,8 @@ export async function executeListSections() {
 
 export async function executeListUnits({ limit }) {
   try {
-    const units = await DataStore.query(Unit);
+    const client = getAmplifyClient();
+    const { data: units } = await client.models.Unit.list();
     const result = limit ? units.slice(0, limit) : units;
     
     return {
@@ -774,19 +786,26 @@ export async function executeListUnits({ limit }) {
 
 export async function executeGetUnitDetails({ unitId }) {
   try {
-    const unit = await DataStore.query(Unit, unitId);
+    const client = getAmplifyClient();
+    const { data: unit } = await client.models.Unit.get({ id: unitId });
     if (!unit) {
       return { success: false, error: 'Unit not found' };
     }
 
     // Get assignments for this unit
-    const assignments = await DataStore.query(Assignment, a => a.unitID.eq(unitId));
+    const { data: assignments } = await client.models.Assignment.list({
+      filter: { unitID: { eq: unitId } }
+    });
     
-    // Get associated words
-    const unitWords = await unit.words.toArray();
+    // Get associated words via UnitWord join table
+    const { data: unitWords } = await client.models.UnitWord.list({
+      filter: { unitID: { eq: unitId } }
+    });
     
-    // Get associated questions
-    const unitQuestions = await unit.questions.toArray();
+    // Get associated questions via QuestionUnit join table
+    const { data: unitQuestions } = await client.models.QuestionUnit.list({
+      filter: { unitID: { eq: unitId } }
+    });
 
     return {
       success: true,
@@ -810,16 +829,18 @@ export async function executeGetUnitDetails({ unitId }) {
 
 export async function executeUpdateUnit({ unitId, name, description, timeLimitSeconds }) {
   try {
-    const unit = await DataStore.query(Unit, unitId);
+    const client = getAmplifyClient();
+    const { data: unit } = await client.models.Unit.get({ id: unitId });
     if (!unit) {
       return { success: false, error: 'Unit not found' };
     }
 
-    await DataStore.save(Unit.copyOf(unit, updated => {
-      if (name !== undefined) updated.name = name;
-      if (description !== undefined) updated.description = description;
-      if (timeLimitSeconds !== undefined) updated.timeLimitSeconds = timeLimitSeconds;
-    }));
+    const updates = { id: unitId };
+    if (name !== undefined) updates.name = name;
+    if (description !== undefined) updates.description = description;
+    if (timeLimitSeconds !== undefined) updates.timeLimitSeconds = timeLimitSeconds;
+    
+    await client.models.Unit.update(updates);
 
     return {
       success: true,
@@ -834,12 +855,13 @@ export async function executeUpdateUnit({ unitId, name, description, timeLimitSe
 
 export async function executeDeleteAssignment({ assignmentId }) {
   try {
-    const assignment = await DataStore.query(Assignment, assignmentId);
+    const client = getAmplifyClient();
+    const { data: assignment } = await client.models.Assignment.get({ id: assignmentId });
     if (!assignment) {
       return { success: false, error: 'Assignment not found' };
     }
 
-    await DataStore.delete(assignment);
+    await client.models.Assignment.delete({ id: assignmentId });
 
     return {
       success: true,

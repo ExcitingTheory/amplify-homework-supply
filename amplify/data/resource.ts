@@ -178,10 +178,12 @@ const schema = a.schema({
     .authorization((allow) => [
       // Owners (creators - typically Instructors) have full control
       allow.owner(),
-      // Instructors can create and manage units
-      allow.group('Instructors'),
       // Admins have full access
       allow.group('Admins'),
+      // Instructors can create new units
+      allow.group('Instructors').to(['create']),
+      // Learners can read all units (for published/assigned content)
+      allow.group('Learners').to(['read']),
       // Dynamic groups for section-based access
       allow.groupsDefinedIn('readableGroups').to(['read']),
       allow.groupsDefinedIn('writableGroups').to(['update']),
@@ -382,7 +384,7 @@ const schema = a.schema({
       wordFiles: a.hasMany('WordFile', ['fileID']),
       questionFiles: a.hasMany('QuestionFile', ['fileID']),
       chatFiles: a.hasMany('AssistantChatFile', ['fileID']),
-      parsedContents: a.hasMany('ParsedContent', ['fileID']),
+      parsedContent: a.hasMany('ParsedContent', ['fileID']),
       // Metadata for semantic search
       embedding: EmbeddingInfo,
     })
@@ -745,8 +747,8 @@ const schema = a.schema({
       sessionId: a.string(),
       metadata: a.json(),
       // Timestamps
-      createdAt: a.datetime().required(),
-      updatedAt: a.datetime().required(),
+      createdAt: a.datetime(),
+      updatedAt: a.datetime(),
     })
     .authorization((allow) => [
       allow.owner(),

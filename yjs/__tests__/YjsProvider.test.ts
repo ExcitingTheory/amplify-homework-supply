@@ -57,7 +57,7 @@ describe('YjsDocProvider', () => {
       expect(ymap.get('key2')).toBe(42)
     })
 
-    it('should observe Y.Map changes', (done) => {
+    it('should observe Y.Map changes', ({ expect }) => {
       const ymap = provider.getMap('test')
       let callCount = 0
 
@@ -70,7 +70,6 @@ describe('YjsDocProvider', () => {
       setTimeout(() => {
         expect(callCount).toBeGreaterThan(0)
         unobserve()
-        done()
       }, 100)
     })
   })
@@ -207,7 +206,7 @@ describe('YjsDocProvider', () => {
   })
 
   describe('Transaction Handling', () => {
-    it('should handle transactions', (done) => {
+    it('should handle transactions', ({ expect }) => {
       const ydoc = provider.getDoc()
       let eventFired = false
 
@@ -223,7 +222,6 @@ describe('YjsDocProvider', () => {
       setTimeout(() => {
         expect(eventFired).toBe(true)
         unsubscribe()
-        done()
       }, 100)
     })
   })

@@ -70,8 +70,7 @@ import { VocabularyCard } from './VocabularyReview2';
 // GraphQL imports
 import { generateClient } from 'aws-amplify/api';
 import { createWord, updateWord as updateWordMutation, deleteWord as deleteWordMutation } from '../graphql/mutations';
-import { DataStore } from 'aws-amplify/datastore';
-import { Word } from '../models';
+import { getAmplifyClient } from '../utils/amplifyClient';
 import { uploadData } from 'aws-amplify/storage';
 
 // TanStack Virtual
@@ -495,9 +494,11 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
                                     onClick={async () => {
                                         setLoading(true);
 
-                                        await DataStore.save(Word.copyOf(word, updated => {
-                                            updated.rubyTags = rubyTagsString;
-                                        }));
+                                        const client = getAmplifyClient();
+                                        await client.models.Word.update({
+                                            id: word.id,
+                                            rubyTags: rubyTagsString
+                                        });
 
                                         setRubyTags([]);
                                         setSelectedPhrase('');
@@ -1405,11 +1406,11 @@ function WordsPlugin({
             const word = Object.values(dictionary).find(w => w.id === wordId);
             if (!word) return;
 
-            await DataStore.save(Word.copyOf(word, updated => {
-                Object.keys(updates).forEach(key => {
-                    updated[key] = updates[key];
-                });
-            }));
+            const client = getAmplifyClient();
+            await client.models.Word.update({
+                id: word.id,
+                ...updates
+            });
         } catch (error) {
             console.error('Failed to update word:', error);
         }
@@ -1435,7 +1436,8 @@ function WordsPlugin({
                         return;
                     }
 
-                    await DataStore.delete(word);
+                    const client = getAmplifyClient();
+                    await client.models.Word.delete({ id: word.id });
                     setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
                 } catch (error) {
                     console.error('Failed to delete word:', error);
@@ -1553,7 +1555,8 @@ export function DictionaryEditor2() {
             onConfirm: async () => {
                 try {
                     const words = Object.values(dictionary).filter(w => selectedItems.has(w.id));
-                    await Promise.all(words.map(word => DataStore.delete(word)));
+                    const client = getAmplifyClient();
+                    await Promise.all(words.map(word => client.models.Word.delete({ id: word.id })));
                     setSelectedItems(new Set());
                     setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
                 } catch (error) {
@@ -1591,15 +1594,14 @@ export function DictionaryEditor2() {
         if (!newPhrase.trim()) return;
 
         try {
-            await DataStore.save(
-                new Word({
-                    phrase: newPhrase,
-                    pronunciation: newPronunciation,
-                    definition: newDefinition,
-                    audio: [],
-                    identityId: identityId,
-                })
-            );
+            const client = getAmplifyClient();
+            await client.models.Word.create({
+                phrase: newPhrase,
+                pronunciation: newPronunciation,
+                definition: newDefinition,
+                audio: [],
+                identityId: identityId,
+            });
 
             setNewPhrase('');
             setNewPronunciation('');

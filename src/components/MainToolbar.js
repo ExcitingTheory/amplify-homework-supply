@@ -37,7 +37,7 @@ import { addSelfToSection } from '../../src/graphql/mutations';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { signOut } from 'aws-amplify/auth';
 import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
-import { DataStore } from 'aws-amplify/datastore';
+import { uploadData } from 'aws-amplify/storage';
 import { Section } from '../../src/models';
 import Switch from '@mui/material/Switch';
 
@@ -321,8 +321,8 @@ export default function MainToolbar({ children }) {
     console.log('signInDetails', signInDetails)
     console.log('session', session)
   
-    await DataStore.clear(Section);
-    // DataStore will restart automatically on page reload
+    // Note: Gen2 doesn't use DataStore local cache, so clear is not needed
+    // Gen2 client will automatically sync with backend
   
     setOpenAddStudentToSection(false)
     setIsWorking(false)

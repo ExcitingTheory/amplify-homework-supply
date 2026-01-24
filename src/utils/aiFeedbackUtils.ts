@@ -5,7 +5,7 @@
  * user feedback on AI-generated content.
  */
 
-import { DataStore } from 'aws-amplify/datastore';
+import { getAmplifyClient } from './amplifyClient';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { 
   AIFeedback,
@@ -31,36 +31,35 @@ interface CreateFeedbackParams {
 }
 
 /**
- * Create and save AI feedback to DataStore
+ * Create and save AI feedback
  */
-export async function createAIFeedback(params: CreateFeedbackParams): Promise<AIFeedback> {
+export async function createAIFeedback(params: CreateFeedbackParams): Promise<any> {
   const session = await fetchAuthSession();
   const owner = session.tokens?.idToken?.payload.sub as string;
   const identityId = session.identityId;
 
-  const savedFeedback = await DataStore.save(
-    new AIFeedback({
-      owner,
-      identityId,
-      contentType: AiContentType[params.contentType],
-      feedbackType: params.feedbackType === 'POSITIVE' 
-        ? AiFeedbackType.POSITIVE 
-        : AiFeedbackType.NEGATIVE,
-      reasons: params.reasons?.map(r => AiFeedbackReason[r]),
-      comment: params.comment,
-      model: params.model,
-      prompt: params.prompt,
-      generatedContent: params.generatedContent,
-      unitID: params.unitId,
-      gradeID: params.gradeId,
-      documentID: params.documentId,
-      messageId: params.messageId,
-      sessionId: params.sessionId,
-      metadata: params.metadata ? JSON.stringify(params.metadata) : undefined,
-    } as AIFeedback)
-  );
+  const client = getAmplifyClient();
+  const { data: savedFeedback } = await client.models.AIFeedback.create({
+    owner,
+    identityId,
+    contentType: AiContentType[params.contentType],
+    feedbackType: params.feedbackType === 'POSITIVE' 
+      ? AiFeedbackType.POSITIVE 
+      : AiFeedbackType.NEGATIVE,
+    reasons: params.reasons?.[0] ? AiFeedbackReason[params.reasons[0]] : undefined,
+    comment: params.comment,
+    model: params.model,
+    prompt: params.prompt,
+    generatedContent: params.generatedContent,
+    unitID: params.unitId,
+    gradeID: params.gradeId,
+    documentID: params.documentId,
+    messageId: params.messageId,
+    sessionId: params.sessionId,
+    metadata: params.metadata ? JSON.stringify(params.metadata) : undefined,
+  });
 
-    return savedFeedback;
+  return savedFeedback;
 }
 
 /**
@@ -68,16 +67,19 @@ export async function createAIFeedback(params: CreateFeedbackParams): Promise<AI
  */
 export async function getFeedbackByContentType(
   contentType: keyof typeof AiContentType
-): Promise<AIFeedback[]> {
+): Promise<any[]> {
   const session = await fetchAuthSession();
   const owner = session.tokens?.idToken?.payload.sub as string;
 
-  const feedback = await DataStore.query(AIFeedback, f =>
-    f.and(f => [
-      f.owner.eq(owner),
-      f.contentType.eq(AiContentType[contentType])
-    ])
-  );
+  const client = getAmplifyClient();
+  const { data: feedback } = await client.models.AIFeedback.list({
+    filter: {
+      and: [
+        { owner: { eq: owner } },
+        { contentType: { eq: AiContentType[contentType] } }
+      ]
+    }
+  });
 
   return feedback;
 }
@@ -85,16 +87,19 @@ export async function getFeedbackByContentType(
 /**
  * Get feedback for a specific unit
  */
-export async function getFeedbackByUnit(unitId: string): Promise<AIFeedback[]> {
+export async function getFeedbackByUnit(unitId: string): Promise<any[]> {
   const session = await fetchAuthSession();
   const owner = session.tokens?.idToken?.payload.sub as string;
 
-  const feedback = await DataStore.query(AIFeedback, f =>
-    f.and(f => [
-      f.owner.eq(owner),
-      f.unitID.eq(unitId)
-    ])
-  );
+  const client = getAmplifyClient();
+  const { data: feedback } = await client.models.AIFeedback.list({
+    filter: {
+      and: [
+        { owner: { eq: owner } },
+        { unitID: { eq: unitId } }
+      ]
+    }
+  });
 
   return feedback;
 }
@@ -102,16 +107,19 @@ export async function getFeedbackByUnit(unitId: string): Promise<AIFeedback[]> {
 /**
  * Get feedback for a specific message
  */
-export async function getFeedbackByMessage(messageId: string): Promise<AIFeedback[]> {
+export async function getFeedbackByMessage(messageId: string): Promise<any[]> {
   const session = await fetchAuthSession();
   const owner = session.tokens?.idToken?.payload.sub as string;
 
-  const feedback = await DataStore.query(AIFeedback, f =>
-    f.and(f => [
-      f.owner.eq(owner),
-      f.messageId.eq(messageId)
-    ])
-  );
+  const client = getAmplifyClient();
+  const { data: feedback } = await client.models.AIFeedback.list({
+    filter: {
+      and: [
+        { owner: { eq: owner } },
+        { messageId: { eq: messageId } }
+      ]
+    }
+  });
 
   return feedback;
 }
@@ -136,32 +144,45 @@ export async function getFeedbackStats(
   const owner = session.tokens?.idToken?.payload.sub as string;
 
   // Build query based on params
-  let feedback: AIFeedback[];
+  const client = getAmplifyClient();
+  let feedback: any[];
   
   if (contentType && unitId) {
-    feedback = await DataStore.query(AIFeedback, f =>
-      f.and(f => [
-        f.owner.eq(owner),
-        f.contentType.eq(AiContentType[contentType]),
-        f.unitID.eq(unitId)
-      ])
-    );
+    const { data } = await client.models.AIFeedback.list({
+      filter: {
+        and: [
+          { owner: { eq: owner } },
+          { contentType: { eq: AiContentType[contentType] } },
+          { unitID: { eq: unitId } }
+        ]
+      }
+    });
+    feedback = data;
   } else if (contentType) {
-    feedback = await DataStore.query(AIFeedback, f =>
-      f.and(f => [
-        f.owner.eq(owner),
-        f.contentType.eq(AiContentType[contentType])
-      ])
-    );
+    const { data } = await client.models.AIFeedback.list({
+      filter: {
+        and: [
+          { owner: { eq: owner } },
+          { contentType: { eq: AiContentType[contentType] } }
+        ]
+      }
+    });
+    feedback = data;
   } else if (unitId) {
-    feedback = await DataStore.query(AIFeedback, f =>
-      f.and(f => [
-        f.owner.eq(owner),
-        f.unitID.eq(unitId)
-      ])
-    );
+    const { data } = await client.models.AIFeedback.list({
+      filter: {
+        and: [
+          { owner: { eq: owner } },
+          { unitID: { eq: unitId } }
+        ]
+      }
+    });
+    feedback = data;
   } else {
-    feedback = await DataStore.query(AIFeedback, f => f.owner.eq(owner));
+    const { data } = await client.models.AIFeedback.list({
+      filter: { owner: { eq: owner } }
+    });
+    feedback = data;
   }
 
   const total = feedback.length;
@@ -172,11 +193,10 @@ export async function getFeedbackStats(
   const reasonCounts: Record<string, number> = {};
   feedback.forEach(f => {
     if (f.reasons) {
-      f.reasons.forEach(reason => {
-        if (reason) {
-          reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
-        }
-      });
+      const reason = f.reasons;
+      if (reason) {
+        reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
+      }
     }
   });
 
@@ -198,9 +218,10 @@ export async function getFeedbackStats(
  * Delete feedback by ID
  */
 export async function deleteFeedback(feedbackId: string): Promise<void> {
-  const feedback = await DataStore.query(AIFeedback, feedbackId);
+  const client = getAmplifyClient();
+  const { data: feedback } = await client.models.AIFeedback.get({ id: feedbackId });
   if (feedback) {
-    await DataStore.delete(feedback);
+    await client.models.AIFeedback.delete({ id: feedbackId });
   }
 }
 

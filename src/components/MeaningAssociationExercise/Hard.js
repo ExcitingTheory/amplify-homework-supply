@@ -10,7 +10,7 @@ import { Grid } from '@mui/material';
 import { LinearProgressWithLabel, AnswerDrop } from '.';
 
 import { Word } from '../../models';
-import { DataStore } from 'aws-amplify/datastore';
+
 import { format } from 'util';
 
 export const Hard = ({

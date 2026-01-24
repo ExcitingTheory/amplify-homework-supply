@@ -67,6 +67,50 @@ Amplify.configure({
   },
 });
 
+// Raw GraphQL operations - .models API doesn't work in Lambda resolvers
+const CREATE_SECTION = /* GraphQL */ `
+  mutation CreateSection($input: CreateSectionInput!) {
+    createSection(input: $input) {
+      id
+      name
+      code
+      createdAt
+    }
+  }
+`;
+
+const LIST_SECTIONS_BY_CODE = /* GraphQL */ `
+  query ListSections($filter: ModelSectionFilterInput) {
+    listSections(filter: $filter) {
+      items {
+        id
+        name
+        code
+      }
+    }
+  }
+`;
+
+const LIST_ASSIGNMENTS = /* GraphQL */ `
+  query ListAssignments($filter: ModelAssignmentFilterInput) {
+    listAssignments(filter: $filter) {
+      items {
+        id
+        unitID
+        sectionID
+      }
+    }
+  }
+`;
+
+const CREATE_ASSIGNMENT = /* GraphQL */ `
+  mutation CreateAssignment($input: CreateAssignmentInput!) {
+    createAssignment(input: $input) {
+      id
+    }
+  }
+`;
+
 // Initialize client lazily to ensure environment variables are set
 let client: any = null;
 
@@ -75,7 +119,10 @@ function getClient() {
     if (!process.env.API_ENDPOINT) {
       throw new Error('API_ENDPOINT environment variable not set. Lambda must be configured as AppSync resolver.');
     }
-    client = generateClient<Schema>();
+    // Create client with IAM auth mode explicitly
+    client = generateClient<Schema>({
+      authMode: 'iam',
+    });
   }
   return client;
 }
@@ -136,19 +183,28 @@ async function handleCreateSectionGroup(
     try {
         // Generate unique 6-character code
         const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-        const dataClient = getClient();
-        const { data: section, errors } = await dataClient.models.Section.create({
-            name,
-            description: description || '',
-            code,
-            instructor: userId,
+        const client = getClient();
+        
+        // Use raw GraphQL mutation (models API doesn't work in Lambda)
+        const { data, errors } = await client.graphql({
+            query: CREATE_SECTION,
+            variables: {
+                input: {
+                    name,
+                    description: description || '',
+                    code,
+                    instructor: userId,
+                    status: 'PUBLISHED',
+                },
+            },
         });
 
-        if (errors || !section) {
+        if (errors || !data?.createSection) {
             console.error('[Section] Failed to create section:', errors);
             throw new Error('Failed to create section record');
         }
 
+        const section = data.createSection;
         const sectionId = section.id;
 
         // Create Cognito groups for this section
@@ -190,18 +246,21 @@ async function handleAddSelfToSection(
     const { code } = args;
 
     try {
-        // Look up Section by code
-        const dataClient = getClient();
-        const { data: sections, errors: lookupErrors } = await dataClient.models.Section.list({
-            filter: { code: { eq: code } }
+        // Look up Section by code using GraphQL
+        const client = getClient();
+        const { data: listData, errors: lookupErrors } = await client.graphql({
+            query: LIST_SECTIONS_BY_CODE,
+            variables: {
+                filter: { code: { eq: code } },
+            },
         });
 
-        if (lookupErrors || !sections || sections.length === 0) {
+        if (lookupErrors || !listData?.listSections?.items || listData.listSections.items.length === 0) {
             console.error('[Section] Section not found with code:', code);
             throw new Error(`No section found with code ${code}`);
         }
 
-        const section = sections[0];
+        const section = listData.listSections.items[0];
         const sectionId = section.id;
 
         // Add user to section learner group
@@ -209,21 +268,32 @@ async function handleAddSelfToSection(
         console.log(`[Section] Added ${username} to learner group for section ${sectionId}`);
 
         // Get all assignments for this section to create student copies
-        const { data: sectionAssignments } = await dataClient.models.Assignment.list({
-            filter: { sectionID: { eq: sectionId } }
+        const { data: assignmentsData } = await client.graphql({
+            query: LIST_ASSIGNMENTS,
+            variables: {
+                filter: { sectionID: { eq: sectionId } },
+            },
         });
+
+        const sectionAssignments = assignmentsData?.listAssignments?.items || [];
 
         // Create assignments for this student
         const readableGroups = [`learner-${sectionId}`];
         const writableGroups = [`learner-${sectionId}`];
 
-        for (const assignment of sectionAssignments || []) {
-            await dataClient.models.Assignment.create({
-                sectionID: sectionId,
-                unitID: assignment.unitID,
-                learner: userId,
-                readableGroups,
-                writableGroups,
+        for (const assignment of sectionAssignments) {
+            await client.graphql({
+                query: CREATE_ASSIGNMENT,
+                variables: {
+                    input: {
+                        sectionID: sectionId,
+                        unitID: assignment.unitID,
+                        learner: userId,
+                        readableGroups,
+                        writableGroups,
+                        status: 'PUBLISHED',
+                    },
+                },
             });
         }
 

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Head from 'next/head';
 import { ThemeProvider } from '@mui/material/styles';
@@ -11,38 +10,12 @@ import amplifyconfig from '../src/amplifyconfiguration.json';
 
 import '../src/components/Editor3/theme.css';
 import '../src/components/Editor3/components/LanguageEditorTheme.css';
-import { Amplify, Logger } from 'aws-amplify';
+import { Amplify } from 'aws-amplify';
 
-// Configure Amplify with DataStore multi-auth
-
-import { AuthModeStrategyType } from 'aws-amplify/datastore';
-
-// Configure Amplify BEFORE importing components that use DataStore
-Amplify.configure({
-  ...amplifyconfig,
-  DataStore: {
-    authModeStrategyType: AuthModeStrategyType.MULTI_AUTH,
-  },
-})
-
-// Schema version - increment this when you run amplify push with schema changes
-const SCHEMA_VERSION = '1.6.0'; // Updated for AssistantChat model migration
-
-// Clear DataStore only when schema version changes (dynamic import to avoid premature DataStore initialization)
-let needsDataStoreClear = false;
-if (typeof window !== 'undefined') {
-  const storedVersion = localStorage.getItem('datastore_schema_version');
-  const isClearing = sessionStorage.getItem('datastore_clearing');
-  
-  if (storedVersion !== SCHEMA_VERSION && !isClearing) {
-    console.log(`Schema version mismatch. Stored: ${storedVersion}, Current: ${SCHEMA_VERSION}. Will clear DataStore...`);
-    needsDataStoreClear = true;
-    sessionStorage.setItem('datastore_clearing', 'true');
-  }
-}
+// Configure Amplify
+Amplify.configure(amplifyconfig);
 
 // Client-side cache, shared for the whole session of the user in the browser.
-
 const clientSideEmotionCache = createEmotionCache();
 
 
@@ -88,58 +61,6 @@ export default function MyApp(props) {
    * 
    */
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
-
-  // Handle DataStore clearing and initialization
-  useEffect(() => {
-    let isMounted = true;
-    
-    const initDataStore = async () => {
-      if (typeof window === 'undefined') return;
-      
-      try {
-        const { DataStore } = await import('aws-amplify/datastore');
-        
-        // If schema version mismatch, stop and clear DataStore
-        if (needsDataStoreClear) {
-          console.log('[_app] Stopping DataStore before clear...');
-          
-          try {
-            await DataStore.stop();
-          } catch (stopErr) {
-            console.warn('[_app] DataStore stop warning:', stopErr.message);
-          }
-          
-          console.log('[_app] Clearing DataStore...');
-          await DataStore.clear();
-          
-          if (isMounted) {
-            localStorage.setItem('datastore_schema_version', SCHEMA_VERSION);
-            sessionStorage.removeItem('datastore_clearing');
-            console.log('[_app] DataStore cleared. Reloading...');
-            window.location.reload();
-          }
-          return;
-        }
-        
-        // Normal startup - start DataStore
-        if (isMounted) {
-          console.log('[_app] Starting DataStore...');
-          await DataStore.start();
-          console.log('[_app] DataStore started successfully');
-        }
-      } catch (error) {
-        console.error('[_app] Error initializing DataStore:', error);
-        // Clear the clearing flag if there was an error
-        sessionStorage.removeItem('datastore_clearing');
-      }
-    };
-
-    initDataStore();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   return (
     <CacheProvider value={emotionCache}>

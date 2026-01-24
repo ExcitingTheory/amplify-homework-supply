@@ -27,7 +27,8 @@
     "test:unit": "vitest run --exclude 'test/integration/**'",
     "test:integration": "vitest run test/integration",
     "test:watch": "vitest watch",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit --project tsconfig.json"
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.0.7",

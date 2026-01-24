@@ -1,7 +1,6 @@
 import React from "react";
-import { DataStore } from "aws-amplify/datastore";
 import { getCurrentUser } from "aws-amplify/auth";
-import { Section, Assignment } from "../models"
+import { getAmplifyClient } from '../utils/amplifyClient';
 
 const SectionContext = React.createContext({
     sections: [],
@@ -24,35 +23,43 @@ const SectionProvider = ({ children, unitId }) => {
                 username,
               } = await getCurrentUser();
 
-            subscription = DataStore.observeQuery(Section,
-                s => s.owner.eq(username)
-            ).subscribe(({ items }) => {
-                let _sectionMap = {}
+            const client = getAmplifyClient();
 
-                items.forEach(item => {
-                    _sectionMap[item.id] = item
-                })
+            subscription = client.models.Section.observeQuery({
+                filter: {
+                    owner: { eq: username }
+                }
+            }).subscribe({
+                next: ({ items }) => {
+                    let _sectionMap = {}
 
-                // Only update if sections have actually changed
-                setSections(prevSections => {
-                    const prevStr = JSON.stringify(prevSections);
-                    const newStr = JSON.stringify(items);
-                    if (prevStr === newStr) {
-                        return prevSections; // Return same reference to prevent rerender
-                    }
-                    return items;
-                });
+                    items.forEach(item => {
+                        _sectionMap[item.id] = item
+                    })
 
-                // Only update if sectionMap has actually changed
-                setSectionMap(prevMap => {
-                    const prevStr = JSON.stringify(prevMap);
-                    const newStr = JSON.stringify(_sectionMap);
-                    if (prevStr === newStr) {
-                        return prevMap; // Return same reference to prevent rerender
-                    }
-                    return _sectionMap;
-                });
+                    // Only update if sections have actually changed
+                    setSections(prevSections => {
+                        const prevStr = JSON.stringify(prevSections);
+                        const newStr = JSON.stringify(items);
+                        if (prevStr === newStr) {
+                            return prevSections; // Return same reference to prevent rerender
+                        }
+                        return items;
+                    });
 
+                    // Only update if sectionMap has actually changed
+                    setSectionMap(prevMap => {
+                        const prevStr = JSON.stringify(prevMap);
+                        const newStr = JSON.stringify(_sectionMap);
+                        if (prevStr === newStr) {
+                            return prevMap; // Return same reference to prevent rerender
+                        }
+                        return _sectionMap;
+                    });
+                },
+                error: (error) => {
+                    console.error('[SectionContext] Section subscription error:', error);
+                }
             });
         }
 
@@ -69,18 +76,27 @@ const SectionProvider = ({ children, unitId }) => {
         let subscription;
 
         async function fetchAssignments() {
-            subscription = DataStore.observeQuery(Assignment,
-                s => s.unitID.eq(unitId)
-            ).subscribe(({ items }) => {
-                // Only update if assignments have actually changed
-                setAssignments(prevAssignments => {
-                    const prevStr = JSON.stringify(prevAssignments);
-                    const newStr = JSON.stringify(items);
-                    if (prevStr === newStr) {
-                        return prevAssignments; // Return same reference to prevent rerender
-                    }
-                    return items;
-                });
+            const client = getAmplifyClient();
+
+            subscription = client.models.Assignment.observeQuery({
+                filter: {
+                    unitID: { eq: unitId }
+                }
+            }).subscribe({
+                next: ({ items }) => {
+                    // Only update if assignments have actually changed
+                    setAssignments(prevAssignments => {
+                        const prevStr = JSON.stringify(prevAssignments);
+                        const newStr = JSON.stringify(items);
+                        if (prevStr === newStr) {
+                            return prevAssignments; // Return same reference to prevent rerender
+                        }
+                        return items;
+                    });
+                },
+                error: (error) => {
+                    console.error('[SectionContext] Assignment subscription error:', error);
+                }
             });
         }
 

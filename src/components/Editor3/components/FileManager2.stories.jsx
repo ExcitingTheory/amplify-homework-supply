@@ -224,7 +224,7 @@ const seedMockData = async () => {
     localStorage.removeItem('fileManager2_activeTab');
   }
   
-  const { seedMockFiles, seedMockDocuments, seedMockParsedContent } = await import('../../../../.storybook/__mocks__/aws-amplify-datastore');
+  const { seedMockFiles, seedMockDocuments, seedMockParsedContent } = await import('../../../../.storybook/__mocks__/aws-amplify-data');
   const { MOCK_IMAGE_URL_1, MOCK_IMAGE_URL_2, mockWaveformData } = await import('../../../../.storybook/__mocks__/media');
   
   const timestamp = new Date().toISOString();

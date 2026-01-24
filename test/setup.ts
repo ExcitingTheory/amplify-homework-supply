@@ -4,7 +4,7 @@
  * Runs before all tests to configure global test environment
  */
 
-import { expect, vi } from 'vitest';
+import { expect, vi, beforeAll, afterAll } from 'vitest';
 
 // Extend Vitest matchers with TypeScript support
 declare module 'vitest' {

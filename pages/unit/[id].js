@@ -1,4 +1,3 @@
-import { DataStore } from 'aws-amplify/datastore';
 import { useRouter } from 'next/router'
 import LanguageEditor from '../../src/components/Editor3'
 import React from "react";

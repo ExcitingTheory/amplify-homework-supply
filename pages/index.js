@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Assignment, Grade, Section, Unit } from "../src/models";
-import { DataStore } from 'aws-amplify/datastore';
+import { getAmplifyClient } from "../src/utils/amplifyClient";
 
 import {
   Button,
@@ -104,148 +103,159 @@ function Index({ signOut, user }) {
 
   useEffect(() => {
     if (!user?.username) return;
-    // if (!id) return
-    fetchAllGrades()
-    async function fetchAllGrades() {
-      const myUserId = user.username
-      const allGrades = await DataStore.query(Grade)
+    const client = getAmplifyClient();
+    const myUserId = user.username;
+    
+    const subscription = client.models.Grade.observeQuery().subscribe({
+      next: ({ items }) => {
+        console.log('[Index] Grade subscription update:', items.length, 'grades');
+        
+        // Process my grades (complete only)
+        const myCompletedGrades = items.filter(g => g.complete === true && g.owner === myUserId);
+        setMyGrades(myCompletedGrades);
+        console.log('fetchMyGrades', myCompletedGrades);
 
-      // Process my grades (complete only)
-      const myCompletedGrades = allGrades.filter(g => g.complete === true && g.owner === myUserId)
-      setMyGrades(myCompletedGrades)
+        // grades by assignment
+        // look for the last grade for each assignment
+        // look for the highest grade for each assignment
+        const gradesByUnit = {};
 
-      console.log('fetchMyGrades', myCompletedGrades)
-
-      // grades by assignment
-      // look for the last grade for each assignment
-      // look for the highest grade for each assignment
-      // limit the grades by the assignment duedae and updated date
-
-      const gradesByUnit = {}
-
-      myCompletedGrades.forEach((grade) => {
-        if (!gradesByUnit[grade.unitID]) {
-          gradesByUnit[grade.unitID] = {
-            last: grade,
-            highest: grade,
-            sum: 0,
-            count: 0,
-            accuracy: 0,
+        myCompletedGrades.forEach((grade) => {
+          if (!gradesByUnit[grade.unitID]) {
+            gradesByUnit[grade.unitID] = {
+              last: grade,
+              highest: grade,
+              sum: 0,
+              count: 0,
+              accuracy: 0,
+            };
           }
-        }
 
-        if (grade.updatedAt > gradesByUnit[grade.unitID].last.updatedAt) {
-          gradesByUnit[grade.unitID].last = grade
-        }
+          if (grade.updatedAt > gradesByUnit[grade.unitID].last.updatedAt) {
+            gradesByUnit[grade.unitID].last = grade;
+          }
 
-        if (grade.accuracy > gradesByUnit[grade.unitID].highest.accuracy) {
-          gradesByUnit[grade.unitID].highest = grade
-        }
+          if (grade.accuracy > gradesByUnit[grade.unitID].highest.accuracy) {
+            gradesByUnit[grade.unitID].highest = grade;
+          }
 
-        gradesByUnit[grade.unitID].sum += grade.accuracy
-        gradesByUnit[grade.unitID].count += 1
+          gradesByUnit[grade.unitID].sum += grade.accuracy;
+          gradesByUnit[grade.unitID].count += 1;
 
-        if (gradesByUnit[grade.unitID].count > 0) {
-          gradesByUnit[grade.unitID].average = gradesByUnit[grade.unitID].sum / gradesByUnit[grade.unitID].count
-        } else {
-          gradesByUnit[grade.unitID].average = 0
-        }
+          if (gradesByUnit[grade.unitID].count > 0) {
+            gradesByUnit[grade.unitID].average = gradesByUnit[grade.unitID].sum / gradesByUnit[grade.unitID].count;
+          } else {
+            gradesByUnit[grade.unitID].average = 0;
+          }
+        });
 
-      })
-
-      console.log('gradesByUnit', gradesByUnit)
-
-      setMyGradeMap(gradesByUnit)
-      
-      // Set all grades
-      setGrades(allGrades)
-    }
-    const subscription = DataStore.observe(Grade).subscribe(() => fetchAllGrades())
+        console.log('gradesByUnit', gradesByUnit);
+        setMyGradeMap(gradesByUnit);
+        setGrades(items);
+      },
+      error: (error) => {
+        console.error('[Index] Grade subscription error:', error);
+      }
+    });
 
     return function cleanup() {
       subscription.unsubscribe();
-    }
+    };
   }, [user?.username])
 
   // Consolidated Assignment observer - handles both my and others' assignments
   useEffect(() => {
     if (!user?.username) return;
-    fetchAllAssignments()
-    async function fetchAllAssignments() {
-      const myUserId = user.username
-      const allAssignments = await DataStore.query(Assignment)
-      
-      const myAssignments = allAssignments.filter(a => a.owner === myUserId)
-      const othersAssignments = allAssignments.filter(a => a.owner !== myUserId)
+    const client = getAmplifyClient();
+    const myUserId = user.username;
+    
+    const subscription = client.models.Assignment.observeQuery().subscribe({
+      next: ({ items }) => {
+        console.log('[Index] Assignment subscription update:', items.length, 'assignments');
+        
+        const myAssignments = items.filter(a => a.owner === myUserId);
+        const othersAssignments = items.filter(a => a.owner !== myUserId);
+        console.log('assignmentData', othersAssignments);
 
-      console.log('assignmentData', othersAssignments)
+        const needsGrading = [];
+        othersAssignments.forEach((assignment) => {
+          const gradesForAssignment = myGradeMap[assignment?.unitID];
+          console.log('gradesForAssignment', gradesForAssignment);
+          if (!gradesForAssignment?.last?.accuracy) {
+            needsGrading.push(assignment);
+          }
+        });
 
-      const needsGrading = []
-      othersAssignments.forEach((assignment) => {
-        const gradesForAssignment = myGradeMap[assignment?.unitID]
-        console.log('gradesForAssignment', gradesForAssignment)
-        if (!gradesForAssignment?.last?.accuracy) {
-          needsGrading.push(assignment)
-        }
-      })
-
-      console.log('needsGrading', needsGrading)
-      setMyAssignmentNeedsGrading(needsGrading)
-      setMyAssignment(myAssignments)
-      setAssignment(othersAssignments)
-    }
-    const subscription = DataStore.observe(Assignment).subscribe(() => fetchAllAssignments())
+        console.log('needsGrading', needsGrading);
+        setMyAssignmentNeedsGrading(needsGrading);
+        setMyAssignment(myAssignments);
+        setAssignment(othersAssignments);
+      },
+      error: (error) => {
+        console.error('[Index] Assignment subscription error:', error);
+      }
+    });
 
     return function cleanup() {
       subscription.unsubscribe();
-    }
+    };
   }, [user?.username, units, JSON.stringify(myGradeMap)])
 
   // Consolidated Section observer - handles both my and others' sections
   useEffect(() => {
     console.log('[Index] Section useEffect triggered, user?.username:', user?.username);
     if (!user?.username) return;
-    fetchAllSections()
-    async function fetchAllSections() {
-      const myUserId = user.username
-      const myGroups = user.groups || [] // Cognito groups the user belongs to
-      console.log('[Index] Fetching sections for user:', myUserId, 'groups:', myGroups);
-      const allSections = await DataStore.query(Section)
-      console.log('[Index] Received sections from DataStore:', allSections.length, allSections);
-      
-      // Sections I own (I'm the instructor)
-      const mySections = allSections.filter(s => s.owner === myUserId)
-      // Sections where I'm a student (I'm in the learner group)
-      const othersSections = allSections.filter(s => 
-        s.owner !== myUserId && s.learner && myGroups.includes(s.learner)
-      )
-      
-      console.log('[Index] mySections:', mySections.length, 'othersSections (where I am in learner group):', othersSections.length);
-      setMySections(mySections)
-      setSections(othersSections)
-    }
-    const subscription = DataStore.observe(Section).subscribe(() => fetchAllSections())
+    const client = getAmplifyClient();
+    const myUserId = user.username;
+    const myGroups = user.groups || []; // Cognito groups the user belongs to
+    
+    const subscription = client.models.Section.observeQuery().subscribe({
+      next: ({ items }) => {
+        console.log('[Index] Section subscription update:', items.length, 'sections');
+        console.log('[Index] Fetching sections for user:', myUserId, 'groups:', myGroups);
+        console.log('[Index] Received sections:', items.length, items);
+        
+        // Sections I own (I'm the instructor)
+        const mySections = items.filter(s => s.owner === myUserId);
+        // Sections where I'm a student (I'm in the learner group)
+        const othersSections = items.filter(s => 
+          s.owner !== myUserId && s.learner && myGroups.includes(s.learner)
+        );
+        
+        console.log('[Index] mySections:', mySections.length, 'othersSections (where I am in learner group):', othersSections.length);
+        setMySections(mySections);
+        setSections(othersSections);
+      },
+      error: (error) => {
+        console.error('[Index] Section subscription error:', error);
+      }
+    });
 
     return function cleanup() {
       subscription.unsubscribe();
-    }
+    };
   }, [user?.username])
 
   useEffect(() => {
-    fetchUnits()
-    async function fetchUnits() {
-      const unitData = await DataStore.query(Unit)
-      const unitsById = {}
-      unitData.forEach(function (unit) {
-        unitsById[unit.id] = unit
-      })
-      setUnits(unitsById)
-    }
-    const subscription = DataStore.observe(Unit).subscribe(() => fetchUnits())
+    const client = getAmplifyClient();
+    
+    const subscription = client.models.Unit.observeQuery().subscribe({
+      next: ({ items }) => {
+        console.log('[Index] Unit subscription update:', items.length, 'units');
+        const unitsById = {};
+        items.forEach(function (unit) {
+          unitsById[unit.id] = unit;
+        });
+        setUnits(unitsById);
+      },
+      error: (error) => {
+        console.error('[Index] Unit subscription error:', error);
+      }
+    });
 
     return function cleanup() {
       subscription.unsubscribe();
-    }
+    };
   }, [])
 
   console.log('Grades.grades', grades)

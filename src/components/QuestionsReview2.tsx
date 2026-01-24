@@ -37,7 +37,7 @@ import {
     Info as InfoIcon,
     QuestionAnswer as QuestionIcon,
 } from '@mui/icons-material';
-import { DataStore } from 'aws-amplify/datastore';
+import { getAmplifyClient } from '../utils/amplifyClient';
 import { ParsedContent, Document } from '../models';
 import DictionaryContext from '../context/dictionaryContext';
 
@@ -450,8 +450,12 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
     useEffect(() => {
         loadParsedContent();
         
-        const subscription = DataStore.observeQuery(ParsedContent).subscribe(() => {
-            loadParsedContent();
+        const client = getAmplifyClient();
+        const subscription = client.models.ParsedContent.observeQuery().subscribe({
+            next: () => {
+                loadParsedContent();
+            },
+            error: (error: any) => console.error('[QuestionsReview2] ParsedContent subscription error:', error)
         });
         
         return () => subscription.unsubscribe();
@@ -461,14 +465,15 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
         try {
             setLoading(true);
             
+            const client = getAmplifyClient();
             // Get document
-            const doc = await DataStore.query(Document, documentId);
+            const { data: doc } = await client.models.Document.get({ id: documentId });
             setDocument(doc);
             
             // Get parsed content for this document
-            const parsedContents = await DataStore.query(ParsedContent, (pc: any) =>
-                pc.documentID.eq(documentId)
-            );
+            const { data: parsedContents } = await client.models.ParsedContent.list({
+                filter: { documentID: { eq: documentId } }
+            });
             
             if (parsedContents.length > 0) {
                 const content = parsedContents[0];
@@ -476,7 +481,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                 
                 // Parse questions
                 const questions = content.questionsJSON 
-                    ? JSON.parse(content.questionsJSON) 
+                    ? JSON.parse(String(content.questionsJSON)) 
                     : [];
                 
                 // Enrich questions with source metadata
@@ -491,13 +496,13 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                 
                 // Parse summaries
                 const sums = content.summariesJSON 
-                    ? JSON.parse(content.summariesJSON) 
+                    ? JSON.parse(String(content.summariesJSON)) 
                     : [];
                 setSummaries(sums);
                 
                 // Parse objectives
                 const objs = content.objectivesJSON 
-                    ? JSON.parse(content.objectivesJSON) 
+                    ? JSON.parse(String(content.objectivesJSON)) 
                     : [];
                 setObjectives(objs);
                 

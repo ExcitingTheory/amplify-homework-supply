@@ -36,9 +36,8 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 import ThumbDownOutlinedIcon from '@mui/icons-material/ThumbDownOutlined';
-import { DataStore } from 'aws-amplify/datastore';
-
-import { AIFeedback } from '../models';
+import { getAmplifyClient } from '../utils/amplifyClient';
+import type { Schema } from '../../amplify/data/resource';
 import { 
   AiFeedbackType, 
   AiFeedbackReason, 
@@ -67,7 +66,7 @@ interface AIFeedbackWidgetProps {
   /** Additional metadata */
   metadata?: Record<string, any>;
   /** Callback when feedback is submitted */
-  onFeedbackSubmitted?: (feedback: AIFeedback) => void;
+  onFeedbackSubmitted?: (feedback: Schema['AIFeedback']['type']) => void;
   /** Size of the buttons */
   size?: 'small' | 'medium' | 'large';
   /** Show labels */
@@ -149,23 +148,22 @@ export default function AIFeedbackWidget({
     setIsSubmitting(true);
     
     try {
-      const feedback = await DataStore.save(
-        new AIFeedback({
-          contentType: AiContentType[contentType],
-          feedbackType: type === 'POSITIVE' ? AiFeedbackType.POSITIVE : AiFeedbackType.NEGATIVE,
-          reasons: reasons?.map(r => AiFeedbackReason[r as keyof typeof AiFeedbackReason]),
-          comment: userComment,
-          model,
-          prompt,
-          generatedContent,
-          unitID: unitId,
-          gradeID: gradeId,
-          documentID: documentId,
-          messageId,
-          sessionId,
-          metadata: metadata ? JSON.stringify(metadata) : undefined,
-        } as any)
-      );
+      const client = getAmplifyClient();
+      const { data: feedback } = await client.models.AIFeedback.create({
+        contentType: AiContentType[contentType],
+        feedbackType: type === 'POSITIVE' ? AiFeedbackType.POSITIVE : AiFeedbackType.NEGATIVE,
+        reasons: reasons?.map(r => AiFeedbackReason[r as keyof typeof AiFeedbackReason]),
+        comment: userComment,
+        model,
+        prompt,
+        generatedContent,
+        unitID: unitId,
+        gradeID: gradeId,
+        documentID: documentId,
+        messageId,
+        sessionId,
+        metadata: metadata ? JSON.stringify(metadata) : undefined,
+      } as any);
 
       setSnackbar({
         open: true,
@@ -173,7 +171,9 @@ export default function AIFeedbackWidget({
         severity: 'success',
       });
 
-      onFeedbackSubmitted?.(feedback);
+      if (feedback) {
+        onFeedbackSubmitted?.(feedback);
+      }
       
       // Clear the form
       setSelectedReasons(new Set());

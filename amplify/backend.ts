@@ -71,8 +71,32 @@ const cognitoPolicy = new Policy(backend.sectionHandler.resources.lambda.stack, 
 
 backend.sectionHandler.resources.lambda.role?.attachInlinePolicy(cognitoPolicy);
 
-// Set USER_POOL_ID environment variable for section handler
+// Grant section handler permission to call AppSync GraphQL API
+const sectionHandlerAppSyncPolicy = new Policy(
+  backend.sectionHandler.resources.lambda.stack,
+  'SectionHandlerAppSyncPolicy',
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ['appsync:GraphQL'],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  }
+);
+
+backend.sectionHandler.resources.lambda.role?.attachInlinePolicy(sectionHandlerAppSyncPolicy);
+
+// Set environment variables for section handler
 backend.sectionHandler.addEnvironment('USER_POOL_ID', backend.auth.resources.userPool.userPoolId);
+backend.sectionHandler.addEnvironment('API_ENDPOINT', backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl);
+
+// Set API_ENDPOINT for handlers that need GraphQL access
+backend.embeddingsHandler.addEnvironment('API_ENDPOINT', backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl);
+backend.documentAnalysisHandler.addEnvironment('API_ENDPOINT', backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl);
+backend.openaiHandler.addEnvironment('API_ENDPOINT', backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl);
 
 // Grant OpenAI handler permission to invoke itself for async operations (audio generation)
 const openaiSelfInvokePolicy = new Policy(backend.openaiHandler.resources.lambda.stack, 'OpenAISelfInvokePolicy', {

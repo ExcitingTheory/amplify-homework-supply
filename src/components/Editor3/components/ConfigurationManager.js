@@ -1,10 +1,9 @@
 import React from "react";
 import { Box, Typography, Switch, FormControlLabel, Divider } from "@mui/material";
-import { DataStore } from "aws-amplify/datastore";
+import { getAmplifyClient } from "../../../utils/amplifyClient";
 import { uploadData } from "aws-amplify/storage";
 import UnitContext from "../../../context/unitContext";
 import SettingsContext from "../../../context/settingsContext";
-import { Unit, Settings } from "../../../models";
 import CameraIcon from '@mui/icons-material/Camera';
 import getCachedUrl from "../../../utils/getCachedUrl";
 import FilesContext from "../../../context/fileContext";
@@ -134,10 +133,11 @@ export default function ConfigurationManager() {
 
         try {
           // update the unit with the new file
-          await DataStore.save(
-            Unit.copyOf(unit, (updated) => {
-              updated.featuredImage = newFilename;
-            }));
+          const client = getAmplifyClient();
+          await client.models.Unit.update({
+            id: unit.id,
+            featuredImage: newFilename
+          });
   
           console.log('updated unit', unit);
         } catch (error) {

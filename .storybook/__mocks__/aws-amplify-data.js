@@ -1,0 +1,484 @@
+/**
+ * Mock aws-amplify/data for Storybook
+ * Provides GraphQL client compatible with Amplify Gen 2 API
+ */
+
+import { mockFiles, mockDocuments, mockParsedContent } from './ui-data/files';
+
+/**
+ * Mock in-memory data stores
+ */
+const dataStores = {
+  File: new Map(),
+  Document: new Map(),
+  Unit: new Map(),
+  Word: new Map(),
+  Question: new Map(),
+  Grade: new Map(),
+  Section: new Map(),
+  Assignment: new Map(),
+  UnitWord: new Map(),
+  UnitFile: new Map(),
+  UnitDocument: new Map(),
+  QuestionUnit: new Map(),
+  ParsedContent: new Map(),
+  AIFeedback: new Map(),
+  AssistantChat: new Map(),
+  AssistantChatFile: new Map(),
+  Settings: new Map(),
+};
+
+/**
+ * Initialize mock data stores
+ */
+const initializeStores = () => {
+  // Populate File store
+  mockFiles.forEach(file => {
+    dataStores.File.set(file.id, file);
+  });
+
+  // Populate Document store
+  Object.values(mockDocuments).forEach(doc => {
+    dataStores.Document.set(doc.id, doc);
+  });
+
+  // Populate ParsedContent store
+  mockParsedContent.forEach(parsed => {
+    dataStores.ParsedContent.set(parsed.id, parsed);
+  });
+
+  console.log('[Mock Data] Initialized stores:', {
+    File: dataStores.File.size,
+    Document: dataStores.Document.size,
+    ParsedContent: dataStores.ParsedContent.size,
+  });
+};
+
+// Initialize on import
+initializeStores();
+
+/**
+ * Relationship definitions matching schema
+ * belongsTo: { foreignKey: 'relatedModel' }
+ * hasMany: { targetModel: 'foreignKeyField' }
+ */
+const relationships = {
+  File: {
+    belongsTo: {
+      document: { foreignKey: 'documentID', targetModel: 'Document' },
+    },
+    hasMany: {
+      parsedContent: { targetModel: 'ParsedContent', foreignKey: 'fileID' },
+    },
+  },
+  Document: {
+    hasMany: {
+      files: { targetModel: 'File', foreignKey: 'documentID' },
+      parsedContent: { targetModel: 'ParsedContent', foreignKey: 'documentID' },
+    },
+  },
+  ParsedContent: {
+    belongsTo: {
+      document: { foreignKey: 'documentID', targetModel: 'Document' },
+      file: { foreignKey: 'fileID', targetModel: 'File' },
+    },
+  },
+  Unit: {
+    hasMany: {
+      unitFiles: { targetModel: 'UnitFile', foreignKey: 'unitID' },
+      unitWords: { targetModel: 'UnitWord', foreignKey: 'unitID' },
+    },
+  },
+};
+
+/**
+ * Add relationship accessors to a model instance
+ * - belongsTo: adds async getter property that fetches related record
+ * - hasMany: adds function that returns filtered list
+ */
+const addRelationshipAccessors = (item, modelName) => {
+  if (!item || !relationships[modelName]) return item;
+
+  const modelRelationships = relationships[modelName];
+  const enhancedItem = { ...item };
+
+  // Add belongsTo accessors (properties that return Promises)
+  if (modelRelationships.belongsTo) {
+    Object.entries(modelRelationships.belongsTo).forEach(([relationName, config]) => {
+      const foreignKeyValue = item[config.foreignKey];
+      if (foreignKeyValue) {
+        // Create property that returns a Promise (mimics Amplify Gen2 lazy loading)
+        Object.defineProperty(enhancedItem, relationName, {
+          get: () => {
+            return Promise.resolve().then(() => {
+              const relatedItem = dataStores[config.targetModel].get(foreignKeyValue);
+              return relatedItem ? addRelationshipAccessors(relatedItem, config.targetModel) : null;
+            });
+          },
+          enumerable: true,
+          configurable: true,
+        });
+      }
+    });
+  }
+
+  // Add hasMany accessors (properties that return Promise<Array>)
+  if (modelRelationships.hasMany) {
+    Object.entries(modelRelationships.hasMany).forEach(([relationName, config]) => {
+      Object.defineProperty(enhancedItem, relationName, {
+        get: () => {
+          return Promise.resolve().then(() => {
+            const allItems = Array.from(dataStores[config.targetModel].values());
+            const filtered = allItems.filter(relatedItem => relatedItem[config.foreignKey] === item.id);
+            return filtered.map(relatedItem => addRelationshipAccessors(relatedItem, config.targetModel));
+          });
+        },
+        enumerable: true,
+        configurable: true,
+      });
+    });
+  }
+
+  return enhancedItem;
+};
+
+/**
+ * Create a mock observable query that immediately returns data
+ */
+const createObservableQuery = (modelName) => {
+  return {
+    subscribe: ({ next, error }) => {
+      try {
+        const items = Array.from(dataStores[modelName].values());
+        console.log(`[Mock Data] ${modelName}.observeQuery() returning ${items.length} items`);
+        
+        // Add relationship accessors to all items
+        const enhancedItems = items.map(item => addRelationshipAccessors(item, modelName));
+        
+        // Call next immediately with synced data
+        setTimeout(() => {
+          next({
+            items: enhancedItems,
+            isSynced: true,
+          });
+        }, 10);
+
+        // Return unsubscribe function
+        return {
+          unsubscribe: () => {
+            console.log(`[Mock Data] ${modelName} subscription unsubscribed`);
+          },
+        };
+      } catch (err) {
+        console.error(`[Mock Data] ${modelName}.observeQuery() error:`, err);
+        if (error) {
+          error(err);
+        }
+        return {
+          unsubscribe: () => {},
+        };
+      }
+    },
+  };
+};
+
+/**
+ * Create a mock model with common operations
+ */
+const createMockModel = (modelName) => ({
+  observeQuery: (filter) => {
+    console.log(`[Mock Data] ${modelName}.observeQuery() called with filter:`, filter);
+    return createObservableQuery(modelName);
+  },
+  
+  list: async (options) => {
+    console.log(`[Mock Data] ${modelName}.list() called with options:`, options);
+    let items = Array.from(dataStores[modelName].values());
+    
+    // Apply filter if provided
+    if (options?.filter) {
+      items = items.filter(item => {
+        // Simple filter implementation - supports { field: { eq: value } }
+        return Object.entries(options.filter).every(([field, condition]) => {
+          if (condition.eq !== undefined) {
+            return item[field] === condition.eq;
+          }
+          return true;
+        });
+      });
+    }
+    
+    // Add relationship accessors
+    const enhancedItems = items.map(item => addRelationshipAccessors(item, modelName));
+    
+    return {
+      data: enhancedItems,
+      errors: [],
+    };
+  },
+  
+  get: async ({ id }) => {
+    console.log(`[Mock Data] ${modelName}.get() called with id:`, id);
+    const item = dataStores[modelName].get(id);
+    const enhancedItem = item ? addRelationshipAccessors(item, modelName) : null;
+    return {
+      data: enhancedItem,
+      errors: item ? [] : [{ message: 'Not found' }],
+    };
+  },
+  
+  create: async (input) => {
+    console.log(`[Mock Data] ${modelName}.create() called with:`, input);
+    const id = input.id || `mock-${modelName.toLowerCase()}-${Date.now()}`;
+    const item = { 
+      ...input, 
+      id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      _version: 1,
+    };
+    dataStores[modelName].set(id, item);
+    
+    // Trigger observeQuery updates
+    setTimeout(() => {
+      // This would notify subscribers in a real implementation
+      console.log(`[Mock Data] ${modelName} created:`, id);
+    }, 10);
+    
+    const enhancedItem = addRelationshipAccessors(item, modelName);
+    
+    return {
+      data: enhancedItem,
+      errors: [],
+    };
+  },
+  
+  update: async (input) => {
+    console.log(`[Mock Data] ${modelName}.update() called with:`, input);
+    const existing = dataStores[modelName].get(input.id);
+    if (!existing) {
+      return {
+        data: null,
+        errors: [{ message: 'Not found' }],
+      };
+    }
+    
+    const updated = {
+      ...existing,
+      ...input,
+      updatedAt: new Date().toISOString(),
+      _version: (existing._version || 0) + 1,
+    };
+    dataStores[modelName].set(input.id, updated);
+    
+    // Trigger observeQuery updates
+    setTimeout(() => {
+      console.log(`[Mock Data] ${modelName} updated:`, input.id);
+    }, 10);
+    
+    const enhancedUpdated = addRelationshipAccessors(updated, modelName);
+    
+    return {
+      data: enhancedUpdated,
+      errors: [],
+    };
+  },
+  
+  delete: async ({ id }) => {
+    console.log(`[Mock Data] ${modelName}.delete() called with id:`, id);
+    const existing = dataStores[modelName].get(id);
+    if (!existing) {
+      return {
+        data: null,
+        errors: [{ message: 'Not found' }],
+      };
+    }
+    
+    dataStores[modelName].delete(id);
+    
+    // Trigger observeQuery updates
+    setTimeout(() => {
+      console.log(`[Mock Data] ${modelName} deleted:`, id);
+    }, 10);
+    
+    return {
+      data: existing,
+      errors: [],
+    };
+  },
+});
+
+/**
+ * Mock GraphQL client matching Amplify Gen 2 structure
+ */
+const mockClient = {
+  models: {
+    File: createMockModel('File'),
+    Document: createMockModel('Document'),
+    Unit: createMockModel('Unit'),
+    Word: createMockModel('Word'),
+    Question: createMockModel('Question'),
+    Grade: createMockModel('Grade'),
+    Section: createMockModel('Section'),
+    Assignment: createMockModel('Assignment'),
+    UnitWord: createMockModel('UnitWord'),
+    UnitFile: createMockModel('UnitFile'),
+    UnitDocument: createMockModel('UnitDocument'),
+    QuestionUnit: createMockModel('QuestionUnit'),
+    ParsedContent: createMockModel('ParsedContent'),
+    AIFeedback: createMockModel('AIFeedback'),
+    AssistantChat: createMockModel('AssistantChat'),
+    AssistantChatFile: createMockModel('AssistantChatFile'),
+    Settings: createMockModel('Settings'),
+  },
+  
+  // GraphQL method for custom queries
+  graphql: async ({ query, variables }) => {
+    console.log('[Mock Data] graphql() called:', { query, variables });
+    return {
+      data: {},
+      errors: [],
+    };
+  },
+};
+
+/**
+ * Mock generateClient function
+ */
+export const generateClient = () => {
+  console.log('[Mock Data] generateClient() called - returning mock client');
+  return mockClient;
+};
+
+/**
+ * Export helpers for story setup
+ */
+export const resetMockData = () => {
+  console.log('[Mock Data] Resetting all data stores');
+  Object.values(dataStores).forEach(store => store.clear());
+  initializeStores();
+};
+
+export const addMockData = (modelName, items) => {
+  console.log(`[Mock Data] Adding ${items.length} items to ${modelName}`);
+  items.forEach(item => {
+    dataStores[modelName].set(item.id, item);
+  });
+};
+
+export const getMockData = (modelName) => {
+  return Array.from(dataStores[modelName].values());
+};
+
+/**
+ * Seed functions for backward compatibility with DataStore mock API
+ */
+export const seedMockFiles = (filesArray) => {
+  console.log(`[Mock Data] seedMockFiles: Adding ${filesArray.length} files`);
+  filesArray.forEach(file => {
+    dataStores.File.set(file.id, file);
+  });
+};
+
+export const seedMockDocuments = (documentsArray) => {
+  console.log(`[Mock Data] seedMockDocuments: Adding ${documentsArray.length} documents`);
+  documentsArray.forEach(doc => {
+    dataStores.Document.set(doc.id, doc);
+  });
+};
+
+export const seedMockParsedContent = (parsedContentArray) => {
+  console.log(`[Mock Data] seedMockParsedContent: Adding ${parsedContentArray.length} parsed content records`);
+  parsedContentArray.forEach(parsed => {
+    // Ensure JSON fields are stringified if they're still objects
+    const processedParsed = {
+      ...parsed,
+      vocabularyJSON: typeof parsed.vocabularyJSON === 'string' 
+        ? parsed.vocabularyJSON 
+        : JSON.stringify(parsed.vocabularyJSON || []),
+      summariesJSON: typeof parsed.summariesJSON === 'string'
+        ? parsed.summariesJSON
+        : JSON.stringify(parsed.summariesJSON || []),
+      objectivesJSON: typeof parsed.objectivesJSON === 'string'
+        ? parsed.objectivesJSON
+        : JSON.stringify(parsed.objectivesJSON || []),
+      conceptsJSON: typeof parsed.conceptsJSON === 'string'
+        ? parsed.conceptsJSON
+        : JSON.stringify(parsed.conceptsJSON || []),
+      questionsJSON: typeof parsed.questionsJSON === 'string'
+        ? parsed.questionsJSON
+        : JSON.stringify(parsed.questionsJSON || []),
+    };
+    dataStores.ParsedContent.set(processedParsed.id, processedParsed);
+  });
+};
+
+export const seedMockUnit = (unitData, options = {}) => {
+  console.log(`[Mock Data] seedMockUnit: Adding unit ${unitData.id}`);
+  dataStores.Unit.set(unitData.id, unitData);
+  
+  // If relationships are provided, add them to join tables
+  if (options.words) {
+    options.words.forEach(word => {
+      const unitWordId = `${unitData.id}-${word.id}`;
+      dataStores.UnitWord.set(unitWordId, {
+        id: unitWordId,
+        unitID: unitData.id,
+        wordID: word.id,
+        owner: unitData.owner,
+      });
+    });
+  }
+  
+  if (options.files) {
+    options.files.forEach(file => {
+      const unitFileId = `${unitData.id}-${file.id}`;
+      dataStores.UnitFile.set(unitFileId, {
+        id: unitFileId,
+        unitID: unitData.id,
+        fileID: file.id,
+        owner: unitData.owner,
+      });
+    });
+  }
+  
+  if (options.questions) {
+    options.questions.forEach(question => {
+      const questionUnitId = `${question.id}-${unitData.id}`;
+      dataStores.QuestionUnit.set(questionUnitId, {
+        id: questionUnitId,
+        questionID: question.id,
+        unitID: unitData.id,
+        owner: unitData.owner,
+      });
+    });
+  }
+};
+
+export const seedMockWords = (wordsArray) => {
+  console.log(`[Mock Data] seedMockWords: Adding ${wordsArray.length} words`);
+  wordsArray.forEach(word => {
+    dataStores.Word.set(word.id, word);
+  });
+};
+
+export const seedMockQuestions = (questionsArray) => {
+  console.log(`[Mock Data] seedMockQuestions: Adding ${questionsArray.length} questions`);
+  questionsArray.forEach(question => {
+    dataStores.Question.set(question.id, question);
+  });
+};
+
+export const seedMockQuestionUnits = (questionUnitsArray) => {
+  console.log(`[Mock Data] seedMockQuestionUnits: Adding ${questionUnitsArray.length} question-unit joins`);
+  questionUnitsArray.forEach(qunit => {
+    dataStores.QuestionUnit.set(qunit.id, qunit);
+  });
+};
+
+export const seedMockAssistantChats = (chatsArray) => {
+  console.log(`[Mock Data] seedMockAssistantChats: Adding ${chatsArray.length} assistant chats`);
+  chatsArray.forEach(chat => {
+    dataStores.AssistantChat.set(chat.id, chat);
+  });
+};

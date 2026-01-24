@@ -24,7 +24,7 @@ import {
     Chip,
     Tooltip,
 } from "@mui/material";
-import { DataStore } from '@aws-amplify/datastore';
+import { getAmplifyClient } from '../utils/amplifyClient';
 import ChatIcon from '@mui/icons-material/Chat';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
@@ -359,12 +359,12 @@ const ChatSidebar = () => {
         if (!chat?.id) return;
 
         try {
-            await DataStore.save(
-                AssistantChat.copyOf(chat, (draft) => {
-                    draft.draft = draftText;
-                    draft.messages = currentMessages;
-                })
-            );
+            const client = getAmplifyClient();
+            await client.models.AssistantChat.update({
+                id: chat.id,
+                draft: draftText,
+                messages: currentMessages
+            });
         } catch (error) {
             console.error('[ChatSidebar] Error saving draft:', error);
         }
@@ -375,12 +375,12 @@ const ChatSidebar = () => {
 
         try {
             const clonedMessages = deepCloneMessages(msgs);
-            await DataStore.save(
-                AssistantChat.copyOf(chat, (draft) => {
-                    draft.messages = clonedMessages;
-                    draft.draft = currentDraft;
-                })
-            );
+            const client = getAmplifyClient();
+            await client.models.AssistantChat.update({
+                id: chat.id,
+                messages: clonedMessages,
+                draft: currentDraft
+            });
         } catch (error) {
             console.error('[ChatSidebar] Error saving messages:', error);
         }
@@ -390,11 +390,11 @@ const ChatSidebar = () => {
         if (!chat) return;
 
         try {
-            // AssistantChat uses @manyToMany with AssistantChatFile join table
-            const { AssistantChatFile } = await import('../models');
-            const currentAssociations = await DataStore.query(AssistantChatFile, (acf) =>
-                acf.assistantChatId.eq(chat.id)
-            );
+            const client = getAmplifyClient();
+            // Query existing associations
+            const { data: currentAssociations } = await client.models.AssistantChatFile.list({
+                filter: { assistantChatId: { eq: chat.id } }
+            });
             const currentFileIds = new Set(currentAssociations.map(a => a.fileId));
             const uploadedFileIds = new Set(files.filter(f => f.id).map(f => f.id));
 
@@ -404,16 +404,14 @@ const ChatSidebar = () => {
             if (filesToAdd.length === 0 && associationsToRemove.length === 0) return;
 
             for (const association of associationsToRemove) {
-                await DataStore.delete(AssistantChatFile, association.id);
+                await client.models.AssistantChatFile.delete({ id: association.id });
             }
 
             for (const file of filesToAdd) {
-                await DataStore.save(
-                    new AssistantChatFile({
-                        assistantChat: chat,
-                        file: file,
-                    })
-                );
+                await client.models.AssistantChatFile.create({
+                    assistantChatId: chat.id,
+                    fileId: file.id
+                });
             }
         } catch (error) {
             console.error('[ChatSidebar] Error saving file associations:', error);
@@ -535,11 +533,11 @@ const ChatSidebar = () => {
 
             // Clear draft
             if (assistantChat?.draft) {
-                DataStore.save(
-                    AssistantChat.copyOf(assistantChat, (draft) => {
-                        draft.draft = '';
-                    })
-                ).catch(err => console.error('[ChatSidebar] Error clearing draft:', err));
+                const client = getAmplifyClient();
+                client.models.AssistantChat.update({
+                    id: assistantChat.id,
+                    draft: ''
+                }).catch(err => console.error('[ChatSidebar] Error clearing draft:', err));
             }
         } catch (error) {
             console.error('[ChatSidebar] Error sending message:', error);
@@ -570,30 +568,34 @@ const ChatSidebar = () => {
 
     // Subscribe to Document status changes
     useEffect(() => {
-        const subscription = DataStore.observeQuery(Document).subscribe(({ items }) => {
-            const statusMap = {};
-            items.forEach(doc => {
-                statusMap[doc.id] = {
-                    status: doc.status,
-                    pageCount: doc.pageCount,
-                    s3Key: doc.s3Key,
-                };
-            });
-
-            // Only update if versions have actually changed
-            const hasChanges = items.some(doc => {
-                const prevDoc = documentStatuses[doc.id];
-                return !prevDoc || doc._version > (prevDoc._version || 0);
-            });
-
-            if (hasChanges) {
-                // Include version info for future comparisons
+        const client = getAmplifyClient();
+        const subscription = client.models.Document.observeQuery().subscribe({
+            next: ({ items }) => {
+                const statusMap = {};
                 items.forEach(doc => {
-                    statusMap[doc.id]._version = doc._version;
+                    statusMap[doc.id] = {
+                        status: doc.status,
+                        pageCount: doc.pageCount,
+                        s3Key: doc.s3Key,
+                    };
                 });
-                console.log('[ChatSidebar] Document statuses updated:', statusMap);
-                dispatch({ type: ACTIONS.SET_DOCUMENT_STATUSES, payload: statusMap });
-            }
+
+                // Only update if versions have actually changed
+                const hasChanges = items.some(doc => {
+                    const prevDoc = documentStatuses[doc.id];
+                    return !prevDoc || (doc._version || 0) > (prevDoc._version || 0);
+                });
+
+                if (hasChanges) {
+                    // Include version info for future comparisons
+                    items.forEach(doc => {
+                        statusMap[doc.id]._version = doc._version;
+                    });
+                    console.log('[ChatSidebar] Document statuses updated:', statusMap);
+                    dispatch({ type: ACTIONS.SET_DOCUMENT_STATUSES, payload: statusMap });
+                }
+            },
+            error: (error) => console.error('[ChatSidebar] Document subscription error:', error)
         });
 
         return () => subscription.unsubscribe();
@@ -997,12 +999,13 @@ const ChatSidebar = () => {
                                             dispatch({ type: ACTIONS.RESET_FOR_NEW_CHAT });
 
                                             // Create new AssistantChat directly
-                                            const newChat = await DataStore.save(new AssistantChat({
+                                            const client = getAmplifyClient();
+                                            const { data: newChat } = await client.models.AssistantChat.create({
                                                 model: 'gpt-4',
-                                                messages: JSON.stringify([]),
+                                                messages: [],
                                                 threadInstructions: '',
                                                 additionalInstructions: '',
-                                            }));
+                                            });
                                             console.log('[ChatSidebar] Created new chat:', newChat.id);
                                             
                                             // TabContext subscription will pick up the new chat automatically
@@ -1023,11 +1026,11 @@ const ChatSidebar = () => {
                                         if (assistantChat?.id && !isLoadingChat) {
                                             try {
                                                 // Mark current chat as archived
-                                                await DataStore.save(
-                                                    AssistantChat.copyOf(assistantChat, updated => {
-                                                        updated.archived = true;
-                                                    })
-                                                );
+                                                const client = getAmplifyClient();
+                                                await client.models.AssistantChat.update({
+                                                    id: assistantChat.id,
+                                                    archived: true
+                                                });
                                                 console.log('[ChatSidebar] Chat archived - TabContext will create new chat');
 
                                                 // Clear local state
@@ -1120,11 +1123,11 @@ const ChatSidebar = () => {
                                                                 onClick={async () => {
                                                                     if (assistantChat && input.trim()) {
                                                                         try {
-                                                                            await DataStore.save(
-                                                                                AssistantChat.copyOf(assistantChat, updated => {
-                                                                                    updated.draft = input;
-                                                                                })
-                                                                            );
+                                                                            const client = getAmplifyClient();
+                                                                            await client.models.AssistantChat.update({
+                                                                                id: assistantChat.id,
+                                                                                draft: input
+                                                                            });
                                                                         } catch (error) {
                                                                             console.error('[ChatSidebar] Error saving draft:', error);
                                                                         }
@@ -1256,11 +1259,11 @@ const ChatSidebar = () => {
                                                                                 e.stopPropagation();
                                                                                 if (history.assistantID) {
                                                                                     try {
-                                                                                        await DataStore.save(
-                                                                                            ChatHistory.copyOf(history, updated => {
-                                                                                                updated.archived = false;
-                                                                                            })
-                                                                                        );
+                                                                                        const client = getAmplifyClient();
+                                                                                        await client.models.AssistantChat.update({
+                                                                                            id: history.id,
+                                                                                            archived: false
+                                                                                        });
                                                                                         console.log('[ChatSidebar] Unarchived chat:', history.id);
                                                                                     } catch (error) {
                                                                                         console.error('[ChatSidebar] Error unarchiving chat:', error);
@@ -1839,7 +1842,8 @@ const ChatSidebar = () => {
                                 color="warning"
                                 onClick={async () => {
                                     try {
-                                        await DataStore.delete(currentChatHistory);
+                                        const client = getAmplifyClient();
+                                        await client.models.AssistantChat.delete({ id: currentChatHistory.id });
                                         console.log('[ChatSidebar] Deleted legacy chat record');
                                         // TabContext will create a new one automatically
                                     } catch (error) {

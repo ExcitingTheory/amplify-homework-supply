@@ -63,6 +63,7 @@ const config: StorybookConfig = {
     // Add AWS Amplify mock aliases
     const mockAliases = {
       'aws-amplify$': path.join(mocksDir, 'aws-amplify.js'),
+      'aws-amplify/data': path.join(mocksDir, 'aws-amplify-data.js'),
       'aws-amplify/datastore': path.join(mocksDir, 'aws-amplify-datastore.js'),
       'aws-amplify/auth': path.join(mocksDir, 'aws-amplify-auth.js'),
       'aws-amplify/storage': path.join(mocksDir, 'aws-amplify-storage.js'),
@@ -72,6 +73,11 @@ const config: StorybookConfig = {
       '../amplifyconfiguration.json': path.join(mocksDir, 'amplifyconfig.js'),
       './amplifyconfiguration.json': path.join(mocksDir, 'amplifyconfig.js'),
       'next/router': path.join(mocksDir, 'next-router.js'),
+      // Mock the amplifyClient singleton utility
+      '@/utils/amplifyClient': path.join(mocksDir, 'amplifyClient.js'),
+      '../utils/amplifyClient': path.join(mocksDir, 'amplifyClient.js'),
+      '../../utils/amplifyClient': path.join(mocksDir, 'amplifyClient.js'),
+      '../../../utils/amplifyClient': path.join(mocksDir, 'amplifyClient.js'),
     };
     
     if (!config.resolve) {

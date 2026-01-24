@@ -48,10 +48,9 @@ import {
 import DictionaryContext from '../../../context/dictionaryContext';
 
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { UnitWord, Word } from '../../../models';
+import { getAmplifyClient } from '../../../utils/amplifyClient';
+// Type import removed - not needed in runtime JS
 import UnitContext from '../../../context/unitContext';
-
-import { DataStore } from 'aws-amplify/datastore';
 import { $isAnswerNode } from '../plugins/AnswerPlugin';
 
 import { PromptMethodSelector, AllowedInputSelector } from './PromptMethodSelector';
@@ -206,13 +205,13 @@ const AnswerEditor = React.memo(function AnswerEditor({
                     node.remove();
 
                     // Remove relationship to word
+                    const client = getAmplifyClient();
                     const _operations = [];
                     wordIDs.forEach((id) => {
                         _operations.push(
-                            DataStore.delete(UnitWord, id)
+                            client.models.UnitWord.delete({ id })
                         );
-                    }
-                    );
+                    });
                     await Promise.allSettled(_operations);
 
                 }
@@ -269,14 +268,13 @@ const AnswerEditor = React.memo(function AnswerEditor({
             if ($isAnswerNode(node)) {
                 node.appendId(id);
                 // Add relationship to word
-                const word = await DataStore.query(Word, id);
+                const client = getAmplifyClient();
+                const { data: word } = await client.models.Word.get({ id });
                 if (word) {
-                    await DataStore.save(
-                        new UnitWord({
-                            unit,
-                            word,
-                        })
-                    );
+                    await client.models.UnitWord.create({
+                        unitID: unit.id,
+                        wordID: id,
+                    });
                 }
             }
         });
@@ -318,10 +316,11 @@ const AnswerEditor = React.memo(function AnswerEditor({
             if ($isAnswerNode(node)) {
                 node.removeIntersection(ids);
                 // Remove relationship to word
+                const client = getAmplifyClient();
                 const _operations = [];
                 ids.forEach((id) => {
                     _operations.push(
-                        DataStore.delete(UnitWord, id)
+                        client.models.UnitWord.delete({ id })
                     );
                 });
                 await Promise.allSettled(_operations);

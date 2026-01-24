@@ -1,4 +1,3 @@
-import { DataStore } from 'aws-amplify/datastore';
 import { useRouter } from 'next/router'
 import { Unit } from '../../src/models'
 import { Workbook } from '../../src/components/Editor3'

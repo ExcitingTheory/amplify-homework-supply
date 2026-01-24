@@ -3,10 +3,10 @@
  * Used by both FileManager and ChatSidebar
  */
 
-import { DataStore } from 'aws-amplify/datastore';
 import { uploadData } from 'aws-amplify/storage';
 import { generateClient } from 'aws-amplify/api';
-import { File as FileModel, Document } from '../models';
+import { getAmplifyClient } from './amplifyClient';
+// Type import removed - not needed in runtime JS
 import { calculateWaveformData } from './calculateWaveformData';
 import { isMimeType } from '@lexical/utils';
 import { Hub } from 'aws-amplify/utils';
@@ -225,6 +225,7 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
     // If PDF, create Document record first (so we have an ID for the File)
     let documentModel = null;
     if (file.type === 'application/pdf') {
+        const amplifyClient = getAmplifyClient();
         // Create document without unit relationship first
         const documentData = {
             filename: file.name,
@@ -233,15 +234,18 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
             identityId,
         };
         
-        documentModel = await DataStore.save(new Document(documentData));
+        const { data: newDocument } = await amplifyClient.models.Document.create(documentData);
+        documentModel = newDocument;
         console.log('Created Document record:', documentModel);
     }
 
     // Create File record, linking to Document if PDF
+    const amplifyClient = getAmplifyClient();
     if (documentModel) {
         fileData.documentID = documentModel.id;
     }
-    const fileModel = await DataStore.save(new FileModel(fileData));
+    const { data: newFile } = await amplifyClient.models.File.create(fileData);
+    const fileModel = newFile;
     console.log('Created File record:', fileModel);
 
     // Generate embedding for the uploaded file (async via Lambda re-invoke pattern)
@@ -255,17 +259,17 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
     // If unitId provided, link document to unit using many-to-many relationship
     if (documentModel && unitId) {
         try {
-            const { Unit, UnitDocument } = await import('../models');
-            const unit = await DataStore.query(Unit, unitId);
+            const amplifyClient = getAmplifyClient();
+            const { data: unit } = await amplifyClient.models.Unit.get({ id: unitId });
             if (unit && unit.id) {
                 // Create the join table entry to link Document and Unit
-                await DataStore.save(new UnitDocument({
-                    document: documentModel,
-                    unit: unit
-                }));
+                await amplifyClient.models.UnitDocument.create({
+                    documentID: documentModel.id,
+                    unitID: unit.id
+                });
                 console.log('Linked Document to Unit:', unit.id);
             } else {
-                console.warn(`Unit ${unitId} not found in DataStore, Document created without unit association`);
+                console.warn(`Unit ${unitId} not found, Document created without unit association`);
             }
         } catch (error) {
             console.warn('Error linking Document to Unit:', error);

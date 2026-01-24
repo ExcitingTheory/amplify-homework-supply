@@ -9,8 +9,8 @@
 import { useEffect, useContext } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import UnitContext from '../../../context/unitContext';
-import { DataStore } from 'aws-amplify/datastore';
-import { Grade } from '../../../models';
+import { getAmplifyClient } from '../../../utils/amplifyClient';
+// Type import removed - not needed in runtime JS
 
 
 export default function StoryProgressPlugin() {
@@ -132,18 +132,18 @@ export default function StoryProgressPlugin() {
                     
                     console.log('[StoryProgressPlugin] Seeding grade with data:', gradeData);
                     
-                    // Update the grade with real node keys using Grade.copyOf
-                    const updatedGrade = Grade.copyOf(grade, draft => {
-                        draft.data = gradeData;
-                        draft.percentComplete = 0.65;
-                        draft.accuracy = 0.75;
-                    });
+                    // Update the grade with real node keys using Gen2 client
+                    const client = getAmplifyClient();
                     
-                    console.log('[StoryProgressPlugin] updatedGrade:', updatedGrade);
-                    console.log('[StoryProgressPlugin] updatedGrade.data:', updatedGrade.data);
+                    console.log('[StoryProgressPlugin] Updating grade with data:', gradeData);
                     
-                    // Use DataStore.save directly (saveGrade expects different format)
-                    DataStore.save(updatedGrade).catch(err => 
+                    // Use Gen2 client directly (saveGrade expects different format)
+                    client.models.Grade.update({
+                        id: grade.id,
+                        data: gradeData,
+                        percentComplete: 0.65,
+                        accuracy: 0.75,
+                    }).catch(err => 
                         console.error('[StoryProgressPlugin] Failed to save grade:', err)
                     );
                 }

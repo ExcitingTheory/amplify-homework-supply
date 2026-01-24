@@ -10,8 +10,7 @@
  */
 
 import React, { createContext } from "react";
-import { DataStore } from "aws-amplify/datastore";
-import { Question, Word } from "../models"
+import { getAmplifyClient } from '../utils/amplifyClient';
 
 
 // Provider and Consumer are connected through their "parent" context
@@ -154,42 +153,49 @@ const DictionaryProvider = ({ children }) => {
     }, [filter, filterWords])
 
     React.useEffect(() => {
-        const subscription = DataStore.observeQuery(Word).subscribe(({ items }) => {
-            const wordMap = {}
-            const _wordMapId = {}
+        const client = getAmplifyClient();
 
-            items.forEach((item) => {
-                wordMap[item.phrase] = item
-                _wordMapId[item.id] = item
-            })
+        const subscription = client.models.Word.observeQuery().subscribe({
+            next: ({ items }) => {
+                const wordMap = {}
+                const _wordMapId = {}
 
-            // Only update if the words have actually changed
-            setWords(prevWords => {
-                const prevStr = JSON.stringify(Object.keys(prevWords).sort());
-                const newStr = JSON.stringify(Object.keys(wordMap).sort());
-                if (prevStr === newStr) {
-                    return prevWords;
+                items.forEach((item) => {
+                    wordMap[item.phrase] = item
+                    _wordMapId[item.id] = item
+                })
+
+                // Only update if the words have actually changed
+                setWords(prevWords => {
+                    const prevStr = JSON.stringify(Object.keys(prevWords).sort());
+                    const newStr = JSON.stringify(Object.keys(wordMap).sort());
+                    if (prevStr === newStr) {
+                        return prevWords;
+                    }
+                    return wordMap;
+                });
+                
+                setFilteredWords(prevFiltered => {
+                    const prevStr = JSON.stringify(Object.keys(prevFiltered).sort());
+                    const newStr = JSON.stringify(Object.keys(wordMap).sort());
+                    if (prevStr === newStr) {
+                        return prevFiltered;
+                    }
+                    return wordMap;
+                });
+                
+                setWordMapId(prev => {
+                    const prevStr = JSON.stringify(prev);
+                    const newStr = JSON.stringify(_wordMapId);
+                    return prevStr === newStr ? prev : _wordMapId;
+                });
+                
+                if (setSearching) {
+                    setSearching(false)
                 }
-                return wordMap;
-            });
-            
-            setFilteredWords(prevFiltered => {
-                const prevStr = JSON.stringify(Object.keys(prevFiltered).sort());
-                const newStr = JSON.stringify(Object.keys(wordMap).sort());
-                if (prevStr === newStr) {
-                    return prevFiltered;
-                }
-                return wordMap;
-            });
-            
-            setWordMapId(prev => {
-                const prevStr = JSON.stringify(prev);
-                const newStr = JSON.stringify(_wordMapId);
-                return prevStr === newStr ? prev : _wordMapId;
-            });
-            
-            if (setSearching) {
-                setSearching(false)
+            },
+            error: (error) => {
+                console.error('[DictionaryContext] Word subscription error:', error);
             }
         });
         return function cleanup() {
@@ -198,18 +204,25 @@ const DictionaryProvider = ({ children }) => {
     }, []);
 
     React.useEffect(() => {
-        const subscription = DataStore.observeQuery(Question).subscribe(({ items }) => {
-            const questionMap = {}
+        const client = getAmplifyClient();
 
-            items.forEach((item) => {
-                questionMap[item.id] = item
-            })
+        const subscription = client.models.Question.observeQuery().subscribe({
+            next: ({ items }) => {
+                const questionMap = {}
 
-            setQuestionBank(prev => {
-                const prevStr = JSON.stringify(prev);
-                const newStr = JSON.stringify(questionMap);
-                return prevStr === newStr ? prev : questionMap;
-            });
+                items.forEach((item) => {
+                    questionMap[item.id] = item
+                })
+
+                setQuestionBank(prev => {
+                    const prevStr = JSON.stringify(prev);
+                    const newStr = JSON.stringify(questionMap);
+                    return prevStr === newStr ? prev : questionMap;
+                });
+            },
+            error: (error) => {
+                console.error('[DictionaryContext] Question subscription error:', error);
+            }
         });
         return function cleanup() {
             subscription.unsubscribe();

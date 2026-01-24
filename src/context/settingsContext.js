@@ -1,6 +1,5 @@
 import React, { createContext } from "react";
-import { DataStore } from "aws-amplify/datastore";
-import { Settings } from "../models";
+import { getAmplifyClient } from '../utils/amplifyClient';
 
 const SettingsContext = createContext();
 
@@ -9,30 +8,38 @@ const SettingsProvider = ({ children }) => {
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
-    const subscription = DataStore.observeQuery(Settings).subscribe(async ({ items }) => {
-      if (items.length > 0) {
-        setSettings(items[0]);
-        setIsLoading(false);
-      } else {
-        // Create default settings if none exist
-        try {
-          const newSettings = await DataStore.save(new Settings({
-            autoAnalyzeDocuments: true,
-            documentAnalysisModel: 'gpt-4',
-            editorTheme: 'auto',
-            editorFontSize: 14,
-            defaultAIModel: 'gpt-4',
-            assistantVoice: 'shimmer',
-            emailNotifications: true,
-            webhookNotifications: false,
-            language: 'en',
-          }));
-          setSettings(newSettings);
-        } catch (error) {
-          console.error('Error creating settings:', error);
-        } finally {
+    const client = getAmplifyClient();
+
+    const subscription = client.models.Settings.observeQuery().subscribe({
+      next: async ({ items }) => {
+        if (items.length > 0) {
+          setSettings(items[0]);
           setIsLoading(false);
+        } else {
+          // Create default settings if none exist
+          try {
+            const { data: newSettings } = await client.models.Settings.create({
+              autoAnalyzeDocuments: true,
+              documentAnalysisModel: 'gpt-4',
+              editorTheme: 'auto',
+              editorFontSize: 14,
+              defaultAIModel: 'gpt-4',
+              assistantVoice: 'shimmer',
+              emailNotifications: true,
+              webhookNotifications: false,
+              language: 'en',
+            });
+            setSettings(newSettings);
+          } catch (error) {
+            console.error('Error creating settings:', error);
+          } finally {
+            setIsLoading(false);
+          }
         }
+      },
+      error: (error) => {
+        console.error('[SettingsContext] Settings subscription error:', error);
+        setIsLoading(false);
       }
     });
     
@@ -42,11 +49,11 @@ const SettingsProvider = ({ children }) => {
   const updateSettings = React.useCallback(async (updates) => {
     if (!settings) return;
     try {
-      const updated = await DataStore.save(
-        Settings.copyOf(settings, (draft) => {
-          Object.assign(draft, updates);
-        })
-      );
+      const client = getAmplifyClient();
+      const { data: updated } = await client.models.Settings.update({
+        id: settings.id,
+        ...updates,
+      });
       setSettings(updated);
       return updated;
     } catch (error) {

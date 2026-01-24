@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import MetadataEditor from './MetadataEditor.tsx';
+import MetadataEditor from './MetadataEditor';
 import { Box, Typography, Paper } from '@mui/material';
 
 const meta: Meta<typeof MetadataEditor> = {

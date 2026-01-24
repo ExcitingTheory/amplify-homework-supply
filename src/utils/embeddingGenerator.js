@@ -15,8 +15,8 @@
  */
 
 import { generateClient } from 'aws-amplify/api';
-import { DataStore } from 'aws-amplify/datastore';
-import { Unit, Section, Word, Question } from '../models';
+import { getAmplifyClient } from './amplifyClient';
+import type { Schema } from '../../amplify/data/resource';
 import { 
   extractPlainText, 
   extractForEmbedding, 
@@ -250,10 +250,11 @@ async function generateEmbedding(text, options = {}) {
  */
 export async function generateUnitEmbedding(unitId, options = {}) {
   const { force = false } = options;
+  const amplifyClient = getAmplifyClient();
   
   try {
     // Get unit
-    const unit = await DataStore.query(Unit, unitId);
+    const { data: unit } = await amplifyClient.models.Unit.get({ id: unitId });
     if (!unit) {
       throw new Error(`Unit not found: ${unitId}`);
     }
@@ -265,7 +266,9 @@ export async function generateUnitEmbedding(unitId, options = {}) {
     }
     
     // Get all sections for this unit
-    const sections = await DataStore.query(Section, s => s.unitID.eq(unitId));
+    const { data: sections } = await amplifyClient.models.Section.list({
+      filter: { unitID: { eq: unitId } }
+    });
     
     if (sections.length === 0) {
       console.warn(`Unit ${unitId} has no sections`);
@@ -294,12 +297,13 @@ export async function generateUnitEmbedding(unitId, options = {}) {
     }
     
     // Save to unit
-    await DataStore.save(Unit.copyOf(unit, updated => {
-      updated.embedding = JSON.stringify(embedding);
-      updated.embeddingVersion = Date.now();
-      updated.embeddingWordCount = extracted.totalWordCount;
-      updated.embeddingSectionCount = extracted.sections.length;
-    }));
+    await amplifyClient.models.Unit.update({
+      id: unit.id,
+      embedding: JSON.stringify(embedding),
+      embeddingVersion: Date.now(),
+      embeddingWordCount: extracted.totalWordCount,
+      embeddingSectionCount: extracted.sections.length,
+    });
     
     console.log(`Generated embedding for unit ${unitId}: ${extracted.totalWordCount} words, ${extracted.sections.length} sections`);
     
@@ -323,9 +327,10 @@ export async function generateUnitEmbedding(unitId, options = {}) {
  */
 export async function generateSectionEmbedding(sectionId, options = {}) {
   const { force = false } = options;
+  const amplifyClient = getAmplifyClient();
   
   try {
-    const section = await DataStore.query(Section, sectionId);
+    const { data: section } = await amplifyClient.models.Section.get({ id: sectionId });
     if (!section) {
       throw new Error(`Section not found: ${sectionId}`);
     }
@@ -352,12 +357,13 @@ export async function generateSectionEmbedding(sectionId, options = {}) {
     }
     
     // Save to section
-    await DataStore.save(Section.copyOf(section, updated => {
-      updated.embedding = JSON.stringify(embedding);
-      updated.textContent = extracted.text;
-      updated.wordCount = extracted.wordCount;
-      updated.embeddingVersion = Date.now();
-    }));
+    await amplifyClient.models.Section.update({
+      id: section.id,
+      embedding: JSON.stringify(embedding),
+      textContent: extracted.text,
+      wordCount: extracted.wordCount,
+      embeddingVersion: Date.now(),
+    });
     
     console.log(`Generated embedding for section ${sectionId}: ${extracted.wordCount} words`);
     
@@ -380,9 +386,10 @@ export async function generateSectionEmbedding(sectionId, options = {}) {
  */
 export async function generateWordEmbedding(wordId, options = {}) {
   const { force = false } = options;
+  const amplifyClient = getAmplifyClient();
   
   try {
-    const word = await DataStore.query(Word, wordId);
+    const { data: word } = await amplifyClient.models.Word.get({ id: wordId });
     if (!word) {
       throw new Error(`Word not found: ${wordId}`);
     }
@@ -400,10 +407,11 @@ export async function generateWordEmbedding(wordId, options = {}) {
     
     const embedding = await generateEmbedding(text);
     
-    await DataStore.save(Word.copyOf(word, updated => {
-      updated.embedding = JSON.stringify(embedding);
-      updated.embeddingVersion = Date.now();
-    }));
+    await amplifyClient.models.Word.update({
+      id: word.id,
+      embedding: JSON.stringify(embedding),
+      embeddingVersion: Date.now(),
+    });
     
     return { success: true, cached: false };
   } catch (error) {
@@ -420,9 +428,10 @@ export async function generateWordEmbedding(wordId, options = {}) {
  */
 export async function generateQuestionEmbedding(questionId, options = {}) {
   const { force = false } = options;
+  const amplifyClient = getAmplifyClient();
   
   try {
-    const question = await DataStore.query(Question, questionId);
+    const { data: question } = await amplifyClient.models.Question.get({ id: questionId });
     if (!question) {
       throw new Error(`Question not found: ${questionId}`);
     }
@@ -440,10 +449,11 @@ export async function generateQuestionEmbedding(questionId, options = {}) {
     
     const embedding = await generateEmbedding(text);
     
-    await DataStore.save(Question.copyOf(question, updated => {
-      updated.embedding = JSON.stringify(embedding);
-      updated.embeddingVersion = Date.now();
-    }));
+    await amplifyClient.models.Question.update({
+      id: question.id,
+      embedding: JSON.stringify(embedding),
+      embeddingVersion: Date.now(),
+    });
     
     return { success: true, cached: false };
   } catch (error) {
@@ -458,8 +468,11 @@ export async function generateQuestionEmbedding(questionId, options = {}) {
  * @returns {Promise<object>} Results summary
  */
 export async function generateAllSectionEmbeddings(unitId) {
+  const amplifyClient = getAmplifyClient();
   try {
-    const sections = await DataStore.query(Section, s => s.unitID.eq(unitId));
+    const { data: sections } = await amplifyClient.models.Section.list({
+      filter: { unitID: { eq: unitId } }
+    });
     
     const results = await Promise.allSettled(
       sections.map(section => generateSectionEmbedding(section.id))
@@ -489,8 +502,9 @@ export async function generateAllSectionEmbeddings(unitId) {
  * @returns {Promise<object>} Result with embedding status
  */
 export async function getOrGenerateUnitEmbedding(unitId, maxAge = 7 * 24 * 60 * 60 * 1000) {
+  const amplifyClient = getAmplifyClient();
   try {
-    const unit = await DataStore.query(Unit, unitId);
+    const { data: unit } = await amplifyClient.models.Unit.get({ id: unitId });
     if (!unit) {
       throw new Error(`Unit not found: ${unitId}`);
     }
@@ -512,7 +526,7 @@ export async function getOrGenerateUnitEmbedding(unitId, maxAge = 7 * 24 * 60 * 
     const result = await generateUnitEmbedding(unitId, { force: true });
     
     // Fetch updated unit to get embedding
-    const updatedUnit = await DataStore.query(Unit, unitId);
+    const { data: updatedUnit } = await amplifyClient.models.Unit.get({ id: unitId });
     
     return {
       ...result,

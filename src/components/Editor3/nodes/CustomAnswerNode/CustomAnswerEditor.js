@@ -43,10 +43,9 @@ import {
 import DictionaryContext from '../../../../context/dictionaryContext';
 
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { Question, QuestionFile, QuestionUnit, UnitWord, Word } from '../../../../models';
 import UnitContext from '../../../../context/unitContext';
 
-import { DataStore } from 'aws-amplify/datastore';
+import { getAmplifyClient } from '../../../../utils/amplifyClient';
 import { $isCustomAnswerNode } from '../../plugins/CustomAnswerPlugin';
 
 import { PromptMethodSelector, AllowedInputSelector } from '../../components/PromptMethodSelector';
@@ -201,34 +200,38 @@ export default React.memo(function CustomAnswerEditor({
 
     const fetch = () => {
         setQuestions({ ...questions, isLoading: true, });
-        const subscription = DataStore.observe(Question).subscribe(msg => {
-            console.log(msg.model, msg.opType, msg.element);
-            const _questions = msg.element
-            console.log('items', msg.element);
-            setResult({ isLoading: false, items: msg.element });
-            const _rows = [];
-            if (_questions.length > 0) {
-                console.log('questions', _questions);
-                _questions.forEach((question) => {
-                    const { prompt, answer, hint, id } = question;
-                    const promptAudio = question?.promptAudio?.[0];
-                    const answerAudio = question?.answerAudio?.[0];
-                    _rows.push({
-                        id,
-                        prompt,
-                        answer,
-                        hint,
-                        promptAudio,
-                        answerAudio,
+        const client = getAmplifyClient();
+        const subscription = client.models.Question.observeQuery().subscribe({
+            next: ({ items }) => {
+                console.log('[CustomAnswerEditor] Question subscription update:', items.length);
+                setResult({ isLoading: false, items });
+                const _rows = [];
+                if (items.length > 0) {
+                    console.log('questions', items);
+                    items.forEach((question) => {
+                        const { prompt, answer, hint, id } = question;
+                        const promptAudio = question?.audio?.[0];
+                        const answerAudio = question?.answerAudio?.[0];
+                        _rows.push({
+                            id,
+                            prompt,
+                            answer,
+                            hint,
+                            promptAudio,
+                            answerAudio,
+                        });
                     });
-                });
+                }
+                console.log('rows', _rows);
+                setRows(_rows);
+            },
+            error: (error) => {
+                console.error('[CustomAnswerEditor] Question subscription error:', error);
             }
-            console.log('rows', _rows);
-            setRows(_rows);
-          });
-          // Call unsubscribe to close the subscription
-          return subscription.unsubscribe();
-      };
+        });
+        // Call unsubscribe to close the subscription
+        return () => subscription.unsubscribe();
+    };
     React.useEffect(fetch, []);
 
 
@@ -399,15 +402,14 @@ export default React.memo(function CustomAnswerEditor({
             const node = $getNodeByKey(nodeKey);
             if ($isCustomAnswerNode(node)) {
                 node.appendId(id);
-                // Add relationship to word
-                const question = await DataStore.query(Question, id);
+                // Add relationship to question
+                const client = getAmplifyClient();
+                const { data: question } = await client.models.Question.get({ id });
                 if (question) {
-                    await DataStore.save(
-                        new QuestionUnit({
-                            unit,
-                            question,
-                        })
-                    );
+                    await client.models.QuestionUnit.create({
+                        unitID: unit.id,
+                        questionID: question.id,
+                    });
                 }
             }
         });
@@ -483,24 +485,27 @@ export default React.memo(function CustomAnswerEditor({
         // Extract waveform data from the backend response
         const promptWaveformData = fileGenerator?.data?.generateAudioFile?.waveformData;
 
-        // Create and save the Question model to DataStore
+        // Create and save the Question model
         try {
-            const newQuestion = await DataStore.save(
-                new Question({
-                    prompt,
-                    answer,
-                    hint,
-                    audio: [path],
-                    audioWaveformData: promptWaveformData,
-                    answerAudio: [], // Can be populated later if answer audio is generated
-                    answerAudioWaveformData: null,
-                    owner: unit?.owner || 'system',
-                    identityId: unit?.identityId || 'system'
-                })
-            );
+            const client = getAmplifyClient();
+            const response = await client.models.Question.create({
+                prompt,
+                answer,
+                hint,
+                audio: [path],
+                audioWaveformData: promptWaveformData,
+                answerAudio: [], // Can be populated later if answer audio is generated
+                answerAudioWaveformData: null,
+                owner: unit?.owner || 'system',
+                identityId: unit?.identityId || 'system'
+            });
+            
+            if (response.errors) {
+                throw new Error(response.errors[0].message);
+            }
 
             // Add the question ID to the custom answer node
-            addQuestionID(newQuestion.id);
+            addQuestionID(response.data.id);
             
             // Close the modal and reset form
             toggleOpen(false);

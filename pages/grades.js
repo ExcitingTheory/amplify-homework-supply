@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grade, Section } from "../src/models";
-import { DataStore } from 'aws-amplify/datastore';
+import { getAmplifyClient } from "../src/utils/amplifyClient";
 
 import {
     Button,
@@ -37,45 +36,66 @@ function Grades({ signOut, user }) {
     const assignments = []
 
     useEffect(() => {
-        fetchGrades()
-        async function fetchGrades() {
-            const gradeData = await DataStore.query(Grade)
-            setGrades(gradeData)
-        }
-        const subscription = DataStore.observe(Grade).subscribe(() => fetchGrades())
+        const client = getAmplifyClient();
+        
+        const subscription = client.models.Grade.observeQuery().subscribe({
+            next: ({ items }) => {
+                console.log('[Grades] Grade subscription update:', items.length, 'grades');
+                setGrades(items);
+            },
+            error: (error) => {
+                console.error('[Grades] Grade subscription error:', error);
+            }
+        });
 
         return function cleanup() {
             subscription.unsubscribe();
-        }
+        };
     }, [])
 
     useEffect(() => {
-        fetchSections()
-        async function fetchSections() {
-            const myUserId = user.username
-            const sectionData = await DataStore.query(Section, s => s.owner.ne(myUserId))
-            setSections(sectionData)
-        }
-        const subscription = DataStore.observe(Section).subscribe(() => fetchSections())
+        if (!user?.username) return;
+        const client = getAmplifyClient();
+        const myUserId = user.username;
+        
+        const subscription = client.models.Section.observeQuery().subscribe({
+            next: ({ items }) => {
+                console.log('[Grades] Section subscription update (others):', items.length, 'sections');
+                // Filter client-side for sections not owned by me
+                const othersSections = items.filter(s => s.owner !== myUserId);
+                setSections(othersSections);
+            },
+            error: (error) => {
+                console.error('[Grades] Section subscription error:', error);
+            }
+        });
 
         return function cleanup() {
             subscription.unsubscribe();
-        }
-    }, [])
+        };
+    }, [user?.username])
 
     useEffect(() => {
-        fetchMySections()
-        async function fetchMySections() {
-            const myUserId = user.username
-            const sectionData = await DataStore.query(Section, s => s.owner.eq(myUserId))
-            setMySections(sectionData)
-        }
-        const subscription = DataStore.observe(Section).subscribe(() => fetchMySections())
+        if (!user?.username) return;
+        const client = getAmplifyClient();
+        const myUserId = user.username;
+        
+        const subscription = client.models.Section.observeQuery().subscribe({
+            next: ({ items }) => {
+                console.log('[Grades] Section subscription update (mine):', items.length, 'sections');
+                // Filter client-side for sections owned by me
+                const mySections = items.filter(s => s.owner === myUserId);
+                setMySections(mySections);
+            },
+            error: (error) => {
+                console.error('[Grades] My Section subscription error:', error);
+            }
+        });
 
         return function cleanup() {
             subscription.unsubscribe();
-        }
-    }, [])
+        };
+    }, [user?.username])
 
     console.log('Grades.grades', grades)
 

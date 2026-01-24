@@ -414,11 +414,11 @@ export default function AudioWaveformPlayer({
                     });
                     console.log('[AudioWaveformPlayer] Upload successful:', uploadResult);
                     
-                    // Save file metadata to DataStore
-                    const { File: FileModel } = await import('../../../models');
-                    const { DataStore } = await import('aws-amplify/datastore');
+                    // Save file metadata using Gen2 client
+                    const { getAmplifyClient } = await import('../../../utils/amplifyClient');
+                    const client = getAmplifyClient();
                     
-                    const newFile = await DataStore.save(new FileModel({
+                    const { data: newFile } = await client.models.File.create({
                         path: uploadResult.path,
                         identityId,
                         name: uploadResult.filename,
@@ -426,7 +426,7 @@ export default function AudioWaveformPlayer({
                         mimeType: 'audio/mp3',
                         level: 'PRIVATE',
                         waveformData: JSON.stringify(waveform),
-                    }));
+                    });
                     
                     console.log('[AudioWaveformPlayer] Saved file metadata:', newFile);
                     

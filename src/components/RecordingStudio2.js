@@ -22,6 +22,7 @@ import { uploadStudentSubmission } from '../utils/userSubmissionStorage';
 
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
+import { getAmplifyClient } from '../utils/amplifyClient';
 
 const client = generateClient();
 
@@ -185,11 +186,10 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
         
         console.log('[RecordingStudio2] Upload successful:', uploadResult);
         
-        // Save file metadata to DataStore
-        const { File: FileModel } = await import('../models');
-        const { DataStore } = await import('aws-amplify/datastore');
+        // Save file metadata using Gen2 client
+        const client = getAmplifyClient();
         
-        const newFile = await DataStore.save(new FileModel({
+        const { data: newFile } = await client.models.File.create({
           path: uploadResult.path,
           identityId,
           name: uploadResult.filename,
@@ -197,23 +197,18 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
           mimeType: 'audio/mp3',
           level: 'PRIVATE',
           waveformData: JSON.stringify(waveformData),
-        }));
+        });
         
         console.log('[RecordingStudio2] Saved file metadata:', newFile);
         
         // Update grade with file reference and identityId
-        const { Grade: GradeModel } = await import('../models');
         if (grade && grade.id) {
-          await DataStore.save(
-            GradeModel.copyOf(grade, updated => {
-              const existingFiles = updated.files || [];
-              updated.files = [...existingFiles, uploadResult.path];
-              // Ensure identityId is set for file access
-              if (!updated.identityId) {
-                updated.identityId = identityId;
-              }
-            })
-          );
+          const existingFiles = grade.files || [];
+          await client.models.Grade.update({
+            id: grade.id,
+            files: [...existingFiles, uploadResult.path],
+            identityId: grade.identityId || identityId,
+          });
           console.log('[RecordingStudio2] Added file to grade.files[]:', uploadResult.path);
         }
         

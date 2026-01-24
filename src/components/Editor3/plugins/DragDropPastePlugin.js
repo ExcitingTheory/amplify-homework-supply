@@ -16,8 +16,8 @@ import { COMMAND_PRIORITY_HIGH, COMMAND_PRIORITY_LOW } from 'lexical';
 import { useEffect } from 'react';
 import { INSERT_IMAGE_COMMAND } from './ImagesPlugin';
 import { INSERT_PLAYLIST_COMMAND } from './PlaylistPlugin';
-import { DataStore } from 'aws-amplify/datastore';
-import { File } from '../../../models';
+import { getAmplifyClient } from '../../../utils/amplifyClient';
+// Type import removed - not needed in runtime JS
 
 import { createPortal } from 'react-dom';
 import FilesContext from '../../../context/fileContext';
@@ -129,14 +129,15 @@ export default function DragDropPaste() {
                         }
                     });
 
-                    const newFile = await DataStore.save(new File({
+                    const client = getAmplifyClient();
+                    const { data: newFile } = await client.models.File.create({
                         path: newFilename,
                         name: file.name,
                         size: file.size,
                         mimeType: file.type,
-                        level: 'protected',
+                        level: 'PROTECTED',
                         identityId,
-                    }));
+                    });
 
                     console.log('DragDropPastePlugin result', newFile)
 

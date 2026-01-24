@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Section } from "../src/models";
-import { DataStore } from 'aws-amplify/datastore';
+import { getAmplifyClient } from "../src/utils/amplifyClient";
 import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 
@@ -153,20 +152,24 @@ function Sections() {
                 identityId,
             } = await fetchAuthSession();
 
-            await DataStore.save(
-                new Section({
-                    name: form.get('name').toString(),
-                    description: form.get('description').toString(),
-                    code: response.data.createSectionGroup,
-                    learner: response.data.createSectionGroup,
-                    identityId
-                })
-            );
+            const amplifyClient = getAmplifyClient();
+            const sectionResponse = await amplifyClient.models.Section.create({
+                name: form.get('name').toString(),
+                description: form.get('description').toString(),
+                code: response.data.createSectionGroup,
+                learner: response.data.createSectionGroup,
+                identityId
+            });
+            
+            if (sectionResponse.errors) {
+                console.error('Error creating section:', sectionResponse.errors);
+                throw new Error(sectionResponse.errors[0].message);
+            }
 
-            setIsWorking(false)
+            setIsWorking(false);
         } catch (errors) {
-            console.error(errors)
-            //   throw new Error(errors[0].message)
+            console.error(errors);
+            setIsWorking(false);
         }
 
         setOpen(false);
@@ -176,18 +179,22 @@ function Sections() {
 
 
     useEffect(() => {
-        fetchSections()
-        async function fetchSections() {
-            const sectionData = await DataStore.query(Section)
-
-            console.log('sectionData', sectionData)
-            setSections(sectionData)
-        }
-        const subscription = DataStore.observe(Section).subscribe(() => fetchSections())
+        const amplifyClient = getAmplifyClient();
+        
+        const subscription = amplifyClient.models.Section.observeQuery().subscribe({
+            next: ({ items }) => {
+                console.log('[Sections] Section subscription update:', items.length, 'sections');
+                console.log('sectionData', items);
+                setSections(items);
+            },
+            error: (error) => {
+                console.error('[Sections] Section subscription error:', error);
+            }
+        });
 
         return function cleanup() {
             subscription.unsubscribe();
-        }
+        };
     }, [])
 
     // console.log('sections', sections)
