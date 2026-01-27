@@ -1,9 +1,23 @@
 # DataStore to Gen2 Client Migration Plan
 
 **Created**: January 23, 2026  
-**Status**: Planning Phase  
-**Estimated Effort**: 80-120 hours  
-**Priority**: Critical for Gen2 migration completion
+**Status**: 60-70% Complete ⚠️  
+**Updated**: January 27, 2026  
+**Remaining Effort**: 20-40 hours  
+**Priority**: Medium (backend complete, frontend partially migrated)
+
+## Progress Summary
+
+### ✅ Completed
+- **Gen2 Client Utility**: `src/utils/amplifyClient.ts` - Singleton client with error handling
+- **Context Files**: 6 contexts using `getAmplifyClient()` (unitContext.js, sectionContext.js, filesContext.js, dictionaryContext.js, settingsContext.js, sectionContext.js)
+- **Components**: 27+ components using Gen2 patterns (query, mutations, subscriptions)
+- **Backend**: All 20+ data models available via Gen2 API
+
+### ⏳ Remaining Work
+- ~30 files still using DataStore imports
+- Real-time subscription patterns need conversion from `observeQuery()` to `client.models.X.observeQuery()`
+- Test coverage for migrated components
 
 ---
 

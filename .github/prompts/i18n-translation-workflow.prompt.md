@@ -14,6 +14,29 @@ Multi-model translation validation system with reverse-translation verification 
 - Quality assurance of existing translations through multi-model consensus and reverse verification
 - When a user says "Translate i18n files", "Translate localization files", or "Update translations"
 
+## How to Invoke This Workflow
+
+### Method 1: Direct Chat Command
+```
+User: "Translate i18n files to Japanese and Spanish using fake mode for testing"
+```
+GitHub Copilot will:
+1. Recognize this matches the i18n-translation-workflow
+2. Read this prompt file for instructions
+3. Use the multi-model-ai-translation skill when needed
+4. Execute the workflow steps
+
+### Method 2: Reference the Prompt File
+```
+User: "Follow .github/prompts/i18n-translation-workflow.prompt.md to translate common namespace to French"
+```
+
+### Method 3: Use Skill Directly
+```
+User: "Use the multi-model-ai-translation skill to translate auth.json from English to German in provable mode"
+```
+The agent will read `.github/skills/multi-model-ai-translation/SKILL.md` directly.
+
 ## Purpose
 
 Translate JSON i18n files across multiple languages using three AI models in parallel, validate consistency between translations, and verify accuracy through reverse translation back to English.
@@ -46,7 +69,7 @@ Translate JSON i18n files across multiple languages using three AI models in par
 - `--verify-only`: Skip translation, only run reverse-translation verification (default: `false`)
 - `--runmode`: Translation execution mode (default: `provable`)
   - `fake`: Use Claude runtime to simulate multi-model translation (free, fast, no proof)
-  - `provable`: Use actual API calls to Claude/GPT/Gemini with cryptographic verification (requires API keys, ~$5-10 cost)
+  - `provable`: Use actual API calls to Claude/GPT/Gemma with cryptographic verification (requires API keys, ~$5-10 cost)
 
 **Example Usage:**
 ```
@@ -68,13 +91,19 @@ Use these three models for translation (chosen for multilingual capability and a
 
 1. **Claude Sonnet 4** (Primary) - Best for context and nuance
 2. **GPT-4o** - Strong multilingual performance  
-3. **Gemini 2.0 Flash** - Fast, accurate, good for Asian languages
+3. **Gemma 3 12B** - Open model, efficient, good for Asian languages
 
 ## Workflow Steps
 
 **CRITICAL: Use Todo List Management**
 
 Before starting, create a comprehensive todo list with `manage_todo_list` tool to track all phases:
+
+**Available Agent Skills for This Workflow:**
+- 📚 **multi-model-ai-translation** (`.github/skills/multi-model-ai-translation/SKILL.md`) - Parallel translation with Claude/GPT/Gemma, consensus analysis, reverse verification
+- 📄 **extract-code-documentation** (`.github/skills/extract-code-documentation/SKILL.md`) - Extract component docblocks for translation metadata
+
+When the workflow instructions mention using these capabilities, use the `read_file` tool to get detailed instructions from the SKILL.md files.
 
 1. Phase 1: Pre-Translation Analysis
 2. Phase 2: Multi-Model Translation (per namespace/language)
@@ -84,15 +113,20 @@ Before starting, create a comprehensive todo list with `manage_todo_list` tool t
 
 **Mark each phase as `in-progress` when starting and `completed` when finished. Update the list after EVERY step.**
 
+---
+
 ### Phase 1: Pre-Translation Analysis
 
 1. **Verify component docblocks exist**: Ensure all components in `src/` have `@fileoverview` JSDoc comments
+
 2. **Generate metadata** (if not already done):
-   ```bash
-   npx tsx scripts/add-translation-metadata.ts
-   ```
-   This extracts docblocks and creates metadata-enhanced English locale files
-3. **Read source language files** from `public/locales/{source}/`
+```bash
+npx tsx scripts/add-translation-metadata.ts
+```
+Note: This extracts docblocks and creates metadata-enhanced English locale files
+
+3. **Read source language files**: `public/locales/{source}/{namespace}.json`
+
 4. **Validate metadata structure**: Ensure all keys have required metadata fields:
    - `value` (string)
    - `context` (string)
@@ -103,8 +137,13 @@ Before starting, create a comprehensive todo list with `manage_todo_list` tool t
    - `userType` (string)
    - `tone` (string)
    - `alternativeTerms` (array, optional)
-5. **Identify namespaces**: List all `.json` files (auth, chat, common, editor, errors, grades, units)
-6. **Check existing translations** in target language folders
+
+5. **Identify namespaces**: Find all namespace files with `file_search`:
+   - Pattern: `public/locales/en/*.json`
+   - Lists all namespace files (auth, chat, common, editor, errors, grades, units)
+
+6. **Check existing translations**: `file_search` with `public/locales/{target}/*.json`
+
 7. **Determine translation scope**:
    - If `--force` is set: Translate all keys
    - If not: Only translate new/missing keys by comparing source vs target
@@ -130,15 +169,13 @@ For each target language, use Claude runtime to simulate all three models:
    - Simulate GPT-4o translation characteristics (slightly different phrasing)
    - Store output as `{namespace}-gpt.json`
 
-3. **Translate with Model 3 (Gemini Flash style)**:
+3. **Translate with Model 3 (Gemma style)**:
    - Same source input as Model 1 & 2
-   - Simulate Gemini translation characteristics
-   - Store output as `{namespace}-gemini.json`
+   - Simulate Gemma translation characteristics
+   - Store output as `{namespace}-translategemma.json`
 
 #### Provable Mode (`--runmode=provable`)
 For each namespace in each target language, execute actual API calls:
-
-**Use `run_in_terminal` tool to execute:**
 
 ```bash
 # Run translation script with proof generation
@@ -148,11 +185,11 @@ npx tsx scripts/translate-with-proof.ts {namespace} {source} {target}
 npx tsx scripts/translate-with-proof.ts auth en ja
 ```
 
-**Script:** [scripts/translate-with-proof.ts](../../scripts/translate-with-proof.ts)
+**Script:** [.github/skills/multi-model-ai-translation/translate-with-proof.ts](../skills/multi-model-ai-translation/translate-with-proof.ts)
 
 **Script Behavior:**
-- Makes parallel API calls to Anthropic (Claude), OpenAI (GPT-4o), Google (Gemini)
-- Generates individual model outputs: `{namespace}-claude.json`, `{namespace}-gpt.json`, `{namespace}-gemini.json`
+- Makes parallel API calls to Anthropic (Claude), OpenAI (GPT-4o), Google (Gemma)
+- Generates individual model outputs: `{namespace}-claude.json`, `{namespace}-gpt.json`, `{namespace}-translategemma.json`
 - Creates metadata files with request IDs and fingerprints for verification
 - Outputs to `.translation-cache/{date}/{target}/` directory
 - Generates proof document: `{namespace}-proof.json` with cryptographic verification data
@@ -180,14 +217,12 @@ For each target language, use Claude runtime to simulate reverse translation:
 #### Provable Mode (`--runmode=provable`)
 After translation scripts complete, run verification:
 
-**Use `run_in_terminal` tool to execute:**
-
 ```bash
 # Verify all translations with cryptographic proof
 npx tsx scripts/verify-translations.ts
 ```
 
-**Script:** [scripts/verify-translations.ts](../../scripts/verify-translations.ts)
+**Script:** [.github/skills/multi-model-ai-translation/verify-translations.ts](../skills/multi-model-ai-translation/verify-translations.ts)
 
 **Script Behavior:**
 - Reads all metadata files from `.translation-cache/{date}/{target}/`
@@ -210,9 +245,9 @@ npx tsx scripts/verify-translations.ts
    - No consensus: All 3 models differ ❌
 3. **Document discrepancies** in markdown table:
 
-   | Key Path | Claude | GPT-4o | Gemini | Consensus |
+   | Key Path | Claude | GPT-4o | Gemma | Consensus |
    |----------|--------|--------|--------|-----------|
-   | `auth.sign_in` | ログイン | サインイン | ログイン | 2/3 (Claude+Gemini) |
+   | `auth.sign_in` | ログイン | サインイン | ログイン | 2/3 (Claude+Gemma) |
 
 4. **Choose final translation**:
    - If exact match: Use that translation
@@ -228,7 +263,7 @@ For each target language:
 1. **Reverse translate with all 3 models**:
    - Input: Final translation file from Phase 3
    - Output: Translate back to English
-   - Store as `{namespace}-reverse-claude.json`, `{namespace}-reverse-gpt.json`, `{namespace}-reverse-gemini.json`
+   - Store as `{namespace}-reverse-claude.json`, `{namespace}-reverse-gpt.json`, `{namespace}-reverse-translategemma.json`
 
 2. **Compare reverse translations to original source**:
    - Calculate semantic similarity (not exact match - allow for paraphrasing)
@@ -237,7 +272,7 @@ For each target language:
 
 3. **Generate verification report** per namespace:
 
-   | Key Path | Original (EN) | Target Translation | Reverse (Claude) | Reverse (GPT) | Reverse (Gemini) | Status |
+   | Key Path | Original (EN) | Target Translation | Reverse (Claude) | Reverse (GPT) | Reverse (Gemma) | Status |
    |----------|---------------|-------------------|------------------|---------------|------------------|--------|
    | `chat.send_message` | Send message | メッセージを送信 | Send message | Send a message | Transmit message | ✅ Pass |
    | `auth.forgot_password` | Forgot Password? | パスワードを忘れた？ | Forgot Password? | Lost Password? | Forgot your password? | ✅ Pass |
@@ -563,7 +598,7 @@ FOR EACH target (ja, es):
     - Script outputs:
       * .translation-cache/2026-01-25/ja/auth-claude.json + metadata
       * .translation-cache/2026-01-25/ja/auth-gpt.json + metadata
-      * .translation-cache/2026-01-25/ja/auth-gemini.json + metadata
+      * .translation-cache/2026-01-25/ja/auth-translategemma.json + metadata
       * .translation-cache/2026-01-25/ja/auth-proof.json
     - Load 3 model outputs from cache
     - Compare outputs for consensus
@@ -611,52 +646,75 @@ FOR EACH target (ja, es):
 | **API Keys** | Not required | Required (3 providers) |
 | **Verification** | Demonstration only | Auditable via API dashboards |
 | **Best For** | Development, testing, demos | Production releases, compliance, audits |
-| **Script Dependencies** | None | [translate-with-proof.ts](../../scripts/translate-with-proof.ts), [verify-translations.ts](../../scripts/verify-translations.ts), [reverse-translate.ts](../../scripts/reverse-translate.ts), [generate-translation-report.ts](../../scripts/generate-translation-report.ts) |
+| **Script Dependencies** | None | [translate-with-proof.ts](../skills/multi-model-ai-translation/translate-with-proof.ts), [verify-translations.ts](../skills/multi-model-ai-translation/verify-translations.ts), [reverse-translate.ts](../skills/multi-model-ai-translation/reverse-translate.ts), [generate-translation-report.ts](../skills/multi-model-ai-translation/generate-translation-report.ts) |
 
 ## Required Scripts
 
 ### Metadata Preparation Scripts
 
-**[scripts/extract-component-docblocks.ts](../../scripts/extract-component-docblocks.ts)**:
+**[.github/skills/extract-code-documentation/extract-component-docblocks.ts](../skills/extract-code-documentation/extract-component-docblocks.ts)**:
 - Core utility that extracts `@fileoverview` JSDoc comments from all component files in `src/`
 - Scans `src/**/*.{ts,tsx,js,jsx}` (excluding tests and stories)
 - Parses docblocks to extract component functionality descriptions
 - Used by add-translation-metadata.ts to populate `component.functionality` field
 - Provides `extractAllDocblocks()` and `findDocblock()` functions
-- Run standalone with: `npx tsx scripts/extract-component-docblocks.ts`
+
+**Run**:
+```bash
+npx tsx scripts/extract-component-docblocks.ts
+```
 
 **[scripts/add-translation-metadata.ts](../../scripts/add-translation-metadata.ts)**:
 - Generates English locale JSON files with rich metadata from component docblocks
 - Automatically extracts component descriptions via extract-component-docblocks.ts
 - Populates all required metadata fields: context, component, usage, impact, userType, tone
 - Must be run BEFORE translation to ensure metadata exists
-- Run with: `npx tsx scripts/add-translation-metadata.ts`
+
+**Run**:
+```bash
+npx tsx scripts/add-translation-metadata.ts
+```
 
 ### Translation Scripts (Provable Mode)
 
 Ensure these TypeScript scripts exist before using `--runmode=provable`:
 
-1. **[scripts/translate-with-proof.ts](../../scripts/translate-with-proof.ts)**:
+1. **[.github/skills/multi-model-ai-translation/translate-with-proof.ts](../skills/multi-model-ai-translation/translate-with-proof.ts)**:
    - Arguments: `{namespace} {source} {target}`
-   - Makes API calls to Claude, GPT-4o, Gemini
+   - Makes API calls to Claude, GPT-4o, Gemma
    - Outputs translation files + metadata to `.translation-cache/`
    - Generates proof document with fingerprints
+   
+   **Run**:
+   ```bash
+   npx tsx .github/skills/multi-model-ai-translation/translate-with-proof.ts {namespace} {source} {target}
+   ```
 
-2. **[scripts/verify-translations.ts](scripts/verify-translations.ts)**:
+2. **[.github/skills/multi-model-ai-translation/verify-translations.ts](../skills/multi-model-ai-translation/verify-translations.ts)**:
    - No arguments (reads from `.translation-cache/`)
    - Verifies SHA-256 fingerprints
    - Validates request IDs and timestamps
    - Outputs verification report to console
+   
+   **Run**:
+   ```bash
+   npx tsx .github/skills/multi-model-ai-translation/verify-translations.ts
+   ```
 
-3. **[scripts/reverse-translate.ts](../../scripts/reverse-translate.ts)**:
+3. **[.github/skills/multi-model-ai-translation/reverse-translate.ts](../skills/multi-model-ai-translation/reverse-translate.ts)**:
    - Arguments: `{namespace} {source} {target}`
    - Performs cross-validation reverse translation
    - Each model's forward translation is reversed back to English by the OTHER two models
    - Creates comprehensive cross-validation matrix comparing all reverse translations to original
    - Outputs results to `.translation-cache/{date}/{target}/{namespace}-reverse-results.json`
    - Reports semantic similarity scores and flags keys with drift
+   
+   **Run**:
+   ```bash
+   npx tsx .github/skills/multi-model-ai-translation/reverse-translate.ts {namespace} {source} {target}
+   ```
 
-4. **[scripts/generate-translation-report.ts](../../scripts/generate-translation-report.ts)**:
+4. **[.github/skills/multi-model-ai-translation/generate-translation-report.ts](../skills/multi-model-ai-translation/generate-translation-report.ts)**:
    - No arguments (reads from `.translation-cache/`)
    - Aggregates all translation, verification, and cross-validation data across all languages
    - Generates comprehensive `translation-report-{timestamp}.md` in project root
@@ -667,19 +725,24 @@ Ensure these TypeScript scripts exist before using `--runmode=provable`:
      - Human review items flagged for attention
      - Summary statistics across all translations
    - Automatically runs at the end of the workflow
+   
+   **Run**:
+   ```bash
+   npx tsx .github/skills/multi-model-ai-translation/generate-translation-report.ts
+   ```
 
 **Required Scripts (Provable Mode):**
 All scripts below exist in `scripts/` directory and are ready to use:
-- [translate-with-proof.ts](../../scripts/translate-with-proof.ts) - Multi-model translation with proof (includes rate limiting: 500ms delay for Claude/GPT, 6.5s for Gemini to stay under 10 req/min limit)
-- [verify-translations.ts](../../scripts/verify-translations.ts) - Cryptographic verification  
-- [reverse-translate.ts](../../scripts/reverse-translate.ts) - Cross-validation reverse translation
-- [generate-translation-report.ts](../../scripts/generate-translation-report.ts) - Report generation
+- [translate-with-proof.ts](../skills/multi-model-ai-translation/translate-with-proof.ts) - Multi-model translation with proof (includes rate limiting: 500ms delay for Claude/GPT, 2s for Gemma to stay under 30 req/min limit)
+- [verify-translations.ts](../skills/multi-model-ai-translation/verify-translations.ts) - Cryptographic verification
+- [reverse-translate.ts](../skills/multi-model-ai-translation/reverse-translate.ts) - Cross-validation reverse translation
+- [generate-translation-report.ts](../skills/multi-model-ai-translation/generate-translation-report.ts) - Report generation
 - [run-full-translation.sh](../../scripts/run-full-translation.sh) - Batch script to run all translations with force mode (includes 10s delays between namespaces)
 
 **Rate Limiting:**
 - Claude: 500ms delay between keys (safe for high limits)
 - GPT-4o: 500ms delay between keys (safe for high limits)  
-- Gemini: 6.5 seconds delay between keys (9 requests/minute to stay under 10 req/min limit)
+- Gemma: 2 seconds delay between keys (30 requests/minute limit for Gemma 3)
 - Batch script: Additional 10s delay between namespaces to prevent quota exhaustion
 
 **Error Handling:**
@@ -688,7 +751,7 @@ All three models must complete successfully for each namespace. If any model fai
 See [i18n-translation-implementation.md](i18n-translation-implementation.md) for full script implementation details.
     - Translate with Claude Sonnet 4
     - Translate with GPT-4o  
-    - Translate with Gemini Flash
+    - Translate with Gemma 3
     - Compare 3 outputs
     - Choose consensus translation
     - Merge with existing translations
@@ -713,7 +776,11 @@ See [i18n-translation-implementation.md](i18n-translation-implementation.md) for
 7. **Iterative refinement** - Use `--force` sparingly, prefer incremental updates
 8. **Per-key context matters** - Translate key-by-key with full metadata, not entire JSON files at once
 9. **NEVER CHANGE RUNMODE** - Once user specifies or defaults to a runmode, it MUST NOT be changed under ANY circumstances (API errors, quota limits, missing keys, etc.). Troubleshoot and fix errors - do not switch modes.
-10. **Use run_in_terminal tool** - Always execute scripts via `run_in_terminal` with appropriate timeout values (120000ms for translations, 30000ms for verification/reports)
+10. **Execute all scripts via `run_in_terminal`** with appropriate timeouts:
+    - Translation scripts: 120 seconds
+    - Verification/report scripts: 30 seconds
+    - Metadata generation: 60 seconds
+    - Always wait for completion (not background)
 
 ## Notes
 

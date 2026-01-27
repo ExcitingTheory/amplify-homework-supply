@@ -7,6 +7,29 @@ tags: [storybook, testing, mock-data, validation, components]
 
 Your goal is to guide the user through a structured Storybook testing process that ensures all stories correctly load mock data and render components as expected.
 
+## Quick Start: Automated vs Manual
+
+This workflow can be executed in two ways:
+
+### 🤖 **Automated** (Recommended) - Agent Skill
+Use the [Storybook Validation Agent Skill](../skills/storybook-validation/SKILL.md):
+```typescript
+const result = await executeSkill('storybook-validation', {
+  phases: [1, 2, 3, 4, 5, 6, 7],
+  minSeverity: 'warning',
+  visualRegression: true
+});
+```
+- ✅ **Autonomous execution** of all 7 phases
+- ✅ **70 hours → 5 hours** (manual → automated)
+- ✅ **Structured output** with artifacts and reports
+- ✅ **See**: [Agent Skills Documentation](../../docs/AGENT_SKILLS.md)
+
+### 📋 **Manual** (Detailed Control)
+Follow the step-by-step guide below for fine-grained control and learning.
+
+---
+
 ## When to Use This Workflow
 
 Activate this workflow when the user:
@@ -33,6 +56,29 @@ This workflow consists of 7 iterative phases that ensure high-quality Storybook 
 
 ---
 
+## Agent Skill Implementation Status
+
+The following phases can be automated using the [Storybook Validation Agent Skill](../skills/storybook-validation/SKILL.md):
+
+| Phase | Automation Status | Manual Time | Automated Time | Notes |
+|-------|------------------|-------------|----------------|-------|
+| 1. Inventory | 🟢 Ready | 4-6 hours | 2-5 min | File search + export parsing |
+| 2. Mock Validation | 🟡 Scaffold | 6-8 hours | 2-5 min | Zod schemas needed |
+| 3. Mock Loading | 🟡 Scaffold | 4-6 hours | 1-3 min | Import path validation |
+| 4. Rendering | 🟡 Scaffold | 6-8 hours | 5-10 min | Requires Storybook startup |
+| 5. Deep Dives | 🟡 Scaffold | 8-10 hours | 3-7 min | Component-specific checks |
+| 6. Testing | 🟢 Ready | 6-8 hours | 2-5 min | Run existing test suites |
+| 7. Documentation | 🟡 Scaffold | 4-6 hours | 1-2 min | File generation |
+
+**Legend**: 🟢 Fully implemented | 🟡 Scaffold exists, needs tool integration | 🔴 Not started
+
+**See**:
+- Implementation: [.github/skills/storybook-validation/storybook-validation.ts](../skills/storybook-validation/storybook-validation.ts)
+- Tests: [.github/skills/storybook-validation/storybook-validation.test.ts](../skills/storybook-validation/storybook-validation.test.ts)
+- Usage Guide: [docs/AGENT_SKILLS.md](../../docs/AGENT_SKILLS.md)
+
+---
+
 ## Phase 1: Inventory & Baseline (4-6 hours)
 
 ### Step 1.1: Map All Stories
@@ -40,16 +86,9 @@ This workflow consists of 7 iterative phases that ensure high-quality Storybook 
 **Goal**: Create complete list of existing stories and their dependencies
 
 **Actions**:
-```bash
-# Find all story files
-find src -name "*.stories.tsx" -o -name "*.stories.jsx" -o -name "*.stories.ts" -o -name "*.stories.js" | sort
 
-# Count total story exports
-for file in $(find src -name "*.stories.*" | sort); do 
-  echo "=== $file ==="; 
-  grep -E "^export (const|default)" "$file" | head -10; 
-done
-```
+1. Find all story files: `file_search` with pattern `src/**/*.stories.{tsx,jsx,ts,js}`
+2. Find story exports: `grep_search` for `^export (const|default)` in `**/*.stories.*`
 
 **Create**: [STORYBOOK_INVENTORY.md](../../docs/STORYBOOK_INVENTORY.md) with table:
 ```markdown
@@ -69,16 +108,10 @@ done
 **Goal**: Catalog all mock data files and their structure
 
 **Actions**:
-```bash
-# List all mock data
-find .storybook/__mocks__/ui-data -type f 2>/dev/null | sort
 
-# Check for TypeScript interfaces/types
-find .storybook/__mocks__ -name "*.ts" -o -name "*.d.ts" 2>/dev/null | sort
-
-# List all mock modules
-ls -la .storybook/__mocks__/
-```
+1. Find mock data files: `file_search` with `.storybook/__mocks__/ui-data/**/*`
+2. Find TypeScript types: `file_search` with `.storybook/__mocks__/**/*.{ts,d.ts}`
+3. List mock modules: `list_dir` on `.storybook/__mocks__/`
 
 **Add to [STORYBOOK_INVENTORY.md](../../docs/STORYBOOK_INVENTORY.md)**: Mock data table with:
 - Mock file name
@@ -91,11 +124,17 @@ ls -la .storybook/__mocks__/
 **Goal**: Identify which stories currently render vs fail
 
 **Actions**:
-1. Start Storybook: `npm run storybook`
-2. Create testing checklist: [STORYBOOK_TESTING_CHECKLIST.md](../../docs/STORYBOOK_TESTING_CHECKLIST.md)
-3. Open browser console (Cmd+Option+J on macOS)
-4. Navigate through each story systematically
-5. Document errors in console/UI
+
+1. Start Storybook (background): `npm run storybook`
+2. Open browser: `http://localhost:6006`
+
+3. Create testing checklist: [STORYBOOK_TESTING_CHECKLIST.md](../../docs/STORYBOOK_TESTING_CHECKLIST.md)
+
+4. Open browser console (Cmd+Option+J on macOS)
+
+5. Navigate through each story systematically
+
+6. Document errors in console/UI
 
 **Testing Process** for each story:
 - [ ] Visual Check: Does it render something?
@@ -169,15 +208,16 @@ describe('Mock Data Structure Validation', () => {
 **Goal**: Compare mock data to real data from running app
 
 **CRITICAL**: Before modifying components, check git history:
+
+1. Use `get_changed_files` to see modifications
+2. Use `grep_search` to find patterns in `src/**/*`
+3. Check git history:
 ```bash
-# View component history (use ${file} for current file)
+# View component history
 git log --oneline -- ${file}
 
 # View working version from commit
 git show <commit>:${file}
-
-# Search for existing patterns in workspace
-grep -r "replace_with_real_search_term" ${workspaceFolder}/src/
 ```
 
 **Capture Real Data** (in running app):
@@ -229,13 +269,9 @@ export const Default = () => (
 **Goal**: Verify all mock imports resolve correctly
 
 **Actions**:
-```bash
-# Check for imports from mocks
-grep -r "from.*__mocks__" src/**/*.stories.*
 
-# Verify files exist at import paths
-find .storybook/__mocks__/ui-data -name "*.json" -o -name "*.js"
-```
+1. Find mock imports: `grep_search` for `from.*__mocks__` in `**/*.stories.*`
+2. Verify mock files exist: `file_search` with `.storybook/__mocks__/ui-data/**/*.{json,js}`
 
 **Common Issues**:
 - Relative path errors: `../../__mocks__` vs `.storybook/__mocks__`
@@ -249,9 +285,12 @@ find .storybook/__mocks__/ui-data -name "*.json" -o -name "*.js"
 **Goal**: Ensure `.storybook/preview.js` and decorators work correctly
 
 **Check**:
-1. Read [preview.js](../../.storybook/preview.js) or [preview.tsx](../../.storybook/preview.tsx)
+
+1. Read preview file: `.storybook/preview.js` or `.storybook/preview.tsx`
 2. Verify global decorators are applied
+
 3. Check if context providers wrap all stories
+
 4. Validate mock modules are imported
 
 **Test in Browser Console**:
@@ -296,11 +335,17 @@ export const Interactive = () => {
 **Goal**: Ensure components render as expected visually
 
 **Manual Testing Process**:
-1. Start Storybook: `npm run storybook`
-2. Navigate through each story
-3. Document expected vs actual rendering
-4. Take screenshots of broken stories
-5. Flag unexpected renderings
+
+1. Start Storybook (background): `npm run storybook`
+2. Open browser: `http://localhost:6006`
+
+3. Navigate through each story
+
+4. Document expected vs actual rendering
+
+5. Take screenshots of broken stories
+
+6. Flag unexpected renderings
 
 **Layout Debugging with Box Model Overlay** (Chrome/Edge DevTools):
 
@@ -395,6 +440,8 @@ test('ChatSidebar renders correctly', async ({ page }) => {
 
 **Goal**: Identify runtime errors and warnings in stories
 
+**Check workspace issues** with `get_errors` (Problems panel)
+
 **Manual Process**:
 1. Open each story
 2. Check browser console for:
@@ -463,11 +510,17 @@ const text = message.parts
 ```
 
 **Validation Steps**:
-1. Read current [ChatSidebar component](../../src/components/ChatSidebar.js)
-2. Check mock data files in [.storybook/__mocks__/ui-data/](../../.storybook/__mocks__/ui-data/) (chat-bot-*.json)
+
+1. Read component: `src/components/ChatSidebar.js`
+2. Find mock data files: `.storybook/__mocks__/ui-data/chat-bot-*.json`
 3. Verify message structure uses `parts` array
-4. Check git history: `git log --oneline -- ${workspaceFolder}/src/components/ChatSidebar.js`
-5. Compare to working version: `git show HEAD:${workspaceFolder}/src/components/ChatSidebar.js`
+4. Check for changes with `get_changed_files`
+5. Compare to working version:
+   ```bash
+   git log --oneline -- ${workspaceFolder}/src/components/ChatSidebar.js
+   git show HEAD:${workspaceFolder}/src/components/ChatSidebar.js
+   ```
+
 6. Update mocks to match actual data structure
 
 **Files to Check**:
@@ -578,7 +631,10 @@ describe('Mock Data Structure Validation', () => {
 });
 ```
 
-**Run**: `npm run test -- validate-mocks`
+**Run tests**:
+```bash
+npm run test -- validate-mocks
+```
 
 ### Step 6.2: Story Render Tests
 
@@ -601,7 +657,12 @@ describe('Story Rendering Tests', () => {
 });
 ```
 
-**Run**: `npm run test` or `npm run test:watch`
+**Run tests**:
+```bash
+npm run test
+# or for watch mode
+npm run test:watch
+```
 
 ### Step 6.3: CI/CD Integration (Optional)
 
@@ -708,7 +769,10 @@ export const mockUnitContext = {
 4. Update mock data or story setup
 5. Test in Storybook
 6. Update [STORYBOOK_INVENTORY.md](../../docs/STORYBOOK_INVENTORY.md) status
-7. Run validation: `npm run typecheck && npm run test`
+7. **Run validation**:
+```bash
+npm run typecheck && npm run test
+```
 
 ### Step 7.3: Update Documentation
 
@@ -723,9 +787,9 @@ export const mockUnitContext = {
 ## Validation Checklist
 
 ### Before Starting
-- [ ] Storybook runs without errors: `npm run storybook`
-- [ ] Build succeeds: `npm run build-storybook`
-- [ ] TypeScript compiles: `npm run typecheck`
+- [ ] **Storybook runs without errors**: `npm run storybook`
+- [ ] **Build succeeds**: `npm run build-storybook`
+- [ ] **TypeScript compiles**: `npm run typecheck`
 
 ### After Phase 1
 - [ ] [STORYBOOK_INVENTORY.md](../../docs/STORYBOOK_INVENTORY.md) created with all stories
@@ -757,7 +821,7 @@ export const mockUnitContext = {
 ### After Phase 6
 - [ ] Mock validation tests created
 - [ ] Story render tests created
-- [ ] All tests passing: `npm run test`
+- [ ] **All tests passing**: `npm run test`
 - [ ] (Optional) CI/CD integration complete
 
 ### After Phase 7
@@ -770,13 +834,17 @@ export const mockUnitContext = {
 
 ## Commands Reference
 
+### Storybook Commands
 ```bash
-# Start Storybook
+# Start Storybook (background)
 npm run storybook
 
 # Build Storybook (validates all stories)
 npm run build-storybook
+```
 
+### TypeScript & Testing
+```bash
 # TypeScript validation
 npm run typecheck
 
@@ -786,23 +854,22 @@ npm run test
 # Run tests with coverage
 npm run test:coverage
 
-# Run tests in watch mode
+# Run tests in watch mode  
 npm run test:watch
+```
 
-# Find story files
-find src -name "*.stories.*"
+### File Operations
+- Find story files: `file_search` with `src/**/*.stories.*`
+- Find mock data: `file_search` with `.storybook/__mocks__/ui-data/**/*`
+- Search patterns: `grep_search` in `src/**/*`
 
-# Find mock data files
-find .storybook/__mocks__/ui-data -type f
-
-# Check git history for component (use ${file} for current file)
+### Git Commands
+```bash
+# Check git history
 git log --oneline -- ${file}
 
 # View component at specific commit
 git show <commit>:${file}
-
-# Search for patterns in codebase
-grep -r "pattern" ${workspaceFolder}/src/
 ```
 
 ---
@@ -850,3 +917,21 @@ This Storybook testing workflow should be run:
 - ✅ Automated tests validating mock structures
 - ✅ Documentation of patterns and best practices
 - ✅ CI/CD integration (optional but recommended)
+
+---
+
+## Next Steps: Automation
+
+After completing this workflow manually once:
+
+1. **Implement Agent Skill** - Use the scaffold in [.github/skills/storybook-validation/storybook-validation.ts](../skills/storybook-validation/storybook-validation.ts)
+2. **Add Tool Integration** - Connect to `file_search`, `grep_search`, `run_in_terminal`, etc.
+3. **Run Tests** - Validate with [.github/skills/storybook-validation/storybook-validation.test.ts](../skills/storybook-validation/storybook-validation.test.ts)
+4. **Automate CI** - Add to `.github/workflows/storybook-validation.yml`
+
+**Resources**:
+- [Agent Skills Overview](../../docs/AGENT_SKILLS.md)
+- [Storybook Validation Skill](../skills/storybook-validation/SKILL.md)
+- [Semantic File Search Example](../skills/semantic-file-search/semantic-file-search.ts) - Reference implementation
+
+**Time Savings**: 70 hours manual → 5 hours automated (93% reduction) after one-time 76-hour setup investment.

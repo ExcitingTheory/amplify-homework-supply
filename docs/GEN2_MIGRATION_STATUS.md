@@ -1,9 +1,31 @@
 # Gen 1 → Gen 2 Migration Status
 
-**Last Updated**: January 17, 2026  
-**Overall Status**: ✅ **PHASE D - ADVANCED (Lambda Functions Complete)**
+**Last Updated**: January 27, 2026  
+**Overall Status**: 95% Complete ✅
 
-## Migration Progress
+## Summary
+
+### ✅ Complete (100%)
+- **Backend Infrastructure**: Full Gen 2 backend with TypeScript data models (`amplify/backend.ts`, `amplify/data/resource.ts`)
+- **Data Schema**: 20+ models migrated (1,021 lines) - Unit, Assignment, Grade, Section, File, Document, etc.
+- **Lambda Handlers**: All 11 functions migrated and registered in backend.ts
+- **HTTP API Gateway**: Streaming endpoints operational (`/chat`, `/content-completion`, `/suggest-blocks`)
+- **Authentication**: Cognito fully configured (`amplify/auth/resource.ts`)
+- **Storage**: Gen 2 S3 resource configured (`amplify/storage/resource.ts`)
+
+### ⚠️ In Progress (60-70%)
+- **Frontend DataStore → Gen2 Client Migration**: 
+  - ✅ `src/utils/amplifyClient.ts` - Gen2 client singleton created
+  - ✅ 6 context files using `getAmplifyClient()` (unitContext.js, sectionContext.js, filesContext.js, etc.)
+  - ✅ 27+ components using Gen2 patterns
+  - ⏳ ~30 files still using DataStore (need migration)
+
+### ⏳ TODO (0%)
+- **WebSocket API Gateway**: Real-time sync for Yjs (not blocking current features, future enhancement)
+
+---
+
+## Detailed Migration Progress
 
 ### Phase A: Gen 2 Backend Setup ✅ **COMPLETE**
 - [x] Initialize Gen 2 backend structure (`amplify/backend.ts`, `amplify/data/resource.ts`)
@@ -189,12 +211,8 @@ const { data: units } = await client.models.Unit.list();
 
 | Document | Status | Purpose |
 |----------|--------|---------|
-| [GEN2_MIGRATION_PLAN.md](./GEN2_MIGRATION_PLAN.md) | Reference | Original migration roadmap |
-| [LAMBDA_HANDLER_IMPLEMENTATIONS.md](./LAMBDA_HANDLER_IMPLEMENTATIONS.md) | Complete | Handler implementation specs |
-| [AMPLIFY_GEN2_HANDLER_COMPLIANCE.md](./AMPLIFY_GEN2_HANDLER_COMPLIANCE.md) | Complete | Handler compliance verification |
-| [LAMBDA_IMPLEMENTATION_COMPLETE.md](./LAMBDA_IMPLEMENTATION_COMPLETE.md) | Complete | Deployment guide |
+| [LAMBDA_HANDLERS_STATUS.md](./LAMBDA_HANDLERS_STATUS.md) | Complete | Handler implementation & deployment guide |
 | [FILE_HANDLING_GUIDE.md](./FILE_HANDLING_GUIDE.md) | Complete | S3 file handling patterns |
-| [FILE_HANDLING_AUDIT.md](./FILE_HANDLING_AUDIT.md) | Complete | File handling compliance |
 | [FILE_HANDLING_QUICK_REFERENCE.md](./FILE_HANDLING_QUICK_REFERENCE.md) | Complete | Developer quick guide |
 | [E2E_TEST_PLAN.md](./E2E_TEST_PLAN.md) | **New** | Comprehensive E2E testing strategy |
 
