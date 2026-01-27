@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getAmplifyClient } from "../src/utils/amplifyClient";
+import { useTranslation } from 'react-i18next';
 
 import {
     Button,
@@ -19,6 +20,7 @@ import MyAuth from "../src/components/authenticator";
 import { useRouter } from 'next/router'
 
 function Grades({ signOut, user }) {
+    const { t } = useTranslation('pages');
     /**
      * Grades is a page that displays a list of grades.
      * For Instructor users, it displays a list of grades organized by section like a gradebook but for all users in the section.
@@ -112,7 +114,7 @@ function Grades({ signOut, user }) {
                 <MainToolbar>
                     <Box sx={{ flexGrow: 1, margin: '1rem' }}>
                         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                            Grades
+                            {t('grades.title')}
                         </Typography>
                     </Box>
                 </MainToolbar>
@@ -136,7 +138,7 @@ function Grades({ signOut, user }) {
                 {/* <h1>hello {user.username}</h1>
             <button onClick={signOut}>Sign Out</button> */}
 
-                <h1>Grades</h1>
+                <h1>{t('grades.title')}</h1>
 
                 <Box>
                     {!grades &&
@@ -166,7 +168,7 @@ function Grades({ signOut, user }) {
                         {
                             sections &&
                             <>
-                                <h1>Sections</h1>
+                                <h1>{t('grades.sections')}</h1>
                                 <>
                                     {sections.map((section, index) => (
                                         <Card
@@ -202,7 +204,7 @@ function Grades({ signOut, user }) {
                         {
                             mySections &&
                             <>
-                                <h1>My Sections</h1>
+                                <h1>{t('grades.mySections')}</h1>
                                 <>
                                     {mySections.map((section, index) => (
                                         <Card
@@ -275,11 +277,11 @@ function Grades({ signOut, user }) {
                     <table>
                         <thead>
                             <tr>
-                                <th>Student</th>
-                                <th>Assignment</th> {/**
+                                <th>{t('grades.studentHeader')}</th>
+                                <th>{t('grades.assignmentHeader')}</th> {/**
                              * TODO This should be a column for each assignment.
                              */}
-                                <th>Grade</th>
+                                <th>{t('grades.gradeHeader')}</th>
                             </tr>
                         </thead>
                         <tbody>
