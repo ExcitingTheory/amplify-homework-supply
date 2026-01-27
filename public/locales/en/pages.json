@@ -1,0 +1,182 @@
+{
+  "grades": {
+    "title": "Grades",
+    "sections": "Sections",
+    "mySections": "My Sections",
+    "studentHeader": "Student",
+    "assignmentHeader": "Assignment",
+    "gradeHeader": "Grade"
+  },
+  "index": {
+    "title": "Homework Supply",
+    "assignments": "Assignments",
+    "viewWorkbook": "View Workbook",
+    "completedAssignments": "Completed Assignments",
+    "myAssignments": "My Assignments",
+    "editUnit": "Edit Unit",
+    "noSectionsYet": "No Sections Yet",
+    "joinSection": "Join Section?",
+    "createNewSection": "Create New Section",
+    "mySections": "My Sections",
+    "untitledSection": "Untitled Section",
+    "noDescription": "No description",
+    "viewSection": "View Section",
+    "sections": "Sections"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: January 15, 2026",
+    "introduction": {
+      "heading": "1. Introduction",
+      "content": "Welcome to Homework Supply. This privacy policy explains how we collect, use, and protect your personal information when you use our Japanese language learning platform."
+    },
+    "informationWeCollect": {
+      "heading": "2. Information We Collect",
+      "content": "We collect information that you provide directly to us, information we collect automatically, and information from third-party sources.",
+      "accountInfo": "Account information (username, email, password)",
+      "learningData": "Learning progress and performance data",
+      "userContent": "User-generated content (assignments, recordings, notes)",
+      "usageData": "Usage data and analytics"
+    },
+    "howWeUseInfo": {
+      "heading": "3. How We Use Your Information",
+      "content": "We use your information to provide, maintain, and improve our services, communicate with you, and ensure platform security.",
+      "provideServices": "Provide and maintain our learning platform",
+      "personalizeExperience": "Personalize your learning experience",
+      "communicate": "Send you updates and notifications",
+      "analyzeTrends": "Analyze usage trends and improve features",
+      "ensureSecurity": "Ensure security and prevent fraud"
+    },
+    "dataStorage": {
+      "heading": "4. Data Storage and Security",
+      "content": "We store your data securely using AWS services with encryption and access controls.",
+      "awsStorage": "Data stored in AWS DynamoDB and S3",
+      "encryption": "Encryption in transit and at rest",
+      "accessControls": "Role-based access controls",
+      "regularBackups": "Regular security audits and backups"
+    },
+    "dataSharing": {
+      "heading": "5. Data Sharing",
+      "content": "We do not sell your personal information. We may share data with service providers and in legal situations.",
+      "serviceProviders": "With service providers (AWS, OpenAI for AI features)",
+      "instructors": "With your instructors for educational purposes",
+      "legalRequirements": "When required by law or to protect rights",
+      "consent": "With your explicit consent"
+    },
+    "yourRights": {
+      "heading": "6. Your Rights",
+      "content": "You have rights regarding your personal data including access, correction, and deletion.",
+      "accessData": "Access your personal data",
+      "correctData": "Correct inaccurate information",
+      "deleteData": "Request deletion of your data",
+      "exportData": "Export your data",
+      "optOut": "Opt out of certain data collection"
+    },
+    "cookies": {
+      "heading": "7. Cookies and Tracking",
+      "content": "We use cookies and similar technologies to improve your experience and analyze platform usage."
+    },
+    "childrensPrivacy": {
+      "heading": "8. Children's Privacy",
+      "content": "Our platform may be used by students of various ages. Parental consent may be required for users under 13."
+    },
+    "policyChanges": {
+      "heading": "9. Changes to This Policy",
+      "content": "We may update this privacy policy periodically. We will notify you of significant changes via email or platform notification."
+    },
+    "contactUs": {
+      "heading": "10. Contact Us",
+      "content": "If you have questions about this privacy policy, please contact us at privacy@homeworksupply.com."
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "heading": "My Profile",
+    "description": "View and update your profile information",
+    "userId": "User Id",
+    "identityId": "Identity Id",
+    "cancel": "Cancel",
+    "updateProfile": "Update Profile",
+    "confirmEmail": {
+      "title": "Confirm your email",
+      "message": "Please check your email and enter the confirmation code to verify your email address.",
+      "button": "Confirm Email"
+    },
+    "changePassword": {
+      "heading": "Change Password",
+      "description": "Update your account password for security",
+      "button": "Change Password"
+    },
+    "advanced": {
+      "heading": "Advanced",
+      "description": "Manage advanced settings and clear local data cache",
+      "clearCache": "Clear Local Cache",
+      "clearCacheDialog": {
+        "title": "Clear Local Data Cache?",
+        "message": "This will clear all locally cached data including offline assignments and synchronized content. You will need to reload data from the server.",
+        "cancel": "Cancel",
+        "confirm": "Clear Cache"
+      }
+    }
+  },
+  "sections": {
+    "title": "Sections",
+    "createNew": "Create New",
+    "noSectionsYet": "No Sections Yet",
+    "createNewSection": "Create New Section",
+    "untitledSection": "Untitled Section",
+    "viewSection": "View Section",
+    "newSection": {
+      "title": "New Section",
+      "description": "Create a new class section to assign learning materials to students",
+      "cancel": "Cancel",
+      "create": "Create"
+    }
+  },
+  "sectionDetail": {
+    "noFeaturedImage": "No featured image set",
+    "joinCode": "Join Code:",
+    "studentView": "Student View",
+    "instructorView": "Instructor View",
+    "students": "Students",
+    "studentHeader": "Student",
+    "emailHeader": "Email",
+    "actionsHeader": "Actions",
+    "gradebook": "Gradebook",
+    "assignmentCount": "{{count}} assignment(s)",
+    "curveMethod": "Curve Method",
+    "assignmentHeader": "Assignment",
+    "gradeHeader": "Grade",
+    "totalAverage": "Total Average",
+    "learnerHeader": "Learner",
+    "totalCompletion": "Total (Completion)",
+    "assignments": "Assignments",
+    "viewWorkbook": "View Workbook",
+    "deleteSection": "Delete Section",
+    "overrideGrade": {
+      "title": "Override Grade",
+      "cancel": "Cancel",
+      "save": "Save Grade"
+    }
+  },
+  "units": {
+    "title": "Units",
+    "createNew": "Create New",
+    "noPublishedUnits": "No Published Units Yet",
+    "createNewUnit": "Create New Unit",
+    "publishedUnits": "Published Units",
+    "untitledUnit": "Untitled Unit",
+    "viewWorkbook": "View Workbook",
+    "editUnit": "Edit Unit",
+    "myDrafts": "My Drafts",
+    "archivedUnits": "Archived Units"
+  },
+  "unitDetail": {
+    "loading": "Loading…"
+  },
+  "workbook": {
+    "timerInstructions": "Click the button below to start the timer for this assignment.",
+    "start": "Start",
+    "loading": "Loading…"
+  }
+}

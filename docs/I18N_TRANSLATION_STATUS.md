@@ -99,54 +99,26 @@ Organized by priority:
 - [x] Map to namespaces
 - [x] Create this status document
 
-### Phase 2: Create Namespace Files ❌ NOT STARTED
+### Phase 2: Create Namespace Files ✅ COMPLETE
 
-#### Phase2_Task1: Create pages.json
-```bash
-# Create new namespace file
-touch public/locales/en/pages.json
-```
+#### Phase2_Task1: Create pages.json ✅
+- [x] Created `/public/locales/en/pages.json` (7.0K)
+- [x] Organized by page sections: grades, index, privacy, profile, sections, sectionDetail, units, unitDetail, workbook
+- [x] Validation: JSON syntax valid
 
-Structure:
-```json
-{
-  "grades": {
-    "title": "Grades",
-    "sections": "Sections",
-    "mySections": "My Sections",
-    ...
-  },
-  "index": {
-    "appName": "Homework Supply",
-    "assignments": "Assignments",
-    ...
-  },
-  ...
-}
-```
+#### Phase2_Task2: Create components.json ✅
+- [x] Created `/public/locales/en/components.json` (9.2K)
+- [x] Organized by component names with nested structure
+- [x] Covers 80+ components from I18N_TRANSLATION_TODOS.md
+- [x] Validation: JSON syntax valid
 
-#### Phase2_Task2: Create components.json
+#### Decision: Merged into pages.json and components.json
+- ✅ profile.json → Merged into pages.json under "profile" key
+- ✅ privacy.json → Merged into pages.json under "privacy" key  
+- ✅ sections.json → Merged into pages.json under "sections" and "sectionDetail" keys
+- ✅ workbook.json → Merged into pages.json under "workbook" key
 
-Structure:
-```json
-{
-  "chatSidebar": {
-    "dropzone": "Drop files here...",
-    "errorRenderingMessage": "Error rendering message",
-    ...
-  },
-  "editor": {
-    "addCaption": "Add Caption",
-    ...
-  }
-}
-```
-
-#### Phase2_Task3: Create remaining namespace files
-- [ ] profile.json
-- [ ] privacy.json
-- [ ] sections.json
-- [ ] workbook.json
+**Rationale**: Fewer namespace files = simpler imports, better organization by feature rather than arbitrary file splits
 
 ### Phase 3: Populate Namespace Files ❌ NOT STARTED
 
@@ -207,12 +179,14 @@ tsc --noEmit --project tsconfig.json
 
 ## Implementation Status by File
 
-### Pages (0/10 complete)
+### Pages (1/10 complete)
+
+**Progress**: 7 of 169 strings completed (4%)
 
 | File | Strings | Status | Notes |
 |------|---------|--------|-------|
 | pages/_document.js | 1 | ❌ Not Started | lang attribute - may not need translation |
-| pages/grades.js | 7 | ❌ Not Started | |
+| pages/grades.js | 7 | ✅ Complete | Implemented with t('pages:grades.*') |
 | pages/index.js | 28 | ❌ Not Started | High priority - main dashboard |
 | pages/privacy.js | 54 | ❌ Not Started | Legal text - needs careful translation |
 | pages/profile.js | 20 | ❌ Not Started | |
