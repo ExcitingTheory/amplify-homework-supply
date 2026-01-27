@@ -9,15 +9,27 @@ interface ReverseResult {
   reverseTranslations: {
     claude: Record<string, any>;
     gpt: Record<string, any>;
-    gemini: Record<string, any>;
+    translategemma: Record<string, any>;
   };
   comparison: {
     key: string;
     original: string;
-    claude: string;
-    gpt: string;
-    gemini: string;
-    semanticMatch: boolean;
+    claude: {
+      byGPT: string;
+      byGemma: string;
+      pass: boolean;
+    };
+    gpt: {
+      byClaude: string;
+      byGemma: string;
+      pass: boolean;
+    };
+    translategemma: {
+      byClaude: string;
+      byGPT: string;
+      pass: boolean;
+    };
+    crossValidationPass: boolean;
     notes?: string;
   }[];
 }
@@ -56,8 +68,8 @@ async function reverseTranslateWithGPT(targetText: string, targetLang: string): 
   return JSON.parse(translationText);
 }
 
-async function reverseTranslateWithGemini(targetText: string, targetLang: string): Promise<Record<string, any>> {
-  const model = gemini.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+async function reverseTranslateWithGemma(targetText: string, targetLang: string): Promise<Record<string, any>> {
+  const model = gemini.getGenerativeModel({ model: 'gemma-3-12b-it' });
   
   const result = await model.generateContent(
     `Translate this ${targetLang} JSON back to English. Preserve structure and placeholders. Return only valid JSON:\n\n${targetText}`
@@ -156,25 +168,25 @@ async function reverseTranslateNamespace(
   // Read the 3 forward translations (each by a different model)
   const claudeForward = JSON.parse(fs.readFileSync(`${cacheDir}/${namespace}-claude.json`, 'utf-8'));
   const gptForward = JSON.parse(fs.readFileSync(`${cacheDir}/${namespace}-gpt.json`, 'utf-8'));
-  const geminiForward = JSON.parse(fs.readFileSync(`${cacheDir}/${namespace}-gemini.json`, 'utf-8'));
+  const gemmaForward = JSON.parse(fs.readFileSync(`${cacheDir}/${namespace}-translategemma.json`, 'utf-8'));
   
   // Cross-validation: reverse each translation with the OTHER 2 models
-  console.log(`   Reversing Claude's translation with GPT & Gemini...`);
-  const [claudeByGPT, claudeByGemini] = await Promise.all([
+  console.log(`   Reversing Claude's translation with GPT & Gemma...`);
+  const [claudeByGPT, claudeByGemma] = await Promise.all([
     reverseTranslateWithGPT(JSON.stringify(claudeForward), targetLang),
-    reverseTranslateWithGemini(JSON.stringify(claudeForward), targetLang)
+    reverseTranslateWithGemma(JSON.stringify(claudeForward), targetLang)
   ]);
   
-  console.log(`   Reversing GPT's translation with Claude & Gemini...`);
-  const [gptByClaude, gptByGemini] = await Promise.all([
+  console.log(`   Reversing GPT's translation with Claude & Gemma...`);
+  const [gptByClaude, gptByGemma] = await Promise.all([
     reverseTranslateWithClaude(JSON.stringify(gptForward), targetLang),
-    reverseTranslateWithGemini(JSON.stringify(gptForward), targetLang)
+    reverseTranslateWithGemma(JSON.stringify(gptForward), targetLang)
   ]);
   
-  console.log(`   Reversing Gemini's translation with Claude & GPT...`);
-  const [geminiByClaude, geminiByGPT] = await Promise.all([
-    reverseTranslateWithClaude(JSON.stringify(geminiForward), targetLang),
-    reverseTranslateWithGPT(JSON.stringify(geminiForward), targetLang)
+  console.log(`   Reversing Gemma's translation with Claude & GPT...`);
+  const [gemmaByClaude, gemmaByGPT] = await Promise.all([
+    reverseTranslateWithClaude(JSON.stringify(gemmaForward), targetLang),
+    reverseTranslateWithGPT(JSON.stringify(gemmaForward), targetLang)
   ]);
   
   // Save reverse translations with cross-validation metadata
@@ -183,21 +195,21 @@ async function reverseTranslateNamespace(
       forward: claudeForward,
       reversedBy: {
         gpt: claudeByGPT,
-        gemini: claudeByGemini
+        translategemma: claudeByGemma
       }
     },
     gpt: {
       forward: gptForward,
       reversedBy: {
         claude: gptByClaude,
-        gemini: gptByGemini
+        translategemma: gptByGemma
       }
     },
-    gemini: {
-      forward: geminiForward,
+    translategemma: {
+      forward: gemmaForward,
       reversedBy: {
-        claude: geminiByClaude,
-        gpt: geminiByGPT
+        claude: gemmaByClaude,
+        gpt: gemmaByGPT
       }
     }
   };
@@ -212,69 +224,73 @@ async function reverseTranslateNamespace(
   
   // Flatten all cross-validation reverse translations
   const claudeByGPTFlat = flattenObject(claudeByGPT);
-  const claudeByGeminiFlat = flattenObject(claudeByGemini);
+  const claudeByGemmaFlat = flattenObject(claudeByGemma);
   const gptByClaudeFlat = flattenObject(gptByClaude);
-  const gptByGeminiFlat = flattenObject(gptByGemini);
-  const geminiByClaudeFlat = flattenObject(geminiByClaude);
-  const geminiByGPTFlat = flattenObject(geminiByGPT);
+  const gptByGemmaFlat = flattenObject(gptByGemma);
+  const gemmaByClaudeFlat = flattenObject(gemmaByClaude);
+  const gemmaByGPTFlat = flattenObject(gemmaByGPT);
   
   // Cross-validation comparison: check each translation against both validators
   const comparison = Object.keys(originalFlat).map(key => {
     const orig = originalFlat[key];
     
-    // Claude's translation checked by GPT and Gemini
+    // Claude's translation checked by GPT and Gemma
     const claudeGPT = claudeByGPTFlat[key] || '[MISSING]';
-    const claudeGemini = claudeByGeminiFlat[key] || '[MISSING]';
+    const claudeGemma = claudeByGemmaFlat[key] || '[MISSING]';
     const claudeGPTMatch = semanticSimilarity(orig, claudeGPT);
-    const claudeGeminiMatch = semanticSimilarity(orig, claudeGemini);
-    const claudePass = claudeGPTMatch.match && claudeGeminiMatch.match;
+    const claudeGemmaMatch = semanticSimilarity(orig, claudeGemma);
+    const claudePass = claudeGPTMatch.match && claudeGemmaMatch.match;
     
-    // GPT's translation checked by Claude and Gemini
+    // GPT's translation checked by Claude and Gemma
     const gptClaude = gptByClaudeFlat[key] || '[MISSING]';
-    const gptGemini = gptByGeminiFlat[key] || '[MISSING]';
+    const gptGemma = gptByGemmaFlat[key] || '[MISSING]';
     const gptClaudeMatch = semanticSimilarity(orig, gptClaude);
-    const gptGeminiMatch = semanticSimilarity(orig, gptGemini);
-    const gptPass = gptClaudeMatch.match && gptGeminiMatch.match;
+    const gptGemmaMatch = semanticSimilarity(orig, gptGemma);
+    const gptPass = gptClaudeMatch.match && gptGemmaMatch.match;
     
-    // Gemini's translation checked by Claude and GPT
-    const geminiClaude = geminiByClaudeFlat[key] || '[MISSING]';
-    const geminiGPT = geminiByGPTFlat[key] || '[MISSING]';
-    const geminiClaudeMatch = semanticSimilarity(orig, geminiClaude);
-    const geminiGPTMatch = semanticSimilarity(orig, geminiGPT);
-    const geminiPass = geminiClaudeMatch.match && geminiGPTMatch.match;
+    // Gemma's translation checked by Claude and GPT
+    const gemmaClaude = gemmaByClaudeFlat[key] || '[MISSING]';
+    const gemmaGPT = gemmaByGPTFlat[key] || '[MISSING]';
+    const gemmaClaudeMatch = semanticSimilarity(orig, gemmaClaude);
+    const gemmaGPTMatch = semanticSimilarity(orig, gemmaGPT);
+    const gemmaPass = gemmaClaudeMatch.match && gemmaGPTMatch.match;
     
-    const allPass = claudePass && gptPass && geminiPass;
+    const allPass = claudePass && gptPass && gemmaPass;
     
     return {
       key,
       original: orig,
       claude: {
         byGPT: claudeGPT,
-        byGemini: claudeGemini,
+        byGemma: claudeGemma,
         pass: claudePass
       },
       gpt: {
         byClaude: gptClaude,
-        byGemini: gptGemini,
+        byGemma: gptGemma,
         pass: gptPass
       },
-      gemini: {
-        byClaude: geminiClaude,
-        byGPT: geminiGPT,
-        pass: geminiPass
+      translategemma: {
+        byClaude: gemmaClaude,
+        byGPT: gemmaGPT,
+        pass: gemmaPass
       },
       crossValidationPass: allPass,
       notes: !allPass ? [
-        !claudePass ? `Claude: ${claudeGPTMatch.notes || ''} ${claudeGeminiMatch.notes || ''}` : null,
-        !gptPass ? `GPT: ${gptClaudeMatch.notes || ''} ${gptGeminiMatch.notes || ''}` : null,
-        !geminiPass ? `Gemini: ${geminiClaudeMatch.notes || ''} ${geminiGPTMatch.notes || ''}` : null
+        !claudePass ? `Claude: ${claudeGPTMatch.notes || ''} ${claudeGemmaMatch.notes || ''}` : null,
+        !gptPass ? `GPT: ${gptClaudeMatch.notes || ''} ${gptGemmaMatch.notes || ''}` : null,
+        !gemmaPass ? `Gemma: ${gemmaClaudeMatch.notes || ''} ${gemmaGPTMatch.notes || ''}` : null
       ].filter(Boolean).join('; ') : undefined
     };
   });
   
   return {
     original,
-    reverseResults,
+    reverseTranslations: {
+      claude: claudeByGPT,
+      gpt: gptByClaude,
+      translategemma: gemmaByGPT
+    },
     comparison
   };
 }
@@ -301,12 +317,12 @@ async function main() {
   // Count how many translations passed for each model
   const claudePasses = result.comparison.filter(c => c.claude.pass).length;
   const gptPasses = result.comparison.filter(c => c.gpt.pass).length;
-  const geminiPasses = result.comparison.filter(c => c.gemini.pass).length;
+  const gemmaPasses = result.comparison.filter(c => c.translategemma.pass).length;
   
   console.log(`\n   Individual model validation:`);
-  console.log(`     Claude:  ${claudePasses}/${totalKeys} (${Math.round(claudePasses/totalKeys*100)}%) verified by GPT & Gemini`);
-  console.log(`     GPT:     ${gptPasses}/${totalKeys} (${Math.round(gptPasses/totalKeys*100)}%) verified by Claude & Gemini`);
-  console.log(`     Gemini:  ${geminiPasses}/${totalKeys} (${Math.round(geminiPasses/totalKeys*100)}%) verified by Claude & GPT`);
+  console.log(`     Claude:  ${claudePasses}/${totalKeys} (${Math.round(claudePasses/totalKeys*100)}%) verified by GPT & Gemma`);
+  console.log(`     GPT:     ${gptPasses}/${totalKeys} (${Math.round(gptPasses/totalKeys*100)}%) verified by Claude & Gemma`);
+  console.log(`     Gemma:  ${gemmaPasses}/${totalKeys} (${Math.round(gemmaPasses/totalKeys*100)}%) verified by Claude & GPT`);
   
   // Show failed cross-validations
   const failures = result.comparison.filter(c => !c.crossValidationPass);
@@ -319,19 +335,19 @@ async function main() {
       if (!f.claude.pass) {
         console.log(`     ❌ Claude's translation:`);
         console.log(`        By GPT:    "${f.claude.byGPT}"`);
-        console.log(`        By Gemini: "${f.claude.byGemini}"`);
+        console.log(`        By Gemma: "${f.claude.byGemma}"`);
       }
       
       if (!f.gpt.pass) {
         console.log(`     ❌ GPT's translation:`);
         console.log(`        By Claude: "${f.gpt.byClaude}"`);
-        console.log(`        By Gemini: "${f.gpt.byGemini}"`);
+        console.log(`        By Gemma: "${f.gpt.byGemma}"`);
       }
       
-      if (!f.gemini.pass) {
-        console.log(`     ❌ Gemini's translation:`);
-        console.log(`        By Claude: "${f.gemini.byClaude}"`);
-        console.log(`        By GPT:    "${f.gemini.byGPT}"`);
+      if (!f.translategemma.pass) {
+        console.log(`     ❌ Gemma's translation:`);
+        console.log(`        By Claude: "${f.translategemma.byClaude}"`);
+        console.log(`        By GPT:    "${f.translategemma.byGPT}"`);
       }
       
       if (f.notes) console.log(`     Notes: ${f.notes}`);

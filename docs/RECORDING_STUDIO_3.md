@@ -276,4 +276,4 @@ JSON Script
 6. **Real-time Preview**: Play any take instantly
 7. **Timeline Sync**: Visual representation matches JSON timing data
 
-Would you like me to create a working prototype of this editor as an interactive web application?AW
+Would you like me to create a working prototype of this editor as an interactive web application?

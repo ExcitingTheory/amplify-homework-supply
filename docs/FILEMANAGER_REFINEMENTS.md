@@ -1,4 +1,53 @@
-# FileManager2 Refinement Updates
+# FileManager2 - Complete UX Guide
+
+**Component**: FileManager2  
+**Location**: Editor3 toolbar and standalone modal  
+**Last Updated**: January 27, 2026
+
+## Evolution Summary
+
+### Phase 1: Redesign (Horizontal Tabs → Split-Panel Tree)
+- Replaced tab-based layout with tree view (35%) + preview panel (65%) split
+- Organized by Protection Level (PRIVATE/PUBLIC/PROTECTED) → File Type → Files
+- Added rich preview panel with metadata and vocabulary tabs
+- Tree view with expand/collapse functionality
+
+### Phase 2: Refinements (Completed)
+- Checkbox selection → Color-based selection (primary.50 background)
+- Inline action buttons → Context menu (⋮) for cleaner rows
+- Separate rename modal → Inline editable filenames
+- Static headers → Sticky, collapsible protection level headers
+
+---
+
+## Quick Reference
+
+### File Row Actions
+Click ⋮ menu icon for:
+- Insert into editor (images/audio only)
+- Download
+- Re-analyze (documents with analysis status)
+- Delete (styled in error color)
+
+### Inline Filename Editing
+- Click filename text to enter edit mode
+- Filename underlines on hover (primary color)
+- Enter to save, Escape to cancel, Blur to auto-save
+- Uses existing `handleFileNameUpdate` from useFileManager hook
+
+### Selection State
+- Click row → Background changes to primary.50
+- File icon changes to primary.main color
+- Smooth 0.2s transition for visual feedback
+
+### Protection Level Headers
+- Sticky positioning (remains visible when scrolling)
+- Click to expand/collapse file groups
+- Shows file count
+
+---
+
+## Detailed Changes
 
 ## Overview
 This document outlines the UX refinements made to FileManager2 based on user feedback. The changes focus on improving interaction patterns, reducing visual clutter, and enhancing file management workflows.

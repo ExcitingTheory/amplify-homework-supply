@@ -13,6 +13,7 @@ export default defineConfig({
       'src/**/*.test.ts',
       'amplify/functions/**/*.test.ts',
       '.storybook/**/*.test.js',
+      '.github/skills/**/*.test.ts',
     ],
     exclude: [
       'node_modules',

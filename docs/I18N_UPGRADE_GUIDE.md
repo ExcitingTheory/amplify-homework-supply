@@ -1,81 +1,74 @@
-Yes, there are several approaches to flag untranslated strings in a React application:
-
-## 1. **Development-time warnings**
-
-Most i18n libraries have built-in options to warn about missing translations:
-
-**react-i18next:**
-```javascript
-i18n.init({
-  saveMissing: true,
-  missingKeyHandler: (lng, ns, key, fallbackValue) => {
-    console.warn(`Missing translation: ${key} in ${lng}/${ns}`);
-  }
-});
-```
-
-**react-intl:**
-```javascript
-<IntlProvider 
-  messages={messages} 
-  locale={locale}
-  onError={(err) => {
-    if (err.code === 'MISSING_TRANSLATION') {
-      console.warn('Missing translation:', err.message);
-    }
-  }}
-/>
-```
-
-## 2. **Visual flagging in development**
-
-You can make untranslated strings visually obvious:
-
-```javascript
-// Wrap your translation function
-const t = (key) => {
-  const translation = i18n.t(key);
-  if (process.env.NODE_ENV === 'development' && translation === key) {
-    return `🚨 ${key} 🚨`; // Makes missing translations obvious
-  }
-  return translation;
-};
-```
-
-## 3. **ESLint plugin**
-
-Use `eslint-plugin-i18n-text` or `eslint-plugin-i18next` to catch hardcoded strings during development.
-
-## 4. **Build-time checks**
-
-Create a script that compares your translation files against strings used in your code, then run it as part of your CI/CD pipeline.
-
-## 5. **Runtime monitoring**
-
-In production, you can log missing translations to a monitoring service:
-
-```javascript
-missingKeyHandler: (lng, ns, key) => {
-  // Send to analytics/monitoring
-  trackEvent('missing_translation', { key, language: lng });
-}
-```
-
-Which i18n library are you using? I can provide more specific implementation details.
-
-
 # Internationalization (i18n) Upgrade Guide
 
-This guide outlines the step-by-step process for adding internationalization support to the Homework Supply application.
+**Status**: 40% Complete (Phases 1-2 ✅, Phase 3 Partial)  
+**Last Updated**: January 27, 2026
+
+## ✅ Completed
+
+### Phase 1: ESLint Detection ✅
+- `eslint-plugin-i18next` installed and configured
+- NPM scripts: `npm run lint:translate`, `npm run lint:translate:report`
+- Mode: `jsx-only` (detects hardcoded strings in JSX/TSX only)
+
+### Phase 2: Translation Files ✅
+- Created `public/locales/{en,ja,de,es,fr,zh}/` directories (6 languages)
+- Populated 8 translation namespaces: auth, chat, common, editor, errors, grades, stories, units
+- Added extensive metadata: context, component locations, usage, impact, tone
+- English translations complete: 989+ lines in common.json
+
+### Phase 3: Dependencies (Partial) ⚠️
+- ✅ `react-i18next` v14.1.2 installed
+- ❌ `i18next` - NOT installed
+- ❌ `next-i18next` - NOT installed
+- ❌ i18n configuration file - NOT created
+- ❌ `_app.js` provider integration - NOT done
+
+## ⏳ TODO: Phases 4-8
+- Install remaining packages: `i18next`, `next-i18next`
+- Create i18n config file
+- Update `_app.js` with i18n provider
+- Replace hardcoded strings in components with `useTranslation()` hooks
+- Test and validate translations
+
+---
+
+## Quick Reference
+
+### Run Detection
+```bash
+npm run lint:translate          # Show all untranslated strings in terminal
+npm run lint:translate:report   # Generate i18n-report.txt file
+```
+
+### What Gets Flagged
+✅ **WILL be flagged** (needs translation):
+- Button labels: `<Button>Save</Button>`
+- Typography text: `<Typography>Welcome</Typography>`
+- Form labels: `<TextField label="Username" />`
+- Alerts: `<Alert>Error occurred</Alert>`
+- Conditional text: `{isLoading ? "Loading..." : "Complete"}`
+
+❌ **Will NOT be flagged** (automatically excluded):
+- className values, style values, URLs/paths
+- Constants outside JSX
+- Console logs and debug messages
+- Technical attribute values
+
+---
 
 ## Overview
 
+This guide outlines the step-by-step process for adding internationalization support to the Homework Supply application.
+
+## Implementation Phases
+
 The application currently has hardcoded strings throughout the codebase. This guide will help you:
-1. Set up i18n infrastructure using `next-i18next` and `react-i18next`
-2. Detect all untranslated strings using ESLint
-3. Systematically replace hardcoded strings with translation keys
-4. Organize and manage translation files
-5. Test and validate translations
+1. ✅ Set up ESLint detection
+2. ✅ Create translation file structure
+3. ⚠️ Install i18n dependencies (partial)
+4. ⏳ Configure i18n infrastructure
+5. ⏳ Replace hardcoded strings with translation keys
+6. ⏳ Test and validate translations
 
 ## Current State
 
