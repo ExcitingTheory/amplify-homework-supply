@@ -12,6 +12,7 @@
  */
 
 import { MOCK_MEDIA } from './mockMediaData';
+import { seedMockUnit, seedMockGrade, seedMockSections, seedMockAssignments } from './aws-amplify-datastore';
 
 /**
  * Mock Units for Index Page
@@ -616,8 +617,6 @@ export const emptyDashboardData = {
  * Helper function to seed index page data in Storybook
  */
 export function seedIndexPageData(scenario = 'student') {
-  const { seedMockUnit, seedMockGrade, seedMockSections, seedMockAssignments } = require('./aws-amplify-datastore');
-  
   let data;
   switch (scenario) {
     case 'student':

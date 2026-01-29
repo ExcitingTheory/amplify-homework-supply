@@ -1,6 +1,12 @@
 import { Meta } from '@storybook/addon-docs/blocks';
 
-<Meta title="Welcome" />
+<Meta title="Welcome" parameters={{
+  layout: 'padded',
+  options: {
+    showPanel: true,
+    showToolbar: true,
+  },
+}} />
 
 <div style={{ 
   padding: '2rem',

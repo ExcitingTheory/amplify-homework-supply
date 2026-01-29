@@ -1,6 +1,7 @@
 {
   "name": "storybook-addon-translation-mode",
   "version": "1.0.0",
+  "type": "module",
   "description": "In-context translation editing for Storybook",
   "main": "index.js",
   "keywords": ["storybook", "i18n", "translation"],

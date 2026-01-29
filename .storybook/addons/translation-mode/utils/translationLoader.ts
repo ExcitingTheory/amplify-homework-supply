@@ -6,6 +6,7 @@
 type TranslationData = Record<string, any>;
 
 const translationCache: Map<string, TranslationData> = new Map();
+const missingFiles: Set<string> = new Set();
 
 /**
  * Load a translation file for a specific language and namespace
@@ -24,17 +25,37 @@ export async function loadTranslation(
     return translationCache.get(cacheKey)!;
   }
   
+  // Check if we already know this file is missing
+  if (missingFiles.has(cacheKey)) {
+    return null;
+  }
+  
   try {
-    // Dynamically import the translation file from public/locales
-    const module = await import(`../../../../public/locales/${language}/${namespace}.json`);
-    const data = module.default || module;
+    // Dynamically import the translation file using fetch
+    // This works in both manager and preview contexts
+    const response = await fetch(`/locales/${language}/${namespace}.json`);
+    
+    if (!response.ok) {
+      // Mark as missing to avoid repeated warnings
+      missingFiles.add(cacheKey);
+      
+      // Only warn in development, not for every missing translation
+      if (process.env.NODE_ENV === 'development' && language !== 'en') {
+        console.debug(`[i18n] Translation not yet available: ${language}/${namespace} (will fall back to English)`);
+      }
+      return null;
+    }
+    
+    const data = await response.json();
     
     // Cache the result
     translationCache.set(cacheKey, data);
     
     return data;
   } catch (error) {
-    console.warn(`Failed to load translation: ${language}/${namespace}`, error);
+    // Mark as missing to avoid repeated errors
+    missingFiles.add(cacheKey);
+    console.error(`[i18n] Failed to load translation: ${language}/${namespace}`, error);
     return null;
   }
 }

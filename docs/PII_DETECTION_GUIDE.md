@@ -11,6 +11,7 @@ The PII (Personally Identifiable Information) detection and scrubbing system pro
 ### High-Priority (Always Detected)
 - ✅ **Email addresses**: `john.doe@example.com`
 - ✅ **Phone numbers**: `(555) 123-4567`, `555-123-4567`, `+1 555 123 4567`
+
 - ✅ **SSN**: `123-45-6789`
 - ✅ **Credit card numbers**: `4532 1234 5678 9010`
 - ✅ **IP addresses**: `192.168.1.1`

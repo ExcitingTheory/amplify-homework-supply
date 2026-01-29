@@ -1,5 +1,11 @@
 import { addons, type State } from 'storybook/manager-api';
 
+// Import custom onboarding addon
+import './code/myOnboarding/manager';
+
+// Import translation-mode addon after onboarding to ensure proper loading order
+import './addons/translation-mode/manager';
+
 addons.setConfig({
   navSize: 300,
   bottomPanelHeight: 300,

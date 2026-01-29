@@ -1,14 +1,3 @@
-/**
- * @fileoverview Storybook stories for Header component
- * 
- * Example header stories demonstrating:
- * - Logged in user state
- * - Logged out user state
- * - Authentication action handlers (login, logout, create account)
- * 
- * @module stories/Header.stories
- */
-
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
 import { fn } from 'storybook/test';
@@ -16,7 +5,7 @@ import { fn } from 'storybook/test';
 import { Header } from './Header';
 
 const meta = {
-  title: '🧩 Components/Header (Example)',
+  title: 'Example/Header',
   component: Header,
   // This component will have an automatically generated Autodocs entry: https://storybook.js.org/docs/writing-docs/autodocs
   tags: ['autodocs'],

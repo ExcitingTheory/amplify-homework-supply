@@ -166,6 +166,11 @@ const preview = {
         state: 'open',
       },
     },
+    // Enable toolbar and panel by default for all stories and docs
+    options: {
+      showPanel: true,
+      showToolbar: true,
+    },
     // Background options for testing
     backgrounds: {
       default: 'light',
@@ -217,9 +222,12 @@ const preview = {
       const disableDictionaryContext = context?.parameters?.disableDictionaryContext || false;
       
       // Get router configuration from story parameters
-      const routerParams = context?.parameters?.nextRouter || {
-        
-      };
+      // Support both nextRouter and nextjs.router for compatibility
+      let routerParams = context?.parameters?.nextRouter;
+      if (!routerParams && context?.parameters?.nextjs?.router) {
+        routerParams = context.parameters.nextjs.router;
+      }
+      routerParams = routerParams || {};
       const mockRouter = createMockRouter(routerParams);
       
       return (

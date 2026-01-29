@@ -32,7 +32,7 @@ import { post } from 'aws-amplify/api';
 
 import AIContentSuggestion from '../components/AIContentSuggestion';
 import UnitContext from '../../../context/unitContext';
-import { AIFeedback, AIFeedbackType, AIContentType } from '../../../models';
+import { AIFeedback, AiFeedbackType, AiContentType } from '../../../models';
 
 import { fetchAuthSession } from 'aws-amplify/auth';
 

@@ -1,9 +1,15 @@
 import { Meta } from '@storybook/addon-docs/blocks';
-import OnboardingGuide from '../.storybook/components/OnboardingGuide';
-import KeyboardShortcuts from '../.storybook/components/KeyboardShortcuts';
-import TutorialBanner from '../.storybook/components/TutorialBanner';
+import OnboardingGuide from '@storybook-components/OnboardingGuide';
+import KeyboardShortcuts from '@storybook-components/KeyboardShortcuts';
+import TutorialBanner from '@storybook-components/TutorialBanner';
 
-<Meta title="Onboarding" />
+<Meta title="Getting Started/Onboarding" parameters={{
+  layout: 'padded',
+  options: {
+    showPanel: true,
+    showToolbar: true,
+  },
+}} />
 
 <TutorialBanner />
 

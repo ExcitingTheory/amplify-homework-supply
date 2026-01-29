@@ -36,7 +36,7 @@ Discovers all `*.stories.*` files and counts variants:
 
 ```bash
 # Finds stories in src/ and pages/
-find src pages -name "*.stories.*" -type f
+npx tsx .github/skills/storybook-validation/scripts/generate-story-inventory.ts
 ```
 
 **Output**: `docs/STORYBOOK_INVENTORY.md` with story catalog
@@ -79,6 +79,8 @@ Tests actual story rendering:
 4. Runs `@storybook/addon-a11y` checks
 5. Optionally runs Chromatic for visual regression
 
+Note: This phase requires a running Storybook instance and additional testing dependencies.
+
 **Output**: Console error catalog, a11y violations
 
 ### Phase 5: Deep Dives (3-7 minutes)
@@ -111,8 +113,7 @@ interface Message {
 Runs validation tests:
 
 ```bash
-npm run test -- validate-mocks
-npm run test -- story-rendering
+npx vitest run .github/skills/storybook-validation/test/validate-mocks.test.ts
 ```
 
 ### Phase 7: Documentation (1-2 minutes)
@@ -299,9 +300,14 @@ export const Default = () => (
 
 ```yaml
 # .github/workflows/storybook-validation.yml
-- name: Validate Storybook
-  run: |
-    npm run storybook:validate
+- name: Generate story inventory
+  run: npx tsx .github/skills/storybook-validation/scripts/generate-story-inventory.ts
+
+- name: Validate mock data schemas
+  run: npx vitest run .github/skills/storybook-validation/test/validate-mocks.test.ts
+
+- name: Validate component prop types
+  run: npx tsx .github/skills/storybook-validation/scripts/validate-component-mocks.ts || true
 ```
 
 ### Pre-commit Hook
@@ -322,9 +328,10 @@ export const Default = () => (
 
 ## Implementation
 
-**Source Code**: `src/agent-skills/storybook-validation.ts`
-**Tests**: `test/agent-skills/storybook-validation.test.ts`
-**Manual Workflow**: `.github/prompts/storybook-testing-workflow.prompt.md`
+**Source Code**: `.github/skills/storybook-validation/storybook-validation.ts`
+**Tests**: `.github/skills/storybook-validation/storybook-validation.test.ts`
+**Scripts**: `.github/skills/storybook-validation/scripts/`
+**Schemas**: `.github/skills/storybook-validation/schemas/`
 
 ## Success Criteria
 

@@ -1,140 +1,63 @@
-import type { StorybookConfig } from '@storybook/nextjs';
-import path, { dirname } from 'path';
+import type { StorybookConfig } from '@storybook/nextjs-vite';
+import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 const config: StorybookConfig = {
   "stories": [
-    "../src/stories/Welcome.mdx", 
-    "../src/stories/GettingStarted.mdx",
-    "../src/stories/Onboarding.mdx",
-    "../src/stories/TechnicalOverview.mdx",
+    "../src/**/*.mdx",
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)",
-    "../pages/**/*.stories.@(js|jsx|mjs|ts|tsx)",
-    "../.storybook/**/*.stories.@(js|jsx|mjs|ts|tsx)"
+    "./TranslationMode.stories.tsx"
   ],
   "addons": [
     "@chromatic-com/storybook",
     "@storybook/addon-vitest",
     "@storybook/addon-a11y",
-    "@storybook/addon-links",
-    "@storybook/addon-docs",
-    // "@storybook/addon-onboarding" // Disabled - using custom branding instead
-    path.resolve(__dirname, 'code/myOnboarding/preset.js'),
-    path.resolve(__dirname, 'addons/translation-mode/preset.js')
+    "@storybook/addon-docs"
   ],
-  "framework": {
-    name: "@storybook/nextjs",
-    options: {},
-  },
+  "framework": "@storybook/nextjs-vite",
   "staticDirs": [
-    "../public",
+    { from: "../public", to: "/" },
     { from: "../mocks", to: "/story-mocks" }
   ],
   
-  typescript: {
-    reactDocgen: 'react-docgen-typescript',
-    reactDocgenTypescriptOptions: {
-      shouldExtractLiteralValuesFromEnum: true,
-      shouldRemoveUndefinedFromOptional: true,
-      propFilter: (prop) => (prop.parent ? !/node_modules/.test(prop.parent.fileName) : true),
-    },
-  },
-  
-  core: {
-    disableTelemetry: true,
-  },
-  
-  async webpackFinal(config) {
-    // Get absolute path to storybook mocks directory  
-    const mocksDir = path.resolve(process.cwd(), '.storybook/__mocks__');
-    const storybookComponentsDir = path.resolve(process.cwd(), '.storybook/components');
-    
-    // Configure externals to prevent bundling Node.js built-in modules and server-side dependencies
-    config.externals = {
-      // ...config.externals,
-      'child_process': 'commonjs child_process',
-      'worker_threads': 'commonjs worker_threads',
-      'inspector': 'commonjs inspector',
-      '@swc/wasm': 'commonjs @swc/wasm',
-      'uglify-js': 'commonjs uglify-js',
-      'esbuild': 'commonjs esbuild',
-      'webpack': 'commonjs webpack',
-      'terser-webpack-plugin': 'commonjs terser-webpack-plugin',
-      'jest-worker': 'commonjs jest-worker',
-    };
-    
-    // Add AWS Amplify mock aliases
-    const mockAliases = {
-      'aws-amplify$': path.join(mocksDir, 'aws-amplify.js'),
-      'aws-amplify/data': path.join(mocksDir, 'aws-amplify-data.js'),
-      'aws-amplify/datastore': path.join(mocksDir, 'aws-amplify-datastore.js'),
-      'aws-amplify/auth': path.join(mocksDir, 'aws-amplify-auth.js'),
-      'aws-amplify/storage': path.join(mocksDir, 'aws-amplify-storage.js'),
-      'aws-amplify/utils': path.join(mocksDir, 'aws-amplify-utils.js'),
-      'aws-amplify/api': path.join(mocksDir, 'aws-amplify-api.js'),
-      'ai/react': path.join(mocksDir, 'ai-react.js'),
-      '../amplifyconfiguration.json': path.join(mocksDir, 'amplifyconfig.js'),
-      './amplifyconfiguration.json': path.join(mocksDir, 'amplifyconfig.js'),
-      'next/router': path.join(mocksDir, 'next-router.js'),
-      // Mock the amplifyClient singleton utility
-      '@/utils/amplifyClient': path.join(mocksDir, 'amplifyClient.js'),
-      '../utils/amplifyClient': path.join(mocksDir, 'amplifyClient.js'),
-      '../../utils/amplifyClient': path.join(mocksDir, 'amplifyClient.js'),
-      '../../../utils/amplifyClient': path.join(mocksDir, 'amplifyClient.js'),
-    };
-    
-    if (!config.resolve) {
-      config.resolve = {};
-    }
-    if (!config.resolve.alias) {
-      config.resolve.alias = {};
-    }
-    
-    // Add alias for .storybook/components directory
+  async viteFinal(config) {
+    // Configure path aliases for component imports
+    config.resolve = config.resolve || {};
     config.resolve.alias = {
-      ...mockAliases,
-      '../.storybook/components': storybookComponentsDir,
       ...config.resolve.alias,
+      '@storybook-components': path.resolve(__dirname, './components'),
+      '@storybook-mocks': path.resolve(__dirname, './__mocks__'),
+      // Mock AWS Amplify modules for Storybook
+      'aws-amplify/data': path.resolve(__dirname, './__mocks__/aws-amplify-data.js'),
+      'aws-amplify/auth': path.resolve(__dirname, './__mocks__/aws-amplify-auth.js'),
+      'aws-amplify/storage': path.resolve(__dirname, './__mocks__/aws-amplify-storage.js'),
+      'aws-amplify/api': path.resolve(__dirname, './__mocks__/aws-amplify-api.js'),
+      'aws-amplify/utils': path.resolve(__dirname, './__mocks__/aws-amplify-utils.js'),
+      // Mock Amplify utilities that use the real client
+      '@/utils/amplifyClient': path.resolve(__dirname, './__mocks__/amplifyClient.js'),
+      '../utils/amplifyClient': path.resolve(__dirname, './__mocks__/amplifyClient.js'),
     };
     
-    // Add fallback for Node.js core modules
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      path: false,
-      crypto: false,
-      stream: false,
-      http: false,
-      https: false,
-      zlib: false,
-      child_process: false,
-      worker_threads: false,
-      inspector: false,
-      module: false,
+    // Define Node.js globals for browser environment to fix Next.js compatibility
+    if (!config.define) {
+      config.define = {};
+    }
+    config.define['__dirname'] = '"/app"';
+    config.define['process.env.NODE_ENV'] = '"development"';
+    
+    // Add global polyfill
+    if (!config.optimizeDeps) {
+      config.optimizeDeps = {};
+    }
+    config.optimizeDeps.esbuildOptions = {
+      ...config.optimizeDeps.esbuildOptions,
+      define: {
+        global: 'globalThis',
+      },
     };
-    
-    // Ensure node_modules are resolved
-    config.resolve.modules = [
-      ...(config.resolve.modules || []),
-      'node_modules',
-      path.resolve(process.cwd(), 'node_modules'),
-    ];
-    
-    // Add ignore plugin to suppress warnings about optional dependencies
-    config.ignoreWarnings = [
-      /Critical dependency: the request of a dependency is an expression/,
-      /Can't resolve '(child_process|worker_threads|inspector)'/,
-      /Can't resolve '@swc/,
-      /Can't resolve 'uglify-js'/,
-      /Module not found.*@swc/,
-    ];
-    
-    console.log('[Storybook Config] Mock aliases configured:', Object.keys(mockAliases));
-    console.log('[Storybook Config] Mocks directory:', mocksDir);
-    console.log('[Storybook Config] Storybook components:', storybookComponentsDir);
     
     return config;
   }

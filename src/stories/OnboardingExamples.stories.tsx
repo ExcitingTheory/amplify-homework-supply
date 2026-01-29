@@ -122,18 +122,49 @@ export const DisplayOnboardingStatus: StoryObj = {
   render: () => {
     const status = useOnboardingStatus();
     const [stats, setStats] = useState<any>(null);
+    const emitter = getOnboardingEmitter();
+    const personaRef = React.useRef(status.persona);
 
-    useEffect(() => {
-      if (status.persona) {
-        const tasks = getTasksForPersona(status.persona);
+    // Keep persona ref up to date
+    React.useEffect(() => {
+      personaRef.current = status.persona;
+    }, [status.persona]);
+
+    // Function to recalculate stats - uses ref to avoid dependency on status functions
+    const updateStats = React.useCallback(() => {
+      const currentPersona = personaRef.current;
+      if (currentPersona) {
+        const tasks = getTasksForPersona(currentPersona);
+        const completionPercentage = emitter.getCompletionPercentage(currentPersona, tasks);
+        const completedTasks = tasks.filter((t) => emitter.isTaskCompleted(t.id, currentPersona));
+        
         setStats({
-          persona: status.persona,
-          completionPercentage: status.getCompletionPercentage(tasks),
-          tasks: tasks,
-          completedTasks: tasks.filter((t) => status.isCompleted(t.id)),
+          persona: currentPersona,
+          completionPercentage,
+          tasks,
+          completedTasks,
         });
       }
-    }, [status]);
+    }, [emitter]); // Only depend on emitter which is stable
+
+    // Initial calculation when persona changes
+    useEffect(() => {
+      if (status.persona) {
+        updateStats();
+      } else {
+        setStats(null);
+      }
+    }, [status.persona, updateStats]);
+
+    // Subscribe to task completion events  
+    useEffect(() => {
+      const unsubscribe = emitter.on((event) => {
+        if (event.type === 'task-completed' || event.type === 'persona-selected') {
+          updateStats();
+        }
+      });
+      return unsubscribe;
+    }, [emitter, updateStats]);
 
     if (!stats) {
       return (

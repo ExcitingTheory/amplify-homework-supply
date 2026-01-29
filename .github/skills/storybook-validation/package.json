@@ -1,0 +1,34 @@
+{
+  "name": "@skills/storybook-validation",
+  "version": "1.0.0",
+  "description": "Self-contained skill for validating Storybook stories, mock data structures, and component rendering",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "inventory": "tsx scripts/generate-story-inventory.ts",
+    "validate:mocks": "vitest run test/validate-mocks.test.ts",
+    "validate:components": "tsx scripts/validate-component-mocks.ts",
+    "validate:all": "npm run inventory && npm run validate:mocks && npm run validate:components",
+    "test": "vitest run storybook-validation.test.ts"
+  },
+  "dependencies": {
+    "glob": "^13.0.0",
+    "typescript": "^5.9.3",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.30",
+    "tsx": "^4.21.0",
+    "vitest": "^4.0.17"
+  },
+  "keywords": [
+    "storybook",
+    "validation",
+    "testing",
+    "mock-data",
+    "typescript",
+    "skill"
+  ],
+  "author": "Homework Supply Team",
+  "license": "MIT"
+}

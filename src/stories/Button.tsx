@@ -1,12 +1,3 @@
-/**
- * @fileoverview Button - Primary UI button component
- * 
- * Storybook example button component with multiple size and style variants.
- * Demonstrates component API design with TypeScript interfaces.
- * 
- * @module stories/Button
- */
-
 import './button.css';
 
 export interface ButtonProps {

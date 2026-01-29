@@ -14,10 +14,10 @@ Japanese language learning platform built with Next.js, AWS Amplify Gen 1, and O
 
 **React Contexts for Shared State**: The app heavily uses React Context to prevent DataStore subscription duplication. Core contexts:
 - `UnitContext` ([src/context/unitContext.js](src/context/unitContext.js)) - Unit data, dictionary, files, question bank, grading
-- `SectionContext` - Class sections and assignments  
-- `FilesContext` - File management and S3 operations
-- `DictionaryContext` - Vocabulary words and questions
-- `SettingsContext` - User settings
+- `SectionContext` ([src/context/sectionContext.js](src/context/sectionContext.js)) - Class sections and assignments  
+- `FilesContext` ([src/context/filesContext.js](src/context/filesContext.js)) - File management and S3 operations
+- `DictionaryContext` ([src/context/dictionaryContext.js](src/context/dictionaryContext.js)) - Vocabulary words and questions
+- `SettingsContext` ([src/context/settingsContext.js](src/context/settingsContext.js)) - User settings
 
 **Always use existing contexts** instead of creating new DataStore subscriptions. Import and consume via `React.useContext()`.
 
@@ -273,7 +273,7 @@ Component development uses Storybook with mocked AWS services:
 
 ## Next.js /api Routes - DO NOT USE
 
-- Amplify Gen 1 uses Lambda functions for backend logic, and if we need rest we will use Express style routes in Lambda functions under `amplify/backend/function/` with `aws-serverless-express` and API Gateway. Do not create new Next.js `/api` routes.
+- Amplify Gen 1 and 2 uses Lambda functions for backend logic, and if we need rest we will use Express style routes in Lambda functions under `amplify/backend/function/` with `aws-serverless-express` and API Gateway. Do not create new Next.js `/api` routes.
 - Instead use the Amplify.api REST client or GraphQL client from the frontend to call Lambda functions or GraphQL API.
 
 

@@ -15,11 +15,7 @@ import {
     COMMAND_PRIORITY_CRITICAL,
     COMMAND_PRIORITY_HIGH,
     COMMAND_PRIORITY_LOW,
-    GridSelection,
     KEY_ESCAPE_COMMAND,
-    LexicalEditor,
-    NodeSelection,
-    RangeSelection,
     SELECTION_CHANGE_COMMAND,
 } from 'lexical';
 import { Dispatch, useCallback, useEffect, useMemo, useRef, useState } from 'react';

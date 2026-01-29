@@ -8,7 +8,6 @@ import {
   Checkbox,
   FormControlLabel,
   LinearProgress,
-  Paper,
   Stack,
   Tab,
   Tabs,
@@ -16,7 +15,10 @@ import {
   Typography,
   Divider,
   Chip,
+  ThemeProvider,
+  createTheme,
 } from '@mui/material';
+import { styled, keyframes } from '@mui/material/styles';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CircleIcon from '@mui/icons-material/Circle';
 import PersonIcon from '@mui/icons-material/Person';
@@ -27,6 +29,40 @@ import { getOnboardingEmitter, UserPersona } from '../code/onboarding-events';
 import { ONBOARDING_TASKS, getTasksForPersona, getTasksByCategory } from '../code/onboarding-tasks';
 
 import './OnboardingPanel.css';
+
+// Force dark theme for panel to match Storybook UI
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    background: {
+      paper: '#1a1a1a',
+      default: '#1a1a1a',
+    },
+    text: {
+      primary: '#e0e0e0',
+      secondary: '#999999',
+    },
+  },
+});
+
+const CardOutline = styled('div')({
+  position: 'relative',
+  width: '100%',
+  padding: 1,
+  overflow: 'hidden',
+  backgroundColor: '#1a1a1a',
+  borderRadius: 4,
+  boxShadow: 'inset 0 0 0 1px #3d3d3d',
+});
+
+const CardContentWrapper = styled('div')({
+  borderRadius: 4,
+  backgroundColor: '#1a1a1a',
+  position: 'relative',
+  height: '100%',
+  overflow: 'auto',
+  color: '#e0e0e0',
+});
 
 interface PersonaOption {
   id: UserPersona;
@@ -135,50 +171,43 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   };
 
   const renderPersonaSelection = () => (
-    <Paper className="onboarding-panel" sx={{ bgcolor: 'background.paper' }}>
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'text.primary' }}>
-          Welcome to Homework Supply
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-          Select your role to see personalized onboarding tasks
-        </Typography>
+    <>
+      <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'text.primary', p: 3, pb: 0 }}>
+        Welcome to Homework Supply
+      </Typography>
+      <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary', px: 3 }}>
+        Select your role to see personalized onboarding tasks
+      </Typography>
 
-        <Stack spacing={2}>
-          {PERSONAS.map((persona) => (
-            <Card
-              key={persona.id}
-              sx={{
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                borderLeft: `4px solid ${persona.color}`,
-                '&:hover': {
-                  boxShadow: 3,
-                },
-              }}
-              onClick={() => handlePersonaSelect(persona.id)}
-            >
-              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ color: persona.color, fontSize: 32 }}>{persona.icon}</Box>
-                <Box>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                    {persona.label}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                    Click to start onboarding
-                  </Typography>
-                </Box>
-              </CardContent>
-            </Card>
-          ))}
-        </Stack>
-
-        <Divider sx={{ my: 3 }} />
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-          You can switch roles anytime by selecting a different persona below.
-        </Typography>
-      </Box>
-    </Paper>
+      <Stack spacing={2} sx={{ px: 3, pb: 3 }}>
+        {PERSONAS.map((persona) => (
+          <Card
+            key={persona.id}
+            sx={{
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              borderLeft: `4px solid ${persona.color}`,
+              '&:hover': {
+                boxShadow: 3,
+              },
+            }}
+            onClick={() => handlePersonaSelect(persona.id)}
+          >
+            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ color: persona.color, fontSize: 32 }}>{persona.icon}</Box>
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                  {persona.label}
+                </Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  Click to start onboarding
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        ))}
+      </Stack>
+    </>
   );
 
   const renderTaskView = () => {
@@ -188,10 +217,9 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     const categories = Object.keys(tasksByCategory);
 
     return (
-    <Paper className="onboarding-panel" sx={{ bgcolor: 'background.paper' }}>
-      <Box sx={{ p: 2 }}>
+      <>
         {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, p: 2, pb: 0 }}>
           <Box sx={{ color: persona.color, fontSize: 24 }}>{persona.icon}</Box>
           <Box sx={{ flex: 1 }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
@@ -217,14 +245,14 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
         <LinearProgress
           variant="determinate"
           value={completionPercentage}
-          sx={{ mb: 2, height: 8, borderRadius: 1 }}
+          sx={{ mb: 2, height: 8, borderRadius: 1, mx: 2 }}
         />
-        <Typography variant="caption" sx={{ color: 'text.secondary', mb: 2, display: 'block' }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary', mb: 2, display: 'block', px: 2 }}>
           {completionPercentage}% Complete
         </Typography>
 
         {/* Quick Stats */}
-        <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+        <Stack direction="row" spacing={1} sx={{ mb: 2, px: 2 }}>
           <Chip
             label={`${completedTasks.size} Completed`}
             icon={<CheckCircleIcon />}
@@ -241,7 +269,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
           />
         </Stack>
 
-        <Divider sx={{ mb: 2 }} />
+        <Divider sx={{ mb: 2, mx: 2 }} />
 
         {/* Task Tabs by Category */}
         <Tabs
@@ -249,7 +277,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
           onChange={(e, v) => setTabValue(v)}
           variant="scrollable"
           scrollButtons="auto"
-          sx={{ mb: 2, minHeight: 36 }}
+          sx={{ mb: 2, minHeight: 36, px: 2 }}
         >
           {categories.map((category, index) => (
             <Tab
@@ -261,7 +289,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
         </Tabs>
 
         {/* Task List for Current Tab */}
-        <Box sx={{ mb: 2 }}>
+        <Box sx={{ mb: 2, px: 2 }}>
           {categories.length > 0 && (
             <Stack spacing={1.5}>
               {tasksByCategory[categories[tabValue]].map((task) => {
@@ -270,8 +298,6 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                   <Card
                     key={task.id}
                     sx={{
-                      opacity: isCompleted ? 0.7 : 1,
-                      transition: 'all 0.2s ease',
                       backgroundColor: isCompleted ? 'rgba(76, 175, 80, 0.05)' : 'transparent',
                     }}
                   >
@@ -300,16 +326,6 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                           >
                             {task.description}
                           </Typography>
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              color: 'text.disabled',
-                              display: 'block',
-                              mt: 0.5,
-                            }}
-                          >
-                            ⏱ {Math.round(task.estimatedTime / 60)} mins
-                          </Typography>
                         </Box>
                       </Box>
                     </CardContent>
@@ -320,35 +336,31 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
           )}
         </Box>
 
-        <Divider sx={{ my: 2 }} />
-
-        {/* Actions */}
-        <Stack direction="row" spacing={1}>
+        {/* Reset Button */}
+        <Divider sx={{ mb: 2, mx: 2 }} />
+        <Box sx={{ px: 2, pb: 2 }}>
           <Button
-            size="small"
             variant="outlined"
+            color="error"
+            size="small"
             onClick={handleResetProgress}
-            fullWidth
             sx={{ textTransform: 'none' }}
           >
             Reset Progress
           </Button>
-        </Stack>
-      </Box>
-    </Paper>
+        </Box>
+      </>
     );
   };
 
   return (
-    <Box sx={{ 
-      height: '100%',
-      bgcolor: '#292929', // Storybook dark theme background
-      border: '1px solid #3d3d3d', // Storybook border color
-      borderRadius: 1,
-      overflow: 'hidden',
-    }}>
-      {renderContent()}
-    </Box>
+    <ThemeProvider theme={darkTheme}>
+      <CardOutline>
+        <CardContentWrapper>
+          {renderContent()}
+        </CardContentWrapper>
+      </CardOutline>
+    </ThemeProvider>
   );
 };
 

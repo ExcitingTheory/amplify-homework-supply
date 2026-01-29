@@ -1,4 +1,3 @@
-import {LexicalEditor} from 'lexical';
 import React, {useState} from 'react';
 
 import {

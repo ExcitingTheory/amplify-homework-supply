@@ -3,6 +3,7 @@ import { Box, Button, Typography, TextField, Alert } from '@mui/material';
 import { TranslationOverlay } from './TranslationOverlay';
 import { useContext } from 'react';
 import { useGlobals } from 'storybook/preview-api';
+import { useTranslation } from 'react-i18next';
 
 export interface TranslationDemoProps {
   namespace?: string;
@@ -14,6 +15,8 @@ export interface TranslationDemoProps {
  * This demo uses actual translation keys from the auth namespace to showcase rich metadata
  */
 export const TranslationDemo: React.FC<TranslationDemoProps> = ({ namespace = 'auth', storyName }) => {
+  const { t } = useTranslation('auth');
+  
   return (
     <Box sx={{ p: 3, maxWidth: 600 }}>
       <Typography variant="h4" gutterBottom>
@@ -59,7 +62,11 @@ export const TranslationDemo: React.FC<TranslationDemoProps> = ({ namespace = 'a
               Username
             </TranslationOverlay>
           }
-          placeholder="Enter your username"
+          placeholder={
+            <TranslationOverlay tKey="username_placeholder" namespace="auth" value="Enter your username" storyName={storyName}>
+              Enter your username
+            </TranslationOverlay>
+          }
           sx={{ mb: 2 }}
         />
 
@@ -71,10 +78,10 @@ export const TranslationDemo: React.FC<TranslationDemoProps> = ({ namespace = 'a
               Password
             </TranslationOverlay>
           }
-          placeholder="Enter your password"
+          placeholder={t('password_placeholder')}
           sx={{ mb: 2 }}
         />
-
+ 
         <TextField
           fullWidth
           label={
@@ -82,7 +89,7 @@ export const TranslationDemo: React.FC<TranslationDemoProps> = ({ namespace = 'a
               Email
             </TranslationOverlay>
           }
-          placeholder="Enter your email"
+          placeholder={t('email_placeholder')}
           sx={{ mb: 2 }}
         />
 
@@ -135,7 +142,7 @@ export const TranslationDemo: React.FC<TranslationDemoProps> = ({ namespace = 'a
               Confirm Password
             </TranslationOverlay>
           }
-          placeholder="Retype your password"
+          placeholder={t('confirm_password_placeholder')}
           sx={{ mb: 2 }}
         />
       </Box>

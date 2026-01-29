@@ -1,13 +1,3 @@
-/**
- * @fileoverview Page - Storybook demo page component
- * 
- * Example page component demonstrating component-driven development
- * with Storybook. Shows how to compose Header and other components
- * into a full page layout.
- * 
- * @module stories/Page
- */
-
 import React from 'react';
 
 import { Header } from './Header';

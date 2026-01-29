@@ -36,14 +36,14 @@ This workflow consists of 7 iterative steps that ensure high-quality TypeScript 
 
 **TypeScript Compilation Validation is REQUIRED after EVERY code change.**
 
-You **MUST** run `tsc --noEmit` using the `run_in_terminal` tool after implementing each TODO item. Do NOT proceed to the next task, step, or phase until TypeScript compilation completes with **zero errors** (exit code 0).
+You **MUST** run `tsc --noEmit --project tsconfig.json` using the `run_in_terminal` tool after implementing each TODO item. Do NOT proceed to the next task, step, or phase until TypeScript compilation completes with **zero errors** (exit code 0).
 
 **Workflow Blocker**: If `tsc` returns errors:
 1. STOP immediately
 2. Display all errors to the user
 3. Fix errors or ask user how to proceed
-4. Re-run `tsc --noEmit` after fixes
-5. Only proceed when exit code = 0
+4. Re-run `tsc --noEmit --project tsconfig.json` after fixes in `run_in_terminal`
+5. Only proceed there are no errors
 
 This rule applies to:
 - After writing implementation code
@@ -284,14 +284,17 @@ Ask: "Which phase would you like to start with?"
 For the selected phase, create a detailed TODO list:
 
 ```markdown
-# TODO: Phase [N] - [Phase Name] - Task[1...x] - Subtask[1...x]
 
-## Setup: Create necessary files - file1 name and path
-## Setup: Create necessary files - file2 name and path
-## Setup: Import dependencies - dependency1
-## Setup: Import dependencies - dependency2
-## Setup: Define types and interfaces - TypeA
-## Setup: Define types and interfaces - TypeB
+# TODO naming pattern: 
+
+pattern: `Phase[N]-Task[1...x]-Subtask[1...x]`
+
+- Phase1:Create-necessary-files-file1
+- Phase1:Create-necessary-files-file2
+- Phase1:Import-dependencies-dependency1
+- Phase1:Import-dependencies-dependency2
+- Phase1:Define-types-and-interfaces-TypeA
+- Phase1:Define-types-and-interfaces-TypeB
 
 ## Implementation: Implement function A
   - [ ] Write code

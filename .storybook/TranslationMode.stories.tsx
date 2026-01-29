@@ -8,6 +8,10 @@ const meta: Meta<typeof TranslationDemo> = {
   decorators: [withTranslationMode],
   parameters: {
     layout: 'fullscreen',
+    options: {
+      showPanel: true,
+      showToolbar: true,
+    },
     docs: {
       description: {
         component: `

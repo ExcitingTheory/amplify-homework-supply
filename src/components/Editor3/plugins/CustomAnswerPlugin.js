@@ -14,7 +14,6 @@ import * as React from 'react';
 import { useEffect } from 'react';
 import CustomAnswerEditor from '../nodes/CustomAnswerNode/CustomAnswerEditor';
 import CustomAnswerComponent from '../nodes/CustomAnswerNode/CustomAnswerComponent';
-import { join } from 'path';
 
 /**
  * Converts a DOM element into a CustomAnswerNode.

@@ -10,7 +10,7 @@ addons.register('storybook/addon-translation-mode', (api) => {
   addons.add('storybook/addon-translation-mode/panel', {
     type: types.PANEL,
     title: 'Translations',
-    match: ({ viewMode }) => viewMode === 'story',
-    render: ({ active }) => <TranslationPanelWrapper api={api} active={active} />,
+    match: ({ viewMode }) => viewMode === 'story' || viewMode === 'docs',
+    render: ({ active }) => <TranslationPanelWrapper api={api} active={active ?? false} />,
   });
 });

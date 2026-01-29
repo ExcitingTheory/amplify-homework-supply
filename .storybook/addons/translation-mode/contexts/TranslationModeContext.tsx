@@ -31,7 +31,7 @@ export const TranslationModeContext = createContext<TranslationModeContextValue>
   selectTranslation: () => {},
   isPanelOpen: false,
   setPanelOpen: () => {},
-  currentLanguages: ['en', 'ja'],
+  currentLanguages: ['en', 'ja', 'es', 'fr', 'zh', 'de'],
   setCurrentLanguages: () => {},
   displayLanguage: 'en',
   setDisplayLanguage: () => {},
@@ -47,7 +47,7 @@ export const TranslationModeProvider: React.FC<Props> = ({ children }) => {
   const [mode, setMode] = useState<TranslationModeType>('off');
   const [selectedTranslation, setSelectedTranslation] = useState<SelectedTranslation | null>(null);
   const [isPanelOpen, setPanelOpen] = useState(false);
-  const [currentLanguages, setCurrentLanguages] = useState<string[]>(['en', 'ja']);
+  const [currentLanguages, setCurrentLanguages] = useState<string[]>(['en', 'ja', 'es', 'fr', 'zh', 'de']);
   const [displayLanguage, setDisplayLanguage] = useState<string>('en');
   const [storyName, setStoryName] = useState<string>('');
 

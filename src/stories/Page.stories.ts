@@ -1,14 +1,3 @@
-/**
- * @fileoverview Storybook stories for Page component
- * 
- * Example page stories with interaction testing:
- * - Logged out state
- * - Logged in state with user interactions
- * - Component testing patterns with play functions
- * 
- * @module stories/Page.stories
- */
-
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
 import { expect, userEvent, within } from 'storybook/test';
@@ -16,7 +5,7 @@ import { expect, userEvent, within } from 'storybook/test';
 import { Page } from './Page';
 
 const meta = {
-  title: '📄 Pages/Example Page',
+  title: 'Example/Page',
   component: Page,
   parameters: {
     // More on how to position stories at: https://storybook.js.org/docs/configure/story-layout

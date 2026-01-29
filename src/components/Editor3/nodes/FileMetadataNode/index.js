@@ -1,7 +1,6 @@
 import {
   $applyNodeReplacement,
   DecoratorNode,
-  NodeKey,
 } from 'lexical';
 import { Suspense } from 'react';
 

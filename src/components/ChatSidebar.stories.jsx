@@ -19,10 +19,9 @@ import ChatSidebar from './ChatSidebar';
 import { UnitProvider } from '../context/unitContext';
 import FilesContext from '../context/fileContext';
 import { TabProvider } from '../context/tabContext';
-import { DemoBanner } from '../../.storybook/components/DemoBanner';
-import { seedMockAssistantChats } from '../../.storybook/__mocks__/aws-amplify-data';
-import { allChatData } from '../../.storybook/__mocks__/chatDataLoader';
-import { create } from 'domain';
+import { DemoBanner } from '@storybook-components/DemoBanner';
+import { seedMockAssistantChats } from '@storybook-mocks/aws-amplify-data';
+import { allChatData } from '@storybook-mocks/chatDataLoader';
 
 export default {
   title: '💬 AI Assistant/Chat Sidebar',
@@ -281,11 +280,6 @@ Let the AI help you brainstorm and create engaging lesson materials.
       },
     },
   },
-  render: () => (
-    <TabProvider>
-      <ChatSidebar />
-    </TabProvider>
-  ),
 };
 
 export const WithFileAttachments = {

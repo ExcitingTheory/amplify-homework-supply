@@ -17,7 +17,6 @@ import {
   COMMAND_PRIORITY_LOW,
   DRAGOVER_COMMAND,
   DROP_COMMAND,
-  LexicalEditor,
 } from 'lexical';
 import * as React from 'react';
 import {useEffect, useRef, useState} from 'react';

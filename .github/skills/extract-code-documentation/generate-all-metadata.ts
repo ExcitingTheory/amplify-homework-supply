@@ -76,7 +76,7 @@ Generate complete metadata for this translation key with the following JSON stru
 - For "alternativeTerms": Provide 2-4 synonyms that help translators understand semantic range
 
 **Platform Context:**
-- This is "Homework Supply" - a Japanese language learning eLearning platform
+- This is "Homework Supply" - an elearning eLearning platform
 - Instructors create learning units with rich content (vocabulary, quizzes, media)
 - Students complete assignments and get graded
 - Uses Lexical editor for content authoring

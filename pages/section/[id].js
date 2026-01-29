@@ -56,7 +56,6 @@ import MyAuth from "../../src/components/authenticator";
 import CameraIcon from '@mui/icons-material/Camera';
 import DeleteIcon from '@mui/icons-material/Delete';
 import getCachedUrl from "../../src/utils/getCachedUrl";
-import { get } from "http";
 import FilesContext from "../../src/context/fileContext";
 
 // import { fetchAuthSession } from '@aws-amplify/auth';

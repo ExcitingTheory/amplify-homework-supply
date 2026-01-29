@@ -428,7 +428,6 @@ export const MinimalCallbacks = {
 // In a constrained container
 export const InConstrainedContainer = {
     args: {
-        results: [...mockFiles, ...mockWords, ...mockQuestions, ...mockSections.slice(0, 1), ...mockUnits.slice(0, 1)],
         results: [...mockFiles, ...mockWords, ...mockQuestions],
         unitId: 'unit-123',
         searchQuery: 'Japanese',

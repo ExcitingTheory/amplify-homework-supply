@@ -14,6 +14,13 @@ import { MOCK_AUDIO_URL_1, mockWaveformData } from '../../../../.storybook/__moc
 export default {
   title: '🧩 Components/Audio Waveform Player',
   component: AudioWaveformPlayer,
+  decorators: [
+    (Story) => (
+      <AudioPlayerProvider>
+        <Story />
+      </AudioPlayerProvider>
+    ),
+  ],
   parameters: {
     layout: 'padded',
     // AudioPlayerProvider is required for this component
@@ -141,7 +148,6 @@ export const MultiplePlayersInList = () => {
   ];
 
   return (
-    <AudioPlayerProvider>
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 700 }}>
       {recordings.map((recording) => (
         <AudioWaveformPlayer
@@ -154,7 +160,6 @@ export const MultiplePlayersInList = () => {
         />
       ))}
     </Box>
-    </AudioPlayerProvider>
   );
 };
 
@@ -212,7 +217,6 @@ export const RecordingWithCallback = () => {
   };
   
   return (
-    <AudioPlayerProvider>
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <AudioWaveformPlayer
         enableRecording={true}
@@ -242,7 +246,6 @@ export const RecordingWithCallback = () => {
         </Box>
       )}
     </Box>
-    </AudioPlayerProvider>
   );
 };
 

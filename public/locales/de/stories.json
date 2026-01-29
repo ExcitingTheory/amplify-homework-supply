@@ -1,0 +1,24 @@
+{
+  "demo": {
+    "title": {
+      "value": "",
+      "context": "Main heading for the Translation Mode demonstration story"
+    },
+    "description": {
+      "value": "",
+      "context": "Instructional paragraph explaining how to use the translation mode demo"
+    },
+    "instructions": {
+      "value": "",
+      "context": "Alert message providing step-by-step instructions for using the translation mode feature"
+    },
+    "auth_form_heading": {
+      "value": "",
+      "context": "Section heading for the authentication form demo area"
+    },
+    "password_reset_heading": {
+      "value": "",
+      "context": "Section heading for the password reset demonstration area"
+    }
+  }
+}

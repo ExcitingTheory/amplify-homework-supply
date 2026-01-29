@@ -34,8 +34,6 @@ import {
   KEY_ENTER_COMMAND,
   KEY_ESCAPE_COMMAND,
   KEY_TAB_COMMAND,
-  LexicalEditor,
-  NodeKey,
   PASTE_COMMAND,
 } from 'lexical';
 import {

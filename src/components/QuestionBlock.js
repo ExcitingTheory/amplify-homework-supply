@@ -21,7 +21,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
 import Stack from '@mui/material/Stack';
-import { GutterContext } from '../context/gutterContext';
+import GutterContext from '../context/gutterContext';
 import UnitContext from '../context/unitContext';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 

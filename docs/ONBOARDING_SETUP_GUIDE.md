@@ -87,40 +87,7 @@ const unsubscribe = emitter.on((event) => {
 - **Learner**: 6 tasks (Joining class, completing assignments, reviewing feedback)
 - **Developer**: 8 tasks (Understanding architecture, setup, running tests)
 
-## Integration Points
-
-### In Pages
-```typescript
-// pages/sections.js
-import { useCompleteTask } from '../.storybook/code/useOnboarding';
-
-export default function SectionsPage() {
-  useCompleteTask('instructor-setup-class', 'instructor');
-  return <SectionsList />;
-}
-```
-
-### In Components
-```typescript
-// src/components/CreateUnitForm.jsx
-import { useTrackTask } from '../.storybook/code/useOnboarding';
-
-export const CreateUnitForm = () => {
-  const { startTask, completeTask } = useTrackTask('instructor-create-unit', 'instructor');
-
-  const handleSubmit = async (data) => {
-    startTask();
-    try {
-      await saveUnit(data);
-      completeTask({ unitName: data.title });
-    } catch (err) {
-      // error handling
-    }
-  };
-
-  return <form onSubmit={handleSubmit}>...</form>;
-};
-```
+## Integration
 
 ### In Stories
 ```typescript
