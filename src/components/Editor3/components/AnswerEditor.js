@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { DataGrid } from '@mui/x-data-grid';
 
@@ -139,6 +140,7 @@ const AnswerEditor = React.memo(function AnswerEditor({
     allowedInput,
     promptMethod,
 }) {
+    const { t } = useTranslation('components');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     // const [rows, setRows] = React.useState([]);
@@ -414,7 +416,7 @@ const AnswerEditor = React.memo(function AnswerEditor({
             </Typography>
 
             <Typography variant='p'>
-                Create a short answer exercise, that can either prompt the user to type in a word or a definition.
+                {t('answerEditor.instructions')}
             </Typography>
 
             {/**
@@ -506,7 +508,7 @@ const AnswerEditor = React.memo(function AnswerEditor({
                     }}
                     // sx={{ width: 300 }}
                     freeSolo
-                    renderInput={(params) => <TextField {...params} label="Add word to exercise" />}
+                    renderInput={(params) => <TextField {...params} label={t('answerEditor.addWordLabel')} />}
                 />
                 <PromptMethodSelector
                     ids={gridSelection}
@@ -532,7 +534,7 @@ const AnswerEditor = React.memo(function AnswerEditor({
 
             <Dialog open={open} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
-                    <DialogTitle>Add a new word</DialogTitle>
+                    <DialogTitle>{t('answerEditor.dialogTitle')}</DialogTitle>
                     <DialogContent
                         sx={{
                             display: 'flex',
@@ -598,14 +600,14 @@ const AnswerEditor = React.memo(function AnswerEditor({
                             // color='error'
                             onClick={handleClose}
                         >
-                            Cancel
+                            {t('answerEditor.cancel')}
                         </Button>
                         <Button
                             type="submit"
                             variant='contained'
                             color='primary'
                         >
-                            Add
+                            {t('answerEditor.save')}
                         </Button>
                     </DialogActions>
                 </form>
@@ -613,7 +615,7 @@ const AnswerEditor = React.memo(function AnswerEditor({
 
             {rows.length === 0 && (
                 <div style={{ marginTop: '0.5' }}>
-                    <p>No words have been added yet. Use the input above to add words from the dictionary. If the word you want to add is not in the dictionary, you can add it by clicking the "Add Word" item in the dropdown or from the dictionary editor in the Sidebar.
+                    <p>{t('answerEditor.emptyState')}
                     </p>
                 </div>
             )}
