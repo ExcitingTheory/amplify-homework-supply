@@ -357,6 +357,19 @@
     "overflow": "hidden"
   },
   "customAnswerComponent": {
+    "answerQuestions": "Answer the following questions:",
+    "text": "Text",
+    "audio": "Audio",
+    "writing": "Writing",
+    "question": "Question:",
+    "completedQuestion": "Completed Question",
+    "promptNotAvailable": "(prompt data not available)",
+    "yourAnswer": "Your answer: \"{{answer}}\"",
+    "audioQuestion": "Audio Question",
+    "answerPlaceholder": "Answer text",
+    "submit": "Submit",
+    "errorOccurred": "Error occurred",
+    "loading": "Loading...",
     "questionDisplay": "Question",
     "inputToggle": {
       "text": "Text",

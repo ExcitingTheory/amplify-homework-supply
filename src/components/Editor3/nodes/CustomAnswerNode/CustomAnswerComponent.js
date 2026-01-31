@@ -1,4 +1,5 @@
 import React, { lazy, Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     verifyShortAnswer,
 } from "../../../../graphql/queries";
@@ -58,6 +59,7 @@ export default function CustomAnswerComponent({
     allowedInput = [],
     promptMethod = [],
 }) {
+    const { t } = useTranslation('components');
     const [answers, setAnswers] = useState({});
     const [progress, setProgress] = useState(0);
     const [feedback, setFeedback] = useState({});
@@ -175,7 +177,7 @@ export default function CustomAnswerComponent({
         >
             <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                    Answer the following questions:
+                    {t('customAnswerComponent.answerQuestions')}
                 </Typography>
 
             </Box>
@@ -191,17 +193,17 @@ export default function CustomAnswerComponent({
                     value="text"
                     aria-label="text entry"
                 >
-                    Text
+                    {t('customAnswerComponent.text')}
                 </ToggleButton>
                 <ToggleButton
                     disabled={!allowedInputMethods.includes('audio')}
                     value="audio" aria-label="audio input">
-                    Audio
+                    {t('customAnswerComponent.audio')}
                 </ToggleButton>
                 <ToggleButton
                     disabled={!allowedInputMethods.includes('writing')}
                     value="writing" aria-label="writing and drawing input">
-                    Writing
+                    {t('customAnswerComponent.writing')}
                 </ToggleButton>
             </ToggleButtonGroup>
 
@@ -275,7 +277,7 @@ export default function CustomAnswerComponent({
                                     marginBottom: '0.5rem',
                                 }}
                                 color="textPrimary">
-                                <strong>Question:</strong>&nbsp;{displayPrompt}
+                                <strong>{t('customAnswerComponent.question')}</strong>&nbsp;{displayPrompt}
                             </Typography>
                             )}
                             
@@ -291,7 +293,7 @@ export default function CustomAnswerComponent({
                                     marginBottom: '0.5rem',
                                 }}
                                 color="text.secondary">
-                                <strong>Completed Question</strong> (prompt data not available)
+                                <strong>{t('customAnswerComponent.completedQuestion')}</strong> {t('customAnswerComponent.promptNotAvailable')}
                             </Typography>
                             )}
 
@@ -309,7 +311,7 @@ export default function CustomAnswerComponent({
                                 }}>
                                     {feedback[questionID]?.userResponse && (
                                         <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontStyle: 'italic' }}>
-                                            Your answer: "{feedback[questionID].userResponse}"
+                                            {t('customAnswerComponent.yourAnswer', { answer: feedback[questionID].userResponse })}
                                         </Typography>
                                     )}
                                     <Typography variant="body2"
@@ -327,7 +329,7 @@ export default function CustomAnswerComponent({
                                     waveformData={question.waveformData ? JSON.parse(question.waveformData) : undefined}
                                     width={400}
                                     height={60}
-                                    title={question.prompt || "Audio Question"}
+                                    title={question.prompt || t('customAnswerComponent.audioQuestion')}
                                 />
                             )}
 
@@ -358,7 +360,7 @@ export default function CustomAnswerComponent({
                                 }}
 
                                 aria-label={`Answer text for question ${questionID}`}
-                                placeholder="Answer text"
+                                placeholder={t('customAnswerComponent.answerPlaceholder')}
                                 type="text"
                                 variant="standard"
                             />
@@ -405,7 +407,7 @@ export default function CustomAnswerComponent({
                                         console.error(error);
                                         setFeedback({
                                             ...feedback,
-                                            [questionID]: 'Error occurred',
+                                            [questionID]: t('customAnswerComponent.errorOccurred'),
                                         });
                                     }
 
@@ -413,7 +415,7 @@ export default function CustomAnswerComponent({
 
                                 }}
                             >
-                                Submit
+                                {t('customAnswerComponent.submit')}
                             </Button>
                             
                             </Box>
@@ -443,7 +445,7 @@ export default function CustomAnswerComponent({
                                     marginBottom: '1rem',
                                 }}
                             >
-                                <Suspense fallback={<div>Loading...</div>}>
+                                <Suspense fallback={<div>{t('customAnswerComponent.loading')}</div>}>
                                 <SketchPad
                                     excalidrawData={inProgress?.excalidrawData ?? {}}
                                     className={className}

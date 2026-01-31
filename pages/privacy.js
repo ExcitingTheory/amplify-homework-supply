@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Typography from '@mui/material/Typography';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -11,6 +13,8 @@ import MainToolbar from '../src/components/MainToolbar';
  * This page is accessible to all users and does not require authentication.
  */
 function PrivacyPolicy() {
+  const { t } = useTranslation('pages');
+  
   return (
     <>
       <AppBar
@@ -24,7 +28,7 @@ function PrivacyPolicy() {
         <MainToolbar>
           <Box sx={{ flexGrow: 1, margin: '1rem' }}>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Privacy Policy
+              {t('privacy.title')}
             </Typography>
           </Box>
         </MainToolbar>
@@ -45,175 +49,174 @@ function PrivacyPolicy() {
             height: 'fit-content',
           }}>
             <Typography variant="h3" component="h1" gutterBottom sx={{ mb: 3 }}>
-              Privacy Policy
+              {t('privacy.title')}
             </Typography>
 
             <Typography variant="body2" color="text.secondary" paragraph>
-              Last updated: January 15, 2026
+              {t('privacy.lastUpdated')}
             </Typography>
 
             <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4, mb: 2 }}>
-              1. Introduction
+              {t('privacy.introduction.heading')}
             </Typography>
             <Typography variant="body1" paragraph>
-              Welcome to Homework Supply. We respect your privacy and are committed to protecting your personal data. 
-              This privacy policy will inform you about how we handle your personal data when you use our Japanese 
-              language learning platform.
+              {t('privacy.introduction.content')}
             </Typography>
 
             <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4, mb: 2 }}>
-              2. Information We Collect
+              {t('privacy.informationWeCollect.heading')}
             </Typography>
             <Typography variant="body1" paragraph>
-              We collect and process the following types of information:
+              {t('privacy.informationWeCollect.intro')}
             </Typography>
             <Box component="ul" sx={{ pl: 4 }}>
               <Typography component="li" variant="body1" paragraph>
-                <strong>Account Information:</strong> Email address, username, and password when you create an account
+                <strong>{t('privacy.informationWeCollect.accountInfo')}</strong> {t('privacy.informationWeCollect.accountInfoText')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                <strong>Learning Data:</strong> Your assignments, grades, unit progress, and submissions
+                <strong>{t('privacy.informationWeCollect.learningData')}</strong> {t('privacy.informationWeCollect.learningDataText')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                <strong>User Content:</strong> Audio recordings, text responses, and other materials you create or upload
+                <strong>{t('privacy.informationWeCollect.userContent')}</strong> {t('privacy.informationWeCollect.userContentText')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                <strong>Usage Information:</strong> How you interact with our platform, including pages visited and features used
+                <strong>{t('privacy.informationWeCollect.usageInfo')}</strong> {t('privacy.informationWeCollect.usageInfoText')}
               </Typography>
             </Box>
 
             <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4, mb: 2 }}>
-              3. How We Use Your Information
+              {t('privacy.howWeUseInfo.heading')}
             </Typography>
             <Typography variant="body1" paragraph>
-              We use your information to:
+              {t('privacy.howWeUseInfo.intro')}
             </Typography>
             <Box component="ul" sx={{ pl: 4 }}>
               <Typography component="li" variant="body1" paragraph>
-                Provide and maintain our educational services
+                {t('privacy.howWeUseInfo.item1')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                Track your learning progress and provide personalized feedback
+                {t('privacy.howWeUseInfo.item2')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                Enable instructors to grade assignments and monitor student progress
+                {t('privacy.howWeUseInfo.item3')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                Improve and optimize our platform and educational content
+                {t('privacy.howWeUseInfo.item4')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                Communicate with you about your account and our services
+                {t('privacy.howWeUseInfo.item5')}
               </Typography>
             </Box>
 
             <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4, mb: 2 }}>
-              4. Data Storage and Security
+              {t('privacy.dataStorage.heading')}
             </Typography>
             <Typography variant="body1" paragraph>
-              Your data is stored securely using Amazon Web Services (AWS) infrastructure, including:
+              {t('privacy.dataStorage.intro')}
             </Typography>
             <Box component="ul" sx={{ pl: 4 }}>
               <Typography component="li" variant="body1" paragraph>
-                AWS Cognito for authentication and user management
+                {t('privacy.dataStorage.item1')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                AWS DynamoDB for database storage with encryption at rest
+                {t('privacy.dataStorage.item2')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                AWS S3 for file storage with appropriate access controls
+                {t('privacy.dataStorage.item3')}
               </Typography>
             </Box>
             <Typography variant="body1" paragraph>
-              We implement appropriate technical and organizational measures to protect your personal data against 
-              unauthorized access, alteration, disclosure, or destruction.
+              {t('privacy.dataStorage.outro')}
             </Typography>
 
             <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4, mb: 2 }}>
-              5. Data Sharing
+              {t('privacy.dataSharing.heading')}
             </Typography>
             <Typography variant="body1" paragraph>
-              We do not sell your personal information. We may share your data only in the following circumstances:
+              {t('privacy.dataSharing.intro')}
             </Typography>
             <Box component="ul" sx={{ pl: 4 }}>
               <Typography component="li" variant="body1" paragraph>
-                <strong>With Instructors:</strong> Your assignments, grades, and learning progress are visible to your instructors
+                <strong>{t('privacy.dataSharing.instructors')}</strong> {t('privacy.dataSharing.instructorsText')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                <strong>With Classmates:</strong> Published content may be visible to other students in your section
+                <strong>{t('privacy.dataSharing.classmates')}</strong> {t('privacy.dataSharing.classmatesText')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                <strong>AI Processing:</strong> We use OpenAI services to process audio transcriptions, generate feedback, 
-                and provide AI-assisted learning features
+                <strong>{t('privacy.dataSharing.aiProcessing')}</strong> {t('privacy.dataSharing.aiProcessingText')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                <strong>Legal Requirements:</strong> When required by law or to protect our rights and users
+                <strong>{t('privacy.dataSharing.legal')}</strong> {t('privacy.dataSharing.legalText')}
               </Typography>
             </Box>
 
             <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4, mb: 2 }}>
-              6. Your Rights
+              {t('privacy.yourRights.heading')}
             </Typography>
             <Typography variant="body1" paragraph>
-              You have the right to:
+              {t('privacy.yourRights.intro')}
             </Typography>
             <Box component="ul" sx={{ pl: 4 }}>
               <Typography component="li" variant="body1" paragraph>
-                Access your personal data
+                {t('privacy.yourRights.item1')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                Correct inaccurate or incomplete data
+                {t('privacy.yourRights.item2')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                Request deletion of your data
+                {t('privacy.yourRights.item3')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                Export your data
+                {t('privacy.yourRights.item4')}
               </Typography>
               <Typography component="li" variant="body1" paragraph>
-                Opt out of certain data processing activities
+                {t('privacy.yourRights.item5')}
               </Typography>
             </Box>
             <Typography variant="body1" paragraph>
-              You can manage many of these settings through your profile page.
+              {t('privacy.yourRights.outro')}
             </Typography>
 
             <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4, mb: 2 }}>
-              7. Cookies and Tracking
+              {t('privacy.cookies.heading')}
             </Typography>
             <Typography variant="body1" paragraph>
-              We use local storage and session storage to maintain your login state and cache data for offline 
-              functionality. We do not use third-party tracking cookies for advertising purposes.
+              {t('privacy.cookies.content')}
             </Typography>
 
             <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4, mb: 2 }}>
-              8. Children's Privacy
+              {t('privacy.childrensPrivacy.heading')}
             </Typography>
             <Typography variant="body1" paragraph>
-              Our service is intended for educational use. If you are under 18, please ensure you have your parent 
-              or guardian's permission before using our platform. We do not knowingly collect personal information 
-              from children without appropriate consent.
+              {t('privacy.childrensPrivacy.content')}
             </Typography>
 
             <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4, mb: 2 }}>
-              9. Changes to This Policy
+              {t('privacy.policyChanges.heading')}
             </Typography>
             <Typography variant="body1" paragraph>
-              We may update this privacy policy from time to time. We will notify you of any changes by posting the 
-              new privacy policy on this page and updating the "Last updated" date.
+              {t('privacy.policyChanges.content')}
             </Typography>
 
             <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4, mb: 2 }}>
-              10. Contact Us
+              {t('privacy.contactUs.heading')}
             </Typography>
             <Typography variant="body1" paragraph>
-              If you have any questions about this privacy policy or our privacy practices, please contact us through 
-              your instructor or the platform administrator.
+              {t('privacy.contactUs.content')}
             </Typography>
           </Card>
         </Container>
       </Box>
     </>
   );
+}
+
+export async function getStaticProps({ locale }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common', 'pages'])),
+    },
+  };
 }
 
 export default PrivacyPolicy;

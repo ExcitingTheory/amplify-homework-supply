@@ -9,6 +9,7 @@ import { useUnitEmbedding, useUnitPublish, useBatchSectionEmbeddings } from '../
 import PublishIcon from '@mui/icons-material/Publish';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Unit Publishing Component with Embedding Generation

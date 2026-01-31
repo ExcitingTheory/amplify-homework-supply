@@ -28,65 +28,74 @@
     "lastUpdated": "Last updated: January 15, 2026",
     "introduction": {
       "heading": "1. Introduction",
-      "content": "Welcome to Homework Supply. This privacy policy explains how we collect, use, and protect your personal information when you use our Japanese language learning platform."
+      "content": "Welcome to Homework Supply. We respect your privacy and are committed to protecting your personal data. This privacy policy will inform you about how we handle your personal data when you use our Japanese language learning platform."
     },
     "informationWeCollect": {
       "heading": "2. Information We Collect",
-      "content": "We collect information that you provide directly to us, information we collect automatically, and information from third-party sources.",
-      "accountInfo": "Account information (username, email, password)",
-      "learningData": "Learning progress and performance data",
-      "userContent": "User-generated content (assignments, recordings, notes)",
-      "usageData": "Usage data and analytics"
+      "intro": "We collect and process the following types of information:",
+      "accountInfo": "Account Information:",
+      "accountInfoText": "Email address, username, and password when you create an account",
+      "learningData": "Learning Data:",
+      "learningDataText": "Your assignments, grades, unit progress, and submissions",
+      "userContent": "User Content:",
+      "userContentText": "Audio recordings, text responses, and other materials you create or upload",
+      "usageInfo": "Usage Information:",
+      "usageInfoText": "How you interact with our platform, including pages visited and features used"
     },
     "howWeUseInfo": {
       "heading": "3. How We Use Your Information",
-      "content": "We use your information to provide, maintain, and improve our services, communicate with you, and ensure platform security.",
-      "provideServices": "Provide and maintain our learning platform",
-      "personalizeExperience": "Personalize your learning experience",
-      "communicate": "Send you updates and notifications",
-      "analyzeTrends": "Analyze usage trends and improve features",
-      "ensureSecurity": "Ensure security and prevent fraud"
+      "intro": "We use your information to:",
+      "item1": "Provide and maintain our educational services",
+      "item2": "Track your learning progress and provide personalized feedback",
+      "item3": "Enable instructors to grade assignments and monitor student progress",
+      "item4": "Improve and optimize our platform and educational content",
+      "item5": "Communicate with you about your account and our services"
     },
     "dataStorage": {
       "heading": "4. Data Storage and Security",
-      "content": "We store your data securely using AWS services with encryption and access controls.",
-      "awsStorage": "Data stored in AWS DynamoDB and S3",
-      "encryption": "Encryption in transit and at rest",
-      "accessControls": "Role-based access controls",
-      "regularBackups": "Regular security audits and backups"
+      "intro": "Your data is stored securely using Amazon Web Services (AWS) infrastructure, including:",
+      "item1": "AWS Cognito for authentication and user management",
+      "item2": "AWS DynamoDB for database storage with encryption at rest",
+      "item3": "AWS S3 for file storage with appropriate access controls",
+      "outro": "We implement appropriate technical and organizational measures to protect your personal data against unauthorized access, alteration, disclosure, or destruction."
     },
     "dataSharing": {
       "heading": "5. Data Sharing",
-      "content": "We do not sell your personal information. We may share data with service providers and in legal situations.",
-      "serviceProviders": "With service providers (AWS, OpenAI for AI features)",
-      "instructors": "With your instructors for educational purposes",
-      "legalRequirements": "When required by law or to protect rights",
-      "consent": "With your explicit consent"
+      "intro": "We do not sell your personal information. We may share your data only in the following circumstances:",
+      "instructors": "With Instructors:",
+      "instructorsText": "Your assignments, grades, and learning progress are visible to your instructors",
+      "classmates": "With Classmates:",
+      "classmatesText": "Published content may be visible to other students in your section",
+      "aiProcessing": "AI Processing:",
+      "aiProcessingText": "We use OpenAI services to process audio transcriptions, generate feedback, and provide AI-assisted learning features",
+      "legal": "Legal Requirements:",
+      "legalText": "When required by law or to protect our rights and users"
     },
     "yourRights": {
       "heading": "6. Your Rights",
-      "content": "You have rights regarding your personal data including access, correction, and deletion.",
-      "accessData": "Access your personal data",
-      "correctData": "Correct inaccurate information",
-      "deleteData": "Request deletion of your data",
-      "exportData": "Export your data",
-      "optOut": "Opt out of certain data collection"
+      "intro": "You have the right to:",
+      "item1": "Access your personal data",
+      "item2": "Correct inaccurate or incomplete data",
+      "item3": "Request deletion of your data",
+      "item4": "Export your data",
+      "item5": "Opt out of certain data processing activities",
+      "outro": "You can manage many of these settings through your profile page."
     },
     "cookies": {
       "heading": "7. Cookies and Tracking",
-      "content": "We use cookies and similar technologies to improve your experience and analyze platform usage."
+      "content": "We use local storage and session storage to maintain your login state and cache data for offline functionality. We do not use third-party tracking cookies for advertising purposes."
     },
     "childrensPrivacy": {
       "heading": "8. Children's Privacy",
-      "content": "Our platform may be used by students of various ages. Parental consent may be required for users under 13."
+      "content": "Our service is intended for educational use. If you are under 18, please ensure you have your parent or guardian's permission before using our platform. We do not knowingly collect personal information from children without appropriate consent."
     },
     "policyChanges": {
       "heading": "9. Changes to This Policy",
-      "content": "We may update this privacy policy periodically. We will notify you of significant changes via email or platform notification."
+      "content": "We may update this privacy policy from time to time. We will notify you of any changes by posting the new privacy policy on this page and updating the \"Last updated\" date."
     },
     "contactUs": {
       "heading": "10. Contact Us",
-      "content": "If you have questions about this privacy policy, please contact us at privacy@homeworksupply.com."
+      "content": "If you have any questions about this privacy policy or our privacy practices, please contact us through your instructor or the platform administrator."
     }
   },
   "profile": {

@@ -132,14 +132,21 @@ async function enrichWithLocaleData(
     const localeFile = path.join(localesDir, `${key.namespace}.json`);
     
     if (fs.existsSync(localeFile)) {
-      const content = JSON.parse(fs.readFileSync(localeFile, 'utf-8'));
-      const value = getNestedValue(content, key.keyPath);
-      
-      if (value) {
-        // Extract value from metadata structure or plain string
-        key.value = typeof value === 'object' && 'value' in value ? value.value : value;
-      } else {
-        key.value = `MISSING: ${key.keyPath}`;
+      try {
+        const content = JSON.parse(fs.readFileSync(localeFile, 'utf-8'));
+        const value = getNestedValue(content, key.keyPath);
+        
+        if (value) {
+          // Extract value from metadata structure or plain string
+          key.value = typeof value === 'object' && 'value' in value ? value.value : value;
+        } else {
+          key.value = `MISSING: ${key.keyPath}`;
+          missingKeys.push(key);
+        }
+      } catch (error) {
+        console.error(`   ⚠️  Invalid JSON in ${key.namespace}.json - skipping this namespace`);
+        console.error(`   Error: ${error instanceof Error ? error.message : String(error)}`);
+        key.value = `INVALID_JSON: ${key.namespace}`;
         missingKeys.push(key);
       }
     } else {
