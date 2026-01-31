@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
     Button,
@@ -15,6 +16,7 @@ const LAYOUTS = [
 ];
 
 export default function InsertLayoutDialog({activeEditor, onClose}) {
+    const { t } = useTranslation('components');
     const [layout, setLayout] = useState(LAYOUTS[0].value);
     const buttonLabel = LAYOUTS.find((item) => item.value === layout)?.label;
 
@@ -37,7 +39,7 @@ export default function InsertLayoutDialog({activeEditor, onClose}) {
                     </DropDownItem>
                 ))}
             </DropDown>
-            <Button onClick={onClick}>Insert</Button>
+            <Button onClick={onClick}>{t('insertLayoutDialog.insert')}</Button>
         </>
     );
 }
