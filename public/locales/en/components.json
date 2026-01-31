@@ -475,5 +475,23 @@
   "wordEmbeddingIntegration": {
     "alertMessage": "Embeddings will be generated",
     "successConfirmation": "Embeddings generated successfully"
+  },
+  "fileManager2": {
+    "metadataEditor": {
+      "heading": "File Metadata",
+      "nameLabel": "Name",
+      "descriptionLabel": "Description",
+      "promptLabel": "Prompt (for AI-generated files)",
+      "modelLabel": "Model",
+      "variantLabel": "Variant",
+      "typeLabel": "Type",
+      "sizeLabel": "Size",
+      "unknown": "Unknown",
+      "pathLabel": "Path",
+      "protectionLevelLabel": "Protection Level",
+      "createdLabel": "Created",
+      "cancelButton": "Cancel",
+      "saveButton": "Save"
+    }
   }
 }

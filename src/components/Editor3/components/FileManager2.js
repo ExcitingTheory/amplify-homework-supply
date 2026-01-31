@@ -40,6 +40,7 @@ import {
 } from "@mui/material";
 import { useVirtualizer } from '@tanstack/react-virtual';
 import React from "react";
+import { useTranslation } from 'react-i18next';
 import { isMimeType } from '@lexical/utils';
 import VectorStoreContext from '../../../context/vectorStoreContext';
 
@@ -735,6 +736,7 @@ function FileNameField({ value, fileId, onSave, searchTerm }) {
 
 // Metadata Editor Component for editing file properties
 function MetadataEditor({ file, onUpdate, onClose }) {
+    const { t } = useTranslation('components');
     const [editing, setEditing] = React.useState(false);
     const [formData, setFormData] = React.useState({
         name: file.name || '',
@@ -765,7 +767,7 @@ function MetadataEditor({ file, onUpdate, onClose }) {
     return (
         <Box sx={{ p: 2, backgroundColor: 'grey.50', borderRadius: 1, mt: 1 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6">File Metadata</Typography>
+                <Typography variant="h6">{t('fileManager2.metadataEditor.heading')}</Typography>
                 {!editing && (
                     <IconButton size="small" onClick={() => setEditing(true)}>
                         <EditIcon />
@@ -775,7 +777,7 @@ function MetadataEditor({ file, onUpdate, onClose }) {
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <TextField
-                    label="Name"
+                    label={t('fileManager2.metadataEditor.nameLabel')}
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     disabled={!editing}
@@ -783,7 +785,7 @@ function MetadataEditor({ file, onUpdate, onClose }) {
                     fullWidth
                 />
                 <TextField
-                    label="Description"
+                    label={t('fileManager2.metadataEditor.descriptionLabel')}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     disabled={!editing}
@@ -793,7 +795,7 @@ function MetadataEditor({ file, onUpdate, onClose }) {
                     fullWidth
                 />
                 <TextField
-                    label="Prompt (for AI-generated files)"
+                    label={t('fileManager2.metadataEditor.promptLabel')}
                     value={formData.prompt}
                     onChange={(e) => setFormData({ ...formData, prompt: e.target.value })}
                     disabled={!editing}
@@ -804,7 +806,7 @@ function MetadataEditor({ file, onUpdate, onClose }) {
                 />
                 <Box sx={{ display: 'flex', gap: 1 }}>
                     <TextField
-                        label="Model"
+                        label={t('fileManager2.metadataEditor.modelLabel')}
                         value={formData.model}
                         onChange={(e) => setFormData({ ...formData, model: e.target.value })}
                         disabled={!editing}
@@ -812,7 +814,7 @@ function MetadataEditor({ file, onUpdate, onClose }) {
                         sx={{ flex: 1 }}
                     />
                     <TextField
-                        label="Variant"
+                        label={t('fileManager2.metadataEditor.variantLabel')}
                         value={formData.variant}
                         onChange={(e) => setFormData({ ...formData, variant: e.target.value })}
                         disabled={!editing}
@@ -824,20 +826,20 @@ function MetadataEditor({ file, onUpdate, onClose }) {
                 {/* File info (read-only) */}
                 <Box sx={{ pt: 2, borderTop: 1, borderColor: 'divider' }}>
                     <Typography variant="caption" color="text.secondary" display="block">
-                        <strong>Type:</strong> {file.mimeType}
+                        <strong>{t('fileManager2.metadataEditor.typeLabel')}:</strong> {file.mimeType}
                     </Typography>
                     <Typography variant="caption" color="text.secondary" display="block">
-                        <strong>Size:</strong> {file.size ? `${(file.size / 1000).toFixed(2)} KB` : 'Unknown'}
+                        <strong>{t('fileManager2.metadataEditor.sizeLabel')}:</strong> {file.size ? `${(file.size / 1000).toFixed(2)} KB` : t('fileManager2.metadataEditor.unknown')}
                     </Typography>
                     <Typography variant="caption" color="text.secondary" display="block">
-                        <strong>Path:</strong> {file.path}
+                        <strong>{t('fileManager2.metadataEditor.pathLabel')}:</strong> {file.path}
                     </Typography>
                     <Typography variant="caption" color="text.secondary" display="block">
-                        <strong>Protection Level:</strong> {file.level || 'UNSET'}
+                        <strong>{t('fileManager2.metadataEditor.protectionLevelLabel')}:</strong> {file.level || 'UNSET'}
                     </Typography>
                     {file.createdAt && (
                         <Typography variant="caption" color="text.secondary" display="block">
-                            <strong>Created:</strong> {new Date(file.createdAt).toLocaleString()}
+                            <strong>{t('fileManager2.metadataEditor.createdLabel')}:</strong> {new Date(file.createdAt).toLocaleString()}
                         </Typography>
                     )}
                 </Box>
@@ -858,14 +860,14 @@ function MetadataEditor({ file, onUpdate, onClose }) {
                                 setEditing(false);
                             }}
                         >
-                            Cancel
+                            {t('fileManager2.metadataEditor.cancelButton')}
                         </Button>
                         <Button
                             variant="contained"
                             size="small"
                             onClick={handleSave}
                         >
-                            Save
+                            {t('fileManager2.metadataEditor.saveButton')}
                         </Button>
                     </Box>
                 )}
