@@ -11,6 +11,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Paper, CircularProgress, Typography } from '@mui/material';
 import { PictureAsPdf as PdfIcon, Error as ErrorIcon } from '@mui/icons-material';
 import getCachedUrl from '../utils/getCachedUrl';
+import { useTranslation } from 'react-i18next';
 
 interface SavedPdfThumbnailProps {
     /** S3 key of the thumbnail image */
@@ -53,6 +54,7 @@ export default function SavedPdfThumbnail({
     pageNumber,
     showLoading = true,
 }: SavedPdfThumbnailProps) {
+    const { t } = useTranslation('components');
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -138,7 +140,7 @@ export default function SavedPdfThumbnail({
             >
                 <ErrorIcon sx={{ fontSize: 32, color: 'error.main', mb: 1 }} />
                 <Typography variant="caption" color="error.main" align="center" px={1}>
-                    {error || 'No thumbnail'}
+                    {error || t('savedPdfThumbnail.errorMessage')}
                 </Typography>
             </Paper>
         );
@@ -179,7 +181,7 @@ export default function SavedPdfThumbnail({
                         transition: 'opacity 0.2s',
                     }}
                 >
-                    p.{pageNumber}
+                    {t('savedPdfThumbnail.pageOverlay', { number: pageNumber })}
                 </Box>
             )}
         </Box>
