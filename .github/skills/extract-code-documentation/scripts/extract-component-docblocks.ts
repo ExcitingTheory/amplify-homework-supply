@@ -120,7 +120,7 @@ export function findDocblock(
   }
   
   // Try fuzzy match on file path
-  for (const [key, docblock] of Array.from(docblocks.entries())) {
+  for (const [key, docblock] of docblocks.entries()) {
     if (docblock.filePath.includes(componentRef) || componentRef.includes(docblock.filePath)) {
       return docblock;
     }
@@ -139,7 +139,7 @@ if (require.main === module) {
     
     // Show samples
     let count = 0;
-    for (const [key, docblock] of Array.from(docblocks.entries())) {
+    for (const [key, docblock] of docblocks.entries()) {
       if (count++ >= 10) break;
       console.log(`${key}:`);
       console.log(`  Path: ${docblock.filePath}`);

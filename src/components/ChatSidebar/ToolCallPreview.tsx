@@ -10,6 +10,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Paper,
@@ -77,6 +78,7 @@ export const ToolCallPreview: React.FC<ToolCallPreviewProps> = ({
   onEdit,
   compact = false,
 }) => {
+  const { t } = useTranslation('components');
   const [isEditing, setIsEditing] = useState(false);
   const [editedParams, setEditedParams] = useState(parameters);
   const [expanded, setExpanded] = useState(!compact);
@@ -132,11 +134,11 @@ export const ToolCallPreview: React.FC<ToolCallPreviewProps> = ({
 
   const getStateLabel = (currentState: string) => {
     switch (currentState) {
-      case 'pending': return 'Awaiting Confirmation';
-      case 'confirmed': return 'Confirmed';
-      case 'executing': return 'Executing...';
-      case 'executed': return 'Completed';
-      case 'error': return 'Failed';
+      case 'pending': return t('chatSidebar.toolCallPreview.stateLabels.pending');
+      case 'confirmed': return t('chatSidebar.toolCallPreview.stateLabels.confirmed');
+      case 'executing': return t('chatSidebar.toolCallPreview.stateLabels.executing');
+      case 'executed': return t('chatSidebar.toolCallPreview.stateLabels.executed');
+      case 'error': return t('chatSidebar.toolCallPreview.stateLabels.error');
       default: return currentState;
     }
   };
@@ -158,7 +160,7 @@ export const ToolCallPreview: React.FC<ToolCallPreviewProps> = ({
             SelectProps={{ native: true }}
             required={isRequired}
           >
-            <option value="">Select...</option>
+            <option value="">{t('chatSidebar.toolCallPreview.selectPlaceholder')}</option>
             {def.enum.map((option: string) => (
               <option key={option} value={option}>{option}</option>
             ))}
@@ -189,8 +191,8 @@ export const ToolCallPreview: React.FC<ToolCallPreviewProps> = ({
             onChange={(e) => handleParameterChange(paramName, e.target.value === 'true')}
             SelectProps={{ native: true }}
           >
-            <option value="true">True</option>
-            <option value="false">False</option>
+            <option value="true">{t('chatSidebar.toolCallPreview.true')}</option>
+            <option value="false">{t('chatSidebar.toolCallPreview.false')}</option>
           </TextField>
         );
       }
@@ -304,7 +306,7 @@ export const ToolCallPreview: React.FC<ToolCallPreviewProps> = ({
           <Box sx={{ display: 'flex', gap: 1, mt: 3, justifyContent: 'flex-end' }}>
             {state === 'pending' && !isEditing && (
               <>
-                <Tooltip title="Edit parameters">
+                <Tooltip title={t('chatSidebar.editParameters')}>
                   <IconButton
                     size="small"
                     onClick={() => setIsEditing(true)}
@@ -319,7 +321,7 @@ export const ToolCallPreview: React.FC<ToolCallPreviewProps> = ({
                   startIcon={<CloseIcon />}
                   onClick={onCancel}
                 >
-                  Cancel
+                  {t('chatSidebar.cancel')}
                 </Button>
                 <Button
                   variant="contained"
@@ -328,7 +330,7 @@ export const ToolCallPreview: React.FC<ToolCallPreviewProps> = ({
                   onClick={handleConfirm}
                   color="primary"
                 >
-                  Execute
+                  {t('chatSidebar.execute')}
                 </Button>
               </>
             )}
@@ -341,7 +343,7 @@ export const ToolCallPreview: React.FC<ToolCallPreviewProps> = ({
                   startIcon={<CloseIcon />}
                   onClick={handleCancelEdit}
                 >
-                  Cancel Edit
+                  {t('chatSidebar.cancelEdit')}
                 </Button>
                 <Button
                   variant="contained"
@@ -350,14 +352,14 @@ export const ToolCallPreview: React.FC<ToolCallPreviewProps> = ({
                   onClick={handleConfirm}
                   color="success"
                 >
-                  Confirm & Execute
+                  {t('chatSidebar.confirmAndExecute')}
                 </Button>
               </>
             )}
 
             {state === 'executing' && (
               <Chip
-                label="Executing..."
+                label={t('chatSidebar.toolCallPreview.stateLabels.executing')}
                 color="info"
                 size="small"
                 sx={{ animation: 'pulse 1.5s ease-in-out infinite' }}

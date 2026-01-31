@@ -29,6 +29,18 @@
     "execute": "Execute",
     "confirmAndExecute": "Confirm & Execute",
     "editParameters": "Edit parameters",
+    "toolCallPreview": {
+      "selectPlaceholder": "Select...",
+      "true": "True",
+      "false": "False",
+      "stateLabels": {
+        "pending": "Awaiting Confirmation",
+        "confirmed": "Confirmed",
+        "executing": "Executing...",
+        "executed": "Completed",
+        "error": "Failed"
+      }
+    },
     "emptyState": "No messages yet",
     "today": "Today",
     "yesterday": "Yesterday",
@@ -290,7 +302,7 @@
     "deleteColumn": "Delete Column"
   },
   "tableOfContents": {
-    "emptyState": "No headings found",
+    "emptyState": "No headings found. Add headings to your document to see the table of contents.",
     "title": "Table of Contents"
   },
   "tabsVerticalLeft": {
@@ -467,6 +479,12 @@
   "recordingStudio": {
     "sectionHeading": "Recording Studio",
     "preview": "Preview"
+  },
+  "recordingStudio2": {
+    "recordingNumber": "Recording {{number}}",
+    "existingRecordings": "Existing Recordings",
+    "staticWaveformPreview": "Static Waveform Preview:",
+    "recordedAudioWaveform": "Recorded Audio Waveform:"
   },
   "recordingStudio3": {
     "record": "Record",

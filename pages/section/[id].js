@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { Section, Grade, Assignment, Unit } from "../../src/models";
 import { DataStore } from 'aws-amplify/datastore';
 import { generateClient } from 'aws-amplify/api';
@@ -119,6 +120,7 @@ function CardMediaComponent({ s3Key, identityId, level = 'protected' }) {
 const client = generateClient();
 
 function SectionDetail({ user, signOut }) {
+  const { t } = useTranslation('pages');
   /**
    * The SectionDetail page displays the section in a single page
    * 
@@ -194,7 +196,7 @@ function SectionDetail({ user, signOut }) {
   const handleDeleteSection = async () => {
     console.log('handleDeleteSection')
     setDeleteOpen(false)
-    if (confirm('Are you sure you want to delete this section?')) {
+    if (confirm(t('sectionDetail.deleteSectionConfirm'))) {
       await DataStore.delete(section)
       router.push('/sections')
     }
@@ -226,7 +228,7 @@ function SectionDetail({ user, signOut }) {
         }
 
         if (!newFilename) {
-          throw new Error('Please upload an image file with a valid extension.');
+          throw new Error(t('sectionDetail.uploadImageInvalidFile'));
         }
 
         // TODO - add support for featured video and featured audio
@@ -734,7 +736,7 @@ function SectionDetail({ user, signOut }) {
     const score = parseFloat(overrideScore);
     
     if (isNaN(score) || score < 0 || score > 100) {
-      alert('Please enter a valid score between 0 and 100');
+      alert(t('sectionDetail.overrideGrade.invalidScore'));
       return;
     }
 
@@ -769,7 +771,7 @@ function SectionDetail({ user, signOut }) {
       handleGradeOverrideClose();
     } catch (error) {
       console.error('Error saving grade override:', error);
-      alert('Failed to save grade. Please try again.');
+      alert(t('sectionDetail.overrideGrade.saveFailed'));
     }
   };
 
@@ -882,10 +884,10 @@ function SectionDetail({ user, signOut }) {
               }}
             >
           {inProgress &&
-          `Uploading Image`
+          t('sectionDetail.uploadingImage')
           }
           {isDragging &&
-          `Upload Image`
+          t('sectionDetail.uploadImagePrompt')
           }
             </div>
           )}
@@ -942,11 +944,8 @@ function SectionDetail({ user, signOut }) {
                     display: 'block',
                   }}
                 /><br />
-                No featured image set.
-                Drag and drop an image here to set it as the featured image.
-              </Typography>
-            </Box>
-          }
+                {t('sectionDetail.noFeaturedImage')}.
+                {t('sectionDetail.dragAndDropPrompt')}
 
         </div>
 
@@ -962,7 +961,7 @@ function SectionDetail({ user, signOut }) {
               </Typography>
 
               <Typography gutterBottom variant="h5" component="div">
-                Join Code: {section?.code}
+                {t('sectionDetail.joinCode')} {section?.code}
               </Typography>
 
               <Typography variant="body2" color="text.secondary">
@@ -970,7 +969,7 @@ function SectionDetail({ user, signOut }) {
               </Typography>
             </Box>
             {isOwner && (
-              <Tooltip title={viewAsStudent ? "Switch to Instructor View" : "Preview Student View"}>
+              <Tooltip title={viewAsStudent ? t('sectionDetail.switchToInstructorView') : t('sectionDetail.previewStudentView')}>
                 <Button
                   variant={viewAsStudent ? "contained" : "outlined"}
                   size="small"
@@ -978,7 +977,7 @@ function SectionDetail({ user, signOut }) {
                   onClick={() => setViewAsStudent(!viewAsStudent)}
                   sx={{ minWidth: 180 }}
                 >
-                  {viewAsStudent ? "Student View" : "Instructor View"}
+                  {viewAsStudent ? t('sectionDetail.studentView') : t('sectionDetail.instructorView')}
                 </Button>
               </Tooltip>
             )}
@@ -1002,7 +1001,7 @@ function SectionDetail({ user, signOut }) {
           margin: '0 auto',
         }}>
           <Typography variant="h5" component="div" sx={{ flexGrow: 1, padding: '1rem' }}>
-            Students
+            {t('sectionDetail.students')}
           </Typography>
 
           <TableContainer component={Paper}>
@@ -1013,9 +1012,9 @@ function SectionDetail({ user, signOut }) {
 
               <TableHead>
                 <TableRow>
-                  <TableCell>Student</TableCell>
-                  <TableCell align="right">Email</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell>{t('sectionDetail.studentHeader')}</TableCell>
+                  <TableCell align="right">{t('sectionDetail.emailHeader')}</TableCell>
+                  <TableCell align="right">{t('sectionDetail.actionsHeader')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -1057,10 +1056,10 @@ function SectionDetail({ user, signOut }) {
         }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '1rem', gap: 2 }}>
             <Typography variant="h5" component="div">
-              Gradebook
+              {t('sectionDetail.gradebook')}
               {visibleAssignmentsCount < totalAssignments && isOwner && (
                 <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                  (Showing {visibleAssignmentsCount} of {totalAssignments} assignments)
+                  {t('sectionDetail.showingAssignments', { visible: visibleAssignmentsCount, total: totalAssignments })}
                 </Typography>
               )}
             </Typography>
@@ -1077,7 +1076,7 @@ function SectionDetail({ user, signOut }) {
                       size="small"
                     />
                   }
-                  label="Show Future"
+                  label={t('sectionDetail.showFutureAssignments')}
                 />
                 
                 <FormControlLabel
@@ -1089,7 +1088,7 @@ function SectionDetail({ user, signOut }) {
                       size="small"
                     />
                   }
-                  label="Show Drafts"
+                  label={t('sectionDetail.showDraftAssignments')}
                 />
                 
                 <FormControlLabel
@@ -1101,19 +1100,19 @@ function SectionDetail({ user, signOut }) {
                       size="small"
                     />
                   }
-                  label="Apply Curve"
+                  label={t('sectionDetail.applyCurve')}
                 />
                 
                 <FormControl size="small" sx={{ minWidth: 200 }}>
-                  <InputLabel>Curve Method</InputLabel>
+                  <InputLabel>{t('sectionDetail.curveMethod')}</InputLabel>
                   <Select
                     value={curveMethod}
                     onChange={(e) => setCurveMethod(e.target.value)}
-                    label="Curve Method"
+                    label={t('sectionDetail.curveMethod')}
                     disabled={!curveEnabled}
                   >
-                    <MenuItem value="scale-to-top">Scale to Top Score (100%)</MenuItem>
-                    <MenuItem value="linear-adjustment">Linear Adjustment (75% avg)</MenuItem>
+                    <MenuItem value="scale-to-top">{t('sectionDetail.scaleToTopMethod')}</MenuItem>
+                    <MenuItem value="linear-adjustment">{t('sectionDetail.linearAdjustmentMethod')}</MenuItem>
                   </Select>
                 </FormControl>
               </Box>
@@ -1124,7 +1123,7 @@ function SectionDetail({ user, signOut }) {
         {curveEnabled && isOwner && !viewAsStudent && (
           <Box sx={{ padding: '0 1rem 1rem 1rem' }}>
             <Typography variant="caption" color="text.secondary">
-              Curve Debug: Method = {curveMethod} | 
+              {t('sectionDetail.curveDebugInfo')} Method = {curveMethod} | 
               {Object.entries(curveData).map(([unitId, data]) => {
                 const unitName = units[unitId]?.name || unitId;
                 if (curveMethod === 'scale-to-top') {
@@ -1143,8 +1142,8 @@ function SectionDetail({ user, signOut }) {
             <Table aria-label="student grades" size="small" sx={{ minWidth: 400 }}>
               <TableHead>
                 <TableRow>
-                  <TableCell>Assignment</TableCell>
-                  <TableCell align="right">Grade</TableCell>
+                  <TableCell>{t('sectionDetail.assignmentHeader')}</TableCell>
+                  <TableCell align="right">{t('sectionDetail.gradeHeader')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -1180,7 +1179,7 @@ function SectionDetail({ user, signOut }) {
                 
                 {/* Total Row */}
                 <TableRow sx={{ backgroundColor: '#f5f5f5', '& td': { backgroundColor: 'inherit' } }}>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Total Average</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>{t('sectionDetail.totalAverage')}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 'bold' }}>
                     {(() => {
                       let totalGrade = 0;
@@ -1233,7 +1232,7 @@ function SectionDetail({ user, signOut }) {
                   boxSizing: 'border-box',
                   boxShadow: '2px 0 4px rgba(0,0,0,0.1)',
                   borderRight: '2px solid #e0e0e0',
-                }}>Learner</TableCell>
+                }}>{t('sectionDetail.learnerHeader')}</TableCell>
                 {visibleAssignments.map((assignment) => {
                   const unitName = units[assignment.unitID]?.name;
                   const isDraft = assignment.status === 'DRAFT';
@@ -1355,7 +1354,7 @@ function SectionDetail({ user, signOut }) {
                           key={assignment.id}
                         >
                           {isOwner ? (
-                            <Tooltip title="Edit" arrow>
+                            <Tooltip title={t('sectionDetail.editTooltip')} arrow>
                               <span
                                 onClick={() => handleGradeCellClick(student, assignment, gradeRecord)}
                                 style={{
@@ -1392,7 +1391,7 @@ function SectionDetail({ user, signOut }) {
       </Box>
 
       {!sectionAssignments &&
-        <div>Loading...</div>
+        <div>{t('sectionDetail.loading')}</div>
       }
       {sectionAssignments &&
         <Box
@@ -1406,7 +1405,7 @@ function SectionDetail({ user, signOut }) {
           margin: '1rem auto',
 
         }}>
-            Assignments
+            {t('sectionDetail.assignments')}
           </Typography>
 
 
@@ -1472,7 +1471,7 @@ function SectionDetail({ user, signOut }) {
                             maxWidth: 'fit-content',
                           }}
                         >
-                          <EditNoteIcon />&nbsp;View Workbook
+                          <EditNoteIcon />&nbsp;{t('sectionDetail.viewWorkbook')}
                         </Button>
 
                       </Box>
@@ -1523,7 +1522,7 @@ function SectionDetail({ user, signOut }) {
               padding: '1rem 3rem',
             }}
             variant="outlined" color="error" onClick={handleDeleteSection}>
-            Delete Section
+            {t('sectionDetail.deleteSection')}
           </Button>
 
 
@@ -1533,23 +1532,23 @@ function SectionDetail({ user, signOut }) {
         {/* Grade Override Dialog */}
         <Dialog open={gradeOverrideOpen} onClose={handleGradeOverrideClose}>
           <DialogTitle>
-            Override Grade
+            {t('sectionDetail.overrideGrade.title')}
           </DialogTitle>
           <DialogContent>
             <DialogContentText>
               {overrideData.student && overrideData.assignment && (
                 <>
-                  Student: <strong>{overrideData.student.name}</strong><br />
-                  Assignment: <strong>{units[overrideData.assignment.unitID]?.name}</strong><br />
-                  Current Grade: <strong>{overrideData.currentGrade?.accuracy ? `${Math.round(overrideData.currentGrade.accuracy)}%` : 'No grade'}</strong><br /><br />
-                  Enter new grade (0-100):
+                  {t('sectionDetail.overrideGrade.student')} <strong>{overrideData.student.name}</strong><br />
+                  {t('sectionDetail.overrideGrade.assignment')} <strong>{units[overrideData.assignment.unitID]?.name}</strong><br />
+                  {t('sectionDetail.overrideGrade.currentGrade')} <strong>{overrideData.currentGrade?.accuracy ? `${Math.round(overrideData.currentGrade.accuracy)}%` : t('sectionDetail.overrideGrade.noGrade')}</strong><br /><br />
+                  {t('sectionDetail.overrideGrade.prompt')}
                 </>
               )}
             </DialogContentText>
             <TextField
               autoFocus
               margin="dense"
-              label="Grade (%)"
+              label={t('sectionDetail.overrideGrade.label')}
               type="number"
               fullWidth
               variant="outlined"
@@ -1559,9 +1558,9 @@ function SectionDetail({ user, signOut }) {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleGradeOverrideClose}>Cancel</Button>
+            <Button onClick={handleGradeOverrideClose}>{t('sectionDetail.overrideGrade.cancel')}</Button>
             <Button onClick={handleGradeOverrideSave} variant="contained" color="primary">
-              Save Grade
+              {t('sectionDetail.overrideGrade.save')}
             </Button>
           </DialogActions>
         </Dialog>

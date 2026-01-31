@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Button } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -23,6 +24,7 @@ export default function ImageResizer({
   setShowCaption,
   captionsEnabled,
 }) {
+  const { t } = useTranslation('components');
   const controlWrapperRef = useRef(null);
   const userSelect = useRef({
     priority: '',
@@ -225,7 +227,7 @@ export default function ImageResizer({
             setShowCaption(!showCaption);
           }}
         >
-          Add Caption
+          {t('imageResizer.addCaption')}
         </Button>
       )}
       <div

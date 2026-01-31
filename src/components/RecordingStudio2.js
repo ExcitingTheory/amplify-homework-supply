@@ -1,5 +1,6 @@
 'use strict';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import FilesContext from '../context/fileContext';
 import DictionaryContext from '../context/dictionaryContext';
 import StopIcon from '@mui/icons-material/Stop';
@@ -28,6 +29,7 @@ const client = generateClient();
 
 // Component to handle async audio URL loading
 function AudioRecordingCard({ file, index, identityId }) {
+  const { t } = useTranslation('components');
   const [audioUrl, setAudioUrl] = React.useState(null);
   
   React.useEffect(() => {
@@ -55,13 +57,13 @@ function AudioRecordingCard({ file, index, identityId }) {
             waveformData={file.waveformData ? JSON.parse(file.waveformData) : undefined}
             width={600}
             height={80}
-            title={file.name || `Recording ${index + 1}`}
+            title={file.name || t('components:recordingStudio2.recordingNumber', { number: index + 1 })}
             showDuration={true}
           />
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <Typography variant="subtitle2" color="text.secondary">
-              {file.name || `Recording ${index + 1}`}
+              {file.name || t('components:recordingStudio2.recordingNumber', { number: index + 1 })}
             </Typography>
             <StaticWaveform 
               file={file} 
@@ -90,6 +92,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
   // TODO: a hidden input that allows you to update the word phrase and pronunciation
   // if during the recording, you change the word, then it should update the word
 
+  const { t } = useTranslation('components');
   const [recording, setRecording] = React.useState(false);
   const [mediaRecorder, setMediaRecorder] = React.useState(null);
   const [audioBlob, setAudioBlob] = React.useState(null);
@@ -536,7 +539,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
     {/* Display all existing audio recordings */}
     {Object.keys(audioFiles).length > 0 && (
       <Box sx={{ mt: 3 }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>Existing Recordings</Typography>
+        <Typography variant="h6" sx={{ mb: 2 }}>{t('components:recordingStudio2.existingRecordings')}</Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {Object.values(audioFiles).map((file, index) => (
             <AudioRecordingCard 
@@ -552,7 +555,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
     
     {audioFile && (
       <Box sx={{ mt: 2 }}>
-        <Typography variant="caption" color="text.secondary">Static Waveform Preview:</Typography>
+        <Typography variant="caption" color="text.secondary">{t('components:recordingStudio2.staticWaveformPreview')}</Typography>
         <StaticWaveform 
           file={audioFile} 
           width={600} 
@@ -562,7 +565,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
     )}
     {waveformData && audioBlob && (
       <Box sx={{ mt: 2 }}>
-        <Typography variant="caption" color="text.secondary">Recorded Audio Waveform:</Typography>
+        <Typography variant="caption" color="text.secondary">{t('components:recordingStudio2.recordedAudioWaveform')}</Typography>
         <StaticWaveform 
           waveformData={waveformData} 
           width={600} 
