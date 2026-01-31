@@ -46,6 +46,7 @@ import {
 } from 'react';
 import * as React from 'react';
 import {createPortal} from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { IS_APPLE } from '../utils/dom';
 import {CellContext} from '../plugins/TablePlugin';
 import {
@@ -325,6 +326,7 @@ function TableActionMenu({
   setSortingOptions,
   sortingOptions,
 }) {
+  const { t } = useTranslation('components');
   const dropDownRef = useRef<null | HTMLDivElement>(null);
 
   useEffect(() => {
@@ -388,7 +390,7 @@ function TableActionMenu({
           onClose();
         }}>
         <span className="text">
-          {cell.type === 'normal' ? 'Make header' : 'Remove header'}
+          {cell.type === 'normal' ? t('tableComponent.makeHeader') : t('tableComponent.removeHeader')}
         </span>
       </button>
       <button
@@ -401,7 +403,7 @@ function TableActionMenu({
           });
           onClose();
         }}>
-        <span className="text">Clear cell</span>
+        <span className="text">{t('tableComponent.clearCell')}</span>
       </button>
       <hr />
       {cell.type === 'header' && y === 0 && (
@@ -413,7 +415,7 @@ function TableActionMenu({
                 setSortingOptions(null);
                 onClose();
               }}>
-              <span className="text">Remove sorting</span>
+              <span className="text">{t('tableComponent.removeSorting')}</span>
             </button>
           )}
           {(sortingOptions === null ||
@@ -425,7 +427,7 @@ function TableActionMenu({
                 setSortingOptions({type: 'ascending', x});
                 onClose();
               }}>
-              <span className="text">Sort ascending</span>
+              <span className="text">{t('tableComponent.sortAscending')}</span>
             </button>
           )}
           {(sortingOptions === null ||
@@ -437,7 +439,7 @@ function TableActionMenu({
                 setSortingOptions({type: 'descending', x});
                 onClose();
               }}>
-              <span className="text">Sort descending</span>
+              <span className="text">{t('tableComponent.sortDescending')}</span>
             </button>
           )}
           <hr />
@@ -452,7 +454,7 @@ function TableActionMenu({
           });
           onClose();
         }}>
-        <span className="text">Insert row above</span>
+        <span className="text">{t('tableComponent.insertRowAbove')}</span>
       </button>
       <button
         className="item"
@@ -463,7 +465,7 @@ function TableActionMenu({
           });
           onClose();
         }}>
-        <span className="text">Insert row below</span>
+        <span className="text">{t('tableComponent.insertRowBelow')}</span>
       </button>
       <hr />
       <button
@@ -475,7 +477,7 @@ function TableActionMenu({
           });
           onClose();
         }}>
-        <span className="text">Insert column left</span>
+        <span className="text">{t('tableComponent.insertColumnLeft')}</span>
       </button>
       <button
         className="item"
@@ -486,7 +488,7 @@ function TableActionMenu({
           });
           onClose();
         }}>
-        <span className="text">Insert column right</span>
+        <span className="text">{t('tableComponent.insertColumnRight')}</span>
       </button>
       <hr />
       {rows[0].cells.length !== 1 && (
@@ -499,7 +501,7 @@ function TableActionMenu({
             });
             onClose();
           }}>
-          <span className="text">Delete column</span>
+          <span className="text">{t('tableComponent.deleteColumn')}</span>
         </button>
       )}
       {rows.length !== 1 && (
@@ -512,7 +514,7 @@ function TableActionMenu({
             });
             onClose();
           }}>
-          <span className="text">Delete row</span>
+          <span className="text">{t('tableComponent.deleteRow')}</span>
         </button>
       )}
       <button
@@ -525,7 +527,7 @@ function TableActionMenu({
           });
           onClose();
         }}>
-        <span className="text">Delete table</span>
+        <span className="text">{t('tableComponent.deleteTable')}</span>
       </button>
     </div>
   );
@@ -603,8 +605,8 @@ function TableCell({
               setShowMenu(!showMenu);
               e.stopPropagation();
             }}
-            aria-label="Table cell actions"
-            title="Add/remove columns and rows">
+            aria-label={t('tableComponent.cellActionsLabel')}
+            title={t('tableComponent.cellActionsTitle')}>
             <i className="chevron-down" />
           </button>
         </div>

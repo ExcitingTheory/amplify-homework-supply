@@ -27,6 +27,7 @@ import {
     Collapse,
     Tooltip,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import {
     Download as ImportIcon,
     CheckCircle as CheckCircleIcon,
@@ -471,6 +472,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
     onImportComplete,
     searchTerm = '',
 }) => {
+    const { t } = useTranslation('components');
     const [parsedContent, setParsedContent] = useState<any>(null);
     const [document, setDocument] = useState<any>(null);
     const [vocabularyItems, setVocabularyItems] = useState<VocabularyItem[]>([]);
@@ -671,7 +673,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
             <Box sx={{ p: 2 }}>
                 <LinearProgress />
                 <Typography variant="body2" sx={{ mt: 1, textAlign: 'center' }}>
-                    Loading vocabulary...
+                    {t('vocabularyReview.loading')}
                 </Typography>
             </Box>
         );
@@ -681,7 +683,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
         return (
             <Box sx={{ p: 2 }}>
                 <Alert severity="info">
-                    No vocabulary found for this document.
+                    {t('vocabularyReview.noVocabulary')}
                 </Alert>
             </Box>
         );
@@ -694,24 +696,28 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
             {/* Header */}
             <Box sx={{ p: 2, flexShrink: 0 }}>
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                    Vocabulary Review
+                    {t('vocabularyReview.sectionHeading')}
                 </Typography>
                 {document && (
                     <Typography variant="body2" color="text.secondary" gutterBottom>
-                        From: {document.filename}
-                        {document.pageCount && ` (${document.pageCount} pages)`}
+                        {t('vocabularyReview.from')}: {document.filename}
+                        {document.pageCount && ` (${document.pageCount} ${t('vocabularyReview.pages')})`}
                     </Typography>
                 )}
                 
                 {alreadyImported && (
                     <Alert severity="success" sx={{ mt: 1 }} icon={<CheckCircleIcon />}>
-                        Imported on {new Date(parsedContent.importedAt).toLocaleString()}
+                        {t('vocabularyReview.importedOn', { date: new Date(parsedContent.importedAt).toLocaleString() })}
                     </Alert>
                 )}
                 
                 {searchTerm && (
                     <Alert severity="info" sx={{ mt: 1 }} icon={<InfoIcon />}>
-                        Filtering by search: "{searchTerm}" ({filteredVocabulary.length} of {vocabularyItems.length} items)
+                        {t('vocabularyReview.filteringBySearch', { 
+                            searchTerm, 
+                            count: filteredVocabulary.length, 
+                            total: vocabularyItems.length 
+                        })}
                     </Alert>
                 )}
             </Box>
@@ -725,14 +731,14 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
                         endIcon={showSummaries ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                         variant="outlined"
                     >
-                        {showSummaries ? 'Hide' : 'Show'} Summaries & Objectives
+                        {showSummaries ? t('vocabularyReview.hide') : t('vocabularyReview.show')} {t('vocabularyReview.summariesAndObjectives')}
                     </Button>
                     <Collapse in={showSummaries}>
                         <Paper elevation={0} sx={{ p: 2, mt: 1, bgcolor: 'grey.50' }}>
                             {summaries.length > 0 && (
                                 <Box sx={{ mb: 2 }}>
                                     <Typography variant="subtitle2" gutterBottom fontWeight={600}>
-                                        Summaries
+                                        {t('vocabularyReview.summaries')}
                                     </Typography>
                                     {summaries.map((summary, i) => (
                                         <Box key={i} sx={{ mb: 1 }}>
@@ -749,7 +755,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
                             {objectives.length > 0 && (
                                 <Box>
                                     <Typography variant="subtitle2" gutterBottom fontWeight={600}>
-                                        Learning Objectives
+                                        {t('vocabularyReview.learningObjectives')}
                                     </Typography>
                                     <List dense>
                                         {objectives.map((obj, i) => (
@@ -775,10 +781,10 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
                         size="small"
                         onClick={toggleAll}
                     >
-                        {selectedItems.size === vocabularyItems.length ? 'Deselect All' : 'Select All'}
+                        {selectedItems.size === vocabularyItems.length ? t('vocabularyReview.deselectAll') : t('vocabularyReview.selectAll')}
                     </Button>
                     <Typography variant="body2" color="text.secondary">
-                        {selectedItems.size} of {vocabularyItems.length} selected
+                        {t('vocabularyReview.selectedCount', { count: selectedItems.size, total: vocabularyItems.length })}
                     </Typography>
                     <Box sx={{ flex: 1 }} />
                     <Button
@@ -787,7 +793,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
                         onClick={handleImport}
                         disabled={importing || selectedItems.size === 0}
                     >
-                        Import to Dictionary
+                        {t('vocabularyReview.importToDictionary')}
                     </Button>
                 </Box>
             )}

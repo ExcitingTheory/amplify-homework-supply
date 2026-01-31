@@ -1601,7 +1601,7 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
             audio.play();
             setWorking(false);
             setNewDescription('');
-            setPreviewMessage('Successfully generated audio file');
+            setPreviewMessage(t('fileManager2.generators.successfullyGeneratedAudio'));
         });
     }, [audioSrc]);
 
@@ -1672,7 +1672,7 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
 
                             setIsOpen(true);
                             setWorking(true);
-                            setPreviewMessage('Generating audio file...');
+                            setPreviewMessage(t('fileManager2.generators.generatingAudio'));
 
                             const {
                                 identityId,
@@ -1709,7 +1709,7 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
                                 console.error('fileGenerator', fileGenerator);
                                 // send error message to preview modal
 
-                                setPreviewMessage('Error generating audio file');
+                                setPreviewMessage(t('fileManager2.generators.errorGeneratingAudio'));
                                 setWorking(false);
                             }
 
@@ -2418,6 +2418,7 @@ function SelectedFileView({ selectedFile, documentStatus, search, editor }) {
  * Handles finding the selected file and wrapping with Suspense
  */
 function SelectedFileDetailsPanel({ selectedItems, files, documentStatuses, search, editor }) {
+    const { t } = useTranslation('components');
     if (selectedItems.size === 0) {
         return (
             <Box
@@ -2430,7 +2431,7 @@ function SelectedFileDetailsPanel({ selectedItems, files, documentStatuses, sear
                 }}
             >
                 <Typography variant="body2">
-                    Select a file to view details and metadata
+                    {t('fileManager2.selectedFileDetails.emptyState')}
                 </Typography>
             </Box>
         );
@@ -2465,6 +2466,7 @@ function SelectedFileDetailsPanel({ selectedItems, files, documentStatuses, sear
 
 export default function FileManager2() {
     console.log('[FileManager2] Component render started');
+    const { t } = useTranslation('components');
     const [editor] = useLexicalComposerContext();
     const [search, setSearch] = React.useState('');
     const [searchMode, setSearchMode] = React.useState('hybrid'); // 'keyword', 'semantic', 'hybrid'
@@ -3410,7 +3412,7 @@ export default function FileManager2() {
                         }}
                     >
                         <Box sx={{ display: 'flex', gap: 0, alignItems: 'center' }}>
-                            <Tooltip title="Select All">
+                            <Tooltip title={t('fileManager2.toolbar.selectAllTooltip')}>
                                 <span>
                                     <Checkbox
                                         size="small"
@@ -3442,7 +3444,7 @@ export default function FileManager2() {
                             value={search}
                             onInput={handleSearch}
                             size="small"
-                            placeholder="Search files..."
+                            placeholder={t('fileManager2.toolbar.searchPlaceholder')}
                             sx={{ flex: 1, minWidth: '100px', mx: 1 }}
                             InputProps={{
                                 startAdornment: (
@@ -3453,7 +3455,7 @@ export default function FileManager2() {
                             }}
                         />
 
-                        <Tooltip title="Upload Files">
+                        <Tooltip title={t('fileManager2.toolbar.uploadTooltip')}>
                             <IconButton
                                 onClick={() => {
                                     document.getElementById('file-upload-input')?.click();
@@ -3465,7 +3467,7 @@ export default function FileManager2() {
                             </IconButton>
                         </Tooltip>
 
-                        <Tooltip title="Actions">
+                        <Tooltip title={t('fileManager2.toolbar.actionsTooltip')}>
                             <span>
                                 <IconButton
                                     onClick={(e) =>
@@ -3497,7 +3499,7 @@ export default function FileManager2() {
                                     setContextMenu(null);
                                 }}
                             >
-                                Deselect All
+                                {t('fileManager2.contextMenu.deselectAll')}
                             </MenuItem>
 
                             {/**
@@ -3508,7 +3510,7 @@ export default function FileManager2() {
                                     setContextMenu(null);
                                     setConfirmDialog({
                                         open: true,
-                                        message: `Delete ${selectedItems.size} selected file(s)?`,
+                                        message: t('fileManager2.contextMenu.deleteConfirmMessage', { count: selectedItems.size }),
                                         severity: 'error',
                                         onConfirm: async () => {
                                             for (const fileId of selectedItems) {
@@ -3524,7 +3526,7 @@ export default function FileManager2() {
                                 }}
                             >
                                 <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
-                                Delete Selected ({selectedItems.size})
+                                {t('fileManager2.contextMenu.deleteSelected', { count: selectedItems.size })}
                             </MenuItem>
 
                             {/**
@@ -3556,7 +3558,7 @@ export default function FileManager2() {
                                 }}
                             >
                                 <AutorenewIcon fontSize="small" sx={{ mr: 1 }} />
-                                Re-analyze Selected ({selectedItems.size})
+                                {t('fileManager2.contextMenu.reAnalyzeSelected', { count: selectedItems.size })}
                             </MenuItem>
                         </Menu>
                     </Box>
@@ -3584,7 +3586,7 @@ export default function FileManager2() {
                                 p: 3,
                                 color: 'text.secondary'
                             }}>
-                                <Typography>No files available. Upload files to get started.</Typography>
+                                <Typography>{t('fileManager2.mainView.noFilesMessage')}</Typography>
                             </Box>
                         ) : (<>
                             <Box
