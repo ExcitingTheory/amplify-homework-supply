@@ -8,6 +8,7 @@
 
 import * as React from 'react';
 import { useEffect, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import UnitContext from '../../../context/unitContext';
 import {
@@ -28,6 +29,7 @@ import {
  * @returns {JSX.Element} Unit completion modal component
  */
 export default function UnitCompletedPlugin() {
+    const { t } = useTranslation('components');
 
     const {
         name,
@@ -84,7 +86,7 @@ export default function UnitCompletedPlugin() {
                     margin: '2rem 0.5rem 0.5rem',
 
                 }}>
-                    {`${name}`} Completed
+                    {t('unitCompletedPlugin.completionMessage')} {name}
                 </Typography>
 
                 {/* <Typography variant="h6" component="h6" sx={{
@@ -100,7 +102,7 @@ export default function UnitCompletedPlugin() {
                     textAlign: 'center',
                     // margin: '1rem',
                 }}>
-                    Top Grades
+                    {t('unitCompletedPlugin.sectionHeading')}
                 </Typography>
 
                 <style global jsx>{`
@@ -204,7 +206,7 @@ export default function UnitCompletedPlugin() {
                             setShowUnitComplete(false)
                         }}
                     >
-                        Close
+                        {t('unitCompletedPlugin.continueButton')}
                     </Button>
                 </Box>
             </Card>
