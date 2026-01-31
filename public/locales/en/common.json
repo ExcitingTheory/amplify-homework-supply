@@ -71,7 +71,20 @@
         "Dismiss",
         "Close",
         "Back"
-      ]
+      ],
+      "_meta": {
+        "context": "Used in MainToolbar.js component",
+        "component": {
+          "location": [
+            "components/MainToolbar.js"
+          ],
+          "functionality": "Component functionality not documented"
+        },
+        "usage": "Button label for cancel action",
+        "impact": "Triggers cancel action when clicked",
+        "userType": "all",
+        "category": "button"
+      }
     },
     "delete": {
       "value": "Delete",
@@ -458,7 +471,20 @@
         "Main",
         "Dashboard",
         "Start"
-      ]
+      ],
+      "_meta": {
+        "context": "Used in MainToolbar.js component",
+        "component": {
+          "location": [
+            "components/MainToolbar.js"
+          ],
+          "functionality": "Component functionality not documented"
+        },
+        "usage": "Navigation item for home",
+        "impact": "Provides navigation information to users",
+        "userType": "all",
+        "category": "navigation"
+      }
     },
     "units": {
       "value": "Units",
@@ -476,7 +502,20 @@
         "Modules",
         "Chapters",
         "Sections"
-      ]
+      ],
+      "_meta": {
+        "context": "Used in MainToolbar.js component",
+        "component": {
+          "location": [
+            "components/MainToolbar.js"
+          ],
+          "functionality": "Component functionality not documented"
+        },
+        "usage": "Navigation item for units",
+        "impact": "Provides navigation information to users",
+        "userType": "all",
+        "category": "navigation"
+      }
     },
     "sections": {
       "value": "Sections",
@@ -494,7 +533,20 @@
         "Divisions",
         "Segments",
         "Areas"
-      ]
+      ],
+      "_meta": {
+        "context": "Used in MainToolbar.js component",
+        "component": {
+          "location": [
+            "components/MainToolbar.js"
+          ],
+          "functionality": "Component functionality not documented"
+        },
+        "usage": "Navigation item for sections",
+        "impact": "Provides navigation information to users",
+        "userType": "all",
+        "category": "navigation"
+      }
     },
     "grades": {
       "value": "Grades",
@@ -530,7 +582,20 @@
         "User Info",
         "My Profile",
         "Settings"
-      ]
+      ],
+      "_meta": {
+        "context": "Used in MainToolbar.js component",
+        "component": {
+          "location": [
+            "components/MainToolbar.js"
+          ],
+          "functionality": "Component functionality not documented"
+        },
+        "usage": "Navigation item for profile",
+        "impact": "Provides navigation information to users",
+        "userType": "all",
+        "category": "navigation"
+      }
     },
     "workbook": {
       "value": "Workbook",
@@ -984,5 +1049,9 @@
         "Learn More"
       ]
     }
+  },
+  "mainToolbar": {
+    "settings": {},
+    "addToSection": {}
   }
 }

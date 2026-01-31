@@ -73,6 +73,7 @@ import {
 } from 'lexical';
 import { useCallback, useEffect, useState, useContext, useRef } from 'react';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import Head from 'next/head'
 import { useRouter } from 'next/router'
@@ -352,6 +353,7 @@ const LAYOUTS = [
 
 
 function LayoutModal({editor}) {
+    const { t } = useTranslation('components');
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -388,7 +390,7 @@ function LayoutModal({editor}) {
         >
 
                  <ColumnsIcon />
-              <span className="text">Columns Layout</span>
+              <span className="text">{t('toolBarPlugin.columnsLayout')}</span>
             </MenuItem>
             <Box sx={{
                 display: 'flex',
@@ -411,7 +413,7 @@ function LayoutModal({editor}) {
 
                     }}>
                         <Typography id="modal-modal-title" variant="h6" component="h2">
-                            Choose a layout
+                            {t('toolBarPlugin.chooseLayout')}
                         </Typography>
 
                         <Select
@@ -449,7 +451,7 @@ function LayoutModal({editor}) {
                                 overflowY: 'auto'
                             }}
                         >
-                            <Button variant='contained' color='primary' onClick={onClick}>Insert</Button>
+                            <Button variant='contained' color='primary' onClick={onClick}>{t('toolBarPlugin.insert')}</Button>
                         </Stack>
 
                     </Card>
@@ -461,6 +463,7 @@ function LayoutModal({editor}) {
 }
 
 function DeleteModal() {
+    const { t } = useTranslation('components');
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -501,7 +504,7 @@ function DeleteModal() {
 
                     }}>
                         <Typography id="modal-modal-title" variant="h6" component="h2">
-                            Are you sure you want to delete this Unit?
+                            {t('toolBarPlugin.deleteUnitConfirmation')}
                         </Typography>
                         <Stack
                             direction="row"
@@ -513,9 +516,9 @@ function DeleteModal() {
                                 overflowY: 'auto'
                             }}
                         >
-                            <Button variant='contained' color='error' onClick={handleDelete}>Delete</Button>
+                            <Button variant='contained' color='error' onClick={handleDelete}>{t('toolBarPlugin.delete')}</Button>
                             <Box sx={{ margin: '1rem' }} />
-                            <Button variant='contained' color='primary' onClick={handleClose}>Cancel</Button>
+                            <Button variant='contained' color='primary' onClick={handleClose}>{t('toolBarPlugin.cancel')}</Button>
                         </Stack>
 
                     </Card>
@@ -557,6 +560,7 @@ const IFrame = ({
 
 
 const PreviewModal = () => {
+    const { t } = useTranslation('components');
     const {
         name,
         unit,
@@ -603,7 +607,7 @@ const PreviewModal = () => {
                                 width: '100%',
                             }}
                         >
-                            Close Preview of {name || 'Untitled Unit'}
+                            {t('toolBarPlugin.closePreview', { name: name || t('toolBarPlugin.untitledUnit') })}
                         </Button>
                     </CardContent>
 
@@ -625,6 +629,7 @@ const PreviewModal = () => {
 
 
 const UnitTitleDescriptionEditor = () => {
+    const { t } = useTranslation('components');
     const {
         name,
         description,
@@ -669,7 +674,7 @@ const UnitTitleDescriptionEditor = () => {
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1, lineHeight: '2rem', borderBottom: '1px solid transparent', pb: '2px' }} onClick={(event) => {
                         setEditName(true)
                     }}>
-                        {newName || 'Untitled Unit'}
+                        {newName || t('toolBarPlugin.untitledUnit')}
                     </Typography>
                 }
                 {editName &&
@@ -678,7 +683,7 @@ const UnitTitleDescriptionEditor = () => {
                         variant='standard'
                         fullWidth
                         value={newName || ''}
-                        placeholder='Untitled Unit'
+                        placeholder={t('toolBarPlugin.untitledUnit')}
                         onChange={(event) => { onNameChange(event) }}
                         InputProps={{
                             sx: { fontSize: '1.25rem', fontWeight: 400 }
@@ -690,7 +695,7 @@ const UnitTitleDescriptionEditor = () => {
                         }}
                         onBlur={async (event) => {
                             event.preventDefault()
-                            await saveName(newName || 'Untitled Unit')
+                            await saveName(newName || t('toolBarPlugin.untitledUnit'))
                             setEditName(false)
                             // console.log('name saved', name)
                         }}
@@ -704,7 +709,7 @@ const UnitTitleDescriptionEditor = () => {
                         // event.preventDefault()
                         setEditDescription(true)
                     }}>
-                        {newDescription || 'Add Description'}
+                        {newDescription || t('toolBarPlugin.addDescription')}
                     </Typography>
                 }
                 {editDescription &&
@@ -714,7 +719,7 @@ const UnitTitleDescriptionEditor = () => {
                         fullWidth
                         // label={`Answer ${index + 1}`}
                         value={newDescription || ''}
-                        placeholder='Add Description'
+                        placeholder={t('toolBarPlugin.addDescription')}
                         onChange={(event) => { onDescriptionChange(event) }}
                         InputProps={{
                             sx: { fontSize: '0.875rem' }
@@ -726,7 +731,7 @@ const UnitTitleDescriptionEditor = () => {
                         }}
                         onBlur={async (event) => {
                             event.preventDefault()
-                            await saveDescription(newDescription || 'Add Description')
+                            await saveDescription(newDescription || t('toolBarPlugin.addDescription'))
                             setEditDescription(false)
                             // console.log('description saved', description)
                         }}
@@ -738,6 +743,7 @@ const UnitTitleDescriptionEditor = () => {
 }
 
 const StatusSelect = () => {
+    const { t } = useTranslation('components');
     const {
         unit,
         handleStatusChange
@@ -785,12 +791,12 @@ const StatusSelect = () => {
                 style={{ minWidth: '7rem', margin: '0.25rem' }}
             >
                 <FormControl fullWidth>
-                    <InputLabel id="formatting-select-label">Status</InputLabel>
+                    <InputLabel id="formatting-select-label">{t('toolBarPlugin.status')}</InputLabel>
                     <Select
                         labelId="status-select-label"
                         id="status-select"
                         value={status}
-                        label="Status"
+                        label={t('toolBarPlugin.status')}
                         onChange={handleChange}
                     >
 
@@ -799,7 +805,7 @@ const StatusSelect = () => {
                             tabIndex={-1}
                         >
                             <DraftIcon />&nbsp;
-                            <span className='text'>Draft</span>
+                            <span className='text'>{t('toolBarPlugin.draft')}</span>
                         </MenuItem>
 
                         <MenuItem
@@ -807,7 +813,7 @@ const StatusSelect = () => {
                             tabIndex={-1}
                         >
                             <PublishedIcon />&nbsp;
-                            <span className='text'>Published</span>
+                            <span className='text'>{t('toolBarPlugin.published')}</span>
                         </MenuItem>
 
                         <MenuItem
@@ -815,7 +821,7 @@ const StatusSelect = () => {
                             tabIndex={-1}
                         >
                             <ArchivedIcon />&nbsp;
-                            <span className='text'>Archived</span>
+                            <span className='text'>{t('toolBarPlugin.archived')}</span>
                         </MenuItem>
 
 
@@ -832,6 +838,7 @@ const TextAlignmentDropdown = ({
     disabled = false,
     isRTL,
 }) => {
+    const { t } = useTranslation('components');
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -851,12 +858,12 @@ const TextAlignmentDropdown = ({
                 onClick={handleClick}
                 disabled={disabled}
                 className={'toolbar-item text-alignment'}
-                title="Text Alignment"
-                aria-label="Formatting options for text alignment"
+                title={t('toolBarPlugin.textAlignment')}
+                aria-label={t('toolBarPlugin.textFormatting')}
                 color='inherit'
             >
                 <FormatAlignLeftIcon />&nbsp;
-                <span className="text">Align</span>
+                <span className="text">{t('toolBarPlugin.align')}</span>
             </Button>
             <Menu
                 disabled={disabled}
@@ -876,7 +883,7 @@ const TextAlignmentDropdown = ({
                     label="Left Align"
                 >
                     <FormatAlignLeftIcon />&nbsp;
-                    <span className="text">Left Align</span>
+                    <span className="text">{t('toolBarPlugin.alignLeft')}</span>
                 </MenuItem>
                 <MenuItem
                     tabIndex={-1}
@@ -888,7 +895,7 @@ const TextAlignmentDropdown = ({
                     label="Center Align"
                 >
                     <FormatAlignCenterIcon />&nbsp;
-                    <span className="text">Center Align</span>
+                    <span className="text">{t('toolBarPlugin.alignCenter')}</span>
                 </MenuItem>
                 <MenuItem
                     tabIndex={-1}
@@ -900,7 +907,7 @@ const TextAlignmentDropdown = ({
                     label="Right Align"
                 >
                     <FormatAlignRightIcon />&nbsp;
-                    <span className="text">Right Align</span>
+                    <span className="text">{t('toolBarPlugin.alignRight')}</span>
                 </MenuItem>
                 <MenuItem
                     tabIndex={-1}
@@ -912,7 +919,7 @@ const TextAlignmentDropdown = ({
                     label="Justify Align"
                 >
                     <FormatAlignJustifyIcon />&nbsp;
-                    <span className="text">Justify Align</span>
+                    <span className="text">{t('toolBarPlugin.justifyAlign')}</span>
                 </MenuItem>
                 <Divider />
                 <MenuItem
@@ -931,7 +938,7 @@ const TextAlignmentDropdown = ({
                         <FormatIndentDecreaseIcon />
                     )
                     }
-                    <span className="text">Outdent</span>
+                    <span className="text">{t('toolBarPlugin.outdent')}</span>
                 </MenuItem>
                 <MenuItem
                     tabIndex={-1}
@@ -950,7 +957,7 @@ const TextAlignmentDropdown = ({
                         <FormatIndentIncreaseIcon />
                     )
                     }
-                    <span className="text">Indent</span>
+                    <span className="text">{t('toolBarPlugin.indent')}</span>
                 </MenuItem>
             </Menu>
         </>
@@ -1024,6 +1031,7 @@ const InsertNodeDropDown = ({
     setTabValue,
     setOpenTab,
 }) => {
+    const { t } = useTranslation('components');
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -1043,12 +1051,12 @@ const InsertNodeDropDown = ({
                 onClick={handleClick}
                 disabled={disabled}
                 // className={'insert-node'}
-                title="Insert Item"
+                title={t('toolBarPlugin.insert')}
                 aria-label="Insert Item Menu"
                 color='inherit'
             >
                 <AddIcon />&nbsp;
-                <span className="text">Insert</span>
+                <span className="text">{t('toolBarPlugin.insert')}</span>
             </Button>
             <Menu
                 open={open}
@@ -1067,7 +1075,7 @@ const InsertNodeDropDown = ({
                     title="Due Date"
                     aria-label="Due Date">
                     <CalendarIcon />&nbsp;
-                    <span className="text">Due Date</span>
+                    <span className="text">{t('toolBarPlugin.dueDate')}</span>
 
                 </MenuItem>
 
@@ -1082,7 +1090,7 @@ const InsertNodeDropDown = ({
                     title="Timer"
                     aria-label="Timer">
                     <TimerIcon />&nbsp;
-                    <span className="text">Timer</span>
+                    <span className="text">{t('toolBarPlugin.timer')}</span>
 
                 </MenuItem>
 
@@ -1097,7 +1105,7 @@ const InsertNodeDropDown = ({
                     title="Meaning Association"
                     aria-label="Meaning Association">
                     <WordBlockIcon />&nbsp;
-                    <span className="text">Meaning Association</span>
+                    <span className="text">{t('toolBarPlugin.meaningAssociation')}</span>
                 </MenuItem>
 
                 <MenuItem
@@ -1112,7 +1120,7 @@ const InsertNodeDropDown = ({
                     title="Word Block"
                     aria-label="Insert Word Block">
                     <FontDownloadIcon />&nbsp;
-                    <span className="text">Word Block</span>
+                    <span className="text">{t('toolBarPlugin.wordBlock')}</span>
                 </MenuItem>
 
                  {/**
@@ -1131,7 +1139,7 @@ const InsertNodeDropDown = ({
                     title="Short Answer"
                     aria-label="Short Answer based on Vocabulary words">
                     <FormatSizeIcon />&nbsp;
-                    <span className="text">Short Answer: Vocabulary</span>
+                    <span className="text">{t('toolBarPlugin.shortAnswerVocabulary')}</span>
                 </MenuItem>
 
                 <MenuItem
@@ -1146,7 +1154,7 @@ const InsertNodeDropDown = ({
                     title="Short Answer"
                     aria-label="Short Answer based on custom prompts">
                     <FormatSizeIcon />&nbsp;
-                    <span className="text">Short Answer: Custom</span>
+                    <span className="text">{t('toolBarPlugin.shortAnswerCustom')}</span>
                 </MenuItem>
 
                 {/**
@@ -1179,7 +1187,7 @@ const InsertNodeDropDown = ({
                     title="Audio"
                     aria-label="Audio">
                     <AudiotrackIcon />&nbsp;
-                    <span className="text">Audio Playlist</span>
+                    <span className="text">{t('toolBarPlugin.audioPlaylist')}</span>
                 </MenuItem>
 
                 <MenuItem
@@ -1193,7 +1201,7 @@ const InsertNodeDropDown = ({
                     title="Quiz"
                     aria-label="Quiz">
                     <QuizIcon />&nbsp;
-                    <span className="text">Multiple Choice Quiz</span>
+                    <span className="text">{t('toolBarPlugin.multipleChoiceQuiz')}</span>
                 </MenuItem>
 
                 <MenuItem
@@ -1206,7 +1214,7 @@ const InsertNodeDropDown = ({
                     }}
                     className="item">
                     <HorizontalRuleIcon />&nbsp;
-                    <span className="text">Horizontal Rule</span>
+                    <span className="text">{t('toolBarPlugin.horizontalRule')}</span>
                 </MenuItem>
 
             <LayoutModal
@@ -1240,6 +1248,7 @@ function TextFormatDropDown({
     isSuperscript,
     clearFormatting,
 }) {
+    const { t } = useTranslation('components');
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -1260,12 +1269,12 @@ function TextFormatDropDown({
                 onClick={handleClick}
                 disabled={disabled}
                 className={'toolbar-item ' + style}
-                title="More Text Formatting"
-                aria-label="Formatting options for text styles"
+                title={t('toolBarPlugin.moreTextFormatting')}
+                aria-label={t('toolBarPlugin.formatTextStyles')}
                 color='inherit'
             >
                 <MoreVertIcon />
-                <span className="text">Text</span>
+                <span className="text">{t('toolBarPlugin.text')}</span>
             </Button>
             <Menu
                 open={open}
@@ -1283,10 +1292,10 @@ function TextFormatDropDown({
                         handleClose();
                     }}
                     className={isStrikethrough ? 'active' : ''}
-                    title="Strikethrough"
-                    aria-label="Format text with a strikethrough">
+                    title={t('toolBarPlugin.strikethroughTitle')}
+                    aria-label={t('toolBarPlugin.formatStrikethrough')}>
                     <FormatStrikethroughIcon />&nbsp;
-                    <span className="text">Strikethrough</span>
+                    <span className="text">{t('toolBarPlugin.strikethrough')}</span>
 
                 </MenuItem>
                 <MenuItem
@@ -1297,10 +1306,10 @@ function TextFormatDropDown({
                         handleClose();
                     }}
                     className={isSubscript ? 'active' : ''}
-                    title="Subscript"
-                    aria-label="Format text with a subscript">
+                    title={t('toolBarPlugin.subscript')}
+                    aria-label={t('toolBarPlugin.formatSubscript')}>
                     <SubscriptIcon />&nbsp;
-                    <span className="text">Subscript</span>
+                    <span className="text">{t('toolBarPlugin.subscript')}</span>
                 </MenuItem>
                 <MenuItem
                     tabIndex={-1}
@@ -1313,10 +1322,10 @@ function TextFormatDropDown({
                         handleClose();
                     }}
                     className={isSuperscript ? 'active' : ''}
-                    title="Superscript"
-                    aria-label="Format text with a superscript">
+                    title={t('toolBarPlugin.superscript')}
+                    aria-label={t('toolBarPlugin.formatSuperscript')}>
                     <SuperscriptIcon />&nbsp;
-                    <span className="text">Superscript</span>
+                    <span className="text">{t('toolBarPlugin.superscript')}</span>
                 </MenuItem>
                 <MenuItem
                     tabIndex={-1}
@@ -1326,10 +1335,10 @@ function TextFormatDropDown({
                         handleClose();
                     }}
                     className="item"
-                    title="Clear text formatting"
-                    aria-label="Clear all text formatting">
+                    title={t('toolBarPlugin.clearTextFormatting')}
+                    aria-label={t('toolBarPlugin.clearAllTextFormatting')}>
                     <FormatClearIcon />&nbsp;
-                    <span className="text">Clear Formatting</span>
+                    <span className="text">{t('toolBarPlugin.clearFormatting')}</span>
                 </MenuItem>
             </Menu>
         </>
@@ -1606,6 +1615,7 @@ function FontDropDown({
     style,
     disabled = false,
 }) {
+    const { t } = useTranslation('components');
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const handleClose = () => {
@@ -1636,8 +1646,8 @@ function FontDropDown({
 
     const buttonAriaLabel =
         style === 'font-family'
-            ? 'Formatting options for font family'
-            : 'Formatting options for font size';
+            ? t('toolBarPlugin.formattingFont')
+            : t('toolBarPlugin.formattingSize');
 
     return (
         <>
@@ -1654,7 +1664,7 @@ function FontDropDown({
                 onClick={handleOpen}
                 disabled={disabled}
                 className={'toolbar-item ' + style}
-                title={style === 'font-family' ? 'Font' : 'Size'}
+                title={style === 'font-family' ? t('toolBarPlugin.font') : t('toolBarPlugin.size')}
                 aria-label={buttonAriaLabel}
                 color='inherit'
             >
@@ -1664,7 +1674,7 @@ function FontDropDown({
                     <FormatSizeIcon />
                 )}
                 <span className="text">
-                    {style === 'font-family' ? 'Font' : 'Size'}
+                    {style === 'font-family' ? t('toolBarPlugin.font') : t('toolBarPlugin.size')}
                 </span>
             </Button>
             <Menu
@@ -1705,6 +1715,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
     setOpen,
     setTabValue,
 }, ref) {
+    const { t } = useTranslation('components');
     const [editor] = useLexicalComposerContext();
     const [activeEditor, setActiveEditor] = useState(editor);
     const [blockType, setBlockType] =
@@ -2224,7 +2235,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                         onClick={() => {
                             activeEditor.dispatchCommand(UNDO_COMMAND, undefined);
                         }}
-                        title={IS_APPLE ? 'Undo (⌘Z)' : 'Undo (Ctrl+Z)'}
+                        title={IS_APPLE ? t('toolBarPlugin.undo') + ' (⌘Z)' : t('toolBarPlugin.undo') + ' (Ctrl+Z)'}
 
                     >
                         <UndoIcon />
@@ -2235,7 +2246,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                         onClick={() => {
                             activeEditor.dispatchCommand(REDO_COMMAND, undefined);
                         }}
-                        title={IS_APPLE ? 'Redo (⌘Y)' : 'Redo (Ctrl+Y)'}
+                        title={IS_APPLE ? t('toolBarPlugin.redo') + ' (⌘Y)' : t('toolBarPlugin.redo') + ' (Ctrl+Y)'}
 
                     >
                         <RedoIcon />
@@ -2272,10 +2283,9 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                             activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold');
                         }}
                         className={(isBold ? 'active' : '')}
-                        title={IS_APPLE ? 'Bold (⌘B)' : 'Bold (Ctrl+B)'}
+                        title={IS_APPLE ? t('toolBarPlugin.bold') + ' (⌘B)' : t('toolBarPlugin.bold') + ' (Ctrl+B)'}
                         type="button"
-                        aria-label={`Format text as bold. Shortcut: ${IS_APPLE ? '⌘B' : 'Ctrl+B'
-                            }`}>
+                        aria-label={t('toolBarPlugin.formatBold') + ` ${IS_APPLE ? '⌘B' : 'Ctrl+B'}`}>
                         <FormatBoldIcon />
                     </Button>
                     <Button
@@ -2285,10 +2295,9 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                             activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic');
                         }}
                         className={(isItalic ? 'active' : '')}
-                        title={IS_APPLE ? 'Italic (⌘I)' : 'Italic (Ctrl+I)'}
+                        title={IS_APPLE ? t('toolBarPlugin.italic') + ' (⌘I)' : t('toolBarPlugin.italic') + ' (Ctrl+I)'}
                         type="button"
-                        aria-label={`Format text as italics. Shortcut: ${IS_APPLE ? '⌘I' : 'Ctrl+I'
-                            }`}>
+                        aria-label={t('toolBarPlugin.formatItalic') + ` ${IS_APPLE ? '⌘I' : 'Ctrl+I'}`}>
                         <FormatItalicIcon />
                     </Button>
                     <Button
@@ -2298,16 +2307,15 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                             activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline');
                         }}
                         className={(isUnderline ? 'active' : '')}
-                        title={IS_APPLE ? 'Underline (⌘U)' : 'Underline (Ctrl+U)'}
+                        title={IS_APPLE ? t('toolBarPlugin.underline') + ' (⌘U)' : t('toolBarPlugin.underline') + ' (Ctrl+U)'}
                         type="button"
-                        aria-label={`Format text to underlined. Shortcut: ${IS_APPLE ? '⌘U' : 'Ctrl+U'
-                            }`}>
+                        aria-label={t('toolBarPlugin.formatUnderline') + ` ${IS_APPLE ? '⌘U' : 'Ctrl+U'}`}>
                         <FormatUnderlinedIcon />
                     </Button>
 
                     <DropdownColorPicker
                         disabled={!isEditable}
-                        buttonAriaLabel="Formatting text color"
+                        buttonAriaLabel={t('toolBarPlugin.formattingTextColor')}
                         color={fontColor}
                         onChange={onFontColorSelect}
                         title="text color"
@@ -2315,7 +2323,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                     />
                     <DropdownColorPicker
                         disabled={!isEditable}
-                        buttonAriaLabel="Formatting background color"
+                        buttonAriaLabel={t('toolBarPlugin.formattingBackgroundColor')}
                         color={bgColor}
                         onChange={onBgColorSelect}
                         title="bg color"
@@ -2347,8 +2355,8 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                         color="inherit"
                         onClick={insertLink}
                         className={(isLink ? 'active' : '')}
-                        aria-label="Insert link"
-                        title="Insert link"
+                        aria-label={t('toolBarPlugin.insertLink')}
+                        title={t('toolBarPlugin.insertLink')}
                     >
                         <AddLinkIcon />
                     </Button>
