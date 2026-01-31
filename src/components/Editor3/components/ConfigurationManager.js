@@ -7,6 +7,7 @@ import SettingsContext from "../../../context/settingsContext";
 import CameraIcon from '@mui/icons-material/Camera';
 import getCachedUrl from "../../../utils/getCachedUrl";
 import FilesContext from "../../../context/fileContext";
+import { useTranslation } from 'react-i18next';
 
 function FeaturedImage({ style, s3Key, identityId }) {
 
@@ -34,6 +35,7 @@ function FeaturedImage({ style, s3Key, identityId }) {
 
 export default function ConfigurationManager() {
 
+  const { t } = useTranslation('components');
   const [isDragging, setIsDragging] = React.useState(false);
   const [filesToUpload, setFilesToUpload] = React.useState([]);
   const [fileOperations, setFileOperations] = React.useState([]);
@@ -203,7 +205,7 @@ export default function ConfigurationManager() {
   >
     {/* PDF Analysis Settings */}
     <Typography variant="h6" sx={{ mb: 2, wordWrap: 'break-word', overflowWrap: 'break-word', maxWidth: '100%' }}>
-      PDF Analysis Settings
+      {t('configurationManager.pdfAnalysisSettings')}
     </Typography>
     <Box sx={{ mb: 3, maxWidth: '100%', display: 'flex', flexDirection: 'column' }}>
       <FormControlLabel
@@ -223,10 +225,10 @@ export default function ConfigurationManager() {
             disabled={loadingSettings}
           />
         }
-        label="Automatically analyze documents on upload"
+        label={t('configurationManager.autoAnalyzeLabel')}
       />
       <Typography variant="caption" display="block" color="text.secondary" sx={{ ml: 4, wordWrap: 'break-word', overflowWrap: 'break-word', maxWidth: '100%', whiteSpace: 'normal' }}>
-        When enabled, PDFs will be sent to OpenAI for vocabulary extraction immediately after upload.
+        {t('configurationManager.autoAnalyzeDescription')}
       </Typography>
     </Box>
     
@@ -288,10 +290,10 @@ export default function ConfigurationManager() {
           }}
         >
           {inProgress &&
-          `Uploading Image`
+          t('configurationManager.uploadingImage')
           }
           {isDragging &&
-          `Upload Image`
+          t('configurationManager.uploadImagePrompt')
           }
         </div>
       )}
@@ -308,7 +310,7 @@ export default function ConfigurationManager() {
           whiteSpace: 'normal',
         }}
       >
-        Set Featured Image
+        {t('configurationManager.setFeaturedImage')}
       </Typography>
 
       {/**
@@ -385,8 +387,9 @@ export default function ConfigurationManager() {
                 display: 'block',
               }}
             /><br />
-            No featured image set.
-            Drag and drop an image here to set it as the featured image.
+            {t('configurationManager.noFeaturedImage')}
+            {' '}
+            {t('configurationManager.dragDropPrompt')}
           </Typography>
         </Box>
       }

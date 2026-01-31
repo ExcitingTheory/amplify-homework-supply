@@ -16,17 +16,38 @@
   },
   "chatSidebar": {
     "errorRenderingMessage": "Error rendering message",
-    "dropFilesHere": "Drop files here...",
+    "chatInitFailure": "Chat initialization failed. Please refresh the page.",
+    "dropFilesHere": "Drop files here",
+    "attachFilesMessage": "Attach files to your message",
     "noResultsFound": "No results found",
     "showLess": "show less",
     "showMore": "show more",
     "searchHelper": "Search for content...",
     "cancel": "Cancel",
+    "confirm": "Confirm",
     "execute": "Execute",
     "confirmAndExecute": "Confirm & Execute",
     "emptyState": "No messages yet",
     "today": "Today",
     "yesterday": "Yesterday",
+    "history": "History",
+    "aiAssistant": "AI Assistant",
+    "backToChat": "Back to chat",
+    "chatHistory": "Chat history",
+    "newChat": "New chat",
+    "archiveChat": "Archive chat",
+    "noHistoryAvailable": "No history available",
+    "activeChats": "Active Chats",
+    "archivedChats": "Archived Chats",
+    "emptyChat": "Empty chat",
+    "cancelAnalysis": "Cancel analysis",
+    "reviewVocabulary": "Review vocabulary",
+    "removeFile": "Remove file",
+    "settingUpChat": "Setting up chat...",
+    "askMeAnything": "Ask me anything...",
+    "reviewImportVocabulary": "Review & Import Vocabulary",
+    "cancellingMessage": "Cancelling...",
+    "analysisCancelled": "Analysis cancelled",
     "contentPreview": {
       "insertButton": "Insert",
       "successMessage": "Content inserted successfully"
@@ -87,10 +108,14 @@
     "generateMore": "Generate More Suggestions"
   },
   "configurationManager": {
-    "pdfAnalysis": "PDF Analysis",
-    "featuredImage": "Featured Image",
-    "toggleOn": "On",
-    "toggleOff": "Off"
+    "pdfAnalysisSettings": "PDF Analysis Settings",
+    "autoAnalyzeLabel": "Automatically analyze documents on upload",
+    "autoAnalyzeDescription": "When enabled, PDFs will be sent to OpenAI for vocabulary extraction immediately after upload.",
+    "uploadingImage": "Uploading Image",
+    "uploadImagePrompt": "Upload Image",
+    "setFeaturedImage": "Set Featured Image",
+    "noFeaturedImage": "No featured image set.",
+    "dragDropPrompt": "Drag and drop an image here to set it as the featured image."
   },
   "documentUploader": {
     "uploadInstructions": "Upload a PDF document for analysis",
@@ -182,9 +207,14 @@
     "gradeDisplay": "Grade: {{score}}%"
   },
   "quizEditor": {
+    "edit": "Edit",
+    "reset": "Reset",
     "save": "Save",
     "cancel": "Cancel",
-    "gradeDisplay": "{{score}}%",
+    "done": "Done",
+    "invalid": "Invalid",
+    "addAnswer": "Add Answer",
+    "gradeDisplay": "Grade: {{score}}",
     "status": "Status"
   },
   "sketchPad": {
@@ -307,9 +337,30 @@
     "flaggedWithCategories": "Flagged: {{categories}}"
   },
   "moderationPanel": {
-    "title": "Moderation",
+    "title": "Content Moderation",
     "categoryDescription": "Review flagged content",
-    "warning": "This content requires review"
+    "warning": "This content requires review",
+    "alertMessage": "This content has been flagged by automated moderation. It has been saved, but may require review according to your institution's policies.",
+    "flaggedCategories": "Flagged Categories:",
+    "confidence": "Confidence: {{score}}%",
+    "checked": "Checked: {{date}}",
+    "model": "Model: {{model}}",
+    "disclaimerNote": "Automated moderation is not perfect. Please review this content in context and handle according to your institution's specific policies and local jurisdiction requirements.",
+    "disclaimerLabel": "Note:",
+    "categories": {
+      "hate": "Content promoting hate based on race, gender, ethnicity, religion, etc.",
+      "hate threatening": "Hateful content that includes violence or serious harm",
+      "harassment": "Content intended to harass, threaten, or bully an individual",
+      "harassment threatening": "Harassment content that includes violence or serious harm",
+      "self-harm": "Content promoting, encouraging, or depicting acts of self-harm",
+      "self-harm intent": "Content where someone expresses intent to engage in self-harm",
+      "self-harm instructions": "Content encouraging or providing instructions for self-harm",
+      "sexual": "Content meant to arouse sexual excitement",
+      "sexual minors": "Sexual content involving individuals under 18",
+      "violence": "Content depicting death, violence, or physical injury",
+      "violence graphic": "Graphic content depicting death, violence, or physical injury",
+      "fallback": "Content flagged in this category."
+    }
   },
   "questionBlock": {
     "submit": "Submit",
