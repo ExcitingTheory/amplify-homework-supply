@@ -356,36 +356,35 @@
   "verticalTabsRo": {
     "overflow": "hidden"
   },
-  "customAnswerComponent": {
-    "answerQuestions": "Answer the following questions:",
-    "text": "Text",
-    "audio": "Audio",
-    "writing": "Writing",
-    "question": "Question:",
-    "completedQuestion": "Completed Question",
-    "promptNotAvailable": "(prompt data not available)",
-    "yourAnswer": "Your answer: \"{{answer}}\"",
-    "audioQuestion": "Audio Question",
-    "answerPlaceholder": "Answer text",
-    "submit": "Submit",
-    "errorOccurred": "Error occurred",
-    "loading": "Loading...",
-    "questionDisplay": "Question",
-    "inputToggle": {
-      "text": "Text",
-      "audio": "Audio"
-    },
-    "feedback": {
-      "correct": "Correct!",
-      "incorrect": "Try again"
-    },
-    "submit": "Submit"
-  },
   "customAnswerEditor": {
-    "instructions": "Create custom answer",
+    "title": "Custom Answer Exercise",
+    "description": "Create a short answer exercise, that can prompt the user with a question and expect a short answer.",
+    "addWordLabel": "Add word to exercise",
+    "remove": "remove",
+    "dialogTitle": "Add a new question",
+    "dialogDescription": "Add a new question and answer pair.",
+    "ttsPreview": "Text to Speech Preview",
+    "audioPreview": "Audio Preview",
+    "promptLabel": "Prompt",
+    "answerLabel": "Answer",
+    "answerPlaceholder": "Answer",
+    "hintLabel": "Hint",
+    "hintPlaceholder": "Hint",
     "cancel": "Cancel",
-    "save": "Save",
-    "dialogTitle": "Custom Answer Editor"
+    "add": "Add",
+    "emptyState": "No questions have been added yet. Use the input above to add prompt and answer pairs.",
+    "generatingAudio": "Generating audio file...",
+    "successGeneratedAudio": "Successfully generated audio file",
+    "errorGeneratingAudio": "Error generating audio file",
+    "errorCreatingQuestion": "Error creating question",
+    "columnHeaders": {
+      "prompt": "Prompt",
+      "answer": "Answer",
+      "id": "ID",
+      "promptAudio": "Prompt Audio",
+      "answerAudio": "Answer Audio",
+      "hint": "Hint"
+    }
   },
   "fileMetadataComponent": {
     "collapse": "Collapse",
@@ -421,6 +420,16 @@
     "embedTitle": "Embed {{contentName}}",
     "embedOption": "Embed {{contentName}}",
     "embed": "Embed"
+  },
+  "floatingLinkEditorPlugin": {
+    "cancelLinkEditing": "Cancel link editing",
+    "linkUrl": "Link URL",
+    "confirmLink": "Confirm link",
+    "closeLinkEditor": "Close link editor",
+    "youtubeEmbed": "YouTube Embed",
+    "convertToYoutubeEmbed": "Convert to YouTube embed",
+    "editLink": "Edit link",
+    "removeLink": "Remove link"
   },
   "imagesPlugin": {
     "upload": "Upload Image",

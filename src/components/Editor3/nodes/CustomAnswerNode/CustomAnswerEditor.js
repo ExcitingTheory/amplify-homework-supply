@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { DataGrid } from '@mui/x-data-grid';
 
@@ -62,11 +63,11 @@ const filter = createFilterOptions();
 const client = generateClient();
 
 
-const columns = [
-    { field: 'prompt', headerName: 'Prompt', flex: 1, minWidth: 100 },
+const useColumns = (t) => [
+    { field: 'prompt', headerName: t('customAnswerEditor.columnHeaders.prompt'), flex: 1, minWidth: 100 },
     {
         field: 'answer',
-        headerName: 'Answer',
+        headerName: t('customAnswerEditor.columnHeaders.answer'),
         flex: 1, minWidth: 200
     },
     // {
@@ -86,7 +87,7 @@ const columns = [
     // },
     {
         field: 'id',
-        headerName: 'ID',
+        headerName: t('customAnswerEditor.columnHeaders.id'),
         flex: 1,
         minWidth: 100,
         sortable: false,
@@ -94,7 +95,7 @@ const columns = [
     },
     {
         field: 'promptAudio',
-        headerName: 'Prompt Audio',
+        headerName: t('customAnswerEditor.columnHeaders.promptAudio'),
         flex: 1,
         minWidth: 100,
         sortable: false,
@@ -102,7 +103,7 @@ const columns = [
     },
     {
         field: 'answerAudio',
-        headerName: 'Answer Audio',
+        headerName: t('customAnswerEditor.columnHeaders.answerAudio'),
         flex: 1,
         minWidth: 100,
         sortable: false,
@@ -110,7 +111,7 @@ const columns = [
     },
     {
         field: 'hint',
-        headerName: 'Hint',
+        headerName: t('customAnswerEditor.columnHeaders.hint'),
         flex: 1,
         minWidth: 100,
         sortable: false,
@@ -126,6 +127,7 @@ export default React.memo(function CustomAnswerEditor({
     promptMethod,
     allowedInput,
 }) {
+    const { t } = useTranslation('components');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     // const [rows, setRows] = React.useState([]);
@@ -176,6 +178,8 @@ export default React.memo(function CustomAnswerEditor({
     const {
         unit,
     } = React.useContext(UnitContext);
+
+    const columns = useColumns(t);
 
     const rows = React.useMemo(() => {
         const result = [];
@@ -311,12 +315,12 @@ export default React.memo(function CustomAnswerEditor({
             audio.play();
             setWorking(false);
             // setValue('');
-            setPreviewMessage('Successfully generated audio file');
+            setPreviewMessage(t('customAnswerEditor.successGeneratedAudio'));
         });
     }, [audioSrc]);
 
 
-    const title ='Custom Answer Exercise'
+    const title = t('customAnswerEditor.title')
 
     React.useEffect(() => {
         const fetchAudio = async () => {
@@ -429,7 +433,7 @@ export default React.memo(function CustomAnswerEditor({
         
         toggleOpen(true);
         setWorking(true);
-        setPreviewMessage('Generating audio file...');
+        setPreviewMessage(t('customAnswerEditor.generatingAudio'));
 
         const {
             identityId,
@@ -466,7 +470,7 @@ export default React.memo(function CustomAnswerEditor({
             console.error('fileGenerator', fileGenerator);
             // send error message to preview modal
 
-            setPreviewMessage('Error generating audio file');
+            setPreviewMessage(t('customAnswerEditor.errorGeneratingAudio'));
             setWorking(false);
         }
 
@@ -512,7 +516,7 @@ export default React.memo(function CustomAnswerEditor({
             setWorking(false);
         } catch (error) {
             console.error('Error creating question:', error);
-            setPreviewMessage('Error creating question');
+            setPreviewMessage(t('customAnswerEditor.errorCreatingQuestion'));
             setWorking(false);
         }
 
@@ -616,7 +620,7 @@ export default React.memo(function CustomAnswerEditor({
             </Typography>
 
             <Typography variant='p'>
-                Create a short answer exercise, that can prompt the user with a question and expect a short answer.
+                {t('customAnswerEditor.description')}
             </Typography>
 
             {/**
@@ -703,7 +707,7 @@ export default React.memo(function CustomAnswerEditor({
                     }}
                     // sx={{ width: 300 }}
                     freeSolo
-                    renderInput={(params) => <TextField {...params} label="Add word to exercise" />}
+                    renderInput={(params) => <TextField {...params} label={t('customAnswerEditor.addWordLabel')} />}
                 />
 
                 {/* <Autocomplete
@@ -804,7 +808,7 @@ export default React.memo(function CustomAnswerEditor({
                         console.log('removeQuestionIDs');
                     removeQuestionIDs(gridSelection);
                 }}>
-                    <Remove />&nbsp;remove
+                    <Remove />&nbsp;{t('customAnswerEditor.remove')}
                 </Button>
                 <PromptMethodSelector
                     ids={gridSelection}
@@ -824,7 +828,7 @@ export default React.memo(function CustomAnswerEditor({
 
             <Dialog open={open} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
-                    <DialogTitle>Add a new question</DialogTitle>
+                    <DialogTitle>{t('customAnswerEditor.dialogTitle')}</DialogTitle>
                     <DialogContent
                         sx={{
                             display: 'flex',
@@ -833,13 +837,13 @@ export default React.memo(function CustomAnswerEditor({
                         }}
                     >
                         <DialogContentText>
-                            Add a new question and answer pair.
+                            {t('customAnswerEditor.dialogDescription')}
                         </DialogContentText>
 
                     {audioSrc &&
                     <>
                     <Typography id="modal-modal-title" variant="h6" component="h2">
-                    Text to Speech Preview  {working && <CircularProgress />}
+                    {t('customAnswerEditor.ttsPreview')}  {working && <CircularProgress />}
                 </Typography>
 
                 <Typography id="modal-modal-description" sx={{ mt: 2 }}>
@@ -867,7 +871,7 @@ export default React.memo(function CustomAnswerEditor({
                                 waveformData={undefined}
                                 width={600}
                                 height={120}
-                                title="Audio Preview"
+                                title={t('customAnswerEditor.audioPreview')}
                                 showDuration={true}
                             />
                         )}
@@ -884,7 +888,7 @@ export default React.memo(function CustomAnswerEditor({
                                     prompt: event.target.value,
                                 })
                             }
-                            label="Prompt"
+                            label={t('customAnswerEditor.promptLabel')}
                             type="text"
                             variant="standard"
                         />
@@ -902,8 +906,8 @@ export default React.memo(function CustomAnswerEditor({
                                     answer: event.target.value,
                                 })
                             }
-                            aria-label='Answer'
-                            placeholder="Answer"
+                            aria-label={t('customAnswerEditor.answerLabel')}
+                            placeholder={t('customAnswerEditor.answerPlaceholder')}
                             type="text"
                             variant="standard"
                         />
@@ -921,8 +925,8 @@ export default React.memo(function CustomAnswerEditor({
                                     hint: event.target.value,
                                 })
                             }
-                            aria-label='Hint'
-                            placeholder="Hint"
+                            aria-label={t('customAnswerEditor.hintLabel')}
+                            placeholder={t('customAnswerEditor.hintPlaceholder')}
                             type="text"
                             variant="standard"
                         />
@@ -931,14 +935,14 @@ export default React.memo(function CustomAnswerEditor({
                         <Button
                             onClick={handleClose}
                         >
-                            Cancel
+                            {t('customAnswerEditor.cancel')}
                         </Button>
                         <Button
                             type="submit"
                             variant='contained'
                             color='primary'
                         >
-                            Add
+                            {t('customAnswerEditor.add')}
                         </Button>
                     </DialogActions>
                 </form>
@@ -946,7 +950,7 @@ export default React.memo(function CustomAnswerEditor({
 
             {rows?.length === 0 && (
                 <div style={{ marginTop: '0.5' }}>
-                    <p>No questions have been added yet. Use the input above to add prompt and answer pairs.
+                    <p>{t('customAnswerEditor.emptyState')}
                     </p>
                 </div>
             )}
