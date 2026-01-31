@@ -231,7 +231,7 @@
     "cancel": "Cancel",
     "create": "Add"
   },
-  "imageMaskEditor": <strong>Instructions:</strong> Paint over the areas you want to regenerate. Use the eraser to remove parts of the mask. Hold Shift and drag to pan. Use zoom buttons to get closer detail.",
+  "imageMaskEditor": "<strong>Instructions:</strong> Paint over the areas you want to regenerate. Use the eraser to remove parts of the mask. Hold Shift and drag to pan. Use zoom buttons to get closer detail.",
     "brushSize": "Brush Size: {{size}}",
     "zoomInfo": "Zoom: {{level}}% | Hold Shift to pan",
     "applyMask": "Apply Mask & Regenerat"Zoom: {{level}}%",
@@ -263,8 +263,7 @@
     }
   },
   "mediaPlayerComponent": {
-    "display": "Display",
-    "type": "Type"
+    "titleHeader": "Title"
   },
   "metadataEditor": {
     "fileInfo": "File Information",
