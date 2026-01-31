@@ -10,6 +10,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Box, List, ListItem, ListItemButton, Typography, Chip, CircularProgress, Button, Tooltip } from '@mui/material';
 import { AutoAwesome as AutoAwesomeIcon } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 /**
  * BlockSuggestionMenu component
@@ -29,6 +30,7 @@ export default function BlockSuggestionMenu({
   useAI = false,
   onRequestMore,
 }) {  
+  const { t } = useTranslation('components');
   const menuRef = useRef(null);
   const [hoveredIndex, setHoveredIndex] = React.useState(null);
   
@@ -56,10 +58,10 @@ export default function BlockSuggestionMenu({
     return (
       <Box sx={{ p: 2, textAlign: 'center' }}>
         <Typography variant="body2" color="text.secondary">
-          No suggestions available yet.
+          {t('blockSuggestionMenu.emptyState')}
         </Typography>
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-          Start typing in the editor to see AI-powered block suggestions.
+          {t('blockSuggestionMenu.emptyStateHelper')}
         </Typography>
       </Box>
     );
@@ -69,7 +71,7 @@ export default function BlockSuggestionMenu({
     <Box ref={menuRef} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ p: 1.5, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="body2" color="text.primary" sx={{ fontWeight: 600, flex: 1 }}>
-          {useAI ? '🤖 AI-Powered Suggestions' : '💡 Suggested Blocks'}
+          {useAI ? t('blockSuggestionMenu.aiTitle') : t('blockSuggestionMenu.suggestionsTitle')}
         </Typography>
         {isLoadingAI && <CircularProgress size={16} />}
       </Box>
@@ -193,7 +195,7 @@ export default function BlockSuggestionMenu({
         }}
       >
         <Typography variant="caption" color="text.secondary">
-          {useAI ? 'Click a suggestion or press Tab/Enter to insert' : 'Click a suggestion to insert it into your lesson'}
+          {useAI ? t('blockSuggestionMenu.helperAI') : t('blockSuggestionMenu.helper')}
         </Typography>
         {useAI && onRequestMore && (
           <Button
@@ -204,7 +206,7 @@ export default function BlockSuggestionMenu({
             disabled={isLoadingAI}
             sx={{ textTransform: 'none' }}
           >
-            Generate More Suggestions
+            {t('blockSuggestionMenu.generateMore')}
           </Button>
         )}
       </Box>

@@ -78,10 +78,13 @@
     "desktopHint": "(TAB)"
   },
   "blockSuggestionMenu": {
-    "suggestions": "Suggestions",
-    "emptyState": "No suggestions available",
-    "helper": "Type to search",
-    "cancel": "Cancel"
+    "aiTitle": "🤖 AI-Powered Suggestions",
+    "suggestionsTitle": "💡 Suggested Blocks",
+    "emptyState": "No suggestions available yet.",
+    "emptyStateHelper": "Start typing in the editor to see AI-powered block suggestions.",
+    "helper": "Click a suggestion to insert it into your lesson",
+    "helperAI": "Click a suggestion or press Tab/Enter to insert",
+    "generateMore": "Generate More Suggestions"
   },
   "configurationManager": {
     "pdfAnalysis": "PDF Analysis",
