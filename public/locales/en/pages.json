@@ -201,7 +201,7 @@
     "loading": "Loading…"
   },
   "workbook": {
-    "timerInstructions": "Click the button below to start the timer for this assignment.",
+    "timerInstructions": "This is a timed exercise, press start to begin the timer and answer the questions.",
     "start": "Start",
     "loading": "Loading…"
   }

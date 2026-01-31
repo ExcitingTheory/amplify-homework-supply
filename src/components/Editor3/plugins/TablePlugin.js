@@ -15,6 +15,7 @@ import {
 } from 'lexical';
 import {createContext, useContext, useEffect, useMemo, useState} from 'react';
 import * as React from 'react';
+import {useTranslation} from 'react-i18next';
 
 import {$createTableNodeWithDimensions, TableNode} from '../components/TableNode';
 
@@ -65,6 +66,7 @@ export function TableContext({children}) {
 }
 
 export function InsertNewTableDialog({editor, onClose}) {
+    const { t } = useTranslation('components');
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -103,7 +105,7 @@ export function InsertNewTableDialog({editor, onClose}) {
         onClick={handleOpen}
         >
 
-            <TableViewIcon />
+            <TableViewIcon />{t('tablePlugin.table')}
               <span className="text">Table</span>
             </MenuItem>
             <Box sx={{
@@ -127,20 +129,20 @@ export function InsertNewTableDialog({editor, onClose}) {
 
                     }}>
                         <Typography id="modal-modal-title" variant="h6" component="h2">
-                            Choose a layout
+                            {t('tablePlugin.chooseLayout')}
                         </Typography>
 
                         <TextField
-                            placeholder={'# of rows (1-500)'}
-                            label="Rows"
+                            placeholder={t('tablePlugin.rowsPlaceholder')}
+                            label={t('tablePlugin.rows')}
                             onChange={onRowsChange}
                             value={rows}
                             data-test-id="table-modal-rows"
                             type="number"
                         />
                         <TextField
-                            placeholder={'# of columns (1-50)'}
-                            label="Columns"
+                            placeholder={t('tablePlugin.columnsPlaceholder')}
+                            label={t('tablePlugin.columns')}
                             onChange={onColumnsChange}
                             value={columns}
                             data-test-id="table-modal-columns"
@@ -157,7 +159,7 @@ export function InsertNewTableDialog({editor, onClose}) {
                                 overflowY: 'auto'
                             }}
                         >
-                            <Button variant='contained' color='primary' onClick={onClick}>Insert</Button>
+                            <Button variant='contained' color='primary' onClick={onClick}>{t('tablePlugin.insert')}</Button>
                         </Stack>
 
                     </Card>

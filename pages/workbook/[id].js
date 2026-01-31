@@ -2,6 +2,7 @@ import { useRouter } from 'next/router'
 import { Unit } from '../../src/models'
 import { Workbook } from '../../src/components/Editor3'
 import React, { useState, useEffect, useContext, useRef } from "react";
+import { useTranslation } from 'next-i18next';
 
 import MyAuth from "../../src/components/authenticator";
 
@@ -28,6 +29,7 @@ import AppBar from '@mui/material/AppBar';
  * If the unit needs a timer, display a timer and a progress bar. Otherwise, display the editor.
  */
 function TimerWrappedEditor() {
+  const { t } = useTranslation('pages');
   const { unit, grade, createGrade, recentGrades } = useContext(UnitContext)
 
   const unitTimeLimitSeconds = unit?.timeLimitSeconds || 0
@@ -93,14 +95,14 @@ function TimerWrappedEditor() {
                       margin: '2rem',
                   }}>
 
-        This is a timed exercise, press start to begin the timer and answer the questions.
+        {t('workbook.timerInstructions')}
         </Typography>
         <Button variant='contained'
           onClick={async () => {
             console.log("start")
             await createGrade()
           }}
-        >Start</Button>
+        >{t('workbook.start')}</Button>
       </Card>
 }
 {recentGrades.length > 0 &&
@@ -239,13 +241,13 @@ function TimerWrappedEditor() {
                       margin: '2rem',
                   }}>
 
-                    This is a timed exercise, press start to begin the timer and answer the questions.
+                    {t('workbook.timerInstructions')}
                     <br /><br /><Button variant='contained'
                       onClick={async () => {
                         console.log("start")
                         await createGrade()
                       }}
-                    >Start</Button>
+                    >{t('workbook.start')}</Button>
                   </Typography>
               </Card>
   
@@ -268,11 +270,12 @@ function WorkbookPage() {
    * @description
    * Display a workbook. The workbook is based on a Unit. Each unit is a collection of blocks from draftjs.
    */
+  const { t } = useTranslation('pages');
   const router = useRouter()
   if (router.isFallback) {
     return (
       <div>
-        <h1>Loading&hellip;</h1>
+        <h1>{t('workbook.loading')}</h1>
       </div>
     )
   }
