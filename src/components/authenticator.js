@@ -11,39 +11,42 @@
 import React from 'react';
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
+import { useTranslation } from 'react-i18next';
 
-const formFields = {
-    signUp: {
-        name: {
-            label: 'Name:',
-            placeholder: 'Enter your Name:',
-            isRequired: true,
-            order: 1,
+function getFormFields(t) {
+    return {
+        signUp: {
+            name: {
+                label: t('components:authenticator.nameLabel'),
+                placeholder: t('components:authenticator.namePlaceholder'),
+                isRequired: true,
+                order: 1,
+            },
+            email: {
+                label: t('components:authenticator.emailLabel'),
+                placeholder: t('components:authenticator.emailPlaceholder'),
+                isRequired: true,
+                order: 2,
+            },
+            password: {
+                label: t('components:authenticator.passwordLabel'),
+                placeholder: t('components:authenticator.passwordPlaceholder'),
+                isRequired: false,
+                order: 3,
+            },
+            confirm_password: {
+                label: t('components:authenticator.confirmPasswordLabel'),
+                order: 4,
+            },
         },
-
-        email: {
-            label: 'Email:',
-            placeholder: 'Enter your Email:',
-            isRequired: true,
-            order: 2,
-        },
-
-        password: {
-            label: 'Password:',
-            placeholder: 'Enter your Password:',
-            isRequired: false,
-            order: 3,
-        },
-        confirm_password: {
-            label: 'Confirm Password:',
-            order: 4,
-        },
-    },
-};
-
+    };
+}
 
 
 export default function MyAuth({ children }) {
+    const { t } = useTranslation();
+    const formFields = getFormFields(t);
+    
     return (
         <Authenticator
             usernameAttributes="email"
