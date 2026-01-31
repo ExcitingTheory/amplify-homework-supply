@@ -11,6 +11,7 @@ import React from 'react';
 import { Box, Chip, Tooltip, Paper } from '@mui/material';
 import { PictureAsPdf as PdfIcon } from '@mui/icons-material';
 import PdfThumbnail from './PdfThumbnail';
+import { useTranslation } from 'react-i18next';
 
 interface DocumentSourceBadgeProps {
     /** Filename of the source document */
@@ -35,6 +36,7 @@ export default function DocumentSourceBadge({
     showThumbnail = true,
     onClick,
 }: DocumentSourceBadgeProps) {
+    const { t } = useTranslation('components');
     const [showPreview, setShowPreview] = React.useState(false);
 
     const handleMouseEnter = () => {
@@ -52,7 +54,7 @@ export default function DocumentSourceBadge({
 
     return (
         <Box sx={{ position: 'relative', display: 'inline-block' }}>
-            <Tooltip title={`Source: ${label}`}>
+            <Tooltip title={`${t('documentSourceBadge.sourcePrefix')} ${label}`}>
                 <Chip
                     icon={<PdfIcon fontSize="small" />}
                     label={truncatedLabel}
@@ -114,8 +116,10 @@ export function CompactDocumentBadge({
     page,
     onClick,
 }: Pick<DocumentSourceBadgeProps, 'filename' | 'page' | 'onClick'>) {
+    const { t } = useTranslation('components');
+    
     return (
-        <Tooltip title={`Source: ${filename}${page ? ` - Page ${page}` : ''}`}>
+        <Tooltip title={`${t('documentSourceBadge.sourcePrefix')} ${filename}${page ? ` - ${t('documentSourceBadge.pagePrefix')} ${page}` : ''}`}>
             <Chip
                 icon={<PdfIcon fontSize="small" />}
                 label={page ? `p.${page}` : filename.slice(0, 10)}
