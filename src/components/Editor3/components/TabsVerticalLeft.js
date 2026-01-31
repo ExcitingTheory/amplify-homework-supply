@@ -7,6 +7,7 @@ import FileManager2 from './FileManager2';
 import { DictionaryEditor2 } from '../../DictionaryEditor2';
 import { QuestionEditor2 } from '../../QuestionEditor2';
 import { AudioPlayerProvider } from '../context/AudioPlayerContext';
+import { useTranslation } from 'react-i18next';
 
 import ChatSidebar from '../../ChatSidebar';
 import TableOfContents from './TableOfContents';
@@ -63,6 +64,7 @@ export default function TabsVerticalLeft({
   setValue,
   setDrawerWidth,
 }) {
+  const { t } = useTranslation('components');
   const [isResizing, setIsResizing] = React.useState(false);
   const startXRef = React.useRef(0);
   const startWidthRef = React.useRef(0);
@@ -182,25 +184,25 @@ export default function TabsVerticalLeft({
       >
 
         <Tab
-          onClick={() => handleTabClick(0)}
-          label={<EditCalendarIcon />} {...a11yProps('Assignments')} />
+          onClick={() => handleTabClick(0)}t('tabsVerticalLeft.tabs.assignments'))} />
         <Tab
           onClick={() => handleTabClick(1)}
-          label={<TocIcon />} {...a11yProps('Table of Contents')} />
+          label={<TocIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.tableOfContents'))} />
         <Tab 
           onClick={() => handleTabClick(2)}
-          label={<DictionaryIcon />} {...a11yProps('Dictionary')} />
+          label={<DictionaryIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.dictionary'))} />
         <Tab
           onClick={() => handleTabClick(3)}
-          label={<QuestionMarkOutlined />} {...a11yProps('Questions')} overflow="hidden" />
+          label={<QuestionMarkOutlined />} {...a11yProps(t('tabsVerticalLeft.tabs.questions'))} overflow="hidden" />
         <Tab
           onClick={() => handleTabClick(4)}
-          label={<FolderIcon />} {...a11yProps('Files')} />
+          label={<FolderIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.files'))} />
         {/* <Tab
           onClick={() => handleTabClick(5)}
-          label={<ChatIcon />} {...a11yProps('AI Assistant')} /> */}
+          label={<ChatIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.aiAssistant'))} /> */}
         <Tab
           onClick={() => handleTabClick(6)}
+          label={<ConfigIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.configuration')
           label={<ConfigIcon />} {...a11yProps('Configuration')} />
         {/* <Tab label="Item Five" {...a11yProps(4)} />
         <Tab label="Item Six" {...a11yProps(5)} />

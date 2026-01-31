@@ -231,10 +231,11 @@
     "cancel": "Cancel",
     "create": "Add"
   },
-  "imageMaskEditor": "<strong>Instructions:</strong> Paint over the areas you want to regenerate. Use the eraser to remove parts of the mask. Hold Shift and drag to pan. Use zoom buttons to get closer detail.",
+  "imageMaskEditor": {
+    "instructions": "<strong>Instructions:</strong> Paint over the areas you want to regenerate. Use the eraser to remove parts of the mask. Hold Shift and drag to pan. Use zoom buttons to get closer detail.",
     "brushSize": "Brush Size: {{size}}",
     "zoomInfo": "Zoom: {{level}}% | Hold Shift to pan",
-    "applyMask": "Apply Mask & Regenerat"Zoom: {{level}}%",
+    "applyMask": "Apply Mask & Regenerate",
     "save": "Save",
     "cancel": "Cancel"
   },
@@ -331,7 +332,15 @@
     "title": "Table of Contents"
   },
   "tabsVerticalLeft": {
-    "overflow": "scroll"
+    "tabs": {
+      "assignments": "Assignments",
+      "tableOfContents": "Table of Contents",
+      "dictionary": "Dictionary",
+      "questions": "Questions",
+      "files": "Files",
+      "aiAssistant": "AI Assistant",
+      "configuration": "Configuration"
+    }
   },
   "tabsVerticalRight": {
     "instructions": "Select a tab to view content",

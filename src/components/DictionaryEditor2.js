@@ -1,5 +1,6 @@
 'use strict';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 // Lexical imports
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
@@ -1157,7 +1158,7 @@ function WordRowComponent({
                 fullWidth
             >
                 <DialogTitle>
-                    Ruby Tag Editor - {phrase}
+                    {t('dictionaryEditor.rubyTagEditorTitle')} - {phrase}
                 </DialogTitle>
                 <DialogContent>
                     <RubyTagEditor
@@ -1176,7 +1177,7 @@ function WordRowComponent({
                 fullWidth
             >
                 <DialogTitle>
-                    Audio Recording Studio - {phrase}
+                    {t('dictionaryEditor.audioStudioTitle')} - {phrase}
                 </DialogTitle>
                 <DialogContent>
                     <RecordingStudioEnhanced
@@ -1455,6 +1456,7 @@ function WordsPlugin({
 // =============================================================================
 
 export function DictionaryEditor2() {
+    const { t } = useTranslation('components');
     const [open, setOpen] = React.useState(false);
     const [isHelpOpen, setHelpOpen] = React.useState(false);
     const [expandedItems, setExpandedItems] = React.useState(new Set());
@@ -1783,7 +1785,7 @@ export function DictionaryEditor2() {
 
             {/* New word dialog */}
             <Dialog open={newWordFormOpen} onClose={toggleNewWordFormOpen} maxWidth="sm" fullWidth>
-                <DialogTitle>Create New Word</DialogTitle>
+                <DialogTitle>{t('dictionaryEditor.createNewWordTitle')}</DialogTitle>
                 <DialogContent>
                     <form onSubmit={(e) => { e.preventDefault(); handleCreateNewWord(); }}>
                         <TextField
@@ -1816,7 +1818,7 @@ export function DictionaryEditor2() {
                             rows={3}
                         />
                         <Button variant="contained" type="submit" sx={{ mt: 2 }}>
-                            Create Word
+                            {t('dictionaryEditor.createWordButton')}
                         </Button>
                     </form>
                 </DialogContent>
@@ -1853,7 +1855,7 @@ export function DictionaryEditor2() {
                                     }}
                                     variant="outlined"
                                 >
-                                    Confirm
+                                    {t('dictionaryEditor.confirmButton')}
                                 </Button>
                                 <Button
                                     color="inherit"
@@ -1864,7 +1866,7 @@ export function DictionaryEditor2() {
                                     }}
                                     variant="contained"
                                 >
-                                    Cancel
+                                    {t('dictionaryEditor.cancel')}
                                 </Button>
                             </Box>
                         }
