@@ -474,7 +474,8 @@
     "dialogTitle": "Assign to Section",
     "selectSection": "Select Section",
     "cancel": "Cancel",
-    "assign": "Assign"
+    "assign": "Assign",
+    "dueDate": "Due Date"
   },
   "svgPreview": {
     "emptyState": "No SVG to preview",

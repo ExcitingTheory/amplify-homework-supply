@@ -6,6 +6,7 @@
 import React from 'react';
 import { Box, Skeleton, Typography } from '@mui/material';
 import { getPreviewUrl, getBestPreview } from '../utils/previewUtils';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Display an SVG preview with automatic fallback to raster formats
@@ -29,6 +30,7 @@ export default function SvgPreview({
   onClick,
   preferRaster = false,
 }) {
+  const { t } = useTranslation('components');
   const [url, setUrl] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [isSvg, setIsSvg] = React.useState(false);
@@ -100,7 +102,7 @@ export default function SvgPreview({
         }}
       >
         <Typography variant="body2" color="text.secondary">
-          No preview available
+          {t('svgPreview.emptyState')}
         </Typography>
       </Box>
     );
@@ -139,7 +141,7 @@ export default function SvgPreview({
           color="text.secondary"
           sx={{ display: 'block', mt: 0.5, textAlign: 'center' }}
         >
-          Vector preview (scalable)
+          {t('svgPreview.caption')}
         </Typography>
       )}
     </Box>

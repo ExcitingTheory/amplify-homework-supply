@@ -18,9 +18,11 @@ import {
 } from '@mui/material';
 import SectionContext from '../context/sectionContext';
 import { Assignment, Unit } from '../models';
+import { useTranslation } from 'react-i18next';
 
 
 export const SectionAssigner = ({ setOpenAssignmentDialog, openAssignmentDialog, ContentModel }) => {
+  const { t } = useTranslation('components');
 
   const {
     sections = [], sectionMap = {}, assignments = []
@@ -114,7 +116,7 @@ export const SectionAssigner = ({ setOpenAssignmentDialog, openAssignmentDialog,
       <form onSubmit={addDueDate} sx={{ width: '100%' }}>
         <DialogTitle id="alert-dialog-title" sx={{
           margin: '1rem 1rem 0rem 1rem'
-        }}>{"Assign a due date to this unit for a section?"}</DialogTitle>
+        }}>{t('sectionAssigner.dialogTitle')}</DialogTitle>
         <DialogContent>
 
           {
@@ -131,7 +133,7 @@ export const SectionAssigner = ({ setOpenAssignmentDialog, openAssignmentDialog,
           <TextField
             sx={{ margin: '1rem' }}
             id="datetime-local"
-            label="Due Date"
+            label={t('sectionAssigner.dueDate')}
             required
             type="datetime-local"
             onClick={(e) => e.stopPropagation()}
@@ -150,12 +152,12 @@ export const SectionAssigner = ({ setOpenAssignmentDialog, openAssignmentDialog,
           }
           {/* <SectionProvider> */}
           <FormControl sx={{ width: '90%', margin: '1rem' }}>
-            <InputLabel id="section-select-helper-label">Section</InputLabel>
+            <InputLabel id="section-select-helper-label">{t('sectionAssigner.selectSection')}</InputLabel>
             <Select
               labelId="section-select-helper-label"
               id="section-select-helper"
               value={section}
-              label="Section"
+              label={t('sectionAssigner.selectSection')}
               required
               onClick={(e) => e.stopPropagation()}
               onChange={handleSectionChange}
@@ -202,12 +204,12 @@ export const SectionAssigner = ({ setOpenAssignmentDialog, openAssignmentDialog,
         <DialogActions sx={{
           margin: '1rem'
         }}>
-          <Button onClick={() => setOpenAssignmentDialog(false)}>Done</Button>
+          <Button onClick={() => setOpenAssignmentDialog(false)}>{t('sectionAssigner.cancel')}</Button>
           <Button type="submit" autoFocus
             variant='contained'
             color='primary'
           >
-            Add
+            {t('sectionAssigner.assign')}
           </Button>
         </DialogActions>
         {
