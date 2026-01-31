@@ -16,6 +16,7 @@ DecoratorBlockNode,
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import * as React from 'react';
 import { useEffect, useContext, useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import DictionaryContext from '../../../context/dictionaryContext';
 import { 
@@ -45,6 +46,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
     nodeKey,
     wordID,
   }) {
+    const { t } = useTranslation('components');
 
     const { wordMapId: dictionary } = useContext(DictionaryContext);
     const word = dictionary[wordID];
@@ -165,7 +167,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
                 {word.audio && word.audio.length > 0 && (
                   <Box sx={{ mb: 1.5 }}>
                     {audioLoading ? (
-                      <Typography variant="body2" sx={{ opacity: 0.6 }}>Loading audio...</Typography>
+                      <Typography variant="body2" sx={{ opacity: 0.6 }}>{t('wordBlockPlugin.loadingAudio')}</Typography>
                     ) : signedAudioUrl ? (
                       <AudioWaveformPlayer
                         audioUrl={signedAudioUrl}
@@ -174,7 +176,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
                         enableRecording={false}
                       />
                     ) : (
-                      <Typography variant="body2" sx={{ opacity: 0.6, fontStyle: 'italic' }}>Audio not available</Typography>
+                      <Typography variant="body2" sx={{ opacity: 0.6, fontStyle: 'italic' }}>{t('wordBlockPlugin.audioUnavailable')}</Typography>
                     )}
                   </Box>
                 )}
