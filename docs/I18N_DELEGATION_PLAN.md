@@ -32,7 +32,7 @@ Divide work by namespace and file groups to avoid merge conflicts. Each subagent
 #### Instructions:
 ```bash
 # 1. Import useTranslation in each file
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 # 2. Add hook at component start
 const { t } = useTranslation('pages');
@@ -72,7 +72,7 @@ git diff pages/[filename].js
 #### Instructions:
 ```bash
 # 1. Import useTranslation
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 # 2. Add hook
 const { t } = useTranslation('components');
@@ -249,7 +249,7 @@ git commit -m "i18n: Add translations to pages/index.js (28 strings)"
 
 After completing each file:
 
-- [ ] Imported `useTranslation` from 'react-i18next'
+- [ ] Imported `useTranslation` from 'next-i18next'
 - [ ] Added `const { t } = useTranslation('[namespace]');` hook
 - [ ] Replaced all literal strings with `t('key')` calls
 - [ ] Verified keys exist in namespace JSON file

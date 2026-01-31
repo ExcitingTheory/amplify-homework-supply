@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 import { DataGrid } from '@mui/x-data-grid';
 
@@ -25,6 +25,8 @@ import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import { mergeRegister } from '@lexical/utils';
+
+import AudioWaveformPlayer from '../../components/AudioWaveformPlayer';
 
 import {
     $getNodeByKey,
@@ -127,10 +129,9 @@ export default React.memo(function CustomAnswerEditor({
     promptMethod,
     allowedInput,
 }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
-    // const [rows, setRows] = React.useState([]);
     const [gridSelection, setGridSelection] = React.useState([]);
     const [dialogValue, setDialogValue] = React.useState({
         prompt: '',
@@ -138,15 +139,6 @@ export default React.memo(function CustomAnswerEditor({
         hint: '',
         promptAudio: [],
         answerAudio: [],
-    });
-
-
-
-    const [questions, setQuestions] = React.useState({
-        items: [],
-        map: {},
-        isLoading: false,
-        error: null,
     });
 
     const [working, setWorking] = React.useState(false);
@@ -201,45 +193,6 @@ export default React.memo(function CustomAnswerEditor({
         }
         return result;
     }, [questionIDs, questionBank]);
-
-    const fetch = () => {
-        setQuestions({ ...questions, isLoading: true, });
-        const client = getAmplifyClient();
-        const subscription = client.models.Question.observeQuery().subscribe({
-            next: ({ items }) => {
-                console.log('[CustomAnswerEditor] Question subscription update:', items.length);
-                setResult({ isLoading: false, items });
-                const _rows = [];
-                if (items.length > 0) {
-                    console.log('questions', items);
-                    items.forEach((question) => {
-                        const { prompt, answer, hint, id } = question;
-                        const promptAudio = question?.audio?.[0];
-                        const answerAudio = question?.answerAudio?.[0];
-                        _rows.push({
-                            id,
-                            prompt,
-                            answer,
-                            hint,
-                            promptAudio,
-                            answerAudio,
-                        });
-                    });
-                }
-                console.log('rows', _rows);
-                setRows(_rows);
-            },
-            error: (error) => {
-                console.error('[CustomAnswerEditor] Question subscription error:', error);
-            }
-        });
-        // Call unsubscribe to close the subscription
-        return () => subscription.unsubscribe();
-    };
-    React.useEffect(fetch, []);
-
-
-                        
 
     React.useEffect(() => {
 

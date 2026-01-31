@@ -18,7 +18,7 @@ import { Button } from '@mui/material';
 
 import CustomAnswerPlugin, { INSERT_CUSTOM_ANSWER_BLOCK_COMMAND, CustomAnswerNode } from './CustomAnswerPlugin';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
-import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 
 export default {
   title: '🔌 Editor Plugins/Custom Answer',

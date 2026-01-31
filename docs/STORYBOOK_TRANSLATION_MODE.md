@@ -6,7 +6,7 @@ A specialized Storybook mode that allows translators to see components in their 
 
 ## Current i18n Setup
 
-**Framework**: next-i18next (based on react-i18next)  
+**Framework**: next-i18next (based on next-i18next)  
 **Structure**: Namespace-based JSON files in `public/locales/{lang}/{namespace}.json`  
 **Languages**: 
 - ✅ English (`en/`) - Complete
@@ -982,7 +982,7 @@ npm install --save-dev levenshtein-edit-distance
 ## References
 
 - [Storybook Addon API](https://storybook.js.org/docs/react/addons/addon-api)
-- [react-i18next Documentation](https://react.i18next.com/)
+- [next-i18next Documentation](https://react.i18next.com/)
 - [i18next Translation Functions](https://www.i18next.com/translation-function/essentials)
 - [Material-UI Localization](https://mui.com/material-ui/guides/localization/)
 

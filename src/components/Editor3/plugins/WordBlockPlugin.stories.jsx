@@ -19,7 +19,7 @@ import { Button } from '@mui/material';
 import WordBlockPlugin, { INSERT_WORD_BLOCK_COMMAND, WordBlockNode } from './WordBlockPlugin';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
 import { UnitProvider } from '../../../context/unitContext';
-import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 import { DictionaryProvider } from '../../../context/dictionaryContext';
 
 export default {

@@ -20,7 +20,7 @@ import ImagesPlugin, { INSERT_IMAGE_COMMAND } from './ImagesPlugin';
 import { ImageNode } from '../components/ImageNode';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
 import { UnitProvider } from '../../../context/unitContext';
-import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 import { MOCK_IMAGE_URL_2, MOCK_IMAGE_URL_3 } from '../../../../.storybook/__mocks__/media';
 
 export default {

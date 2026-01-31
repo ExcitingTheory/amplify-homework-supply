@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'next-i18next';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
@@ -52,6 +53,7 @@ export default function VerticalTabsRo({
   setValue,
   setDrawerWidth,
 }) {
+  const { t } = useTranslation('editor');
   const [isResizing, setIsResizing] = React.useState(false);
   const startXRef = React.useRef(0);
   const startWidthRef = React.useRef(0);
@@ -173,17 +175,17 @@ export default function VerticalTabsRo({
           onClick={() => {
             setOpen(true);
           }}
-          label={<HistoryIcon />} {...a11yProps('Previous Attempts')} />
+          label={<HistoryIcon />} {...a11yProps(t('verticalTabsRo.previousAttempts'))} />
         <Tab
           onClick={() => {
             setOpen(true);
           }}
-          label={<ChatIcon />} {...a11yProps('AI Assistant')} />
+          label={<ChatIcon />} {...a11yProps(t('verticalTabsRo.aiAssistant'))} />
         <Tab
           onClick={() => {
             setOpen(true);
           }}
-          label={<ConfigIcon />} {...a11yProps('Settings')} />
+          label={<ConfigIcon />} {...a11yProps(t('verticalTabsRo.settings'))} />
         {/* <Tab
           onClick={() => {
             setOpen(true);

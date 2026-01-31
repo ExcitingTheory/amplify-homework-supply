@@ -33,7 +33,7 @@ cat public/locales/en/components.json | grep -A 3 "mainToolbar\|questionBlock"
 
 **Implementation**:
 ```javascript
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 export default function MainToolbar(props) {
     const { t } = useTranslation('components');
@@ -163,7 +163,7 @@ git commit -m "i18n: Add translations to QuestionEditor2.js (2 strings)"
 
 **Implementation**:
 ```typescript
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 const { t } = useTranslation('components');
 // t('questionsReview.sectionHeading')

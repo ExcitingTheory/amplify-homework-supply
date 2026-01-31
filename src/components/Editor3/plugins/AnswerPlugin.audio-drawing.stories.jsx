@@ -12,7 +12,7 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { HeadingNode } from '@lexical/rich-text';
 
 import AnswerPlugin, { AnswerNode } from './AnswerPlugin';
-import { seedMockUnit, seedMockWords } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit, seedMockWords } from '../../../../.storybook/__mocks__/aws-amplify-data';
 import { AudioPlayerProvider } from '../context/AudioPlayerContext';
 import { UnitProvider } from '../../../context/unitContext';
 

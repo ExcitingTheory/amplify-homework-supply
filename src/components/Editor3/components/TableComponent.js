@@ -46,7 +46,7 @@ import {
 } from 'react';
 import * as React from 'react';
 import {createPortal} from 'react-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { IS_APPLE } from '../utils/dom';
 import {CellContext} from '../plugins/TablePlugin';
 import {
@@ -326,7 +326,7 @@ function TableActionMenu({
   setSortingOptions,
   sortingOptions,
 }) {
-  const { t } = useTranslation('components');
+  const { t } = useTranslation('editor');
   const dropDownRef = useRef<null | HTMLDivElement>(null);
 
   useEffect(() => {

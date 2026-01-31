@@ -11,12 +11,12 @@ import Checkbox from '@mui/material/Checkbox';
 import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 import UnitContext from '../../../context/unitContext'
 
 export default function QuestionBlockRo(props) {
-  const { t } = useTranslation('components');
+  const { t } = useTranslation('editor');
   const { nodeKey, data } = props
   const { grade, saveGrade } = React.useContext(UnitContext)
   console.log('QuestionBlockRo.grade', grade)

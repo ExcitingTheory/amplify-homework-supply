@@ -29,29 +29,29 @@
     "continue": "继续"
   },
   "navigation": {
-    "home": "主页",
+    "home": "首页",
     "units": "单元",
     "sections": "章节",
     "grades": "成绩",
     "profile": "个人资料",
-    "workbook": "作业本"
+    "workbook": "练习册"
   },
   "status": {
     "loading": "加载中...",
     "saving": "正在保存...",
     "success": "成功",
     "error": "错误",
-    "processing": "处理中...",
-    "uploading": "上传中...",
+    "processing": "正在处理...",
+    "uploading": "正在上传...",
     "downloading": "正在下载...",
     "complete": "完成",
     "incomplete": "未完成",
     "pending": "待处理"
   },
   "time": {
-    "created": "创建时间",
+    "created": "已创建",
     "updated": "已更新",
-    "due": "到期",
+    "due": "截止日期",
     "completed": "已完成"
   },
   "common": {

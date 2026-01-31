@@ -7,6 +7,7 @@ import { verifyImage } from "../../../graphql/queries";
 import { uploadStudentSubmission } from "../../../utils/userSubmissionStorage";
 import UnitContext from "../../../context/unitContext";
 import { Button, Box, Typography } from "@mui/material";
+import { useTranslation } from "next-i18next";
 
 const client = generateClient();
 // TODO Add a version to the data so that we can update the data when the version is higher than the current working copy, which should be one above the last saved version
@@ -18,6 +19,7 @@ const SketchPad = ({ excalidrawData,
     feedback,
     questionID
  }) => {
+    const { t } = useTranslation('editor');
     const [isHovering, setIsHovering] = useState(false);
     const [excalidrawAPI, setExcalidrawAPI] = useState(null);
     const [imageData, setImageData] = useState(null);
@@ -232,21 +234,21 @@ const SketchPad = ({ excalidrawData,
                     <img src={`data:image/png;base64,${imageData}`} alt="sketch" style={{ maxWidth: "100%", maxHeight: "100%" }} />
                 ) : (
                     <Typography variant="body2" color="text.secondary">
-                        Hover to start drawing
+                        {t('sketchPad.hoverToStartDrawing')}
                     </Typography>
                 )}
             </div>
             {countdown !== null && (
                 <Box sx={{ mt: 2, p: 2, bgcolor: "#fff3cd", borderRadius: 1, border: "1px solid #ffc107" }}>
                     <Typography variant="body1" sx={{ mb: 1 }}>
-                        Submitting drawing for grading in {countdown} seconds...
+                        {t('sketchPad.submittingInSeconds', { countdown })}
                     </Typography>
                     <Button 
                         variant="contained" 
                         color="warning"
                         onClick={handleCancelSubmission}
                     >
-                        Cancel Submission
+                        {t('sketchPad.cancelSubmission')}
                     </Button>
                 </Box>
             )}

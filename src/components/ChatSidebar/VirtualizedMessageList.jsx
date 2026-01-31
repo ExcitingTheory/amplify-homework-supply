@@ -16,7 +16,7 @@
 
 import React, { useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { LexicalMessageRenderer } from './LexicalMessageRenderer';
 import { useAutoScroll } from './hooks/useAutoScroll';

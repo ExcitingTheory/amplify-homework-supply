@@ -32,7 +32,7 @@ cat public/locales/en/components.json
 
 **Implementation**:
 ```javascript
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 export default function Copyright() {
     const { t } = useTranslation('components');
@@ -84,7 +84,7 @@ git commit -m "i18n: Add translations to src/ProTip.js (3 strings)"
 
 **Implementation**:
 ```typescript
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 export default function AIFeedbackWidget() {
     const { t } = useTranslation('components');
@@ -279,7 +279,7 @@ git commit -m "i18n: Add translations to DictionaryEditor2.js (5 strings)"
 
 ## Quality Checklist (for each file)
 
-- [ ] Imported `useTranslation` from 'react-i18next'
+- [ ] Imported `useTranslation` from 'next-i18next'
 - [ ] Added `const { t } = useTranslation('components');`
 - [ ] All literal strings replaced with `t('key')` calls
 - [ ] Keys exist in `public/locales/en/components.json`

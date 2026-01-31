@@ -19,7 +19,7 @@ import { AutocompleteProvider } from '../context/SharedAutocompleteContext';
 import { AutocompleteNode } from '../components/AutocompleteNode';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
 import { UnitProvider } from '../../../context/unitContext';
-import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 
 export default {
   title: '🔌 Editor Plugins/Autocomplete',

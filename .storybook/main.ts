@@ -39,6 +39,8 @@ const config: StorybookConfig = {
       // Mock Amplify utilities that use the real client
       '@/utils/amplifyClient': path.resolve(__dirname, './__mocks__/amplifyClient.js'),
       '../utils/amplifyClient': path.resolve(__dirname, './__mocks__/amplifyClient.js'),
+      // Mock i18next to integrate with Translation Mode
+      'next-i18next': path.resolve(__dirname, './__mocks__/next-i18next.js'),
     };
     
     // Define Node.js globals for browser environment to fix Next.js compatibility

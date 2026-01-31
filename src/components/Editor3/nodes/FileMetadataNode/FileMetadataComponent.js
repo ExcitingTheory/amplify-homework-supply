@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import {
     Box,
     Card,
@@ -98,7 +98,7 @@ export default function FileMetadataComponent({
     search = '',
     index = 0
 }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [isExpanded, setIsExpanded] = useState(false);
     const [isSelected, setIsSelected] = useState(false);
     const [editingFileName, setEditingFileName] = useState(false);
@@ -246,7 +246,7 @@ export default function FileMetadataComponent({
                     >
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                             <Typography variant="h6">
-                                Vocabulary ({filterAndHighlight(parsedContent.vocabulary, 'term').length})
+                                {t('fileMetadataComponent.vocabularyCount', { count: filterAndHighlight(parsedContent.vocabulary, 'term').length })}
                             </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
@@ -272,7 +272,7 @@ export default function FileMetadataComponent({
                     >
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                             <Typography variant="h6">
-                                Summaries ({filterAndHighlight(parsedContent.summaries, 'content').length})
+                                {t('fileMetadataComponent.summariesCount', { count: filterAndHighlight(parsedContent.summaries, 'content').length })}
                             </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
@@ -300,7 +300,7 @@ export default function FileMetadataComponent({
                     >
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                             <Typography variant="h6">
-                                Objectives ({filterAndHighlight(parsedContent.objectives, 'description').length})
+                                {t('fileMetadataComponent.objectivesCount', { count: filterAndHighlight(parsedContent.objectives, 'description').length })}
                             </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
@@ -326,7 +326,7 @@ export default function FileMetadataComponent({
                     >
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                             <Typography variant="h6">
-                                Concepts ({filterAndHighlight(parsedContent.concepts, 'name').length})
+                                {t('fileMetadataComponent.conceptsCount', { count: filterAndHighlight(parsedContent.concepts, 'name').length })}
                             </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
@@ -352,7 +352,7 @@ export default function FileMetadataComponent({
                     >
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                             <Typography variant="h6">
-                                Questions ({filterAndHighlight(parsedContent.questions, 'question').length})
+                                {t('fileMetadataComponent.questionsCount', { count: filterAndHighlight(parsedContent.questions, 'question').length })}
                             </Typography>
                         </AccordionSummary>
                         <AccordionDetails>

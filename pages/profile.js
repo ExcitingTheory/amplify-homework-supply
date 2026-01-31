@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 // import Paper from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import AppBar from '@mui/material/AppBar';
@@ -13,8 +13,6 @@ import {
   updatePassword,
   fetchAuthSession
 } from 'aws-amplify/auth';
-
-import { DataStore } from 'aws-amplify/datastore';
 
 import FormControl from '@mui/material/FormControl';
 import MainToolbar from '../src/components/MainToolbar'
@@ -157,14 +155,21 @@ function Profile() {
     setClearDataStoreDialogOpen(false)
     
     try {
-      await DataStore.clear()
-      console.log('Local DataStore cache cleared.')
-      setSuccessMessage('Local cache cleared successfully. Please refresh the page.')
+      // Gen2 client doesn't have DataStore.clear() - instead reload the page to clear cache
+      console.log('Reloading page to clear cache...')
+      setSuccessMessage('Clearing cache and reloading...')
+      
+      // Clear sessionStorage and localStorage if needed
+      sessionStorage.clear()
+      
+      // Reload the page after a brief delay to show the message
+      setTimeout(() => {
+        window.location.reload()
+      }, 1000)
     } catch (error) {
-      alert('Error clearing DataStore: ' + error.message)
+      alert('Error clearing cache: ' + error.message)
+      setIsWorking(false)
     }
-    
-    setIsWorking(false)
   }
 
   React.useEffect(() => {

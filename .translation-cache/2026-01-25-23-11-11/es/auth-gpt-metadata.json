@@ -1,8 +1,0 @@
-{
-  "model": "gpt-4o-2024-08-06",
-  "provider": "openai",
-  "timestamp": "2026-01-26T07:07:55.708Z",
-  "requestId": "chatcmpl-D2AzTf4ZeBlb52jmkHvvpEX2j5IVA",
-  "tokensUsed": 184,
-  "fingerprint": "5b2578f441326f5b4d4b78a62c811ac746d296e55d16e89d9573dc8d00345d72"
-}

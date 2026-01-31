@@ -7,7 +7,7 @@ import SettingsContext from "../../../context/settingsContext";
 import CameraIcon from '@mui/icons-material/Camera';
 import getCachedUrl from "../../../utils/getCachedUrl";
 import FilesContext from "../../../context/fileContext";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 function FeaturedImage({ style, s3Key, identityId }) {
 
@@ -35,7 +35,7 @@ function FeaturedImage({ style, s3Key, identityId }) {
 
 export default function ConfigurationManager() {
 
-  const { t } = useTranslation('components');
+  const { t } = useTranslation('editor');
   const [isDragging, setIsDragging] = React.useState(false);
   const [filesToUpload, setFilesToUpload] = React.useState([]);
   const [fileOperations, setFileOperations] = React.useState([]);

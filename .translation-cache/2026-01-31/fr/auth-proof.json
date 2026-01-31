@@ -1,0 +1,84 @@
+{
+  "namespace": "auth",
+  "sourceLang": "en",
+  "targetLang": "fr",
+  "timestamp": "2026-01-31T10:07:18.899Z",
+  "models": [
+    {
+      "name": "claude-sonnet-4-20250514",
+      "provider": "anthropic",
+      "requestId": "msg_01HZ6pow4skMmcNuzE7sxbgw",
+      "fingerprint": "f1558ed1d5a3eaf3e280d5a47b92bf570b180491ccad3d5c5b0ee4080cbdafe1"
+    },
+    {
+      "name": "gpt-4o",
+      "provider": "openai",
+      "requestId": "chatcmpl-D429vZhDdhHsvsLJOaRfvCp1eF3zA",
+      "fingerprint": "f1558ed1d5a3eaf3e280d5a47b92bf570b180491ccad3d5c5b0ee4080cbdafe1"
+    },
+    {
+      "name": "gemma-3-12b-it",
+      "provider": "google-gemma",
+      "requestId": "d71f9d47-de9f-4524-b96d-573c4da6318d",
+      "fingerprint": "90409e47ea74b12ad236dd07fb53c1d6f1b6e02a990ce3c309aa0de810508a1d"
+    }
+  ],
+  "consensusFingerprint": "f1558ed1d5a3eaf3e280d5a47b92bf570b180491ccad3d5c5b0ee4080cbdafe1",
+  "consensus": {
+    "source": {
+      "sign_in": "Sign In",
+      "sign_out": "Sign Out",
+      "sign_up": "Sign Up",
+      "username": "Username",
+      "password": "Password",
+      "email": "Email",
+      "forgot_password": "Forgot Password?",
+      "reset_password": "Reset Password",
+      "confirm_password": "Confirm Password"
+    },
+    "claude": {
+      "sign_in": "Se connecter",
+      "sign_out": "Se déconnecter",
+      "sign_up": "S'inscrire",
+      "username": "Nom d'utilisateur",
+      "password": "Mot de passe",
+      "email": "E-mail",
+      "forgot_password": "Mot de passe oublié ?",
+      "reset_password": "Réinitialiser le mot de passe",
+      "confirm_password": "Confirmer le mot de passe"
+    },
+    "gpt": {
+      "sign_in": "Se connecter",
+      "sign_out": "Se déconnecter",
+      "sign_up": "S'inscrire",
+      "username": "Nom d'utilisateur",
+      "password": "Mot de passe",
+      "email": "E-mail",
+      "forgot_password": "Mot de passe oublié ?",
+      "reset_password": "Réinitialiser le mot de passe",
+      "confirm_password": "Confirmer le mot de passe"
+    },
+    "translategemma": {
+      "sign_in": "Se connecter",
+      "sign_out": "Se déconnecter",
+      "sign_up": "S'inscrire",
+      "username": "Nom d'utilisateur",
+      "password": "Mot de passe",
+      "email": "Courriel",
+      "forgot_password": "Mot de passe oublié ?",
+      "reset_password": "Réinitialiser le mot de passe",
+      "confirm_password": "Confirmer le mot de passe"
+    },
+    "final": {
+      "sign_in": "Se connecter",
+      "sign_out": "Se déconnecter",
+      "sign_up": "S'inscrire",
+      "username": "Nom d'utilisateur",
+      "password": "Mot de passe",
+      "email": "E-mail",
+      "forgot_password": "Mot de passe oublié ?",
+      "reset_password": "Réinitialiser le mot de passe",
+      "confirm_password": "Confirmer le mot de passe"
+    }
+  }
+}

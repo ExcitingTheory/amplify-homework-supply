@@ -55,7 +55,7 @@ git diff main pages/grades.js
 **Implementation**:
 ```javascript
 // 1. Add import at top
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 // 2. In component function
 function Index({ signOut, user }) {
@@ -192,7 +192,7 @@ git commit -m "i18n: Add translations to pages/privacy.js (54 strings)"
 
 After completing each file:
 
-- [ ] Imported `useTranslation` from 'react-i18next'
+- [ ] Imported `useTranslation` from 'next-i18next'
 - [ ] Added `const { t } = useTranslation('pages');`
 - [ ] All literal strings replaced with `t('key')` calls
 - [ ] Verified keys exist in `public/locales/en/pages.json`

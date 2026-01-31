@@ -20,7 +20,7 @@
     "remove": "Eliminar",
     "update": "Actualizar",
     "confirm": "Confirmar",
-    "clear": "Borrar",
+    "clear": "Limpiar",
     "reset": "Restablecer",
     "retry": "Reintentar",
     "back": "Atrás",
@@ -34,7 +34,7 @@
     "sections": "Secciones",
     "grades": "Calificaciones",
     "profile": "Perfil",
-    "workbook": "Cuaderno"
+    "workbook": "Cuaderno de trabajo"
   },
   "status": {
     "loading": "Cargando...",
@@ -44,14 +44,14 @@
     "processing": "Procesando...",
     "uploading": "Subiendo...",
     "downloading": "Descargando...",
-    "complete": "Completo",
+    "complete": "Completado",
     "incomplete": "Incompleto",
     "pending": "Pendiente"
   },
   "time": {
     "created": "Creado",
     "updated": "Actualizado",
-    "due": "Vencimiento",
+    "due": "Vence",
     "completed": "Completado"
   },
   "common": {

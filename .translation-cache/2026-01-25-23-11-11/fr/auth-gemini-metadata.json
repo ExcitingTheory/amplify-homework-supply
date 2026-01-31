@@ -1,8 +1,0 @@
-{
-  "model": "gemini-2.0-flash-exp",
-  "provider": "google",
-  "timestamp": "2026-01-26T07:08:49.153Z",
-  "requestId": "743f947f-7b94-43b3-8a06-d0aa0cb2e180",
-  "tokensUsed": 0,
-  "fingerprint": "7a6c208d28a055dad4e6c5f14af0756ec11cc45cc76578956299388b641bd165"
-}

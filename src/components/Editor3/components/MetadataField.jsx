@@ -16,6 +16,7 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
+import { useTranslation } from 'next-i18next';
 
 /**
  * MetadataField - Individual metadata field editor with optional Lexical support
@@ -31,6 +32,7 @@ function MetadataField({
     required = false,
     variant = 'standard',
 }) {
+    const { t } = useTranslation('editor');
     const [localValue, setLocalValue] = React.useState(value);
     const [isDraft, setIsDraft] = React.useState(false);
     const saveTimeoutRef = React.useRef(null);
@@ -87,7 +89,7 @@ function MetadataField({
                 >
                     {label}
                     {required && <span style={{ color: 'red', marginLeft: '4px' }}>*</span>}
-                    {isDraft && <span style={{ marginLeft: '4px' }}>(unsaved changes)</span>}
+                    {isDraft && <span style={{ marginLeft: '4px' }}>({t('metadataField.unsavedChanges')})</span>}
                 </Typography>
             )}
             <TextField

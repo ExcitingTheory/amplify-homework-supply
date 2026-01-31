@@ -26,6 +26,8 @@ import {
   KEY_ENTER_COMMAND,
   KEY_ESCAPE_COMMAND,
   KEY_TAB_COMMAND,
+  DRAGOVER_COMMAND,
+  DROP_COMMAND,
 } from 'lexical';
 import { mergeRegister } from '@lexical/utils';
 import { $isHeadingNode } from '@lexical/rich-text';
@@ -186,9 +188,11 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
   const { suggestions, setSuggestions, isLoadingAI, setIsLoadingAI, registerInsertCallback } = useSuggestions();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [anchorElement, setAnchorElement] = useState(null);
+  const [userHasTyped, setUserHasTyped] = useState(false);
   const aiRequestTimer = useRef(null);
   const abortController = useRef(null);
   const lastAIRequestTime = useRef(0);
+  const isDragging = useRef(false);
   const AI_COOLDOWN_MS = 5000; // 5 second cooldown between automatic AI suggestions
   
   const { currentUnit } = useContext(UnitContext);
@@ -219,10 +223,13 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
         const root = $getRoot();
         const children = root.getChildren();
         
-        return children.map(node => ({
-          type: categorizeNode(node) || node.getType(),
-          content: node.getTextContent().substring(0, 200),
-        }));
+        return children.map(node => {
+          const textContent = node.getTextContent?.() || '';
+          return {
+            type: categorizeNode(node) || node.getType(),
+            content: typeof textContent === 'string' ? textContent.substring(0, 200) : '',
+          };
+        });
       });
       
       const lastBlock = structure[structure.length - 1];
@@ -269,6 +276,11 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
   // Update suggestions when selection changes
   useEffect(() => {
     return editor.registerUpdateListener(({ editorState }) => {
+      // Don't show suggestions if user hasn't typed yet or is dragging
+      if (!userHasTyped || isDragging.current) {
+        return;
+      }
+      
       editorState.read(() => {
         const selection = $getSelection();
         
@@ -282,13 +294,13 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
           ? anchorNode.getParent() 
           : anchorNode;
         
-        // Only show suggestions on empty lines at the end of the current block
+        // Only show suggestions on empty paragraph blocks at the end
         if (currentBlock && currentBlock.getType() === 'paragraph') {
           const text = currentBlock.getTextContent().trim();
           const isAtEnd = selection.anchor.offset === currentBlock.getTextContentSize();
           
-          // Show suggestions only if we're on an empty line or at the end of a paragraph
-          if (text === '' || (isAtEnd && text.length > 20)) {
+          // ONLY show suggestions if we're on a completely empty paragraph
+          if (text === '' && isAtEnd) {
             // Get rule-based analysis synchronously (inside read block)
             const analysis = $analyzePreviousBlocks();
             
@@ -379,6 +391,36 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
         return false;
     }
   }, [suggestions, selectedIndex]);
+  
+  // Track drag operations and user typing
+  useEffect(() => {
+    return mergeRegister(
+      // Track drag operations
+      editor.registerCommand(
+        DRAGOVER_COMMAND,
+        () => {
+          isDragging.current = true;
+          setSuggestions(null);
+          return false; // Don't prevent default
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand(
+        DROP_COMMAND,
+        () => {
+          isDragging.current = false;
+          return false; // Don't prevent default
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
+      // Track when user types to enable suggestions
+      editor.registerTextContentListener(() => {
+        if (!isDragging.current) {
+          setUserHasTyped(true);
+        }
+      }),
+    );
+  }, [editor, setSuggestions]);
   
   useEffect(() => {
     if (!suggestions) return;

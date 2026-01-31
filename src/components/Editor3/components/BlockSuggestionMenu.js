@@ -10,7 +10,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Box, List, ListItem, ListItemButton, Typography, Chip, CircularProgress, Button, Tooltip } from '@mui/material';
 import { AutoAwesome as AutoAwesomeIcon } from '@mui/icons-material';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 /**
  * BlockSuggestionMenu component
@@ -30,7 +30,7 @@ export default function BlockSuggestionMenu({
   useAI = false,
   onRequestMore,
 }) {  
-  const { t } = useTranslation('components');
+  const { t } = useTranslation('editor');
   const menuRef = useRef(null);
   const [hoveredIndex, setHoveredIndex] = React.useState(null);
   

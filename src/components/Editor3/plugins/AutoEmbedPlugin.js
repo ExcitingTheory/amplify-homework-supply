@@ -15,7 +15,7 @@ import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {useMemo, useState} from 'react';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 // import useModal from '../../hooks/useModal';
 // import Button from '../../ui/Button';
@@ -219,7 +219,7 @@ export function AutoEmbedDialog({
   embedConfig,
   onClose,
 }) {
-  const { t } = useTranslation('components');
+  const { t } = useTranslation('editor');
   const [text, setText] = useState('');
   const [editor] = useLexicalComposerContext();
   const [embedResult, setEmbedResult] = useState(null);
@@ -277,7 +277,7 @@ export function AutoEmbedDialog({
 }
 
 export default function AutoEmbedPlugin() {
-  const { t } = useTranslation('components');
+  const { t } = useTranslation('editor');
   // const [modal, showModal] = useModal();
 
   const openEmbedModal = (embedConfig) => {

@@ -18,7 +18,7 @@ import { Box, Paper, Typography, Alert } from '@mui/material';
 import AIContentCompletionPlugin from './AIContentCompletionPlugin';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
 import { UnitProvider } from '../../../context/unitContext';
-import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 
 export default {
   title: '🔌 Editor Plugins/AI Content Completion',

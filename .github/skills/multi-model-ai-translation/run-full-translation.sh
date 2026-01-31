@@ -6,9 +6,10 @@
 set -e  # Exit on error
 
 # Configuration
-NAMESPACES=("auth" "chat" "common" "editor" "errors" "grades" "units")
+NAMESPACES=("auth" "common" "components" "editor" "errors" "pages")
 TARGET_LANGS=("ja" "es" "fr" "zh" "de")
 SOURCE_LANG="en"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 echo "==================================="
 echo "Multi-Model Translation Workflow"
@@ -64,7 +65,7 @@ for namespace in "${NAMESPACES[@]}"; do
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     
     # Run translation with error handling
-    if npx tsx scripts/translate-with-proof.ts "$namespace" "$SOURCE_LANG" "$lang"; then
+    if npx tsx "$SCRIPT_DIR/scripts/translate-with-proof.ts" "$namespace" "$SOURCE_LANG" "$lang"; then
       echo "✅ Success: $namespace → $lang"
     else
       echo "❌ Failed: $namespace → $lang"

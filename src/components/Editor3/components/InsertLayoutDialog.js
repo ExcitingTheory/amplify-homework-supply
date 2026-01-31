@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 import {
     Button,
@@ -16,7 +16,7 @@ const LAYOUTS = [
 ];
 
 export default function InsertLayoutDialog({activeEditor, onClose}) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [layout, setLayout] = useState(LAYOUTS[0].value);
     const buttonLabel = LAYOUTS.find((item) => item.value === layout)?.label;
 

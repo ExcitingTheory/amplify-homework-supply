@@ -11,6 +11,7 @@ import Checkbox from '@mui/material/Checkbox';
 import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
+import { withTranslation } from 'next-i18next';
 
 import UnitContext from '../../../context/unitContext';
 
@@ -167,7 +168,7 @@ class QuestionBlockRo1 extends React.Component {
             <Box sx={{ flexGrow: 1 }}>
             </Box>
             <Box>
-              Grade: {this.state.grade || 0}
+              {this.props.t('quizComponent.grade', { grade: this.state.grade || 0 })}
             </Box>
             {/* <Box
               style={{
@@ -191,6 +192,8 @@ class QuestionBlockRo1 extends React.Component {
   }
 }
 
+// Wrap class component with translation HOC
+const QuestionBlockRo1WithTranslation = withTranslation('editor')(QuestionBlockRo1);
 
 export default function QuestionBlockRo(props) {
   const { nodeKey, data } = props
@@ -228,7 +231,7 @@ export default function QuestionBlockRo(props) {
   // Do grade handling here and pass in so the Assignment block is fully controlled
   // and we don't have to keep updating it internally with data implementation
 
-  return (<QuestionBlockRo1
+  return (<QuestionBlockRo1WithTranslation
     inProgressContent={indexContent}
     questionContent={questionContent}
     accuracy={accuracy}

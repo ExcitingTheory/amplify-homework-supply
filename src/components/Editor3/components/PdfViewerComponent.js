@@ -10,6 +10,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Box, IconButton, Typography, Paper, ButtonGroup, CircularProgress } from '@mui/material';
 import { Document, Page, pdfjs } from 'react-pdf';
+import { useTranslation } from 'next-i18next';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import { mergeRegister } from '@lexical/utils';
@@ -56,6 +57,7 @@ export default function PdfViewerComponent({
     filename,
     nodeKey 
 }) {
+    const { t } = useTranslation('editor');
     const [editor] = useLexicalComposerContext();
     const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey);
     const containerRef = useRef(null);
@@ -271,7 +273,7 @@ export default function PdfViewerComponent({
             >
                 <PdfIcon sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
                 <Typography variant="body2" color="text.secondary">
-                    Loading PDF: {filename}
+                    {t('pdfViewerComponent.loadingPdf', { filename })}
                 </Typography>
             </Paper>
         );
@@ -452,7 +454,7 @@ export default function PdfViewerComponent({
                     </Document>
                 ) : (
                     <Typography variant="body2" color="text.secondary">
-                        No PDF to display
+                        {t('pdfViewerComponent.noPdfToDisplay')}
                     </Typography>
                 )}
             </Box>

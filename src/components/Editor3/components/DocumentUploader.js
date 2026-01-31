@@ -24,7 +24,7 @@ import { getAmplifyClient } from '../../../utils/amplifyClient';
 // import type { Schema } from '../../../../amplify/data/resource';
 import UnitContext from '../../../context/unitContext';
 import FilesContext from '../../../context/fileContext';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 const client = generateClient();
 
@@ -54,7 +54,7 @@ const analyzeDocumentMutation = /* GraphQL */ `
  * Component for uploading and processing documents to extract vocabulary or questions
  */
 export default function DocumentUploader({ extractionType = 'vocabulary', onUploadComplete }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [error, setError] = useState(null);

@@ -21,7 +21,7 @@ import { TableNode as NewTableNode } from '../components/TableNode';
 import TableCellNodes from '../components/TableCellNodes';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
 import { UnitProvider } from '../../../context/unitContext';
-import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 
 export default {
   title: '🔌 Editor Plugins/Table',

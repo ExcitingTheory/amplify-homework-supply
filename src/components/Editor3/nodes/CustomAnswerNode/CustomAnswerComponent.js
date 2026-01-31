@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import {
     verifyShortAnswer,
 } from "../../../../graphql/queries";
@@ -59,7 +59,7 @@ export default function CustomAnswerComponent({
     allowedInput = [],
     promptMethod = [],
 }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [answers, setAnswers] = useState({});
     const [progress, setProgress] = useState(0);
     const [feedback, setFeedback] = useState({});

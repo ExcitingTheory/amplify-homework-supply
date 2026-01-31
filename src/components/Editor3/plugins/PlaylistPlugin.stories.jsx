@@ -19,7 +19,7 @@ import { Button } from '@mui/material';
 import PlaylistPlugin, { INSERT_PLAYLIST_COMMAND, PlaylistNode } from './PlaylistPlugin';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
 import { UnitProvider } from '../../../context/unitContext';
-import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 
 export default {
   title: '🔌 Editor Plugins/Playlist',

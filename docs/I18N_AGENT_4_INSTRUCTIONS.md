@@ -32,7 +32,7 @@ cat public/locales/en/components.json | grep -A 3 "toolBarPlugin\|quizComponent"
 
 **Implementation**:
 ```javascript
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 const { t } = useTranslation('components');
 // t('promptMethodSelector.menuAttribute')

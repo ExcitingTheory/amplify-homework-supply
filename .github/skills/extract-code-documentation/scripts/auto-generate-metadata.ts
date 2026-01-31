@@ -14,8 +14,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { glob } from 'glob';
 import { extractAllDocblocks, findDocblock } from './extract-component-docblocks';
+import { buildMetadataPrompt } from './metadata-prompt';
+import Anthropic from '@anthropic-ai/sdk';
 
 const workspaceRoot = path.join(__dirname, '../../..');
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
 
 interface TranslationKey {
   namespace: string;
@@ -35,13 +41,14 @@ interface TranslationUsage {
 interface GeneratedMetadata {
   context: string;
   component: {
-    location: string[];
-    functionality: string;
+    location: string;
+    description: string;
   };
   usage: string;
   impact: string;
-  userType: 'all' | 'instructor' | 'student' | 'admin';
-  category: 'button' | 'label' | 'heading' | 'message' | 'placeholder' | 'error' | 'status' | 'navigation';
+  userType: 'all' | 'instructors' | 'students' | 'admins';
+  tone: 'polite-formal' | 'casual' | 'technical';
+  alternativeTerms?: string[];
 }
 
 /**
@@ -60,25 +67,43 @@ async function scanTranslationCalls(sourceDir: string): Promise<TranslationKey[]
     const content = fs.readFileSync(file, 'utf-8');
     const relativeFile = path.relative(sourceDir, file);
     
-    // Pattern 1: useTranslation('namespace')
-    const useTranslationMatches = content.matchAll(/useTranslation\(['"`]([^'"`]+)['"`]\)/g);
-    let currentNamespace = 'common'; // default
+    // Pattern 1: Extract default namespace from useTranslation calls
+    // i18next behavior: useTranslation(['ns1', 'ns2', 'ns3']) sets t() default to 'ns1' (first)
+    let defaultNamespace = 'common'; // fallback
     
-    for (const match of useTranslationMatches) {
-      currentNamespace = match[1];
+    // Match single string: useTranslation('namespace')
+    const singleNsMatches = content.matchAll(/useTranslation\(\s*['"`]([^'"`]+)['"`]\s*\)/g);
+    for (const match of singleNsMatches) {
+      defaultNamespace = match[1];
     }
     
-    // Pattern 2: t('namespace:key') or t('key')
-    const tCallMatches = content.matchAll(/\bt\(['"`]([^'"`]+)['"`]/g);
+    // Match array: useTranslation(['ns1', 'ns2']) - first element is default
+    const arrayNsMatches = content.matchAll(/useTranslation\(\s*\[\s*['"`]([^'"`]+)['"`]/g);
+    for (const match of arrayNsMatches) {
+      defaultNamespace = match[1]; // First namespace in array is default
+    }
+    
+    // Pattern 2: t('namespace:key') or t('key') or t('key', { ns: 'namespace' })
+    const tCallMatches = content.matchAll(/\bt\(\s*['"`]([^'"`]+)['"`](?:\s*,\s*\{[^}]*ns:\s*['"`]([^'"`]+)['"`][^}]*\})?/g);
     
     for (const match of tCallMatches) {
       const fullKey = match[1];
-      let namespace = currentNamespace;
-      let keyPath = fullKey;
+      const explicitNs = match[2]; // From { ns: 'namespace' } option
+      let namespace: string;
+      let keyPath: string;
       
-      // Check if namespace is specified in the key
-      if (fullKey.includes(':')) {
+      // Priority: explicit ns option > namespace prefix > default namespace
+      if (explicitNs) {
+        // t('key', { ns: 'namespace' })
+        namespace = explicitNs;
+        keyPath = fullKey;
+      } else if (fullKey.includes(':')) {
+        // t('namespace:key')
         [namespace, keyPath] = fullKey.split(':', 2);
+      } else {
+        // t('key') - use default namespace from useTranslation
+        namespace = defaultNamespace;
+        keyPath = fullKey;
       }
       
       const uniqueKey = `${namespace}:${keyPath}`;
@@ -191,7 +216,7 @@ function extractComponentName(filePath: string): string {
 }
 
 /**
- * Step 3 & 4: Generate metadata from usage context and docblocks
+ * Step 3 & 4: Generate metadata from usage context and docblocks using AI
  */
 async function generateMetadata(
   key: TranslationKey,
@@ -209,147 +234,95 @@ async function generateMetadata(
     }
   }
   
-  // Infer category from key structure and value
-  const category = inferCategory(key);
+  // Build docblocks context for AI
+  const docblocksContext = docblockDescriptions.length > 0
+    ? docblockDescriptions.map((desc, i) => `- ${uniqueLocations[i]}: ${desc}`).join('\n')
+    : 'No specific component docblocks found';
   
-  // Infer user type from namespace and file paths
-  const userType = inferUserType(key);
-  
-  // Build context description
-  const context = generateContext(key);
-  
-  // Build usage description
-  const usage = generateUsage(key, category);
-  
-  // Build impact description
-  const impact = generateImpact(key, category);
-  
-  return {
-    context,
-    component: {
-      location: uniqueLocations,
-      functionality: docblockDescriptions[0] || 'Component functionality not documented'
-    },
-    usage,
-    impact,
-    userType,
-    category
-  };
+  // Generate metadata with AI
+  return await generateMetadataWithAI(key, key.namespace, docblocksContext, uniqueLocations[0] || 'unknown');
 }
 
 /**
- * Infer category from key name and value
+ * Generate metadata using Claude AI
  */
-function inferCategory(key: TranslationKey): GeneratedMetadata['category'] {
-  const keyLower = key.keyPath.toLowerCase();
-  const valueLower = key.value.toLowerCase();
-  
-  // Check key path patterns
-  if (keyLower.includes('button') || keyLower.includes('action') || keyLower.includes('submit')) {
-    return 'button';
-  }
-  if (keyLower.includes('error') || key.namespace === 'errors') {
-    return 'error';
-  }
-  if (keyLower.includes('heading') || keyLower.includes('title')) {
-    return 'heading';
-  }
-  if (keyLower.includes('placeholder')) {
-    return 'placeholder';
-  }
-  if (keyLower.includes('status')) {
-    return 'status';
-  }
-  if (keyLower.includes('nav') || keyLower.includes('menu')) {
-    return 'navigation';
-  }
-  if (keyLower.includes('message') || keyLower.includes('description')) {
-    return 'message';
-  }
-  
-  // Check for button-like values
-  if (valueLower.match(/^(save|cancel|delete|edit|create|submit|add|remove)/)) {
-    return 'button';
-  }
-  
-  // Default to label
-  return 'label';
-}
-
-/**
- * Infer user type from namespace and file paths
- */
-function inferUserType(key: TranslationKey): GeneratedMetadata['userType'] {
-  const pathsStr = key.usages.map(u => u.file).join(' ').toLowerCase();
-  
-  if (pathsStr.includes('instructor') || key.namespace === 'editor' || key.namespace === 'units') {
-    return 'instructor';
-  }
-  if (pathsStr.includes('student') || pathsStr.includes('workbook') || key.namespace === 'grades') {
-    return 'student';
-  }
-  if (pathsStr.includes('admin')) {
-    return 'admin';
-  }
-  
-  return 'all';
-}
-
-/**
- * Generate context description
- */
-function generateContext(key: TranslationKey): string {
-  const locations = key.usages.map(u => {
-    const parts = u.file.split('/');
-    if (parts.includes('components')) {
-      return `${parts[parts.length - 1]} component`;
-    }
-    if (parts.includes('pages')) {
-      return `${parts[parts.length - 1].replace(/\.(js|tsx?)$/, '')} page`;
-    }
-    return parts[parts.length - 1];
+async function generateMetadataWithAI(
+  key: TranslationKey,
+  namespace: string,
+  docblocksContext: string,
+  componentLocation: string
+): Promise<GeneratedMetadata> {
+  const prompt = buildMetadataPrompt({
+    keyPath: key.keyPath,
+    value: key.value,
+    namespace,
+    componentLocation: componentLocation || 'src/components/common',
+    docblocksContext
   });
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1000,
+    messages: [{
+      role: 'user',
+      content: prompt
+    }]
+  });
+
+  const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
   
-  if (locations.length === 0) {
-    return `Translation key not currently used in codebase`;
+  // Clean and parse JSON response
+  let cleanedJson = responseText;
+  
+  // Remove markdown code fences if present
+  cleanedJson = cleanedJson.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+  
+  // Extract JSON object
+  const jsonMatch = cleanedJson.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error(`No JSON object found in Claude response for key: ${key.keyPath}`);
   }
   
-  return `Used in ${Array.from(new Set(locations)).join(', ')}`;
-}
-
-/**
- * Generate usage description
- */
-function generateUsage(key: TranslationKey, category: string): string {
-  const templates = {
-    button: `Button label for ${key.keyPath.split('.').pop()} action`,
-    label: `Label text for ${key.keyPath.split('.').pop()} field`,
-    heading: `Heading text for ${key.keyPath.split('.').pop()} section`,
-    error: `Error message displayed when ${key.keyPath.split('.').pop()} fails`,
-    placeholder: `Placeholder text for ${key.keyPath.split('.').pop()} input`,
-    status: `Status indicator showing ${key.keyPath.split('.').pop()} state`,
-    navigation: `Navigation item for ${key.keyPath.split('.').pop()}`,
-    message: `Message displayed for ${key.keyPath.split('.').pop()}`
+  let metadata: any;
+  try {
+    metadata = JSON.parse(jsonMatch[0]);
+  } catch (parseError) {
+    // If JSON parse fails, try to fix common issues
+    let fixedJson = jsonMatch[0];
+    
+    // Fix trailing commas before closing braces/brackets
+    fixedJson = fixedJson.replace(/,(\s*[}\]])/g, '$1');
+    
+    // Fix unescaped quotes in strings (basic attempt)
+    // This is a simple heuristic - may need adjustment
+    fixedJson = fixedJson.replace(/: "([^"]*)"([^,}\]])/g, ': "$1\\"$2');
+    
+    try {
+      metadata = JSON.parse(fixedJson);
+    } catch (retryError) {
+      // Log the problematic JSON for debugging
+      console.error(`   ⚠️  Failed to parse JSON for ${key.keyPath}`);
+      console.error(`   Original error: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+      console.error(`   Retry error: ${retryError instanceof Error ? retryError.message : String(retryError)}`);
+      console.error(`   JSON snippet: ${jsonMatch[0].substring(0, 200)}...`);
+      
+      throw new Error(`JSON parse failed even after cleanup attempts: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+    }
+  }
+  
+  // Ensure required fields are present with defaults
+  return {
+    context: metadata.context || `Used in ${componentLocation}`,
+    component: {
+      location: metadata.component?.location || componentLocation,
+      description: metadata.component?.description || 'Component functionality not documented'
+    },
+    usage: metadata.usage || `Translation key: ${key.keyPath}`,
+    impact: metadata.impact || 'Provides information to users',
+    userType: metadata.userType || 'all',
+    tone: metadata.tone || 'polite-formal',
+    alternativeTerms: metadata.alternativeTerms || []
   };
-  
-  return templates[category as keyof typeof templates] || `Text for ${key.keyPath}`;
-}
-
-/**
- * Generate impact description
- */
-function generateImpact(key: TranslationKey, category: string): string {
-  if (category === 'button') {
-    return `Triggers ${key.keyPath.split('.').pop()} action when clicked`;
-  }
-  if (category === 'error') {
-    return `Alerts user to ${key.keyPath.split('.').pop()} error condition`;
-  }
-  if (category === 'heading') {
-    return `Labels the ${key.keyPath.split('.').pop()} section for users`;
-  }
-  
-  return `Provides ${category} information to users`;
 }
 
 /**
@@ -399,10 +372,15 @@ async function mergeMetadataIntoLocales(
           _meta: meta
         };
       } else if (current[finalKey] && typeof current[finalKey] === 'object') {
-        // Update existing metadata
-        current[finalKey]._meta = {
-          ...current[finalKey]._meta,
-          ...meta
+        // Preserve existing value, update metadata
+        const existingValue = current[finalKey].value || current[finalKey];
+        current[finalKey] = {
+          ...current[finalKey],
+          value: typeof existingValue === 'string' ? existingValue : current[finalKey].value,
+          _meta: {
+            ...current[finalKey]._meta,
+            ...meta
+          }
         };
       }
     }
@@ -422,14 +400,39 @@ async function main() {
   // Change to workspace root so extractAllDocblocks() works correctly
   process.chdir(workspaceRoot);
   
+  // Check for API key - required for metadata generation
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.error('❌ Error: ANTHROPIC_API_KEY environment variable not set');
+    console.error('   This script requires Claude AI for metadata generation.');
+    console.error('   Export your Anthropic API key: export ANTHROPIC_API_KEY=sk-ant-...\n');
+    process.exit(1);
+  }
+  
   const localesDir = path.join(workspaceRoot, 'public/locales/en');
-  const sourceDir = path.join(workspaceRoot, 'src');
   
   console.log('🔍 Step 1: Scanning codebase for translation calls...');
-  const discoveredKeys = await scanTranslationCalls(sourceDir);
+  
+  // Scan both src/ and pages/ directories
+  const srcKeys = await scanTranslationCalls(path.join(workspaceRoot, 'src'));
+  const pagesKeys = await scanTranslationCalls(path.join(workspaceRoot, 'pages'));
+  
+  // Merge keys from both directories
+  const keyMap = new Map<string, TranslationKey>();
+  for (const key of [...srcKeys, ...pagesKeys]) {
+    const uniqueKey = `${key.namespace}:${key.keyPath}`;
+    if (keyMap.has(uniqueKey)) {
+      // Merge usages
+      keyMap.get(uniqueKey)!.usages.push(...key.usages);
+    } else {
+      keyMap.set(uniqueKey, key);
+    }
+  }
+  
+  const discoveredKeys = Array.from(keyMap.values());
   const totalUsages = discoveredKeys.reduce((sum, k) => sum + k.usages.length, 0);
   console.log(`   Found ${discoveredKeys.length} unique translation keys with ${totalUsages} usages`);
-  console.log(`   Across ${new Set(discoveredKeys.map(k => k.namespace)).size} namespaces\n`);
+  console.log(`   Across ${new Set(discoveredKeys.map(k => k.namespace)).size} namespaces`);
+  console.log(`   Scanned src/ (${srcKeys.length} keys) and pages/ (${pagesKeys.length} keys)\n`);
   
   console.log('🔍 Step 2: Comparing with locale files...');
   const { keys, missingKeys, newNamespaces } = await enrichWithLocaleData(discoveredKeys, localesDir);
@@ -451,13 +454,31 @@ async function main() {
   const docblocks = await extractAllDocblocks();
   console.log(`   Extracted ${docblocks.size} component docblocks\n`);
   
-  console.log('🔍 Step 4: Generating metadata from usage context...');
+  console.log('🔍 Step 4: Generating metadata with AI (Claude Sonnet 4)...');
+  
   const metadata = new Map<string, GeneratedMetadata>();
-  for (const key of keys) {
-    const meta = await generateMetadata(key, docblocks);
-    metadata.set(`${key.namespace}:${key.keyPath}`, meta);
+  let successCount = 0;
+  let errorCount = 0;
+  
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    if (i > 0 && i % 10 === 0) {
+      console.log(`   Progress: ${i}/${keys.length} keys processed...`);
+      // Rate limiting: 100ms delay every 10 requests
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    try {
+      const meta = await generateMetadata(key, docblocks);
+      metadata.set(`${key.namespace}:${key.keyPath}`, meta);
+      successCount++;
+    } catch (error) {
+      console.error(`   ⚠️  Error generating metadata for ${key.keyPath}:`, error instanceof Error ? error.message : String(error));
+      errorCount++;
+    }
   }
-  console.log(`   Generated ${metadata.size} metadata entries\n`);
+  
+  console.log(`   Generated ${metadata.size} metadata entries (${successCount} successful, ${errorCount} errors)\n`);
   
   console.log('🔍 Step 5: Updating locale files with metadata...');
   await mergeMetadataIntoLocales(keys, metadata, localesDir);

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'next-i18next';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
@@ -72,6 +73,7 @@ export default function TabsVerticalRight({
   setValue,
   setDrawerWidth,
 }) {
+  const { t } = useTranslation('editor');
   const [isResizing, setIsResizing] = React.useState(false);
   const startXRef = React.useRef(0);
   const startWidthRef = React.useRef(0);
@@ -201,10 +203,10 @@ export default function TabsVerticalRight({
               fontWeight: 600
             }}>
               <AutoAwesomeIcon sx={{ fontSize: 28 }} />
-              AI Block Suggestions
+              {t('tabsVerticalRight.aiSuggestionsHeading')}
             </Typography>
             <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.95)', lineHeight: 1.6 }}>
-              AI-powered content block suggestions will appear here based on your current lesson content.
+              {t('tabsVerticalRight.aiSuggestionsDesc')}
             </Typography>
           </Box>
           <Box sx={{ px: 2 }}>
@@ -213,7 +215,7 @@ export default function TabsVerticalRight({
               mb: 2,
               fontStyle: 'italic'
             }}>
-              Coming soon: Interactive suggestions panel with reasoning and priority indicators.
+              {t('tabsVerticalRight.comingSoon')}
             </Typography>
             {/** Add unit suggestions list here in the future */}
             {/**  Add block suggestions list here */}
@@ -244,24 +246,24 @@ export default function TabsVerticalRight({
               fontWeight: 600
             }}>
               <GradeIcon sx={{ fontSize: 28 }} />
-              Unit Grades
+              {t('tabsVerticalRight.gradesHeading')}
             </Typography>
             <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.95)', lineHeight: 1.6 }}>
-              View grades and progress for this unit.
+              {t('tabsVerticalRight.gradesDesc')}
             </Typography>
           </Box>
           <Box sx={{ px: 2 }}>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontWeight: 500 }}>
-              📊 Instructors:
+              {t('tabsVerticalRight.instructorsLabel')}
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2, pl: 2 }}>
-              View all student grades and submissions
+              {t('tabsVerticalRight.instructorsDesc')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontWeight: 500 }}>
-              ✍️ Learners:
+              {t('tabsVerticalRight.learnersLabel')}
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', pl: 2 }}>
-              View your own grades and feedback
+              {t('tabsVerticalRight.learnersDesc')}
             </Typography>
           </Box>
         </TabPanel>
@@ -281,31 +283,31 @@ export default function TabsVerticalRight({
               fontWeight: 600
             }}>
               <ForumIcon sx={{ fontSize: 28, color: '#2196f3' }} />
-              Cohort Chat
+              {t('tabsVerticalRight.cohortChatHeading')}
             </Typography>
             <Typography variant="body2" sx={{ color: 'rgba(0,0,0,0.75)', lineHeight: 1.6 }}>
-              Collaborate with your classmates and instructor.
+              {t('tabsVerticalRight.cohortChatDesc')}
             </Typography>
           </Box>
           <Box sx={{ px: 2 }}>
             <Box sx={{ mb: 2, p: 2, bgcolor: 'background.default', borderRadius: 1, borderLeft: '3px solid #2196f3' }}>
               <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: 'text.primary' }}>
-                💬 Tag <Box component="span" sx={{ px: 0.5, py: 0.25, bgcolor: 'primary.light', color: 'primary.contrastText', borderRadius: 0.5, fontFamily: 'monospace' }}>@kai</Box>
+                {t('tabsVerticalRight.tagKaiLabel')}
               </Typography>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', pl: 3 }}>
-                Get AI assistance in the discussion
+                {t('tabsVerticalRight.tagKaiDesc')}
               </Typography>
             </Box>
             <Box sx={{ mb: 2, p: 2, bgcolor: 'background.default', borderRadius: 1, borderLeft: '3px solid #ff9800' }}>
               <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: 'text.primary' }}>
-                🏷️ Use <Box component="span" sx={{ px: 0.5, py: 0.25, bgcolor: 'warning.light', color: 'warning.contrastText', borderRadius: 0.5, fontFamily: 'monospace' }}>#topics</Box>
+                {t('tabsVerticalRight.useTopicsLabel')}
               </Typography>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', pl: 3 }}>
-                Organize conversations by theme
+                {t('tabsVerticalRight.useTopicsDesc')}
               </Typography>
             </Box>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontStyle: 'italic', textAlign: 'center', mt: 2 }}>
-              Share insights, ask questions, and learn together
+              {t('tabsVerticalRight.shareInsights')}
             </Typography>
           </Box>
         </TabPanel>
@@ -345,19 +347,19 @@ export default function TabsVerticalRight({
         <Tab
           value={5}
           onClick={() => handleTabClick(5)}
-          label={<ChatIcon />} {...a11yProps('AI Assistant')} />
+          label={<ChatIcon />} {...a11yProps(t('tabsVerticalRight.aiAssistantTab'))} />
         <Tab
           value={7}
           onClick={() => handleTabClick(7)}
-          label={<AutoAwesomeIcon />} {...a11yProps('AI Suggestions')} />
+          label={<AutoAwesomeIcon />} {...a11yProps(t('tabsVerticalRight.aiSuggestionsTab'))} />
         <Tab
           value={8}
           onClick={() => handleTabClick(8)}
-          label={<GradeIcon />} {...a11yProps('Grades')} />
+          label={<GradeIcon />} {...a11yProps(t('tabsVerticalRight.gradesTab'))} />
         <Tab
           value={9}
           onClick={() => handleTabClick(9)}
-          label={<ForumIcon />} {...a11yProps('Cohort Chat')} />
+          label={<ForumIcon />} {...a11yProps(t('tabsVerticalRight.cohortChatTab'))} />
       </Tabs>
     </Box>
   );

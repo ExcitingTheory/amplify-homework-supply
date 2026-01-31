@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Fourniture de devoirs",
+    "name": "Fournitures de devoirs",
     "tagline": "Plateforme d'apprentissage de la langue japonaise"
   },
   "actions": {
@@ -57,7 +57,7 @@
   "common": {
     "yes": "Oui",
     "no": "Non",
-    "ok": "OK",
+    "ok": "D'accord",
     "search": "Rechercher",
     "filter": "Filtrer",
     "sort": "Trier",

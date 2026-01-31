@@ -18,7 +18,7 @@ import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import DraggableBlockPlugin from './DraggableBlockPlugin';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
 import { UnitProvider } from '../../../context/unitContext';
-import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 import { GutterProvider } from '../../../context/gutterContext';
 import '../theme.css';
 

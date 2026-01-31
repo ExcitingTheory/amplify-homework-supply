@@ -1,6 +1,9 @@
 import * as React from 'react';
 import { useContext, useState, useCallback, useRef, useEffect } from 'react';
 
+import './components/LanguageEditorTheme.css';
+import './theme.css';
+
 import { styled, useTheme } from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
@@ -52,8 +55,8 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 
 import ToolBarPlugin from './plugins/ToolBarPlugin';
-// import CodeHighlightPlugin from './plugins/CodeHighlightPlugin';
-// import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
+import CodeHighlightPlugin from './plugins/CodeHighlightPlugin';
+import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
 
 import UnitContext from '../../context/unitContext';
 
@@ -101,13 +104,13 @@ import { LayoutItemNode } from './components/LayoutItemNode';
 
 import UnitCompletedPlugin from './plugins/UnitCompletedPlugin';
 import DraggableBlockPlugin from './plugins/DraggableBlockPlugin';
-import { DndWrapper } from '../MeaningAssociationExercise/DndWrapper.js';
+import { DndWrapper } from '../MeaningAssociationExercise/DndWrapper.jsx';
 import LanguageEditorTheme from './components/LanguageEditorTheme';
 // import { EditorRefPlugin } from '@lexical/react/LexicalEditorRefPlugin.js';
 
 import AnswerPlugin from './plugins/AnswerPlugin.js';
 import { AnswerNode } from './plugins/AnswerPlugin.js';
-import CustomAnswerPlugin, { CustomAnswerNode } from './plugins/CustomAnswerPlugin.js';
+import CustomAnswerPlugin, { CustomAnswerNode } from './plugins/CustomAnswerPlugin.jsx';
 import BlockSuggestionPlugin from './plugins/BlockSuggestionPlugin.js';
 import { SuggestionProvider } from './context/SuggestionContext';
 import AIContentCompletionPlugin from './plugins/AIContentCompletionPlugin.js';
@@ -520,11 +523,13 @@ export default function Editor() {
           <ClearEditorPlugin />
           <HashtagPlugin />
           <HistoryPlugin />
+          <CodeHighlightPlugin />
           <HorizontalRulePlugin />
           <ListPlugin />
           <TabIndentationPlugin />
           <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
           <TablePlugin />
+          <CodeActionMenuPlugin />
           <WordBlockPlugin />
           <QuizPlugin />
           <DataPlugin />
@@ -606,13 +611,34 @@ export default function Editor() {
               padding: 0,
               width: `calc(100% - ${openTabVerticalLeft ? actualDrawerWidthLeft : 40}px - ${openTabVerticalRight ? actualDrawerWidthRight : 40}px)`,
               transition: 'width 0.3s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100vh',
+              boxShadow: 'none',
             }}>
               <DrawerHeader
                 style={{
                   height: 'var(--app-bar-height, 11rem)',
+                  flexShrink: 0,
                 }}
               />
-              <div ref={onRef} style={{ position: 'relative' }}>
+              <div
+                style={{
+                  flexGrow: 1,
+                  overflow: 'auto',
+                  position: 'relative',
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
+                <div
+                  ref={onRef}
+                  className="editor-container"
+                  style={{
+                    position: 'relative',
+                    minHeight: '100%',
+                    paddingLeft: '2.5rem',
+                  }}
+                >
                 <RichTextPlugin
                   contentEditable={
                     <ContentEditable
@@ -620,10 +646,7 @@ export default function Editor() {
                       aria-label="Main editor content"
                       aria-placeholder="Enter some text..."
                       style={{
-                        height: 'calc(100vh - var(--app-bar-height, 11rem))',
                         maxWidth: '100%',
-                        overflowY: 'auto',
-                        overflowX: 'auto',
                         outline: 'none',
                       }}
                     />
@@ -633,6 +656,7 @@ export default function Editor() {
                 />
                 <MyOnChangePlugin onChange={onChange} />
               </div>
+            </div>
             </Box>
             
             {/* Right Drawer */}
@@ -839,6 +863,7 @@ export function Workbook() {
                     style={{
                       margin: '0',
                       padding: '0',
+                      paddingLeft: '2.5rem', // Space for draggable handles
                       height: 'calc(100vh - 11rem)',
                       overflowY: 'auto',
                       width: '100%',

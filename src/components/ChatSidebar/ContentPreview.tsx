@@ -11,7 +11,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import {
   Box,
   Paper,
@@ -176,7 +176,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            {getContentTypeIcon(contentType)} Generated {contentType.replace(/_/g, ' ')}
+            {getContentTypeIcon(contentType)} {t('chatSidebar.contentPreview.generatedContent', { contentType: contentType.replace(/_/g, ' ') })}
           </Typography>
           <Chip
             label={format}

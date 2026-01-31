@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useTranslation } from 'react-i18next';
-import { Section, Grade, Assignment, Unit } from "../../src/models";
-import { DataStore } from 'aws-amplify/datastore';
-import { generateClient } from 'aws-amplify/api';
+import { useTranslation } from 'next-i18next';
+import { getAmplifyClient } from '../../src/utils/amplifyClient';
 import { fetchUserAttributes, getCurrentUser } from "aws-amplify/auth";
 import { createSectionGroup } from '../../src/graphql/mutations';
 import { listSectionStudents } from '../../src/graphql/queries';
@@ -116,10 +114,8 @@ function CardMediaComponent({ s3Key, identityId, level = 'protected' }) {
   )
 }
 
-
-const client = generateClient();
-
 function SectionDetail({ user, signOut }) {
+  const client = getAmplifyClient();
   const { t } = useTranslation('pages');
   /**
    * The SectionDetail page displays the section in a single page
@@ -197,8 +193,12 @@ function SectionDetail({ user, signOut }) {
     console.log('handleDeleteSection')
     setDeleteOpen(false)
     if (confirm(t('sectionDetail.deleteSectionConfirm'))) {
-      await DataStore.delete(section)
-      router.push('/sections')
+      const { errors } = await client.models.Section.delete({ id: section.id });
+      if (errors) {
+        console.error('Error deleting section:', errors);
+      } else {
+        router.push('/sections');
+      }
     }
   }
 
@@ -275,12 +275,15 @@ function SectionDetail({ user, signOut }) {
         // Hide loading indicator
 
         try {
-          // update the unit with the new file
-          await DataStore.save(
-            Section.copyOf(section, (updated) => {
-              updated.featuredImage = newFilename;
-            }));
-  
+          // update the section with the new file
+          const { errors } = await client.models.Section.update({
+            id: section.id,
+            featuredImage: newFilename,
+          });
+          
+          if (errors) {
+            console.error('Error updating section:', errors);
+          }
         } catch (error) {
           console.error(error);
         }
@@ -353,7 +356,10 @@ function SectionDetail({ user, signOut }) {
 
   const handleDeleteAssignment = async (assignment) => {
     console.log('handleDeleteAssignment')
-    await DataStore.delete(assignment)
+    const { errors } = await client.models.Assignment.delete({ id: assignment.id });
+    if (errors) {
+      console.error('Error deleting assignment:', errors);
+    }
   }
 
   const handleImageUpload = async (event) => {
@@ -390,20 +396,24 @@ function SectionDetail({ user, signOut }) {
 
   // Get the unit data
   useEffect(() => {
-    const _units = DataStore.observeQuery(Unit/*, (u) =>
-      u.status.eq('PUBLISHED')
-    */).subscribe((unitUpdate) => {
-      const unitMap = {}
-      console.log('unitUpdate', unitUpdate)
-      unitUpdate.items.forEach((unit) => {
-        unitMap[unit.id] = unit
-      })
+    const subscription = client.models.Unit.observeQuery({
+      // filter: { status: { eq: 'PUBLISHED' } } // Uncomment if needed
+    }).subscribe({
+      next: ({ items }) => {
+        const unitMap = {}
+        console.log('unitUpdate', { items })
+        items.forEach((unit) => {
+          unitMap[unit.id] = unit
+        })
 
-      console.log('unitMap', unitMap)
-      setUnits(unitMap)
-    })
+        console.log('unitMap', unitMap)
+        setUnits(unitMap)
+      },
+      error: (err) => console.error('Unit subscription error:', err)
+    });
+    
     return () => {
-      _units.unsubscribe()
+      subscription.unsubscribe()
     }
   }, [])
 
@@ -411,16 +421,18 @@ function SectionDetail({ user, signOut }) {
   useEffect(() => {
     console.log('[SectionDetail] Section query useEffect - id:', id);
     if (!id) return
-    fetchSections()
-    async function fetchSections() {
-      const sectionData = await DataStore.query(Section, (s) =>
-        s.id.eq(id)
-      )
-
-      console.log('sectionData', sectionData)
-      setSection(sectionData[0])
-    }
-    const subscription = DataStore.observe(Section).subscribe(() => fetchSections())
+    
+    const subscription = client.models.Section.observeQuery({
+      filter: { id: { eq: id } }
+    }).subscribe({
+      next: ({ items }) => {
+        console.log('sectionData', items)
+        if (items.length > 0) {
+          setSection(items[0])
+        }
+      },
+      error: (err) => console.error('Section subscription error:', err)
+    });
 
     return function cleanup() {
       subscription.unsubscribe();
@@ -433,13 +445,16 @@ function SectionDetail({ user, signOut }) {
     if (!section?.owner) return; // Wait for section to load
     if (currentUser.username === section.owner) return; // Skip for section owner/instructor
     
-    fetchMyGrades()
-    async function fetchMyGrades() {
-      const grades = await DataStore.query(Grade, (g) =>
-        g.and(g => [
-          g.complete.eq(true),
-          g.owner.eq(currentUser.username)]))
-      setMyGrades(grades)
+    const subscription = client.models.Grade.observeQuery({
+      filter: {
+        and: [
+          { complete: { eq: true } },
+          { owner: { eq: currentUser.username } }
+        ]
+      }
+    }).subscribe({
+      next: ({ items: grades }) => {
+        setMyGrades(grades)
 
       console.log('fetchMyGrades (learner)', grades)
 
@@ -482,9 +497,10 @@ function SectionDetail({ user, signOut }) {
 
       console.log('gradesByUnit', gradesByUnit)
 
-      setMyGradeMap(gradesByUnit)
-    }
-    const subscription = DataStore.observe(Grade).subscribe(() => fetchMyGrades())
+        setMyGradeMap(gradesByUnit)
+      },
+      error: (err) => console.error('My grades subscription error:', err)
+    });
 
     return function cleanup() {
       subscription.unsubscribe();
@@ -494,14 +510,16 @@ function SectionDetail({ user, signOut }) {
   useEffect(() => {
     if (units == {}) return
     // if (!isOwner || !isTeacher) return 
-    fetchGrades()
-    async function fetchGrades() {
-
-      const grades = await DataStore.query(Grade, (g) =>
-        g.and(g => [
-          g.complete.eq(true),
-          g.accuracy.ne(null),
-        ]))
+    
+    const subscription = client.models.Grade.observeQuery({
+      filter: {
+        and: [
+          { complete: { eq: true } },
+          { accuracy: { ne: null } }
+        ]
+      }
+    }).subscribe({
+      next: ({ items: grades }) => {
 
 
       // grades by user and assignment
@@ -549,10 +567,11 @@ function SectionDetail({ user, signOut }) {
 
       console.log('gradesByUserUnit', gradesByUserUnit)
 
-      setGrades(grades)
-      setGradeMap(gradesByUserUnit)
-    }
-    const subscription = DataStore.observe(Grade).subscribe(() => fetchGrades())
+        setGrades(grades)
+        setGradeMap(gradesByUserUnit)
+      },
+      error: (err) => console.error('All grades subscription error:', err)
+    });
 
     return function cleanup() {
       subscription.unsubscribe();
@@ -561,18 +580,16 @@ function SectionDetail({ user, signOut }) {
 
   useEffect(() => {
     if (!id) return
-    fetchSectionAssignments()
-    async function fetchSectionAssignments() {
-      const _sectionAssignments = await DataStore.query(Assignment, (a) =>
-        a.sectionID.eq(id)
-      )
-
-      console.log('_sectionAssignments', _sectionAssignments)
-
-      setSectionAssignments(_sectionAssignments)
-
-    }
-    const subscription = DataStore.observe(Assignment).subscribe(() => fetchSectionAssignments())
+    
+    const subscription = client.models.Assignment.observeQuery({
+      filter: { sectionID: { eq: id } }
+    }).subscribe({
+      next: ({ items }) => {
+        console.log('_sectionAssignments', items)
+        setSectionAssignments(items)
+      },
+      error: (err) => console.error('Assignments subscription error:', err)
+    });
 
     return function cleanup() {
       subscription.unsubscribe();
@@ -745,27 +762,36 @@ function SectionDetail({ user, signOut }) {
       
       if (currentGrade) {
         // Update existing grade
-        await DataStore.save(
-          Grade.copyOf(currentGrade, updated => {
-            updated.accuracy = score;
-            updated.percentComplete = 100;
-            updated.complete = true;
-          })
-        );
+        const { errors } = await client.models.Grade.update({
+          id: currentGrade.id,
+          accuracy: score,
+          percentComplete: 100,
+          complete: true,
+        });
+        
+        if (errors) {
+          console.error('Error updating grade:', errors);
+          alert(t('sectionDetail.overrideGrade.saveFailed'));
+          return;
+        }
       } else {
         // Create new grade for this student
-        await DataStore.save(
-          new Grade({
-            unitID: assignment.unitID,
-            assignmentID: assignment.id,
-            owner: student.id, // Student owns the grade so they can see it
-            instructor: currentUser?.username,
-            accuracy: score,
-            percentComplete: 100,
-            complete: true,
-            data: JSON.stringify({}), // Empty data for manual override
-          })
-        );
+        const { errors } = await client.models.Grade.create({
+          unitID: assignment.unitID,
+          assignmentID: assignment.id,
+          owner: student.id, // Student owns the grade so they can see it
+          instructor: currentUser?.username,
+          accuracy: score,
+          percentComplete: 100,
+          complete: true,
+          data: JSON.stringify({}), // Empty data for manual override
+        });
+        
+        if (errors) {
+          console.error('Error creating grade:', errors);
+          alert(t('sectionDetail.overrideGrade.saveFailed'));
+          return;
+        }
       }
       
       handleGradeOverrideClose();
@@ -944,14 +970,15 @@ function SectionDetail({ user, signOut }) {
                     display: 'block',
                   }}
                 /><br />
-                {t('sectionDetail.noFeaturedImage')}.
-                {t('sectionDetail.dragAndDropPrompt')}
+                <Typography>
+                  {t('sectionDetail.noFeaturedImage')}.
+                  {t('sectionDetail.dragAndDropPrompt')}
+                </Typography>
+              </Typography>
+            </Box>
+          }
 
         </div>
-
-
-        {/* </Box> */}
-        {/* } */}
 
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '1rem' }}>

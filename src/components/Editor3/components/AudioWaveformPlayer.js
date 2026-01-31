@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { Box, IconButton, Typography, Slider } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
@@ -49,7 +49,7 @@ export default function AudioWaveformPlayer({
     metadata = {},
     onRecordingComplete
 }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const theme = useTheme();
     const mainColor = theme.palette.primary.main;
     const rgbColor = hexToRgb(mainColor);

@@ -17,7 +17,35 @@ The addon is already integrated into this Storybook instance. No additional inst
 
 ## Usage
 
-### 1. Enable Translation Mode
+### 1. Automatic Capturing with `useTranslation` (Recommended)
+
+If your components already use `next-i18next`'s `useTranslation` hook, **Translation Mode automatically captures all `t()` calls** without any code changes! Just add the decorator:
+
+```tsx
+import { withTranslationMode } from '../.storybook/addons/translation-mode';
+
+export default {
+  title: 'My Component',
+  component: MyComponent,
+  decorators: [withTranslationMode],
+};
+```
+
+Your existing code works as-is:
+
+```tsx
+function MyComponent() {
+  const { t } = useTranslation('common');
+  
+  return (
+    <Button>{t('actions.save')}</Button>  // ✅ Automatically captured!
+  );
+}
+```
+
+**How it works:** The `next-i18next` module is mocked in Storybook to use `useTranslationWithCapture`, which wraps every `t()` function call to automatically capture translations and sync them with Translation Mode.
+
+### 2. Enable Translation Mode
 
 Click the **globe icon** in the Storybook toolbar and choose a mode:
 
@@ -25,9 +53,9 @@ Click the **globe icon** in the Storybook toolbar and choose a mode:
 - **Highlight Mode**: Hover over text to see translation keys in tooltips
 - **Edit Mode**: Click on any text to open the translation editor
 
-### 2. Wrap Text with TranslationOverlay
+### 3. Manual Wrapping with `TranslationOverlay` (Alternative)
 
-In your components, wrap translatable text with the `TranslationOverlay` component:
+For components that don't use `useTranslation`, or for more granular control, wrap text manually:
 
 ```tsx
 import { TranslationOverlay } from '../.storybook/addons/translation-mode';
@@ -42,20 +70,6 @@ import { TranslationOverlay } from '../.storybook/addons/translation-mode';
     Save
   </TranslationOverlay>
 </Button>
-```
-
-### 3. Add the Decorator to Stories
-
-Enable translation mode for specific stories:
-
-```tsx
-import { withTranslationMode } from '../.storybook/addons/translation-mode';
-
-export default {
-  title: 'My Component',
-  component: MyComponent,
-  decorators: [withTranslationMode],
-};
 ```
 
 Or enable it globally in `.storybook/preview.jsx` (already configured).

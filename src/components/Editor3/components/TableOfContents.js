@@ -9,7 +9,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { $getRoot, $isElementNode } from 'lexical';
 import { $isHeadingNode } from '@lexical/rich-text';
 import { List, ListItem, ListItemButton, ListItemText, Typography, Box } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 /**
  * Extracts heading nodes from the editor state
@@ -49,7 +49,7 @@ function scrollToNode(editor, key) {
 }
 
 export default function TableOfContents() {
-  const { t } = useTranslation('components');
+  const { t } = useTranslation('editor');
   const [editor] = useLexicalComposerContext();
   const [headings, setHeadings] = useState([]);
 
@@ -66,7 +66,7 @@ export default function TableOfContents() {
   if (headings.length === 0) {
     return (
       <Box sx={{ p: 2, textAlign: 'center' }}>
-        <T{t('tableOfContents.emptyState')}
+        <Typography>{t('tableOfContents.emptyState')}
         </Typography>
       </Box>
     );
@@ -75,8 +75,7 @@ export default function TableOfContents() {
   return (
     <Box sx={{ width: '100%' }}>
       <Typography variant="h6" sx={{ p: 2, pb: 1 }}>
-        {t('tableOfContents.title')}="h6" sx={{ p: 2, pb: 1 }}>
-        Table of Contents
+        {t('tableOfContents.title')}
       </Typography>
       <List dense>
         {headings.map((heading) => (

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getAmplifyClient } from "../src/utils/amplifyClient";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 import {
   Button,

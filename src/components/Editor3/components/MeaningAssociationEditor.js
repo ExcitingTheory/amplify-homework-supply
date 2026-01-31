@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 import { DataGrid } from '@mui/x-data-grid';
 
@@ -62,7 +62,7 @@ export function ActionsMenu({
     ids,
     removeWordIDs,
 }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
@@ -116,7 +116,7 @@ export default function MeaningAssociationEditor({
     // setWordIDs,
     wordIDs,
 }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     // const [rows, setRows] = React.useState([]);

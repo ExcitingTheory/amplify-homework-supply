@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getAmplifyClient } from "../src/utils/amplifyClient";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import {
     Button,
     Box,
@@ -55,7 +55,7 @@ function CardMediaComponent({ s3Key, identityId, level = 'protected' }) {
 }
 
 function Units() {
-    const { t } = useTranslation('pages');
+    const { t } = useTranslation('units');
     /**
      * Units is a page that displays a list of units.
      * For Instructor users, it displays a list of units they are teaching.
@@ -288,7 +288,7 @@ function Units() {
                                             }}>
                                                 <CardContent sx={{ flex: '1 0 auto', pb: 1 }}>
                                                     <Typography component="div" variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
-                                                        {unit.name || 'Untitled Unit'}
+                                                        {unit.name || t('untitledUnit')}
                                                     </Typography>
                                                     <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                                                         {unit.description || ''}
@@ -317,7 +317,7 @@ function Units() {
                                                             },
                                                         }}
                                                     >
-                                                        View Workbook
+                                                        {t('viewWorkbook')}
                                                     </Button>
                                                     <Button
                                                         variant="outlined"

@@ -6,7 +6,7 @@
 
 ## Problem Statement
 
-The codebase has 785 locations where literal strings need to be replaced with i18n translation tags `{t('namespace.key')}` following the react-i18next pattern. This implementation follows the TypeScript Feature Workflow to ensure comprehensive, validated translation coverage.
+The codebase has 785 locations where literal strings need to be replaced with i18n translation tags `{t('namespace.key')}` following the next-i18next pattern. This implementation follows the TypeScript Feature Workflow to ensure comprehensive, validated translation coverage.
 
 ## Implementation Approach
 

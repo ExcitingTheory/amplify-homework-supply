@@ -19,7 +19,7 @@ import { Button } from '@mui/material';
 import MeaningAssociationPlugin, { INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND, MeaningAssociationNode } from './MeaningAssociationPlugin';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
 import { UnitProvider } from '../../../context/unitContext';
-import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 import DictionaryContext from '../../../context/dictionaryContext';
 import { DndWrapper } from '../../MeaningAssociationExercise/DndWrapper';
 import { MOCK_AUDIO_URL_1, MOCK_AUDIO_URL_2, MOCK_AUDIO_URL_3 } from '../../../../.storybook/__mocks__/media';

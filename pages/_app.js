@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { CacheProvider } from '@emotion/react';
+import { appWithTranslation } from 'next-i18next';
 import theme from '../src/theme';
 import createEmotionCache from '../src/createEmotionCache';
 import amplifyconfig from '../src/amplifyconfiguration.json';
@@ -31,11 +32,12 @@ const clientSideEmotionCache = createEmotionCache();
 // });
 // Amplify.addPluggable(new AmazonCloudWatchLogsProvider());
 
-export default function MyApp(props) {
+function MyApp(props) {
   /**
    * MyApp is the root component of the application.
    * It is used to initialize the emotion cache and theme, and it wraps the application in the ThemeProvider.
    * It also wraps the application in the CacheProvider to allow for server-side rendering.
+   * Wrapped with appWithTranslation for i18n support.
    * 
    * @param {object} props
    * @param {React.ComponentType} props.Component
@@ -79,5 +81,8 @@ export default function MyApp(props) {
 MyApp.propTypes = {
   Component: PropTypes.elementType.isRequired,
   emotionCache: PropTypes.object,
-  pageProps: PropTypes.object.isRequired,
+  
+
+// Wrap with appWithTranslation to enable i18n
+export default appWithTranslation(MyApp);pageProps: PropTypes.object.isRequired,
 };

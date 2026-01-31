@@ -131,11 +131,6 @@ Start a conversation with your AI teaching assistant. The chat is empty and read
 };
 
 export const TranslationHelper = {
-  render: () => (
-    <TabProvider>
-      <ChatSidebar />
-    </TabProvider>
-  ),
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -280,6 +275,11 @@ Let the AI help you brainstorm and create engaging lesson materials.
       },
     },
   },
+  render: () => (
+    <TabProvider>
+      <ChatSidebar />
+    </TabProvider>
+  ),
 };
 
 export const WithFileAttachments = {

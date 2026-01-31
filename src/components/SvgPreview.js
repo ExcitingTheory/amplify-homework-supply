@@ -6,7 +6,7 @@
 import React from 'react';
 import { Box, Skeleton, Typography } from '@mui/material';
 import { getPreviewUrl, getBestPreview } from '../utils/previewUtils';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 /**
  * Display an SVG preview with automatic fallback to raster formats

@@ -11,7 +11,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Paper, CircularProgress, Typography } from '@mui/material';
 import { PictureAsPdf as PdfIcon, Error as ErrorIcon } from '@mui/icons-material';
 import getCachedUrl from '../utils/getCachedUrl';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 interface SavedPdfThumbnailProps {
     /** S3 key of the thumbnail image */

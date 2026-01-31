@@ -5,7 +5,7 @@
 // silently record incorrect answers for review, but allow the user to continue and try to answer the question again.
 
 import React, { lazy, Suspense } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import {
     verifyWord,
     verifyDefinition,
@@ -67,7 +67,7 @@ function SignedAudioPlayer({ audioKey, identityId, waveformData, width, height, 
   }
 
   if (!signedUrl) {
-    return <Typography variant="body2" sx={{ opacity: 0.6, fontStyle: 'italic' }}>Audio not available</Typography>;
+    return <Typography variant="body2" sx={{ opacity: 0.6, fontStyle: 'italic' }}>{t('answerComponent.audioNotAvailable')}</Typography>;
   }
 
   return (
@@ -117,7 +117,7 @@ export default function AnswerComponent({
     allowedInput,
     promptMethod,
 }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
 
     /**
      * Answer Schema
@@ -297,7 +297,7 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
 
     // Add defensive check for dictionary
     if (!dictionary) {
-        return <Typography variant="body2" color="error">No dictionary available</Typography>;
+        return <Typography variant="body2" color="error">{t('answerComponent.noDictionaryAvailable')}</Typography>;
     }
 
     return <ol>
@@ -378,7 +378,7 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                                 fontStyle: 'italic',
                                 color: 'gray',
                             }}>
-                                {dictionary[wordId]?.phrase} (audio not available)
+                                {dictionary[wordId]?.phrase} {t('answerComponent.audioNotAvailableParens')}
                             </Typography>
                         )
                     )}
@@ -510,7 +510,7 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                         variant="body1"
                         component="div"
                         sx={{ flexGrow: 1, fontStyle: 'italic', color: 'gray' }}>
-                        {dictionary[wordId]?.phrase} (audio not available)
+                        {t('answerComponent.audioNotAvailable', { text: dictionary[wordId]?.phrase })}
                     </Typography>
                 )
             )}
@@ -554,7 +554,7 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                         />
                     ) : (
                         <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'gray' }}>
-                            {dictionary[wordId]?.phrase} (audio not available)
+                            {t('answerComponent.audioNotAvailable', { text: dictionary[wordId]?.phrase })}
                         </Typography>
                     )
                 )}
@@ -592,7 +592,7 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
 function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey) {
     // Add defensive check for dictionary
     if (!dictionary) {
-        return <Typography variant="body2" color="error">No dictionary available</Typography>;
+        return <Typography variant="body2" color="error">{t('answerComponent.noDictionaryAvailable')}</Typography>;
     }
 
     return <ol>
@@ -636,7 +636,7 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                             />
                         ) : (
                             <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'gray' }}>
-                                {dictionary[wordId]?.definition} (audio not available)
+                                {t('answerComponent.audioNotAvailable', { text: dictionary[wordId]?.definition })}
                             </Typography>
                         )
                     )}
@@ -741,7 +741,7 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                         />
                     ) : (
                         <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'gray' }}>
-                            {dictionary[wordId]?.definition} (audio not available)
+                            {t('answerComponent.audioNotAvailable', { text: dictionary[wordId]?.definition })}
                         </Typography>
                     )
                 )}
@@ -790,7 +790,7 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                         />
                     ) : (
                         <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'gray' }}>
-                            {dictionary[wordId]?.definition} (audio not available)
+                            {t('answerComponent.audioNotAvailable', { text: dictionary[wordId]?.definition })}
                         </Typography>
                     )
                 )}

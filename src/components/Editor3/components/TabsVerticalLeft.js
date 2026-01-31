@@ -7,7 +7,7 @@ import FileManager2 from './FileManager2';
 import { DictionaryEditor2 } from '../../DictionaryEditor2';
 import { QuestionEditor2 } from '../../QuestionEditor2';
 import { AudioPlayerProvider } from '../context/AudioPlayerContext';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 import ChatSidebar from '../../ChatSidebar';
 import TableOfContents from './TableOfContents';
@@ -18,6 +18,7 @@ import FolderIcon from '@mui/icons-material/Folder';
 import ConfigIcon from '@mui/icons-material/Settings';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import TocIcon from '@mui/icons-material/Toc';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import { QuestionMarkOutlined } from '@mui/icons-material';
 
 import ConfigurationManager from './ConfigurationManager';
@@ -64,7 +65,7 @@ export default function TabsVerticalLeft({
   setValue,
   setDrawerWidth,
 }) {
-  const { t } = useTranslation('components');
+  const { t } = useTranslation('editor');
   const [isResizing, setIsResizing] = React.useState(false);
   const startXRef = React.useRef(0);
   const startWidthRef = React.useRef(0);
@@ -184,7 +185,8 @@ export default function TabsVerticalLeft({
       >
 
         <Tab
-          onClick={() => handleTabClick(0)}t('tabsVerticalLeft.tabs.assignments'))} />
+          onClick={() => handleTabClick(0)}
+          label={<AssignmentIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.assignments'))} />
         <Tab
           onClick={() => handleTabClick(1)}
           label={<TocIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.tableOfContents'))} />
@@ -202,8 +204,7 @@ export default function TabsVerticalLeft({
           label={<ChatIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.aiAssistant'))} /> */}
         <Tab
           onClick={() => handleTabClick(6)}
-          label={<ConfigIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.configuration')
-          label={<ConfigIcon />} {...a11yProps('Configuration')} />
+          label={<ConfigIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.configuration'))} />
         {/* <Tab label="Item Five" {...a11yProps(4)} />
         <Tab label="Item Six" {...a11yProps(5)} />
         <Tab label="Item Seven" {...a11yProps(6)} /> */}

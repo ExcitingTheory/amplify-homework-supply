@@ -63,13 +63,23 @@ p {
     left: 4px;
     top: 0;
     will-change: transform;
+    transition: opacity 0.2s ease;
+    z-index: 10;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: url(./images/draggable-block-menu.svg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px 16px;
   }
   
   .draggable-block-menu .icon {
     width: 16px;
     height: 16px;
     opacity: 0.3;
-    background-image: url(./images/draggable-block-menu.svg);
   }
   
   .draggable-block-menu:active {
@@ -80,15 +90,32 @@ p {
     background-color: #efefef;
   }
   
+  /* Show drag handle when hovering near a block */
+  .editor-container:hover .draggable-block-menu {
+    opacity: 1;
+  }
+  
+  .draggable-block-menu:hover {
+    opacity: 1 !important;
+  }
+  
   .draggable-block-target-line {
     pointer-events: none;
-    background: deepskyblue;
+    background: #0099ff;
     height: 4px;
     position: absolute;
     left: 0;
     top: 0;
     opacity: 0;
     will-change: transform;
+    z-index: 50;
+    border-radius: 2px;
+    box-shadow: 0 0 8px rgba(0, 153, 255, 0.6);
+    display: block !important; /* Override Storybook's div:empty:last-child rule */
+  }
+
+  .draggable-block-target-line--visible {
+    opacity: 0.6 !important;
   }
 
 

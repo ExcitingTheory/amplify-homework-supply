@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { createPortal } from 'react-dom';
 
@@ -28,6 +29,7 @@ export default function AIContentSuggestion({
   onAccept,
   onDismiss,
 }) {
+  const { t } = useTranslation('editor');
   const suggestionRef = useRef(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   
@@ -109,7 +111,7 @@ export default function AIContentSuggestion({
             borderColor: 'divider',
           }}
         >
-          Tab to accept
+          {t('aiContentSuggestion.tabToAccept')}
         </Typography>
       )}
     </Box>,

@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { DataGrid } from '@mui/x-data-grid';
+import { useTranslation } from 'next-i18next';
 
 import {
     Menu,
@@ -103,6 +104,7 @@ export default function PlaylistEditor({
     // setFileIDs,
     fileIDs,
 }) {
+    const { t } = useTranslation('editor');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     // const [rows, setRows] = React.useState([]);
@@ -389,7 +391,7 @@ export default function PlaylistEditor({
 
             {rows.length === 0 && (
                 <div style={{ marginTop: '0.5' }}>
-                    <p>No files have been added yet. Use the input above to add files to the playlist.
+                    <p>{t('playlistEditor.noFilesMessage')}
                         {/* Or drop the files into the playlist, and the files will be added automatically. */}
                     </p>
                 </div>

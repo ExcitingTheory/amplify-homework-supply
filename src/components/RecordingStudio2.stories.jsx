@@ -2,7 +2,7 @@ import React from 'react';
 import { RecordingStudio2 } from './RecordingStudio2';
 import FilesContext from '../context/fileContext';
 import UnitContext from '../context/unitContext';
-import { seedMockFiles } from '../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockFiles } from '../../.storybook/__mocks__/aws-amplify-data';
 
 // Helper function to generate realistic waveform data
 const generateWaveformData = (length = 100) => {

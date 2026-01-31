@@ -4,7 +4,7 @@ import path from 'path';
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'node',
+    environment: 'happy-dom',
     setupFiles: ['./test/setup.ts'],
     testTimeout: 30000, // 30 seconds for integration tests
     hookTimeout: 30000,

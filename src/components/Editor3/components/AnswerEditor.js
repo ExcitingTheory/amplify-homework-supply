@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 import { DataGrid } from '@mui/x-data-grid';
 
@@ -140,7 +140,7 @@ const AnswerEditor = React.memo(function AnswerEditor({
     allowedInput,
     promptMethod,
 }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     // const [rows, setRows] = React.useState([]);
@@ -543,7 +543,7 @@ const AnswerEditor = React.memo(function AnswerEditor({
                         }}
                     >
                         <DialogContentText>
-                            Add a new word to the dictionary.
+                            {t('answerEditor.addWordToDict')}
                         </DialogContentText>
                         <TextField
                             autoFocus

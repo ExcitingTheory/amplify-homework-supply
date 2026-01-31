@@ -11,6 +11,7 @@
  */
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'next-i18next';
 import {
   Box,
   Paper,
@@ -99,6 +100,8 @@ export default function RecordingStudio3({
   identityId,
   readOnly = false,
 }) {
+  const { t } = useTranslation('components');
+  
   // Script data state
   const [scriptData, setScriptData] = useState(initialScriptData || {
     metadata: {
@@ -227,7 +230,7 @@ export default function RecordingStudio3({
   const handleAddDialogueLine = () => {
     const speakerIds = Object.keys(scriptData.speakers);
     if (speakerIds.length === 0) {
-      alert('Please add a speaker first');
+      alert(t('recordingStudio3.addSpeakerFirst'));
       return;
     }
 
@@ -289,7 +292,7 @@ export default function RecordingStudio3({
   // Start recording
   const handleStartRecording = async () => {
     if (!selectedDialogue) {
-      alert('Please select a dialogue line first');
+      alert(t('recordingStudio3.selectDialogueFirst'));
       return;
     }
 
@@ -315,7 +318,7 @@ export default function RecordingStudio3({
       setRecording(true);
     } catch (error) {
       console.error('Error starting recording:', error);
-      alert('Failed to access microphone');
+      alert(t('recordingStudio3.micAccessFailed'));
     }
   };
 
@@ -399,7 +402,7 @@ export default function RecordingStudio3({
 
     } catch (error) {
       console.error('Error processing recording:', error);
-      alert('Failed to save recording');
+      alert(t('recordingStudio3.saveRecordingFailed'));
     }
   };
 
@@ -407,13 +410,13 @@ export default function RecordingStudio3({
   const handleGenerateTTS = async (dialogueId) => {
     const dialogue = scriptData.dialogue.find(d => d.id === dialogueId);
     if (!dialogue || !dialogue.text) {
-      alert('No text to generate');
+      alert(t('recordingStudio3.noTextToGenerate'));
       return;
     }
 
     const speaker = scriptData.speakers[dialogue.speaker];
     if (!speaker) {
-      alert('Speaker not found');
+      alert(t('recordingStudio3.speakerNotFound'));
       return;
     }
 
@@ -478,7 +481,7 @@ export default function RecordingStudio3({
       
     } catch (error) {
       console.error('Error generating TTS:', error);
-      alert('Failed to generate TTS audio');
+      alert(t('recordingStudio3.ttsGenerationFailed'));
     } finally {
       setIsGenerating(false);
     }
@@ -491,7 +494,7 @@ export default function RecordingStudio3({
     );
 
     if (missingLines.length === 0) {
-      alert('No missing audio to generate');
+      alert(t('recordingStudio3.noMissingAudio'));
       return;
     }
 
@@ -571,7 +574,7 @@ export default function RecordingStudio3({
         }
       } catch (error) {
         console.error('Error importing JSON:', error);
-        alert('Failed to import JSON file');
+        alert(t('recordingStudio3.importFailed'));
       }
     };
     reader.readAsText(file);
@@ -600,7 +603,7 @@ export default function RecordingStudio3({
               variant="outlined"
               size="small"
             >
-              Import JSON
+              {t('recordingStudio3.importJson')}
             </Button>
           </label>
           
@@ -610,7 +613,7 @@ export default function RecordingStudio3({
             variant="outlined"
             size="small"
           >
-            Export JSON
+            {t('recordingStudio3.exportJson')}
           </Button>
         </Stack>
       </Paper>
@@ -621,7 +624,7 @@ export default function RecordingStudio3({
           <Box sx={{ p: 2 }}>
             <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
               <Typography variant="subtitle1" sx={{ flex: 1 }}>
-                Script
+                {t('recordingStudio3.script')}
               </Typography>
               <Button
                 size="small"
@@ -629,7 +632,7 @@ export default function RecordingStudio3({
                 onClick={handleAddDialogueLine}
                 disabled={readOnly}
               >
-                Add Line
+                {t('recordingStudio3.addLine')}
               </Button>
             </Stack>
 
@@ -695,7 +698,10 @@ export default function RecordingStudio3({
           {selectedDialogue && (
             <Paper sx={{ p: 2, borderRadius: 0 }}>
               <Typography variant="subtitle2" gutterBottom>
-                Line #{scriptData.dialogue.findIndex(d => d.id === selectedDialogue.id) + 1} - {selectedSpeaker?.name}
+                {t('recordingStudio3.lineNumber', { 
+                  number: scriptData.dialogue.findIndex(d => d.id === selectedDialogue.id) + 1,
+                  speaker: selectedSpeaker?.name 
+                })}
               </Typography>
 
               <Stack spacing={2}>
@@ -741,7 +747,7 @@ export default function RecordingStudio3({
                     onClick={recording ? handleStopRecording : handleStartRecording}
                     disabled={readOnly || isGenerating}
                   >
-                    {recording ? 'Stop' : 'Record'}
+                    {recording ? t('recordingStudio3.stop') : t('recordingStudio3.record')}
                   </Button>
 
                   <Button
@@ -750,7 +756,7 @@ export default function RecordingStudio3({
                     onClick={() => handleGenerateTTS(selectedDialogue.id)}
                     disabled={readOnly || isGenerating || !selectedDialogue.text}
                   >
-                    Generate TTS
+                    {t('recordingStudio3.generateTts')}
                   </Button>
                 </Stack>
 
@@ -758,7 +764,7 @@ export default function RecordingStudio3({
                 {selectedDialogue.takes && selectedDialogue.takes.length > 0 && (
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Takes:
+                      {t('recordingStudio3.takes')}
                     </Typography>
                     <List dense>
                       {selectedDialogue.takes.map((take, index) => {
@@ -802,7 +808,7 @@ export default function RecordingStudio3({
           {/* Timeline/Waveform View */}
           <Box sx={{ flex: 1, p: 2, overflow: 'auto', bgcolor: 'grey.50' }}>
             <Typography variant="subtitle2" gutterBottom>
-              Timeline
+              {t('recordingStudio3.timeline')}
             </Typography>
             
             {scriptData.dialogue.map((line) => {
@@ -837,7 +843,7 @@ export default function RecordingStudio3({
           <Box sx={{ p: 2 }}>
             <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
               <Typography variant="subtitle1" sx={{ flex: 1 }}>
-                Speakers
+                {t('recordingStudio3.speakers')}
               </Typography>
               <Button
                 size="small"
@@ -845,7 +851,7 @@ export default function RecordingStudio3({
                 onClick={handleAddSpeaker}
                 disabled={readOnly}
               >
-                Add
+                {t('recordingStudio3.add')}
               </Button>
             </Stack>
 
@@ -881,12 +887,12 @@ export default function RecordingStudio3({
                       </Stack>
 
                       <FormControl fullWidth size="small">
-                        <InputLabel>Voice</InputLabel>
+                        <InputLabel>{t('recordingStudio3.voice')}</InputLabel>
                         <Select
                           value={speaker.voice || 'alloy'}
                           onChange={(e) => handleUpdateSpeaker(speakerId, { voice: e.target.value })}
                           disabled={readOnly}
-                          label="Voice"
+                          label={t('recordingStudio3.voice')}
                         >
                           {TTS_VOICES.map(voice => (
                             <MenuItem key={voice.value} value={voice.value}>
@@ -922,13 +928,13 @@ export default function RecordingStudio3({
                 onClick={handleBatchGenerateTTS}
                 disabled={readOnly || isGenerating}
               >
-                Generate All Missing TTS
+                {t('recordingStudio3.generateAllMissing')}
               </Button>
               {ttsQueue.length > 0 && (
                 <Box sx={{ mt: 1 }}>
                   <LinearProgress />
                   <Typography variant="caption" color="text.secondary">
-                    Processing {ttsQueue.length} lines...
+                    {t('recordingStudio3.processingLines', { count: ttsQueue.length })}
                   </Typography>
                 </Box>
               )}

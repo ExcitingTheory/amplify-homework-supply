@@ -1,6 +1,6 @@
 'use strict';
 import React, { use } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { getAmplifyClient } from '../../../utils/amplifyClient';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -54,7 +54,7 @@ const formatTime = (countDown) => {
 
 
 export default function AssignmentConfiguration() {
-  const { t } = useTranslation('components');
+  const { t } = useTranslation('editor');
 
   const {
     sections, sectionMap, assignments
@@ -198,17 +198,14 @@ export default function AssignmentConfiguration() {
           style={{
             textWrap: 'wrap',
           }}>
-          Add a timer to this unit?
+          {t('assignmentConfiguration.addTimerQuestion')}
         </h3>
         <Typography
           sx={{
             textWrap: 'wrap',
           }}
         >
-          The timer will start after the user has clicked the "Start" button.
-          <br /><br />
-          Users will be allowed to continue after the timer has run out, and it will be recorded when the assignment was started and completed.
-          The countdown will be displayed at the top of the screen for the duration of the timer.
+          {t('assignmentConfiguration.timerDescription')}
         </Typography>
 
 
@@ -239,7 +236,7 @@ export default function AssignmentConfiguration() {
             title='Add Timer to Unit'
             onClick={() => setOpenTimerDialog(true)}
             startIcon={<TimerIcon />}>
-            Add Timer
+            {t('assignmentConfiguration.addTimerButton')}
           </Button>
         }
 
@@ -311,14 +308,14 @@ export default function AssignmentConfiguration() {
             style={{
               margin: '1rem 1rem 0rem 1rem',
               textWrap: 'wrap',
-            }}>Assign a due date to this unit for a section?</h3>
+            }}>{t('assignmentConfiguration.assignDueDateQuestion')}</h3>
 
           <Typography sx={{
             margin: '1rem',
             textWrap: 'wrap'
           }}>
-            Users will be allowed to continue after the due date has passed.
-            The due date will be used to sort the units in the class section.
+            {t('assignmentConfiguration.dueDateDescriptionLine1')}
+            {t('assignmentConfiguration.dueDateDescriptionLine2')}
           </Typography>
           <TextField
             sx={{ margin: '1rem' }}
@@ -375,7 +372,7 @@ export default function AssignmentConfiguration() {
                   );
                 })}
             </Select>
-            <FormHelperText>Select a section to assign the due date to</FormHelperText>
+            <FormHelperText>{t('assignmentConfiguration.selectSectionHelper')}</FormHelperText>
           </FormControl>
           {/* </SectionProvider> */}
 
@@ -394,7 +391,7 @@ export default function AssignmentConfiguration() {
               }}
               startIcon={<CalendarMonthIcon />}
             >
-              Add Due Date
+              {t('assignmentConfiguration.addDueDateButton')}
             </Button>
           </Box>
           {
@@ -405,15 +402,15 @@ export default function AssignmentConfiguration() {
           <div style={{ margin: '1rem' }} onClick={(e) => e.stopPropagation()}>
 
             <h4 style={{ margin: '1rem' }}>
-              Assigned to Sections
+              {t('assignmentConfiguration.assignedToSectionsHeading')}
             </h4>
             {assignments?.length > 0 &&
             <List>
               {assignments.map((_assignment, index) => {
 
-                const description = _assignment?.dueDate ? new Date(_assignment?.dueDate).toLocaleString() : 'No due date set';
+                const description = _assignment?.dueDate ? new Date(_assignment?.dueDate).toLocaleString() : t('assignmentConfiguration.noDueDateSet');
 
-                const name = sectionMap[_assignment?.sectionID]?.name || 'No section set';
+                const name = sectionMap[_assignment?.sectionID]?.name || t('assignmentConfiguration.noSectionSet');
                 return (
                   <ListItem key={index} style={{
                     display: 'flex',

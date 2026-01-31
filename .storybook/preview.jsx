@@ -42,6 +42,9 @@ import { RouterContext, createMockRouter } from './__mocks__/next-router';
 import { withTranslationMode } from './addons/translation-mode';
 import { globalTypes } from './addons/translation-mode/globalTypes';
 
+// Import i18n for Storybook
+import i18n from './i18next';
+
 // Mock fetch for /api/chat endpoint
 const originalFetch = global.fetch;
 global.fetch = async (url, options) => {
@@ -209,6 +212,20 @@ const preview = {
   tags: ['autodocs'],
   decorators: [
     withTranslationMode,
+    // Language switcher decorator - syncs with translation mode addon
+    (Story, context) => {
+      const [globals] = React.useState(context.globals || {});
+      const language = globals.translationLanguage || 'en';
+      
+      // Update i18n language when global changes
+      React.useEffect(() => {
+        if (i18n.language !== language) {
+          i18n.changeLanguage(language);
+        }
+      }, [language]);
+      
+      return <Story />;
+    },
     (Story, context) => {
       // Try to get unitId from story args or parameters
       const unitId = context?.args?.unitId || context?.parameters?.unitId || 'mock-unit-id';

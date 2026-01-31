@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { getAmplifyClient } from "../src/utils/amplifyClient";
 import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
@@ -234,7 +234,7 @@ function Sections() {
                     }}
                 >
                     <form onSubmit={handleCreate}>
-{t('sections.newSection.title')}</DialogTitle>
+                        <DialogTitle>{t('sections.newSection.title')}</DialogTitle>
                         <DialogContent>
                             <DialogContentText>
                                 {t('sections.newSection.description')}
@@ -273,8 +273,7 @@ function Sections() {
                                 {t('sections.newSection.cancel')}
                             </Button>
                             <Button disabled={work} type="submit" variant="contained">
-                                {t('sections.newSection.create')}sabled={work} type="submit" variant="contained">
-                                Create
+                                {t('sections.newSection.create')}
                             </Button>
                         </DialogActions>
                     </form>

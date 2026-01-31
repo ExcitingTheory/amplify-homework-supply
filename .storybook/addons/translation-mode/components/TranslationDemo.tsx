@@ -3,7 +3,7 @@ import { Box, Button, Typography, TextField, Alert } from '@mui/material';
 import { TranslationOverlay } from './TranslationOverlay';
 import { useContext } from 'react';
 import { useGlobals } from 'storybook/preview-api';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 export interface TranslationDemoProps {
   namespace?: string;

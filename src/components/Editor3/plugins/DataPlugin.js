@@ -21,14 +21,8 @@ export default function DataPlugin() {
     const hasLoadedInitialState = useRef(false);
   
     useEffect(() => {
-        if (!unit?.data?.root) {
-            return;
-        }
-        
-        const unitVersion = unit._version;
-        
-        // Skip if this is the same or older version we already processed
-        if (versionRef.current >= unitVersion) {
+        // Early return if no data at all
+        if (!unit?.data) {
             return;
         }
         
@@ -44,6 +38,13 @@ export default function DataPlugin() {
         } else {
             parsedData = unit.data;
         }
+        
+        // Check if parsed data has root node
+        if (!parsedData?.root) {
+            return;
+        }
+        
+        const unitVersion = unit._version;
         
         const data = JSON.stringify(parsedData);
         

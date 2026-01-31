@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "宿題配布",
+    "name": "宿題教材",
     "tagline": "日本語学習プラットフォーム"
   },
   "actions": {
@@ -8,7 +8,7 @@
     "cancel": "キャンセル",
     "delete": "削除します",
     "edit": "編集します",
-    "submit": "提出します",
+    "submit": "提出",
     "close": "閉じる",
     "create": "作成します",
     "upload": "アップロードします",
@@ -26,7 +26,7 @@
     "back": "戻る",
     "next": "次へ",
     "finish": "完了",
-    "continue": "続ける"
+    "continue": "続行"
   },
   "navigation": {
     "home": "ホーム",
@@ -41,15 +41,15 @@
     "saving": "保存中...",
     "success": "成功しました",
     "error": "エラー",
-    "processing": "処理中...",
+    "processing": "処理中です...",
     "uploading": "アップロード中...",
     "downloading": "ダウンロード中です...",
     "complete": "完了しました",
-    "incomplete": "未完了",
+    "incomplete": "未完了です",
     "pending": "保留中"
   },
   "time": {
-    "created": "作成済み",
+    "created": "作成日時",
     "updated": "更新されました",
     "due": "期限",
     "completed": "完了しました"

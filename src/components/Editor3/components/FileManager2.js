@@ -40,7 +40,7 @@ import {
 } from "@mui/material";
 import { useVirtualizer } from '@tanstack/react-virtual';
 import React from "react";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { isMimeType } from '@lexical/utils';
 import VectorStoreContext from '../../../context/vectorStoreContext';
 
@@ -591,7 +591,7 @@ function InlineEditorField({
             {isDraft && (
                 <Box sx={{ mt: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
                     <Typography variant="caption" color="warning.main">
-                        Draft changes
+                        {t('fileManager.draftChanges')}
                     </Typography>
                     <Button
                         size="small"
@@ -600,7 +600,7 @@ function InlineEditorField({
                         onClick={handleSaveNow}
                         sx={{ minWidth: 'auto', px: 1 }}
                     >
-                        Save
+                        {t('fileManager.save')}
                     </Button>
                     <Button
                         size="small"
@@ -609,7 +609,7 @@ function InlineEditorField({
                         onClick={handleRevert}
                         sx={{ minWidth: 'auto', px: 1 }}
                     >
-                        Revert
+                        {t('fileManager.revert')}
                     </Button>
                 </Box>
             )}
@@ -736,7 +736,7 @@ function FileNameField({ value, fileId, onSave, searchTerm }) {
 
 // Metadata Editor Component for editing file properties
 function MetadataEditor({ file, onUpdate, onClose }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [editing, setEditing] = React.useState(false);
     const [formData, setFormData] = React.useState({
         name: file.name || '',
@@ -877,7 +877,7 @@ function MetadataEditor({ file, onUpdate, onClose }) {
 }
 
 const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, parsedContent, search, editor }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [activeTab, setActiveTab] = React.useState(0);
 
     const handleInsertIntoEditor = () => {
@@ -1183,7 +1183,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
 });
 
 function NewImageFileForm({ open, toggleNewImageFileForm }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
 
     const [newDescription, setNewDescription] = React.useState('');
     const [presignedUrl, setPresignedUrl] = React.useState('');
@@ -1326,13 +1326,8 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
                             margin: '1rem',
                         }}
                     >
-                        Create
+                        {t('fileManager.create')}
                     </Button>
-
-
-
-
-
                 </Box>
             </Collapse>
             {/**
@@ -1370,7 +1365,7 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
 
                 >
                     <Typography id="modal-text-to-image-preview" variant="h6" component="h2">
-                        Text to Image Preview  {working && <CircularProgress />}
+                        {t('fileManager.textToImagePreview')} {working && <CircularProgress />}
                     </Typography>
 
                     <Typography id="modal-text-to-image-preview-description" sx={{ mt: 2 }}>
@@ -1400,7 +1395,7 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
                             // close modal
                             setIsOpen(false);
                         }}>
-                        Close
+                        {t('fileManager.close')}
                     </Button>
 
 
@@ -1484,7 +1479,7 @@ function NewVideoFileForm({ open, toggleNewVideoFileForm }) {
                         margin: '1rem',
                     }}
                 >
-                    Create
+                    {t('fileManager.create')}
                 </Button>
 
             </Box>
@@ -1493,7 +1488,7 @@ function NewVideoFileForm({ open, toggleNewVideoFileForm }) {
 }
 
 function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [newDescription, setNewDescription] = React.useState('');
     const [audioSrc, setAudioSrc] = React.useState('');
     const [presignedUrl, setPresignedUrl] = React.useState('');
@@ -1771,7 +1766,7 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
 
                 >
                     <Typography id="modal-modal-title" variant="h6" component="h2">
-                        Text to Speech Preview  {working && <CircularProgress />}
+                        {t('fileManager.textToSpeechPreview')} {working && <CircularProgress />}
                     </Typography>
 
                     <Typography id="modal-modal-description" sx={{ mt: 2 }}>
@@ -1803,7 +1798,7 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
                             // close modal
                             setIsOpen(false);
                         }}>
-                        Close
+                        {t('fileManager.close')}
                     </Button>
 
                 </Card>
@@ -1923,7 +1918,7 @@ const FileTypeSubheader = React.memo(function FileTypeSubheader({ label, fileTyp
 // =============================================================================
 
 const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentStatus, editor }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const { setConfirmDialog } = useFileManager();
     const [imageUrl, setImageUrl] = React.useState(null);
     const [audioUrl, setAudioUrl] = React.useState(null);
@@ -2418,7 +2413,7 @@ function SelectedFileView({ selectedFile, documentStatus, search, editor }) {
  * Handles finding the selected file and wrapping with Suspense
  */
 function SelectedFileDetailsPanel({ selectedItems, files, documentStatuses, search, editor }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     if (selectedItems.size === 0) {
         return (
             <Box
@@ -2466,7 +2461,7 @@ function SelectedFileDetailsPanel({ selectedItems, files, documentStatuses, sear
 
 export default function FileManager2() {
     console.log('[FileManager2] Component render started');
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [editor] = useLexicalComposerContext();
     const [search, setSearch] = React.useState('');
     const [searchMode, setSearchMode] = React.useState('hybrid'); // 'keyword', 'semantic', 'hybrid'
@@ -3852,6 +3847,6 @@ export default function FileManager2() {
         );
     } catch (err) {
         console.error('[FileManager2] Render error:', err);
-        return <Box>Error rendering FileManager: {err?.message}</Box>;
+        return <Box>{t('fileManager.errorRendering', { message: err?.message })}</Box>;
     }
 }   

@@ -33,7 +33,7 @@ cat public/locales/en/components.json | grep -A 5 "answerComponent\|fileManager"
 
 **Implementation**:
 ```javascript
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 export default function AnswerComponent(props) {
     const { t } = useTranslation('components');
@@ -302,7 +302,7 @@ git commit -m "i18n: Complete FileManager2.js translations (71 strings total)"
 
 ## Quality Checklist (for each file)
 
-- [ ] Imported `useTranslation` from 'react-i18next'
+- [ ] Imported `useTranslation` from 'next-i18next'
 - [ ] Added `const { t } = useTranslation('components');`
 - [ ] All literal strings replaced
 - [ ] Keys exist in `public/locales/en/components.json`

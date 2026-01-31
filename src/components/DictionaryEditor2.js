@@ -1,6 +1,6 @@
 'use strict';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 // Lexical imports
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
@@ -316,13 +316,13 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
                 }}>
                     <Alert severity="info" sx={{ mb: 4, width: '100%', whiteSpace: 'normal', wordWrap: 'break-word' }}>
                         <Typography variant="body1" sx={{ mb: 1.5, fontSize: '1.1rem', whiteSpace: 'normal' }}>
-                            <strong>How to create ruby tags:</strong>
+                            <strong>{t('dictionaryEditor.rubyTagsTitle')}</strong>
                         </Typography>
                         <Typography variant="body1" component="div" sx={{ fontSize: '1rem', lineHeight: 1.8, whiteSpace: 'normal' }}>
-                            1. Select text in the pronunciation field (top), then select the corresponding text in the phrase field (bottom)<br/>
-                            2. The selected portions will be paired and moved to the ruby tag preview<br/>
-                            3. Continue selecting pairs until both fields are empty<br/>
-                            4. Click Save to apply the ruby tags
+                            {t('dictionaryEditor.rubyTagsStep1')}<br/>
+                            {t('dictionaryEditor.rubyTagsStep2')}<br/>
+                            {t('dictionaryEditor.rubyTagsStep3')}<br/>
+                            {t('dictionaryEditor.rubyTagsStep4')}
                         </Typography>
                     </Alert>
                     {!hideAll &&
@@ -345,7 +345,7 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
                             </style>
                             <Box sx={{ mb: 4, width: '100%' }}>
                                 <Typography variant="body1" color="text.secondary" sx={{ mb: 1.5, display: 'block', fontSize: '1.1rem', fontWeight: 500 }}>
-                                    Pronunciation (select first):
+                                    {t('dictionaryEditor.pronunciationLabel')}
                                 </Typography>
                                 {selectedPronunciation !== null && (
                                     <div
@@ -384,7 +384,7 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
                             </Box>
                             <Box sx={{ mb: 4, width: '100%' }}>
                                 <Typography variant="body1" color="text.secondary" sx={{ mb: 1.5, display: 'block', fontSize: '1.1rem', fontWeight: 500 }}>
-                                    Phrase (select second):
+                                    {t('dictionaryEditor.phraseLabel')}
                                 </Typography>
                                 {selectedPhrase !== null && (
                                     <Typography
@@ -425,7 +425,7 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
                     }
                     <Box sx={{ mb: 4, width: '100%' }}>
                         <Typography variant="body1" color="text.secondary" sx={{ mb: 1.5, display: 'block', fontSize: '1.1rem', fontWeight: 500 }}>
-                            Ruby Tag Preview:
+                            {t('dictionaryEditor.rubyTagPreview')}
                         </Typography>
                         <Box sx={{ 
                             p: 3, 

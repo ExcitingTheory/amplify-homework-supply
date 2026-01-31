@@ -9,12 +9,12 @@ import TextareaAutosize from '@mui/material/TextareaAutosize';
 import Button from '@mui/material/Button';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import DictionaryContext from '../../../context/dictionaryContext';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 const filter = createFilterOptions();
 
 export default function FreeSoloCreateOptionDialog() {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
 

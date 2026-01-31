@@ -1,6 +1,6 @@
 import React from 'react';
 import { Workbook } from './index';
-import { seedMockUnit, seedMockGrade } from '../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit, seedMockGrade } from '../../../.storybook/__mocks__/aws-amplify-data';
 import { MOCK_IMAGE_URL_1 } from '../../../.storybook/__mocks__/media';
 import { userEvent, within, waitFor, expect } from 'storybook/test';
 

@@ -547,6 +547,104 @@ export const seedMockQuestionUnits = (questionUnitsArray) => {
   });
 };
 
+export const seedMockGrade = (gradeData) => {
+  if (gradeData.id) {
+    dataStores.Grade.set(gradeData.id, gradeData);
+    console.log('[Mock Data] Seeded grade:', gradeData.id, 'for unit:', gradeData.unitID);
+    console.log('[Mock Data] Grade has data:', !!gradeData.data);
+    console.log('[Mock Data] Total grades in store:', dataStores.Grade.size);
+    
+    // Notify all Grade subscribers about the new data
+    if (activeSubscriptions.Grade.length > 0) {
+      const items = Array.from(dataStores.Grade.values());
+      const enhancedItems = items.map(item => addRelationshipAccessors(item, 'Grade'));
+      activeSubscriptions.Grade.forEach(subscription => {
+        console.log('[Mock Data] Notifying subscriber with', items.length, 'grades');
+        setTimeout(() => {
+          subscription.next({
+            items: enhancedItems,
+            isSynced: true,
+          });
+        }, 0);
+      });
+    }
+  }
+};
+
+export const seedMockSections = (sectionsArray) => {
+  console.log(`[Mock Data] seedMockSections: Adding ${sectionsArray.length} sections`);
+  sectionsArray.forEach(section => {
+    if (section.id) {
+      dataStores.Section.set(section.id, section);
+    }
+  });
+  console.log('[Mock Data] Total sections in store:', dataStores.Section.size);
+  
+  // Notify all Section subscribers about the new data
+  if (activeSubscriptions.Section.length > 0) {
+    const items = Array.from(dataStores.Section.values());
+    const enhancedItems = items.map(item => addRelationshipAccessors(item, 'Section'));
+    activeSubscriptions.Section.forEach(subscription => {
+      console.log('[Mock Data] Notifying Section subscriber with', items.length, 'sections');
+      setTimeout(() => {
+        subscription.next({
+          items: enhancedItems,
+          isSynced: true,
+        });
+      }, 0);
+    });
+  }
+};
+
+export const seedMockAssignments = (assignmentsArray) => {
+  console.log(`[Mock Data] seedMockAssignments: Adding ${assignmentsArray.length} assignments`);
+  assignmentsArray.forEach(assignment => {
+    if (assignment.id) {
+      dataStores.Assignment.set(assignment.id, assignment);
+    }
+  });
+  console.log('[Mock Data] Total assignments in store:', dataStores.Assignment.size);
+  
+  // Notify all Assignment subscribers about the new data
+  if (activeSubscriptions.Assignment.length > 0) {
+    const items = Array.from(dataStores.Assignment.values());
+    const enhancedItems = items.map(item => addRelationshipAccessors(item, 'Assignment'));
+    activeSubscriptions.Assignment.forEach(subscription => {
+      console.log('[Mock Data] Notifying Assignment subscriber with', items.length, 'assignments');
+      setTimeout(() => {
+        subscription.next({
+          items: enhancedItems,
+          isSynced: true,
+        });
+      }, 0);
+    });
+  }
+};
+
+export const seedMockSettings = (settingsData) => {
+  console.log('[Mock Data] seedMockSettings: Adding settings', settingsData);
+  if (!settingsData.id) {
+    settingsData.id = 'settings-1';
+  }
+  dataStores.Settings.set(settingsData.id, settingsData);
+  console.log('[Mock Data] Total settings in store:', dataStores.Settings.size);
+  
+  // Notify all Settings subscribers about the new data
+  if (activeSubscriptions.Settings.length > 0) {
+    const items = Array.from(dataStores.Settings.values());
+    const enhancedItems = items.map(item => addRelationshipAccessors(item, 'Settings'));
+    activeSubscriptions.Settings.forEach(subscription => {
+      console.log('[Mock Data] Notifying Settings subscriber with', items.length, 'settings');
+      setTimeout(() => {
+        subscription.next({
+          items: enhancedItems,
+          isSynced: true,
+        });
+      }, 0);
+    });
+  }
+};
+
 export const seedMockAssistantChats = (chatsArray) => {
   console.log(`[Mock Data] seedMockAssistantChats: Replacing with ${chatsArray.length} assistant chats`);
   
@@ -572,6 +670,16 @@ export const seedMockAssistantChats = (chatsArray) => {
       }, 0);
     });
   }
+};
+
+/**
+ * Clear all mock data from stores
+ * Useful for resetting between stories
+ */
+export const clearMockData = () => {
+  console.log('[Mock Data] Clearing all data stores');
+  Object.values(dataStores).forEach(store => store.clear());
+  console.log('[Mock Data] All data stores cleared');
 };
 /**
  * Initialize default mock data for Storybook

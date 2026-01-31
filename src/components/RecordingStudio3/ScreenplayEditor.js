@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { Box, Select, MenuItem, Paper } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';

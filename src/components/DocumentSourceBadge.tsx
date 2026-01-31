@@ -11,7 +11,7 @@ import React from 'react';
 import { Box, Chip, Tooltip, Paper } from '@mui/material';
 import { PictureAsPdf as PdfIcon } from '@mui/icons-material';
 import PdfThumbnail from './PdfThumbnail';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 interface DocumentSourceBadgeProps {
     /** Filename of the source document */

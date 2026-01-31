@@ -19,7 +19,7 @@ import { DemoBanner } from '../../.storybook/components/DemoBanner';
 // Shared loader function for all stories
 const createQuestionLoader = (documentId: string, questions: any[]) => {
     return async () => {
-        const { mockDocuments, mockParsedContent, seedMockDocuments, seedMockParsedContent } = await import('../../.storybook/__mocks__/aws-amplify-datastore.js');
+        const { mockDocuments, mockParsedContent, seedMockDocuments, seedMockParsedContent } = await import('../../.storybook/__mocks__/aws-amplify-data.js');
         
         // Clear existing data
         Object.keys(mockDocuments).forEach(k => delete (mockDocuments as any)[k]);
@@ -375,7 +375,7 @@ export const AlreadyImported: Story = {
         searchTerm: '',
     },
     loaders: [async () => {
-        const { mockDocuments, mockParsedContent, seedMockDocuments, seedMockParsedContent } = await import('../../.storybook/__mocks__/aws-amplify-datastore.js');
+        const { mockDocuments, mockParsedContent, seedMockDocuments, seedMockParsedContent } = await import('../../.storybook/__mocks__/aws-amplify-data.js');
         
         Object.keys(mockDocuments).forEach(k => delete (mockDocuments as any)[k]);
         Object.keys(mockParsedContent).forEach(k => delete (mockParsedContent as any)[k]);

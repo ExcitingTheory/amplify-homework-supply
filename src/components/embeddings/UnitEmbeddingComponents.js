@@ -9,13 +9,14 @@ import { useUnitEmbedding, useUnitPublish, useBatchSectionEmbeddings } from '../
 import PublishIcon from '@mui/icons-material/Publish';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 /**
  * Unit Publishing Component with Embedding Generation
  * Place this in your unit editor
  */
 export function UnitPublishButton({ unit }) {
+  const { t } = useTranslation('components');
   const { publishing, error, publish } = useUnitPublish(unit);
   const [published, setPublished] = React.useState(false);
 
@@ -39,18 +40,18 @@ export function UnitPublishButton({ unit }) {
         onClick={handlePublish}
         disabled={publishing || !unit}
       >
-        {publishing ? 'Publishing...' : 'Publish Unit'}
+        {publishing ? t('unitEmbedding.publishing') : t('unitEmbedding.publishUnit')}
       </Button>
       
       {published && (
         <Alert severity="success" sx={{ mt: 1 }}>
-          Unit published with embeddings generated!
+          {t('unitEmbedding.publishSuccess')}
         </Alert>
       )}
       
       {error && (
         <Alert severity="error" sx={{ mt: 1 }}>
-          Error: {error.message}
+          {t('unitEmbedding.error', { message: error.message })}
         </Alert>
       )}
     </Box>
@@ -62,6 +63,7 @@ export function UnitPublishButton({ unit }) {
  * Add to unit editor toolbar
  */
 export function EmbeddingGenerateButton({ unitId, showSections = false }) {
+  const { t } = useTranslation('components');
   const { loading, error, result, generate } = useUnitEmbedding(unitId);
   const sections = useBatchSectionEmbeddings(unitId);
 
@@ -86,7 +88,7 @@ export function EmbeddingGenerateButton({ unitId, showSections = false }) {
         onClick={handleGenerate}
         disabled={loading || sections.loading}
       >
-        {loading || sections.loading ? 'Generating...' : 'Generate Embeddings'}
+        {loading || sections.loading ? t('unitEmbedding.generating') : t('unitEmbedding.generateEmbeddings')}
       </Button>
       
       {result && (
@@ -116,6 +118,7 @@ export function EmbeddingGenerateButton({ unitId, showSections = false }) {
  * Shows whether unit has fresh embeddings
  */
 export function EmbeddingStatusIndicator({ unit }) {
+  const { t } = useTranslation('components');
   const hasEmbedding = unit?.embedding && unit?.embeddingVersion;
   const age = hasEmbedding ? Date.now() - unit.embeddingVersion : null;
   const isStale = age && age > 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -123,7 +126,7 @@ export function EmbeddingStatusIndicator({ unit }) {
   if (!hasEmbedding) {
     return (
       <Chip
-        label="No embedding"
+        label={t('unitEmbedding.noEmbedding')}
         color="default"
         size="small"
         variant="outlined"
@@ -134,7 +137,7 @@ export function EmbeddingStatusIndicator({ unit }) {
   if (isStale) {
     return (
       <Chip
-        label="Embedding stale"
+        label={t('unitEmbedding.embeddingStale')}
         color="warning"
         size="small"
       />
@@ -144,7 +147,7 @@ export function EmbeddingStatusIndicator({ unit }) {
   return (
     <Chip
       icon={<CheckCircleIcon />}
-      label="Embedding fresh"
+      label={t('unitEmbedding.embeddingFresh')}
       color="success"
       size="small"
     />

@@ -1,6 +1,6 @@
 // react component that renders the chat session with the user and the bot
 import React, { useState, useEffect, useRef, useMemo, useCallback, useReducer } from "react";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import {
     Alert,
     TextField,
@@ -1128,7 +1128,7 @@ const ChatSidebar = () => {
                                                     console.log('First user message for history', history.id, ':', firstUserMessage, historyMessages);
                                                     const preview = firstUserMessage?.part || historyDraft || t('chatSidebar.emptyChat');
                                                     const displayPreview = typeof preview === 'string' ? preview : JSON.stringify(preview);
-                                                    const createdAt = history.createdAt ? new Date(history.createdAt).toLocaleDateString() : 'Unknown';
+                                                    const createdAt = history.createdAt ? new Date(history.createdAt).toLocaleDateString() : t('chatSidebar.unknown');
 
                                                     return (
                                                         <React.Fragment key={history.id}>
@@ -1215,9 +1215,9 @@ const ChatSidebar = () => {
                                                     }
                                                     const messageCount = historyMessages.length;
                                                     const firstUserMessage = historyMessages.find(m => m.role === 'user');
-                                                    const preview = firstUserMessage?.content || historyDraft || 'Empty chat';
+                                                    const preview = firstUserMessage?.content || historyDraft || t('chatSidebar.emptyChat');
                                                     const displayPreview = typeof preview === 'string' ? preview : JSON.stringify(preview);
-                                                    const createdAt = history.createdAt ? new Date(history.createdAt).toLocaleDateString() : 'Unknown';
+                                                    const createdAt = history.createdAt ? new Date(history.createdAt).toLocaleDateString() : t('chatSidebar.unknown');
 
                                                     return (
                                                         <React.Fragment key={history.id}>
@@ -1382,7 +1382,7 @@ const ChatSidebar = () => {
                                         {toolParts.map((part, toolIdx) => {
                                             const callId = part.toolCallId;
                                             // Extract tool name from type (e.g., 'tool-search_content' -> 'search_content')
-                                            const toolName = part.type?.replace('tool-', '') || part.toolName || 'unknown';
+                                            const toolName = part.type?.replace('tool-', '') || part.toolName || t('chatSidebar.unknown');
 
                                             // Render tool parts based on specific tool names
                                             if (toolName === 'search_content') {
@@ -1415,7 +1415,7 @@ const ChatSidebar = () => {
                                                     >
                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
                                                             <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                                                                🔍 Search Results
+                                                                {t('chatSidebar.searchResultsHeader')}
                                                             </Typography>
                                                             {executionState === 'executing' && (
                                                                 <CircularProgress size={16} />
@@ -1430,7 +1430,7 @@ const ChatSidebar = () => {
 
                                                         {part.state === 'input-available' && (
                                                             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1, fontStyle: 'italic' }}>
-                                                                Searching for: "{part.input?.query}"
+                                                                {t('chatSidebar.searchingFor', { query: part.input?.query })}
                                                             </Typography>
                                                         )}
 
@@ -1439,7 +1439,7 @@ const ChatSidebar = () => {
                                                                 {parsedOutput.success ? (
                                                                     <>
                                                                         <Typography variant="body2" sx={{ color: 'success.dark', mb: 2, fontWeight: 500 }}>
-                                                                            Found {parsedOutput.results?.length || 0} {parsedOutput.results?.length === 1 ? 'result' : 'results'}
+                                                                            {t('chatSidebar.foundResults', { count: parsedOutput.results?.length || 0 })}
                                                                         </Typography>
                                                                         <SearchResults
                                                                             results={parsedOutput.results || []}
@@ -1453,7 +1453,7 @@ const ChatSidebar = () => {
                                                                     </>
                                                                 ) : (
                                                                     <Typography variant="body2" sx={{ color: 'error.main' }}>
-                                                                        {parsedOutput.error || 'Search failed'}
+                                                                        {parsedOutput.error || t('chatSidebar.searchFailed')}
                                                                     </Typography>
                                                                 )}
                                                             </Box>
@@ -1484,7 +1484,7 @@ const ChatSidebar = () => {
                                                         }}
                                                     >
                                                         <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
-                                                            ➕ Create Section
+                                                            {t('chatSidebar.createSection')}
                                                         </Typography>
 
                                                         {part.state === 'input-streaming' && (
@@ -1501,7 +1501,7 @@ const ChatSidebar = () => {
 
                                                         {part.state === 'output-available' && (
                                                             <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
-                                                                ✓ {part.output?.message || 'Created'}
+                                                                ✓ {part.output?.message || t('chatSidebar.created')}
                                                             </Typography>
                                                         )}
 
@@ -1530,7 +1530,7 @@ const ChatSidebar = () => {
                                                         }}
                                                     >
                                                         <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
-                                                            ✨ Generate Content
+                                                            {t('chatSidebar.generateContent')}
                                                         </Typography>
 
                                                         {part.state === 'input-streaming' && (
@@ -1541,13 +1541,13 @@ const ChatSidebar = () => {
 
                                                         {part.state === 'input-available' && (
                                                             <Typography variant="caption" sx={{ display: 'block' }}>
-                                                                {part.input?.contentType}: "{part.input?.topic}"
+                                                                {t('chatSidebar.contentTypeAndTopic', { contentType: part.input?.contentType, topic: part.input?.topic })}
                                                             </Typography>
                                                         )}
 
                                                         {part.state === 'output-available' && (
                                                             <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
-                                                                ✓ {part.output?.message || 'Ready'}
+                                                                ✓ {part.output?.message || t('chatSidebar.ready')}
                                                             </Typography>
                                                         )}
 
@@ -1575,7 +1575,7 @@ const ChatSidebar = () => {
                                                     }}
                                                 >
                                                     <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', color: 'text.primary' }}>
-                                                        🔧 {toolName || 'unknown'}
+                                                        🔧 {toolName || t('chatSidebar.unknown')}
                                                     </Typography>
 
                                                     {part.state === 'input-streaming' && (
@@ -1592,7 +1592,7 @@ const ChatSidebar = () => {
 
                                                     {part.state === 'output-available' && (
                                                         <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'success.dark' }}>
-                                                            ✓ Complete
+                                                            {t('chatSidebar.complete')}
                                                         </Typography>
                                                     )}
 
@@ -1715,7 +1715,7 @@ const ChatSidebar = () => {
                                             whiteSpace: 'normal'
                                         }}
                                     >
-                                        Ask me anything about your curriculum, files, or content!
+                                        {t('chatSidebar.welcomeMessage')}
                                     </Typography>
                                 </Box>
                             }
@@ -1799,7 +1799,7 @@ const ChatSidebar = () => {
                                         </Box>
 
                                         {/* Cancel button for processing documents */}
-                                        {isDocument && status && ['uploading', 'analyzing', 'extracting'].includes(status.status) && (
+                                        {isDocument && status && [t('chatSidebar.uploading'), t('chatSidebar.analyzing'), t('chatSidebar.extracting')].includes(status.status) && (
                                             <IconButton
                                                 size="small"
                                                 onClick={() => cancelProcessing(index)}

@@ -1,6 +1,11 @@
+const { i18n } = require('./next-i18next.config');
+
 module.exports = {
   reactStrictMode: true,
   transpilePackages: ['@mui/x-data-grid'],
+  
+  // Internationalization
+  i18n,
   
   // Reduce build output size for Amplify deployment
   productionBrowserSourceMaps: false, // Disable source maps in production

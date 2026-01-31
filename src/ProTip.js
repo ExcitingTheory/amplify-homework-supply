@@ -2,7 +2,7 @@ import * as React from 'react';
 import Link from '@mui/material/Link';
 import SvgIcon from '@mui/material/SvgIcon';
 import Typography from '@mui/material/Typography';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 function LightBulbIcon(props) {
   return (

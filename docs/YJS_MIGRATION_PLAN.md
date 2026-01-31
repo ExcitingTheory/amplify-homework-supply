@@ -1,6 +1,11 @@
 # Yjs + Amplify Gen 2 Migration Plan
 **Real-time Collaboration & Offline-First Architecture**
 
+> ⚠️ **CRITICAL**: Amplify Gen 2 stores all JSON fields as strings.  
+> - **Read**: `JSON.parse(unit.data || '{}')` 
+> - **Write**: `data: JSON.stringify(editorState)`  
+> - See [Section 12: Common Pitfalls](#12-common-pitfalls---gen-2-json-string-handling) for details
+
 ## Executive Summary
 
 Migrate from AWS Amplify DataStore (Gen 1) to **Yjs + Amplify Gen 2** for:
@@ -27,10 +32,10 @@ tabContext.js        → AssistantChat (observeQuery)
 ```
 
 **Write Operations:**
-- `Unit.save()` - Editor content (data field = JSON)
-- `Grade.save()` - Student submissions
-- `Word.save()` - Vocabulary updates
-- `File.save()` - File metadata
+- `Unit.save()` - Editor content (data field = JSON string, requires `JSON.stringify()`)
+- `Grade.save()` - Student submissions (data field = JSON string)
+- `Word.save()` - Vocabulary updates (waveformData = JSON string)
+- `File.save()` - File metadata (metadata = JSON string)
 
 **Key Limitation:** DataStore polls every ~1-2 seconds (no real-time push)
 
@@ -162,6 +167,31 @@ yprivateView.set('scrollPosition', { x: 0, y: 450 })
 yprivateView.set('selectedBlockId', 'block-123')
 yprivateView.set('draftAnswer', 'こんにちは...')
 yprivateView.set('lastViewedAt', Date.now())
+
+// SYNC TO DATABASE (CRITICAL - Gen 2 requires JSON.stringify)
+// When persisting to DynamoDB, all structured data must be stringified:
+const syncToDatabase = async () => {
+  // Extract Yjs state
+  const metadata = {}
+  ymetadata.forEach((value, key) => {
+    metadata[key] = value
+  })
+  
+  const chatMessages = ychat.toArray().map(msg => {
+    const obj = {}
+    msg.forEach((v, k) => obj[k] = v)
+    return obj
+  })
+  
+  // MUST stringify before saving to Gen 2
+  await client.models.Unit.update({
+    id: unitId,
+    name: metadata.name, // Simple strings OK
+    data: JSON.stringify({ /* Lexical state */ }), // MUST stringify
+    chatMessagesJSON: JSON.stringify(chatMessages), // MUST stringify
+    _version: currentVersion + 1
+  })
+}
 ```
 ```
 
@@ -209,12 +239,14 @@ User edits locally → Y.Doc updated → IndexedDB persisted
 
 **Current Flow:**
 ```
-Unit.data (JSON string) → Editor3 loads → Edit → Unit.save(copyOf)
+Unit.data (JSON string) → JSON.parse() → Editor3 loads → Edit → 
+  JSON.stringify() → Unit.save(copyOf)
 ```
 
 **New Flow:**
 ```
-Y.Text (CRDT) → Lexical binds to Y.Text → Edit → Y.update sent → DynamoDB
+Y.Text (CRDT) → Lexical binds to Y.Text → Edit → Y.update sent → 
+  Server snapshot → JSON.stringify() → DynamoDB
 ```
 
 **Tasks:**
@@ -226,8 +258,9 @@ Y.Text (CRDT) → Lexical binds to Y.Text → Edit → Y.update sent → DynamoD
 
 **Backwards Compatibility:**
 - Keep DataStore Unit model during transition
-- `Unit.data` becomes "last snapshot" field
-- Yjs updates only stored in `Unit.yjsSnapshot` field
+- `Unit.data` becomes "last snapshot" field (JSON string - must `JSON.stringify()` before save)
+- Yjs updates stored in `Unit.yjsSnapshot` field (binary data as base64 string)
+- Always parse on read: `const editorState = JSON.parse(unit.data || '{}')`
 
 **Conflict Resolution:**
 - Yjs handles it automatically (CRDT)
@@ -241,7 +274,8 @@ Y.Text (CRDT) → Lexical binds to Y.Text → Edit → Y.update sent → DynamoD
 
 **Current Flow:**
 ```
-Grade.data (JSON: blockId → answer) → User saves → Grade.save()
+Grade.data (JSON string) → JSON.parse() → blockId → answer → User saves → 
+  JSON.stringify() → Grade.save()
 ```
 
 **New Flow:**
@@ -253,6 +287,8 @@ Student updates answer → Y.update
 Instructor sees update in real-time (same Grade doc)
    ↓
 Instructor leaves feedback → Y.Map feedback field
+   ↓
+Server snapshot → JSON.stringify() → DynamoDB
 ```
 
 **Tasks:**
@@ -490,6 +526,54 @@ yprivateView.set('draftAnswers', new Y.Map([
 
 ## 4. Implementation Details
 
+### ⚠️ CRITICAL: Gen 2 JSON String Handling
+
+**Amplify Gen 2 stores all JSON fields as strings**. You MUST parse on read and stringify on write:
+
+```javascript
+// ❌ WRONG - Gen 2 returns strings, not objects
+const { data } = await client.models.Unit.get({ id: unitId })
+const editorState = data.data // This is a STRING, not an object!
+
+// ✅ CORRECT - Always parse JSON fields
+const { data } = await client.models.Unit.get({ id: unitId })
+const editorState = JSON.parse(data.data || '{}') // Now it's an object
+
+// ❌ WRONG - Can't save objects directly
+await client.models.Grade.update({ 
+  id: gradeId, 
+  data: { 'block-1': { complete: true } } // Will fail or corrupt data
+})
+
+// ✅ CORRECT - Always stringify JSON fields before save
+const gradeData = { 'block-1': { complete: true, accuracy: 85 } }
+await client.models.Grade.update({ 
+  id: gradeId, 
+  data: JSON.stringify(gradeData) // Must be a string
+})
+```
+
+**Affected Models:**
+- `Unit.data` - Lexical editor state (JSON string)
+- `Grade.data` - Block answers/grades (JSON string)  
+- `Word.waveformData` - Audio waveform (JSON string)
+- `File.metadata` - File metadata (JSON string)
+- `ParsedContent.vocabularyJSON`, `summariesJSON`, `conceptsJSON`, `questionsJSON` - All JSON strings
+
+**Migration Pattern:**
+```javascript
+// 1. READ: Always parse
+const unit = await DataStore.query(Unit, id)
+const editorContent = unit.data ? JSON.parse(unit.data) : {}
+
+// 2. WRITE: Always stringify
+await DataStore.save(Unit.copyOf(unit, updated => {
+  updated.data = JSON.stringify(editorContent) // MUST stringify
+}))
+```
+
+---
+
 ### YjsProvider Wrapper
 
 ```javascript
@@ -554,6 +638,9 @@ export class YjsDocProvider {
 // src/context/unitContextYjs.js (NEW - replaces unitContext.js)
 import { useEffect, useState, useRef } from 'react'
 import { YjsDocProvider } from '../lib/yjs/YjsProvider'
+import { generateClient } from 'aws-amplify/data' // Gen 2 client
+
+const client = generateClient()
 
 const useYjsUnit = (unitId) => {
   const providerRef = useRef(null)
@@ -561,6 +648,18 @@ const useYjsUnit = (unitId) => {
   const [isSynced, setIsSynced] = useState(false)
   
   useEffect(() => {
+    // Fetch initial snapshot from DynamoDB (Gen 2)
+    client.models.Unit.get({ id: unitId }).then(({ data }) => {
+      if (!data) return
+      
+      // CRITICAL: Parse JSON string fields from Gen 2
+      const parsedUnit = {
+        ...data,
+        data: data.data ? JSON.parse(data.data) : null,
+      }
+      setUnit(parsedUnit)
+    })
+    
     const provider = new YjsDocProvider(`unit-${unitId}`)
     providerRef.current = provider
     
@@ -573,7 +672,7 @@ const useYjsUnit = (unitId) => {
       ymap.forEach((value, key) => {
         newUnit[key] = value
       })
-      setUnit(newUnit)
+      setUnit(prev => ({ ...prev, ...newUnit }))
     })
     
     // Subscribe to sync status
@@ -584,9 +683,21 @@ const useYjsUnit = (unitId) => {
     return () => provider.destroy()
   }, [unitId])
   
-  const updateMetadata = (key, value) => {
+  const updateMetadata = async (updates) => {
+    // Update Yjs map first (local)
     const ymap = providerRef.current.getMap('metadata')
-    ymap.set(key, value)
+    Object.entries(updates).forEach(([key, value]) => {
+      ymap.set(key, value)
+    })
+    
+    // Stringify JSON fields before saving to Gen 2
+    const stringifiedUpdates = {
+      ...updates,
+      data: updates.data ? JSON.stringify(updates.data) : undefined,
+    }
+    
+    // Sync to DynamoDB
+    await client.models.Unit.update({ id: unitId, ...stringifiedUpdates })
   }
   
   return { unit, isSynced, updateMetadata }
@@ -666,10 +777,18 @@ const indexeddb = new IndexeddbPersistence(docName, ydoc)
 // If offline for >24 hours, fetch fresh snapshot from server
 const lastSyncTime = indexeddb.get('_lastSync')
 if (Date.now() - lastSyncTime > 86400000) {
-  // Fetch Unit snapshot from GraphQL
-  const snapshot = await graphql.query(GetUnitSnapshot, { id: unitId })
-  // Load snapshot into Y.Doc
-  Y.applyUpdate(ydoc, snapshot.yjsSnapshot)
+  // Fetch Unit snapshot from GraphQL (Gen 2)
+  const { data } = await client.models.Unit.get({ id: unitId })
+  
+  // Parse JSON string fields
+  const editorState = JSON.parse(data.data || '{}')
+  const yjsSnapshot = data.yjsSnapshot // base64 string
+  
+  // Apply Yjs snapshot (decode from base64 if stored as base64)
+  if (yjsSnapshot) {
+    const updateBytes = Buffer.from(yjsSnapshot, 'base64')
+    Y.applyUpdate(ydoc, updateBytes)
+  }
 }
 ```
 
@@ -819,7 +938,100 @@ Week 8+:  DataStore removal + optimization
 
 ---
 
-## 12. Next Steps
+## 12. Common Pitfalls - Gen 2 JSON String Handling
+
+### ❌ Pitfall 1: Forgetting to Parse JSON on Read
+
+```javascript
+// WRONG - Treating JSON string as object
+const { data } = await client.models.Unit.get({ id: unitId })
+console.log(data.data.root) // ❌ TypeError: Cannot read property 'root' of undefined
+// data.data is a STRING like '{"root":{"children":[]}}'
+
+// CORRECT - Always parse
+const { data } = await client.models.Unit.get({ id: unitId })
+const editorState = JSON.parse(data.data || '{}')
+console.log(editorState.root) // ✅ Works
+```
+
+### ❌ Pitfall 2: Forgetting to Stringify on Write
+
+```javascript
+// WRONG - Saving object directly
+await client.models.Grade.update({
+  id: gradeId,
+  data: { 'block-1': { complete: true } } // ❌ Will corrupt data
+})
+
+// CORRECT - Always stringify
+await client.models.Grade.update({
+  id: gradeId,
+  data: JSON.stringify({ 'block-1': { complete: true } }) // ✅ Works
+})
+```
+
+### ❌ Pitfall 3: Double-Stringifying
+
+```javascript
+// WRONG - Stringifying twice
+const gradeData = { 'block-1': { complete: true } }
+const jsonString = JSON.stringify(gradeData)
+await client.models.Grade.update({
+  id: gradeId,
+  data: JSON.stringify(jsonString) // ❌ Double-stringified!
+})
+// Result in DB: "\"{\\\"block-1\\\":{\\\"complete\\\":true}}\""
+
+// CORRECT - Stringify once
+await client.models.Grade.update({
+  id: gradeId,
+  data: JSON.stringify(gradeData) // ✅ One level of stringification
+})
+```
+
+### ❌ Pitfall 4: Null/Undefined Handling
+
+```javascript
+// WRONG - Assuming undefined/null are safe
+const unit = await client.models.Unit.get({ id: unitId })
+const editorState = JSON.parse(unit.data.data) // ❌ Throws if data.data is null
+
+// CORRECT - Default to empty object/array
+const editorState = JSON.parse(unit.data.data || '{}')
+const chatMessages = JSON.parse(unit.data.chatMessagesJSON || '[]')
+```
+
+### ❌ Pitfall 5: Mixing Yjs and Direct JSON Saves
+
+```javascript
+// WRONG - Bypassing Yjs sync layer
+const ymap = ydoc.getMap('metadata')
+ymap.set('name', 'New Name') // Updates Yjs
+
+// Then immediately:
+await client.models.Unit.update({ 
+  id: unitId, 
+  name: 'Different Name' // ❌ Out of sync with Yjs!
+})
+
+// CORRECT - Use Yjs as single source of truth
+const ymap = ydoc.getMap('metadata')
+ymap.set('name', 'New Name')
+// Let Yjs provider handle DB sync automatically
+```
+
+### ✅ Best Practice Checklist
+
+- [ ] Parse JSON fields on read: `JSON.parse(data.field || '{}')`
+- [ ] Stringify JSON fields on write: `data: JSON.stringify(obj)`
+- [ ] Handle null/undefined: Use fallback `|| '{}'` or `|| '[]'`
+- [ ] Use single source of truth: Yjs OR direct DB, not both
+- [ ] Test with empty/null data: Verify `data: null` doesn't break parsing
+- [ ] Validate after parse: Check structure matches expected schema
+
+---
+
+## 13. Next Steps
 
 **Immediate (Today):**
 1. [ ] Approve this plan

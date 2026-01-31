@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import {
     Dialog,
     DialogTitle,
@@ -32,6 +33,7 @@ export default function UnifiedGenerateModal({
     type = 'image', // 'image', 'audio', 'video'
     children, // Custom form inputs if needed
 }) {
+    const { t } = useTranslation('editor');
     const [mode, setMode] = useState('input'); // 'input', 'generating', 'preview', 'confirming-cancel'
     const [prompt, setPrompt] = useState('');
     const [generatedContent, setGeneratedContent] = useState(null);
@@ -155,9 +157,9 @@ export default function UnifiedGenerateModal({
                         minHeight="200px"
                     >
                         <CircularProgress size={60} sx={{ mb: 2 }} />
-                        <Typography variant="body1">Generating {type}...</Typography>
+                        <Typography variant="body1">{t('unifiedGenerateModal.generating', { type })}</Typography>
                         <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-                            This may take a few moments
+                            {t('unifiedGenerateModal.takeMoments')}
                         </Typography>
                     </Box>
                 )}
@@ -172,7 +174,7 @@ export default function UnifiedGenerateModal({
                             mb={2}
                         >
                             <Typography variant="subtitle2" color="text.secondary">
-                                Preview
+                                {t('unifiedGenerateModal.preview')}
                             </Typography>
                             <Box>
                                 <IconButton
@@ -226,10 +228,10 @@ export default function UnifiedGenerateModal({
                 {mode === 'confirming-cancel' && (
                     <Box textAlign="center" py={3}>
                         <Typography variant="h6" gutterBottom>
-                            Discard changes?
+                            {t('unifiedGenerateModal.discardChanges')}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                            Your generated {type} will be lost if you cancel now.
+                            {t('unifiedGenerateModal.lostWarning', { type })}
                         </Typography>
                     </Box>
                 )}
@@ -240,14 +242,14 @@ export default function UnifiedGenerateModal({
                 {mode === 'input' && (
                     <>
                         <Button onClick={resetAndClose} color="inherit">
-                            Cancel
+                            {t('unifiedGenerateModal.cancel')}
                         </Button>
                         <Button
                             onClick={handleGenerate}
                             variant="contained"
                             disabled={!prompt.trim()}
                         >
-                            Generate
+                            {t('unifiedGenerateModal.generate')}
                         </Button>
                     </>
                 )}
@@ -259,10 +261,10 @@ export default function UnifiedGenerateModal({
                 {mode === 'preview' && (
                     <>
                         <Button onClick={handleClose} color="inherit">
-                            Cancel
+                            {t('unifiedGenerateModal.cancel')}
                         </Button>
                         <Button onClick={handleSave} variant="contained">
-                            Save & Close
+                            {t('unifiedGenerateModal.saveClose')}
                         </Button>
                     </>
                 )}
@@ -271,10 +273,10 @@ export default function UnifiedGenerateModal({
                 {mode === 'confirming-cancel' && (
                     <>
                         <Button onClick={() => setMode('preview')} color="inherit">
-                            Keep Editing
+                            {t('unifiedGenerateModal.keepEditing')}
                         </Button>
                         <Button onClick={handleConfirmCancel} color="error" variant="contained">
-                            Discard
+                            {t('unifiedGenerateModal.discard')}
                         </Button>
                     </>
                 )}

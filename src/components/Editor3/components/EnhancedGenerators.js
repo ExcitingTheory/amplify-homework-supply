@@ -7,7 +7,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
 import UnifiedGenerateModal from './UnifiedGenerateModal';
 import ImageMaskEditor from './ImageMaskEditor';
 import RecordingStudioEnhanced from '../../RecordingStudioEnhanced';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 const client = generateClient();
 
@@ -15,7 +15,7 @@ const client = generateClient();
  * Enhanced Image Generation with mask support for targeted regeneration
  */
 export function EnhancedImageGenerator({ open, onClose }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [showMaskEditor, setShowMaskEditor] = useState(false);
     const [currentImage, setCurrentImage] = useState(null);
 
@@ -69,7 +69,7 @@ export function EnhancedImageGenerator({ open, onClose }) {
                             setShowMaskEditor(true);
                         }}
                     >
-                        Edit with Mask (Regenerate Part)
+                        {t('enhancedGenerators.editWithMask')}
                     </Button>
                 </Box>
             ),
@@ -140,7 +140,7 @@ export function EnhancedImageGenerator({ open, onClose }) {
                             setShowMaskEditor(true);
                         }}
                     >
-                        Edit with Mask (Regenerate Part)
+                        {t('enhancedGenerators.editWithMask')}
                     </Button>
                 </Box>
             ),
@@ -184,7 +184,7 @@ export function EnhancedImageGenerator({ open, onClose }) {
  * Enhanced Audio Generation with RecordingStudio integration
  */
 export function EnhancedAudioGenerator({ open, onClose, gradeId, nodeKey }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [showRecordingStudio, setShowRecordingStudio] = useState(false);
 
     const handleGenerate = async (prompt) => {
@@ -279,7 +279,7 @@ export function EnhancedAudioGenerator({ open, onClose, gradeId, nodeKey }) {
  * Button component for image generation that can be embedded in FileManager
  */
 export function ImageGeneratorButton({ open, onSuccess }) {
-    const { t } = useTranslation('components');
+    const { t } = useTranslation('editor');
     const [modalOpen, setModalOpen] = useState(false);
 
     // Auto-open when parent says open=true

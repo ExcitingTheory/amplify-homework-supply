@@ -10,6 +10,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'next-i18next';
 import {
     Box,
     Typography,
@@ -184,6 +185,7 @@ export default function MetadataEditor({
     onUpdate,
     autoSaveDelay = 2000,
 }: MetadataEditorProps) {
+    const { t } = useTranslation('editor');
     const [saving, setSaving] = useState(false);
     const [formData, setFormData] = useState<FormData>({
         name: file.name || '',
@@ -294,7 +296,7 @@ export default function MetadataEditor({
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        File Metadata
+                        {t('metadataEditor.fileMetadataHeading')}
                     </Typography>
                     {hasUnsavedChanges && (
                         <Chip 
@@ -338,13 +340,13 @@ export default function MetadataEditor({
                     <Box sx={{ mb: 2.5 }}>
                         <Divider sx={{ mb: 2 }} />
                         <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ fontWeight: 600 }}>
-                            AI Generation Information
+                            {t('metadataEditor.aiGenerationInfo')}
                         </Typography>
                         
                         {formData.prompt && (
                             <Box sx={{ mb: 1.5 }}>
                                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 500 }}>
-                                    Prompt
+                                    {t('metadataEditor.promptLabel')}
                                 </Typography>
                                 <Paper 
                                     variant="outlined" 
@@ -366,7 +368,7 @@ export default function MetadataEditor({
                             {formData.model && (
                                 <Box sx={{ flex: 1 }}>
                                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 500 }}>
-                                        Model
+                                        {t('metadataEditor.modelLabel')}
                                     </Typography>
                                     <Chip 
                                         label={formData.model} 
@@ -379,7 +381,7 @@ export default function MetadataEditor({
                             {formData.variant && (
                                 <Box sx={{ flex: 1 }}>
                                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 500 }}>
-                                        Variant
+                                        {t('metadataEditor.variantLabel')}
                                     </Typography>
                                     <Chip 
                                         label={formData.variant} 
@@ -397,32 +399,32 @@ export default function MetadataEditor({
                 <Box sx={{ mt: 2 }}>
                     <Divider sx={{ mb: 2 }} />
                     <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ fontWeight: 600 }}>
-                        File Information
+                        {t('metadataEditor.fileInfo')}
                     </Typography>
                     <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 1, mt: 1.5 }}>
                         <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                            Type:
+                            {t('metadataEditor.typeLabel')}
                         </Typography>
                         <Typography variant="body2">
-                            {file.mimeType || 'Unknown'}
+                            {file.mimeType || t('metadataEditor.unknown')}
                         </Typography>
 
                         <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                            Size:
+                            {t('metadataEditor.sizeLabel')}
                         </Typography>
                         <Typography variant="body2">
                             {formatFileSize(file.size)}
                         </Typography>
 
                         <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                            Path:
+                            {t('metadataEditor.pathLabel')}
                         </Typography>
                         <Typography variant="body2" sx={{ wordBreak: 'break-all', fontFamily: 'monospace', fontSize: '0.875rem' }}>
-                            {file.path || 'Not set'}
+                            {file.path || t('metadataEditor.notSet')}
                         </Typography>
 
                         <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                            Protection:
+                            {t('metadataEditor.protectionLabel')}
                         </Typography>
                         <Chip 
                             label={file.level || 'UNSET'} 
@@ -434,7 +436,7 @@ export default function MetadataEditor({
                         {file.createdAt && (
                             <>
                                 <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                                    Created:
+                                    {t('metadataEditor.createdLabel')}
                                 </Typography>
                                 <Typography variant="body2">
                                     {new Date(file.createdAt).toLocaleString()}
@@ -445,7 +447,7 @@ export default function MetadataEditor({
                         {file.updatedAt && (
                             <>
                                 <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                                    Updated:
+                                    {t('metadataEditor.updatedLabel')}
                                 </Typography>
                                 <Typography variant="body2">
                                     {new Date(file.updatedAt).toLocaleString()}

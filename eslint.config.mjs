@@ -172,6 +172,7 @@ const i18nextRuleConfig = [
     ],
     callees: {
       exclude: [
+        't', // i18next translation function
         'console.log',
         'console.warn',
         'console.error',
