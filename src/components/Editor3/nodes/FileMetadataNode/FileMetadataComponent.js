@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Box,
     Card,
@@ -97,6 +98,7 @@ export default function FileMetadataComponent({
     search = '',
     index = 0
 }) {
+    const { t } = useTranslation('components');
     const [isExpanded, setIsExpanded] = useState(false);
     const [isSelected, setIsSelected] = useState(false);
     const [editingFileName, setEditingFileName] = useState(false);
@@ -169,16 +171,16 @@ export default function FileMetadataComponent({
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 {getFileTypeIcon(file?.mimeType)}
                 <Typography variant="body2" color="text.secondary">
-                    {file?.mimeType} • {file?.size ? `${(file.size / 1000).toFixed(2)} KB` : 'Unknown size'}
+                    {file?.mimeType} • {file?.size ? `${(file.size / 1000).toFixed(2)} KB` : t('fileMetadataComponent.unknownSize')}
                 </Typography>
             </Box>
 
             {/* Protection Level */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="body2">Protection Level:</Typography>
+                <Typography variant="body2">{t('fileMetadataComponent.protectionLevel')}</Typography>
                 <Chip 
                     size="small" 
-                    label={file?.level || 'UNSET'} 
+                    label={file?.level || t('fileMetadataComponent.unset')} 
                     color={file?.level === 'PRIVATE' ? 'error' : file?.level === 'PROTECTED' ? 'warning' : 'default'}
                 />
             </Box>
@@ -186,14 +188,14 @@ export default function FileMetadataComponent({
             {/* File Path */}
             {file?.path && (
                 <Typography variant="body2" color="text.secondary" sx={{ wordBreak: 'break-all' }}>
-                    <strong>Path:</strong> {highlightMatches(file.path, localSearch)}
+                    <strong>{t('fileMetadataComponent.path')}</strong> {highlightMatches(file.path, localSearch)}
                 </Typography>
             )}
 
             {/* Created/Modified dates */}
             {file?.createdAt && (
                 <Typography variant="body2" color="text.secondary">
-                    <strong>Created:</strong> {new Date(file.createdAt).toLocaleString()}
+                    <strong>{t('fileMetadataComponent.created')}</strong> {new Date(file.createdAt).toLocaleString()}
                 </Typography>
             )}
         </Stack>
@@ -203,7 +205,7 @@ export default function FileMetadataComponent({
         if (!file?.metadata) {
             return (
                 <Typography variant="body2" color="text.secondary">
-                    No metadata available for this file.
+                    {t('fileMetadataComponent.noMetadataAvailable')}
                 </Typography>
             );
         }
@@ -229,7 +231,7 @@ export default function FileMetadataComponent({
         if (!parsedContent) {
             return (
                 <Typography variant="body2" color="text.secondary">
-                    No parsed content available for this file.
+                    {t('fileMetadataComponent.noParsedContentAvailable')}
                 </Typography>
             );
         }
@@ -419,7 +421,7 @@ export default function FileMetadataComponent({
                             />
                             <IconButton
                                 size="small"
-                                title={isExpanded ? 'Collapse' : 'Expand'}
+                                title={isExpanded ? t('fileMetadataComponent.collapse') : t('fileMetadataComponent.expand')}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     setIsExpanded(!isExpanded);
@@ -437,11 +439,11 @@ export default function FileMetadataComponent({
                             
                             <Chip 
                                 size="small" 
-                                label={file?.level || 'UNSET'} 
+                                label={file?.level || t('fileMetadataComponent.unset')} 
                                 color={file?.level === 'PRIVATE' ? 'error' : file?.level === 'PROTECTED' ? 'warning' : 'default'}
                             />
                             
-                            <Tooltip title="File Info">
+                            <Tooltip title={t('fileMetadataComponent.fileInfo')}>
                                 <IconButton
                                     size="small"
                                     color="default"
@@ -450,14 +452,14 @@ export default function FileMetadataComponent({
                                 </IconButton>
                             </Tooltip>
                             
-                            <Tooltip title="Delete File">
+                            <Tooltip title={t('fileMetadataComponent.deleteFile')}>
                                 <IconButton
                                     size="small"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setConfirmDialog({
                                             open: true,
-                                            message: `Delete file: "${file?.name}"?`,
+                                            message: t('fileMetadataComponent.deleteConfirmation', { fileName: file?.name }),
                                             severity: 'warning',
                                             onConfirm: () => {
                                                 onRemove && onRemove(nodeKey);
@@ -519,7 +521,7 @@ export default function FileMetadataComponent({
                             {/* Filename */}
                             <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Typography variant="body2" sx={{ minWidth: 100 }}>
-                                    Filename:
+                                    {t('fileMetadataComponent.filename')}
                                 </Typography>
                                 {getFileTypeIcon(file?.mimeType)}
                                 {editingFileName ? (
@@ -558,10 +560,10 @@ export default function FileMetadataComponent({
                             {/* File Type and Size */}
                             <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Typography variant="body2" sx={{ minWidth: 100 }}>
-                                    Type:
+                                    {t('fileMetadataComponent.type')}
                                 </Typography>
                                 <Typography variant="body1" color="text.secondary">
-                                    {file?.mimeType || 'Unknown'}
+                                    {file?.mimeType || t('fileMetadataComponent.unknown')}
                                 </Typography>
                             </Box>
 
@@ -569,7 +571,7 @@ export default function FileMetadataComponent({
                             {file?.path && (
                                 <Box sx={{ mb: 2, display: 'flex', alignItems: 'flex-start', gap: 1 }}>
                                     <Typography variant="body2" sx={{ minWidth: 100 }}>
-                                        Path:
+                                        {t('fileMetadataComponent.path')}
                                     </Typography>
                                     <Typography variant="body1" color="text.secondary" sx={{ wordBreak: 'break-all', flex: 1 }}>
                                         {highlightMatches(file.path, localSearch)}
@@ -582,7 +584,7 @@ export default function FileMetadataComponent({
                                 <TextField
                                     value={localSearch}
                                     onChange={(e) => setLocalSearch(e.target.value)}
-                                    placeholder="Search file content..."
+                                    placeholder={t('fileMetadataComponent.searchPlaceholder')}
                                     size="small"
                                     fullWidth
                                     InputProps={{
@@ -611,9 +613,9 @@ export default function FileMetadataComponent({
                                     onChange={handleTabChange}
                                     variant="fullWidth"
                                 >
-                                    <Tab label="Basic Info" />
-                                    <Tab label="Raw Metadata" />
-                                    <Tab label="Parsed Content" />
+                                    <Tab label={t('fileMetadataComponent.basicInfo')} />
+                                    <Tab label={t('fileMetadataComponent.rawMetadata')} />
+                                    <Tab label={t('fileMetadataComponent.parsedContent')} />
                                 </Tabs>
 
                                 {/* Tab Panels */}
@@ -665,7 +667,7 @@ export default function FileMetadataComponent({
                                     }}
                                     variant="outlined"
                                 >
-                                    Confirm
+                                    {t('fileMetadataComponent.confirm')}
                                 </Button>
                                 <Button
                                     color="inherit"
@@ -676,7 +678,7 @@ export default function FileMetadataComponent({
                                     }}
                                     variant="contained"
                                 >
-                                    Cancel
+                                    {t('fileMetadataComponent.cancel')}
                                 </Button>
                             </Box>
                         }
