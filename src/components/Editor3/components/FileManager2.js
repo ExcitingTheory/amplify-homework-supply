@@ -877,6 +877,7 @@ function MetadataEditor({ file, onUpdate, onClose }) {
 }
 
 const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, parsedContent, search, editor }) {
+    const { t } = useTranslation('components');
     const [activeTab, setActiveTab] = React.useState(0);
 
     const handleInsertIntoEditor = () => {
@@ -928,12 +929,12 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
             {metadata && (
                 <Box>
                     <Typography variant="h6" gutterBottom>
-                        Extracted Content
+                        {t('fileManager2.expandedContent.extractedContentHeading')}
                     </Typography>
                     {metadata.analysis?.description && (
                         <Box sx={{ mb: 2 }}>
                             <Typography variant="subtitle2" color="primary">
-                                Description:
+                                {t('fileManager2.expandedContent.descriptionLabel')}
                             </Typography>
                             <Typography variant="body2">
                                 {highlightText(metadata.analysis.description)}
@@ -943,7 +944,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
                     {metadata.analysis?.transcription && (
                         <Box sx={{ mb: 2 }}>
                             <Typography variant="subtitle2" color="primary">
-                                Transcription:
+                                {t('fileManager2.expandedContent.transcriptionLabel')}
                             </Typography>
                             <Typography variant="body2">
                                 {highlightText(metadata.analysis.transcription)}
@@ -1001,7 +1002,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
                             {parsedContent.vocabularyJSON.length > 0 ? (
                                 <>
                                     <Alert severity="info" sx={{ mb: 2 }}>
-                                        Review and import vocabulary from the document
+                                        {t('fileManager2.expandedContent.reviewVocabularyMessage')}
                                     </Alert>
                                     <SuggestedVocabulary
                                         documentId={file.documentID}
@@ -1015,7 +1016,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
                                 </>
                             ) : (
                                 <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
-                                    No vocabulary extracted
+                                    {t('fileManager2.expandedContent.noVocabularyExtracted')}
                                 </Typography>
                             )}
                         </Box>
@@ -1027,7 +1028,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
                             {parsedContent.questionsJSON.length > 0 ? (
                                 <>
                                     <Alert severity="info" sx={{ mb: 2 }}>
-                                        Review and import questions from the document
+                                        {t('fileManager2.expandedContent.reviewQuestionsMessage')}
                                     </Alert>
                                     <SuggestedQuestions
                                         documentId={file.documentID}
@@ -1041,7 +1042,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
                                 </>
                             ) : (
                                 <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
-                                    No questions extracted
+                                    {t('fileManager2.expandedContent.noQuestionsExtracted')}
                                 </Typography>
                             )}
                         </Box>
@@ -1082,7 +1083,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
                                 ))
                             ) : (
                                 <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
-                                    No summaries extracted
+                                    {t('fileManager2.expandedContent.noSummariesExtracted')}
                                 </Typography>
                             )}
                         </Box>
@@ -1120,7 +1121,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
                                 ))
                             ) : (
                                 <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
-                                    No objectives extracted
+                                    {t('fileManager2.expandedContent.noObjectivesExtracted')}
                                 </Typography>
                             )}
                         </Box>
@@ -1163,7 +1164,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
                                 ))
                             ) : (
                                 <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
-                                    No concepts extracted
+                                    {t('fileManager2.expandedContent.noConceptsExtracted')}
                                 </Typography>
                             )}
                         </Box>
@@ -1174,7 +1175,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
             {/* No content available */}
             {!metadata && !parsedContent && (
                 <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-                    No extracted content available
+                    {t('fileManager2.expandedContent.noContentAvailable')}
                 </Typography>
             )}
         </Box>

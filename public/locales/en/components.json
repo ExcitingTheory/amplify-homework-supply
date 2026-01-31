@@ -419,7 +419,30 @@
     "alertMessage": "Review all questions before submitting",
     "filterBy": "Filter by",
     "cancel": "Cancel",
-    "submit": "Submit"
+    "submit": "Submit",
+    "loading": "Loading questions...",
+    "noQuestions": "No questions found for this document.",
+    "from": "From",
+    "pages": "pages",
+    "importedOn": "Imported on {{date}}",
+    "filteringBySearch": "Filtering by search: \"{{searchTerm}}\" ({{count}} of {{total}} items)",
+    "hide": "Hide",
+    "show": "Show",
+    "summariesAndObjectives": "Summaries & Objectives",
+    "summaries": "Summaries",
+    "learningObjectives": "Learning Objectives",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "selectedCount": "{{count}} of {{total}} selected",
+    "importToQuestionBank": "Import to Question Bank",
+    "questionPrompt": "Question Prompt",
+    "enterQuestion": "Enter question...",
+    "hintOptional": "Hint (optional)",
+    "enterHint": "Enter hint...",
+    "answer": "Answer",
+    "enterAnswer": "Enter answer...",
+    "hasAudio": "Has audio",
+    "hasImage": "Has image"
   },
   "recordingStudio": {
     "sectionHeading": "Recording Studio",
@@ -492,6 +515,19 @@
       "createdLabel": "Created",
       "cancelButton": "Cancel",
       "saveButton": "Save"
+    },
+    "expandedContent": {
+      "extractedContentHeading": "Extracted Content",
+      "descriptionLabel": "Description:",
+      "transcriptionLabel": "Transcription:",
+      "reviewVocabularyMessage": "Review and import vocabulary from the document",
+      "noVocabularyExtracted": "No vocabulary extracted",
+      "reviewQuestionsMessage": "Review and import questions from the document",
+      "noQuestionsExtracted": "No questions extracted",
+      "noSummariesExtracted": "No summaries extracted",
+      "noObjectivesExtracted": "No objectives extracted",
+      "noConceptsExtracted": "No concepts extracted",
+      "noContentAvailable": "No extracted content available"
     }
   }
 }
