@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getAmplifyClient } from "../src/utils/amplifyClient";
+import { useTranslation } from 'react-i18next';
 import {
     Button,
     Box,
@@ -54,6 +55,7 @@ function CardMediaComponent({ s3Key, identityId, level = 'protected' }) {
 }
 
 function Units() {
+    const { t } = useTranslation('pages');
     /**
      * Units is a page that displays a list of units.
      * For Instructor users, it displays a list of units they are teaching.
@@ -181,9 +183,9 @@ function Units() {
                     <Typography variant="h2" component="div" sx={{
                         flexGrow: 1,
                     }}>
-                        Units&nbsp;
+                        {t('units.title')}&nbsp;
                     </Typography>
-                    <Button variant="outlined" color="primary" disabled={work} onClick={createUnit}><AddIcon />&nbsp;Create New</Button>
+                    <Button variant="outlined" color="primary" disabled={work} onClick={createUnit}><AddIcon />&nbsp;{t('units.createNew')}</Button>
                 </div>
                 <Box
                     sx={{
@@ -225,7 +227,7 @@ function Units() {
                                     textAlign: 'center',
                                 }}>
                                     <Typography component="div" variant="h5" sx={{ mb: 3 }}>
-                                        No Published Units Yet
+                                        {t('units.noPublishedUnits')}
                                     </Typography>
                                     <Button
                                         variant="outlined"
@@ -240,7 +242,7 @@ function Units() {
                                             borderRadius: 2,
                                         }}
                                     >
-                                        Create New Unit
+                                        {t('units.createNewUnit')}
                                     </Button>
                                 </CardContent>
                             </Box>
@@ -254,7 +256,7 @@ function Units() {
                                 width: '80vw',
                                 margin: '1rem auto',
                             }}>
-                                Published Units
+                                {t('units.publishedUnits')}
                             </Typography>
                             {
                                 publishedUnits.map(function (unit) {
@@ -338,7 +340,7 @@ function Units() {
                                                             },
                                                         }}
                                                     >
-                                                        Edit Unit
+                                                        {t('units.editUnit')}
                                                     </Button>
                                                 </Box>
                                             </Box>
@@ -367,7 +369,7 @@ function Units() {
                                 width: '80vw',
                                 margin: '1rem auto',
                             }}>
-                                My Drafts
+                                {t('units.myDrafts')}
                             </Typography>
                             {
                                 draftUnits.map(function (unit) {
@@ -399,7 +401,7 @@ function Units() {
                                             }}>
                                                 <CardContent sx={{ flex: '1 0 auto', pb: 1 }}>
                                                     <Typography component="div" variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
-                                                        {unit.name || 'Untitled Unit'}
+                                                        {unit.name || t('units.untitledUnit')}
                                                     </Typography>
                                                     <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                                                         {unit.description || ''}
@@ -428,7 +430,7 @@ function Units() {
                                                             },
                                                         }}
                                                     >
-                                                        View Workbook
+                                                        {t('units.viewWorkbook')}
                                                     </Button>
                                                     <Button
                                                         variant="outlined"
@@ -451,7 +453,7 @@ function Units() {
                                                             },
                                                         }}
                                                     >
-                                                        Edit Unit
+                                                        {t('units.editUnit')}
                                                     </Button>
                                                 </Box>
                                             </Box>
@@ -477,7 +479,7 @@ function Units() {
                                 width: '80vw',
                                 margin: '1rem auto',
                             }}>
-                                Archived Units
+                                {t('units.archivedUnits')}
                             </Typography>
                             {
                                 archivedUnits.map(function (unit) {
@@ -509,7 +511,7 @@ function Units() {
                                             }}>
                                                 <CardContent sx={{ flex: '1 0 auto', pb: 1 }}>
                                                     <Typography component="div" variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
-                                                        {unit.name || 'Untitled Unit'}
+                                                        {unit.name || t('units.untitledUnit')}
                                                     </Typography>
                                                     <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                                                         {unit.description || ''}
@@ -538,7 +540,7 @@ function Units() {
                                                             },
                                                         }}
                                                     >
-                                                        View Workbook
+                                                        {t('units.viewWorkbook')}
                                                     </Button>
                                                     <Button
                                                         variant="outlined"
@@ -561,7 +563,7 @@ function Units() {
                                                             },
                                                         }}
                                                     >
-                                                        Edit Unit
+                                                        {t('units.editUnit')}
                                                     </Button>
                                                 </Box>
                                             </Box>

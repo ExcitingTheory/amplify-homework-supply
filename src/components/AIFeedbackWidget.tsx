@@ -32,6 +32,7 @@ import {
   Alert,
   Snackbar,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
@@ -98,6 +99,7 @@ export default function AIFeedbackWidget({
   size = 'small',
   showLabels = false,
 }: AIFeedbackWidgetProps) {
+  const { t } = useTranslation('components');
   const [feedbackType, setFeedbackType] = useState<'POSITIVE' | 'NEGATIVE' | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [selectedReasons, setSelectedReasons] = useState<Set<keyof typeof AiFeedbackReason>>(new Set());
@@ -222,7 +224,7 @@ export default function AIFeedbackWidget({
         
         {showLabels && feedbackType === 'POSITIVE' && (
           <Typography variant="caption" color="success.main">
-            Helpful
+            {t('aiFeedbackWidget.helpful')}
           </Typography>
         )}
 
@@ -247,7 +249,7 @@ export default function AIFeedbackWidget({
         
         {showLabels && feedbackType === 'NEGATIVE' && (
           <Typography variant="caption" color="error.main">
-            Needs improvement
+            {t('aiFeedbackWidget.needsImprovement')}
           </Typography>
         )}
       </Box>
@@ -268,12 +270,12 @@ export default function AIFeedbackWidget({
       >
         <Box sx={{ p: 2, minWidth: 300, maxWidth: 400 }}>
           <Typography variant="subtitle2" gutterBottom>
-            What could be improved?
+            {t('aiFeedbackWidget.whatToImprove')}
           </Typography>
           
           <FormControl component="fieldset" variant="standard" fullWidth>
             <FormLabel component="legend" sx={{ fontSize: '0.875rem', mb: 1 }}>
-              Select all that apply:
+              {t('aiFeedbackWidget.selectAllThatApply')}
             </FormLabel>
             <FormGroup>
               {Object.entries(REASON_LABELS).map(([key, label]) => {
@@ -313,7 +315,7 @@ export default function AIFeedbackWidget({
               onClick={handleClosePopover}
               disabled={isSubmitting}
             >
-              Cancel
+              {t('aiFeedbackWidget.cancel')}
             </Button>
             <Button
               variant="contained"
@@ -321,7 +323,7 @@ export default function AIFeedbackWidget({
               onClick={handleSubmitNegativeFeedback}
               disabled={isSubmitting || selectedReasons.size === 0}
             >
-              Submit
+              {t('aiFeedbackWidget.submit')}
             </Button>
           </Box>
         </Box>

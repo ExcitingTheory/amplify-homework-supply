@@ -1,5 +1,6 @@
 'use strict';
 import React, { use } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getAmplifyClient } from '../../../utils/amplifyClient';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -53,6 +54,7 @@ const formatTime = (countDown) => {
 
 
 export default function AssignmentConfiguration() {
+  const { t } = useTranslation('components');
 
   const {
     sections, sectionMap, assignments
@@ -254,7 +256,7 @@ export default function AssignmentConfiguration() {
               <TextField
                 autoFocus
                 id="outlined-timer"
-                label="Timer (seconds)"
+                label={t('assignmentConfiguration.timerLabel')}
                 title="Set timer in seconds"
                 type="number"
                 InputLabelProps={{
@@ -277,7 +279,7 @@ export default function AssignmentConfiguration() {
                   margin: '1rem',
                 }}
               
-              onClick={() => setOpenTimerDialog(false)}>Cancel</Button>
+              onClick={() => setOpenTimerDialog(false)}>{t('assignmentConfiguration.cancel')}</Button>
               <Button
                 variant='contained'
                 title="Set Unit Timer"
@@ -285,7 +287,7 @@ export default function AssignmentConfiguration() {
                 color="primary"
                 autoFocus
                 >
-                Ok
+                {t('assignmentConfiguration.save')}
               </Button>
             </Box>
           </form>
@@ -325,7 +327,7 @@ export default function AssignmentConfiguration() {
             hiddenLabel
             // ariaLabel='Due Date'
             required
-            label='Set Unit Due Date'
+            label={t('assignmentConfiguration.dueDateLabel')}
             type="datetime-local"
             defaultValue={dueDate}
 
@@ -336,12 +338,12 @@ export default function AssignmentConfiguration() {
 
 
           <FormControl sx={{ margin: '1rem' }}>
-            <InputLabel id="section-select-helper-label">Section</InputLabel>
+            <InputLabel id="section-select-helper-label">{t('assignmentConfiguration.sectionLabel')}</InputLabel>
             <Select
               labelId="section-select-helper-label"
               id="section-select-helper"
               value={section}
-              label="Section"
+              label={t('assignmentConfiguration.sectionLabel')}
               title="Select Section"
               required
               // variant='contained'
