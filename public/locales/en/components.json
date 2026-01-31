@@ -118,15 +118,35 @@
     "dragDropPrompt": "Drag and drop an image here to set it as the featured image."
   },
   "documentUploader": {
-    "uploadInstructions": "Upload a PDF document for analysis",
-    "fileTypeInfo": "Supported: PDF files only",
-    "howItWorks": {
-      "step1": "Select a PDF file",
-      "step2": "Upload to server",
-      "step3": "AI extracts vocabulary"
+    "title": "Upload Documents for {{extractionType}} Extraction",
+    "extractionTypes": {
+      "vocabulary": "Vocabulary",
+      "question": "Question",
+      "dictionary": "dictionary",
+      "questions": "questions"
     },
-    "upload": "Upload",
-    "cancel": "Cancel"
+    "dragDropPrompt": "Drag and drop documents here",
+    "supportedFormats": "Supported: PDF, Word (.doc, .docx), Text (.txt), Excel (.xls, .xlsx, .csv)",
+    "browseFiles": "Browse Files",
+    "uploadingProgress": "Uploading... {{progress}}%",
+    "recentUploads": "Recent Uploads",
+    "statusLabels": {
+      "processing": "Processing...",
+      "complete": "Complete",
+      "failed": "Failed"
+    },
+    "errorMessages": {
+      "noSupportedFiles": "No supported documents found. Please upload PDF, Word, Text, or Excel files.",
+      "skippedFiles": "Some files were skipped (unsupported type)",
+      "uploadFailed": "Failed to upload {{fileName}}: {{error}}"
+    },
+    "howItWorks": {
+      "title": "How it works:",
+      "step1": "1. Upload your documents (PDF, Word, Text, or Excel files)",
+      "step2": "2. AI will analyze the content and extract {{extractionType}}",
+      "step3": "3. Review and approve suggestions in the \"Suggestions\" tab",
+      "step4": "4. Import selected items to your {{target}}"
+    }
   },
   "enhancedGenerators": {
     "generate": "Generate",
@@ -364,8 +384,17 @@
   },
   "questionBlock": {
     "submit": "Submit",
-    "gradeDisplay": "Grade: {{score}}%",
-    "status": "Status"
+    "gradeDisplay": "Grade: {{score}}",
+    "status": "Status",
+    "answerLabel": "Answer {{number}}",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "edit": "Edit",
+    "reset": "Reset",
+    "done": "Done",
+    "invalid": "Invalid",
+    "remove": "Remove",
+    "addAnswerPlaceholder": "Add Answer"
   },
   "questionEditor": {
     "dialogTitle": "Edit Question",

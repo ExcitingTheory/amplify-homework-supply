@@ -24,6 +24,7 @@ import { getAmplifyClient } from '../../../utils/amplifyClient';
 // import type { Schema } from '../../../../amplify/data/resource';
 import UnitContext from '../../../context/unitContext';
 import FilesContext from '../../../context/fileContext';
+import { useTranslation } from 'react-i18next';
 
 const client = generateClient();
 
@@ -53,6 +54,7 @@ const analyzeDocumentMutation = /* GraphQL */ `
  * Component for uploading and processing documents to extract vocabulary or questions
  */
 export default function DocumentUploader({ extractionType = 'vocabulary', onUploadComplete }) {
+    const { t } = useTranslation('components');
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [error, setError] = useState(null);
@@ -99,12 +101,12 @@ export default function DocumentUploader({ extractionType = 'vocabulary', onUplo
         );
 
         if (validFiles.length === 0) {
-            setError('No supported documents found. Please upload PDF, Word, Text, or Excel files.');
+            setError(t('documentUploader.errorMessages.noSupportedFiles'));
             return;
         }
 
         if (validFiles.length !== files.length) {
-            setError('Some files were skipped (unsupported type)');
+            setError(t('documentUploader.errorMessages.skippedFiles'));
         }
 
         for (const file of validFiles) {
@@ -180,7 +182,7 @@ export default function DocumentUploader({ extractionType = 'vocabulary', onUplo
 
         } catch (error) {
             console.error('Upload error:', error);
-            setError(`Failed to upload ${file.name}: ${error.message}`);
+            setError(t('documentUploader.errorMessages.uploadFailed', { fileName: file.name, error: error.message }));
         } finally {
             setUploading(false);
             setUploadProgress(0);
@@ -203,7 +205,11 @@ export default function DocumentUploader({ extractionType = 'vocabulary', onUplo
     return (
         <Box sx={{ p: 2, width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
-                Upload Documents for {extractionType === 'vocabulary' ? 'Vocabulary' : 'Question'} Extraction
+                {t('documentUploader.title', { 
+                    extractionType: extractionType === 'vocabulary' 
+                        ? t('documentUploader.extractionTypes.vocabulary') 
+                        : t('documentUploader.extractionTypes.question')
+                })}
             </Typography>
 
             {/* Drop Zone */}
@@ -225,17 +231,17 @@ export default function DocumentUploader({ extractionType = 'vocabulary', onUplo
             >
                 <CloudUploadIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                    Drag and drop documents here
+                    {t('documentUploader.dragDropPrompt')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    Supported: PDF, Word (.doc, .docx), Text (.txt), Excel (.xls, .xlsx, .csv)
+                    {t('documentUploader.supportedFormats')}
                 </Typography>
                 <Button
                     variant="contained"
                     component="label"
                     disabled={uploading}
                 >
-                    Browse Files
+                    {t('documentUploader.browseFiles')}
                     <input
                         type="file"
                         hidden
@@ -250,7 +256,7 @@ export default function DocumentUploader({ extractionType = 'vocabulary', onUplo
             {uploading && (
                 <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" sx={{ mb: 1 }}>
-                        Uploading... {uploadProgress}%
+                        {t('documentUploader.uploadingProgress', { progress: uploadProgress })}
                     </Typography>
                     <LinearProgress variant="determinate" value={uploadProgress} />
                 </Box>
@@ -267,7 +273,7 @@ export default function DocumentUploader({ extractionType = 'vocabulary', onUplo
             {uploadedDocs.length > 0 && (
                 <Box>
                     <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                        Recent Uploads
+                        {t('documentUploader.recentUploads')}
                     </Typography>
                     <List dense>
                         {uploadedDocs.map((doc) => (
@@ -290,9 +296,9 @@ export default function DocumentUploader({ extractionType = 'vocabulary', onUplo
                                         <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
                                             <Chip label={doc.type} size="small" sx={{ mr: 1 }} />
                                             <Typography variant="caption" color="text.secondary">
-                                                {doc.status === 'analyzing' && 'Processing...'}
-                                                {doc.status === 'completed' && 'Complete'}
-                                                {doc.status === 'error' && 'Failed'}
+                                                {doc.status === 'analyzing' && t('documentUploader.statusLabels.processing')}
+                                                {doc.status === 'completed' && t('documentUploader.statusLabels.complete')}
+                                                {doc.status === 'error' && t('documentUploader.statusLabels.failed')}
                                             </Typography>
                                         </Box>
                                     }
@@ -322,13 +328,17 @@ export default function DocumentUploader({ extractionType = 'vocabulary', onUplo
             {/* Instructions */}
             <Box sx={{ mt: 3, p: 2, backgroundColor: 'info.light', borderRadius: 1 }}>
                 <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>How it works:</strong>
+                    <strong>{t('documentUploader.howItWorks.title')}</strong>
                 </Typography>
                 <Typography variant="body2" component="div">
-                    1. Upload your documents (PDF, Word, Text, or Excel files)<br />
-                    2. AI will analyze the content and extract {extractionType}<br />
-                    3. Review and approve suggestions in the "Suggestions" tab<br />
-                    4. Import selected items to your {extractionType === 'vocabulary' ? 'dictionary' : 'questions'}
+                    {t('documentUploader.howItWorks.step1')}<br />
+                    {t('documentUploader.howItWorks.step2', { extractionType })}<br />
+                    {t('documentUploader.howItWorks.step3')}<br />
+                    {t('documentUploader.howItWorks.step4', { 
+                        target: extractionType === 'vocabulary' 
+                            ? t('documentUploader.extractionTypes.dictionary') 
+                            : t('documentUploader.extractionTypes.questions')
+                    })}
                 </Typography>
             </Box>
         </Box>
