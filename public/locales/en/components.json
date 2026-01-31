@@ -109,6 +109,11 @@
   },
   "dictionaryEditor": {
     "rubyTagInstructions": "Use ruby tags for phonetic annotations",
+    "rubyTagEditorTitle": "Ruby Tag Editor",
+    "audioStudioTitle": "Audio Recording Studio",
+    "createNewWordTitle": "Create New Word",
+    "createWordButton": "Create Word",
+    "confirmButton": "Confirm",
     "cancel": "Cancel",
     "save": "Save"
   },
@@ -241,10 +246,21 @@
     "insert": "Insert"
   },
   "meaningAssociationEditor": {
-    "dialogTitle": "Meaning Association",
-    "description": "Match words with their meanings",
+    "removeFromAssignment": "Remove from Assignment",
+    "addWordLabel": "Add word to exercise",
+    "dialogTitle": "Add a new word",
+    "dialogDescription": "Add a new word to the dictionary.",
+    "phraseLabel": "phrase",
+    "pronunciationLabel": "pronunciation",
+    "definitionPlaceholder": "definition",
     "cancel": "Cancel",
-    "save": "Save"
+    "add": "Add",
+    "emptyState": "No words have been added yet. Use the input above to add words from the dictionary. If the word you want to add is not in the dictionary, you can add it by clicking the \"Add Word\" item in the dropdown or from the dictionary editor in the Sidebar.",
+    "columnHeaders": {
+      "phrase": "Phrase",
+      "pronunciation": "Pronunciation",
+      "definition": "Definition"
+    }
   },
   "mediaPlayerComponent": {
     "display": "Display",

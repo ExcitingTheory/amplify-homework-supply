@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { DataGrid } from '@mui/x-data-grid';
 
@@ -47,12 +48,12 @@ import { getAmplifyClient } from '../../../utils/amplifyClient';
 
 const filter = createFilterOptions();
 
-const columns = [
-    { field: 'phrase', headerName: 'Phrase', flex: 1, minWidth: 100 },
-    { field: 'pronunciation', headerName: 'Pronunciation', flex: 1, minWidth: 100 },
+const getColumns = (t) => [
+    { field: 'phrase', headerName: t('meaningAssociationEditor.columnHeaders.phrase'), flex: 1, minWidth: 100 },
+    { field: 'pronunciation', headerName: t('meaningAssociationEditor.columnHeaders.pronunciation'), flex: 1, minWidth: 100 },
     {
         field: 'definition',
-        headerName: 'Definition',
+        headerName: t('meaningAssociationEditor.columnHeaders.definition'),
         flex: 1, minWidth: 200
     },
 ];
@@ -61,6 +62,7 @@ export function ActionsMenu({
     ids,
     removeWordIDs,
 }) {
+    const { t } = useTranslation('components');
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
@@ -101,7 +103,7 @@ export function ActionsMenu({
                     'aria-labelledby': 'basic-button',
                 }}
             >
-                <MenuItem onClick={removeFromAssignment}>Remove from Assignment</MenuItem>
+                <MenuItem onClick={removeFromAssignment}>{t('meaningAssociationEditor.removeFromAssignment')}</MenuItem>
             </Menu>
         </>
     );
@@ -114,6 +116,7 @@ export default function MeaningAssociationEditor({
     // setWordIDs,
     wordIDs,
 }) {
+    const { t } = useTranslation('components');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     // const [rows, setRows] = React.useState([]);
@@ -404,7 +407,7 @@ export default function MeaningAssociationEditor({
                     }}
                     // sx={{ width: 300 }}
                     freeSolo
-                    renderInput={(params) => <TextField {...params} label="Add word to exercise" />}
+                    renderInput={(params) => <TextField {...params} label={t('meaningAssociationEditor.addWordLabel')} />}
                 />
                 <ActionsMenu
                     removeWordIDs={removeWordIDs}
@@ -416,7 +419,7 @@ export default function MeaningAssociationEditor({
 
             <Dialog open={open} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
-                    <DialogTitle>Add a new word</DialogTitle>
+                    <DialogTitle>{t('meaningAssociationEditor.dialogTitle')}</DialogTitle>
                     <DialogContent
                         sx={{
                             display: 'flex',
@@ -425,7 +428,7 @@ export default function MeaningAssociationEditor({
                         }}
                     >
                         <DialogContentText>
-                            Add a new word to the dictionary.
+                            {t('meaningAssociationEditor.dialogDescription')}
                         </DialogContentText>
                         <TextField
                             autoFocus
@@ -438,7 +441,7 @@ export default function MeaningAssociationEditor({
                                     phrase: event.target.value,
                                 })
                             }
-                            label="phrase"
+                            label={t('meaningAssociationEditor.phraseLabel')}
                             type="text"
                             variant="standard"
                         />
@@ -452,7 +455,7 @@ export default function MeaningAssociationEditor({
                                     pronunciation: event.target.value,
                                 })
                             }
-                            label="pronunciation"
+                            label={t('meaningAssociationEditor.pronunciationLabel')}
                             type="text"
                             variant="standard"
                         />
@@ -471,7 +474,7 @@ export default function MeaningAssociationEditor({
                                 })
                             }
                             aria-label='Definition'
-                            placeholder="definition"
+                            placeholder={t('meaningAssociationEditor.definitionPlaceholder')}
                             type="text"
                             variant="standard"
                         />
@@ -482,14 +485,14 @@ export default function MeaningAssociationEditor({
                             // color='error'
                             onClick={handleClose}
                         >
-                            Cancel
+                            {t('meaningAssociationEditor.cancel')}
                         </Button>
                         <Button
                             type="submit"
                             variant='contained'
                             color='primary'
                         >
-                            Add
+                            {t('meaningAssociationEditor.add')}
                         </Button>
                     </DialogActions>
                 </form>
@@ -497,7 +500,7 @@ export default function MeaningAssociationEditor({
 
             {rows.length === 0 && (
                 <div style={{ marginTop: '0.5' }}>
-                    <p>No words have been added yet. Use the input above to add words from the dictionary. If the word you want to add is not in the dictionary, you can add it by clicking the "Add Word" item in the dropdown or from the dictionary editor in the Sidebar.
+                    <p>{t('meaningAssociationEditor.emptyState')}
                     </p>
                 </div>
             )}
@@ -507,7 +510,7 @@ export default function MeaningAssociationEditor({
                         marginTop: '0.5rem',
                     }}
                     rows={rows}
-                    columns={columns}
+                    columns={getColumns(t)}
                     initialState={{
                         pagination: {
                             paginationModel: { page: 0, pageSize: 10 },
