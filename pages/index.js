@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getAmplifyClient } from "../src/utils/amplifyClient";
+import { useTranslation } from 'react-i18next';
 
 import {
   Button,
@@ -80,6 +81,7 @@ function CardMediaComponent({ s3Key, identityId, level = 'protected', filter = n
 
 
 function Index({ signOut, user }) {
+  const { t } = useTranslation('pages');
   /**
    * Grades is a page that displays a list of grades.
    * For Instructor users, it displays a list of grades organized by section like a gradebook but for all users in the section.
@@ -273,7 +275,7 @@ function Index({ signOut, user }) {
         <MainToolbar>
           <Box sx={{ flexGrow: 1, margin: '1rem' }} >
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Homework Supply
+              {t('index.title')}
             </Typography>
           </Box>
         </MainToolbar>
@@ -312,7 +314,7 @@ function Index({ signOut, user }) {
                 margin: '1rem auto',
 
               }}>
-                Assignments
+                {t('index.assignments')}
               </Typography>
 
 
@@ -402,7 +404,7 @@ function Index({ signOut, user }) {
                                 },
                               }}
                             >
-                              View Workbook
+                              {t('index.viewWorkbook')}
                             </Button>
 
                           </Box>
@@ -446,7 +448,7 @@ function Index({ signOut, user }) {
                 margin: '1rem auto',
 
               }}>
-                Completed Assignments
+                {t('index.completedAssignments')}
               </Typography>
 
 
@@ -613,7 +615,7 @@ function Index({ signOut, user }) {
                                 },
                               }}
                             >
-                              View Workbook
+                              {t('index.viewWorkbook')}
                             </Button>
 
                           </Box>
@@ -660,7 +662,7 @@ function Index({ signOut, user }) {
                 margin: '1rem auto',
 
               }}>
-                My Assignments
+                {t('index.myAssignments')}
               </Typography>
 
 
@@ -742,7 +744,7 @@ function Index({ signOut, user }) {
                                 },
                               }}
                             >
-                              View Workbook
+                              {t('index.viewWorkbook')}
                             </Button>
 
                             <Button
@@ -766,7 +768,7 @@ function Index({ signOut, user }) {
                                 },
                               }}
                             >
-                              Edit Unit
+                              {t('index.editUnit')}
                             </Button>
 
                           </Box>
@@ -826,7 +828,7 @@ function Index({ signOut, user }) {
                   textAlign: 'center',
                 }}>
                   <Typography component="div" variant="h5" sx={{ mb: 3 }}>
-                    No Sections Yet
+                    {t('index.noSectionsYet')}
                   </Typography>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
                     <Button
@@ -842,7 +844,7 @@ function Index({ signOut, user }) {
                         borderRadius: 2,
                       }}
                     >
-                      Join Section?
+                      {t('index.joinSection')}
                     </Button>
 
                     <Button
@@ -858,7 +860,7 @@ function Index({ signOut, user }) {
                         borderRadius: 2,
                       }}
                     >
-                      Create New Section
+                      {t('index.createNewSection')}
                     </Button>
                   </Box>
                 </CardContent>
@@ -880,7 +882,7 @@ function Index({ signOut, user }) {
                 margin: '1rem auto',
 
               }}>
-                My Sections
+                {t('index.mySections')}
               </Typography>
 
 
@@ -916,10 +918,10 @@ function Index({ signOut, user }) {
                         }}>
                           <CardContent sx={{ flex: '1 0 auto', pb: 1 }}>
                             <Typography component="div" variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
-                              {section?.name || "Untitled Section"}
+                              {section?.name || t('index.untitledSection')}
                             </Typography>
                             <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
-                              {section?.description || "No description"}
+                              {section?.description || t('index.noDescription')}
                             </Typography>
                           </CardContent>
                           <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5 }}>
@@ -945,7 +947,7 @@ function Index({ signOut, user }) {
                                 },
                               }}
                             >
-                              View Section
+                              {t('index.viewSection')}
                             </Button>
 
                           </Box>
@@ -990,7 +992,7 @@ function Index({ signOut, user }) {
                 margin: '1rem auto',
 
               }}>
-                Sections
+                {t('index.sections')}
               </Typography>
 
 
@@ -1026,10 +1028,10 @@ function Index({ signOut, user }) {
                         }}>
                           <CardContent sx={{ flex: '1 0 auto', pb: 1 }}>
                             <Typography component="div" variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
-                              {section?.name || "Untitled Section"}
+                              {section?.name || t('index.untitledSection')}
                             </Typography>
                             <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
-                              {section?.description || "No description"}
+                              {section?.description || t('index.noDescription')}
                             </Typography>
                           </CardContent>
                           <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5 }}>
@@ -1055,7 +1057,7 @@ function Index({ signOut, user }) {
                                 },
                               }}
                             >
-                              View Section
+                              {t('index.viewSection')}
                             </Button>
 
                           </Box>
