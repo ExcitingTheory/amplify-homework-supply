@@ -74,8 +74,8 @@
     "noAudioSource": "No audio source provided"
   },
   "autocompleteNode": {
-    "mobileHint": "Tap to select",
-    "desktopHint": "Press Enter to select"
+    "mobileHint": "(SWIPE ⮕)",
+    "desktopHint": "(TAB)"
   },
   "blockSuggestionMenu": {
     "suggestions": "Suggestions",
@@ -295,7 +295,13 @@
   },
   "moderationBadge": {
     "warning": "Content flagged for moderation",
-    "category": "Category"
+    "category": "Category",
+    "approved": "Content Approved",
+    "flaggedForReview": "Content Flagged for Review",
+    "categories": "Categories",
+    "savedMessage": "Content has been saved. Please review according to your school's policies.",
+    "flagged": "Flagged",
+    "flaggedWithCategories": "Flagged: {{categories}}"
   },
   "moderationPanel": {
     "title": "Moderation",

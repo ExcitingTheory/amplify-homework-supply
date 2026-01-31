@@ -3,6 +3,7 @@ import {
 } from 'lexical';
 import * as React from 'react';
 import { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import AutocompleteContext from '../context/SharedAutocompleteContext';
 
@@ -60,6 +61,7 @@ export function $createAutocompleteNode(uuid) {
 }
 
 function AutocompleteComponent() {
+    const { t } = useTranslation('components');
     const {
         suggestion,
     } = useContext(AutocompleteContext)
@@ -75,7 +77,7 @@ function AutocompleteComponent() {
       : window.innerWidth <= 800 && window.innerHeight <= 600;
   return (
     <span style={{ color: '#ccc' }} spellCheck="false">
-      {autocompleteChunk} {isMobile ? '(SWIPE \u2B95)' : '(TAB)'}
+      {autocompleteChunk} {isMobile ? t('autocompleteNode.mobileHint') : t('autocompleteNode.desktopHint')}
     </span>
   );
 }
