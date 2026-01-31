@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, IconButton, Typography, Slider } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
@@ -48,6 +49,7 @@ export default function AudioWaveformPlayer({
     metadata = {},
     onRecordingComplete
 }) {
+    const { t } = useTranslation('components');
     const theme = useTheme();
     const mainColor = theme.palette.primary.main;
     const rgbColor = hexToRgb(mainColor);
@@ -487,7 +489,7 @@ export default function AudioWaveformPlayer({
     if (!sourceUrl && !file && !waveformData && !enableRecording) {
         return (
             <Box sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
-                No audio source provided
+                {t('audioWaveformPlayer.noAudioSource')}
             </Box>
         );
     }
