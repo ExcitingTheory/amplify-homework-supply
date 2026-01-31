@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAutoEmbedding } from '../../hooks/useEmbeddings';
 import { Box, Alert, LinearProgress } from '@mui/material';
 
@@ -12,6 +13,7 @@ import { Box, Alert, LinearProgress } from '@mui/material';
  * Wrap your existing word editor with this component
  */
 export function WordEditorWithEmbedding({ wordId, children, onSaveComplete }) {
+  const { t } = useTranslation('components');
   const {
     loading,
     error,
@@ -36,10 +38,10 @@ export function WordEditorWithEmbedding({ wordId, children, onSaveComplete }) {
         onSaveComplete(wordData, embeddingResult);
       }
     } catch (err) {
-      console.error('Save with embedding error:', err);
+      console.error(t('wordEmbedding.questionSaveFailed'), err);
       throw err;
     }
-  }, [generateForContent, onSaveComplete]);
+  }, [generateForContent, onSaveComplete, t]);
 
   return (
     <Box>
@@ -49,13 +51,13 @@ export function WordEditorWithEmbedding({ wordId, children, onSaveComplete }) {
       
       {error && (
         <Alert severity="warning" sx={{ mb: 2 }}>
-          Word saved, but embedding generation failed: {error.message}
+          {t('wordEmbedding.embeddingFailed', { error: error.message })}
         </Alert>
       )}
       
       {result && result.wordCount > 0 && (
         <Alert severity="success" sx={{ mb: 2 }} onClose={() => {}}>
-          Embedding generated: {result.wordCount} words processed
+          {t('wordEmbeddingIntegration.embeddingGenerated', { count: result.wordCount })}
         </Alert>
       )}
       
@@ -70,6 +72,7 @@ export function WordEditorWithEmbedding({ wordId, children, onSaveComplete }) {
  * Similar pattern for questions
  */
 export function QuestionEditorWithEmbedding({ questionId, children, onSaveComplete }) {
+  const { t } = useTranslation('components');
   const {
     loading,
     error,
@@ -102,7 +105,7 @@ export function QuestionEditorWithEmbedding({ questionId, children, onSaveComple
       
       {error && (
         <Alert severity="warning" sx={{ mb: 2 }}>
-          Question saved, but embedding generation failed: {error.message}
+          {t('wordEmbeddingIntegration.embeddingFailed', { error: error.message })}
         </Alert>
       )}
       
