@@ -42,6 +42,16 @@
       }
     },
     "emptyState": "No messages yet",
+    "emptyStateHint": "Start a conversation to get help",
+    "messageList": {
+      "you": "You",
+      "assistant": "Assistant",
+      "newMessages": "New messages",
+      "chatMessagesLabel": "Chat messages",
+      "scrollToBottomLabel": "Scroll to bottom - new messages available",
+      "userMessageLabel": "User message",
+      "assistantMessageLabel": "Assistant message"
+    },
     "today": "Today",
     "yesterday": "Yesterday",
     "history": "History",

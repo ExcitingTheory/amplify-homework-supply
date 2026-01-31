@@ -16,6 +16,7 @@
 
 import React, { useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { LexicalMessageRenderer } from './LexicalMessageRenderer';
 import { useAutoScroll } from './hooks/useAutoScroll';
@@ -26,7 +27,8 @@ import styles from './VirtualizedMessageList.module.css';
  * Shows role and timestamp for each message
  */
 const MessageHeader = ({ role, timestamp }) => {
-  const roleLabel = role === 'user' ? 'You' : 'Assistant';
+  const { t } = useTranslation('components');
+  const roleLabel = role === 'user' ? t('chatSidebar.messageList.you') : t('chatSidebar.messageList.assistant');
   const timeStr = timestamp ? new Date(timestamp).toLocaleTimeString() : '';
   
   return (
@@ -116,6 +118,7 @@ export const VirtualizedMessageList = ({
   renderToolPart,
   useLexicalRenderer = true,
 }) => {
+  const { t } = useTranslation('components');
   const parentRef = useRef(null);
   
   // Auto-scroll hook
@@ -145,8 +148,8 @@ export const VirtualizedMessageList = ({
     return (
       <div className={styles.empty}>
         <div className={styles.emptyIcon}>💬</div>
-        <div className={styles.emptyText}>No messages yet</div>
-        <div className={styles.emptyHint}>Start a conversation to get help</div>
+        <div className={styles.emptyText}>{t('chatSidebar.emptyState')}</div>
+        <div className={styles.emptyHint}>{t('chatSidebar.emptyStateHint')}</div>
       </div>
     );
   }
@@ -159,7 +162,7 @@ export const VirtualizedMessageList = ({
         onScroll={handleScroll}
         role="log"
         aria-live="polite"
-        aria-label="Chat messages"
+        aria-label={t('chatSidebar.messageList.chatMessagesLabel')}
       >
         <div
           style={{
@@ -218,7 +221,7 @@ export const VirtualizedMessageList = ({
                 }}
                 onClick={() => onMessageClick?.(message)}
                 role="article"
-                aria-label={`${isUser ? 'User' : 'Assistant'} message`}
+                aria-label={isUser ? t('chatSidebar.messageList.userMessageLabel') : t('chatSidebar.messageList.assistantMessageLabel')}
               >
                 <MessageHeader 
                   role={message.role} 
@@ -258,11 +261,11 @@ export const VirtualizedMessageList = ({
         <button 
           className={styles.scrollToBottom}
           onClick={() => scrollToBottom()}
-          aria-label="Scroll to bottom - new messages available"
+          aria-label={t('chatSidebar.messageList.scrollToBottomLabel')}
           type="button"
         >
           <span>↓</span>
-          <span>New messages</span>
+          <span>{t('chatSidebar.messageList.newMessages')}</span>
         </button>
       )}
     </div>
