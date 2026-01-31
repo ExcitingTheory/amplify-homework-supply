@@ -63,6 +63,9 @@ import FilesContext from '../context/fileContext';
 import UnitContext from '../context/unitContext';
 import { useTabContext } from '../context/tabContext';
 
+// i18n
+import { useTranslation } from 'react-i18next';
+
 // Import QuestionCard from QuestionsReview2
 import { QuestionCard } from './QuestionsReview2';
 
@@ -904,6 +907,7 @@ function QuestionsPlugin({
 // =============================================================================
 
 export function QuestionEditor2() {
+  const { t } = useTranslation('components');
   const [open, setOpen] = React.useState(false);
   const [isHelpOpen, setHelpOpen] = React.useState(false);
   const [expandedItems, setExpandedItems] = React.useState(new Set());
@@ -1234,7 +1238,7 @@ export function QuestionEditor2() {
 
       {/* New Question Dialog */}
       <Dialog open={newQuestionFormOpen} onClose={toggleNewQuestionFormOpen} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Question</DialogTitle>
+        <DialogTitle>{t('questionEditor.dialogTitle')}</DialogTitle>
         <DialogContent>
           <form onSubmit={handleCreateQuestion}>
             <TextField
@@ -1265,7 +1269,7 @@ export function QuestionEditor2() {
               variant="outlined"
             />
             <Button variant="contained" type="submit" sx={{ mt: 2 }}>
-              Create Question
+              {t('questionEditor.save')}
             </Button>
           </form>
         </DialogContent>
@@ -1302,7 +1306,7 @@ export function QuestionEditor2() {
                   }}
                   variant="outlined"
                 >
-                  Confirm
+                  {t('chatSidebar.confirm')}
                 </Button>
                 <Button
                   color="inherit"
@@ -1313,7 +1317,7 @@ export function QuestionEditor2() {
                   }}
                   variant="contained"
                 >
-                  Cancel
+                  {t('chatSidebar.cancel')}
                 </Button>
               </Box>
             }
