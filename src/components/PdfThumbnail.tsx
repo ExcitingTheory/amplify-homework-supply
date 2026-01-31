@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Box, CircularProgress, Typography, Paper } from '@mui/material';
 import { PictureAsPdf as PdfIcon, Error as ErrorIcon } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -44,6 +45,7 @@ export default function PdfThumbnail({
     showBorder = true,
     onClick,
 }: PdfThumbnailProps) {
+    const { t } = useTranslation('components');
     const [numPages, setNumPages] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -56,7 +58,7 @@ export default function PdfThumbnail({
 
     const onDocumentLoadError = (error: Error) => {
         console.error('Error loading PDF:', error);
-        setError('Failed to load PDF');
+        setError(t('pdfThumbnail.failedToLoad'));
         setLoading(false);
     };
 
@@ -167,7 +169,7 @@ export default function PdfThumbnail({
                         transition: 'opacity 0.2s',
                     }}
                 >
-                    {pageNumber} / {numPages}
+                    {t('pdfThumbnail.pageNumber', { current: pageNumber, total: numPages })}
                 </Box>
             )}
         </Box>
