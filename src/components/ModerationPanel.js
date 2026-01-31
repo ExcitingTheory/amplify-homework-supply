@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import WarningIcon from '@mui/icons-material/Warning';
+import { useTranslation } from 'react-i18next';
 
 /**
  * ModerationPanel Component
@@ -20,7 +21,8 @@ import WarningIcon from '@mui/icons-material/Warning';
  * Detailed moderation information panel for instructors.
  * Shows flagged categories with scores and policy guidance.
  */
-export default function ModerationPanel({ item, title = "Content Moderation" }) {
+export default function ModerationPanel({ item, title }) {
+  const { t } = useTranslation('components');
   if (!item || !item.moderationCheckedAt) {
     return null;
   }
@@ -56,17 +58,17 @@ export default function ModerationPanel({ item, title = "Content Moderation" }) 
   }
 
   const categoryDescriptions = {
-    'hate': 'Content promoting hate based on race, gender, ethnicity, religion, etc.',
-    'hate threatening': 'Hateful content that includes violence or serious harm',
-    'harassment': 'Content intended to harass, threaten, or bully an individual',
-    'harassment threatening': 'Harassment content that includes violence or serious harm',
-    'self-harm': 'Content promoting, encouraging, or depicting acts of self-harm',
-    'self-harm intent': 'Content where someone expresses intent to engage in self-harm',
-    'self-harm instructions': 'Content encouraging or providing instructions for self-harm',
-    'sexual': 'Content meant to arouse sexual excitement',
-    'sexual minors': 'Sexual content involving individuals under 18',
-    'violence': 'Content depicting death, violence, or physical injury',
-    'violence graphic': 'Graphic content depicting death, violence, or physical injury'
+    'hate': t('moderationPanel.categories.hate'),
+    'hate threatening': t('moderationPanel.categories.hate threatening'),
+    'harassment': t('moderationPanel.categories.harassment'),
+    'harassment threatening': t('moderationPanel.categories.harassment threatening'),
+    'self-harm': t('moderationPanel.categories.self-harm'),
+    'self-harm intent': t('moderationPanel.categories.self-harm intent'),
+    'self-harm instructions': t('moderationPanel.categories.self-harm instructions'),
+    'sexual': t('moderationPanel.categories.sexual'),
+    'sexual minors': t('moderationPanel.categories.sexual minors'),
+    'violence': t('moderationPanel.categories.violence'),
+    'violence graphic': t('moderationPanel.categories.violence graphic')
   };
 
   return (
@@ -81,16 +83,16 @@ export default function ModerationPanel({ item, title = "Content Moderation" }) 
     >
       <Alert severity="warning" icon={<WarningIcon />}>
         <AlertTitle sx={{ fontWeight: 'bold' }}>
-          {title}
+          {title || t('moderationPanel.title')}
         </AlertTitle>
         <Typography variant="body2" sx={{ mb: 1 }}>
-          This content has been flagged by automated moderation. It has been saved, but may require review according to your institution's policies.
+          {t('moderationPanel.alertMessage')}
         </Typography>
       </Alert>
 
       <Box sx={{ mt: 2 }}>
         <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
-          Flagged Categories:
+          {t('moderationPanel.flaggedCategories')}
         </Typography>
         <Stack spacing={1}>
           {flaggedCategories.map(({ name, score, rawName }) => (
@@ -104,13 +106,13 @@ export default function ModerationPanel({ item, title = "Content Moderation" }) 
                     sx={{ textTransform: 'capitalize' }}
                   />
                   <Typography variant="caption" color="text.secondary">
-                    Confidence: {(score * 100).toFixed(1)}%
+                    {t('moderationPanel.confidence', { score: (score * 100).toFixed(1) })}
                   </Typography>
                 </Box>
               </AccordionSummary>
               <AccordionDetails>
                 <Typography variant="body2" color="text.secondary">
-                  {categoryDescriptions[name] || 'Content flagged in this category.'}
+                  {categoryDescriptions[name] || t('moderationPanel.categories.fallback')}
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -120,17 +122,17 @@ export default function ModerationPanel({ item, title = "Content Moderation" }) 
 
       <Box sx={{ mt: 2, p: 1, bgcolor: 'grey.50', borderRadius: 1 }}>
         <Typography variant="caption" color="text.secondary">
-          Checked: {new Date(item.moderationCheckedAt).toLocaleString()}
+          {t('moderationPanel.checked', { date: new Date(item.moderationCheckedAt).toLocaleString() })}
         </Typography>
         <br />
         <Typography variant="caption" color="text.secondary">
-          Model: {model}
+          {t('moderationPanel.model', { model })}
         </Typography>
       </Box>
 
       <Box sx={{ mt: 2 }}>
         <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
-          <strong>Note:</strong> Automated moderation is not perfect. Please review this content in context and handle according to your institution's specific policies and local jurisdiction requirements.
+          <strong>{t('moderationPanel.disclaimerLabel')}</strong> {t('moderationPanel.disclaimerNote')}
         </Typography>
       </Box>
     </Paper>
