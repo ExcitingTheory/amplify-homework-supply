@@ -28,6 +28,7 @@ import {
 } from 'lexical';
 import { useEffect, useRef, useState } from 'react';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 // import landscapeImage from '../../images/landscape.jpg';
 // import yellowFlowerImage from '../../images/yellow-flower.jpg';
@@ -45,6 +46,7 @@ import {
 export const INSERT_IMAGE_COMMAND = createCommand('INSERT_IMAGE_COMMAND');
 
 export function InsertImageUriDialogBody({ onClick }) {
+    const { t } = useTranslation('components');
     const [src, setSrc] = useState('');
     const [altText, setAltText] = useState('');
 
@@ -53,15 +55,15 @@ export function InsertImageUriDialogBody({ onClick }) {
     return (
         <>
             <TextInput
-                label="Image URL"
-                placeholder="i.e. https://source.unsplash.com/random"
+                label={t('imagesPlugin.imageUrl')}
+                placeholder={t('imagesPlugin.imageUrlPlaceholder')}
                 onChange={setSrc}
                 value={src}
                 data-test-id="image-modal-url-input"
             />
             <TextInput
-                label="Alt Text"
-                placeholder="Random unsplash image"
+                label={t('imagesPlugin.altText')}
+                placeholder={t('imagesPlugin.altTextPlaceholder')}
                 onChange={setAltText}
                 value={altText}
                 data-test-id="image-modal-alt-text-input"
@@ -72,7 +74,7 @@ export function InsertImageUriDialogBody({ onClick }) {
                     disabled={isDisabled}
                     onClick={() => onClick({ altText, src })}
                 >
-                    Confirm
+                    {t('imagesPlugin.confirm')}
                 </Button>
             </DialogActions>
         </>
@@ -80,6 +82,7 @@ export function InsertImageUriDialogBody({ onClick }) {
 }
 
 export function InsertImageUploadedDialogBody({ onClick }) {
+    const { t } = useTranslation('components');
     const [src, setSrc] = useState('');
     const [altText, setAltText] = useState('');
 
@@ -101,14 +104,14 @@ export function InsertImageUploadedDialogBody({ onClick }) {
     return (
         <>
             <FileInput
-                label="Image Upload"
+                label={t('imagesPlugin.imageUpload')}
                 onChange={loadImage}
                 accept="image/*"
                 data-test-id="image-modal-file-upload"
             />
             <TextInput
-                label="Alt Text"
-                placeholder="Descriptive alternative text"
+                label={t('imagesPlugin.altText')}
+                placeholder={t('imagesPlugin.altTextDescriptive')}
                 onChange={setAltText}
                 value={altText}
                 data-test-id="image-modal-alt-text-input"
@@ -119,7 +122,7 @@ export function InsertImageUploadedDialogBody({ onClick }) {
                     disabled={isDisabled}
                     onClick={() => onClick({ altText, src })}
                 >
-                    Confirm
+                    {t('imagesPlugin.confirm')}
                 </Button>
             </DialogActions>
         </>
@@ -127,6 +130,7 @@ export function InsertImageUploadedDialogBody({ onClick }) {
 }
 
 export function InsertImageDialog({ activeEditor, onClose }) {
+    const { t } = useTranslation('components');
     const [mode, setMode] = useState(null);
     const hasModifier = useRef(false);
 
@@ -167,19 +171,19 @@ export function InsertImageDialog({ activeEditor, onClose }) {
                             )
                         }
                     >
-                        Sample
+                        {t('imagesPlugin.sample')}
                     </Button>
                     <Button
                         data-test-id="image-modal-option-url"
                         onClick={() => setMode('url')}
                     >
-                        URL
+                        {t('imagesPlugin.url')}
                     </Button>
                     <Button
                         data-test-id="image-modal-option-file"
                         onClick={() => setMode('file')}
                     >
-                        File
+                        {t('imagesPlugin.file')}
                     </Button>
                 </DialogButtonsList>
             )}
