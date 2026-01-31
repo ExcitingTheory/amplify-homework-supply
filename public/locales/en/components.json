@@ -50,7 +50,15 @@
     "analysisCancelled": "Analysis cancelled",
     "contentPreview": {
       "insertButton": "Insert",
-      "successMessage": "Content inserted successfully"
+      "inserted": "Inserted",
+      "insertIntoEditor": "Insert into Editor",
+      "successMessage": "Content inserted into editor!",
+      "copyToClipboard": "Copy to clipboard",
+      "copied": "Copied!",
+      "regenerateContent": "Regenerate content",
+      "preview": "Preview",
+      "raw": "Raw",
+      "topic": "Topic"
     },
     "searchResults": {
       "noResults": "No results found",
@@ -149,9 +157,13 @@
     }
   },
   "enhancedGenerators": {
-    "generate": "Generate",
-    "cancel": "Cancel",
-    "modalTitle": "Generate Content"
+    "generateImage": "Generate Image",
+    "generateAudio": "Generate Audio",
+    "imagePromptPlaceholder": "Describe the image you want to generate...",
+    "audioPromptPlaceholder": "Enter text to convert to speech...",
+    "editWithMask": "Edit with Mask (Regenerate Part)",
+    "openRecordingStudio": "Open in Recording Studio",
+    "backToGenerator": "Back to Generator"
   },
   "fileManager": {
     "metadata": "Metadata",
@@ -166,15 +178,16 @@
     "ready": "Ready"
   },
   "freeSoloCreateOptionDialog": {
-    "dialogTitle": "Create New Option",
-    "label": "Option Name",
+    "dialogTitle": "Add a new word",
+    "description": "Add a new word to the dictionary.",
+    "label": "Free solo dialog",
     "cancel": "Cancel",
-    "create": "Create"
+    "create": "Add"
   },
-  "imageMaskEditor": {
-    "instructions": "Use brush to mask areas",
-    "brushSize": "Brush Size",
-    "zoomInfo": "Zoom: {{level}}%",
+  "imageMaskEditor": <strong>Instructions:</strong> Paint over the areas you want to regenerate. Use the eraser to remove parts of the mask. Hold Shift and drag to pan. Use zoom buttons to get closer detail.",
+    "brushSize": "Brush Size: {{size}}",
+    "zoomInfo": "Zoom: {{level}}% | Hold Shift to pan",
+    "applyMask": "Apply Mask & Regenerat"Zoom: {{level}}%",
     "save": "Save",
     "cancel": "Cancel"
   },

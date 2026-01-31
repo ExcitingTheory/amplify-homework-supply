@@ -1,5 +1,6 @@
 // react component that renders the chat session with the user and the bot
 import React, { useState, useEffect, useRef, useMemo, useCallback, useReducer } from "react";
+import { useTranslation } from 'react-i18next';
 import {
     Alert,
     TextField,
@@ -60,6 +61,8 @@ import ToolCallPreview from './ChatSidebar/ToolCallPreview';
 import ContentPreview from './ChatSidebar/ContentPreview';
 
 const ChatSidebar = () => {
+    const { t } = useTranslation('components');
+
     // Utility function to deep clone messages to prevent frozen object errors
     // The AI SDK mutates message objects during streaming, so they must be mutable
     const deepCloneMessages = useCallback((messages) => {
@@ -493,7 +496,7 @@ const ChatSidebar = () => {
         console.error('[ChatSidebar] useChat returned null/undefined!');
         return (
             <Box sx={{ p: 2 }}>
-                <Alert severity="error">Chat initialization failed. Please refresh the page.</Alert>
+                <Alert severity="error">{t('chatSidebar.chatInitFailure')}</Alert>
             </Box>
         );
     }
@@ -656,7 +659,7 @@ const ChatSidebar = () => {
                     updated[index] = {
                         ...status,
                         status: 'cancelled',
-                        message: 'Analysis cancelled',
+                        message: t('chatSidebar.analysisCancelled'),
                     };
                     hasChanges = true;
                 } else if (docStatus === 'failed') {
@@ -722,7 +725,7 @@ const ChatSidebar = () => {
                 type: ACTIONS.UPDATE_DOCUMENT_PROCESSING_STATUS, payload: {
                     [index]: {
                         ...documentProcessingStatus[index],
-                        message: 'Cancelling...'
+                        message: t('chatSidebar.cancellingMessage')
                     }
                 }
             });
@@ -734,7 +737,7 @@ const ChatSidebar = () => {
                     [index]: {
                         ...documentProcessingStatus[index],
                         status: 'cancelled',
-                        message: 'Analysis cancelled'
+                        message: t('chatSidebar.analysisCancelled')
                     }
                 }
             });
@@ -933,8 +936,8 @@ const ChatSidebar = () => {
                     >
                         <Box sx={{ textAlign: 'center', color: 'white' }}>
                             <UploadFile sx={{ fontSize: 64, mb: 2 }} />
-                            <Typography variant="h6">Drop files here</Typography>
-                            <Typography variant="body2">Attach files to your message</Typography>
+                            <Typography variant="h6">{t('chatSidebar.dropFilesHere')}</Typography>
+                            <Typography variant="body2">{t('chatSidebar.attachFilesMessage')}</Typography>
                         </Box>
                     </Box>
                 )}
@@ -955,14 +958,14 @@ const ChatSidebar = () => {
                             <>
                                 <HistoryIcon color="primary" />
                                 <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
-                                    History
+                                    {t('chatSidebar.history')}
                                 </Typography>
                             </>
                         ) : (
                             <>
                                 <ChatIcon color="primary" />
                                 <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
-                                    AI Assistant
+                                    {t('chatSidebar.aiAssistant')}
                                 </Typography>
                             </>
                         )}
@@ -972,7 +975,7 @@ const ChatSidebar = () => {
                             <IconButton
                                 size="small"
                                 onClick={() => dispatch({ type: ACTIONS.SET_HISTORY_DRAWER_OPEN, payload: false })}
-                                title="Back to chat"
+                                title={t('chatSidebar.backToChat')}
                                 sx={{ color: 'primary.main' }}
                             >
                                 <ChatIcon fontSize="small" />
@@ -1024,7 +1027,7 @@ const ChatSidebar = () => {
                                             console.error('[ChatSidebar] Error creating new chat:', error);
                                         }
                                     }}
-                                    title="New chat"
+                                    title={t('chatSidebar.newChat')}
                                     sx={{ color: 'success.main' }}
                                 >
                                     <AddIcon fontSize="small" />
@@ -1052,7 +1055,7 @@ const ChatSidebar = () => {
                                             }
                                         }
                                     }}
-                                    title="Archive chat"
+                                    title={t('chatSidebar.archiveChat')}
                                     sx={{ color: 'warning.main' }}
                                 >
                                     <ArchiveIcon fontSize="small" />
@@ -1096,7 +1099,7 @@ const ChatSidebar = () => {
                                 >
                                     <HistoryIcon sx={{ fontSize: 48, mb: 2, opacity: 0.3 }} />
                                     <Typography variant="body2">
-                                        No history available
+                                        {t('chatSidebar.noHistoryAvailable')}
                                     </Typography>
                                 </Box>
                             ) : (
@@ -1105,7 +1108,7 @@ const ChatSidebar = () => {
                                     {chatHistories.filter(h => !h.archived).length > 0 && (
                                         <>
                                             <Typography variant="subtitle2" sx={{ px: 2, py: 1, color: 'text.secondary', fontWeight: 600 }}>
-                                                Active Chats
+                                                {t('chatSidebar.activeChats')}
                                             </Typography>
                                             <List sx={{ p: 0 }}>
                                                 {chatHistories.filter(h => !h.archived).map((history, index) => {
@@ -1123,7 +1126,7 @@ const ChatSidebar = () => {
                                                     const messageCount = historyMessages.length;
                                                     const firstUserMessage = historyMessages.find(m => m.role === 'user');
                                                     console.log('First user message for history', history.id, ':', firstUserMessage, historyMessages);
-                                                    const preview = firstUserMessage?.part || historyDraft || 'Empty chat';
+                                                    const preview = firstUserMessage?.part || historyDraft || t('chatSidebar.emptyChat');
                                                     const displayPreview = typeof preview === 'string' ? preview : JSON.stringify(preview);
                                                     const createdAt = history.createdAt ? new Date(history.createdAt).toLocaleDateString() : 'Unknown';
 
@@ -1196,7 +1199,7 @@ const ChatSidebar = () => {
                                     {chatHistories.filter(h => h.archived).length > 0 && (
                                         <>
                                             <Typography variant="subtitle2" sx={{ px: 2, py: 1, mt: 2, color: 'text.secondary', fontWeight: 600 }}>
-                                                Archived Chats
+                                                {t('chatSidebar.archivedChats')}
                                             </Typography>
                                             <List sx={{ p: 0 }}>
                                                 {chatHistories.filter(h => h.archived).map((history, index) => {
@@ -1801,7 +1804,7 @@ const ChatSidebar = () => {
                                                 size="small"
                                                 onClick={() => cancelProcessing(index)}
                                                 sx={{ p: 0.5 }}
-                                                title="Cancel analysis"
+                                                title={t('chatSidebar.cancelAnalysis')}
                                             >
                                                 <CancelIcon sx={{ fontSize: 16, color: 'warning.main' }} />
                                             </IconButton>
@@ -1813,7 +1816,7 @@ const ChatSidebar = () => {
                                                 size="small"
                                                 onClick={() => openVocabularyReview(status.documentId)}
                                                 sx={{ p: 0.5 }}
-                                                title="Review vocabulary"
+                                                title={t('chatSidebar.reviewVocabulary')}
                                                 color="primary"
                                             >
                                                 <RateReviewIcon sx={{ fontSize: 16 }} />
@@ -1825,7 +1828,7 @@ const ChatSidebar = () => {
                                             size="small"
                                             onClick={() => removeFile(index)}
                                             sx={{ p: 0.5 }}
-                                            title="Remove file"
+                                            title={t('chatSidebar.removeFile')}
                                         >
                                             <DeleteIcon sx={{ fontSize: 16 }} />
                                         </IconButton>
@@ -1893,8 +1896,8 @@ const ChatSidebar = () => {
                             }}
                             placeholder={
                                 !assistantChat?._version
-                                    ? "Setting up chat..."
-                                    : "Ask me anything..."
+                                    ? t('chatSidebar.settingUpChat')
+                                    : t('chatSidebar.askMeAnything')
                             }
                             disabled={isLoading || !assistantChat?._version}
                             multiline
@@ -1934,7 +1937,7 @@ const ChatSidebar = () => {
                 fullWidth
             >
                 <DialogTitle>
-                    Review & Import Vocabulary
+                    {t('chatSidebar.reviewImportVocabulary')}
                     <IconButton
                         onClick={() => dispatch({ type: ACTIONS.SET_VOCABULARY_REVIEW_DIALOG, payload: false })}
                         sx={{ position: 'absolute', right: 8, top: 8 }}
@@ -1986,7 +1989,7 @@ const ChatSidebar = () => {
                                     }}
                                     variant="outlined"
                                 >
-                                    Confirm
+                                    {t('chatSidebar.confirm')}
                                 </Button>
                                 <Button
                                     color="inherit"
@@ -2001,7 +2004,7 @@ const ChatSidebar = () => {
                                     }}
                                     variant="contained"
                                 >
-                                    Cancel
+                                    {t('chatSidebar.cancel')}
                                 </Button>
                             </Box>
                         }

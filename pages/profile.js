@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 // import Paper from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import AppBar from '@mui/material/AppBar';
@@ -39,6 +40,7 @@ function Profile() {
    * So they can delete their account.
    */
 
+  const { t } = useTranslation('pages');
   const [user, setUser] = React.useState({})
   const [oldPassword, setOldPassword] = React.useState('')
   const [newPassword, setNewPassword] = React.useState('')
@@ -206,7 +208,7 @@ function Profile() {
         <MainToolbar>
           <Box sx={{ flexGrow: 1, margin: '1rem' }}>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              My Profile
+              {t('profile.title')}
             </Typography>
           </Box>
         </MainToolbar>
@@ -226,8 +228,8 @@ function Profile() {
           height: 'fit-content',
           maxWidth: '60rem',
         }}>
-          <h1>My Profile</h1>
-          <p>Here is your profile information.</p>
+          <h1>{t('profile.heading')}</h1>
+          <p>{t('profile.description')}</p>
 
           <form onSubmit={updateUser}>
 
@@ -267,7 +269,7 @@ function Profile() {
                 autoComplete="email"
               />
 
-              <label>User Id</label>
+              <label>{t('profile.userId')}</label>
 
               <TextField
                 // label="User Id"
@@ -277,7 +279,7 @@ function Profile() {
                 sx={{ mb: 2 }}
               />
 
-              <label>Identity Id</label>
+              <label>{t('profile.identityId')}</label>
 
               <TextField
                 // label="User Id"
@@ -302,7 +304,7 @@ function Profile() {
                     setName(user?.name || '')
                     setEmail(user?.email || '')
                   }}
-                >Cancel</Button>
+                >{t('profile.cancel')}</Button>
 
                 <Button
                   variant="contained"
@@ -312,7 +314,7 @@ function Profile() {
                   {isWorking &&
                     <CircularProgress />
                   }
-                  &nbsp;Update Profile</Button>
+                  &nbsp;{t('profile.updateProfile')}</Button>
               </div>
 
             </FormControl>
@@ -339,10 +341,10 @@ function Profile() {
               }}
             >
               <Typography id="modal-modal-title" variant="h6" component="h2">
-                Confirm your email
+                {t('profile.confirmEmail.title')}
               </Typography>
               <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                We have sent you a confirmation code to your email address. Please enter it below.
+                {t('profile.confirmEmail.message')}
               </Typography>
 
               <br />
@@ -385,7 +387,7 @@ function Profile() {
                       {isWorking &&
                         <CircularProgress />
                       }
-                      &nbsp;Confirm Email</Button>
+                      &nbsp;{t('profile.confirmEmail.button')}</Button>
                   </div>
 
                 </FormControl>
@@ -401,8 +403,8 @@ function Profile() {
           height: 'fit-content',
           maxWidth: '60rem',
         }}>
-          <h1>Change Password</h1>
-          <p>Here you can change your password.</p>
+          <h1>{t('profile.changePassword.heading')}</h1>
+          <p>{t('profile.changePassword.description')}</p>
           <form onSubmit={changePassword}>
             {/**
            * Password change form
@@ -465,7 +467,7 @@ function Profile() {
                 {isWorking &&
                   <CircularProgress />
                 }
-                &nbsp;Change Password</Button>
+                &nbsp;{t('profile.changePassword.button')}</Button>
 
             </FormControl>
           </form>
@@ -478,8 +480,8 @@ function Profile() {
           height: 'fit-content',
           maxWidth: '60rem',
         }}>
-          <h1>Advanced</h1>
-          <p>Clear local data cache. This will remove all locally stored data and force a fresh sync from the server.</p>
+          <h1>{t('profile.advanced.heading')}</h1>
+          <p>{t('profile.advanced.description')}</p>
           
           <Button
             variant="outlined"
@@ -488,7 +490,7 @@ function Profile() {
             onClick={() => setClearDataStoreDialogOpen(true)}
             sx={{ mt: 2 }}
           >
-            Clear Local Cache
+            {t('profile.advanced.clearCache')}
           </Button>
         </Card>
 
@@ -499,13 +501,11 @@ function Profile() {
           aria-describedby="clear-datastore-dialog-description"
         >
           <DialogTitle id="clear-datastore-dialog-title">
-            Clear Local Data Cache?
+            {t('profile.advanced.clearCacheDialog.title')}
           </DialogTitle>
           <DialogContent>
             <DialogContentText id="clear-datastore-dialog-description">
-              This will remove all locally cached data from your device. Your data will be re-synced from the server when you refresh the page.
-              <br /><br />
-              <strong>Warning:</strong> Any unsaved changes will be lost. Make sure all your work is saved before proceeding.
+              {t('profile.advanced.clearCacheDialog.message')}
             </DialogContentText>
           </DialogContent>
           <DialogActions>
@@ -513,7 +513,7 @@ function Profile() {
               onClick={() => setClearDataStoreDialogOpen(false)}
               color="primary"
             >
-              Cancel
+              {t('profile.advanced.clearCacheDialog.cancel')}
             </Button>
             <Button 
               onClick={handleClearDataStore}
@@ -521,7 +521,7 @@ function Profile() {
               variant="contained"
               autoFocus
             >
-              Clear Cache
+              {t('profile.advanced.clearCacheDialog.confirm')}
             </Button>
           </DialogActions>
         </Dialog>

@@ -9,10 +9,12 @@ import TextareaAutosize from '@mui/material/TextareaAutosize';
 import Button from '@mui/material/Button';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import DictionaryContext from '../../../context/dictionaryContext';
+import { useTranslation } from 'react-i18next';
 
 const filter = createFilterOptions();
 
 export default function FreeSoloCreateOptionDialog() {
+    const { t } = useTranslation('components');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
 
@@ -106,11 +108,11 @@ export default function FreeSoloCreateOptionDialog() {
                 }}
                 // sx={{ width: 300 }}
                 freeSolo
-                renderInput={(params) => <TextField {...params} label="Free solo dialog" />}
+                renderInput={(params) => <TextField {...params} label={t('freeSoloCreateOptionDialog.label')} />}
             />
             <Dialog open={open} onClose={handleClose}>
                 <form onSubmit={handleSubmit}>
-                    <DialogTitle>Add a new word</DialogTitle>
+                    <DialogTitle>{t('freeSoloCreateOptionDialog.dialogTitle')}</DialogTitle>
                     <DialogContent
                         sx={{
                             display: 'flex',
@@ -119,7 +121,7 @@ export default function FreeSoloCreateOptionDialog() {
                         }}
                     >
                         <DialogContentText>
-                            Add a new word to the dictionary.
+                            {t('freeSoloCreateOptionDialog.description')}
                         </DialogContentText>
                         <TextField
                             autoFocus
@@ -176,14 +178,14 @@ export default function FreeSoloCreateOptionDialog() {
                             // color='error'
                             onClick={handleClose}
                         >
-                            Cancel
+                            {t('freeSoloCreateOptionDialog.cancel')}
                         </Button>
                         <Button
                             type="submit"
                             variant='contained'
                             color='primary'
                         >
-                            Add
+                            {t('freeSoloCreateOptionDialog.create')}
                         </Button>
                     </DialogActions>
                 </form>

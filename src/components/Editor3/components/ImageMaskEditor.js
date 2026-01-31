@@ -16,6 +16,7 @@ import RedoIcon from '@mui/icons-material/Redo';
 import ClearIcon from '@mui/icons-material/Clear';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Image Mask Editor component for selecting areas of an image to regenerate
@@ -29,6 +30,7 @@ export default function ImageMaskEditor({
     width = 800,
     height = 600,
 }) {
+    const { t } = useTranslation('components');
     const canvasRef = useRef(null);
     const maskCanvasRef = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
@@ -235,7 +237,7 @@ export default function ImageMaskEditor({
                 
                 <Box sx={{ width: 200 }}>
                     <Typography variant="caption" gutterBottom>
-                        Brush Size: {brushSize}
+                        {t('imageMaskEditor.brushSize', { size: brushSize })}
                     </Typography>
                     <Slider
                         value={brushSize}
@@ -289,7 +291,7 @@ export default function ImageMaskEditor({
                 </Tooltip>
                 
                 <Typography variant="caption" sx={{ ml: 'auto' }}>
-                    Zoom: {(zoom * 100).toFixed(0)}% | Hold Shift to pan
+                    {t('imageMaskEditor.zoomInfo', { level: (zoom * 100).toFixed(0) })}
                 </Typography>
             </Toolbar>
             
@@ -346,19 +348,17 @@ export default function ImageMaskEditor({
             {/* Action buttons */}
             <Box sx={{ p: 2, display: 'flex', gap: 2, justifyContent: 'flex-end', bgcolor: 'background.paper' }}>
                 <Button onClick={onCancel} variant="outlined">
-                    Cancel
+                    {t('imageMaskEditor.cancel')}
                 </Button>
                 <Button onClick={handleComplete} variant="contained">
-                    Apply Mask & Regenerate
+                    {t('imageMaskEditor.applyMask')}
                 </Button>
             </Box>
             
             {/* Instructions */}
             <Box sx={{ p: 2, bgcolor: 'info.light' }}>
                 <Typography variant="caption">
-                    <strong>Instructions:</strong> Paint over the areas you want to regenerate. 
-                    Use the eraser to remove parts of the mask. Hold Shift and drag to pan. 
-                    Use zoom buttons to get closer detail.
+                    {t('imageMaskEditor.instructions')}
                 </Typography>
             </Box>
         </Box>

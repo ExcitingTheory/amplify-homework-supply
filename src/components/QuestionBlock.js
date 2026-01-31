@@ -19,6 +19,7 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import ClearIcon from '@mui/icons-material/Clear';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import { withTranslation } from 'react-i18next';
 
 import Stack from '@mui/material/Stack';
 import GutterContext from '../context/gutterContext';
@@ -39,7 +40,8 @@ function DraggableAnswer({
   index,
   onQuestionChange,
   onCorrectChange,
-  onQuestionDelete
+  onQuestionDelete,
+  t
 }) {
 
   return (
@@ -60,7 +62,7 @@ function DraggableAnswer({
         >
           <DragIndicatorIcon />
           <TextField
-            label={`Answer ${index + 1}`}
+            label={t('components:questionBlock.answerLabel', { number: index + 1 })}
             value={data.answer}
             onChange={(event) => { onQuestionChange(event, index) }}
             fullWidth
@@ -73,7 +75,7 @@ function DraggableAnswer({
           <FormControlLabel
             value={data.correct}
             control={<Switch color="primary" checked={data.correct} />}
-            label={data.correct ? "Correct" : "Incorrect"}
+            label={data.correct ? t('components:questionBlock.correct') : t('components:questionBlock.incorrect')}
             onChange={(event) => { onCorrectChange(event, index) }}
             labelPlacement="bottom"
           />
@@ -96,7 +98,8 @@ function SortableAnswers({
   onQuestionChange,
   onCorrectChange,
   onQuestionDelete,
-  onQuestionReorder
+  onQuestionReorder,
+  t
 }) {
 
   function onDragEnd(result) {
@@ -127,6 +130,7 @@ function SortableAnswers({
         onQuestionChange={onQuestionChange}
         onCorrectChange={onCorrectChange}
         onQuestionDelete={onQuestionDelete}
+        t={t}
       />
     ))
   }
@@ -146,9 +150,10 @@ function SortableAnswers({
 }
 
 
-export default class QuestionBlock extends React.Component {
+class QuestionBlock extends React.Component {
   constructor(props) {
     super(props);
+    const { t } = this.props;
     this.state = {
       editMode: false,
       isLocked: false,
@@ -415,6 +420,7 @@ export default class QuestionBlock extends React.Component {
 
   render() {
     const { gutterRefs } = this.context;
+    const { t } = this.props;
     const blockKey = this.props.block.getKey()
 
     console.log('blockKey', blockKey)
@@ -480,18 +486,18 @@ export default class QuestionBlock extends React.Component {
                   // variant='contained'
                   onClick={this._onClick}
                 >
-                  Edit
+                  {t('components:questionBlock.edit')}
                 </Button>
 
               <Button
                 size='small'
                 onClick={this._reset}
               >
-                Reset
+                {t('components:questionBlock.reset')}
               </Button>
 
               <Box>
-                Grade: {this.state.grade}
+                {t('components:questionBlock.gradeDisplay', { score: this.state.grade })}
               </Box>
               </Toolbar>
             </Card>
@@ -517,7 +523,7 @@ export default class QuestionBlock extends React.Component {
                   // variant='outlined'
                   disabled={this.state.invalidQuestion}
                   onClick={this._save}>
-                  {this.state.invalidQuestion ? 'Invalid' : 'Done'}
+                  {this.state.invalidQuestion ? t('components:questionBlock.invalid') : t('components:questionBlock.done')}
                 </Button>
                 <Box sx={{ flexGrow: 1 }}>
               </Box>
@@ -525,7 +531,7 @@ export default class QuestionBlock extends React.Component {
                   size='small'
                   onClick={this._remove}
                 >
-                  Remove
+                  {t('components:questionBlock.remove')}
                 </Button>
               </Toolbar>
             </Card>
@@ -536,6 +542,7 @@ export default class QuestionBlock extends React.Component {
               onCorrectChange={this._onCorrectChange}
               onQuestionDelete={this._onQuestionDelete}
               onQuestionReorder={this._onQuestionReorder}
+              t={t}
             />
 
             <Stack
@@ -550,7 +557,7 @@ export default class QuestionBlock extends React.Component {
               <DragIndicatorIcon />
               <TextField
                 // disabled
-                placeholder="Add Answer"
+                placeholder={t('components:questionBlock.addAnswerPlaceholder')}
                 onClick={this._onAddQuestion}
                 fullWidth
               />
@@ -561,3 +568,5 @@ export default class QuestionBlock extends React.Component {
     );
   }
 }
+
+export default withTranslation('components')(QuestionBlock);

@@ -12,6 +12,7 @@ import IconButton from '@mui/material/IconButton';
 import ClearIcon from '@mui/icons-material/Clear';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import Stack from '@mui/material/Stack';
+import { useTranslation } from 'react-i18next';
 // import { GutterContext } from '../context/gutterContext';
 import SortableAnswers from '../../SortableAnswers';
 import UnitContext from '../../../context/unitContext';
@@ -37,6 +38,7 @@ const QuizEditor = ({
     nodeKey,
     data,
 }) => {
+    const { t } = useTranslation('components');
     const [editMode, setEditMode] = useState(false);
     const [isLocked, setIsLocked] = useState(false);
     const [grade, setGrade] = useState(0.0);
@@ -378,17 +380,17 @@ const QuizEditor = ({
                                 size='small'
                                 onClick={onClick}
                             >
-                                Edit
+                                {t('quizEditor.edit')}
                             </Button>
                             <Box sx={{ flexGrow: 1 }}></Box>
                             <Button
                                 size='small'
                                 onClick={reset}
                             >
-                                Reset
+                                {t('quizEditor.reset')}
                             </Button>
                             <Box>
-                                Grade: {grade}
+                                {t('quizEditor.gradeDisplay', { score: grade })}
                             </Box>
                         </Toolbar>
                     </Card>
@@ -406,7 +408,7 @@ const QuizEditor = ({
                                 disabled={invalidQuestion}
                                 onClick={save}
                             >
-                                {invalidQuestion ? 'Invalid' : 'Done'}
+                                {invalidQuestion ? t('quizEditor.invalid') : t('quizEditor.done')}
                             </Button>
                             <Box sx={{ flexGrow: 1 }}></Box>
                             {/* <Button
@@ -435,7 +437,7 @@ const QuizEditor = ({
                     >
                         <DragIndicatorIcon />
                         <TextField
-                            placeholder="Add Answer"
+                            placeholder={t('quizEditor.addAnswer')}
                             onClick={onAddQuestion}
                             fullWidth
                         />

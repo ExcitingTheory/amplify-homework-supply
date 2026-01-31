@@ -11,6 +11,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Paper,
@@ -78,6 +79,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
   compact = false,
   showInsertButton = true,
 }) => {
+  const { t } = useTranslation('components');
   const [viewMode, setViewMode] = useState<'preview' | 'raw'>('preview');
   const [copied, setCopied] = useState(false);
   const [inserted, setInserted] = useState(false);
@@ -184,7 +186,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
         </Box>
 
         <Stack direction="row" spacing={0.5}>
-          <Tooltip title={copied ? 'Copied!' : 'Copy to clipboard'}>
+          <Tooltip title={copied ? t('chatSidebar.contentPreview.copied') : t('chatSidebar.contentPreview.copyToClipboard')}>
             <IconButton
               size="small"
               onClick={handleCopy}
@@ -195,7 +197,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
           </Tooltip>
 
           {onRegenerate && (
-            <Tooltip title="Regenerate content">
+            <Tooltip title={t('chatSidebar.contentPreview.regenerateContent')}>
               <IconButton size="small" onClick={onRegenerate}>
                 <RefreshIcon fontSize="small" />
               </IconButton>
@@ -208,7 +210,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
       {topic && (
         <Box sx={{ px: 2, py: 1, bgcolor: 'grey.50', borderBottom: 1, borderColor: 'divider' }}>
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-            Topic: {topic}
+            {t('chatSidebar.contentPreview.topic')}: {topic}
           </Typography>
         </Box>
       )}
@@ -220,14 +222,14 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
         sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'grey.50' }}
       >
         <Tab
-          label="Preview"
+          label={t('chatSidebar.contentPreview.preview')}
           value="preview"
           icon={<VisibilityIcon fontSize="small" />}
           iconPosition="start"
           sx={{ minHeight: 40 }}
         />
         <Tab
-          label="Raw"
+          label={t('chatSidebar.contentPreview.raw')}
           value="raw"
           icon={<CodeIcon fontSize="small" />}
           iconPosition="start"
@@ -348,7 +350,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
         >
           {inserted && (
             <Alert severity="success" sx={{ flex: 1, py: 0 }}>
-              Content inserted into editor!
+              {t('chatSidebar.contentPreview.successMessage')}
             </Alert>
           )}
           
@@ -359,7 +361,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
             disabled={inserted}
             color={inserted ? 'success' : 'primary'}
           >
-            {inserted ? 'Inserted' : 'Insert into Editor'}
+            {inserted ? t('chatSidebar.contentPreview.inserted') : t('chatSidebar.contentPreview.insertIntoEditor')}
           </Button>
         </Box>
       )}

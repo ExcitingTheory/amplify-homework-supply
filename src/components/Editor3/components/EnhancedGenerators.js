@@ -7,6 +7,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
 import UnifiedGenerateModal from './UnifiedGenerateModal';
 import ImageMaskEditor from './ImageMaskEditor';
 import RecordingStudioEnhanced from '../../RecordingStudioEnhanced';
+import { useTranslation } from 'react-i18next';
 
 const client = generateClient();
 
@@ -14,6 +15,7 @@ const client = generateClient();
  * Enhanced Image Generation with mask support for targeted regeneration
  */
 export function EnhancedImageGenerator({ open, onClose }) {
+    const { t } = useTranslation('components');
     const [showMaskEditor, setShowMaskEditor] = useState(false);
     const [currentImage, setCurrentImage] = useState(null);
 
@@ -171,8 +173,8 @@ export function EnhancedImageGenerator({ open, onClose }) {
             onClose={onClose}
             onGenerate={handleGenerate}
             onRegenerate={handleRegenerate}
-            title="Generate Image"
-            inputPlaceholder="Describe the image you want to generate..."
+            title={t('enhancedGenerators.generateImage')}
+            inputPlaceholder={t('enhancedGenerators.imagePromptPlaceholder')}
             type="image"
         />
     );
@@ -182,6 +184,7 @@ export function EnhancedImageGenerator({ open, onClose }) {
  * Enhanced Audio Generation with RecordingStudio integration
  */
 export function EnhancedAudioGenerator({ open, onClose, gradeId, nodeKey }) {
+    const { t } = useTranslation('components');
     const [showRecordingStudio, setShowRecordingStudio] = useState(false);
 
     const handleGenerate = async (prompt) => {
@@ -230,7 +233,7 @@ export function EnhancedAudioGenerator({ open, onClose, gradeId, nodeKey }) {
                         sx={{ mt: 2 }}
                         onClick={() => setShowRecordingStudio(true)}
                     >
-                        Open in Recording Studio
+                        {t('enhancedGenerators.openRecordingStudio')}
                     </Button>
                 </Box>
             ),
@@ -249,7 +252,7 @@ export function EnhancedAudioGenerator({ open, onClose, gradeId, nodeKey }) {
                     onClick={() => setShowRecordingStudio(false)}
                     sx={{ mb: 2 }}
                 >
-                    Back to Generator
+                    {t('enhancedGenerators.backToGenerator')}
                 </Button>
                 <RecordingStudioEnhanced
                     gradeId={gradeId}
@@ -265,8 +268,8 @@ export function EnhancedAudioGenerator({ open, onClose, gradeId, nodeKey }) {
             onClose={onClose}
             onGenerate={handleGenerate}
             onRegenerate={handleRegenerate}
-            title="Generate Audio"
-            inputPlaceholder="Enter text to convert to speech..."
+            title={t('enhancedGenerators.generateAudio')}
+            inputPlaceholder={t('enhancedGenerators.audioPromptPlaceholder')}
             type="audio"
         />
     );
@@ -276,6 +279,7 @@ export function EnhancedAudioGenerator({ open, onClose, gradeId, nodeKey }) {
  * Button component for image generation that can be embedded in FileManager
  */
 export function ImageGeneratorButton({ open, onSuccess }) {
+    const { t } = useTranslation('components');
     const [modalOpen, setModalOpen] = useState(false);
 
     // Auto-open when parent says open=true

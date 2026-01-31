@@ -126,9 +126,12 @@
     "createNewSection": "Create New Section",
     "untitledSection": "Untitled Section",
     "viewSection": "View Section",
+    "loading": "Loading...",
     "newSection": {
       "title": "New Section",
-      "description": "Create a new class section to assign learning materials to students",
+      "description": "Create a new Section by entering the following information",
+      "nameLabel": "Name",
+      "descriptionLabel": "Description",
       "cancel": "Cancel",
       "create": "Create"
     }

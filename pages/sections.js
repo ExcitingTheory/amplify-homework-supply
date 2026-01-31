@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { getAmplifyClient } from "../src/utils/amplifyClient";
 import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
@@ -100,6 +101,7 @@ function Sections() {
      * Sections can be copied by Instructors and Admins.
      * 
      */
+    const { t } = useTranslation('pages');
     const [sections, setSections] = useState([])
     const [work, setIsWorking] = useState(false)
     const [open, setOpen] = React.useState(false);
@@ -232,11 +234,10 @@ function Sections() {
                     }}
                 >
                     <form onSubmit={handleCreate}>
-
-                        <DialogTitle id="form-dialog-title">New Section</DialogTitle>
+{t('sections.newSection.title')}</DialogTitle>
                         <DialogContent>
                             <DialogContentText>
-                                Create a new Section by entering the following information
+                                {t('sections.newSection.description')}
                             </DialogContentText>
                             <br />
 
@@ -246,7 +247,7 @@ function Sections() {
                                 required
                                 id="name"
                                 name="name"
-                                label="Name"
+                                label={t('sections.newSection.nameLabel')}
                                 variant="outlined"
                             /><br /><br />
                             <TextField
@@ -256,7 +257,7 @@ function Sections() {
                                 rows={4}
                                 id="description"
                                 name="description"
-                                label="Description"
+                                label={t('sections.newSection.descriptionLabel')}
                                 variant="outlined"
                             /><br /><br />
 
@@ -269,9 +270,10 @@ function Sections() {
                             }}
                         >
                             <Button disabled={work} onClick={handleClose} color="primary" variant="outlined">
-                                Cancel
+                                {t('sections.newSection.cancel')}
                             </Button>
                             <Button disabled={work} type="submit" variant="contained">
+                                {t('sections.newSection.create')}sabled={work} type="submit" variant="contained">
                                 Create
                             </Button>
                         </DialogActions>
@@ -305,12 +307,12 @@ function Sections() {
                         <Typography variant="h2" component="div" sx={{
                             flexGrow: 1,
                         }}>
-                            Sections&nbsp;
+                            {t('sections.title')}&nbsp;
                         </Typography>
-                        <Button variant="outlined" color="primary" disabled={work} onClick={handleClickOpen}><AddIcon />&nbsp;Create New</Button>
+                        <Button variant="outlined" color="primary" disabled={work} onClick={handleClickOpen}><AddIcon />&nbsp;{t('sections.createNew')}</Button>
                     </div>
                     {!sections &&
-                        <div>Loading...</div>
+                        <div>{t('sections.loading')}</div>
                     }
 
 {sections.length == 0 &&
@@ -342,7 +344,7 @@ function Sections() {
                   textAlign: 'center',
                 }}>
                   <Typography component="div" variant="h5" sx={{ mb: 3 }}>
-                    No Sections Yet
+                    {t('sections.noSectionsYet')}
                   </Typography>
                   <Button
                     variant="outlined"
@@ -357,7 +359,7 @@ function Sections() {
                       borderRadius: 2,
                     }}
                   >
-                    Create New Section
+                    {t('sections.createNewSection')}
                   </Button>
                 </CardContent>
               </Box>
@@ -396,7 +398,7 @@ function Sections() {
                                     }}>
                                         <CardContent sx={{ flex: '1 0 auto', pb: 1 }}>
                                             <Typography component="div" variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
-                                                {section?.name || 'Untitled Section'}
+                                                {section?.name || t('sections.untitledSection')}
                                             </Typography>
                                             <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                                                 {section?.description || ''}
@@ -424,7 +426,7 @@ function Sections() {
                                                     },
                                                 }}
                                             >
-                                                View Section
+                                                {t('sections.viewSection')}
                                             </Button>
                                         </Box>
                                     </Box>
