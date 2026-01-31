@@ -201,6 +201,22 @@ export const generateClient = () => ({
       };
     }
     
+    // Mock content moderation
+    if (query.includes('ModerateContent')) {
+      console.log('[Mock API] Moderating content:', variables.content?.substring(0, 100));
+      return {
+        data: {
+          moderateContent: {
+            flagged: false,
+            categories: {},
+            categoryScores: {},
+            model: 'mock-moderation-v1',
+            error: null
+          }
+        }
+      };
+    }
+    
     // Mock audio generation
     if (query.includes('generateAudioFile')) {
       console.log('[Mock API] Generating audio file:', variables);
