@@ -62,7 +62,25 @@
     },
     "searchResults": {
       "noResults": "No results found",
-      "helper": "Try different keywords"
+      "helper": "Try different keywords",
+      "tryAdjusting": "Try adjusting your search terms or browse the content library for related materials.",
+      "openFile": "Open file",
+      "openWord": "Open word",
+      "openQuestion": "Open question",
+      "openSection": "Open section",
+      "openUnit": "Open unit",
+      "insertIntoEditor": "Insert into editor",
+      "editWord": "Edit word",
+      "editQuestion": "Edit question",
+      "linkedToUnit": "Linked to unit",
+      "addToUnit": "Add to unit",
+      "sections": {
+        "files": "Files",
+        "vocabulary": "Vocabulary",
+        "questions": "Questions",
+        "sectionsTitle": "Sections",
+        "units": "Units"
+      }
     }
   },
   "dictionaryEditor": {
@@ -547,6 +565,24 @@
       "generatingAudio": "Generating audio file...",
       "errorGeneratingAudio": "Error generating audio file",
       "successfullyGeneratedAudio": "Successfully generated audio file"
+    },
+    "selectedFileDetails": {
+      "emptyState": "Select a file to view details and metadata"
+    },
+    "toolbar": {
+      "selectAllTooltip": "Select All",
+      "searchPlaceholder": "Search files...",
+      "uploadTooltip": "Upload Files",
+      "actionsTooltip": "Actions"
+    },
+    "contextMenu": {
+      "deselectAll": "Deselect All",
+      "deleteConfirmMessage": "Delete {{count}} selected file(s)?",
+      "deleteSelected": "Delete Selected ({{count}})",
+      "reAnalyzeSelected": "Re-analyze Selected ({{count}})"
+    },
+    "mainView": {
+      "noFilesMessage": "No files available. Upload files to get started."
     }
   }
 }

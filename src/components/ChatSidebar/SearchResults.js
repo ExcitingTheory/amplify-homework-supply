@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Box,
     Typography,
@@ -94,6 +95,7 @@ function renderSimpleMarkdown(text) {
  * Component to display truncated text with show more/less and optional markdown
  */
 function TruncatedText({ text, maxLength = 150, variant = 'caption', sx = {}, searchTerm = '', markdown = false }) {
+    const { t } = useTranslation('components');
     const [expanded, setExpanded] = React.useState(false);
     
     if (!text || text.length <= maxLength) {
@@ -121,7 +123,7 @@ function TruncatedText({ text, maxLength = 150, variant = 'caption', sx = {}, se
                 }}
                 sx={{ cursor: 'pointer', fontWeight: 600 }}
             >
-                {expanded ? 'show less' : 'show more'}
+                {expanded ? t('chatSidebar.showLess') : t('chatSidebar.showMore')}
             </Link>
         </Typography>
     );
@@ -161,6 +163,7 @@ function ResultSkeleton() {
  * Enhanced empty state with icon and message
  */
 function EmptyState({ query }) {
+    const { t } = useTranslation('components');
     return (
         <Box
             sx={{
@@ -181,11 +184,11 @@ function EmptyState({ query }) {
                 }} 
             />
             <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 500 }}>
-                No results found
+                {t('chatSidebar.searchResults.noResults')}
             </Typography>
             {query && (
                 <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
-                    Try adjusting your search terms or browse the content library for related materials.
+                    {t('chatSidebar.searchResults.tryAdjusting')}
                 </Typography>
             )}
         </Box>
@@ -217,6 +220,7 @@ export default function SearchResults({
     onFocusItem,
     isLoading = false,
 }) {
+    const { t } = useTranslation('components');
     const [linkingStates, setLinkingStates] = React.useState({});
     const [expandedSections, setExpandedSections] = React.useState({
         files: true,
@@ -441,7 +445,7 @@ export default function SearchResults({
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
                         <RelevanceScore similarity={file.similarity} />
-                        <Tooltip title="Open file">
+                        <Tooltip title={t('chatSidebar.searchResults.openFile')}>
                             <IconButton
                                 size="small"
                                 onClick={() => handleOpenFile(file)}
@@ -537,7 +541,7 @@ export default function SearchResults({
                         <RelevanceScore similarity={word.similarity} />
                         <ButtonGroup size="small" variant="outlined">
                             {onInsertWord && (
-                                <Tooltip title="Insert into editor">
+                                <Tooltip title={t('chatSidebar.searchResults.insertIntoEditor')}>
                                     <IconButton
                                         size="small"
                                         onClick={() => onInsertWord(word)}
@@ -548,7 +552,7 @@ export default function SearchResults({
                                 </Tooltip>
                             )}
                             {unitId && (
-                                <Tooltip title={linkState === 'linked' ? 'Linked to unit' : 'Add to unit'}>
+                                <Tooltip title={linkState === 'linked' ? t('chatSidebar.searchResults.linkedToUnit') : t('chatSidebar.searchResults.addToUnit')}>
                                     <span>
                                         <IconButton
                                             size="small"
@@ -565,7 +569,7 @@ export default function SearchResults({
                                     </span>
                                 </Tooltip>
                             )}
-                            <Tooltip title="Edit word">
+                            <Tooltip title={t('chatSidebar.searchResults.editWord')}>
                                 <IconButton
                                     size="small"
                                     onClick={() => handleOpenWord(word)}
@@ -647,7 +651,7 @@ export default function SearchResults({
                         <RelevanceScore similarity={question.similarity} />
                         <ButtonGroup size="small" variant="outlined">
                             {onInsertQuestion && (
-                                <Tooltip title="Insert into editor">
+                                <Tooltip title={t('chatSidebar.searchResults.insertIntoEditor')}>
                                     <IconButton
                                         size="small"
                                         onClick={() => onInsertQuestion(question)}
@@ -658,7 +662,7 @@ export default function SearchResults({
                                 </Tooltip>
                             )}
                             {unitId && (
-                                <Tooltip title={linkState === 'linked' ? 'Linked to unit' : 'Add to unit'}>
+                                <Tooltip title={linkState === 'linked' ? t('chatSidebar.searchResults.linkedToUnit') : t('chatSidebar.searchResults.addToUnit')}>
                                     <span>
                                         <IconButton
                                             size="small"
@@ -675,7 +679,7 @@ export default function SearchResults({
                                     </span>
                                 </Tooltip>
                             )}
-                            <Tooltip title="Edit question">
+                            <Tooltip title={t('chatSidebar.searchResults.editQuestion')}>
                                 <IconButton
                                     size="small"
                                     onClick={() => handleOpenQuestion(question)}
@@ -765,7 +769,7 @@ export default function SearchResults({
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
                         <RelevanceScore similarity={section.similarity} />
-                        <Tooltip title="Open section">
+                        <Tooltip title={t('chatSidebar.searchResults.openSection')}>
                             <IconButton
                                 size="small"
                                 onClick={() => handleOpenSection(section)}
@@ -853,7 +857,7 @@ export default function SearchResults({
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
                         <RelevanceScore similarity={unit.similarity} />
-                        <Tooltip title="Open unit">
+                        <Tooltip title={t('chatSidebar.searchResults.openUnit')}>
                             <IconButton
                                 size="small"
                                 onClick={() => handleOpenUnit(unit)}
@@ -960,7 +964,7 @@ export default function SearchResults({
             {fileResults.length > 0 && (
                 <Box>
                     <SectionHeader
-                        title="Files"
+                        title={t('chatSidebar.searchResults.sections.files')}
                         count={fileResults.length}
                         color="primary"
                         expanded={expandedSections.files}
@@ -977,7 +981,7 @@ export default function SearchResults({
             {wordResults.length > 0 && (
                 <Box>
                     <SectionHeader
-                        title="Vocabulary"
+                        title={t('chatSidebar.searchResults.sections.vocabulary')}
                         count={wordResults.length}
                         color="secondary"
                         expanded={expandedSections.words}
@@ -994,7 +998,7 @@ export default function SearchResults({
             {questionResults.length > 0 && (
                 <Box>
                     <SectionHeader
-                        title="Questions"
+                        title={t('chatSidebar.searchResults.sections.questions')}
                         count={questionResults.length}
                         color="info"
                         expanded={expandedSections.questions}
@@ -1011,7 +1015,7 @@ export default function SearchResults({
             {sectionResults.length > 0 && (
                 <Box>
                     <SectionHeader
-                        title="Sections"
+                        title={t('chatSidebar.searchResults.sections.sectionsTitle')}
                         count={sectionResults.length}
                         color="secondary"
                         expanded={expandedSections.sections}
@@ -1028,7 +1032,7 @@ export default function SearchResults({
             {unitResults.length > 0 && (
                 <Box>
                     <SectionHeader
-                        title="Units"
+                        title={t('chatSidebar.searchResults.sections.units')}
                         count={unitResults.length}
                         color="primary"
                         expanded={expandedSections.units}
