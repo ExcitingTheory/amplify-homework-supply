@@ -1183,6 +1183,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
 });
 
 function NewImageFileForm({ open, toggleNewImageFileForm }) {
+    const { t } = useTranslation('components');
 
     const [newDescription, setNewDescription] = React.useState('');
     const [presignedUrl, setPresignedUrl] = React.useState('');
@@ -1207,7 +1208,7 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
 
                 setWorking(false);
                 setNewDescription('');
-                setPreviewMessage('Successfully generated image file');
+                setPreviewMessage(t('fileManager2.generators.successfullyGeneratedImage'));
 
             } catch (error) {
                 console.error(error);
@@ -1248,7 +1249,7 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
                             e.preventDefault();
                             e.stopPropagation();
                         }}
-                        placeholder='Text to transform into image file.'
+                        placeholder={t('fileManager2.generators.imagePromptPlaceholder')}
 
                         ref={(input) => {
                             if (input != null) {
@@ -1271,7 +1272,7 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
 
                             setIsOpen(true);
                             setWorking(true);
-                            setPreviewMessage('Generating image file...');
+                            setPreviewMessage(t('fileManager2.generators.generatingImage'));
 
                             const {
                                 identityId,
@@ -1307,7 +1308,7 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
                                 console.error('fileGenerator', fileGenerator);
                                 // send error message to preview modal
 
-                                setPreviewMessage('Error generating image file');
+                                setPreviewMessage(t('fileManager2.generators.errorGeneratingImage'));
                                 setWorking(false);
                             }
 
@@ -1492,6 +1493,7 @@ function NewVideoFileForm({ open, toggleNewVideoFileForm }) {
 }
 
 function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
+    const { t } = useTranslation('components');
     const [newDescription, setNewDescription] = React.useState('');
     const [audioSrc, setAudioSrc] = React.useState('');
     const [presignedUrl, setPresignedUrl] = React.useState('');
@@ -1647,7 +1649,7 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
                             e.preventDefault();
                             e.stopPropagation();
                         }}
-                        placeholder='Text to transform into audio file.'
+                        placeholder={t('fileManager2.generators.audioPromptPlaceholder')}
 
                         ref={(input) => {
                             if (input != null) {
@@ -1921,6 +1923,7 @@ const FileTypeSubheader = React.memo(function FileTypeSubheader({ label, fileTyp
 // =============================================================================
 
 const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentStatus, editor }) {
+    const { t } = useTranslation('components');
     const { setConfirmDialog } = useFileManager();
     const [imageUrl, setImageUrl] = React.useState(null);
     const [audioUrl, setAudioUrl] = React.useState(null);
@@ -2065,7 +2068,7 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentSt
                     ) : (
                         <Box sx={{ textAlign: 'center', color: 'action.disabled', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                             <AudioFileIcon sx={{ fontSize: '64px' }} />
-                            <Typography variant="caption">No waveform available</Typography>
+                            <Typography variant="caption">{t('fileManager2.fileDetails.noWaveformAvailable')}</Typography>
                         </Box>
                     )
                 ) : file.mimeType?.startsWith('video/') ? (
@@ -2079,7 +2082,7 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentSt
                             }}
                         >
                             <source src={videoUrl} type={file.mimeType} />
-                            Your browser does not support the video tag.
+                            {t('fileManager2.fileDetails.videoNotSupported')}
                         </video>
                     ) : (
                         <CircularProgress />
@@ -2110,32 +2113,32 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentSt
                 )}
                 <Box sx={{ ml: 'auto', display: 'flex', gap: 0.5, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                     {editor && file.mimeType?.startsWith('image/') && (
-                        <Tooltip title="Insert into editor">
+                        <Tooltip title={t('fileManager2.fileDetails.insertTooltip')}>
                             <IconButton size="small" onClick={() => handleMenuAction('insert-image')}>
                                 <AddIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
                     )}
                     {editor && (file.mimeType?.startsWith('audio/') || file.mimeType === 'application/octet-stream') && (
-                        <Tooltip title="Insert into editor">
+                        <Tooltip title={t('fileManager2.fileDetails.insertTooltip')}>
                             <IconButton size="small" onClick={() => handleMenuAction('insert-audio')}>
                                 <AddIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
                     )}
-                    <Tooltip title="Download">
+                    <Tooltip title={t('fileManager2.fileDetails.downloadTooltip')}>
                         <IconButton size="small" onClick={() => handleMenuAction('download')}>
                             <DownloadIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
                     {documentStatus && (
-                        <Tooltip title="Re-analyze">
+                        <Tooltip title={t('fileManager2.fileDetails.reAnalyzeTooltip')}>
                             <IconButton size="small" onClick={() => handleMenuAction('re-analyze')}>
                                 <RefreshIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
                     )}
-                    <Tooltip title="Delete">
+                    <Tooltip title={t('fileManager2.fileDetails.deleteTooltip')}>
                         <IconButton size="small" onClick={() => handleMenuAction('delete')} sx={{ color: 'error.main' }}>
                             <DeleteIcon fontSize="small" />
                         </IconButton>

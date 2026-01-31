@@ -528,6 +528,24 @@
       "noObjectivesExtracted": "No objectives extracted",
       "noConceptsExtracted": "No concepts extracted",
       "noContentAvailable": "No extracted content available"
+    },
+    "fileDetails": {
+      "noWaveformAvailable": "No waveform available",
+      "videoNotSupported": "Your browser does not support the video tag.",
+      "insertTooltip": "Insert into editor",
+      "downloadTooltip": "Download",
+      "reAnalyzeTooltip": "Re-analyze",
+      "deleteTooltip": "Delete"
+    },
+    "generators": {
+      "imagePromptPlaceholder": "Text to transform into image file.",
+      "audioPromptPlaceholder": "Text to transform into audio file.",
+      "generatingImage": "Generating image file...",
+      "errorGeneratingImage": "Error generating image file",
+      "successfullyGeneratedImage": "Successfully generated image file",
+      "generatingAudio": "Generating audio file...",
+      "errorGeneratingAudio": "Error generating audio file",
+      "successfullyGeneratedAudio": "Successfully generated audio file"
     }
   }
 }
