@@ -165,8 +165,15 @@
     "emptyState": "No items in playlist"
   },
   "promptMethodSelector": {
-    "menuAttribute": "Method",
-    "selectPrompt": "Select Prompt"
+    "inputButton": "Input",
+    "outputButton": "Output",
+    "menuItems": {
+      "text": "Text",
+      "audio": "Audio",
+      "image": "Image",
+      "drawing": "Drawing",
+      "video": "Video"
+    }
   },
   "quizComponent": {
     "gradeDisplay": "Grade: {{score}}%"
