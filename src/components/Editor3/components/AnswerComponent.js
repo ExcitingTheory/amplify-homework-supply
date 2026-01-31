@@ -5,6 +5,7 @@
 // silently record incorrect answers for review, but allow the user to continue and try to answer the question again.
 
 import React, { lazy, Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     verifyWord,
     verifyDefinition,
@@ -116,6 +117,7 @@ export default function AnswerComponent({
     allowedInput,
     promptMethod,
 }) {
+    const { t } = useTranslation('components');
 
     /**
      * Answer Schema
@@ -253,12 +255,12 @@ export default function AnswerComponent({
                     value="text"
                     aria-label="text entry"
                 >
-                    Text
+                    {t('answerComponent.inputMethods.text')}
                 </ToggleButton>
                 <ToggleButton
                     disabled={!allowedInputMethods.includes('audio')}
                     value="audio" aria-label="audio input">
-                    Audio
+                    {t('answerComponent.inputMethods.audio')}
                 </ToggleButton>
                 {/* <ToggleButton value="listening" aria-label="listening exercise">
         Listening
@@ -266,7 +268,7 @@ export default function AnswerComponent({
                 <ToggleButton
                     disabled={!allowedInputMethods.includes('writing')}
                     value="writing" aria-label="writing and drawing input">
-                    Writing
+                    {t('answerComponent.inputMethods.writing')}
                 </ToggleButton>
             </ToggleButtonGroup>
 
@@ -558,11 +560,11 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                 )}
 
                 {isCorrect === true && <Typography variant="body2" component="div" sx={{ flexGrow: 1 }}>
-                    Correct! "{feedback[wordId]?.reason || ''}"
+                    {t('answerComponent.feedback.correct')} "{feedback[wordId]?.reason || ''}"
                 </Typography>
                 }
                 {isCorrect === false && <Typography variant="body2" component="div" sx={{ flexGrow: 1 }}>
-                    Incorrect! "{feedback[wordId]?.reason || ''}"
+                    {t('answerComponent.feedback.incorrect')} "{feedback[wordId]?.reason || ''}"
                 </Typography>
                 }
 
@@ -715,7 +717,7 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                     // red if incorrect, green if correct
                     color: feedback[wordId]?.answer === true ? 'green' : feedback[wordId]?.answer === false ? 'red' : 'black', }}>
                     {
-                        feedback[wordId]?.answer === true ? 'Correct! ' : feedback[wordId]?.answer === false ? 'Incorrect ' : ''
+                        feedback[wordId]?.answer === true ? t('answerComponent.feedback.correct') + ' ' : feedback[wordId]?.answer === false ? t('answerComponent.feedback.incorrect') + ' ' : ''
                     }
                     {JSON.stringify(feedback[wordId]?.reason) || ''}
                 </Typography>
