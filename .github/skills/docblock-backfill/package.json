@@ -1,0 +1,38 @@
+{
+  "name": "docblock-backfill",
+  "version": "1.0.0",
+  "description": "Automatically adds and updates JSDoc/TSDoc docblocks in files with user-facing strings",
+  "private": true,
+  "scripts": {
+    "backfill": "tsx scripts/backfill-docblocks.ts",
+    "backfill:dry": "tsx scripts/backfill-docblocks.ts --dry-run",
+    "sync": "tsx scripts/sync-metadata.ts",
+    "validate": "tsx scripts/validate-docblocks.ts",
+    "validate:strict": "tsx scripts/validate-docblocks.ts --strict",
+    "report": "tsx scripts/generate-docblock-report.ts",
+    "test": "tsx test/docblock-backfill.test.ts"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.23.0",
+    "@babel/traverse": "^7.23.0",
+    "@babel/types": "^7.23.0",
+    "glob": "^10.3.0"
+  },
+  "devDependencies": {
+    "@types/babel__traverse": "^7.20.0",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "documentation",
+    "jsdoc",
+    "tsdoc",
+    "docblock",
+    "metadata",
+    "i18n",
+    "localization"
+  ],
+  "author": "ExcitingTheory",
+  "license": "MIT"
+}
