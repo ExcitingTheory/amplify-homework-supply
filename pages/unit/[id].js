@@ -1,6 +1,8 @@
 import { useRouter } from 'next/router'
 import LanguageEditor from '../../src/components/Editor3'
 import React from "react";
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 import MyAuth from "../../src/components/authenticator";
 
@@ -16,12 +18,13 @@ function UnitPage() {
    * The unit is passed to the Editor2 component. 
    * The Editor2 component is a wrapper around the draftjs editor.
    */
+  const { t } = useTranslation('pages');
 
   const router = useRouter()
   if (router.isFallback) {
     return (
       <div>
-        <h1>Loading&hellip;</h1>
+        <h1>{t('unitDetail.loading')}</h1>
       </div>
     )
   }
@@ -49,6 +52,21 @@ function WrappedPage() {
       <UnitPage />
     </MyAuth>
   )
+}
+
+export async function getStaticProps({ locale }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common', 'pages'])),
+    },
+  };
+}
+
+export async function getStaticPaths() {
+  return {
+    paths: [],
+    fallback: true,
+  };
 }
 
 export default WrappedPage
