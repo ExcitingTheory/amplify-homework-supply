@@ -21,6 +21,7 @@ import {
 import { Dispatch, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as React from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 import { getSelectedNode } from '../utils/getSelectedNode';
 
@@ -135,6 +136,7 @@ function FloatingLinkEditor({
     isLeftDrawerOpen = false,
     isRightDrawerOpen = false,
 }) {
+    const { t } = useTranslation('components');
     const editorRef = useRef(null);
     const inputRef = useRef(null);
     const [linkUrl, setLinkUrl] = useState('');
@@ -428,8 +430,8 @@ function FloatingLinkEditor({
                         <>
                             <Button
                                 className="link-cancel"
-                                aria-label="Cancel link editing"
-                                title="Cancel link editing"
+                                aria-label={t('floatingLinkEditorPlugin.cancelLinkEditing')}
+                                title={t('floatingLinkEditorPlugin.cancelLinkEditing')}
                                 role="button"
                                 tabIndex={0}
                                 onMouseDown={(event) => event.preventDefault()}
@@ -443,7 +445,7 @@ function FloatingLinkEditor({
                                 ref={inputRef}
                                 className="link-input"
                                 type="text"
-                                title="Link URL"
+                                title={t('floatingLinkEditorPlugin.linkUrl')}
                                 value={editedLinkUrl}
                                 onChange={(event) => {
                                     setEditedLinkUrl(event.target.value);
@@ -454,8 +456,8 @@ function FloatingLinkEditor({
                             />
                                 <Button
                                     className="link-confirm"
-                                    aria-label="Confirm link"
-                                    title="Confirm link"
+                                    aria-label={t('floatingLinkEditorPlugin.confirmLink')}
+                                    title={t('floatingLinkEditorPlugin.confirmLink')}
                                     role="button"
                                     tabIndex={0}
                                     onMouseDown={(event) => event.preventDefault()}
@@ -467,11 +469,11 @@ function FloatingLinkEditor({
                     ) : (
                         <>
                             <Button
-                                aria-label="Close link editor"
+                                aria-label={t('floatingLinkEditorPlugin.closeLinkEditor')}
                                 className="link-close"
                                 role="button"
                                 tabIndex={0}
-                                title="Close link editor"
+                                title={t('floatingLinkEditorPlugin.closeLinkEditor')}
                                 onMouseDown={(event) => event.preventDefault()}
                                 onClick={() => {
                                     setIsLink(false);
@@ -489,8 +491,8 @@ function FloatingLinkEditor({
                             {isYouTubeUrl && (
                                 <Button
                                     className="link-youtube"
-                                    aria-label="YouTube Embed"
-                                    title="Convert to YouTube embed"
+                                    aria-label={t('floatingLinkEditorPlugin.youtubeEmbed')}
+                                    title={t('floatingLinkEditorPlugin.convertToYoutubeEmbed')}
                                     role="button"
                                     tabIndex={0}
                                     onMouseDown={(event) => event.preventDefault()}
@@ -501,8 +503,8 @@ function FloatingLinkEditor({
                             )}
                             <Button
                                 className="link-edit"
-                                aria-label="Edit link"
-                                title="Edit link"
+                                aria-label={t('floatingLinkEditorPlugin.editLink')}
+                                title={t('floatingLinkEditorPlugin.editLink')}
                                 role="button"
                                 tabIndex={0}
                                 onMouseDown={(event) => event.preventDefault()}
@@ -514,9 +516,9 @@ function FloatingLinkEditor({
                                 <EditIcon />
                             </Button>
                             <Button
-                                aria-label="Remove link"
+                                aria-label={t('floatingLinkEditorPlugin.removeLink')}
                                 className="link-trash"
-                                title="Remove link"
+                                title={t('floatingLinkEditorPlugin.removeLink')}
                                 role="button"
                                 tabIndex={0}
                                 onMouseDown={(event) => event.preventDefault()}
