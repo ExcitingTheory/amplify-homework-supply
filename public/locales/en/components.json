@@ -375,9 +375,32 @@
     "dialogTitle": "Custom Answer Editor"
   },
   "fileMetadataComponent": {
-    "metadata": "Metadata",
-    "content": "Content",
-    "emptyState": "No metadata available"
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "fileInfo": "File Info",
+    "deleteFile": "Delete File",
+    "deleteConfirmation": "Delete file: \"{{fileName}}\"?",
+    "filename": "Filename:",
+    "type": "Type:",
+    "unknown": "Unknown",
+    "unknownSize": "Unknown size",
+    "path": "Path:",
+    "protectionLevel": "Protection Level:",
+    "unset": "UNSET",
+    "created": "Created:",
+    "searchPlaceholder": "Search file content...",
+    "basicInfo": "Basic Info",
+    "rawMetadata": "Raw Metadata",
+    "parsedContent": "Parsed Content",
+    "noMetadataAvailable": "No metadata available for this file.",
+    "noParsedContentAvailable": "No parsed content available for this file.",
+    "vocabulary": "Vocabulary",
+    "summaries": "Summaries",
+    "objectives": "Objectives",
+    "concepts": "Concepts",
+    "questions": "Questions",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   },
   "autoEmbedPlugin": {
     "embed": "Embed"
@@ -388,7 +411,11 @@
   },
   "tablePlugin": {
     "insertTable": "Insert Table",
+    "table": "Table",
+    "chooseLayout": "Choose a layout",
+    "rowsPlaceholder": "# of rows (1-500)",
     "rows": "Rows",
+    "columnsPlaceholder": "# of columns (1-50)",
     "columns": "Columns",
     "insert": "Insert"
   },
@@ -638,5 +665,79 @@
     "mainView": {
       "noFilesMessage": "No files available. Upload files to get started."
     }
+  },
+  "sortableAnswers": {
+    "answerLabel": "Answer {{number}}",
+    "correct": "Correct",
+    "incorrect": "Incorrect"
+  },
+  "documentSourceBadge": {
+    "sourcePrefix": "Source:",
+    "pagePrefix": "Page"
+  },
+  "pdfThumbnail": {
+    "failedToLoad": "Failed to load PDF",
+    "pageNumber": "{{current}} / {{total}}"
+  },
+  "authenticator": {
+    "nameLabel": "Name:",
+    "namePlaceholder": "Enter your Name:",
+    "emailLabel": "Email:",
+    "emailPlaceholder": "Enter your Email:",
+    "passwordLabel": "Password:",
+    "passwordPlaceholder": "Enter your Password:",
+    "confirmPasswordLabel": "Confirm Password:"
+  },
+  "unitEmbedding": {
+    "publishing": "Publishing...",
+    "publishUnit": "Publish Unit",
+    "publishSuccess": "Unit published with embeddings generated!",
+    "generating": "Generating...",
+    "generateEmbeddings": "Generate Embeddings",
+    "cached": "Cached",
+    "wordsEmbedded": "{{count}} words embedded",
+    "completedCount": "{{completed}}/{{total}} completed",
+    "allSectionsComplete": "All sections complete!"
+  },
+  "wordEmbedding": {
+    "embeddingFailed": "Word saved, but embedding generation failed: {{error}}",
+    "embeddingGenerated": "Embedding generated: {{count}} words processed",
+    "questionSaveFailed": "Save with embedding error"
+  },
+  "recordingStudioEnhanced": {
+    "audioFilters": "Audio Filters",
+    "noiseReduction": "Noise Reduction",
+    "speechEnhancement": "Speech Enhancement",
+    "none": "None",
+    "light": "Light",
+    "medium": "Medium",
+    "heavy": "Heavy",
+    "clarity": "Clarity",
+    "presence": "Presence",
+    "broadcast": "Broadcast",
+    "popClickTooltip": "Remove pops and clicks",
+    "popClick": "Pop/Click",
+    "highPassTooltip": "Remove low frequencies",
+    "highPass": "High Pass",
+    "lowPassTooltip": "Remove high frequencies",
+    "lowPass": "Low Pass",
+    "normalizeTooltip": "Normalize audio levels",
+    "normalize": "Normalize",
+    "cutTooltip": "Cut selected portion",
+    "cutButton": "Cut",
+    "tracks": "Tracks",
+    "addTrack": "Add Track",
+    "trackName": "Track {{number}}",
+    "deleteLastTrackAlert": "Cannot delete the last track",
+    "voice": "Voice",
+    "promptPlaceholder": "Enter text to generate audio...",
+    "generate": "Generate",
+    "record": "Record",
+    "stop": "Stop",
+    "selectToCut": "Please select a portion of audio to cut",
+    "enterPrompt": "Please enter a prompt for this track",
+    "ttsNotImplemented": "Text-to-speech generation not yet implemented",
+    "ttsGenerationFailed": "Failed to generate audio from prompt",
+    "micAccessError": "Could not access microphone"
   }
 }
