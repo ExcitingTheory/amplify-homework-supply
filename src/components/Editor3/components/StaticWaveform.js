@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Box, CircularProgress } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { useTranslation } from 'react-i18next';
 import { hexToRgb } from '../../../utils/hexToRgb';
 import getCachedUrl from '../../../utils/getCachedUrl';
 import { calculateWaveformData } from '../../../utils/calculateWaveformData';
@@ -25,6 +26,7 @@ export default function StaticWaveform({
     backgroundColor = 'white',
     showLoading = true
 }) {
+    const { t } = useTranslation('components');
     const canvasRef = useRef(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -136,7 +138,7 @@ export default function StaticWaveform({
                 borderRadius: 1,
                 color: 'error.main'
             }}>
-                Error loading waveform
+                {t('staticWaveform.errorLoading')}
             </Box>
         );
     }
