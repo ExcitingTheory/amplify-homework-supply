@@ -3,6 +3,7 @@ import { Chip, Tooltip, Box } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { useTranslation } from 'react-i18next';
 
 /**
  * ModerationBadge Component
@@ -12,6 +13,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
  * Instructors can see what categories were flagged.
  */
 export default function ModerationBadge({ item, showDetails = false }) {
+  const { t } = useTranslation('components');
   if (!item || !item.moderationCheckedAt) {
     return null; // Not yet moderated
   }
@@ -43,7 +45,7 @@ export default function ModerationBadge({ item, showDetails = false }) {
     return showDetails ? (
       <Chip
         icon={<CheckCircleIcon />}
-        label="Content Approved"
+        label={t('moderationBadge.approved')}
         size="small"
         color="success"
         variant="outlined"
@@ -56,13 +58,13 @@ export default function ModerationBadge({ item, showDetails = false }) {
   const tooltipContent = (
     <Box>
       <Box sx={{ fontWeight: 'bold', mb: 0.5 }}>
-        Content Flagged for Review
+        {t('moderationBadge.flaggedForReview')}
       </Box>
       <Box sx={{ fontSize: '0.85rem' }}>
-        Categories: {flaggedCategories.join(', ')}
+        {t('moderationBadge.categories')}: {flaggedCategories.join(', ')}
       </Box>
       <Box sx={{ fontSize: '0.75rem', mt: 0.5, fontStyle: 'italic' }}>
-        Content has been saved. Please review according to your school's policies.
+        {t('moderationBadge.savedMessage')}
       </Box>
     </Box>
   );
@@ -71,7 +73,7 @@ export default function ModerationBadge({ item, showDetails = false }) {
     <Tooltip title={tooltipContent} arrow>
       <Chip
         icon={<WarningIcon />}
-        label={showDetails ? `Flagged: ${flaggedCategories.join(', ')}` : 'Flagged'}
+        label={showDetails ? t('moderationBadge.flaggedWithCategories', { categories: flaggedCategories.join(', ') }) : t('moderationBadge.flagged')}
         size="small"
         color="warning"
         sx={{ 
@@ -89,6 +91,8 @@ export default function ModerationBadge({ item, showDetails = false }) {
  * Simple icon-only indicator for compact layouts
  */
 export function ModerationStatusIcon({ item }) {
+  const { t } = useTranslation('components');
+  
   if (!item || !item.moderationCheckedAt) {
     return null;
   }
@@ -115,7 +119,7 @@ export function ModerationStatusIcon({ item }) {
 
   return (
     <Tooltip 
-      title={`Flagged: ${flaggedCategories.join(', ')}`}
+      title={t('moderationBadge.flaggedWithCategories', { categories: flaggedCategories.join(', ') })}
       arrow
     >
       <WarningIcon 
