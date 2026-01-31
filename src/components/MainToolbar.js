@@ -10,6 +10,7 @@
  */
 
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 // import AppBar from '@mui/material/AppBar';
 // import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -78,6 +79,7 @@ function ToggleMenuItem(props) {
 }
 
 export function SettingsMenu() {
+  const { t } = useTranslation(['components', 'common']);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const router = useRouter()  
@@ -129,10 +131,10 @@ export function SettingsMenu() {
            * - 
            */
         }
-        <ToggleMenuItem label="Disable notifications" />
-        <ToggleMenuItem label="Dark mode" /> 
-        <ToggleMenuItem label="Experimental features" />
-        <ToggleMenuItem label="Student mode" />
+        <ToggleMenuItem label={t('mainToolbar.settings.disableNotifications', 'Disable notifications')} />
+        <ToggleMenuItem label={t('mainToolbar.settings.darkMode', 'Dark mode')} /> 
+        <ToggleMenuItem label={t('mainToolbar.settings.experimentalFeatures', 'Experimental features')} />
+        <ToggleMenuItem label={t('mainToolbar.settings.studentMode', 'Student mode')} />
 
         {/* <MenuItem onClick={handleSettings}>Change password</MenuItem> */}
       </Menu>
@@ -142,6 +144,7 @@ export function SettingsMenu() {
 
 
 export function HelpMenu() {
+  const { t } = useTranslation(['components', 'common']);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const router = useRouter()
@@ -183,7 +186,7 @@ export function HelpMenu() {
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem onClick={handleHelp}>Help</MenuItem>
+        <MenuItem onClick={handleHelp}>{t('mainToolbar.help', 'Help')}</MenuItem>
       </Menu>
     </div>
   )
@@ -191,6 +194,7 @@ export function HelpMenu() {
 
 
 export function UserMenu() {
+  const { t } = useTranslation(['common', 'auth']);
   const [anchorEl, setAnchorEl] = React.useState(null);
   // const [username, setUsername] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -230,12 +234,12 @@ export function UserMenu() {
       >
         <MenuItem onClick={() => {
           router.push('/profile')
-        }}><UserIcon/>&nbsp;Profile</MenuItem>
+        }}><UserIcon/>&nbsp;{t('common:navigation.profile')}</MenuItem>
         {/* <MenuItem onClick={handleClose}>My account</MenuItem> */}
         <MenuItem onClick={() => {
           signOut();
         }}>
-          <LogoutIcon/>&nbsp;Logout</MenuItem>
+          <LogoutIcon/>&nbsp;{t('auth:sign_out')}</MenuItem>
       </Menu>
     </div>
   );
@@ -243,6 +247,7 @@ export function UserMenu() {
 
 
 export default function MainToolbar({ children }) {
+  const { t } = useTranslation(['common', 'components']);
   const [state, setState] = React.useState({
     // top: false,
     left: false,
@@ -436,7 +441,7 @@ export default function MainToolbar({ children }) {
                     >
                       <HomeIcon />
                     </ListItemIcon>
-                    <ListItemText primary='Home' />
+                    <ListItemText primary={t('common:navigation.home')} />
                   </ListItemButton>
                 </ListItem>
                 {/* <ListItem disablePadding>
@@ -457,7 +462,7 @@ export default function MainToolbar({ children }) {
                     >
                       <PeopleIcon />
                     </ListItemIcon>
-                    <ListItemText primary='Sections' />
+                    <ListItemText primary={t('common:navigation.sections')} />
                   </ListItemButton>
                 </ListItem>
                 {/* <ListItem disablePadding>
@@ -478,7 +483,7 @@ export default function MainToolbar({ children }) {
                     >
                       <MenuBookIcon />
                     </ListItemIcon>
-                    <ListItemText primary='Units' />
+                    <ListItemText primary={t('common:navigation.units')} />
                   </ListItemButton>
                 </ListItem>
               </List>
@@ -503,10 +508,10 @@ export default function MainToolbar({ children }) {
                 >
                         <form onSubmit={addStudentToSection}>
 
-                        <DialogTitle id="form-dialog-title">Add self to Section</DialogTitle>
+                        <DialogTitle id="form-dialog-title">{t('mainToolbar.addToSection.title', 'Add self to Section')}</DialogTitle>
                         <DialogContent>
                             <DialogContentText>
-                                Add yourself as a student to a section by entering the section code.
+                                {t('mainToolbar.addToSection.description', 'Add yourself as a student to a section by entering the section code.')}
                         </DialogContentText>
                         <br/>
 
@@ -516,7 +521,7 @@ export default function MainToolbar({ children }) {
                                 required
                                 id="code"
                                 name="code"
-                                label="Code"
+                                label={t('mainToolbar.addToSection.codeLabel', 'Code')}
                                 variant="outlined"
                             /><br /><br />
 
@@ -531,10 +536,10 @@ export default function MainToolbar({ children }) {
                             <Button disabled={work}
                                 onClick={() => setOpenAddStudentToSection(false)}
                             color="primary" variant="outlined">
-                                Cancel
+                                {t('common:actions.cancel')}
                         </Button>
                             <Button disabled={work} type="submit" variant="contained">
-                                Add
+                                {t('mainToolbar.addToSection.add', 'Add')}
                         </Button>
                         </DialogActions>
                     </form>
