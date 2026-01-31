@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Box,
     Typography,
@@ -50,6 +51,7 @@ export default function RecordingStudioEnhanced({
     onRecordingComplete,
     metadata = {},
 }) {
+    const { t } = useTranslation('components');
     const theme = useTheme();
     
     // Tracks state - each track can have multiple audio clips
@@ -108,7 +110,7 @@ export default function RecordingStudioEnhanced({
     const handleAddTrack = () => {
         const newTrack = {
             id: Date.now(),
-            name: `Track ${tracks.length + 1}`,
+            name: t('recordingStudioEnhanced.trackName', { number: tracks.length + 1 }),
             voice: 'alloy',
             prompt: '',
             clips: [],
@@ -119,7 +121,7 @@ export default function RecordingStudioEnhanced({
     // Delete track
     const handleDeleteTrack = (trackId) => {
         if (tracks.length === 1) {
-            alert('Cannot delete the last track');
+            alert(t('recordingStudioEnhanced.deleteLastTrackAlert'));
             return;
         }
         setTracks(tracks.filter(t => t.id !== trackId));
@@ -180,7 +182,7 @@ export default function RecordingStudioEnhanced({
             setRecording(true);
         } catch (error) {
             console.error('Error starting recording:', error);
-            alert('Could not access microphone');
+            alert(t('recordingStudioEnhanced.micAccessError'));
         }
     };
     
@@ -211,7 +213,7 @@ export default function RecordingStudioEnhanced({
     // Cut selected portion of audio
     const handleCut = () => {
         if (selectionStart === null || selectionEnd === null) {
-            alert('Please select a portion of audio to cut');
+            alert(t('recordingStudioEnhanced.selectToCut'));
             return;
         }
         
@@ -227,7 +229,7 @@ export default function RecordingStudioEnhanced({
     const handleGenerateFromPrompt = async (trackId) => {
         const track = tracks.find(t => t.id === trackId);
         if (!track || !track.prompt.trim()) {
-            alert('Please enter a prompt for this track');
+            alert(t('recordingStudioEnhanced.enterPrompt'));
             return;
         }
         
@@ -239,11 +241,11 @@ export default function RecordingStudioEnhanced({
             });
             
             // Placeholder - would need to implement actual API call
-            alert('Text-to-speech generation not yet implemented');
+            alert(t('recordingStudioEnhanced.ttsNotImplemented'));
             
         } catch (error) {
             console.error('Error generating audio:', error);
-            alert('Failed to generate audio from prompt');
+            alert(t('recordingStudioEnhanced.ttsGenerationFailed'));
         }
     };
     
@@ -260,34 +262,34 @@ export default function RecordingStudioEnhanced({
                 }}
             >
                 <Typography variant="subtitle2" sx={{ mr: 2 }}>
-                    Audio Filters
+                    {t('recordingStudioEnhanced.audioFilters')}
                 </Typography>
                 
                 <FormControl size="small" sx={{ minWidth: 150 }}>
-                    <InputLabel>Noise Reduction</InputLabel>
+                    <InputLabel>{t('recordingStudioEnhanced.noiseReduction')}</InputLabel>
                     <Select
                         value={filters.noiseReduction}
-                        label="Noise Reduction"
+                        label={t('recordingStudioEnhanced.noiseReduction')}
                         onChange={(e) => setFilters({ ...filters, noiseReduction: e.target.value })}
                     >
-                        <MenuItem value="none">None</MenuItem>
-                        <MenuItem value="light">Light</MenuItem>
-                        <MenuItem value="medium">Medium</MenuItem>
-                        <MenuItem value="heavy">Heavy</MenuItem>
+                        <MenuItem value="none">{t('recordingStudioEnhanced.none')}</MenuItem>
+                        <MenuItem value="light">{t('recordingStudioEnhanced.light')}</MenuItem>
+                        <MenuItem value="medium">{t('recordingStudioEnhanced.medium')}</MenuItem>
+                        <MenuItem value="heavy">{t('recordingStudioEnhanced.heavy')}</MenuItem>
                     </Select>
                 </FormControl>
                 
                 <FormControl size="small" sx={{ minWidth: 150 }}>
-                    <InputLabel>Speech Enhancement</InputLabel>
+                    <InputLabel>{t('recordingStudioEnhanced.speechEnhancement')}</InputLabel>
                     <Select
                         value={filters.speechEnhancement}
-                        label="Speech Enhancement"
+                        label={t('recordingStudioEnhanced.speechEnhancement')}
                         onChange={(e) => setFilters({ ...filters, speechEnhancement: e.target.value })}
                     >
-                        <MenuItem value="none">None</MenuItem>
-                        <MenuItem value="clarity">Clarity</MenuItem>
-                        <MenuItem value="presence">Presence</MenuItem>
-                        <MenuItem value="broadcast">Broadcast</MenuItem>
+                        <MenuItem value="none">{t('recordingStudioEnhanced.none')}</MenuItem>
+                        <MenuItem value="clarity">{t('recordingStudioEnhanced.clarity')}</MenuItem>
+                        <MenuItem value="presence">{t('recordingStudioEnhanced.presence')}</MenuItem>
+                        <MenuItem value="broadcast">{t('recordingStudioEnhanced.broadcast')}</MenuItem>
                     </Select>
                 </FormControl>
                 
@@ -333,7 +335,7 @@ export default function RecordingStudioEnhanced({
                 
                 <Divider orientation="vertical" flexItem />
                 
-                <Tooltip title="Cut selected audio">
+                <Tooltip title={t('recordingStudioEnhanced.cutTooltip')}>
                     <span>
                         <IconButton
                             onClick={handleCut}
@@ -368,7 +370,7 @@ export default function RecordingStudioEnhanced({
                     )}
                     
                     <Typography variant="body2">
-                        {recording ? 'Recording...' : 'Click to record'}
+                        {recording ? t('recordingStudioEnhanced.recording') : t('recordingStudioEnhanced.clickToRecord')}
                     </Typography>
                     
                     <Box sx={{ flexGrow: 1 }} />
@@ -379,7 +381,7 @@ export default function RecordingStudioEnhanced({
                         variant="outlined"
                         size="small"
                     >
-                        Add Track
+                        {t('recordingStudioEnhanced.addTrack')}
                     </Button>
                 </Box>
             </Box>
@@ -408,7 +410,7 @@ export default function RecordingStudioEnhanced({
                         <CardContent>
                             <Box sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
                                 <TextField
-                                    label="Track Name"
+                                    label={t('recordingStudioEnhanced.trackName')}
                                     value={track.name}
                                     onChange={(e) => updateTrack(track.id, { name: e.target.value })}
                                     size="small"
@@ -416,10 +418,10 @@ export default function RecordingStudioEnhanced({
                                 />
                                 
                                 <FormControl size="small" sx={{ minWidth: 120 }}>
-                                    <InputLabel>Voice</InputLabel>
+                                    <InputLabel>{t('recordingStudioEnhanced.voice')}</InputLabel>
                                     <Select
                                         value={track.voice}
-                                        label="Voice"
+                                        label={t('recordingStudioEnhanced.voice')}
                                         onChange={(e) => updateTrack(track.id, { voice: e.target.value })}
                                     >
                                         {whisperVoices.map(voice => (
@@ -431,13 +433,13 @@ export default function RecordingStudioEnhanced({
                                 </FormControl>
                                 
                                 <TextField
-                                    label="Prompt for TTS"
+                                    label={t('recordingStudioEnhanced.promptPlaceholder')}
                                     value={track.prompt}
                                     onChange={(e) => updateTrack(track.id, { prompt: e.target.value })}
                                     multiline
                                     size="small"
                                     sx={{ flexGrow: 1 }}
-                                    placeholder="Enter text to generate speech..."
+                                    placeholder={t('recordingStudioEnhanced.promptPlaceholder')}
                                 />
                                 
                                 <Button
@@ -446,7 +448,7 @@ export default function RecordingStudioEnhanced({
                                     size="small"
                                     disabled={!track.prompt.trim()}
                                 >
-                                    Generate
+                                    {t('recordingStudioEnhanced.generate')}
                                 </Button>
                                 
                                 <IconButton
@@ -478,7 +480,7 @@ export default function RecordingStudioEnhanced({
                                         color="text.secondary"
                                         sx={{ display: 'inline-block', lineHeight: '80px' }}
                                     >
-                                        No audio clips yet. Record or generate audio to add to this track.
+                                        {t('recordingStudioEnhanced.noClips')}
                                     </Typography>
                                 ) : (
                                     <Box sx={{ display: 'inline-flex', gap: 1 }}>
