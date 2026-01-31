@@ -15,6 +15,7 @@
 
 import React, { useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -85,6 +86,8 @@ export const LexicalMessageRenderer = React.memo(({
   className = '',
   onContentLoaded,
 }) => {
+  const { t } = useTranslation('components');
+  
   // Create editor config with error handling
   const config = useMemo(() => ({
     ...chatMessageEditorConfig,
@@ -117,7 +120,7 @@ export const LexicalMessageRenderer = React.memo(({
             />
           }
           placeholder={null}
-          ErrorBoundary={() => <div>Error rendering message</div>}
+          ErrorBoundary={() => <div>{t('chatSidebar.errorRenderingMessage')}</div>}
         />
         
         {/* Content rendering */}
