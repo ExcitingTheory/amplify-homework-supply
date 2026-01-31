@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Select, MenuItem, Paper } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
@@ -80,6 +81,7 @@ const FloatingFormatSelector = styled(Paper, {
 // Plugin for floating format selector
 function FloatingFormatSelectorPlugin() {
   const [editor] = useLexicalComposerContext();
+  const { t } = useTranslation('components');
   const [currentType, setCurrentType] = useState('action');
   const [showSelector, setShowSelector] = useState(false);
 
@@ -156,7 +158,7 @@ function FloatingFormatSelectorPlugin() {
 
   return (
     <FloatingFormatSelector show={showSelector} elevation={3}>
-      <Box sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>Format:</Box>
+      <Box sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>{t('screenplayEditor.formatLabel')}:</Box>
       <Select
         value={currentType}
         onChange={handleTypeChange}
@@ -211,6 +213,7 @@ function onError(error) {
 }
 
 export default function ScreenplayEditor() {
+  const { t } = useTranslation('components');
   const initialConfig = {
     namespace: 'ScreenplayEditor',
     theme: ScreenplayTheme,
@@ -308,7 +311,7 @@ export default function ScreenplayEditor() {
             contentEditable={
               <ScreenplayContentEditable
                 className="screenplay-editor"
-                aria-placeholder="FADE IN:"
+                aria-placeholder={t('screenplayEditor.placeholder')}
               />
             }
             placeholder={null}
