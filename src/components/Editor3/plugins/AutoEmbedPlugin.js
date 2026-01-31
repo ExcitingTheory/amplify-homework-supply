@@ -15,6 +15,7 @@ import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {useMemo, useState} from 'react';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 // import useModal from '../../hooks/useModal';
 // import Button from '../../ui/Button';
@@ -36,7 +37,7 @@ import {
 
 
 export const YoutubeEmbedConfig = {
-  contentName: 'Youtube Video',
+  contentName: 'youtubeVideo', // Translation key
 
   exampleUrl: 'https://www.youtube.com/watch?v=jNQXAC9IVRw',
 
@@ -218,6 +219,7 @@ export function AutoEmbedDialog({
   embedConfig,
   onClose,
 }) {
+  const { t } = useTranslation('components');
   const [text, setText] = useState('');
   const [editor] = useLexicalComposerContext();
   const [embedResult, setEmbedResult] = useState(null);
@@ -267,7 +269,7 @@ export function AutoEmbedDialog({
           disabled={!embedResult}
           onClick={onClick}
           data-test-id={`${embedConfig.type}-embed-modal-submit-btn`}>
-          Embed
+          {t('autoEmbedPlugin.embed')}
         </Button>
       </DialogActions>
     </div>
@@ -275,10 +277,11 @@ export function AutoEmbedDialog({
 }
 
 export default function AutoEmbedPlugin() {
+  const { t } = useTranslation('components');
   // const [modal, showModal] = useModal();
 
   const openEmbedModal = (embedConfig) => {
-    showModal(`Embed ${embedConfig.contentName}`, (onClose) => (
+    showModal(t('autoEmbedPlugin.embedTitle', { contentName: t(`autoEmbedPlugin.${embedConfig.contentName}`) }), (onClose) => (
       <AutoEmbedDialog embedConfig={embedConfig} onClose={onClose} />
     ));
   };
@@ -289,10 +292,10 @@ export default function AutoEmbedPlugin() {
     dismissFn,
   ) => {
     return [
-      new AutoEmbedOption('Dismiss', {
+      new AutoEmbedOption(t('autoEmbedPlugin.dismiss'), {
         onSelect: dismissFn,
       }),
-      new AutoEmbedOption(`Embed ${activeEmbedConfig.contentName}`, {
+      new AutoEmbedOption(t('autoEmbedPlugin.embedOption', { contentName: t(`autoEmbedPlugin.${activeEmbedConfig.contentName}`) }), {
         onSelect: embedFn,
       }),
     ];

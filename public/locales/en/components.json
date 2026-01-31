@@ -416,6 +416,10 @@
     "cancel": "Cancel"
   },
   "autoEmbedPlugin": {
+    "youtubeVideo": "Youtube Video",
+    "dismiss": "Dismiss",
+    "embedTitle": "Embed {{contentName}}",
+    "embedOption": "Embed {{contentName}}",
     "embed": "Embed"
   },
   "imagesPlugin": {
