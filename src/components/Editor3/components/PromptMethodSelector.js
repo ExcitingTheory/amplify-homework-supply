@@ -7,11 +7,13 @@ import Button from '@mui/material/Button';
 import { Check } from '@mui/icons-material';
 import VideoSettingsIcon from '@mui/icons-material/VideoSettings';
 import InputIcon from '@mui/icons-material/Input';
+import { useTranslation } from 'react-i18next';
 
 export const AllowedInputSelector = React.memo(({
     ids, defaultAllowedInputs = ['text', 'audio'], allowedInput = [], setAllowedInput,
     // wordIDs,
 }) => {
+    const { t } = useTranslation('components');
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [_allowedInputs, setAllowedInputs] = React.useState(allowedInput.length > 0 ? allowedInput : defaultAllowedInputs);
     const open = Boolean(anchorEl);
@@ -60,7 +62,7 @@ export const AllowedInputSelector = React.memo(({
                 }}
             >
 
-                <InputIcon />&nbsp;Input
+                <InputIcon />&nbsp;{t('promptMethodSelector.inputButton')}
             </Button>
             <Menu
                 id="allowed-inputs-menu"
@@ -81,28 +83,28 @@ export const AllowedInputSelector = React.memo(({
                         <ListItemIcon>
                             <Check />
                         </ListItemIcon>}
-                    Text</MenuItem>
+                    {t('promptMethodSelector.menuItems.text')}</MenuItem>
                 <MenuItem onClick={handleSelect} value='audio'>
 
                     {_allowedInputs.includes('audio') &&
                         <ListItemIcon>
                             <Check />
                         </ListItemIcon>}
-                    Audio</MenuItem>
+                    {t('promptMethodSelector.menuItems.audio')}</MenuItem>
                 <MenuItem onClick={handleSelect} value='image'>
 
                     {_allowedInputs.includes('image') &&
                         <ListItemIcon>
                             <Check />
                         </ListItemIcon>}
-                    Image</MenuItem>
+                    {t('promptMethodSelector.menuItems.image')}</MenuItem>
                 <MenuItem onClick={handleSelect} value='writing'>
 
                     {_allowedInputs.includes('writing') &&
                         <ListItemIcon>
                             <Check />
                         </ListItemIcon>}
-                    Drawing</MenuItem>
+                    {t('promptMethodSelector.menuItems.drawing')}</MenuItem>
                 <MenuItem onClick={handleSelect} value='video'
                     style={{
                         textAlign: 'right',
@@ -113,7 +115,7 @@ export const AllowedInputSelector = React.memo(({
                         <ListItemIcon>
                             <Check />
                         </ListItemIcon>}
-                    Video</MenuItem>
+                    {t('promptMethodSelector.menuItems.video')}</MenuItem>
             </Menu>
         </>
 
@@ -134,6 +136,7 @@ export const PromptMethodSelector = React.memo(({
     ids, defaultPromptMethods = ['text', 'audio', 'writing'], promptMethod = [], setPromptMethod,
     // wordIDs,
 }) => {
+    const { t } = useTranslation('components');
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [_promptMethods, setPromptMethods] = React.useState(promptMethod.length > 0 ? promptMethod : []);
     const open = Boolean(anchorEl);
@@ -184,7 +187,7 @@ export const PromptMethodSelector = React.memo(({
                 }}
             >
 
-                <VideoSettingsIcon />&nbsp;Output
+                <VideoSettingsIcon />&nbsp;{t('promptMethodSelector.outputButton')}
             </Button>
             <Menu
                 id="prompt-methods-menu"
@@ -205,28 +208,28 @@ export const PromptMethodSelector = React.memo(({
                         <ListItemIcon>
                             <Check />
                         </ListItemIcon>}
-                    Text</MenuItem>
+                    {t('promptMethodSelector.menuItems.text')}</MenuItem>
                 <MenuItem onClick={handleSelect} value='audio'>
 
                     {_promptMethods.includes('audio') &&
                         <ListItemIcon>
                             <Check />
                         </ListItemIcon>}
-                    Audio</MenuItem>
+                    {t('promptMethodSelector.menuItems.audio')}</MenuItem>
                 <MenuItem onClick={handleSelect} value='image'>
 
                     {_promptMethods.includes('image') &&
                         <ListItemIcon>
                             <Check />
                         </ListItemIcon>}
-                    Image</MenuItem>
+                    {t('promptMethodSelector.menuItems.image')}</MenuItem>
                 <MenuItem onClick={handleSelect} value='writing'>
 
                     {_promptMethods.includes('writing') &&
                         <ListItemIcon>
                             <Check />
                         </ListItemIcon>}
-                    Drawing</MenuItem>
+                    {t('promptMethodSelector.menuItems.drawing')}</MenuItem>
                 <MenuItem onClick={handleSelect} value='video'
                     style={{
                         textAlign: 'right',
@@ -237,7 +240,7 @@ export const PromptMethodSelector = React.memo(({
                         <ListItemIcon>
                             <Check />
                         </ListItemIcon>}
-                    Video</MenuItem>
+                    {t('promptMethodSelector.menuItems.video')}</MenuItem>
             </Menu>
         </>
 
