@@ -27,6 +27,7 @@ import {
     Collapse,
     Tooltip,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import {
     Download as ImportIcon,
     CheckCircle as CheckCircleIcon,
@@ -336,12 +337,12 @@ export function QuestionCard({
                         />
                     )}
                     {item.hasAudio && (
-                        <Tooltip title="Has audio">
+                        <Tooltip title={t('questionsReview.hasAudio')}>
                             <MicIcon fontSize="small" color="primary" />
                         </Tooltip>
                     )}
                     {item.hasImage && (
-                        <Tooltip title="Has image">
+                        <Tooltip title={t('questionsReview.hasImage')}>
                             <ImageIcon fontSize="small" color="secondary" />
                         </Tooltip>
                     )}
@@ -357,8 +358,8 @@ export function QuestionCard({
                         itemIndex={index}
                         onSave={onUpdate}
                         searchTerm={searchTerm}
-                        label="Question Prompt"
-                        placeholder="Enter question..."
+                        label={t('questionsReview.questionPrompt')}
+                        placeholder={t('questionsReview.enterQuestion')}
                         multiline
                     />
 
@@ -369,8 +370,8 @@ export function QuestionCard({
                             itemIndex={index}
                             onSave={onUpdate}
                             searchTerm={searchTerm}
-                            label="Hint (optional)"
-                            placeholder="Enter hint..."
+                            label={t('questionsReview.hintOptional')}
+                            placeholder={t('questionsReview.enterHint')}
                             multiline
                         />
                     )}
@@ -381,8 +382,8 @@ export function QuestionCard({
                         itemIndex={index}
                         onSave={onUpdate}
                         searchTerm={searchTerm}
-                        label="Answer"
-                        placeholder="Enter answer..."
+                        label={t('questionsReview.answer')}
+                        placeholder={t('questionsReview.enterAnswer')}
                         multiline
                     />
                 </Box>
@@ -403,6 +404,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
     onImportComplete,
     searchTerm = '',
 }) => {
+    const { t } = useTranslation('components');
     const [parsedContent, setParsedContent] = useState<any>(null);
     const [document, setDocument] = useState<any>(null);
     const [questionItems, setQuestionItems] = useState<QuestionItem[]>([]);
@@ -602,7 +604,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
             <Box sx={{ p: 2 }}>
                 <LinearProgress />
                 <Typography variant="body2" sx={{ mt: 1, textAlign: 'center' }}>
-                    Loading questions...
+                    {t('questionsReview.loading')}
                 </Typography>
             </Box>
         );
@@ -612,7 +614,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
         return (
             <Box sx={{ p: 2 }}>
                 <Alert severity="info" icon={<QuestionIcon />}>
-                    No questions found for this document.
+                    {t('questionsReview.noQuestions')}
                 </Alert>
             </Box>
         );
@@ -625,24 +627,28 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
             {/* Header */}
             <Box sx={{ p: 2, flexShrink: 0 }}>
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                    Questions Review
+                    {t('questionsReview.sectionHeading')}
                 </Typography>
                 {document && (
                     <Typography variant="body2" color="text.secondary" gutterBottom>
-                        From: {document.filename}
-                        {document.pageCount && ` (${document.pageCount} pages)`}
+                        {t('questionsReview.from')}: {document.filename}
+                        {document.pageCount && ` (${document.pageCount} ${t('questionsReview.pages')})`}
                     </Typography>
                 )}
                 
                 {alreadyImported && (
                     <Alert severity="success" sx={{ mt: 1 }} icon={<CheckCircleIcon />}>
-                        Imported on {new Date(parsedContent.importedAt).toLocaleString()}
+                        {t('questionsReview.importedOn', { date: new Date(parsedContent.importedAt).toLocaleString() })}
                     </Alert>
                 )}
                 
                 {searchTerm && (
                     <Alert severity="info" sx={{ mt: 1 }} icon={<InfoIcon />}>
-                        Filtering by search: "{searchTerm}" ({filteredQuestions.length} of {questionItems.length} items)
+                        {t('questionsReview.filteringBySearch', { 
+                            searchTerm, 
+                            count: filteredQuestions.length, 
+                            total: questionItems.length 
+                        })}
                     </Alert>
                 )}
             </Box>
@@ -656,14 +662,14 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                         endIcon={showSummaries ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                         variant="outlined"
                     >
-                        {showSummaries ? 'Hide' : 'Show'} Summaries & Objectives
+                        {showSummaries ? t('questionsReview.hide') : t('questionsReview.show')} {t('questionsReview.summariesAndObjectives')}
                     </Button>
                     <Collapse in={showSummaries}>
                         <Paper elevation={0} sx={{ p: 2, mt: 1, bgcolor: 'grey.50' }}>
                             {summaries.length > 0 && (
                                 <Box sx={{ mb: 2 }}>
                                     <Typography variant="subtitle2" gutterBottom fontWeight={600}>
-                                        Summaries
+                                        {t('questionsReview.summaries')}
                                     </Typography>
                                     {summaries.map((summary, i) => (
                                         <Box key={i} sx={{ mb: 1 }}>
@@ -680,7 +686,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                             {objectives.length > 0 && (
                                 <Box>
                                     <Typography variant="subtitle2" gutterBottom fontWeight={600}>
-                                        Learning Objectives
+                                        {t('questionsReview.learningObjectives')}
                                     </Typography>
                                     <List dense>
                                         {objectives.map((obj, i) => (
@@ -706,10 +712,10 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                         size="small"
                         onClick={toggleAll}
                     >
-                        {selectedItems.size === questionItems.length ? 'Deselect All' : 'Select All'}
+                        {selectedItems.size === questionItems.length ? t('questionsReview.deselectAll') : t('questionsReview.selectAll')}
                     </Button>
                     <Typography variant="body2" color="text.secondary">
-                        {selectedItems.size} of {questionItems.length} selected
+                        {t('questionsReview.selectedCount', { count: selectedItems.size, total: questionItems.length })}
                     </Typography>
                     <Box sx={{ flex: 1 }} />
                     <Button
@@ -718,7 +724,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                         onClick={handleImport}
                         disabled={importing || selectedItems.size === 0}
                     >
-                        Import to Question Bank
+                        {t('questionsReview.importToQuestionBank')}
                     </Button>
                 </Box>
             )}
