@@ -115,6 +115,7 @@ export default function MeaningAssociationEditor({
     nodeKey,
     // setWordIDs,
     wordIDs,
+    enabledModes = ['learn', 'easy', 'hard'],
 }) {
     const { t } = useTranslation('editor.blocks');
     const [value, setValue] = React.useState(null);

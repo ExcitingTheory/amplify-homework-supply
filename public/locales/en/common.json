@@ -714,17 +714,187 @@
   },
   "mainToolbar": {
     "addToSection": {
-      "add": "Add",
-      "codeLabel": "Code Label",
-      "description": "Description",
-      "title": "Title"
+      "add": {
+        "value": "Add",
+        "_meta": {
+          "context": "This text appears on a button in the main toolbar interface when users are in the process of adding content to a specific section. Users see this text as the final confirmation action after selecting content items they want to add to a learning unit section.",
+          "component": {
+            "location": "src/components/MainToolbar.jsx",
+            "description": "MainToolbar is a primary navigation and action component that provides key functionality across the platform. It contains action buttons and controls that allow users to perform common tasks like adding content, managing sections, and accessing platform features."
+          },
+          "usage": "Button text for confirming the addition of selected content to a learning section",
+          "impact": "High - This is a primary action button that enables the core content creation workflow for instructors building learning units",
+          "userType": "instructors",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Insert",
+            "Include",
+            "Append",
+            "Attach"
+          ]
+        }
+      },
+      "codeLabel": {
+        "value": "Code Label",
+        "_meta": {
+          "context": "This text appears as a label in the MainToolbar component, specifically within the 'addToSection' functionality where users can add coded elements or programming content to learning sections. Users see this when they are adding structured code blocks or labeled code snippets to their educational content.",
+          "component": {
+            "location": "src/components/MainToolbar.jsx",
+            "description": "MainToolbar is a primary navigation and content creation toolbar that provides instructors with tools to add various content types to learning sections. It appears when users are actively creating or editing educational content and need quick access to content insertion options."
+          },
+          "usage": "Label text for a code insertion or code labeling feature within the content creation toolbar.",
+          "impact": "Medium - Important for instructors who need to add programming content or code examples to Japanese language learning materials, though not critical for basic platform functionality.",
+          "userType": "instructors",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Code Title",
+            "Code Caption",
+            "Programming Label",
+            "Code Identifier"
+          ]
+        }
+      },
+      "description": {
+        "value": "Description",
+        "_meta": {
+          "context": "This text appears as a form field label in the MainToolbar component when instructors are adding content to a learning section. Users see this label when they are in the content creation workflow, specifically when prompted to provide descriptive information about the section or content they are adding.",
+          "component": {
+            "location": "src/components/MainToolbar.jsx",
+            "description": "The MainToolbar component provides primary navigation and content creation tools for instructors. It displays when users are actively creating or editing learning materials and includes various action buttons and form fields for content management."
+          },
+          "usage": "Form field label that prompts instructors to enter descriptive text about the section content they are adding.",
+          "impact": "Important because it guides instructors to provide essential metadata that helps students understand the purpose and content of each learning section.",
+          "userType": "instructors",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Summary",
+            "Details",
+            "Information",
+            "Overview"
+          ]
+        }
+      },
+      "title": {
+        "value": "Title",
+        "_meta": {
+          "context": "This text appears as a field label or column header within the 'Add to Section' dialog or modal in the main toolbar. Users see this when they are organizing or adding content items to course sections and need to specify or view the title of the content being added.",
+          "component": {
+            "location": "src/components/MainToolbar.jsx",
+            "description": "MainToolbar is the primary navigation and action bar component that provides quick access to content creation and organization features. It displays essential tools and controls that instructors use frequently when building and managing their course content."
+          },
+          "usage": "Field label or column header identifying where users enter or view the title of content being added to a section.",
+          "impact": "High - This label is essential for content organization as it helps instructors identify and properly title their learning materials within course sections.",
+          "userType": "all",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Name",
+            "Heading",
+            "Label",
+            "Caption"
+          ]
+        }
+      }
     },
-    "help": "Help",
+    "help": {
+      "value": "Help",
+      "_meta": {
+        "context": "This text appears as a clickable element in the main toolbar that is visible across all pages of the eLearning platform. Users see this help option consistently in the top navigation area to access assistance, documentation, or support resources whenever they need guidance while using the platform.",
+        "component": {
+          "location": "src/components/MainToolbar.jsx",
+          "description": "The MainToolbar component renders the primary navigation bar that appears at the top of the application interface. It provides users with quick access to essential platform features and support options that remain consistently available throughout their learning or teaching session."
+        },
+        "usage": "Navigation button or link that users click to access help documentation or support resources.",
+        "impact": "High - Essential for user support and platform usability, especially important for new users learning to navigate the Japanese language learning platform.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Support",
+          "Assistance",
+          "Documentation",
+          "Guide"
+        ]
+      }
+    },
     "settings": {
-      "darkMode": "Dark Mode",
-      "disableNotifications": "Disable Notifications",
-      "experimentalFeatures": "Experimental Features",
-      "studentMode": "Student Mode"
+      "darkMode": {
+        "value": "Dark Mode",
+        "_meta": {
+          "context": "This text appears as a toggle option within the settings menu of the main application toolbar, allowing users to switch between light and dark visual themes. Users see this when they click on the settings icon in the main toolbar and want to customize their visual experience.",
+          "component": {
+            "location": "src/components/MainToolbar.jsx",
+            "description": "The MainToolbar component provides the primary navigation and settings interface that appears at the top of the application across all pages. It contains essential controls and settings options that users can access from anywhere in the platform."
+          },
+          "usage": "Toggle switch or checkbox label that allows users to enable dark mode theme.",
+          "impact": "Medium - Enhances user experience by providing visual customization options that can reduce eye strain and improve accessibility.",
+          "userType": "all",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Night Mode",
+            "Dark Theme",
+            "Low Light Mode"
+          ]
+        }
+      },
+      "disableNotifications": {
+        "value": "Disable Notifications",
+        "_meta": {
+          "context": "This text appears as an option in the settings menu of the main toolbar, allowing users to control their notification preferences. Users see this when they access the settings dropdown from the main navigation toolbar to customize their platform experience.",
+          "component": {
+            "location": "src/components/MainToolbar.jsx",
+            "description": "The MainToolbar component provides the primary navigation and control interface at the top of the platform. It contains essential user actions, settings access, and global controls that remain consistent across different platform views."
+          },
+          "usage": "Settings menu option or toggle control that users can select to turn off platform notifications.",
+          "impact": "Medium - Important for user experience customization as it allows users to control interruptions and manage their learning environment preferences.",
+          "userType": "all",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Turn Off Notifications",
+            "Mute Notifications",
+            "Stop Notifications",
+            "Silence Alerts"
+          ]
+        }
+      },
+      "experimentalFeatures": {
+        "value": "Experimental Features",
+        "_meta": {
+          "context": "This text appears as a menu item or section header in the main toolbar's settings dropdown, allowing users to access beta or preview features that are still in development. Users see this when they open the settings menu from the main navigation toolbar.",
+          "component": {
+            "location": "src/components/MainToolbar.jsx",
+            "description": "The MainToolbar component provides the primary navigation and settings access for the platform. It contains dropdown menus and controls that are available across different pages of the application."
+          },
+          "usage": "Menu item or section label that users click to access experimental platform features.",
+          "impact": "Medium - helps users discover and opt into new features while clearly indicating their experimental status.",
+          "userType": "all",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Beta Features",
+            "Preview Features",
+            "Advanced Features",
+            "Test Features"
+          ]
+        }
+      },
+      "studentMode": {
+        "value": "Student Mode",
+        "_meta": {
+          "context": "This text appears as a toggle or button option in the main toolbar settings menu, allowing users to switch between different interface modes. It enables a simplified view mode designed specifically for students to focus on learning content without instructor authoring tools visible.",
+          "component": {
+            "location": "src/components/MainToolbar.jsx",
+            "description": "The MainToolbar component provides the primary navigation and settings interface at the top of the application. It contains various controls and options that appear across different pages of the eLearning platform, including mode switching capabilities."
+          },
+          "usage": "Translation key: mainToolbar.settings.studentMode",
+          "impact": "Provides information to users",
+          "userType": "all",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Learner Mode",
+            "Study Mode",
+            "Learning View",
+            "Student View"
+          ]
+        }
+      }
     }
   },
   "navigation": {

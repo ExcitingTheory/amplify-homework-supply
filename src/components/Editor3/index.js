@@ -43,11 +43,15 @@ import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin
 import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
 import { TRANSFORMERS } from '@lexical/markdown';
+import { CUSTOM_BLOCK_TRANSFORMERS } from './utils/customMarkdownTransformers';
 import {
   TableCellNode,
   TableNode,
   TableRowNode,
 } from '@lexical/table';
+
+// Combine default Lexical transformers with our custom block transformers
+const ALL_TRANSFORMERS = [...TRANSFORMERS, ...CUSTOM_BLOCK_TRANSFORMERS];
 
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -81,6 +85,7 @@ import {
 import AutocompletePlugin from './plugins/AutocompletePlugin';
 import { AutocompleteProvider } from './context/SharedAutocompleteContext';
 import { AutocompleteNode } from './components/AutocompleteNode';
+import { AIContentSuggestionNode, AILoadingNode } from './components/AIContentSuggestionNode';
 
 import DragDropPastePlugin from './plugins/DragDropPastePlugin';
 import { ImageNode } from './components/ImageNode';
@@ -138,6 +143,8 @@ export const EditorNodes = [
   WordBlockNode,
   MeaningAssociationNode,
   AutocompleteNode,
+  AIContentSuggestionNode,
+  AILoadingNode,
   ImageNode,
   QuizNode,
   PlaylistNode,
@@ -528,7 +535,7 @@ export default function Editor() {
           <HorizontalRulePlugin />
           <ListPlugin />
           <TabIndentationPlugin />
-          <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+          <MarkdownShortcutPlugin transformers={ALL_TRANSFORMERS} />
           <TablePlugin />
           <CodeActionMenuPlugin />
           <WordBlockPlugin />
@@ -784,7 +791,7 @@ export function Workbook() {
           <HorizontalRulePlugin />
           <ListPlugin />
           <TabIndentationPlugin />
-          <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+          <MarkdownShortcutPlugin transformers={ALL_TRANSFORMERS} />
           <TablePlugin />
           <LexicalClickableLinkPlugin />
           <YouTubePlugin />

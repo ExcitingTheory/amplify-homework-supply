@@ -160,6 +160,7 @@ function SectionDetail({ user, signOut }) {
   const [inProgress, setInProgress] = React.useState(false);
   const [curveEnabled, setCurveEnabled] = React.useState(false);
   const [curveMethod, setCurveMethod] = React.useState('scale-to-top');
+  const [selectedCurveAssignments, setSelectedCurveAssignments] = React.useState(new Set());
   const [showFutureAssignments, setShowFutureAssignments] = React.useState(false);
   const [showDraftAssignments, setShowDraftAssignments] = React.useState(false);
   const [gradeOverrideOpen, setGradeOverrideOpen] = React.useState(false);
@@ -428,7 +429,19 @@ function SectionDetail({ user, signOut }) {
       next: ({ items }) => {
         console.log('sectionData', items)
         if (items.length > 0) {
-          setSection(items[0])
+          const sectionData = items[0];
+          setSection(sectionData);
+          
+          // Load curve settings from section
+          if (sectionData.curveEnabled !== undefined) {
+            setCurveEnabled(sectionData.curveEnabled);
+          }
+          if (sectionData.curveMethod) {
+            setCurveMethod(sectionData.curveMethod);
+          }
+          if (sectionData.curveAssignments) {
+            setSelectedCurveAssignments(new Set(sectionData.curveAssignments));
+          }
         }
       },
       error: (err) => console.error('Section subscription error:', err)
@@ -723,6 +736,9 @@ function SectionDetail({ user, signOut }) {
   const applyCurve = (grade, assignmentId) => {
     if (!curveEnabled || !grade || isNaN(grade)) return grade;
     
+    // Only apply curve if this assignment is selected
+    if (!selectedCurveAssignments.has(assignmentId)) return grade;
+    
     const curve = curveData[assignmentId];
     if (!curve) return grade;
     
@@ -734,6 +750,55 @@ function SectionDetail({ user, signOut }) {
     
     return grade;
   };
+
+  // Toggle assignment curve selection
+  const toggleCurveAssignment = (assignmentId) => {
+    setSelectedCurveAssignments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(assignmentId)) {
+        newSet.delete(assignmentId);
+      } else {
+        newSet.add(assignmentId);
+      }
+      return newSet;
+    });
+  };
+
+  // Select all assignments for curve
+  const selectAllCurveAssignments = () => {
+    setSelectedCurveAssignments(new Set(visibleAssignments.map(a => a.unitID)));
+  };
+
+  // Clear all curve selections
+  const clearAllCurveAssignments = () => {
+    setSelectedCurveAssignments(new Set());
+  };
+
+  // Save curve settings to section when they change
+  useEffect(() => {
+    if (!section?.id || !isOwner) return;
+    
+    const saveCurveSettings = async () => {
+      try {
+        const { errors } = await client.models.Section.update({
+          id: section.id,
+          curveEnabled,
+          curveMethod,
+          curveAssignments: Array.from(selectedCurveAssignments),
+        });
+        
+        if (errors) {
+          console.error('Error saving curve settings:', errors);
+        }
+      } catch (error) {
+        console.error('Error saving curve settings:', error);
+      }
+    };
+    
+    // Debounce the save to avoid too many updates
+    const timeoutId = setTimeout(saveCurveSettings, 500);
+    return () => clearTimeout(timeoutId);
+  }, [curveEnabled, curveMethod, selectedCurveAssignments, section?.id, isOwner]);
 
   const handleGradeCellClick = (student, assignment, currentGrade) => {
     if (!isOwner) return; // Only instructors can override grades
@@ -1146,19 +1211,62 @@ function SectionDetail({ user, signOut }) {
             )}
           </Box>
         
-        {/* Curve Debug Information */}
+        {/* Curve Assignment Selection */}
         {curveEnabled && isOwner && !viewAsStudent && (
+          <Box sx={{ padding: '0 1rem 1rem 1rem' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                {t('sectionDetail.selectAssignmentsToCurve')} ({selectedCurveAssignments.size}/{visibleAssignments.length})
+              </Typography>
+              <Button 
+                size="small" 
+                onClick={selectAllCurveAssignments}
+                disabled={selectedCurveAssignments.size === visibleAssignments.length}
+              >
+                {t('sectionDetail.selectAll')}
+              </Button>
+              <Button 
+                size="small" 
+                onClick={clearAllCurveAssignments}
+                disabled={selectedCurveAssignments.size === 0}
+              >
+                {t('sectionDetail.clearAll')}
+              </Button>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              {visibleAssignments.map((assignment) => {
+                const unitName = units[assignment.unitID]?.name || 'Unknown';
+                const isSelected = selectedCurveAssignments.has(assignment.unitID);
+                return (
+                  <Chip
+                    key={assignment.id}
+                    label={unitName}
+                    onClick={() => toggleCurveAssignment(assignment.unitID)}
+                    color={isSelected ? 'primary' : 'default'}
+                    variant={isSelected ? 'filled' : 'outlined'}
+                    sx={{ cursor: 'pointer' }}
+                  />
+                );
+              })}
+            </Box>
+          </Box>
+        )}
+        
+        {/* Curve Debug Information - only show for selected assignments */}
+        {curveEnabled && isOwner && !viewAsStudent && selectedCurveAssignments.size > 0 && (
           <Box sx={{ padding: '0 1rem 1rem 1rem' }}>
             <Typography variant="caption" color="text.secondary">
               {t('sectionDetail.curveDebugInfo')} Method = {curveMethod} | 
-              {Object.entries(curveData).map(([unitId, data]) => {
+              {Array.from(selectedCurveAssignments).map((unitId) => {
+                const data = curveData[unitId];
+                if (!data) return '';
                 const unitName = units[unitId]?.name || unitId;
                 if (curveMethod === 'scale-to-top') {
                   return ` ${unitName}: max=${data.maxScore.toFixed(1)}%, scale=${data.adjustment.toFixed(2)}x`;
                 } else {
                   return ` ${unitName}: avg=${data.avgScore.toFixed(1)}%, adjust=+${data.adjustment.toFixed(1)}%`;
                 }
-              }).join(' | ')}
+              }).filter(Boolean).join(' | ')}
             </Typography>
           </Box>
         )}

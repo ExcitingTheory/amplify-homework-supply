@@ -622,6 +622,24 @@
     }
   },
   "aiContentSuggestion": {
-    "tabToAccept": "Tab To Accept"
+    "tabToAccept": {
+      "value": "Tab To Accept",
+      "_meta": {
+        "context": "This text appears as an instructional hint within the AI content suggestion overlay in the rich text editor. Users see this guidance when an AI-generated text suggestion is displayed inline with their current typing, indicating how they can accept the suggested content.",
+        "component": {
+          "location": "src/components/Editor3/components/AIContentSuggestion.js",
+          "description": "Renders AI-generated text suggestions inline with the editor content, styled similarly to GitHub Copilot's ghost text. The component displays suggested content that users can accept or ignore while creating learning materials in the Lexical editor."
+        },
+        "usage": "Instructional label displayed within the AI suggestion overlay to guide user interaction.",
+        "impact": "High - Essential for users to understand how to interact with AI suggestions and efficiently incorporate generated content into their work.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Press Tab to Accept",
+          "Tab Key to Accept",
+          "Use Tab to Accept"
+        ]
+      }
+    }
   }
 }

@@ -6,7 +6,7 @@
  * 
  * Features:
  * - Server-side SSE streaming
- * - Tool execution (search_content, create_section, generate_unit_content)
+ * - Tool execution (search_content, create_section, insert_quiz, insert_answer_block, insert_meaning_association, insert_custom_answer)
  * - Prompt injection detection
  * - Context-aware system prompts (unit, files, dictionary, sections)
  * 
@@ -69,7 +69,7 @@ const tools = {
 
   // Server-side tool with execute function
   generate_unit_content: tool({
-    description: 'Generate rich educational content (explanations, examples, quizzes, etc.) that can be inserted into the current unit',
+    description: 'Generate rich educational content (explanations, examples, quizzes, etc.) that can be inserted into the current unit. DEPRECATED: Use insert_quiz or other block tools instead.',
     inputSchema: z.object({
       contentType: z.enum(['explanation', 'example', 'practice', 'quiz', 'summary', 'vocabulary_section', 'custom']).describe('Type of content to generate'),
       topic: z.string().describe('The topic or subject for the content'),
@@ -94,7 +94,143 @@ const tools = {
         template: templates[contentType] || templates.custom,
         guidance: instructions || `Generate ${contentType} content about "${topic}"`,
         includeMarkdown,
-        message: `Ready to generate ${contentType} content. Follow the template structure.`
+        message: `DEPRECATED: Use insert_quiz or other block tools instead. Template: ${templates[contentType] || templates.custom}`
+      };
+    },
+  }),
+
+  // New block insertion tools - client-side execution with server-side validation
+  insert_quiz: tool({
+    description: 'Create an interactive quiz block with graded questions. Returns block data for user approval before insertion.',
+    inputSchema: z.object({
+      questions: z.array(z.object({
+        prompt: z.string().describe('The question text'),
+        type: z.enum(['multiple-choice', 'short-answer', 'true-false']).describe('Type of question'),
+        options: z.array(z.string()).optional().describe('Answer options (for multiple-choice)'),
+        correctAnswer: z.string().describe('The correct answer'),
+        points: z.number().optional().default(1).describe('Points for this question'),
+      })).describe('Array of quiz questions'),
+      title: z.string().optional().describe('Title for the quiz'),
+    }),
+    execute: async ({ questions, title }: any) => {
+      const quizData = {
+        title: title || 'Quiz',
+        questions: questions.map((q: any, index: number) => ({
+          id: `q-${Date.now()}-${index}`,
+          prompt: q.prompt,
+          type: q.type || 'multiple-choice',
+          options: q.options || [],
+          correctAnswer: q.correctAnswer,
+          points: q.points || 1,
+        }))
+      };
+
+      return {
+        success: true,
+        action: 'insert_editor_block',
+        blockType: 'quiz',
+        blockData: quizData,
+        preview: {
+          title: quizData.title,
+          questionCount: questions.length,
+          totalPoints: questions.reduce((sum: number, q: any) => sum + (q.points || 1), 0),
+          questions: questions.map((q: any) => ({ prompt: q.prompt, type: q.type }))
+        },
+        message: `Quiz block ready: "${title || 'Quiz'}" with ${questions.length} questions`
+      };
+    },
+  }),
+
+  insert_answer_block: tool({
+    description: 'Create an answer block where students provide translations or definitions of vocabulary words.',
+    inputSchema: z.object({
+      wordIds: z.array(z.string()).describe('IDs of vocabulary words to test'),
+      requestDefinition: z.boolean().optional().default(false).describe('Request definition (true) or phrase (false)'),
+      allowedInput: z.object({
+        keyboard: z.boolean().optional().default(true),
+        speech: z.boolean().optional().default(false),
+        handwriting: z.boolean().optional().default(false),
+      }).optional().describe('Allowed input methods'),
+    }),
+    execute: async ({ wordIds, requestDefinition = false, allowedInput = {} }: any) => {
+      const defaultAllowedInput = {
+        keyboard: true,
+        speech: false,
+        handwriting: false,
+        ...allowedInput
+      };
+
+      return {
+        success: true,
+        action: 'insert_editor_block',
+        blockType: 'answer',
+        blockData: {
+          wordIDs: wordIds,
+          requestDefinition,
+          allowedInput: defaultAllowedInput,
+          promptMethod: []
+        },
+        preview: {
+          wordCount: wordIds.length,
+          mode: requestDefinition ? 'Request Definition' : 'Request Translation',
+          inputMethods: Object.entries(defaultAllowedInput).filter(([k, v]) => v).map(([k]) => k)
+        },
+        message: `Answer block ready for ${wordIds.length} word(s)`
+      };
+    },
+  }),
+
+  insert_meaning_association: tool({
+    description: 'Create a drag-and-drop matching exercise connecting terms with definitions.',
+    inputSchema: z.object({
+      wordIds: z.array(z.string()).describe('IDs of vocabulary words to match'),
+      instructions: z.string().optional().describe('Instructions for the exercise'),
+    }),
+    execute: async ({ wordIds, instructions }: any) => {
+      return {
+        success: true,
+        action: 'insert_editor_block',
+        blockType: 'meaning-association',
+        blockData: {
+          wordIDs: wordIds,
+          instructions: instructions || 'Match each term with its definition'
+        },
+        preview: {
+          wordCount: wordIds.length,
+          instructions: instructions || 'Match each term with its definition'
+        },
+        message: `Meaning association block ready for ${wordIds.length} word(s)`
+      };
+    },
+  }),
+
+  insert_custom_answer: tool({
+    description: 'Create a custom answer block with flexible prompt and validation.',
+    inputSchema: z.object({
+      prompt: z.string().describe('The prompt or question to display'),
+      acceptedAnswers: z.array(z.string()).describe('Array of accepted correct answers'),
+      caseSensitive: z.boolean().optional().default(false).describe('Case-sensitive matching'),
+      allowMultipleAttempts: z.boolean().optional().default(true).describe('Allow multiple attempts'),
+    }),
+    execute: async ({ prompt, acceptedAnswers, caseSensitive = false, allowMultipleAttempts = true }: any) => {
+      return {
+        success: true,
+        action: 'insert_editor_block',
+        blockType: 'custom-answer',
+        blockData: {
+          prompt,
+          acceptedAnswers,
+          caseSensitive,
+          allowMultipleAttempts,
+          id: `ca-${Date.now()}`
+        },
+        preview: {
+          prompt,
+          answerCount: acceptedAnswers.length,
+          caseSensitive,
+          allowMultipleAttempts
+        },
+        message: `Custom answer block ready: "${prompt}"`
       };
     },
   }),

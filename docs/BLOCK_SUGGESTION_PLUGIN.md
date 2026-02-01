@@ -303,8 +303,7 @@ const [anchorElement, setAnchorElement] = useState(null); // Selection range for
 ### Phase 2: AI Content Completion
 - Use GPT to suggest **actual content** (sentences/paragraphs)
 - Trigger on paragraph end
-- Stream suggestions like GitHub Copilot
-
+- Stream suggestions into the editor with autocomplete
 ### Phase 3: AI Block Suggestions
 - Analyze entire unit structure with GPT
 - Provide **reasoning** for suggestions ("After a quiz, learners benefit from reflection...")

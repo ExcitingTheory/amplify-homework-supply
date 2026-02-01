@@ -138,6 +138,10 @@ const theme = createTheme({
 const preview = {
   globalTypes,
   parameters: {
+    // Disable onboarding addon  
+    onboarding: {
+      disabled: true,
+    },
     // Note: Base action handlers are defined here but will be wrapped
     // with tracking in the decorator below based on story context
     actions: { 

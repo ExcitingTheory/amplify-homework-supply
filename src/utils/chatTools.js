@@ -304,36 +304,137 @@ export const toolDefinitions = [
   {
     type: 'function',
     function: {
-      name: 'generate_unit_content',
-      description: 'Generate markdown content suggestions that can be inserted into the current unit. Creates educational content like explanations, examples, practice sections, etc. Returns preview for user confirmation first.',
+      name: 'insert_quiz',
+      description: 'Insert a quiz block into the current unit. Quizzes are interactive graded assessment blocks with multiple questions.',
       parameters: {
         type: 'object',
         properties: {
-          contentType: {
-            type: 'string',
-            enum: ['explanation', 'example', 'practice', 'quiz', 'summary', 'vocabulary_section', 'custom'],
-            description: 'Type of content to generate'
+          questions: {
+            type: 'array',
+            description: 'Array of quiz questions',
+            items: {
+              type: 'object',
+              properties: {
+                prompt: {
+                  type: 'string',
+                  description: 'The question text'
+                },
+                type: {
+                  type: 'string',
+                  enum: ['multiple-choice', 'short-answer', 'true-false'],
+                  description: 'Type of question'
+                },
+                options: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Answer options (for multiple-choice)'
+                },
+                correctAnswer: {
+                  type: 'string',
+                  description: 'The correct answer'
+                },
+                points: {
+                  type: 'number',
+                  description: 'Points for this question',
+                  default: 1
+                }
+              },
+              required: ['prompt', 'type', 'correctAnswer']
+            }
           },
-          topic: {
+          title: {
             type: 'string',
-            description: 'Topic or subject for the content'
+            description: 'Title for the quiz',
+          }
+        },
+        required: ['questions']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'insert_answer_block',
+      description: 'Insert an answer block where students provide translations or definitions of vocabulary words.',
+      parameters: {
+        type: 'object',
+        properties: {
+          wordIds: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'IDs of vocabulary words to test'
+          },
+          requestDefinition: {
+            type: 'boolean',
+            description: 'Whether to request the definition (true) or the phrase (false)',
+            default: false
+          },
+          allowedInput: {
+            type: 'object',
+            description: 'Allowed input methods (keyboard, speech, handwriting)',
+            properties: {
+              keyboard: { type: 'boolean', default: true },
+              speech: { type: 'boolean', default: false },
+              handwriting: { type: 'boolean', default: false }
+            }
+          }
+        },
+        required: ['wordIds']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'insert_meaning_association',
+      description: 'Insert a meaning association block - a drag-and-drop matching exercise connecting terms with definitions.',
+      parameters: {
+        type: 'object',
+        properties: {
+          wordIds: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'IDs of vocabulary words to match'
           },
           instructions: {
             type: 'string',
-            description: 'Specific instructions or requirements for the content'
-          },
-          includeMarkdown: {
-            type: 'boolean',
-            description: 'Whether to include markdown formatting in the response',
-            default: true
-          },
-          confirmed: {
-            type: 'boolean',
-            description: 'Set to true when user has confirmed the parameters',
-            default: false
+            description: 'Instructions for the exercise',
+            default: 'Match each term with its definition'
           }
         },
-        required: ['contentType', 'topic']
+        required: ['wordIds']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'insert_custom_answer',
+      description: 'Insert a custom answer block with flexible prompt and validation.',
+      parameters: {
+        type: 'object',
+        properties: {
+          prompt: {
+            type: 'string',
+            description: 'The prompt or question to display'
+          },
+          acceptedAnswers: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Array of accepted correct answers'
+          },
+          caseSensitive: {
+            type: 'boolean',
+            description: 'Whether answer matching is case-sensitive',
+            default: false
+          },
+          allowMultipleAttempts: {
+            type: 'boolean',
+            description: 'Allow students multiple attempts',
+            default: true
+          }
+        },
+        required: ['prompt', 'acceptedAnswers']
       }
     }
   }
@@ -879,139 +980,123 @@ export async function executeDeleteAssignment({ assignmentId }) {
   }
 }
 
-export async function executeGenerateUnitContent({ contentType, topic, instructions, includeMarkdown = true, confirmed = false }) {
+export async function executeInsertQuiz({ questions, title }) {
   try {
-    // If not confirmed, return preview data for user confirmation
-    if (!confirmed) {
-      let template = '';
-      let guidance = '';
-      
-      switch (contentType) {
-        case 'explanation':
-          guidance = `Generate a clear, educational explanation about "${topic}". ${instructions || 'Include relevant details and context.'}`;
-          template = includeMarkdown ? `
-## ${topic}
+    // Create Lexical QuizNode data structure
+    const quizData = {
+      title: title || 'Quiz',
+      questions: questions.map((q, index) => ({
+        id: `q-${Date.now()}-${index}`,
+        prompt: q.prompt,
+        type: q.type || 'multiple-choice',
+        options: q.options || [],
+        correctAnswer: q.correctAnswer,
+        points: q.points || 1,
+      }))
+    };
 
-[Your explanation here]
-
-### Key Points
-- Point 1
-- Point 2
-- Point 3
-` : `${topic}\n\n[Your explanation here]\n\nKey Points:\n- Point 1\n- Point 2`;
-          break;
-          
-        case 'example':
-          guidance = `Generate practical examples demonstrating "${topic}". ${instructions || 'Include 2-3 clear examples with explanations.'}`;
-          template = includeMarkdown ? `
-### Examples: ${topic}
-
-**Example 1:**
-[Example text]
-- Explanation: [Details]
-
-**Example 2:**
-[Example text]
-- Explanation: [Details]
-` : `Examples: ${topic}\n\nExample 1: [text]\nExplanation: [details]`;
-          break;
-          
-        case 'practice':
-          guidance = `Generate practice exercises for "${topic}". ${instructions || 'Include 3-5 practice problems or activities.'}`;
-          template = includeMarkdown ? `
-### Practice: ${topic}
-
-1. [Exercise 1]
-   - Answer: [Answer]
-
-2. [Exercise 2]
-   - Answer: [Answer]
-
-3. [Exercise 3]
-   - Answer: [Answer]
-` : `Practice: ${topic}\n\n1. [Exercise 1]\n2. [Exercise 2]`;
-          break;
-          
-        case 'quiz':
-          guidance = `Generate quiz questions about "${topic}". ${instructions || 'Create 4-5 multiple choice or short answer questions.'}`;
-          template = includeMarkdown ? `
-### Quiz: ${topic}
-
-**Question 1:** [Question text]
-- A) [Option]
-- B) [Option]
-- C) [Option]
-- D) [Option]
-- **Answer:** [Correct answer]
-
-**Question 2:** [Question text]
-- **Answer:** [Answer]
-` : `Quiz: ${topic}\n\nQ1: [Question]\nAnswer: [Answer]`;
-          break;
-          
-        case 'summary':
-          guidance = `Generate a concise summary of "${topic}". ${instructions || 'Highlight the main points in a clear, organized way.'}`;
-          template = includeMarkdown ? `
-## Summary: ${topic}
-
-[Summary paragraph]
-
-### Main Takeaways
-1. [Point 1]
-2. [Point 2]
-3. [Point 3]
-` : `Summary: ${topic}\n\n[Summary]\n\nMain points:\n1. [Point 1]`;
-          break;
-          
-        case 'vocabulary_section':
-          guidance = `Generate a vocabulary section for "${topic}". ${instructions || 'Include 5-10 relevant terms with definitions.'}`;
-          template = includeMarkdown ? `
-### Vocabulary: ${topic}
-
-| Term | Reading | Meaning |
-|------|---------|---------|
-| [Term] | [Reading] | [Definition] |
-| [Term] | [Reading] | [Definition] |
-` : `Vocabulary: ${topic}\n\n[Term] - [Reading] - [Definition]`;
-          break;
-          
-        case 'custom':
-          guidance = `Generate custom content about "${topic}". ${instructions || 'Create appropriate educational content.'}`;
-          template = includeMarkdown ? `## ${topic}\n\n[Your content here]` : `${topic}\n\n[Content]`;
-          break;
-          
-        default:
-          guidance = `Generate content about "${topic}". ${instructions || ''}`;
-          template = includeMarkdown ? `## ${topic}\n\n[Content]` : topic;
-      }
-      
-      return {
-        success: true,
-        requiresConfirmation: true,
-        contentType,
-        topic,
-        instructions,
-        guidance,
-        template,
-        includeMarkdown,
-        message: `Ready to generate ${contentType} content about "${topic}". Confirm to proceed.`
-      };
-    }
-    
-    // If confirmed, this would trigger actual AI content generation
-    // The AI will see this success response and generate the actual markdown content
     return {
       success: true,
-      confirmed: true,
-      contentType,
-      topic,
-      instructions,
-      includeMarkdown,
-      message: `Generating ${contentType} content about "${topic}"...`,
-      needsGeneration: true, // Signal to AI to generate actual content
+      action: 'insert_editor_block',
+      blockType: 'quiz',
+      blockData: quizData,
+      preview: {
+        title: quizData.title,
+        questionCount: questions.length,
+        totalPoints: questions.reduce((sum, q) => sum + (q.points || 1), 0),
+        questions: questions.map(q => ({ prompt: q.prompt, type: q.type }))
+      },
+      message: `Quiz block ready: "${title || 'Quiz'}" with ${questions.length} questions`
     };
   } catch (error) {
-    console.error('Generate unit content error:', error);
+    console.error('Insert quiz error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function executeInsertAnswerBlock({ wordIds, requestDefinition = false, allowedInput = {} }) {
+  try {
+    const defaultAllowedInput = {
+      keyboard: true,
+      speech: false,
+      handwriting: false,
+      ...allowedInput
+    };
+
+    const blockData = {
+      wordIDs: wordIds,
+      requestDefinition,
+      allowedInput: defaultAllowedInput,
+      promptMethod: []
+    };
+
+    return {
+      success: true,
+      action: 'insert_editor_block',
+      blockType: 'answer',
+      blockData,
+      preview: {
+        wordCount: wordIds.length,
+        mode: requestDefinition ? 'Request Definition' : 'Request Translation',
+        inputMethods: Object.entries(defaultAllowedInput).filter(([k, v]) => v).map(([k]) => k)
+      },
+      message: `Answer block ready for ${wordIds.length} word(s)`
+    };
+  } catch (error) {
+    console.error('Insert answer block error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function executeInsertMeaningAssociation({ wordIds, instructions }) {
+  try {
+    const blockData = {
+      wordIDs: wordIds,
+      instructions: instructions || 'Match each term with its definition'
+    };
+
+    return {
+      success: true,
+      action: 'insert_editor_block',
+      blockType: 'meaning-association',
+      blockData,
+      preview: {
+        wordCount: wordIds.length,
+        instructions: blockData.instructions
+      },
+      message: `Meaning association block ready for ${wordIds.length} word(s)`
+    };
+  } catch (error) {
+    console.error('Insert meaning association error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function executeInsertCustomAnswer({ prompt, acceptedAnswers, caseSensitive = false, allowMultipleAttempts = true }) {
+  try {
+    const blockData = {
+      prompt,
+      acceptedAnswers,
+      caseSensitive,
+      allowMultipleAttempts,
+      id: `ca-${Date.now()}`
+    };
+
+    return {
+      success: true,
+      action: 'insert_editor_block',
+      blockType: 'custom-answer',
+      blockData,
+      preview: {
+        prompt,
+        answerCount: acceptedAnswers.length,
+        caseSensitive,
+        allowMultipleAttempts
+      },
+      message: `Custom answer block ready: "${prompt}"`
+    };
+  } catch (error) {
+    console.error('Insert custom answer error:', error);
     return { success: false, error: error.message };
   }
 }
@@ -1036,7 +1121,10 @@ export async function executeTool(toolName, args) {
     get_unit_details: executeGetUnitDetails,
     update_unit: executeUpdateUnit,
     delete_assignment: executeDeleteAssignment,
-    generate_unit_content: executeGenerateUnitContent
+    insert_quiz: executeInsertQuiz,
+    insert_answer_block: executeInsertAnswerBlock,
+    insert_meaning_association: executeInsertMeaningAssociation,
+    insert_custom_answer: executeInsertCustomAnswer
   };
 
   const executor = toolMap[toolName];

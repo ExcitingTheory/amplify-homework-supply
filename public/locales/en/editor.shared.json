@@ -55,7 +55,26 @@
       },
       "value": "Please add a speaker first"
     },
-    "description": "Description",
+    "description": {
+      "value": "Description",
+      "_meta": {
+        "context": "This text appears as a label for a description input field in the Recording Studio interface where instructors can add descriptive text to their audio recordings. It guides users to provide context or details about the recording content they are creating for their students.",
+        "component": {
+          "location": "src/components/common",
+          "description": "A form label component that identifies the description input field in the recording studio interface. It helps instructors understand what information they should provide about their audio content."
+        },
+        "usage": "Form field label that prompts instructors to enter descriptive text about their recording",
+        "impact": "Medium - helps instructors provide clear context for their recordings which improves content organization and student understanding",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Details",
+          "Summary",
+          "Overview",
+          "Information"
+        ]
+      }
+    },
     "descriptionPlaceholder": {
       "_meta": {
         "alternativeTerms": [
@@ -96,7 +115,26 @@
       },
       "value": "Direction"
     },
-    "directionPlaceholder": "e.g., entering, out of breath",
+    "directionPlaceholder": {
+      "value": "e.g., entering, out of breath",
+      "_meta": {
+        "context": "This placeholder text appears in a direction input field within the recording studio interface, specifically in the third step or section of the recording process. It provides example text to guide users on what type of directional or contextual information they should enter to describe how audio content should be delivered or performed.",
+        "component": {
+          "location": "src/components/common",
+          "description": "This component is part of the recording studio functionality that allows instructors to create audio content with specific performance directions. It provides input fields where users can specify how recorded content should be delivered, including emotional tone, physical state, or contextual information that affects pronunciation or delivery style."
+        },
+        "usage": "Input field placeholder text that appears when users focus on or interact with a direction specification field.",
+        "impact": "Medium - This guidance helps instructors create more nuanced and contextually appropriate audio content for language learning, improving the quality of pronunciation examples and listening exercises.",
+        "userType": "instructors",
+        "tone": "casual",
+        "alternativeTerms": [
+          "for example",
+          "such as",
+          "like",
+          "instance"
+        ]
+      }
+    },
     "emotion": {
       "_meta": {
         "alternativeTerms": [],
@@ -131,7 +169,26 @@
       },
       "value": "e.g., cheerful, tired"
     },
-    "empty": "(empty)",
+    "empty": {
+      "value": "(empty)",
+      "_meta": {
+        "context": "This text appears as a placeholder indicator within the recording studio interface when no content or recording has been created yet. Users see this empty state message in the third recording studio component before they begin recording audio content for their learning materials.",
+        "component": {
+          "location": "src/components/common",
+          "description": "This component manages the empty state display for the recording studio functionality, showing placeholder text when no recordings or content are present. It provides visual feedback to users about the current state of their recording workspace and prompts them to begin creating content."
+        },
+        "usage": "Placeholder text displayed in an empty content area within the recording studio interface.",
+        "impact": "Medium - This text helps users understand the current state of their recording workspace and provides clear visual feedback about empty content areas.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "blank",
+          "no content",
+          "vacant",
+          "void"
+        ]
+      }
+    },
     "exportJSON": {
       "_meta": {
         "alternativeTerms": [
@@ -332,7 +389,26 @@
       },
       "value": "Play"
     },
-    "processing": "Processing {{count}} lines...",
+    "processing": {
+      "value": "Processing {{count}} lines...",
+      "_meta": {
+        "context": "This text appears as a status message in the recording studio interface while the system processes recorded audio content. Users see this message during the intermediate step after recording audio but before the processed result is available, with the count indicating the number of lines being processed.",
+        "component": {
+          "location": "src/components/common",
+          "description": "This component displays processing status messages to users during audio processing operations in the recording studio. It provides real-time feedback about the progress of audio transcription or other processing tasks."
+        },
+        "usage": "Status message displayed during audio processing operations showing progress with dynamic count",
+        "impact": "Important because it reassures users that their audio is being processed and provides transparency about system activity",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "analyzing",
+          "converting",
+          "transcribing",
+          "working on"
+        ]
+      }
+    },
     "record": {
       "_meta": {
         "alternativeTerms": [
@@ -1088,7 +1164,26 @@
       },
       "value": "Publishing..."
     },
-    "wordsEmbedded": "{{count}} words embedded"
+    "wordsEmbedded": {
+      "value": "{{count}} words embedded",
+      "_meta": {
+        "context": "This status message appears in the content editor when instructors are embedding vocabulary words into learning units. It displays a count of how many words have been successfully processed and embedded, providing feedback during the content creation workflow.",
+        "component": {
+          "location": "src/components/common",
+          "description": "A progress or status display component that shows the current count of embedded vocabulary words during unit creation. It provides real-time feedback to instructors as they build learning content with vocabulary integration."
+        },
+        "usage": "Translation key: unitEmbedding.wordsEmbedded",
+        "impact": "Medium - helps instructors track their content creation progress and confirms vocabulary integration is working properly",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "integrated",
+          "inserted",
+          "incorporated",
+          "added"
+        ]
+      }
+    }
   },
   "autoEmbedPlugin": {
     "${activeEmbedConfig": {},
@@ -1842,9 +1937,64 @@
     }
   },
   "tableComponent": {
-    "cellActionsLabel": "Cell Actions Label",
-    "cellActionsTitle": "Cell Actions Title",
-    "clearCell": "Clear Cell",
+    "cellActionsLabel": {
+      "value": "Cell Actions Label",
+      "_meta": {
+        "context": "This text appears as an accessibility label for cell action controls within table components in the content editor. It provides screen reader users with context about what actions are available when they navigate to or interact with table cells during content creation.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "The TableComponent provides rich table editing functionality within the Lexical editor, allowing instructors to create and modify tables for their learning content. It includes interactive cell controls for actions like adding rows, columns, or formatting cells."
+        },
+        "usage": "Accessibility label for table cell action controls that appears for assistive technologies.",
+        "impact": "Important - ensures table editing functionality is accessible to screen reader users and maintains compliance with accessibility standards for the content creation interface.",
+        "userType": "instructors",
+        "tone": "technical",
+        "alternativeTerms": [
+          "Cell Options Label",
+          "Table Cell Controls",
+          "Cell Menu Label"
+        ]
+      }
+    },
+    "cellActionsTitle": {
+      "value": "Cell Actions Title",
+      "_meta": {
+        "context": "This text appears as a title for cell action controls within table components in the content editor. Users see this when they interact with individual table cells to access editing options like insert, delete, or modify cell properties.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "Handles table functionality within the Lexical editor for creating structured content. Provides cell-level actions and controls for instructors building educational materials with tabular data."
+        },
+        "usage": "Title text for cell action menu or toolbar when editing table cells",
+        "impact": "Medium - helps instructors understand available cell editing options but not critical for core functionality",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Cell Options Title",
+          "Cell Menu Header",
+          "Cell Controls Label"
+        ]
+      }
+    },
+    "clearCell": {
+      "value": "Clear Cell",
+      "_meta": {
+        "context": "This text appears as an action option within table editing functionality when users are working with table cells in the content editor. Users see this option when they right-click on a table cell or access cell-specific actions through a context menu or toolbar.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "This component provides table editing functionality within the Lexical editor, allowing instructors to create and modify tabular content for their learning materials. It handles various table operations including cell manipulation, formatting, and content management."
+        },
+        "usage": "Button or menu item that triggers the action to clear all content from a selected table cell.",
+        "impact": "Medium - This action helps instructors efficiently edit table content by quickly removing cell data without affecting table structure.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Empty Cell",
+          "Delete Cell Content",
+          "Remove Cell Data",
+          "Erase Cell"
+        ]
+      }
+    },
     "deleteColumn": {
       "_meta": {
         "alternativeTerms": [
@@ -1883,7 +2033,26 @@
       },
       "value": "Delete Row"
     },
-    "deleteTable": "Delete Table",
+    "deleteTable": {
+      "value": "Delete Table",
+      "_meta": {
+        "context": "This text appears as a button or menu option within the table editing interface of the rich content editor. Users see this when they right-click on a table or access table management options, allowing them to permanently remove an entire table from their learning content.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "A table management component within the Lexical rich text editor that handles table operations and formatting. This component provides instructors with tools to create, modify, and delete tables when authoring learning content and assignments."
+        },
+        "usage": "Button or menu item text that triggers the deletion of an entire table element.",
+        "impact": "Important because this action permanently removes content, so users must clearly understand what will happen when they click this option.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Remove Table",
+          "Delete Grid",
+          "Remove Data Table",
+          "Clear Table"
+        ]
+      }
+    },
     "insertColumn": {
       "_meta": {
         "alternativeTerms": [
@@ -1903,8 +2072,44 @@
       },
       "value": "Insert Column"
     },
-    "insertColumnLeft": "Insert Column Left",
-    "insertColumnRight": "Insert Column Right",
+    "insertColumnLeft": {
+      "value": "Insert Column Left",
+      "_meta": {
+        "context": "This text appears as a context menu option or toolbar button when users right-click on a table cell or column in the Lexical editor. It allows instructors to insert a new column immediately to the left of the currently selected column while creating learning content.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "This component handles table editing functionality within the Lexical rich text editor. It provides users with table manipulation tools including column insertion, deletion, and formatting options for creating structured learning materials."
+        },
+        "usage": "Context menu item or toolbar button that triggers column insertion when clicked.",
+        "impact": "Medium - This feature enables instructors to efficiently structure tabular content in their learning materials, which is important for organizing vocabulary lists, grammar tables, and exercise formats.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Add Column Left",
+          "Insert Left Column",
+          "Add Column Before"
+        ]
+      }
+    },
+    "insertColumnRight": {
+      "value": "Insert Column Right",
+      "_meta": {
+        "context": "This text appears as a context menu option or toolbar button when users right-click on a table cell or select table editing options in the rich text editor. It allows content creators to dynamically expand tables by adding a new column to the right of the currently selected column.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "A table management component within the Lexical editor that provides interactive table editing capabilities for content creation. It offers various table manipulation functions including column and row insertion, deletion, and formatting options for instructors building learning materials."
+        },
+        "usage": "Context menu item or toolbar button that triggers the insertion of a new table column to the right of the selected column.",
+        "impact": "Important - Essential for instructors creating structured content like vocabulary tables, comparison charts, or exercise layouts that require flexible table editing capabilities.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Add Column Right",
+          "Insert Right Column",
+          "Add Column After"
+        ]
+      }
+    },
     "insertRow": {
       "_meta": {
         "alternativeTerms": [
@@ -1924,17 +2129,215 @@
       },
       "value": "Insert Row"
     },
-    "insertRowAbove": "Insert Row Above",
-    "insertRowBelow": "Insert Row Below",
-    "makeColumnHeader": "Make Column Header",
-    "makeHeader": "Make Header",
-    "makeRowHeader": "Make Row Header",
-    "removeColumnHeader": "Remove Column Header",
-    "removeHeader": "Remove Header",
-    "removeRowHeader": "Remove Row Header",
-    "removeSorting": "Remove Sorting",
-    "sortAscending": "Sort Ascending",
-    "sortDescending": "Sort Descending"
+    "insertRowAbove": {
+      "value": "Insert Row Above",
+      "_meta": {
+        "context": "This text appears in a context menu or toolbar when users right-click on a table row or access table editing options within the rich text editor. Users see this option when they want to add a new row directly above the currently selected row in a table they are editing.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "This component provides table editing functionality within the Lexical rich text editor, allowing users to create and modify tables in their learning content. It includes various table manipulation options like inserting, deleting, and formatting rows and columns for instructors creating educational materials."
+        },
+        "usage": "Menu item or button that users click to insert a new table row above the currently selected row.",
+        "impact": "Medium - This is a useful table editing feature that helps instructors efficiently structure tabular content in their learning materials.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Add Row Above",
+          "Insert Row Before",
+          "Create Row Above"
+        ]
+      }
+    },
+    "insertRowBelow": {
+      "value": "Insert Row Below",
+      "_meta": {
+        "context": "This text appears as an option in a context menu or toolbar when users right-click or select actions for a table row within the rich text editor. Users see this when they want to expand their table by adding a new row directly below the currently selected row.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "This component provides table editing functionality within the Lexical rich text editor, allowing instructors to create and modify tables for learning content. It includes various table manipulation tools and context menu options for row and column operations."
+        },
+        "usage": "Context menu item or button that triggers the insertion of a new table row below the current selection.",
+        "impact": "Important because table editing capabilities are essential for instructors creating structured learning content and assignments.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Add Row Below",
+          "Insert New Row Below",
+          "Create Row Below"
+        ]
+      }
+    },
+    "makeColumnHeader": {
+      "value": "Make Column Header",
+      "_meta": {
+        "context": "This text appears as an option in a table editing interface within the Lexical editor when users right-click on a table cell or access table formatting options. Instructors see this when creating or editing table content in learning materials and need to designate which row should serve as the table header.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "A table editing component that provides rich table functionality within the Lexical editor. It allows instructors to create, format, and modify tables in their learning content with various formatting and structural options."
+        },
+        "usage": "Menu item or button that allows users to convert a selected table row into a header row with appropriate styling.",
+        "impact": "Important - This feature is essential for creating well-structured, accessible tables that help students better understand and navigate tabular learning content.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Set as Header Row",
+          "Convert to Header",
+          "Create Table Header",
+          "Mark as Column Headers"
+        ]
+      }
+    },
+    "makeHeader": {
+      "value": "Make Header",
+      "_meta": {
+        "context": "This text appears in the table editing interface when instructors are creating or editing table content within learning materials. Users see this option when they right-click on a table row or access table formatting controls to designate a row as a header row.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "This component handles table creation and editing functionality within the Lexical rich text editor. It provides table manipulation tools including the ability to format rows as headers for better table structure and accessibility."
+        },
+        "usage": "Button or menu option that converts a selected table row into a header row when clicked.",
+        "impact": "Important because proper table headers improve content accessibility and help students better understand structured data in learning materials.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Convert to Header",
+          "Set as Header",
+          "Create Header Row"
+        ]
+      }
+    },
+    "makeRowHeader": {
+      "value": "Make Row Header",
+      "_meta": {
+        "context": "This text appears as an option in a table editing context menu or toolbar when an instructor is editing table content within the rich text editor. Users see this option when they right-click on a table row or access table formatting options while creating or editing learning materials.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "A table editing component within the Lexical rich text editor that provides formatting and structure options for tabular content. Instructors use this component when creating structured data presentations in their learning materials."
+        },
+        "usage": "Menu item or button that allows users to designate a table row as a header row with special formatting.",
+        "impact": "Medium - This feature helps instructors create well-structured, accessible tables that improve content organization and readability for students.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Set Row Header",
+          "Convert to Header Row",
+          "Header Row Option"
+        ]
+      }
+    },
+    "removeColumnHeader": {
+      "value": "Remove Column Header",
+      "_meta": {
+        "context": "This text appears as a button or menu option within the table editing interface when instructors are creating or editing table content in learning materials. Users see this option when they want to remove the header row from an existing table in the rich content editor.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "TableComponent handles table creation and editing functionality within the Lexical rich text editor. It provides various table manipulation options including adding/removing rows, columns, and formatting table headers for instructional content."
+        },
+        "usage": "Button or menu item that instructors click to remove the header row from a table element.",
+        "impact": "Medium - This is an important editing function that affects how tabular data is structured and presented in learning materials.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Delete Column Header",
+          "Remove Header Row",
+          "Clear Column Headers"
+        ]
+      }
+    },
+    "removeHeader": {
+      "value": "Remove Header",
+      "_meta": {
+        "context": "This text appears as an action option within the table editing interface of the Lexical editor. Users see this option when they have selected or are interacting with a table that currently has a header row and want to remove that header formatting.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "This component handles table creation and editing functionality within the rich content editor. It provides various table manipulation options including adding/removing headers, rows, and columns for instructors creating learning content."
+        },
+        "usage": "Button or menu item that allows users to remove the header row from an existing table.",
+        "impact": "Medium - Important for table editing flexibility but not critical for basic content creation functionality.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Delete Header",
+          "Remove Table Header",
+          "Clear Header Row"
+        ]
+      }
+    },
+    "removeRowHeader": {
+      "value": "Remove Row Header",
+      "_meta": {
+        "context": "This text appears as a button or menu option within the table editing interface when instructors are working with tables in the content editor. Users see this option when they have selected a table row that currently serves as a header row and want to convert it back to a regular data row.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "The TableComponent provides rich table editing functionality within the Lexical editor, allowing instructors to create and modify tables for their learning content. It includes various table manipulation tools such as adding/removing rows and columns, and formatting options like header row designation."
+        },
+        "usage": "Button or menu item that instructors click to remove header formatting from a selected table row.",
+        "impact": "Medium - This feature provides instructors with flexibility in table formatting, allowing them to adjust table structure as they refine their learning materials.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Remove Header Row",
+          "Unset Row Header",
+          "Convert Header to Data Row",
+          "Remove Row Heading"
+        ]
+      }
+    },
+    "removeSorting": {
+      "value": "Remove Sorting",
+      "_meta": {
+        "context": "This text appears as an option in a table component's sorting controls within the rich content editor. Users see this when they have applied sorting to table columns and want to clear or reset the sorting to return to the original data order.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "A table component within the Lexical-based rich content editor that allows instructors to create and manage tabular data. The component provides interactive features like column sorting for organizing educational content such as vocabulary lists or quiz data."
+        },
+        "usage": "Translation key: tableComponent.removeSorting",
+        "impact": "Provides information to users",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": []
+      }
+    },
+    "sortAscending": {
+      "value": "Sort Ascending",
+      "_meta": {
+        "context": "This text appears as a menu option or button label when users interact with table sorting controls in the rich text editor. Users see this when they right-click on a table column header or access the table's sorting options to arrange data in ascending order.",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "This component renders interactive data tables within the Lexical editor, allowing instructors to create structured content like vocabulary lists or grade tables. It provides sorting functionality to help organize tabular data for better readability in learning materials."
+        },
+        "usage": "Menu item or button label that users click to sort table data in ascending order",
+        "impact": "Medium - helps users organize table content effectively but is not essential for core learning functionality",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Sort A-Z",
+          "Sort Low to High",
+          "Ascending Order",
+          "Sort Up"
+        ]
+      }
+    },
+    "sortDescending": {
+      "value": "Sort Descending",
+      "_meta": {
+        "context": "This text appears as a clickable option in table column header dropdown menus or context menus within the Lexical rich text editor. Users see this when they right-click on a table column header or access sorting options to arrange table data in descending order (Z-A, highest to lowest).",
+        "component": {
+          "location": "src/components/Editor3/components/TableComponent.js",
+          "description": "TableComponent provides rich table editing functionality within the Lexical editor, allowing instructors to create and manipulate data tables for learning content. It includes sorting, formatting, and data management features for creating structured educational materials."
+        },
+        "usage": "Menu item or button that triggers descending sort functionality when clicked.",
+        "impact": "Medium - Essential for instructors organizing tabular data in learning materials, enabling clear presentation of vocabulary lists, quiz results, or other structured content.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Sort Z to A",
+          "Descending Order",
+          "Sort High to Low",
+          "Reverse Sort"
+        ]
+      }
+    }
   },
   "mediaPlayerComponent": {
     "titleHeader": {

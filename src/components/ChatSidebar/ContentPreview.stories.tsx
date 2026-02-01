@@ -16,7 +16,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import ContentPreview from './ContentPreview';
 
 const meta: Meta<typeof ContentPreview> = {
-  title: 'ChatSidebar/ContentPreview',
+  title: '💬 AI Assistant/Components/Content Preview',
   component: ContentPreview,
   parameters: {
     layout: 'padded',

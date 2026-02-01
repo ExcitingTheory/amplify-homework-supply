@@ -44,6 +44,7 @@ import { RecordingStudio2 } from '../../RecordingStudio2';
 
 // Component to handle signed URL for word audio
 function SignedAudioPlayer({ audioKey, identityId, waveformData, width, height, title }) {
+  const { t } = useTranslation('workbook');
   const [signedUrl, setSignedUrl] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -279,16 +280,16 @@ export default function AnswerComponent({
                 <LinearProgressWithLabel value={progress} />
             </Box>
             {!requestDefinition &&
-                ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey)
+                ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t)
             }
             {requestDefinition &&
-                ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey)
+                ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t)
             }
         </div>
     );
 }
 
-function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey) {
+function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t) {
 
     console.log('ByWordList', wordIDs, feedback, answers);
     console.log('ByWordList.currentPromptMethod', currentPromptMethod);
@@ -589,7 +590,7 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
     </ol>;
 }
 
-function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey) {
+function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t) {
     // Add defensive check for dictionary
     if (!dictionary) {
         return <Typography variant="body2" color="error">{t('answerComponent.noDictionaryAvailable')}</Typography>;

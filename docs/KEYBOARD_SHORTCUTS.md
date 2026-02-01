@@ -9,30 +9,29 @@ Comprehensive list of keyboard shortcuts available in the Homework Supply Editor
 | **Bold** | `Ctrl + B` | `⌘ B` | Make selected text bold |
 | **Italic** | `Ctrl + I` | `⌘ I` | Make selected text italic |
 | **Underline** | `Ctrl + U` | `⌘ U` | Underline selected text |
-| **Strikethrough** | `Ctrl + Shift + S` | `⌘ ⇧ S` | Strike through selected text |
-| **Clear Formatting** | `Ctrl + \` | `⌘ \` | Remove all formatting from selection |
+| **Strikethrough** | `Ctrl + Shift + X` | `⌃ ⇧ X` | Strike through selected text |
+| **Clear Formatting** | `Ctrl + Shift + 0` | `⌃ ⇧ 0` | Remove all formatting from selection |
 
 ## 🔤 Editor - Block Types & Structure
 
 | Command | Windows/Linux | Mac | Description |
 |---------|---------------|-----|-------------|
-| **Heading 1** | `Ctrl + Alt + 1` | `⌘ ⌥ 1` | Convert to Heading 1 |
-| **Heading 2** | `Ctrl + Alt + 2` | `⌘ ⌥ 2` | Convert to Heading 2 |
-| **Heading 3** | `Ctrl + Alt + 3` | `⌘ ⌥ 3` | Convert to Heading 3 |
-| **Paragraph** | `Ctrl + Alt + 0` | `⌘ ⌥ 0` | Convert to normal paragraph |
-| **Bullet List** | `Ctrl + Shift + 8` | `⌘ ⇧ 8` | Create/toggle bullet list |
-| **Numbered List** | `Ctrl + Shift + 7` | `⌘ ⇧ 7` | Create/toggle numbered list |
-| **Quote** | `Ctrl + Shift + Q` | `⌘ ⇧ Q` | Create block quote |
-| **Code Block** | `Ctrl + Alt + C` | `⌘ ⌥ C` | Create code block |
+| **Heading 1** | `Ctrl + Shift + 1` | `⌃ ⇧ 1` | Convert to Heading 1 |
+| **Heading 2** | `Ctrl + Shift + 2` | `⌃ ⇧ 2` | Convert to Heading 2 |
+| **Heading 3** | `Ctrl + Shift + 3` | `⌃ ⇧ 3` | Convert to Heading 3 |
+| **Bullet List** | `Ctrl + Shift + 8` | `⌃ ⇧ 8` | Create/toggle bullet list |
+| **Numbered List** | `Ctrl + Shift + 7` | `⌃ ⇧ 7` | Create/toggle numbered list |
+| **Quote** | `Ctrl + '` | `⌃ '` | Create block quote |
+| **Code Block** | `Ctrl + Shift + C` | `⌃ ⇧ C` | Create code block |
 
 ## ↔️ Editor - Alignment & Indentation
 
 | Command | Windows/Linux | Mac | Description |
 |---------|---------------|-----|-------------|
-| **Align Left** | `Ctrl + Shift + L` | `⌘ ⇧ L` | Align text left |
-| **Align Center** | `Ctrl + Shift + E` | `⌘ ⇧ E` | Align text center |
-| **Align Right** | `Ctrl + Shift + R` | `⌘ ⇧ R` | Align text right |
-| **Justify** | `Ctrl + Shift + J` | `⌘ ⇧ J` | Justify text |
+| **Align Left** | `Ctrl + Shift + L` | `⌃ ⇧ L` | Align text left |
+| **Align Center** | `Ctrl + Shift + E` | `⌃ ⇧ E` | Align text center |
+| **Align Right** | `Ctrl + Shift + R` | `⌃ ⇧ R` | Align text right |
+| **Justify** | `Ctrl + Shift + J` | `⌃ ⇧ J` | Justify text |
 | **Indent** | `Tab` | `Tab` | Indent current line/block |
 | **Outdent** | `Shift + Tab` | `⇧ Tab` | Outdent current line/block |
 
@@ -172,10 +171,23 @@ The editor supports markdown-style shortcuts while typing:
 
 ## ⚠️ Browser-Specific Notes
 
-Some shortcuts may be overridden by browser defaults:
+**Designed for Compatibility:** All shortcuts are carefully chosen to avoid conflicts with common system and browser shortcuts:
+
+- **App-specific shortcuts use Ctrl on ALL platforms** (including Mac!)
+  - Headings, alignment, lists, code blocks all use `Ctrl` (⌃) not `Cmd` (⌘)
+  - This avoids Mac system shortcuts: ⌘⇧3/4/5 (screenshots), ⌘⌥ (Mission Control)
+- **OS-standard shortcuts use Cmd/Ctrl**: Bold (⌘B), Italic (⌘I), Link (⌘K), Undo (⌘Z)
+- **Matches VS Code approach**: Ctrl for app features, Cmd for system features
+- Quote (Ctrl+') and code (Ctrl+Shift+C) work universally
+- Clear formatting (Ctrl+Shift+0) avoids fingerprint unlock
+
+**Browser shortcuts that still work:**
 - **`Ctrl/⌘ + P`**: Print (browser default) - not used in editor
 - **`Ctrl/⌘ + F`**: Find (browser default) - not used in editor
 - **`Ctrl/⌘ + S`**: Save (captured for auto-save in editor)
+- **`Ctrl/⌘ + T`**: New tab (browser default) - not used in editor
+
+**Note:** If any shortcut conflicts with your system or browser extensions, you can use the toolbar buttons or slash commands (type `/`) as alternatives.
 
 ## 💡 Pro Tips
 

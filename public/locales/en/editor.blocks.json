@@ -955,7 +955,26 @@
     }
   },
   "answerEditor": {
-    "addWordLabel": "Add Word Label",
+    "addWordLabel": {
+      "value": "Add Word Label",
+      "_meta": {
+        "context": "This text appears as a label or button in the answer editor interface when instructors are creating interactive content blocks that require word-level labeling or tagging. Users see this when they want to add semantic labels or categories to individual words within answer options, likely for vocabulary exercises or language learning activities.",
+        "component": {
+          "location": "src/components/Editor3/components/AnswerEditor.js",
+          "description": "The AnswerEditor component allows instructors to create and configure answer options for interactive exercises and quizzes. It provides tools for setting up different types of answers including those that require word-level annotations or labels for language learning purposes."
+        },
+        "usage": "Button or clickable label that triggers the action to add a semantic label or tag to a specific word within an answer option.",
+        "impact": "Important - This enables instructors to create sophisticated vocabulary and language exercises with word-level annotations, which is essential for effective Japanese language learning content.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Add Word Tag",
+          "Label Word",
+          "Add Word Annotation",
+          "Tag Word"
+        ]
+      }
+    },
     "addWordToDict": {
       "_meta": {
         "alternativeTerms": [

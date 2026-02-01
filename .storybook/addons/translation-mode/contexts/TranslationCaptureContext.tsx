@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useState, ReactNode } from 'react';
+import React, { createContext, useCallback, useState, useRef, useEffect, useMemo, ReactNode } from 'react';
 
 export interface CapturedTranslation {
   key: string;
@@ -42,6 +42,13 @@ interface Props {
 
 export const TranslationCaptureProvider: React.FC<Props> = ({ children }) => {
   const [translations, setTranslations] = useState<Map<string, CapturedTranslation>>(new Map());
+  // Use ref to access current translations without causing re-renders
+  const translationsRef = useRef(translations);
+  
+  // Keep ref in sync with state
+  useEffect(() => {
+    translationsRef.current = translations;
+  }, [translations]);
 
   const captureTranslation = useCallback((translation: CapturedTranslation) => {
     setTranslations((prev) => {
@@ -64,9 +71,10 @@ export const TranslationCaptureProvider: React.FC<Props> = ({ children }) => {
     setTranslations(new Map());
   }, []);
 
+  // Stable callback - doesn't depend on translations state
   const getTranslation = useCallback((key: string, namespace: string) => {
-    return translations.get(`${namespace}:${key}`);
-  }, [translations]);
+    return translationsRef.current.get(`${namespace}:${key}`);
+  }, []);
 
   const updateTranslation = useCallback((key: string, namespace: string, updates: Partial<CapturedTranslation>) => {
     setTranslations((prev) => {
@@ -82,16 +90,21 @@ export const TranslationCaptureProvider: React.FC<Props> = ({ children }) => {
     });
   }, []);
 
+  // Memoize context value to prevent unnecessary re-renders
+  // Only changes when translations Map changes (callbacks are stable)
+  const contextValue = useMemo(
+    () => ({
+      translations,
+      captureTranslation,
+      clearTranslations,
+      getTranslation,
+      updateTranslation,
+    }),
+    [translations, captureTranslation, clearTranslations, getTranslation, updateTranslation]
+  );
+
   return (
-    <TranslationCaptureContext.Provider
-      value={{
-        translations,
-        captureTranslation,
-        clearTranslations,
-        getTranslation,
-        updateTranslation,
-      }}
-    >
+    <TranslationCaptureContext.Provider value={contextValue}>
       {children}
     </TranslationCaptureContext.Provider>
   );

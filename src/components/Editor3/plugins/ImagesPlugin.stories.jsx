@@ -24,7 +24,7 @@ import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data'
 import { MOCK_IMAGE_URL_2, MOCK_IMAGE_URL_3 } from '../../../../.storybook/__mocks__/media';
 
 export default {
-  title: '🔌 Editor Plugins/Images',
+  title: '🔌 Editor Plugins/Media/Images',
   component: ImagesPlugin,
   parameters: {
     layout: 'fullscreen',

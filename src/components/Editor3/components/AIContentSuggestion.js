@@ -33,13 +33,13 @@ export default function AIContentSuggestion({
   const suggestionRef = useRef(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   
-  // Position suggestion at cursor
+  // Position suggestion at cursor - inline with text, not below
   useEffect(() => {
     if (anchorElement && suggestionRef.current) {
       const rect = anchorElement.getBoundingClientRect();
       
       setPosition({
-        top: rect.bottom + window.scrollY,
+        top: rect.top + window.scrollY,
         left: rect.right + window.scrollX,
       });
     }
@@ -57,9 +57,7 @@ export default function AIContentSuggestion({
         top: `${position.top}px`,
         left: `${position.left}px`,
         zIndex: 999,
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 0.5,
+        display: 'inline',
         pointerEvents: 'none', // Don't interfere with typing
       }}
     >
@@ -78,16 +76,13 @@ export default function AIContentSuggestion({
         </Box>
       ) : (
         <Typography
+          component="span"
           sx={{
             color: 'text.disabled',
             opacity: 0.5,
             fontFamily: 'inherit',
             fontSize: 'inherit',
             fontStyle: 'italic',
-            borderLeft: '2px solid',
-            borderColor: 'primary.main',
-            paddingLeft: 0.5,
-            maxWidth: '600px',
             whiteSpace: 'pre-wrap',
             wordWrap: 'break-word',
           }}
@@ -98,17 +93,13 @@ export default function AIContentSuggestion({
       
       {!isLoading && suggestion && (
         <Typography
+          component="span"
           variant="caption"
           sx={{
-            ml: 1,
+            ml: 0.5,
             color: 'text.disabled',
-            bgcolor: 'background.paper',
-            px: 0.5,
-            py: 0.25,
-            borderRadius: 0.5,
+            opacity: 0.6,
             fontSize: '10px',
-            border: '1px solid',
-            borderColor: 'divider',
           }}
         >
           {t('aiContentSuggestion.tabToAccept')}

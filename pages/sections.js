@@ -32,6 +32,7 @@ import AddIcon from '@mui/icons-material/Add';
 import MainToolbar from '../src/components/MainToolbar'
 import MyAuth from "../src/components/authenticator";
 import getCachedUrl from "../src/utils/getCachedUrl";
+import InstructorDashboard from '../src/components/InstructorDashboard';
 
 const client = generateClient();
 
@@ -310,6 +311,10 @@ function Sections() {
                         </Typography>
                         <Button variant="outlined" color="primary" disabled={work} onClick={handleClickOpen}><AddIcon />&nbsp;{t('sections.createNew')}</Button>
                     </div>
+                    
+                    {/* Instructor Dashboard with aggregate stats and leaderboards */}
+                    {sections.length > 0 && <InstructorDashboard sections={sections} />}
+                    
                     {!sections &&
                         <div>{t('sections.loading')}</div>
                     }

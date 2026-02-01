@@ -23,7 +23,7 @@ import { GutterProvider } from '../../../context/gutterContext';
 import '../theme.css';
 
 export default {
-  title: '🔌 Editor Plugins/Draggable Block',
+  title: '🔌 Editor Plugins/Interactions/Draggable Block',
   component: DraggableBlockPlugin,
   parameters: {
     layout: 'fullscreen',

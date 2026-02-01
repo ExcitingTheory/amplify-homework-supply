@@ -25,7 +25,7 @@ import { DndWrapper } from '../../MeaningAssociationExercise/DndWrapper';
 import { MOCK_AUDIO_URL_1, MOCK_AUDIO_URL_2, MOCK_AUDIO_URL_3 } from '../../../../.storybook/__mocks__/media';
 
 export default {
-  title: '🔌 Editor Plugins/Meaning Association',
+  title: '🔌 Editor Plugins/Content Blocks/Meaning Association',
   component: MeaningAssociationPlugin,
   parameters: {
     layout: 'fullscreen',

@@ -11,8 +11,10 @@
  * Modifier key configuration for keyboard shortcuts
  */
 export interface KeyboardModifiers {
-  /** Require Cmd (Mac) or Ctrl (Win/Linux) */
+  /** Require Cmd (Mac) or Ctrl (Win/Linux) for OS-standard shortcuts */
   mod?: boolean;
+  /** Require Ctrl only (app-specific shortcuts, avoids Mac Cmd conflicts) */
+  ctrl?: boolean;
   /** Require Shift key */
   shift?: boolean;
   /** Require Alt/Option key */
@@ -98,14 +100,17 @@ export function isModifierKey(event: KeyboardEvent): boolean {
 export function isShortcut(
   event: KeyboardEvent,
   key: string,
-  { mod = false, shift = false, alt = false }: KeyboardModifiers = {}
+  { mod = false, shift = false, alt = false, ctrl = false }: KeyboardModifiers = {}
 ): boolean {
-  // Accept either metaKey (⌘ on Mac) or ctrlKey (Ctrl on Win/Linux) for mod
+  // mod: Accept either metaKey (⌘ on Mac) or ctrlKey (Ctrl) for OS-standard shortcuts
+  // ctrl: Use ONLY ctrlKey for app-specific shortcuts (avoids Mac Cmd+Shift conflicts)
   const modPressed = event.metaKey || event.ctrlKey;
+  const ctrlPressed = event.ctrlKey;
   
   return (
     event.code === key &&
     (!mod || modPressed) &&
+    (!ctrl || ctrlPressed) &&
     (!shift || event.shiftKey) &&
     (!alt || event.altKey)
   );

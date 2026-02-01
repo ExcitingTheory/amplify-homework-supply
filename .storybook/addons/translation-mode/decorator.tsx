@@ -54,7 +54,7 @@ const TranslationModeController: React.FC<TranslationModeControllerProps> = ({ m
     setStoryName(storyName);
   }, [storyName, setStoryName]);
 
-  // Set up channel listeners
+  // Set up channel listeners - only once on mount
   useEffect(() => {
     const channel = addons.getChannel();
     
@@ -68,7 +68,9 @@ const TranslationModeController: React.FC<TranslationModeControllerProps> = ({ m
 
     // Listen for export events from the panel
     const handleExport = () => {
-      console.log('Export all translations', translations);
+      // Note: This will capture the translations at the time of the export click
+      // We access it through the context, not the closure
+      console.log('Export translations triggered');
       // TODO: Implement export functionality
     };
 
@@ -79,12 +81,16 @@ const TranslationModeController: React.FC<TranslationModeControllerProps> = ({ m
       channel.off('translation-mode/save', handleSave);
       channel.off('translation-mode/export', handleExport);
     };
-  }, [translations, updateTranslation]);
+  }, [updateTranslation]); // Only depend on updateTranslation (stable)
 
-  // Sync translations to the panel whenever they change
+  // Sync translations to the panel - debounce this to avoid excessive updates
   useEffect(() => {
     const channel = addons.getChannel();
-    channel.emit('translation-mode/update-all', translations);
+    const timeoutId = setTimeout(() => {
+      channel.emit('translation-mode/update-all', translations);
+    }, 100); // Debounce for 100ms
+    
+    return () => clearTimeout(timeoutId);
   }, [translations]);
 
   return <>{children}</>;

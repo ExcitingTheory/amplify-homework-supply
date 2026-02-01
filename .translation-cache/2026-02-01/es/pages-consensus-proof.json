@@ -1,0 +1,21 @@
+{
+  "namespace": "pages",
+  "sourceLang": "en",
+  "targetLang": "es",
+  "mode": "provable",
+  "timestamp": "2026-02-01T16:53:51.407Z",
+  "summary": {
+    "totalKeys": 115,
+    "existingKeys": 0,
+    "translatedKeys": 0,
+    "errors": 115,
+    "coverage": 0
+  },
+  "tokens": {
+    "claude": 0,
+    "gpt": 0,
+    "gemini": 0
+  },
+  "translations": [],
+  "fingerprint": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+}

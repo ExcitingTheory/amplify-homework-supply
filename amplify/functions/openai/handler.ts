@@ -16,6 +16,10 @@ import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 import { type Schema } from '../../data/resource';
 import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/data';
+import { initializePhoenixTracing, addTraceAttributes } from '../shared/phoenix-tracer';
+
+// Initialize Phoenix tracing at module load
+initializePhoenixTracing();
 
 const lambdaClient = new LambdaClient();
 let openaiInstance: any = null;
@@ -86,6 +90,14 @@ export const handler: Handler = async (event: any, context: any) => {
     const { userId, username, identityId } = requireAuth(event);
     const userPoolId = process.env.USER_POOL_ID;
     const args = event.arguments || {};
+
+    // Add trace attributes for this request
+    addTraceAttributes({
+      'operation.name': operationName,
+      'lambda.requestId': context.requestId,
+      'user.id': userId,
+      'user.username': username,
+    });
 
     switch (operationName) {
       case 'chat':

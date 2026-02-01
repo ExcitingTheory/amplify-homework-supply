@@ -100,40 +100,82 @@ res.end();
 
 **File**: `src/components/ChatSidebar.js`
 
-**Key Changes**:
-- Use `DefaultChatTransport` with `streamProtocol: 'data'`
-- Define tools with `experimental_tools`
-- Use `experimental_sendAutomaticallyWhen` for automatic tool execution
+**Key Changes** (✅ ALL IMPLEMENTED):
+- ✅ Use `DefaultChatTransport` with `streamProtocol: 'data'`
+- ✅ Define tools with `experimental_tools`
+- ✅ Use `experimental_sendAutomaticallyWhen` for automatic tool execution
+- ✅ Register 12 client-side CRUD tools
+- ✅ Remove deprecated `onToolCall` pattern
+- ✅ Remove `addToolOutputRef` workaround
 
-**Transport Setup**:
+**Transport Setup** (✅ IMPLEMENTED):
 ```javascript
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
 
 const transport = useMemo(() => new DefaultChatTransport({
-    fetch: customFetch,
+    api: '/api/chat',
+    fetch: customFetch, // Custom fetch that routes through Amplify
     streamProtocol: 'data', // SSE format with tool call support
 }), [customFetch]);
 ```
 
-**Tool Registration**:
+**Tool Registration** (✅ IMPLEMENTED):
 ```javascript
+// Register all client-side tools with experimental_tools pattern
+const clientSideTools = useMemo(() => {
+    const tools = {};
+    
+    // List of tools that should execute client-side (have access to DataStore)
+    const clientSideToolNames = [
+        'search_content',
+        'create_section',
+        'create_unit',
+        'create_assignment',
+        'add_timer_to_unit',
+        'create_vocabulary_word',
+        'create_question',
+        'list_sections',
+        'list_units',
+        'get_unit_details',
+        'update_unit',
+        'delete_assignment'
+    ];
+
+    // Register each client-side tool
+    toolDefinitions.forEach(toolDef => {
+        const toolName = toolDef.function.name;
+        
+        if (clientSideToolNames.includes(toolName)) {
+            tools[toolName] = {
+                description: toolDef.function.description,
+                parameters: toolDef.function.parameters,
+                execute: async (args) => {
+                    console.log(`[ChatSidebar] Executing ${toolName}:`, args);
+                    
+                    try {
+                        const result = await executeTool(toolName, args);
+                        console.log(`[ChatSidebar] ${toolName} result:`, result);
+                        return result;
+                    } catch (error) {
+                        console.error(`[ChatSidebar] Error executing ${toolName}:`, error);
+                        return {
+                            success: false,
+                            error: error.message || `Failed to execute ${toolName}`
+                        };
+                    }
+                }
+            };
+        }
+    });
+
+    return tools;
+}, []);
+
 const chatHookResult = useChat({
     transport,
     
-    // Provide tool definitions to the client
-    experimental_tools: toolDefinitions.reduce((acc, tool) => {
-        acc[tool.function.name] = {
-            description: tool.function.description,
-            parameters: tool.function.parameters,
-            execute: async (args) => {
-                console.log(`Executing tool: ${tool.function.name}`, args);
-                const result = await executeTool(tool.function.name, args);
-                console.log(`Tool result:`, result);
-                return result;
-            }
-        };
-        return acc;
-    }, {}),
+    // Register client-side tools using experimental_tools
+    experimental_tools: clientSideTools,
     
     // Automatically execute client-side tools when ready
     experimental_sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,

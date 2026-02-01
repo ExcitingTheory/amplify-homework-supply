@@ -20,6 +20,8 @@ import {
   $getSelection, 
   $isRangeSelection,
   $createTextNode,
+  $getNodeByKey,
+  $setSelection,
   COMMAND_PRIORITY_LOW,
   KEY_ARROW_RIGHT_COMMAND,
   KEY_ESCAPE_COMMAND,
@@ -30,7 +32,13 @@ import { useCallback, useEffect, useState, useRef, useContext } from 'react';
 import * as React from 'react';
 import { post } from 'aws-amplify/api';
 
-import AIContentSuggestion from '../components/AIContentSuggestion';
+import { 
+  $createAIContentSuggestionNode, 
+  AIContentSuggestionNode,
+  $createAILoadingNode,
+  AILoadingNode,
+  AI_SUGGESTION_UUID 
+} from '../components/AIContentSuggestionNode';
 import UnitContext from '../../../context/unitContext';
 import { AIFeedback, AiFeedbackType, AiContentType } from '../../../models';
 
@@ -45,25 +53,89 @@ const TRIGGER_CHARS = ['.', '!', '?', '。']; // Sentence-ending punctuation
  */
 export default function AIContentCompletionPlugin() {
   const [editor] = useLexicalComposerContext();
-  const [suggestion, setSuggestion] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [anchorElement, setAnchorElement] = useState(null);
+  const suggestionNodeKey = useRef(null);
+  const currentSuggestion = useRef(null);
   const [lastAcceptedSuggestion, setLastAcceptedSuggestion] = useState(null); // Track for feedback
   const debounceTimer = useRef(null);
   const abortController = useRef(null);
   
   const { currentUnit } = useContext(UnitContext);
   
+  // Clear suggestion node
+  const clearSuggestion = useCallback(() => {
+    editor.update(() => {
+      if (suggestionNodeKey.current !== null) {
+        const node = $getNodeByKey(suggestionNodeKey.current);
+        if (node !== null && node.isAttached()) {
+          node.remove();
+        }
+        suggestionNodeKey.current = null;
+      }
+      currentSuggestion.current = null;
+    }, { tag: 'skip-collab' });
+  }, [editor]);
+
+  // Update or create suggestion node
+  const updateSuggestion = useCallback((text) => {
+    console.log('updateSuggestion called with text:', text);
+    
+    editor.update(() => {
+      const selection = $getSelection();
+      
+      if (!$isRangeSelection(selection)) {
+        console.log('No range selection, skipping');
+        return;
+      }
+      
+      if (suggestionNodeKey.current !== null) {
+        // Update existing node
+        console.log('Updating existing node with key:', suggestionNodeKey.current);
+        const node = $getNodeByKey(suggestionNodeKey.current);
+        if (node instanceof AIContentSuggestionNode) {
+          // Remove old node and create new one to force re-render
+          const selectionCopy = selection.clone();
+          node.remove();
+          const newNode = $createAIContentSuggestionNode(AI_SUGGESTION_UUID, text);
+          suggestionNodeKey.current = newNode.getKey();
+          selection.insertNodes([newNode]);
+          $setSelection(selectionCopy);
+        }
+      } else {
+        // Create new node
+        console.log('Creating new suggestion node');
+        const selectionCopy = selection.clone();
+        const node = $createAIContentSuggestionNode(AI_SUGGESTION_UUID, text);
+        suggestionNodeKey.current = node.getKey();
+        selection.insertNodes([node]);
+        $setSelection(selectionCopy);
+      }
+      
+      currentSuggestion.current = text;
+    }, { tag: 'skip-collab' });
+  }, [editor]);
+
   // Fetch AI suggestion
   const fetchSuggestion = useCallback(async (prompt, context) => {
+    console.log('fetchSuggestion called with prompt:', prompt);
+    
     // Cancel any in-flight requests
     if (abortController.current) {
       abortController.current.abort();
     }
     
     abortController.current = new AbortController();
-    setIsLoading(true);
-    setSuggestion(null);
+    
+    // Show loading indicator
+    editor.update(() => {
+      const selection = $getSelection();
+      if (!$isRangeSelection(selection)) return;
+      
+      const selectionCopy = selection.clone();
+      const loadingNode = $createAILoadingNode(AI_SUGGESTION_UUID);
+      suggestionNodeKey.current = loadingNode.getKey();
+      selection.insertNodes([loadingNode]);
+      $setSelection(selectionCopy);
+    }, { tag: 'skip-collab' });
     
     try {
       const contextData = {
@@ -74,6 +146,8 @@ export default function AIContentCompletionPlugin() {
         ...context,
       };
 
+      console.log('Making API call to completions...');
+      
       // Call REST API with streaming support
       const restOperation = post({
         apiName: 'completions',
@@ -91,6 +165,8 @@ export default function AIContentCompletionPlugin() {
       const decoder = new TextDecoder();
       let completion = '';
 
+      console.log('Starting to stream response...');
+      
       // Stream the response
       while (true) {
         const { done, value } = await reader.read();
@@ -99,32 +175,39 @@ export default function AIContentCompletionPlugin() {
         const chunk = decoder.decode(value, { stream: true });
         completion += chunk;
         
+        console.log('Streaming chunk, total length:', completion.length);
+        
         // Update suggestion in real-time as we stream
-        setSuggestion(completion);
+        updateSuggestion(completion);
       }
       
       if (!completion) {
         throw new Error('No completion returned');
       }
       
-      setSuggestion(completion.trim());
-      setIsLoading(false);
+      console.log('Final completion:', completion);
+      updateSuggestion(completion.trim());
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error('Error fetching suggestion:', error);
-        setIsLoading(false);
+        clearSuggestion();
       }
     }
-  }, [currentUnit]);
+  }, [currentUnit, updateSuggestion, clearSuggestion, editor]);
   
   // Detect when to trigger suggestions
   useEffect(() => {
-    return editor.registerUpdateListener(({ editorState }) => {
+    return editor.registerUpdateListener(({ editorState, tags }) => {
+      // Ignore updates from our own operations and history
+      if (tags && (tags.has('skip-collab') || tags.has('historic') || tags.has('history-push'))) {
+        return;
+      }
+
       editorState.read(() => {
         const selection = $getSelection();
         
         if (!$isRangeSelection(selection)) {
-          setSuggestion(null);
+          clearSuggestion();
           return;
         }
         
@@ -134,7 +217,7 @@ export default function AIContentCompletionPlugin() {
         
         // Only trigger if we're at the end of a text node
         if (offset !== text.length) {
-          setSuggestion(null);
+          clearSuggestion();
           return;
         }
         
@@ -145,7 +228,7 @@ export default function AIContentCompletionPlugin() {
           TRIGGER_CHARS.includes(lastChar);
         
         if (!shouldTrigger) {
-          setSuggestion(null);
+          clearSuggestion();
           return;
         }
         
@@ -153,7 +236,7 @@ export default function AIContentCompletionPlugin() {
         const parent = anchorNode.getParent();
         if (!parent || $isHeadingNode(parent)) {
           // Don't suggest in headings
-          setSuggestion(null);
+          clearSuggestion();
           return;
         }
         
@@ -175,60 +258,51 @@ export default function AIContentCompletionPlugin() {
         }, DEBOUNCE_DELAY);
       });
     });
-  }, [editor, fetchSuggestion]);
-  
-  // Get anchor element for positioning
-  useEffect(() => {
-    return editor.registerUpdateListener(() => {
-      editor.getEditorState().read(() => {
-        const selection = $getSelection();
-        
-        if ($isRangeSelection(selection)) {
-          const nativeSelection = window.getSelection();
-          if (nativeSelection && nativeSelection.rangeCount > 0) {
-            const range = nativeSelection.getRangeAt(0);
-            setAnchorElement(range);
-          }
-        }
-      });
-    });
-  }, [editor]);
+  }, [editor, fetchSuggestion, clearSuggestion]);
   
   // Accept suggestion
   const acceptSuggestion = useCallback(() => {
-    if (!suggestion) return;
+    if (!currentSuggestion.current || suggestionNodeKey.current === null) {
+      return false;
+    }
     
     editor.update(() => {
-      const selection = $getSelection();
-      
-      if ($isRangeSelection(selection)) {
-        // Insert a space before the suggestion
-        const textNode = $createTextNode(' ' + suggestion);
-        selection.insertNodes([textNode]);
+      const node = $getNodeByKey(suggestionNodeKey.current);
+      if (node === null) {
+        return;
       }
       
-      setSuggestion(null);
+      // Replace suggestion node with actual text
+      const textNode = $createTextNode(' ' + currentSuggestion.current);
+      node.replace(textNode);
+      textNode.selectNext();
+      
+      // Clear refs
+      suggestionNodeKey.current = null;
+      currentSuggestion.current = null;
     });
-  }, [editor, suggestion]);
+    
+    return true;
+  }, [editor]);
   
   // Dismiss suggestion
   const dismissSuggestion = useCallback(() => {
-    setSuggestion(null);
+    clearSuggestion();
     if (abortController.current) {
       abortController.current.abort();
     }
-  }, []);
+  }, [clearSuggestion]);
   
   // Keyboard handlers
   useEffect(() => {
-    if (!suggestion) return;
-    
     const removeTab = editor.registerCommand(
       KEY_TAB_COMMAND,
       (event) => {
-        event.preventDefault();
-        acceptSuggestion();
-        return true;
+        if (acceptSuggestion()) {
+          event.preventDefault();
+          return true;
+        }
+        return false;
       },
       COMMAND_PRIORITY_LOW
     );
@@ -236,19 +310,20 @@ export default function AIContentCompletionPlugin() {
     const removeArrowRight = editor.registerCommand(
       KEY_ARROW_RIGHT_COMMAND,
       (event) => {
-        // Only accept on arrow right if at end of text
-        const selection = $getSelection();
-        if ($isRangeSelection(selection)) {
-          const anchorNode = selection.anchor.getNode();
-          const text = anchorNode.getTextContent();
-          const offset = selection.anchor.offset;
-          
-          if (offset === text.length) {
-            event.preventDefault();
-            acceptSuggestion();
-            return true;
+        // Only accept on arrow right if we have a suggestion and at end of text
+        editor.getEditorState().read(() => {
+          const selection = $getSelection();
+          if ($isRangeSelection(selection) && currentSuggestion.current) {
+            const anchorNode = selection.anchor.getNode();
+            const text = anchorNode.getTextContent();
+            const offset = selection.anchor.offset;
+            
+            if (offset === text.length) {
+              event.preventDefault();
+              acceptSuggestion();
+            }
           }
-        }
+        });
         return false;
       },
       COMMAND_PRIORITY_LOW
@@ -257,46 +332,47 @@ export default function AIContentCompletionPlugin() {
     const removeEscape = editor.registerCommand(
       KEY_ESCAPE_COMMAND,
       (event) => {
-        event.preventDefault();
-        dismissSuggestion();
-        return true;
+        if (currentSuggestion.current) {
+          event.preventDefault();
+          dismissSuggestion();
+          return true;
+        }
+        return false;
       },
       COMMAND_PRIORITY_LOW
     );
     
+    const unregisterSuggestion = editor.registerNodeTransform(AIContentSuggestionNode, (node) => {
+      const key = node.getKey();
+      if (node.__uuid === AI_SUGGESTION_UUID && key !== suggestionNodeKey.current) {
+        clearSuggestion();
+      }
+    });
+    
+    const unregisterLoading = editor.registerNodeTransform(AILoadingNode, (node) => {
+      const key = node.getKey();
+      if (node.__uuid === AI_SUGGESTION_UUID && key !== suggestionNodeKey.current) {
+        clearSuggestion();
+      }
+    });
+    
     return () => {
-      removeTab();
-      removeArrowRight();
+      unregisterSuggestion();
+      unregisterLoading();
       removeEscape();
     };
-  }, [editor, suggestion, acceptSuggestion, dismissSuggestion]);
+  }, [editor, acceptSuggestion, dismissSuggestion]);
   
-  // Dismiss on typing
+  // Auto-dismiss on typing
   useEffect(() => {
-    if (!suggestion) return;
-    
-    const handleKeyDown = (event) => {
-      // Dismiss if user types anything other than acceptance keys
-      if (event.key !== 'Tab' && event.key !== 'ArrowRight' && event.key !== 'Escape') {
-        dismissSuggestion();
+    return editor.registerNodeTransform(AIContentSuggestionNode, (node) => {
+      const key = node.getKey();
+      // If different instance of the node exists, clear our reference
+      if (node.__uuid === AI_SUGGESTION_UUID && key !== suggestionNodeKey.current) {
+        clearSuggestion();
       }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [suggestion, dismissSuggestion]);
+    });
+  }, [editor, clearSuggestion]);
   
-  if (!suggestion && !isLoading) {
-    return null;
-  }
-  
-  return (
-    <AIContentSuggestion
-      suggestion={suggestion}
-      isLoading={isLoading}
-      anchorElement={anchorElement}
-      onAccept={acceptSuggestion}
-      onDismiss={dismissSuggestion}
-    />
-  );
+  return null;
 }

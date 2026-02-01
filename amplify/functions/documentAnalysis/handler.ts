@@ -13,6 +13,10 @@ import { S3Client } from '@aws-sdk/client-s3';
 import { type Schema } from '../../data/resource';
 import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/data';
+import { initializePhoenixTracing, addTraceAttributes } from '../shared/phoenix-tracer';
+
+// Initialize Phoenix tracing
+initializePhoenixTracing();
 
 const s3Client = new S3Client();
 let openaiInstance: any = null;
@@ -69,6 +73,14 @@ export const handler: Handler = async (event: any, context: any) => {
   
   // Require authentication
   const { userId, username } = requireAuth(event);
+
+  // Add trace attributes
+  addTraceAttributes({
+    'operation.name': operationName,
+    'lambda.requestId': context.requestId,
+    'user.id': userId,
+    'document.fileId': args.fileID || 'unknown',
+  });
 
   try {
     switch (operationName) {

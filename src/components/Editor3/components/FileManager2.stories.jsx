@@ -425,8 +425,8 @@ const FileManagerWrapper = ({ children, showDebug = false }) => {
     editorState: null,
   };
   
-  // Mock UnitContext value
-  const mockUnitContext = {
+  // Memoize context values to prevent recreation on every render
+  const mockUnitContext = React.useMemo(() => ({
     unit: {
       id: 'mock-unit-id',
       name: 'Mock Unit',
@@ -436,12 +436,11 @@ const FileManagerWrapper = ({ children, showDebug = false }) => {
       identityId: 'us-east-1:mock-identity-123',
       username: 'mock-user-sub',
     },
-  };
+  }), []);
 
-  // Mock SettingsContext value
-  const mockSettingsContext = {
+  const mockSettingsContext = React.useMemo(() => ({
     settings: null,
-  };
+  }), []);
   
   return (
     <SettingsContext.Provider value={mockSettingsContext}>

@@ -22,7 +22,7 @@ import { UnitProvider } from '../../../context/unitContext';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
-  title: '🔌 Editor Plugins/Quiz',
+  title: '🔌 Editor Plugins/Content Blocks/Quiz',
   component: QuizPlugin,
   parameters: {
     layout: 'fullscreen',

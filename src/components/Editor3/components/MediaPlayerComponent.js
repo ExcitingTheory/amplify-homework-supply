@@ -78,13 +78,23 @@ export default function MediaPlayerComponent({
                     const file = files[id];
                     const url = file?.path;
                     
-                    if (key === 0) {
+                    if (key === 0 && url) {
                         // sign url
                         const src = await getCachedUrl(url, 'protected', unit.identityId);
-                        newSources.push({
-                            src,
-                            type: 'audio/mp3',
-                        });
+                        if (src) {
+                            // Detect MIME type from file extension
+                            const ext = url.split('.').pop().toLowerCase();
+                            const mimeType = ext === 'mp4' ? 'video/mp4' : 
+                                           ext === 'webm' ? 'video/webm' :
+                                           ext === 'ogg' ? 'audio/ogg' :
+                                           ext === 'wav' ? 'audio/wav' :
+                                           ext === 'm4a' ? 'audio/mp4' :
+                                           'audio/mpeg'; // default for mp3
+                            newSources.push({
+                                src,
+                                type: mimeType,
+                            });
+                        }
                     }
                     
                     if (file) {
@@ -115,13 +125,22 @@ export default function MediaPlayerComponent({
 
                     const targetIdentityId = question?.targetIdentityId;
                     
-                    if (key === 0) {
+                    if (key === 0 && url) {
                         // sign url
                         const src = await getCachedUrl(url, 'protected', targetIdentityId);
-                        newSources.push({
-                            src,
-                            type: 'audio/mp3',
-                        });
+                        if (src) {
+                            const ext = url.split('.').pop().toLowerCase();
+                            const mimeType = ext === 'mp4' ? 'video/mp4' : 
+                                           ext === 'webm' ? 'video/webm' :
+                                           ext === 'ogg' ? 'audio/ogg' :
+                                           ext === 'wav' ? 'audio/wav' :
+                                           ext === 'm4a' ? 'audio/mp4' :
+                                           'audio/mpeg';
+                            newSources.push({
+                                src,
+                                type: mimeType,
+                            });
+                        }
                     }
                     
                     if (question) {
@@ -152,13 +171,22 @@ export default function MediaPlayerComponent({
 
                     const targetIdentityId = word?.targetIdentityId;
                     
-                    if (key === 0) {
+                    if (key === 0 && url) {
                         // sign url
                         const src = await getCachedUrl(url, 'protected', targetIdentityId);
-                        newSources.push({
-                            src,
-                            type: 'audio/mp3',
-                        });
+                        if (src) {
+                            const ext = url.split('.').pop().toLowerCase();
+                            const mimeType = ext === 'mp4' ? 'video/mp4' : 
+                                           ext === 'webm' ? 'video/webm' :
+                                           ext === 'ogg' ? 'audio/ogg' :
+                                           ext === 'wav' ? 'audio/wav' :
+                                           ext === 'm4a' ? 'audio/mp4' :
+                                           'audio/mpeg';
+                            newSources.push({
+                                src,
+                                type: mimeType,
+                            });
+                        }
                     }
                     
                     if (word) {
@@ -216,6 +244,11 @@ export default function MediaPlayerComponent({
     // const {options, onReady} = props;
 
     useEffect(() => {
+        // Only initialize player if we have sources
+        if (sources.length === 0) {
+            return;
+        }
+
         // Make sure Video.js player is only initialized once
         if (!playerRef.current) {
             // The Video.js player needs to be _inside_ the component el for React 18 Strict Mode. 
@@ -239,7 +272,7 @@ export default function MediaPlayerComponent({
                 player.load();
             }
         }
-    }, [options, videoRef]);
+    }, [options, videoRef, sources]);
 
     // Dispose the Video.js player when the functional component unmounts
     useEffect(() => {
@@ -293,11 +326,21 @@ export default function MediaPlayerComponent({
                             player.autoplay(true);
                             
                             // sign url
-                            const src = await getCachedUrl(playlistUrls[_id]);
-                            setSources([{
-                                src,
-                                type: 'audio/mp3',
-                            }]);
+                            const url = playlistUrls[_id];
+                            const src = await getCachedUrl(url);
+                            if (src) {
+                                const ext = url?.split('.').pop().toLowerCase() || 'mp3';
+                                const mimeType = ext === 'mp4' ? 'video/mp4' : 
+                                               ext === 'webm' ? 'video/webm' :
+                                               ext === 'ogg' ? 'audio/ogg' :
+                                               ext === 'wav' ? 'audio/wav' :
+                                               ext === 'm4a' ? 'audio/mp4' :
+                                               'audio/mpeg';
+                                setSources([{
+                                    src,
+                                    type: mimeType,
+                                }]);
+                            }
    
                         }
                         setGridSelection(e);

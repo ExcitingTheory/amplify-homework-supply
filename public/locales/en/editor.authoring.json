@@ -743,7 +743,25 @@
       },
       "value": "Redo"
     },
-    "scrollToolbarLeft": "Scroll toolbar left",
+    "scrollToolbarLeft": {
+      "value": "Scroll toolbar left",
+      "_meta": {
+        "context": "This text appears as a tooltip or accessibility label for a navigation control in the rich text editor toolbar. Users see this when hovering over or focusing on a left-facing arrow button that allows them to scroll through toolbar options when the toolbar is too wide for the current viewport.",
+        "component": {
+          "location": "src/components/common",
+          "description": "This component is part of the toolbar plugin system for the Lexical editor used in content authoring. It provides navigation controls that allow users to scroll through toolbar items horizontally when all tools cannot fit in the available space."
+        },
+        "usage": "Tooltip or accessibility label for a left scroll navigation button in the editor toolbar",
+        "impact": "Medium - This label helps users understand toolbar navigation functionality, which is important for accessibility and user guidance when creating learning content",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Navigate toolbar left",
+          "Move toolbar left",
+          "Slide toolbar left"
+        ]
+      }
+    },
     "scrollToolbarRight": {
       "_meta": {
         "alternativeTerms": [],

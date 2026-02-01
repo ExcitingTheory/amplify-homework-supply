@@ -19,6 +19,9 @@ export const aiHandler = defineFunction({
   resourceGroupName: 'data',  // Assign to data stack - used as GraphQL resolver
   environment: {
     OPENAI_API_KEY: secret('OPENAI_API_KEY'),
+    PHOENIX_COLLECTOR_ENDPOINT: secret('PHOENIX_COLLECTOR_ENDPOINT'),
+    // Optional: Phoenix authentication
+    // PHOENIX_API_KEY: secret('PHOENIX_API_KEY'),
   },
 
 });

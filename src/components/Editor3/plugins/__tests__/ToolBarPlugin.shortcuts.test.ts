@@ -57,9 +57,9 @@ describe('ToolBarPlugin Keyboard Shortcuts', () => {
       expect(isShortcut(event, 'KeyS', { mod: true, shift: true })).toBe(true);
     });
 
-    it('should detect clear formatting shortcut with Ctrl+\\', () => {
-      const event = createKeyboardEvent('Backslash', { ctrlKey: true });
-      expect(isShortcut(event, 'Backslash', { mod: true })).toBe(true);
+    it('should detect clear formatting shortcut with Ctrl+Shift+0', () => {
+      const event = createKeyboardEvent('Digit0', { ctrlKey: true, shiftKey: true });
+      expect(isShortcut(event, 'Digit0', { mod: true, shift: true })).toBe(true);
     });
 
     it('should NOT detect shortcut without modifier key', () => {
@@ -69,34 +69,29 @@ describe('ToolBarPlugin Keyboard Shortcuts', () => {
   });
 
   describe('Block Type Shortcuts', () => {
-    it('should detect Heading 1 shortcut with Ctrl+Alt+1', () => {
-      const event = createKeyboardEvent('Digit1', { ctrlKey: true, altKey: true });
-      expect(isShortcut(event, 'Digit1', { mod: true, alt: true })).toBe(true);
+    it('should detect Heading 1 shortcut with Ctrl+Shift+1', () => {
+      const event = createKeyboardEvent('Digit1', { ctrlKey: true, shiftKey: true });
+      expect(isShortcut(event, 'Digit1', { mod: true, shift: true })).toBe(true);
     });
 
-    it('should detect Heading 2 shortcut with Ctrl+Alt+2', () => {
-      const event = createKeyboardEvent('Digit2', { ctrlKey: true, altKey: true });
-      expect(isShortcut(event, 'Digit2', { mod: true, alt: true })).toBe(true);
+    it('should detect Heading 2 shortcut with Ctrl+Shift+2', () => {
+      const event = createKeyboardEvent('Digit2', { ctrlKey: true, shiftKey: true });
+      expect(isShortcut(event, 'Digit2', { mod: true, shift: true })).toBe(true);
     });
 
-    it('should detect Heading 3 shortcut with Ctrl+Alt+3', () => {
-      const event = createKeyboardEvent('Digit3', { ctrlKey: true, altKey: true });
-      expect(isShortcut(event, 'Digit3', { mod: true, alt: true })).toBe(true);
+    it('should detect Heading 3 shortcut with Ctrl+Shift+3', () => {
+      const event = createKeyboardEvent('Digit3', { ctrlKey: true, shiftKey: true });
+      expect(isShortcut(event, 'Digit3', { mod: true, shift: true })).toBe(true);
     });
 
-    it('should detect paragraph shortcut with Ctrl+Alt+0', () => {
-      const event = createKeyboardEvent('Digit0', { ctrlKey: true, altKey: true });
-      expect(isShortcut(event, 'Digit0', { mod: true, alt: true })).toBe(true);
+    it('should detect quote shortcut with Ctrl+\'', () => {
+      const event = createKeyboardEvent('Quote', { ctrlKey: true });
+      expect(isShortcut(event, 'Quote', { mod: true })).toBe(true);
     });
 
-    it('should detect quote shortcut with Ctrl+Shift+Q', () => {
-      const event = createKeyboardEvent('KeyQ', { ctrlKey: true, shiftKey: true });
-      expect(isShortcut(event, 'KeyQ', { mod: true, shift: true })).toBe(true);
-    });
-
-    it('should detect code block shortcut with Ctrl+Alt+C', () => {
-      const event = createKeyboardEvent('KeyC', { ctrlKey: true, altKey: true });
-      expect(isShortcut(event, 'KeyC', { mod: true, alt: true })).toBe(true);
+    it('should detect code block shortcut with Ctrl+Shift+C', () => {
+      const event = createKeyboardEvent('KeyC', { ctrlKey: true, shiftKey: true });
+      expect(isShortcut(event, 'KeyC', { mod: true, shift: true })).toBe(true);
     });
   });
 

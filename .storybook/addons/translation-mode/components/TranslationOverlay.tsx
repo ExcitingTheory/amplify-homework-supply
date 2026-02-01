@@ -30,12 +30,17 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
   const [hover, setHover] = useState(false);
   const [translatedText, setTranslatedText] = useState<string | null>(null);
   const elementRef = useRef<HTMLDivElement>(null);
+  // Track if we've already captured this translation to prevent duplicates
+  const capturedRef = useRef(false);
   
   // Use story name from props first, then context
   const storyName = propStoryName || contextStoryName;
 
-  // Capture this translation on mount with full metadata
+  // Capture this translation on mount with full metadata - only once
   useEffect(() => {
+    // Skip if already captured
+    if (capturedRef.current) return;
+    
     let isMounted = true;
     
     async function loadMetadata() {
@@ -66,6 +71,9 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
         usedIn: storyName ? [storyName] : undefined,
         ...metadata,
       });
+      
+      // Mark as captured
+      capturedRef.current = true;
     }
     
     loadMetadata();
@@ -73,7 +81,9 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [tKey, namespace, value, defaultValue, context, storyName, captureTranslation]);
+    // Removed captureTranslation from deps - it's stable
+    // Only re-capture if the key or namespace changes
+  }, [tKey, namespace]);
 
   // Load translation when language changes
   useEffect(() => {

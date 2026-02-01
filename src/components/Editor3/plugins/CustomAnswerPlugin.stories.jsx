@@ -21,7 +21,7 @@ import LanguageEditorTheme from '../components/LanguageEditorTheme';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 
 export default {
-  title: '🔌 Editor Plugins/Custom Answer',
+  title: '🔌 Editor Plugins/Content Blocks/Custom Answer',
   component: CustomAnswerPlugin,
   parameters: {
     layout: 'fullscreen',

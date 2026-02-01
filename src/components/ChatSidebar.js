@@ -59,6 +59,11 @@ import { VirtualizedMessageList } from './ChatSidebar/VirtualizedMessageList';
 import { LexicalMessageRenderer } from './ChatSidebar/LexicalMessageRenderer';
 import ToolCallPreview from './ChatSidebar/ToolCallPreview';
 import ContentPreview from './ChatSidebar/ContentPreview';
+import BlockInsertPreview from './ChatSidebar/BlockInsertPreview';
+import { INSERT_QUIZ_COMMAND } from '../components/Editor3/plugins/QuizPlugin';
+import { INSERT_ANSWER_BLOCK_COMMAND } from '../components/Editor3/plugins/AnswerPlugin';
+import { INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND } from '../components/Editor3/plugins/MeaningAssociationPlugin';
+import { INSERT_CUSTOM_ANSWER_BLOCK_COMMAND } from '../components/Editor3/plugins/CustomAnswerPlugin';
 
 const ChatSidebar = () => {
     const { t } = useTranslation('components');
@@ -197,7 +202,6 @@ const ChatSidebar = () => {
     // Refs for DOM interaction
     const chatContainerRef = useRef(null);
     const fileInputRef = useRef(null);
-    const addToolOutputRef = useRef(null);
 
     const unitContext = React.useContext(UnitContext);
     const {
@@ -228,6 +232,39 @@ const ChatSidebar = () => {
     const handleInsertWord = (word) => insertWord?.(word);
     const handleInsertQuestion = (question) => insertQuestion?.(question);
     const handleFocusItem = (type, id) => tabContext.setFocusItem?.({ type, id, timestamp: Date.now() });
+
+    // Handle inserting editor blocks from chat
+    const handleInsertBlock = useCallback((blockType, blockData) => {
+        if (!editorRef?.current) {
+            console.error('[ChatSidebar] No editor ref available');
+            return;
+        }
+
+        const editor = editorRef.current;
+
+        editor.update(() => {
+            switch (blockType) {
+                case 'quiz':
+                    editor.dispatchCommand(INSERT_QUIZ_COMMAND, blockData);
+                    console.log('[ChatSidebar] Inserted quiz block:', blockData);
+                    break;
+                case 'answer':
+                    editor.dispatchCommand(INSERT_ANSWER_BLOCK_COMMAND, blockData);
+                    console.log('[ChatSidebar] Inserted answer block:', blockData);
+                    break;
+                case 'meaning-association':
+                    editor.dispatchCommand(INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND, blockData);
+                    console.log('[ChatSidebar] Inserted meaning association block:', blockData);
+                    break;
+                case 'custom-answer':
+                    editor.dispatchCommand(INSERT_CUSTOM_ANSWER_BLOCK_COMMAND, blockData);
+                    console.log('[ChatSidebar] Inserted custom answer block:', blockData);
+                    break;
+                default:
+                    console.warn('[ChatSidebar] Unknown block type:', blockType);
+            }
+        });
+    }, [editorRef]);
 
     // Load chat data when chat changes
     useEffect(() => {
@@ -366,7 +403,60 @@ const ChatSidebar = () => {
     const transport = useMemo(() => new DefaultChatTransport({
         api: '/api/chat',
         fetch: customFetch, // Use our custom fetch that routes through Amplify
+        streamProtocol: 'data', // SSE format with tool call support
     }), [customFetch]);
+
+    // Register all client-side tools with experimental_tools pattern
+    // These tools execute on the client where DataStore is available
+    const clientSideTools = useMemo(() => {
+        const tools = {};
+        
+        // List of tools that should execute client-side (have access to DataStore)
+        const clientSideToolNames = [
+            'search_content',
+            'create_section',
+            'create_unit',
+            'create_assignment',
+            'add_timer_to_unit',
+            'create_vocabulary_word',
+            'create_question',
+            'list_sections',
+            'list_units',
+            'get_unit_details',
+            'update_unit',
+            'delete_assignment'
+        ];
+
+        // Register each client-side tool
+        toolDefinitions.forEach(toolDef => {
+            const toolName = toolDef.function.name;
+            
+            if (clientSideToolNames.includes(toolName)) {
+                tools[toolName] = {
+                    description: toolDef.function.description,
+                    parameters: toolDef.function.parameters,
+                    execute: async (args) => {
+                        console.log(`[ChatSidebar] Executing ${toolName}:`, args);
+                        
+                        try {
+                            const result = await executeTool(toolName, args);
+                            console.log(`[ChatSidebar] ${toolName} result:`, result);
+                            return result;
+                        } catch (error) {
+                            console.error(`[ChatSidebar] Error executing ${toolName}:`, error);
+                            return {
+                                success: false,
+                                error: error.message || `Failed to execute ${toolName}`
+                            };
+                        }
+                    }
+                };
+            }
+        });
+
+        console.log('[ChatSidebar] Registered client-side tools:', Object.keys(tools));
+        return tools;
+    }, []);
 
     // Simplified save functions
     const saveDraft = useCallback(async (draftText, chat, currentMessages = []) => {
@@ -436,47 +526,12 @@ const ChatSidebar = () => {
     const chatHookResult = useChat({
         transport,
 
-        // Handle client-side tools
-        async onToolCall({ toolCall }) {
-            console.log('[ChatSidebar] onToolCall invoked:', toolCall.toolName, toolCall.toolCallId);
-
-            // Check if it's a dynamic tool first for proper type narrowing
-            if (toolCall.dynamic) {
-                console.log('[ChatSidebar] Dynamic tool, skipping');
-                return;
-            }
-
-            if (toolCall.toolName === 'search_content') {
-                console.log('[ChatSidebar] Executing client-side search_content:', toolCall.input);
-
-                try {
-                    const result = await executeTool('search_content', toolCall.input);
-                    console.log('[ChatSidebar] Search result:', result);
-
-                    // Use addToolOutput from ref (no await to avoid deadlocks)
-                    if (addToolOutputRef.current) {
-                        addToolOutputRef.current({
-                            toolCallId: toolCall.toolCallId,
-                            output: result
-                        });
-                    }
-                } catch (error) {
-                    console.error('[ChatSidebar] Search error:', error);
-
-                    // Add error output
-                    if (addToolOutputRef.current) {
-                        addToolOutputRef.current({
-                            toolCallId: toolCall.toolCallId,
-                            state: 'output-error',
-                            errorText: error.message || 'Search failed'
-                        });
-                    }
-                }
-            }
-        },
+        // Register client-side tools using experimental_tools
+        // These execute in the browser with access to DataStore
+        experimental_tools: clientSideTools,
 
         // Automatically send when all tool results are available
-        sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+        experimental_sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
 
         onError: (error) => {
             console.error('[ChatSidebar] Chat error:', error);
@@ -511,7 +566,6 @@ const ChatSidebar = () => {
         status = 'idle',
         stop,
         toolCalls = [],
-        addToolOutput,
     } = chatHookResult || {};
 
     // Only log useChat status on meaningful changes
@@ -557,11 +611,6 @@ const ChatSidebar = () => {
             console.error('[ChatSidebar] Error sending message:', error);
         }
     }, [input, sendMessage, assistantChat]);
-
-    // Store addToolOutput in ref for onToolCall access
-    useEffect(() => {
-        addToolOutputRef.current = addToolOutput;
-    }, [addToolOutput]);
 
     // Auto-scroll to bottom when messages change
     useEffect(() => {
@@ -1330,6 +1379,7 @@ const ChatSidebar = () => {
                                         {/* Render text content in speech bubble */}
                                         {textContent && (
                                             <Box
+                                                className={message.role === 'user' ? 'user' : 'assistant'}
                                                 sx={{
                                                     m: 0.75,
                                                     p: '0.75rem 1rem',
@@ -1514,7 +1564,67 @@ const ChatSidebar = () => {
                                                 );
                                             }
 
-                                            // Handle generate_unit_content tool
+                                            // Handle block insertion tools (quiz, answer, meaning-association, custom-answer, content)
+                                            if (['insert_quiz', 'insert_answer_block', 'insert_meaning_association', 'insert_custom_answer', 'insert_content_block'].includes(toolName)) {
+                                                // Parse output to get block data
+                                                let parsedOutput = null;
+                                                if (part.state === 'output-available' && part.output) {
+                                                    try {
+                                                        parsedOutput = typeof part.output === 'string'
+                                                            ? JSON.parse(part.output)
+                                                            : part.output;
+                                                    } catch (e) {
+                                                        console.error('[ChatSidebar] Failed to parse block output:', e);
+                                                    }
+                                                }
+
+                                                return (
+                                                    <Box
+                                                        key={callId || toolIdx}
+                                                        sx={{
+                                                            width: '100%',
+                                                            mb: 2,
+                                                        }}
+                                                    >
+                                                        {part.state === 'input-streaming' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic', color: 'text.secondary' }}>
+                                                                Preparing block...
+                                                            </Typography>
+                                                        )}
+
+                                                        {part.state === 'input-available' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
+                                                                Creating {toolName.replace('insert_', '').replace(/_/g, ' ')} block...
+                                                            </Typography>
+                                                        )}
+
+                                                        {part.state === 'output-available' && parsedOutput && (
+                                                            <BlockInsertPreview
+                                                                toolOutput={parsedOutput}
+                                                                onInsertBlock={handleInsertBlock}
+                                                                onReject={() => console.log('[ChatSidebar] Block insert rejected')}
+                                                            />
+                                                        )}
+
+                                                        {part.state === 'output-error' && (
+                                                            <Box
+                                                                sx={{
+                                                                    p: 2,
+                                                                    bgcolor: 'error.light',
+                                                                    borderRadius: 1,
+                                                                    color: 'error.dark'
+                                                                }}
+                                                            >
+                                                                <Typography variant="body2">
+                                                                    Error creating block: {part.errorText}
+                                                                </Typography>
+                                                            </Box>
+                                                        )}
+                                                    </Box>
+                                                );
+                                            }
+
+                                            // Handle generate_unit_content tool (deprecated - kept for backwards compatibility)
                                             if (toolName === 'generate_unit_content') {
                                                 return (
                                                     <Box
@@ -1548,6 +1658,52 @@ const ChatSidebar = () => {
                                                         {part.state === 'output-available' && (
                                                             <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
                                                                 ✓ {part.output?.message || t('chatSidebar.ready')}
+                                                            </Typography>
+                                                        )}
+
+                                                        {part.state === 'output-error' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
+                                                                ✗ {part.errorText}
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                );
+                                            }
+
+                                            // Handle generate_quiz_questions tool
+                                            if (toolName === 'generate_quiz_questions') {
+                                                return (
+                                                    <Box
+                                                        key={callId || toolIdx}
+                                                        sx={{
+                                                            mb: 1,
+                                                            p: 1,
+                                                            bgcolor: 'transparent',
+                                                            borderLeft: '2px solid',
+                                                            borderColor: part.state === 'output-error' ? 'error.main' : 'primary.main',
+                                                            fontSize: '0.8rem',
+                                                            color: 'text.secondary',
+                                                        }}
+                                                    >
+                                                        <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
+                                                            📝 Generate Quiz Questions
+                                                        </Typography>
+
+                                                        {part.state === 'input-streaming' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic' }}>
+                                                                Preparing...
+                                                            </Typography>
+                                                        )}
+
+                                                        {part.state === 'input-available' && (
+                                                            <Typography variant="caption" sx={{ display: 'block' }}>
+                                                                Topic: {part.input?.topic} ({part.input?.count} {part.input?.questionType} questions, {part.input?.difficulty} difficulty)
+                                                            </Typography>
+                                                        )}
+
+                                                        {part.state === 'output-available' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
+                                                                ✓ {part.output?.message || `Generated ${part.output?.questionsGenerated || part.input?.count} questions`}
                                                             </Typography>
                                                         )}
 

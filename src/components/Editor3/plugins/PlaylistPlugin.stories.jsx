@@ -22,7 +22,7 @@ import { UnitProvider } from '../../../context/unitContext';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 
 export default {
-  title: '🔌 Editor Plugins/Playlist',
+  title: '🔌 Editor Plugins/Media/Playlist',
   component: PlaylistPlugin,
   parameters: {
     layout: 'fullscreen',

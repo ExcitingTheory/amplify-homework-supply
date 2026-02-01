@@ -24,7 +24,7 @@ import { UnitProvider } from '../../../context/unitContext';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
-  title: '🔌 Editor Plugins/Layout',
+  title: '🔌 Editor Plugins/Formatting/Layout',
   component: LayoutPlugin,
   parameters: {
     layout: 'fullscreen',

@@ -5,9 +5,11 @@ import UnitContext from '../../context/unitContext';
 import {
   Grid, List,
   ListItem,
-  ListItemText
+  ListItemText,
+  Box
 } from '@mui/material';
 import { LinearProgressWithLabel, AnswerDropLearn } from '.';
+import { CompletionScreen } from './CompletionScreen';
 import { shuffle } from './utils';
 import { DragBox } from './DragBox';
 import { Word } from '../../models';
@@ -26,8 +28,15 @@ export const Learn = ({
   const [filterLearn, setFilterLearn] = React.useState([]);
   const [completedLearn, setCompletedLearn] = React.useState(0);
   const [startPositionLearn, setStartPositionLearn] = React.useState(0);
+  const [dropAnswerVisibility, setDropAnswerVisibility] = React.useState([]);
+  const [showCompletion, setShowCompletion] = React.useState(false);
 
   const isFirstRender = React.useRef(true);
+
+  // Reset completion screen when tab changes
+  React.useEffect(() => {
+    setShowCompletion(false);
+  }, [tabIndex]);
 
   const { wordMapId: dictionary } = React.useContext(DictionaryContext);
 
@@ -40,6 +49,7 @@ export const Learn = ({
     setAnswers([..._vocabulary])
     setLength(_vocabulary.length)
   }, [wordIDs, dictionary]);
+  
   const { grade, saveGrade } = React.useContext(UnitContext);
   const inProgress = grade?.data?.[nodeKey] || {};
 
@@ -52,8 +62,9 @@ export const Learn = ({
       setFilterLearn(verified);
       setCompletedLearn(percentComplete);
       setStartPositionLearn(verified.length);
+      setDropAnswerVisibility(verified);
     }
-  }, [inProgress])
+  }, [inProgress]);
 
   let vocabList = []
   let vocabListLearn = []
@@ -93,7 +104,6 @@ export const Learn = ({
   
   const loadAttemptedAnswers = inProgress?.learn?.attemptedAnswers || {};
   const attemptsCount = inProgress?.learn?.attemptsCount || 0;
-  const dropAnswerVisibility = verifiedAnswers;
 
   let _correctAnswer = '';
 
@@ -133,7 +143,8 @@ export const Learn = ({
         allTabsComplete = true;
       }
 
-      newTab++;
+      // Don't auto-advance, show completion screen instead
+      // newTab++;
     }
 
     let savedGradeCopy = JSON.parse(JSON.stringify(grade?.data || {}));
@@ -166,6 +177,10 @@ export const Learn = ({
 
     await saveGrade(savedGradeCopy);
 
+    // Show completion screen if exercise is complete
+    if (thisExerciseComplete) {
+      setShowCompletion(true);
+    }
   }
 
   async function sendFail(phrase) {
@@ -208,25 +223,33 @@ export const Learn = ({
   function sendPass() {
     // // // console.log('sendPass')
   }
-
+  const handleContinueFromCompletion = () => {
+    setShowCompletion(false);
+    setTabIndex(1); // Move to Easy mode
+  };
 
   const maxHeight = '15rem';
 
   return (
+    <Box sx={{ position: 'relative' }}>
+      {showCompletion && (
+        <CompletionScreen
+          levelName="Learn Mode"
+          accuracy={dropAnswerVisibility.length / (inProgress?.learn?.attemptsCount || 1)}
+          attempts={inProgress?.learn?.attemptsCount || 0}
+          onContinue={handleContinueFromCompletion}
+          nextLevelName="Easy Mode"
+          isLastLevel={false}
+        />
+      )}
 
-    <Grid container flexDirection="column">
-      <Grid xs={12} flexGrow={1} >
+      <Grid container direction="column" spacing={0}>
+      <Grid item>
         <LinearProgressWithLabel value={percentComplete} />
       </Grid>
-      <Grid container flexDirection="row">
-      <Grid xs={8}>
-        <List
-          style={{
-            maxHeight: maxHeight || 'fit-content',
-            overflowX: 'auto',
-          }}
-        >
-
+      <Grid item container direction="row" spacing={2} wrap="nowrap">
+      <Grid item xs={8} sm={8} md={8} lg={8}>
+        <List>
           {easyAssignment.map((listItem, id) => {
             // console.log('SimpleList listItem', listItem)
             let _correctWord = '';
@@ -282,15 +305,20 @@ export const Learn = ({
 
         </List>
       </Grid>
-      <Grid item xs={4} style={{
-        marginBottom: '1rem',
-        paddingBottom: '1rem',
-        maxHeight: '15rem',
-        overflowX: 'auto'
-      }}>
-        {easyVocab}
+      <Grid item xs={4} sm={4} md={4} lg={4}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 1,
+            padding: 1,
+          }}
+        >
+          {easyVocab}
+        </Box>
       </Grid>
       </Grid>
     </Grid>
+    </Box>
   );
 };

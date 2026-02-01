@@ -24,25 +24,25 @@ import {
   ListItem,
   ListItemText
 } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { Easy } from './Easy';
 import { Hard } from './Hard';
 import { Learn } from './Learn';
+import UnitContext from '../../context/unitContext';
 
 
 export function LinearProgressWithLabel(props) {
   return (
-    <>
-      <Box display="flex" alignItems="center" margin={1}>
-        <Box width="80%">
-          <LinearProgress variant="determinate" {...props} />
-        </Box>
-        <Box width='fit-content' marginLeft={1}>
-          <Typography variant="body2" color="textSecondary">{`${Math.round(
-            props.value,
-          )}%`}</Typography>
-        </Box>
+    <Box display="flex" alignItems="center">
+      <Box flex={1}>
+        <LinearProgress variant="determinate" {...props} />
       </Box>
-    </>
+      <Box width='fit-content' marginLeft={1}>
+        <Typography variant="body2" color="textSecondary">{`${Math.round(
+          props.value,
+        )}%`}</Typography>
+      </Box>
+    </Box>
   );
 }
 
@@ -166,17 +166,31 @@ function a11yProps(index) {
 const MeaningAssociationTabs = ({
   nodeKey,
   wordIDs,
+  enabledModes = ['learn', 'easy', 'hard'],
 }) => {
 
-  const [tabIndex, setTabIndex] = React.useState(0);
+  const { grade } = React.useContext(UnitContext);
+  const inProgress = grade?.data?.[nodeKey] || {};
+  
+  // Load saved tab index or default to 0
+  const savedTabIndex = inProgress?.tabIndex || 0;
+  const [tabIndex, setTabIndex] = React.useState(savedTabIndex);
+
+  // Update tab index when grade data changes (e.g., from another component)
+  React.useEffect(() => {
+    if (inProgress?.tabIndex !== undefined && inProgress.tabIndex !== tabIndex) {
+      setTabIndex(inProgress.tabIndex);
+    }
+  }, [inProgress?.tabIndex]);
 
   const handleTabChange = (event, newValue) => {
     setTabIndex(newValue);
   };
 
-  // React.useEffect(() => {
-  //   setTabIndex(initialTab)
-  // }, [initialTab])
+  // Check completion status for each mode
+  const learnComplete = inProgress?.learn?.complete || false;
+  const easyComplete = inProgress?.easy?.complete || false;
+  const hardComplete = inProgress?.hard?.complete || false;
 
   return (
     <>
@@ -200,36 +214,72 @@ const MeaningAssociationTabs = ({
             padding: 0,
           }}
         >
-          <Tab label="Learn" {...a11yProps(0)} />
-          <Tab label="Easy" {...a11yProps(1)} />
-          <Tab label="Hard" {...a11yProps(2)} />
+          {enabledModes.includes('learn') && (
+            <Tab 
+              label={
+                <Box display="flex" alignItems="center" gap={1}>
+                  Learn
+                  {learnComplete && <CheckCircleIcon style={{ fontSize: '1rem', color: '#4caf50' }} />}
+                </Box>
+              } 
+              {...a11yProps(enabledModes.indexOf('learn'))} 
+            />
+          )}
+          {enabledModes.includes('easy') && (
+            <Tab 
+              label={
+                <Box display="flex" alignItems="center" gap={1}>
+                  Easy
+                  {easyComplete && <CheckCircleIcon style={{ fontSize: '1rem', color: '#4caf50' }} />}
+                </Box>
+              } 
+              {...a11yProps(enabledModes.indexOf('easy'))} 
+            />
+          )}
+          {enabledModes.includes('hard') && (
+            <Tab 
+              label={
+                <Box display="flex" alignItems="center" gap={1}>
+                  Hard
+                  {hardComplete && <CheckCircleIcon style={{ fontSize: '1rem', color: '#4caf50' }} />}
+                </Box>
+              } 
+              {...a11yProps(enabledModes.indexOf('hard'))} 
+            />
+          )}
         </Tabs>
       </AppBar>
       {/* <DndWrapper> */}
-        <TabPanel value={tabIndex} index={0}>
-            <Learn
-              nodeKey={nodeKey}
-              setTabIndex={setTabIndex}
-              tabIndex={tabIndex}
-              wordIDs={wordIDs}
-            />
-        </TabPanel>
-        <TabPanel value={tabIndex} index={1}>
-            <Easy
-              nodeKey={nodeKey}
-              setTabIndex={setTabIndex}
-              tabIndex={tabIndex}
-              wordIDs={wordIDs}
-            />
-        </TabPanel>
-        <TabPanel value={tabIndex} index={2}>
-            <Hard
-              nodeKey={nodeKey}
-              setTabIndex={setTabIndex}
-              tabIndex={tabIndex}
-              wordIDs={wordIDs}
-            />
-        </TabPanel>
+        {enabledModes.includes('learn') && (
+          <TabPanel value={tabIndex} index={enabledModes.indexOf('learn')}>
+              <Learn
+                nodeKey={nodeKey}
+                setTabIndex={setTabIndex}
+                tabIndex={tabIndex}
+                wordIDs={wordIDs}
+              />
+          </TabPanel>
+        )}
+        {enabledModes.includes('easy') && (
+          <TabPanel value={tabIndex} index={enabledModes.indexOf('easy')}>
+              <Easy
+                nodeKey={nodeKey}
+                setTabIndex={setTabIndex}
+                tabIndex={tabIndex}
+                wordIDs={wordIDs}
+              />
+          </TabPanel>
+        )}
+        {enabledModes.includes('hard') && (
+          <TabPanel value={tabIndex} index={enabledModes.indexOf('hard')}>
+              <Hard
+                nodeKey={nodeKey}
+                setTabIndex={setTabIndex}
+                tabIndex={tabIndex}
+                wordIDs={wordIDs}
+              />
+          </TabPanel>
+        )}
       {/* </DndWrapper> */}
     </>
   )
@@ -238,6 +288,7 @@ const MeaningAssociationTabs = ({
 const MeaningAssociationExercise = ({
   nodeKey,
   wordIDs,
+  enabledModes = ['learn', 'easy', 'hard'],
 }) => {
 
   return (
@@ -250,6 +301,7 @@ const MeaningAssociationExercise = ({
       <MeaningAssociationTabs
         nodeKey={nodeKey}
         wordIDs={wordIDs}
+        enabledModes={enabledModes}
       />
     </div>
   )

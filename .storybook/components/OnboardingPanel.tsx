@@ -17,6 +17,9 @@ import {
   Chip,
   ThemeProvider,
   createTheme,
+  Link,
+  Collapse,
+  IconButton,
 } from '@mui/material';
 import { styled, keyframes } from '@mui/material/styles';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -24,9 +27,11 @@ import CircleIcon from '@mui/icons-material/Circle';
 import PersonIcon from '@mui/icons-material/Person';
 import SchoolIcon from '@mui/icons-material/School';
 import CodeIcon from '@mui/icons-material/Code';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import LaunchIcon from '@mui/icons-material/Launch';
 import { useTheme } from '@mui/material/styles';
 import { getOnboardingEmitter, UserPersona } from '../code/onboarding-events';
-import { ONBOARDING_TASKS, getTasksForPersona, getTasksByCategory } from '../code/onboarding-tasks';
+import { ONBOARDING_TASKS, getTasksForPersona, getTasksByCategory, OnboardingTaskWithCriteria } from '../code/onboarding-tasks';
 
 import './OnboardingPanel.css';
 
@@ -98,6 +103,8 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   const [tabValue, setTabValue] = useState(0);
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
   const [completionPercentage, setCompletionPercentage] = useState(0);
+  const [mode, setMode] = useState<'tutorial' | 'quiz'>('tutorial');
+  const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
 
   const emitter = getOnboardingEmitter();
 
@@ -139,20 +146,6 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     emitter.setPersona(persona);
   };
 
-  const handleTaskComplete = (taskId: string) => {
-    if (!selectedPersona) return;
-
-    const isCompleted = completedTasks.has(taskId);
-    if (!isCompleted) {
-      emitter.emit({
-        type: 'task-completed',
-        taskId,
-        persona: selectedPersona,
-        timestamp: Date.now(),
-      });
-    }
-  };
-
   const handleResetProgress = () => {
     if (window.confirm('Are you sure you want to reset all onboarding progress?')) {
       emitter.reset();
@@ -162,7 +155,37 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
       setTabValue(0);
     }
   };
+toggleTaskExpanded = (taskId: string) => {
+    setExpandedTasks(prev => {
+      const next = new Set(prev);
+      if (next.has(taskId)) {
+        next.delete(taskId);
+      } else {
+        next.add(taskId);
+      }
+      return next;
+    });
+  };
 
+  const getStoryLink = (task: OnboardingTaskWithCriteria): string | null => {
+    const storyId = task.completionCriteria?.storyId;
+    if (!storyId) return null;
+    
+    // Convert story ID to URL path
+    return `/?path=/story/${storyId}`;
+  };
+
+  const handleNavigateToStory = (storyId: string) => {
+    if (api?.selectStory) {
+      // Use Storybook API if available
+      api.selectStory(storyId);
+    } else {
+      // Navigate directly
+      window.parent.location.href = `/?path=/story/${storyId}`;
+    }
+  };
+
+  const 
   const renderContent = () => {
     if (!selectedPersona) {
       return renderPersonaSelection();
@@ -229,6 +252,24 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
               {completedTasks.size} of {tasks.length} tasks completed
             </Typography>
           </Box>
+          <Tooltip title="Learning mode">
+            <Box sx={{ display: 'flex', gap: 0.5 }}>
+              <Chip
+                label="Tutorial"
+                size="small"
+                color={mode === 'tutorial' ? 'primary' : 'default'}
+                onClick={() => setMode('tutorial')}
+                sx={{ cursor: 'pointer', fontSize: '0.7rem' }}
+              />
+              <Chip
+                label="Quiz"
+                size="small"
+                color={mode === 'quiz' ? 'primary' : 'default'}
+                onClick={() => setMode('quiz')}
+                sx={{ cursor: 'pointer', fontSize: '0.7rem' }}
+              />
+            </Box>
+          </Tooltip>
           <Tooltip title="Change role">
             <Button
               size="small"
@@ -248,8 +289,20 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
           sx={{ mb: 2, height: 8, borderRadius: 1, mx: 2 }}
         />
         <Typography variant="caption" sx={{ color: 'text.secondary', mb: 2, display: 'block', px: 2 }}>
-          {completionPercentage}% Complete
+          {completionPercentage}% Complete · {mode === 'tutorial' ? '📖 Tutorial Mode' : '🎯 Quiz Mode'}
         </Typography>
+
+        {/* Quiz Mode Instructions */}
+        {mode === 'quiz' && (
+          <Box sx={{ mx: 2, mb: 2, p: 2, backgroundColor: 'rgba(33, 150, 243, 0.1)', borderRadius: 1, borderLeft: '4px solid #2196F3' }}>
+            <Typography variant="caption" sx={{ color: 'text.primary', display: 'block', fontWeight: 600, mb: 0.5 }}>
+              🎯 Quiz Mode Active
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+              Navigate to <strong>📄 Pages → Application Pages</strong> to practice using the actual app. Complete tasks to track progress below.
+            </Typography>
+          </Box>
+        )}
 
         {/* Quick Stats */}
         <Stack direction="row" spacing={1} sx={{ mb: 2, px: 2 }}>
@@ -262,40 +315,133 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
           />
           <Chip
             label={`${tasks.length - completedTasks.size} Remaining`}
-            icon={<CircleIcon />}
-            color="default"
-            variant="outlined"
-            size="small"
-          />
-        </Stack>
-
-        <Divider sx={{ mb: 2, mx: 2 }} />
-
-        {/* Task Tabs by Category */}
-        <Tabs
-          value={tabValue}
-          onChange={(e, v) => setTabValue(v)}
-          variant="scrollable"
-          scrollButtons="auto"
-          sx={{ mb: 2, minHeight: 36, px: 2 }}
-        >
-          {categories.map((category, index) => (
-            <Tab
-              key={category}
-              label={`${category} (${tasksByCategory[category].filter((t) => completedTasks.has(t.id)).length}/${tasksByCategory[category].length})`}
-              sx={{ textTransform: 'none', fontSize: '0.85rem' }}
-            />
-          ))}
-        </Tabs>
-
-        {/* Task List for Current Tab */}
-        <Box sx={{ mb: 2, px: 2 }}>
-          {categories.length > 0 && (
-            <Stack spacing={1.5}>
-              {tasksByCategory[categories[tabValue]].map((task) => {
+            icon={<CircleIcon />}: OnboardingTaskWithCriteria) => {
                 const isCompleted = completedTasks.has(task.id);
+                const isExpanded = expandedTasks.has(task.id);
+                const storyLink = getStoryLink(task);
+                const hasInstructions = task.instructions && task.instructions.length > 0;
+                
                 return (
                   <Card
+                    key={task.id}
+                    sx={{
+                      backgroundColor: isCompleted ? 'rgba(76, 175, 80, 0.05)' : 'transparent',
+                    }}
+                  >
+                    <CardContent sx={{ p: 1.5, pb: hasInstructions || storyLink ? 1 : 1.5 }}>
+                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                        <Checkbox
+                          checked={isCompleted}
+                          disabled
+                          size="small"
+                          sx={{ mt: 0.5, cursor: 'default' }}
+                        />
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  fontWeight: 500,
+                                  textDecoration: isCompleted ? 'line-through' : 'none',
+                                  color: isCompleted ? 'text.secondary' : 'text.primary',
+                                }}
+                              >
+                                {task.title}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                sx={{ color: 'text.secondary', display: 'block', mt: 0.5 }}
+                              >
+                                {task.description}
+                              </Typography>
+                              
+                              {/* Estimated time and mode indicator */}
+                              <Box sx={{ display: 'flex', gap: 1, mt: 0.5, alignItems: 'center' }}>
+                                <Chip 
+                                  label={`~${Math.ceil(task.estimatedTime / 60)} min`}
+                                  size="small"
+                                  sx={{ height: 18, fontSize: '0.65rem' }}
+                                />
+                                {mode === 'quiz' && storyLink && (
+                                  <Chip 
+                                    label="Practice Available"
+                                    size="small"
+                                    color="primary"
+                                    variant="outlined"
+                                    sx={{ height: 18, fontSize: '0.65rem' }}
+                                  />
+                                )}
+                              </Box>
+                            </Box>
+                            
+                            {(hasInstructions || storyLink) && (
+                              <IconButton
+                                size="small"
+                                onClick={() => toggleTaskExpanded(task.id)}
+                                sx={{
+                                  transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                                  transition: 'transform 0.2s',
+                                }}
+                              >
+                                <ExpandMoreIcon fontSize="small" />
+                              </IconButton>
+                            )}
+                          </Box>
+
+                          {/* Expandable content */}
+                          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                            <Box sx={{ mt: 1.5, pt: 1.5, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                              {/* Instructions */}
+                              {hasInstructions && (
+                                <Box sx={{ mb: storyLink ? 1.5 : 0 }}>
+                                  <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', display: 'block', mb: 0.5 }}>
+                                    📋 Steps:
+                                  </Typography>
+                                  <Box component="ol" sx={{ m: 0, pl: 2.5, fontSize: '0.7rem', color: 'text.secondary' }}>
+                                    {task.instructions.map((instruction, i) => (
+                                      <li key={i} style={{ marginBottom: '4px' }}>{instruction}</li>
+                                    ))}
+                                  </Box>
+                                </Box>
+                              )}
+                              
+                              {/* Story link for Quiz mode */}
+                              {storyLink && (
+                                <Box sx={{ p: 1, backgroundColor: 'rgba(33, 150, 243, 0.1)', borderRadius: 1, borderLeft: '3px solid #2196F3' }}>
+                                  <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', display: 'block', mb: 0.5 }}>
+                                    {mode === 'quiz' ? '🎯 Practice Here:' : '📖 Learn More:'}
+                                  </Typography>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                    <Link
+                                      component="button"
+                                      variant="caption"
+                                      onClick={() => task.completionCriteria?.storyId && handleNavigateToStory(task.completionCriteria.storyId)}
+                                      sx={{ 
+                                        color: '#2196F3',
+                                        textAlign: 'left',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 0.5,
+                                        fontSize: '0.7rem',
+                                        '&:hover': {
+                                          textDecoration: 'underline',
+                                        }
+                                      }}
+                                    >
+                                      Go to {task.completionCriteria?.storyId?.split('--')[0].replace(/-/g, ' ')}
+                                      <LaunchIcon sx={{ fontSize: 12 }} />
+                                    </Link>
+                                  </Box>
+                                  {mode === 'quiz' && task.completionCriteria?.requiredActions && (
+                                    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.5, fontSize: '0.65rem', fontStyle: 'italic' }}>
+                                      Complete the actions to mark this task done automatically
+                                    </Typography>
+                                  )}
+                                </Box>
+                              )}
+                            </Box>
+                          </Collapse
                     key={task.id}
                     sx={{
                       backgroundColor: isCompleted ? 'rgba(76, 175, 80, 0.05)' : 'transparent',
@@ -305,9 +451,9 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                       <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
                         <Checkbox
                           checked={isCompleted}
-                          onChange={() => handleTaskComplete(task.id)}
+                          disabled
                           size="small"
-                          sx={{ mt: 0.5 }}
+                          sx={{ mt: 0.5, cursor: 'default' }}
                         />
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Typography

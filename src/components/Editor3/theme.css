@@ -17,7 +17,7 @@
 */
 div[data-lexical-editor="true"] {
     padding: 1rem 2rem 1rem 0.5rem;
-    min-height: calc(100vh - var(--app-bar-height, 11rem));
+    /* min-height: calc(100vh - var(--app-bar-height, 11rem)); */
 }
 
 div.ImageNode__contentEditable {
@@ -52,7 +52,7 @@ div.ImageNode__contentEditable {
 }
 
 .editor-container {
-    min-height: calc(100vh - var(--app-bar-height, 11rem));
+    /* min-height: calc(100vh - var(--app-bar-height, 11rem)); */
 }
 
 .editor-textUnderline {

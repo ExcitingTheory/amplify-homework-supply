@@ -49,17 +49,21 @@ function convertMeaningAssociationElement(
  */
 export class MeaningAssociationNode extends DecoratorNode {
   __ids;
+  __enabledModes;
 
   static getType() {
     return 'meaning-association';
   }
 
   static clone(node) {
-    return new MeaningAssociationNode(node.__ids, node.__format);
+    return new MeaningAssociationNode(node.__ids, node.__enabledModes, node.__format);
   }
 
   static importJSON(serializedNode) {
-    const node = $createMeaningAssociationNode(serializedNode.wordIDs);
+    const node = $createMeaningAssociationNode(
+      serializedNode.wordIDs,
+      serializedNode.enabledModes
+    );
     // node.setFormat(serializedNode.format);
     return node;
   }
@@ -70,12 +74,14 @@ export class MeaningAssociationNode extends DecoratorNode {
       type: 'meaning-association',
       version: 1,
       wordIDs: [...this.__ids],
+      enabledModes: this.__enabledModes || ['learn', 'easy', 'hard'],
     };
   }
 
-  constructor(ids = [], format, key) {
+  constructor(ids = [], enabledModes = ['learn', 'easy', 'hard'], format, key) {
     super(format, key);
     this.__ids = ids;
+    this.__enabledModes = enabledModes;
   }
 
   exportDOM() {
@@ -126,6 +132,15 @@ export class MeaningAssociationNode extends DecoratorNode {
     return this.__ids;
   }
 
+  getEnabledModes() {
+    return this.__enabledModes || ['learn', 'easy', 'hard'];
+  }
+
+  setEnabledModes(modes) {
+    const writable = this.getWritable();
+    writable.__enabledModes = modes;
+  }
+
   removeIntersection(ids) {
     const writable = this.getWritable();
 
@@ -173,6 +188,7 @@ export class MeaningAssociationNode extends DecoratorNode {
       format={this.__format}
       nodeKey={this.getKey()}
       wordIDs={this.__ids}
+      enabledModes={this.__enabledModes || ['learn', 'easy', 'hard']}
     />
       )}
 
@@ -182,6 +198,7 @@ export class MeaningAssociationNode extends DecoratorNode {
       format={this.__format}
       nodeKey={this.getKey()}
       wordIDs={this.__ids}
+      enabledModes={this.__enabledModes || ['learn', 'easy', 'hard']}
     />
       )}
       </>
@@ -194,10 +211,11 @@ export class MeaningAssociationNode extends DecoratorNode {
  * Factory function to create a MeaningAssociationNode.
  * 
  * @param {string[]} wordIDs - Array of Word IDs to include in exercise
+ * @param {string[]} enabledModes - Array of enabled difficulty modes ['learn', 'easy', 'hard']
  * @returns {MeaningAssociationNode} New node instance
  */
-export function $createMeaningAssociationNode(wordIDs) {
-  return new MeaningAssociationNode(wordIDs);
+export function $createMeaningAssociationNode(wordIDs, enabledModes = ['learn', 'easy', 'hard']) {
+  return new MeaningAssociationNode(wordIDs, enabledModes);
 }
 
 /**

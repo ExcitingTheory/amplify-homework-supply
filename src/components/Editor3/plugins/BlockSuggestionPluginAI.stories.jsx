@@ -24,7 +24,7 @@ import { UnitProvider } from '../../../context/unitContext';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 
 export default {
-  title: '🔌 Editor Plugins/Block Suggestion (AI Mode)',
+  title: '🔌 Editor Plugins/AI/Block Suggestion (AI Mode)',
   component: BlockSuggestionPlugin,
   parameters: {
     layout: 'fullscreen',

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useState, useCallback, useMemo, ReactNode } from 'react';
 import { addons } from 'storybook/preview-api';
 
 export type TranslationModeType = 'off' | 'highlight' | 'edit';
@@ -63,23 +63,35 @@ export const TranslationModeProvider: React.FC<Props> = ({ children }) => {
     }
   }, []);
 
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({
+      mode,
+      setMode,
+      selectedTranslation,
+      selectTranslation,
+      isPanelOpen,
+      setPanelOpen,
+      currentLanguages,
+      setCurrentLanguages,
+      displayLanguage,
+      setDisplayLanguage,
+      storyName,
+      setStoryName,
+    }),
+    [
+      mode,
+      selectedTranslation,
+      selectTranslation,
+      isPanelOpen,
+      currentLanguages,
+      displayLanguage,
+      storyName,
+    ]
+  );
+
   return (
-    <TranslationModeContext.Provider
-      value={{
-        mode,
-        setMode,
-        selectedTranslation,
-        selectTranslation,
-        isPanelOpen,
-        setPanelOpen,
-        currentLanguages,
-        setCurrentLanguages,
-        displayLanguage,
-        setDisplayLanguage,
-        storyName,
-        setStoryName,
-      }}
-    >
+    <TranslationModeContext.Provider value={contextValue}>
       {children}
     </TranslationModeContext.Provider>
   );

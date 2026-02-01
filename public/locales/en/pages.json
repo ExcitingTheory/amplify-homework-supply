@@ -20,7 +20,26 @@
         ]
       }
     },
-    "sections": "Sections",
+    "sections": {
+      "value": "Sections",
+      "_meta": {
+        "context": "This text appears as a section header or navigation label within the grades interface, helping users organize and view graded content by different sections or modules. Students and instructors see this when navigating through different parts of graded assignments or course content.",
+        "component": {
+          "location": "src/components/common",
+          "description": "A common UI component that displays section-based navigation or organization within the grading system. This component helps users categorize and access different portions of graded content in an organized manner."
+        },
+        "usage": "Translation key: grades.sections",
+        "impact": "Important - This organizational label helps users efficiently navigate through graded content and understand the structure of their coursework",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Parts",
+          "Modules",
+          "Divisions",
+          "Categories"
+        ]
+      }
+    },
     "mySections": {
       "value": "My Sections",
       "_meta": {
@@ -1443,6 +1462,63 @@
         ]
       }
     },
+    "selectAssignmentsToCurve": {
+      "value": "Select assignments to curve",
+      "_meta": {
+        "context": "This text appears as an instructional prompt in the gradebook section detail view when instructors enable the curve feature. It appears above the assignment selection interface, guiding instructors to choose which specific assignments should have the grading curve applied to them.",
+        "component": {
+          "location": "src/components/pages",
+          "description": "This component renders the gradebook management interface where instructors can apply grading curves to individual assignments. It provides granular control over curve application, allowing instructors to selectively curve assignments rather than applying curves universally."
+        },
+        "usage": "Instructional label that guides instructors to select assignments for curve application.",
+        "impact": "High - This is essential for instructors to understand they can selectively apply curves to specific assignments rather than all assignments in the section.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Choose assignments for curving",
+          "Pick assignments to adjust",
+          "Select which assignments to curve"
+        ]
+      }
+    },
+    "selectAll": {
+      "value": "Select All",
+      "_meta": {
+        "context": "This text appears as a button label in the assignment curve selection interface within the gradebook. Instructors see this when they want to quickly select all visible assignments to apply a grading curve, rather than selecting assignments individually.",
+        "component": {
+          "location": "src/components/pages",
+          "description": "This component provides bulk selection functionality for the assignment curve feature in the gradebook. It allows instructors to efficiently manage which assignments receive curve adjustments by providing quick select/deselect actions."
+        },
+        "usage": "Button text that triggers selection of all available assignments for curve application.",
+        "impact": "Medium - Improves instructor efficiency by allowing bulk selection of assignments for grading curve application.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Choose All",
+          "Select Everything",
+          "Mark All"
+        ]
+      }
+    },
+    "clearAll": {
+      "value": "Clear All",
+      "_meta": {
+        "context": "This text appears as a button label in the assignment curve selection interface within the gradebook. Instructors use this to quickly deselect all assignments that have been selected for curve application, allowing them to start over with their selection.",
+        "component": {
+          "location": "src/components/pages",
+          "description": "This component provides bulk deselection functionality for the assignment curve feature in the gradebook. It allows instructors to efficiently reset their assignment curve selections without manually deselecting each assignment individually."
+        },
+        "usage": "Button text that triggers deselection of all selected assignments in the curve interface.",
+        "impact": "Medium - Improves instructor workflow by providing quick reset functionality for assignment curve selections.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Deselect All",
+          "Reset Selection",
+          "Clear Selection"
+        ]
+      }
+    },
     "assignmentHeader": {
       "value": "Assignment",
       "_meta": {
@@ -1914,7 +1990,26 @@
         ]
       }
     },
-    "publishedUnits": "Published Units",
+    "publishedUnits": {
+      "value": "Published Units",
+      "_meta": {
+        "context": "This text appears as a section heading or label on the units management page, specifically identifying the section that displays learning units that have been published and are available to students. Users see this when viewing or managing their published course content.",
+        "component": {
+          "location": "pages/units.js",
+          "description": "This is the units management page where instructors can view, organize, and manage their learning units. The page displays different categories of units including published ones that are live and accessible to students."
+        },
+        "usage": "Section heading or label that categorizes published learning units in the content management interface.",
+        "impact": "Important - This label helps instructors quickly identify which units are live and available to students, which is crucial for course management and content organization.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Live Units",
+          "Active Units",
+          "Available Units",
+          "Released Units"
+        ]
+      }
+    },
     "untitledUnit": {
       "value": "Untitled Unit",
       "_meta": {

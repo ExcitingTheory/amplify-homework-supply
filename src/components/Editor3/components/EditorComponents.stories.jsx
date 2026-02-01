@@ -29,14 +29,7 @@ import { DemoBanner } from '../../../../.storybook/components/DemoBanner';
  * Image Files:
  * - animals-10008941_1280.jpg
  * - piano-10046998_1280.jpg
- * - abstract-10055158_640.jpg
  * - meerkat-10071273_1280.png
- * - beef-9706049_1280.jpg
- * - namibia-9992336_1280.jpg
- * - rhinoceros-10074916_1280.jpg
- * - sand-4753305_1280.jpg
- * - pattern-9842070_640.png
- * - cormorant-8489010_640.jpg
  */
 
 // Mock file records for media components pointing to actual files in mocks/
@@ -141,22 +134,6 @@ const MOCK_MEDIA_FILES = [
     _version: 1,
   },
   {
-    id: 'image-abstract',
-    name: 'Abstract Pattern',
-    owner: 'mock-user-id',
-    identityId: 'us-east-1:mock-identity',
-    description: 'Abstract artistic pattern',
-    mimeType: 'image/jpeg',
-    level: 'PUBLIC',
-    path: '/story-mocks/abstract-10055158_640.jpg',
-    size: 123456,
-    generated: false,
-    thumbnail: '/story-mocks/abstract-10055158_640.jpg',
-    createdAt: '2026-01-14T16:00:00.000Z',
-    updatedAt: '2026-01-14T16:00:00.000Z',
-    _version: 1,
-  },
-  {
     id: 'image-meerkat',
     name: 'Meerkat PNG',
     owner: 'mock-user-id',
@@ -170,102 +147,6 @@ const MOCK_MEDIA_FILES = [
     thumbnail: '/story-mocks/meerkat-10071273_1280.png',
     createdAt: '2026-01-13T14:00:00.000Z',
     updatedAt: '2026-01-13T14:00:00.000Z',
-    _version: 1,
-  },
-  {
-    id: 'image-beef',
-    name: 'Beef Image',
-    owner: 'mock-user-id',
-    identityId: 'us-east-1:mock-identity',
-    description: 'Beef meat for food education',
-    mimeType: 'image/jpeg',
-    level: 'PUBLIC',
-    path: '/story-mocks/beef-9706049_1280.jpg',
-    size: 234567,
-    generated: false,
-    thumbnail: '/story-mocks/beef-9706049_1280.jpg',
-    createdAt: '2026-01-12T10:00:00.000Z',
-    updatedAt: '2026-01-12T10:00:00.000Z',
-    _version: 1,
-  },
-  {
-    id: 'image-namibia',
-    name: 'Namibia Landscape',
-    owner: 'mock-user-id',
-    identityId: 'us-east-1:mock-identity',
-    description: 'Desert landscape from Namibia',
-    mimeType: 'image/jpeg',
-    level: 'PUBLIC',
-    path: '/story-mocks/namibia-9992336_1280.jpg',
-    size: 345678,
-    generated: false,
-    thumbnail: '/story-mocks/namibia-9992336_1280.jpg',
-    createdAt: '2026-01-11T09:00:00.000Z',
-    updatedAt: '2026-01-11T09:00:00.000Z',
-    _version: 1,
-  },
-  {
-    id: 'image-rhinoceros',
-    name: 'Rhinoceros',
-    owner: 'mock-user-id',
-    identityId: 'us-east-1:mock-identity',
-    description: 'Rhinoceros wildlife photography',
-    mimeType: 'image/jpeg',
-    level: 'PUBLIC',
-    path: '/story-mocks/rhinoceros-10074916_1280.jpg',
-    size: 456789,
-    generated: false,
-    thumbnail: '/story-mocks/rhinoceros-10074916_1280.jpg',
-    createdAt: '2026-01-10T15:00:00.000Z',
-    updatedAt: '2026-01-10T15:00:00.000Z',
-    _version: 1,
-  },
-  {
-    id: 'image-sand',
-    name: 'Sand Texture',
-    owner: 'mock-user-id',
-    identityId: 'us-east-1:mock-identity',
-    description: 'Sand dunes texture pattern',
-    mimeType: 'image/jpeg',
-    level: 'PUBLIC',
-    path: '/story-mocks/sand-4753305_1280.jpg',
-    size: 234567,
-    generated: false,
-    thumbnail: '/story-mocks/sand-4753305_1280.jpg',
-    createdAt: '2026-01-09T11:00:00.000Z',
-    updatedAt: '2026-01-09T11:00:00.000Z',
-    _version: 1,
-  },
-  {
-    id: 'image-pattern',
-    name: 'Geometric Pattern',
-    owner: 'mock-user-id',
-    identityId: 'us-east-1:mock-identity',
-    description: 'Geometric pattern design',
-    mimeType: 'image/png',
-    level: 'PUBLIC',
-    path: '/story-mocks/pattern-9842070_640.png',
-    size: 123456,
-    generated: false,
-    thumbnail: '/story-mocks/pattern-9842070_640.png',
-    createdAt: '2026-01-08T13:00:00.000Z',
-    updatedAt: '2026-01-08T13:00:00.000Z',
-    _version: 1,
-  },
-  {
-    id: 'image-cormorant',
-    name: 'Cormorant Bird',
-    owner: 'mock-user-id',
-    identityId: 'us-east-1:mock-identity',
-    description: 'Cormorant bird photography',
-    mimeType: 'image/jpeg',
-    level: 'PUBLIC',
-    path: '/story-mocks/cormorant-8489010_640.jpg',
-    size: 156789,
-    generated: false,
-    thumbnail: '/story-mocks/cormorant-8489010_640.jpg',
-    createdAt: '2026-01-07T12:00:00.000Z',
-    updatedAt: '2026-01-07T12:00:00.000Z',
     _version: 1,
   },
 ];
@@ -469,14 +350,16 @@ export const ImageDefault = {
     return (
       <UnitProvider id={unitId}>
         <WithLexical>
-          <ImageComponent
-            nodeKey="image-1"
-            src="/story-mocks/animals-10008941_1280.jpg"
-            altText="Wildlife animals in nature"
-            width={640}
-            height={360}
-            resizable={false}
-          />
+          <Box sx={{ maxWidth: '100%', '& img': { display: 'block' } }}>
+            <ImageComponent
+              nodeKey="image-1"
+              src="/story-mocks/animals-10008941_1280.jpg"
+              altText="Wildlife animals in nature"
+              width={640}
+              height={360}
+              resizable={false}
+            />
+          </Box>
         </WithLexical>
       </UnitProvider>
     );
@@ -510,7 +393,7 @@ export const ImageWithCaption = {
     return (
       <UnitProvider id={unitId}>
         <WithLexical>
-          <div>
+          <Box sx={{ maxWidth: '100%', '& img': { display: 'block' } }}>
             <ImageComponent
               nodeKey="image-2"
               src="/story-mocks/piano-10046998_1280.jpg"
@@ -522,7 +405,7 @@ export const ImageWithCaption = {
               caption={captionEditor}
               captionsEnabled={true}
             />
-          </div>
+          </Box>
         </WithLexical>
       </UnitProvider>
     );
@@ -550,14 +433,16 @@ export const ImageSmall = {
     return (
       <UnitProvider id={unitId}>
         <WithLexical>
-          <ImageComponent
-            nodeKey="image-3"
-            src="/story-mocks/meerkat-10071273_1280.png"
-            altText="Meerkat standing"
-            width={320}
-            height={320}
-            resizable={false}
-          />
+          <Box sx={{ maxWidth: '100%', '& img': { display: 'block' } }}>
+            <ImageComponent
+              nodeKey="image-3"
+              src="/story-mocks/meerkat-10071273_1280.png"
+              altText="Meerkat standing"
+              width={320}
+              height={320}
+              resizable={false}
+            />
+          </Box>
         </WithLexical>
       </UnitProvider>
     );
@@ -566,181 +451,6 @@ export const ImageSmall = {
     docs: {
       description: {
         story: 'Smaller image showing a meerkat. Images can be any size and aspect ratio.',
-      },
-    },
-  },
-};
-
-export const ImageAbstract = {
-  render: () => {
-    const unitId = 'story-unit-id-' + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: 'Image Story Unit',
-      data: { root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 } },
-      _version: 1,
-      owner: 'mock-user-sub',
-    });
-    seedMockFiles([MOCK_MEDIA_FILES.find(f => f.id === 'image-abstract')]);
-    return (
-      <UnitProvider id={unitId}>
-        <WithLexical>
-          <ImageComponent
-            nodeKey="image-abstract-1"
-            src="/story-mocks/abstract-10055158_640.jpg"
-            altText="Colorful abstract pattern"
-            width={640}
-            height={427}
-            resizable={false}
-          />
-        </WithLexical>
-      </UnitProvider>
-    );
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Abstract pattern image for visual interest and decoration.',
-      },
-    },
-  },
-};
-
-export const ImageRhinoceros = {
-  render: () => {
-    const unitId = 'story-unit-id-' + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: 'Image Story Unit',
-      data: { root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 } },
-      _version: 1,
-      owner: 'mock-user-sub',
-    });
-    seedMockFiles([MOCK_MEDIA_FILES.find(f => f.id === 'image-rhinoceros')]);
-    return (
-      <UnitProvider id={unitId}>
-        <WithLexical>
-          <ImageComponent
-            nodeKey="image-rhino-1"
-            src="/story-mocks/rhinoceros-10074916_1280.jpg"
-            altText="Rhinoceros in the wild"
-            width={960}
-            height={640}
-            resizable={false}
-          />
-        </WithLexical>
-      </UnitProvider>
-    );
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Wildlife photography of a rhinoceros. Great for biology or nature lessons.',
-      },
-    },
-  },
-};
-
-export const ImageNamibia = {
-  render: () => {
-    const unitId = 'story-unit-id-' + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: 'Image Story Unit',
-      data: { root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 } },
-      _version: 1,
-      owner: 'mock-user-sub',
-    });
-    seedMockFiles([MOCK_MEDIA_FILES.find(f => f.id === 'image-namibia')]);
-    return (
-      <UnitProvider id={unitId}>
-        <WithLexical>
-          <ImageComponent
-            nodeKey="image-namibia-1"
-            src="/story-mocks/namibia-9992336_1280.jpg"
-            altText="Desert landscape in Namibia"
-            width={960}
-            height={640}
-            resizable={false}
-          />
-        </WithLexical>
-      </UnitProvider>
-    );
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Stunning desert landscape from Namibia. Ideal for geography lessons.',
-      },
-    },
-  },
-};
-
-export const ImagePattern = {
-  render: () => {
-    const unitId = 'story-unit-id-' + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: 'Image Story Unit',
-      data: { root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 } },
-      _version: 1,
-      owner: 'mock-user-sub',
-    });
-    seedMockFiles([MOCK_MEDIA_FILES.find(f => f.id === 'image-pattern')]);
-    return (
-      <UnitProvider id={unitId}>
-        <WithLexical>
-          <ImageComponent
-            nodeKey="image-pattern-1"
-            src="/story-mocks/pattern-9842070_640.png"
-            altText="Geometric pattern"
-            width={640}
-            height={427}
-            resizable={false}
-          />
-        </WithLexical>
-      </UnitProvider>
-    );
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Geometric pattern design. PNG format with transparency support.',
-      },
-    },
-  },
-};
-
-export const ImageCormorant = {
-  render: () => {
-    const unitId = 'story-unit-id-' + Math.random();
-    seedMockUnit({
-      id: unitId,
-      name: 'Image Story Unit',
-      data: { root: { children: [], direction: 'ltr', format: '', indent: 0, type: 'root', version: 1 } },
-      _version: 1,
-      owner: 'mock-user-sub',
-    });
-    seedMockFiles([MOCK_MEDIA_FILES.find(f => f.id === 'image-cormorant')]);
-    return (
-      <UnitProvider id={unitId}>
-        <WithLexical>
-          <ImageComponent
-            nodeKey="image-cormorant-1"
-            src="/story-mocks/cormorant-8489010_640.jpg"
-            altText="Cormorant bird"
-            width={640}
-            height={427}
-            resizable={false}
-          />
-        </WithLexical>
-      </UnitProvider>
-    );
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Cormorant bird photography. Perfect for ornithology or biology content.',
       },
     },
   },

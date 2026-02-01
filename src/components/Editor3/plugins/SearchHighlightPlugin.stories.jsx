@@ -10,7 +10,7 @@ import { Box, TextField, Typography } from '@mui/material';
 import SearchHighlightPlugin from './SearchHighlightPlugin';
 
 export default {
-  title: '🔌 Editor Plugins/Search Highlight',
+  title: '🔌 Editor Plugins/Interactions/Search Highlight',
   component: SearchHighlightPlugin,
 };
 

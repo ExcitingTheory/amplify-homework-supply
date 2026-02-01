@@ -20,7 +20,7 @@ import { UnitProvider } from '../context/unitContext';
 import FilesContext from '../context/fileContext';
 import { TabProvider } from '../context/tabContext';
 import { DemoBanner } from '@storybook-components/DemoBanner';
-import { seedMockAssistantChats } from '@storybook-mocks/aws-amplify-data';
+import { seedMockAssistantChats, seedMockWords, seedMockQuestions } from '@storybook-mocks/aws-amplify-data';
 import { allChatData } from '@storybook-mocks/chatDataLoader';
 
 export default {
@@ -354,9 +354,62 @@ export const QuizGenerator = {
             {
               id: 'msg2',
               role: 'assistant',
+              parts: [
+                { type: 'step-start' },
+                { type: 'text', text: 'I\'ll create a quiz block with 3 multiple choice questions about hiragana characters.' },
+                {
+                  type: 'tool-insert_quiz',
+                  toolCallId: 'call_quiz_456',
+                  state: 'output-available',
+                  input: {
+                    topic: 'hiragana characters',
+                    count: 3,
+                    questionType: 'multiple_choice',
+                    difficulty: 'beginner',
+                    includeExplanations: true
+                  },
+                  output: {
+                    success: true,
+                    action: 'insert_editor_block',
+                    blockType: 'quiz',
+                    blockData: [
+                      // Question 1: Which hiragana character represents "ka"?
+                      { id: 'q1-a', answer: 'き (ki)', question: 'Which hiragana character represents the sound "ka"?', correct: false },
+                      { id: 'q1-b', answer: 'か (ka)', question: 'Which hiragana character represents the sound "ka"?', correct: true },
+                      { id: 'q1-c', answer: 'く (ku)', question: 'Which hiragana character represents the sound "ka"?', correct: false },
+                      { id: 'q1-d', answer: 'け (ke)', question: 'Which hiragana character represents the sound "ka"?', correct: false },
+                      // Question 2: What sound does す make?
+                      { id: 'q2-a', answer: 'shi', question: 'What sound does the hiragana "す" make?', correct: false },
+                      { id: 'q2-b', answer: 'su', question: 'What sound does the hiragana "す" make?', correct: true },
+                      { id: 'q2-c', answer: 'sa', question: 'What sound does the hiragana "す" make?', correct: false },
+                      { id: 'q2-d', answer: 'se', question: 'What sound does the hiragana "す" make?', correct: false },
+                      // Question 3: Correct hiragana for "n"?
+                      { id: 'q3-a', answer: 'ん', question: 'Which of these is the correct hiragana for "n"?', correct: true },
+                      { id: 'q3-b', answer: 'を', question: 'Which of these is the correct hiragana for "n"?', correct: false },
+                      { id: 'q3-c', answer: 'ね', question: 'Which of these is the correct hiragana for "n"?', correct: false },
+                      { id: 'q3-d', answer: 'に', question: 'Which of these is the correct hiragana for "n"?', correct: false },
+                    ],
+                    preview: {
+                      title: 'Hiragana Characters Quiz',
+                      questionCount: 3,
+                      totalPoints: 3,
+                      questions: [
+                        { prompt: 'Which hiragana character represents the sound "ka"?', type: 'multiple_choice' },
+                        { prompt: 'What sound does the hiragana "す" make?', type: 'multiple_choice' },
+                        { prompt: 'Which of these is the correct hiragana for "n"?', type: 'multiple_choice' }
+                      ]
+                    },
+                    message: 'Quiz block ready to insert'
+                  }
+                }
+              ]
+            },
+            {
+              id: 'msg3',
+              role: 'assistant',
               parts: [{
                 type: 'text',
-                text: 'Here are 3 multiple choice questions about hiragana:\n\n**Question 1:** Which hiragana character represents the sound "ka"?\nA) き (ki)\nB) か (ka)\nC) く (ku)\nD) け (ke)\n\n**Answer:** B) か (ka)\n\n**Question 2:** What sound does the hiragana "す" make?\nA) shi\nB) su\nC) sa\nD) se\n\n**Answer:** B) su\n\n**Question 3:** Which of these is the correct hiragana for "n"?\nA) ん\nB) を\nC) ね\nD) に\n\n**Answer:** A) ん\n\nWould you like me to generate more questions or create questions about a different topic?'
+                text: 'I\'ve created a quiz with 3 multiple choice questions about hiragana characters. You can select your answers by clicking the checkboxes. The quiz will automatically grade your responses!'
               }]
             }
           ]
@@ -369,21 +422,26 @@ export const QuizGenerator = {
     docs: {
       description: {
         story: `
-### ❓ Quiz & Assessment Generator
+### ❓ Quiz Block Insertion
 
-Generate quiz questions, practice exercises, and assessments automatically.
+Demonstrates the **insert_quiz** tool creating interactive quiz blocks directly in the editor.
+
+**What This Shows:**
+- AI generates quiz questions with the \`insert_quiz\` tool
+- Block preview displays question count, points, and sample questions
+- User can approve to insert into editor or reject
+- Questions include explanations for learning
+
+**Block Features:**
+- 📝 Multiple choice format
+- ✓ Correct answer marking
+- 💡 Explanations for each question
+- 📊 Point values and scoring
 
 **Create Questions:**
 - "Generate 10 multiple choice questions about Japanese particles"
 - "Make 5 fill-in-the-blank exercises for Japanese verbs"
-- "Create true/false questions about Japanese culture"
-
-**Different Question Types:**
-- Multiple choice with distractors
-- Short answer questions
-- Translation exercises
-- Matching activities
-- Listening comprehension prompts
+- "Create quiz about hiragana characters with explanations"
 
 **Customization:**
 - "Make them easier for beginners"
@@ -391,22 +449,386 @@ Generate quiz questions, practice exercises, and assessments automatically.
 - "Include explanations for correct answers"
 - "Focus on practical, conversational Japanese"
 
-**Example request:**
-"Generate 5 quiz questions about basic Japanese greetings. Include:
-- Multiple choice format
-- 4 answer options each
-- One correct answer
-- Difficulty: beginner
-- Include both formal and informal greetings"
+**Block Types Available:**
+- \`insert_quiz\` - Multiple choice, fill-in, true/false questions
+- \`insert_answer_block\` - Free-form text input exercises
+- \`insert_meaning_association\` - Vocabulary matching games
+- \`insert_custom_answer\` - Specific answer validation
 
-**The AI provides:**
-- ✅ Well-formatted questions
-- ✅ Plausible wrong answers
-- ✅ Answer keys
-- ✅ Difficulty appropriate content
-- ✅ Explanations when requested
+**The tool generates:**
+- ✅ Interactive preview with question details
+- ✅ Approve/Reject buttons for user control
+- ✅ Structured blockData ready for editor insertion
+- ✅ Question explanations and point values
+        `,
+      },
+    },
+  },
+  render: () => (
+    <TabProvider>
+      <ChatSidebar />
+    </TabProvider>
+  ),
+};
 
-**💡 Use with:** Export generated questions to the [Editor](?path=/docs/components-editor--empty-editor-text-formatting) with \`/quiz\` command
+export const AnswerBlockGenerator = {
+  decorators: [
+    (Story) => {
+      // Seed mock words for answer block
+      seedMockWords([
+        { id: 'word-1', phrase: 'こんにちは', phonetic: 'konnichiwa', definition: 'Hello/Good afternoon', owner: 'mock-user' },
+        { id: 'word-2', phrase: 'ありがとう', phonetic: 'arigatou', definition: 'Thank you', owner: 'mock-user' },
+        { id: 'word-3', phrase: 'さようなら', phonetic: 'sayounara', definition: 'Goodbye', owner: 'mock-user' },
+      ]);
+      
+      seedMockAssistantChats([
+        {
+          id: 'answer-block-chat',
+          model: 'gpt-4',
+          threadInstructions: 'You are a helpful Japanese language learning assistant.',
+          draft: '',
+          archived: false,
+          owner: 'mock-user-sub',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          _version: 1,
+          messages: [
+            {
+              id: 'msg1',
+              role: 'user',
+              parts: [{ type: 'text', text: 'Create an answer block where students translate 3 basic Japanese greetings' }]
+            },
+            {
+              id: 'msg2',
+              role: 'assistant',
+              parts: [
+                { type: 'step-start' },
+                { type: 'text', text: 'I\'ll create an answer block with 3 Japanese greeting words for translation practice.' },
+                {
+                  type: 'tool-insert_answer_block',
+                  toolCallId: 'call_answer_789',
+                  state: 'output-available',
+                  input: {
+                    wordIDs: ['word-1', 'word-2', 'word-3'],
+                    mode: 'translate'
+                  },
+                  output: {
+                    success: true,
+                    action: 'insert_editor_block',
+                    blockType: 'answer',
+                    blockData: ['word-1', 'word-2', 'word-3'],
+                    preview: {
+                      wordCount: 3,
+                      mode: 'translate',
+                      inputMethods: ['text', 'audio', 'writing']
+                    },
+                    message: 'Answer block ready to insert'
+                  }
+                }
+              ]
+            },
+            {
+              id: 'msg3',
+              role: 'assistant',
+              parts: [{
+                type: 'text',
+                text: 'I\'ve created an answer block with 3 Japanese greetings. Students can type their translations, record audio, or write them out!'
+              }]
+            }
+          ]
+        }
+      ]);
+      return <Story />;
+    }
+  ],
+  parameters: {
+    docs: {
+      description: {
+        story: `
+### ✍️ Answer Block Insertion
+
+Demonstrates the **insert_answer_block** tool creating interactive answer exercises.
+
+**What This Shows:**
+- AI generates answer block with word IDs
+- Students can respond via text, audio, or handwriting
+- AI verification of answers
+- Progress tracking
+
+**Block Features:**
+- 📝 Multiple input methods (text/audio/writing)
+- ✓ AI-powered answer verification
+- 💡 Hints and corrections
+- 📊 Progress tracking
+
+**Create Exercises:**
+- "Make an answer block for vocabulary translation"
+- "Create a short answer exercise about Japanese verbs"
+- "Generate definition practice for 5 words"
+
+**Input Methods:**
+- **Text**: Type answers directly
+- **Audio**: Record spoken answers
+- **Writing**: Draw answers with stylus/mouse
+
+**The tool generates:**
+- ✅ Interactive input with multiple methods
+- ✅ AI verification via ChatGPT
+- ✅ Progress bar and completion tracking
+- ✅ Flexible answer checking
+        `,
+      },
+    },
+  },
+  render: () => (
+    <TabProvider>
+      <ChatSidebar />
+    </TabProvider>
+  ),
+};
+
+export const MeaningAssociationGenerator = {
+  decorators: [
+    (Story) => {
+      // Seed mock words for meaning association
+      seedMockWords([
+        { id: 'word-1', phrase: '赤', phonetic: 'aka', definition: 'red', owner: 'mock-user' },
+        { id: 'word-2', phrase: '青', phonetic: 'ao', definition: 'blue', owner: 'mock-user' },
+        { id: 'word-3', phrase: '緑', phonetic: 'midori', definition: 'green', owner: 'mock-user' },
+        { id: 'word-4', phrase: '黄色', phonetic: 'kiiro', definition: 'yellow', owner: 'mock-user' },
+      ]);
+      
+      seedMockAssistantChats([
+        {
+          id: 'meaning-chat',
+          model: 'gpt-4',
+          threadInstructions: 'You are a helpful Japanese language learning assistant.',
+          draft: '',
+          archived: false,
+          owner: 'mock-user-sub',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          _version: 1,
+          messages: [
+            {
+              id: 'msg1',
+              role: 'user',
+              parts: [{ type: 'text', text: 'Create a matching exercise for Japanese color words' }]
+            },
+            {
+              id: 'msg2',
+              role: 'assistant',
+              parts: [
+                { type: 'step-start' },
+                { type: 'text', text: 'I\'ll create a meaning association exercise where students match Japanese color words with their definitions.' },
+                {
+                  type: 'tool-insert_meaning_association',
+                  toolCallId: 'call_meaning_101',
+                  state: 'output-available',
+                  input: {
+                    wordIDs: ['word-1', 'word-2', 'word-3', 'word-4'],
+                    enabledModes: ['learn', 'easy', 'hard']
+                  },
+                  output: {
+                    success: true,
+                    action: 'insert_editor_block',
+                    blockType: 'meaning-association',
+                    blockData: ['word-1', 'word-2', 'word-3', 'word-4'],
+                    preview: {
+                      wordCount: 4,
+                      instructions: 'Match each Japanese word with its English meaning',
+                      modes: ['learn', 'easy', 'hard']
+                    },
+                    message: 'Meaning association block ready to insert'
+                  }
+                }
+              ]
+            },
+            {
+              id: 'msg3',
+              role: 'assistant',
+              parts: [{
+                type: 'text',
+                text: 'I\'ve created a meaning association exercise with 4 color words. Students can practice in Learn mode (flashcards), Easy mode (drag-and-drop), or Hard mode (timed challenge)!'
+              }]
+            }
+          ]
+        }
+      ]);
+      return <Story />;
+    }
+  ],
+  parameters: {
+    docs: {
+      description: {
+        story: `
+### 🔗 Meaning Association Block
+
+Demonstrates the **insert_meaning_association** tool creating drag-and-drop vocabulary matching exercises.
+
+**What This Shows:**
+- AI generates matching exercise with word IDs
+- Three difficulty modes (Learn, Easy, Hard)
+- Drag-and-drop interaction
+- Automatic scoring
+
+**Block Features:**
+- 📚 **Learn Mode**: Flashcard-style review
+- 🎯 **Easy Mode**: Drag phrases to match definitions
+- ⚡ **Hard Mode**: Timed challenge with shuffled options
+- 📊 Progress tracking and completion
+
+**Create Exercises:**
+- "Make a matching exercise for Japanese particles"
+- "Create vocabulary matching for food words"
+- "Generate a drag-and-drop exercise for verbs"
+
+**Difficulty Modes:**
+- **Learn**: Review one word at a time with definitions visible
+- **Easy**: Drag Japanese words to match English definitions
+- **Hard**: Timed matching with randomized positions
+
+**The tool generates:**
+- ✅ Interactive drag-and-drop interface
+- ✅ Configurable difficulty modes
+- ✅ Real-time feedback and scoring
+- ✅ Progress tracking across modes
+        `,
+      },
+    },
+  },
+  render: () => (
+    <TabProvider>
+      <ChatSidebar />
+    </TabProvider>
+  ),
+};
+
+export const CustomAnswerGenerator = {
+  decorators: [
+    (Story) => {
+      // Seed mock questions for custom answer block
+      seedMockQuestions([
+        { 
+          id: 'q-1', 
+          prompt: 'Listen and type what you hear', 
+          answer: 'おはよう', 
+          phonetic: 'ohayou',
+          audioKey: 'public/audio/ohayou.mp3',
+          owner: 'mock-user' 
+        },
+        { 
+          id: 'q-2', 
+          prompt: 'Listen and type what you hear', 
+          answer: 'おやすみ', 
+          phonetic: 'oyasumi',
+          audioKey: 'public/audio/oyasumi.mp3',
+          owner: 'mock-user' 
+        },
+      ]);
+      
+      seedMockAssistantChats([
+        {
+          id: 'custom-answer-chat',
+          model: 'gpt-4',
+          threadInstructions: 'You are a helpful Japanese language learning assistant.',
+          draft: '',
+          archived: false,
+          owner: 'mock-user-sub',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          _version: 1,
+          messages: [
+            {
+              id: 'msg1',
+              role: 'user',
+              parts: [{ type: 'text', text: 'Create questions where students listen to Japanese audio and type what they hear' }]
+            },
+            {
+              id: 'msg2',
+              role: 'assistant',
+              parts: [
+                { type: 'step-start' },
+                { type: 'text', text: 'I\'ll create a custom answer block with audio-based questions where students transcribe what they hear.' },
+                {
+                  type: 'tool-insert_custom_answer',
+                  toolCallId: 'call_custom_202',
+                  state: 'output-available',
+                  input: {
+                    questionIDs: ['q-1', 'q-2'],
+                    allowedInput: ['text'],
+                    promptMethod: ['audio']
+                  },
+                  output: {
+                    success: true,
+                    action: 'insert_editor_block',
+                    blockType: 'custom-answer',
+                    blockData: ['q-1', 'q-2'],
+                    preview: {
+                      questionCount: 2,
+                      prompt: 'Listen to the audio and type what you hear',
+                      answerCount: 2,
+                      caseSensitive: false,
+                      allowMultipleAttempts: true,
+                      inputMethods: ['text'],
+                      promptMethods: ['audio']
+                    },
+                    message: 'Custom answer block ready to insert'
+                  }
+                }
+              ]
+            },
+            {
+              id: 'msg3',
+              role: 'assistant',
+              parts: [{
+                type: 'text',
+                text: 'I\'ve created a listening comprehension exercise with 2 questions. Students will hear audio prompts and type their answers!'
+              }]
+            }
+          ]
+        }
+      ]);
+      return <Story />;
+    }
+  ],
+  parameters: {
+    docs: {
+      description: {
+        story: `
+### 🎯 Custom Answer Block
+
+Demonstrates the **insert_custom_answer** tool creating exercises with specific answer validation.
+
+**What This Shows:**
+- AI generates custom questions from question bank
+- Flexible input/output methods
+- Specific answer checking
+- Multiple attempts support
+
+**Block Features:**
+- 🎧 **Audio Prompts**: Questions presented as audio
+- 📝 **Text Input**: Type answers
+- ✏️ **Writing Input**: Draw answers
+- 🎤 **Audio Input**: Speak answers
+- ✓ Exact answer matching with AI verification
+
+**Create Exercises:**
+- "Make listening comprehension questions"
+- "Create audio-to-text transcription practice"
+- "Generate questions with specific correct answers"
+
+**Input/Output Combinations:**
+- **Audio → Text**: Listen and type
+- **Text → Audio**: Read and speak
+- **Audio → Audio**: Listen and repeat
+- **Text → Writing**: Read and write
+
+**The tool generates:**
+- ✅ Configurable prompt and input methods
+- ✅ Specific answer validation
+- ✅ Multiple attempt support
+- ✅ Real-time feedback
         `,
       },
     },
@@ -789,9 +1211,10 @@ export const ToolCallGenerateContent = {
               id: 'msg2',
               role: 'assistant',
               parts: [
-                { type: 'text', text: 'I\'ll generate practice exercises for Japanese particles.' },
+                { type: 'step-start' },
+                { type: 'text', text: 'I\'ll create practice exercises about Japanese particles that you can insert into your unit.' },
                 {
-                  type: 'tool-generate_unit_content',
+                  type: 'tool-insert_content_block',
                   toolCallId: 'call_gen_789',
                   state: 'output-available',
                   input: {
@@ -801,8 +1224,111 @@ export const ToolCallGenerateContent = {
                   },
                   output: {
                     success: true,
-                    contentType: 'practice',
-                    template: 'markdown'
+                    action: 'insert_editor_block',
+                    blockType: 'content',
+                    blockData: {
+                      root: {
+                        children: [
+                          {
+                            children: [
+                              { detail: 0, format: 0, mode: 'normal', style: '', text: 'Practice: Japanese Particles', type: 'text', version: 1 }
+                            ],
+                            direction: 'ltr',
+                            format: '',
+                            indent: 0,
+                            type: 'heading',
+                            version: 1,
+                            tag: 'h2'
+                          },
+                          {
+                            children: [
+                              { detail: 0, format: 1, mode: 'normal', style: '', text: 'Exercise 1', type: 'text', version: 1 }
+                            ],
+                            direction: 'ltr',
+                            format: '',
+                            indent: 0,
+                            type: 'heading',
+                            version: 1,
+                            tag: 'h3'
+                          },
+                          {
+                            children: [
+                              { detail: 0, format: 0, mode: 'normal', style: '', text: 'Fill in the blank with the correct particle:', type: 'text', version: 1 }
+                            ],
+                            direction: 'ltr',
+                            format: '',
+                            indent: 0,
+                            type: 'paragraph',
+                            version: 1
+                          },
+                          {
+                            children: [
+                              { detail: 0, format: 0, mode: 'normal', style: '', text: '私___学生です。(I am a student)', type: 'text', version: 1 }
+                            ],
+                            direction: 'ltr',
+                            format: '',
+                            indent: 0,
+                            type: 'paragraph',
+                            version: 1
+                          },
+                          {
+                            children: [
+                              { detail: 0, format: 1, mode: 'normal', style: '', text: 'Answer: ', type: 'text', version: 1 },
+                              { detail: 0, format: 0, mode: 'normal', style: '', text: 'は (wa) - topic marker', type: 'text', version: 1 }
+                            ],
+                            direction: 'ltr',
+                            format: '',
+                            indent: 0,
+                            type: 'paragraph',
+                            version: 1
+                          },
+                          {
+                            children: [
+                              { detail: 0, format: 1, mode: 'normal', style: '', text: 'Exercise 2', type: 'text', version: 1 }
+                            ],
+                            direction: 'ltr',
+                            format: '',
+                            indent: 0,
+                            type: 'heading',
+                            version: 1,
+                            tag: 'h3'
+                          },
+                          {
+                            children: [
+                              { detail: 0, format: 0, mode: 'normal', style: '', text: '本___読みます。(I read a book)', type: 'text', version: 1 }
+                            ],
+                            direction: 'ltr',
+                            format: '',
+                            indent: 0,
+                            type: 'paragraph',
+                            version: 1
+                          },
+                          {
+                            children: [
+                              { detail: 0, format: 1, mode: 'normal', style: '', text: 'Answer: ', type: 'text', version: 1 },
+                              { detail: 0, format: 0, mode: 'normal', style: '', text: 'を (wo) - object marker', type: 'text', version: 1 }
+                            ],
+                            direction: 'ltr',
+                            format: '',
+                            indent: 0,
+                            type: 'paragraph',
+                            version: 1
+                          }
+                        ],
+                        direction: 'ltr',
+                        format: '',
+                        indent: 0,
+                        type: 'root',
+                        version: 1
+                      }
+                    },
+                    preview: {
+                      title: 'Practice: Japanese Particles',
+                      contentType: 'practice',
+                      nodeCount: 8,
+                      excerpt: 'Fill-in-the-blank exercises for Japanese particles は, が, を, に, で'
+                    },
+                    message: 'Content ready to insert'
                   }
                 }
               ]
@@ -812,7 +1338,7 @@ export const ToolCallGenerateContent = {
               role: 'assistant',
               parts: [{
                 type: 'text',
-                text: `Here are practice exercises for Japanese particles:\n\n## Practice: Japanese Particles\n\n### Exercise 1\nFill in the blank with the correct particle:\n\n私___学生です。(I am a student)\n\n**Answer:** は (wa) - topic marker\n\n### Exercise 2\n本___読みます。(I read a book)\n\n**Answer:** を (wo) - object marker\n\n### Exercise 3\n学校___行きます。(I go to school)\n\n**Answer:** に (ni) - destination marker\n\n### Exercise 4\n誰___来ましたか？(Who came?)\n\n**Answer:** が (ga) - subject marker\n\n### Exercise 5\n図書館___勉強します。(I study at the library)\n\n**Answer:** で (de) - location of action marker\n\n---\n\n**💡 Tip:** Copy this content and paste it into your unit editor. The markdown will automatically convert to formatted content.`
+                text: 'I\'ve created practice exercises for Japanese particles. Click "Insert into Editor" to add them to your unit!'
               }]
             }
           ]
@@ -825,36 +1351,39 @@ export const ToolCallGenerateContent = {
     docs: {
       description: {
         story: `
-### ✨ Tool Call Example: Generate Content
+### ✨ Content Block Insertion
 
-Demonstrates **generate_unit_content** tool creating educational materials.
+Demonstrates **insert_content_block** tool creating insertable educational content.
 
-**Content Generation Flow:**
-1. User requests specific content type
-2. AI calls tool with parameters
-3. Tool returns template structure
-4. AI generates actual markdown content
-5. User can copy/paste into editor
+**What This Shows:**
+- AI generates formatted content as Lexical editor JSON
+- Preview shows rendered content
+- Click "Insert into Editor" to add to unit
+- No copy-paste required
 
 **Content Types Available:**
 - **explanation** - Educational text with key points
 - **practice** - Interactive exercises (shown here)
-- **quiz** - Questions with answers
 - **example** - Demonstrations with explanations
 - **summary** - Concise overviews
 - **vocabulary** - Structured word lists
 
-**Markdown Features:**
-- Headings (##, ###)
-- **Bold** text
-- Lists and numbering
-- Code blocks for examples
-- Horizontal rules (---)
+**Block Features:**
+- 📝 Rich text formatting (headings, bold, lists)
+- ✨ Proper Lexical editor structure
+- 🎯 Direct insertion into editor
+- 📄 Preview before inserting
 
-**Try asking:**
-- "Generate a quiz about verb conjugation"
-- "Create an explanation of Japanese honorifics"
-- "Make a vocabulary section for food words"
+**Create Content:**
+- "Generate practice exercises for Japanese verbs"
+- "Create an explanation of particle usage"
+- "Make vocabulary examples with sentences"
+
+**The tool generates:**
+- ✅ Formatted Lexical editor JSON
+- ✅ Visual preview of content
+- ✅ Insert/Reject buttons
+- ✅ Seamless editor integration
         `,
       },
     },

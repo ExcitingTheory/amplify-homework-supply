@@ -6,11 +6,13 @@
 export type UserPersona = 'instructor' | 'learner' | 'developer';
 
 export interface OnboardingEvent {
-  type: 'task-started' | 'task-completed' | 'task-skipped' | 'persona-selected';
+  type: 'task-started' | 'task-completed' | 'task-skipped' | 'persona-selected' | 'action-performed';
   taskId: string;
-  persona: UserPersona;
+  persona: UserPersona | null;
   timestamp: number;
   metadata?: Record<string, any>;
+  actionName?: string;
+  storyId?: string;
 }
 
 export interface OnboardingTask {

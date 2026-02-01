@@ -15,7 +15,7 @@ import CustomAnswerPlugin, { CustomAnswerNode } from './CustomAnswerPlugin';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
-  title: '🔌 Editor Plugins/Custom Answer (Audio & Drawing)',
+  title: '🔌 Editor Plugins/Content Blocks/Custom Answer (Audio & Drawing)',
   component: CustomAnswerPlugin,
   parameters: {
     layout: 'fullscreen',

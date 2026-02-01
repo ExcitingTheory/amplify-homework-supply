@@ -2109,24 +2109,24 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                     return true;
                 }
                 
-                // Strikethrough: Ctrl/⌘+Shift+S
-                if (isShortcut(event, 'KeyS', { mod: true, shift: true })) {
+                // Strikethrough: Ctrl+Shift+X (Ctrl-only to avoid conflicts)
+                if (isShortcut(event, 'KeyX', { ctrl: true, shift: true })) {
                     event.preventDefault();
                     activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough');
                     return true;
                 }
                 
-                // Clear formatting: Ctrl/⌘+\
-                if (isShortcut(event, 'Backslash', { mod: true })) {
+                // Clear formatting: Ctrl+Shift+0 (Ctrl-only, avoids conflicts)
+                if (isShortcut(event, 'Digit0', { ctrl: true, shift: true })) {
                     event.preventDefault();
                     clearFormatting();
                     return true;
                 }
                 
-                // BLOCK TYPE SHORTCUTS (Ctrl/⌘+Alt + Number/Key)
+                // BLOCK TYPE SHORTCUTS (Ctrl+Shift - works on Mac without conflicts!)
                 
-                // Heading 1: Ctrl/⌘+Alt+1
-                if (isShortcut(event, 'Digit1', { mod: true, alt: true })) {
+                // Heading 1: Ctrl+Shift+1 (uses Ctrl key on both Mac and Windows)
+                if (isShortcut(event, 'Digit1', { ctrl: true, shift: true })) {
                     event.preventDefault();
                     activeEditor.update(() => {
                         if ($isRangeSelection(selection)) {
@@ -2136,8 +2136,8 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                     return true;
                 }
                 
-                // Heading 2: Ctrl/⌘+Alt+2
-                if (isShortcut(event, 'Digit2', { mod: true, alt: true })) {
+                // Heading 2: Ctrl+Shift+2
+                if (isShortcut(event, 'Digit2', { ctrl: true, shift: true })) {
                     event.preventDefault();
                     activeEditor.update(() => {
                         if ($isRangeSelection(selection)) {
@@ -2147,8 +2147,8 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                     return true;
                 }
                 
-                // Heading 3: Ctrl/⌘+Alt+3
-                if (isShortcut(event, 'Digit3', { mod: true, alt: true })) {
+                // Heading 3: Ctrl+Shift+3
+                if (isShortcut(event, 'Digit3', { ctrl: true, shift: true })) {
                     event.preventDefault();
                     activeEditor.update(() => {
                         if ($isRangeSelection(selection)) {
@@ -2158,19 +2158,8 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                     return true;
                 }
                 
-                // Paragraph: Ctrl/⌘+Alt+0
-                if (isShortcut(event, 'Digit0', { mod: true, alt: true })) {
-                    event.preventDefault();
-                    activeEditor.update(() => {
-                        if ($isRangeSelection(selection)) {
-                            $setBlocksType(selection, () => $createParagraphNode());
-                        }
-                    });
-                    return true;
-                }
-                
-                // Quote: Ctrl/⌘+Shift+Q
-                if (isShortcut(event, 'KeyQ', { mod: true, shift: true })) {
+                // Quote: Ctrl+' (Ctrl-only, avoids conflicts)
+                if (isShortcut(event, 'Quote', { ctrl: true })) {
                     event.preventDefault();
                     activeEditor.update(() => {
                         if ($isRangeSelection(selection)) {
@@ -2180,8 +2169,8 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                     return true;
                 }
                 
-                // Code Block: Ctrl/⌘+Alt+C
-                if (isShortcut(event, 'KeyC', { mod: true, alt: true })) {
+                // Code Block: Ctrl+Shift+C (Ctrl-only on both platforms)
+                if (isShortcut(event, 'KeyC', { ctrl: true, shift: true })) {
                     event.preventDefault();
                     activeEditor.update(() => {
                         if ($isRangeSelection(selection)) {
@@ -2191,47 +2180,47 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                     return true;
                 }
                 
-                // LIST SHORTCUTS (Ctrl/⌘+Shift + Number)
+                // LIST SHORTCUTS (Ctrl+Shift, not Cmd+Shift)
                 
-                // Bullet List: Ctrl/⌘+Shift+8
-                if (isShortcut(event, 'Digit8', { mod: true, shift: true })) {
+                // Bullet List: Ctrl+Shift+8
+                if (isShortcut(event, 'Digit8', { ctrl: true, shift: true })) {
                     event.preventDefault();
                     activeEditor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
                     return true;
                 }
                 
-                // Numbered List: Ctrl/⌘+Shift+7
-                if (isShortcut(event, 'Digit7', { mod: true, shift: true })) {
+                // Numbered List: Ctrl+Shift+7
+                if (isShortcut(event, 'Digit7', { ctrl: true, shift: true })) {
                     event.preventDefault();
                     activeEditor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
                     return true;
                 }
                 
-                // ALIGNMENT SHORTCUTS (Ctrl/⌘+Shift + L/E/R/J)
+                // ALIGNMENT SHORTCUTS (Ctrl+Shift only - avoids Mac conflicts)
                 
-                // Align Left: Ctrl/⌘+Shift+L
-                if (isShortcut(event, 'KeyL', { mod: true, shift: true })) {
+                // Align Left: Ctrl+Shift+L
+                if (isShortcut(event, 'KeyL', { ctrl: true, shift: true })) {
                     event.preventDefault();
                     activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left');
                     return true;
                 }
                 
-                // Align Center: Ctrl/⌘+Shift+E
-                if (isShortcut(event, 'KeyE', { mod: true, shift: true })) {
+                // Align Center: Ctrl+Shift+E
+                if (isShortcut(event, 'KeyE', { ctrl: true, shift: true })) {
                     event.preventDefault();
                     activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center');
                     return true;
                 }
                 
-                // Align Right: Ctrl/⌘+Shift+R
-                if (isShortcut(event, 'KeyR', { mod: true, shift: true })) {
+                // Align Right: Ctrl+Shift+R
+                if (isShortcut(event, 'KeyR', { ctrl: true, shift: true })) {
                     event.preventDefault();
                     activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right');
                     return true;
                 }
                 
-                // Justify: Ctrl/⌘+Shift+J
-                if (isShortcut(event, 'KeyJ', { mod: true, shift: true })) {
+                // Justify: Ctrl+Shift+J
+                if (isShortcut(event, 'KeyJ', { ctrl: true, shift: true})) {
                     event.preventDefault();
                     activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'justify');
                     return true;

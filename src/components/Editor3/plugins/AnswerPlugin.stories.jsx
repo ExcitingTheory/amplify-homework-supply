@@ -21,7 +21,7 @@ import LanguageEditorTheme from '../components/LanguageEditorTheme';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
 
 export default {
-  title: '🔌 Editor Plugins/Answer',
+  title: '🔌 Editor Plugins/Content Blocks/Answer',
   component: AnswerPlugin,
   parameters: {
     layout: 'fullscreen',

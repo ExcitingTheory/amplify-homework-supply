@@ -190,15 +190,25 @@ const SketchPad = ({ excalidrawData,
 
     useEffect(() => {
         if (excalidrawAPI) {
-            excalidrawAPI.setActiveTool({ type: "freedraw" });
-            // Update app state to hide UI elements
+            // Auto-select the pencil (freedraw) tool and update app state
             excalidrawAPI.updateScene({
                 appState: {
                     viewModeEnabled: false,
                     zenModeEnabled: true,
                     gridSize: null,
+                    activeTool: {
+                        type: "freedraw",
+                        locked: false,
+                    },
+                    currentItemStrokeColor: "#000000",
+                    currentItemBackgroundColor: "transparent",
                 }
             });
+            
+            // Also explicitly set the active tool
+            setTimeout(() => {
+                excalidrawAPI.setActiveTool({ type: "freedraw" });
+            }, 100);
         }
     }, [excalidrawAPI]);
 
@@ -210,11 +220,11 @@ const SketchPad = ({ excalidrawData,
     // render canvas when not hovering, excalidraw when hovering
     if (!isHovering) {
         return (
-        <Box>
+        <Box sx={{ m: 2, position: "relative" }}>
             <div
                 onMouseEnter={() => { 
                     if(imageData) {
-                        return
+                        return;
                     }
                     setIsHovering(true);
                 }}
@@ -228,6 +238,8 @@ const SketchPad = ({ excalidrawData,
                     justifyContent: "center",
                     cursor: "pointer",
                     backgroundColor: "#f9f9f9",
+                    minHeight: "400px",
+                    minWidth: "600px",
                 }} 
             >
                 {imageData ? (
@@ -238,15 +250,29 @@ const SketchPad = ({ excalidrawData,
                     </Typography>
                 )}
             </div>
+            
             {countdown !== null && (
-                <Box sx={{ mt: 2, p: 2, bgcolor: "#fff3cd", borderRadius: 1, border: "1px solid #ffc107" }}>
-                    <Typography variant="body1" sx={{ mb: 1 }}>
+                <Box sx={{ 
+                    position: "absolute", 
+                    top: 16, 
+                    right: 16, 
+                    p: 2, 
+                    bgcolor: "rgba(255, 243, 205, 0.95)", 
+                    borderRadius: 1, 
+                    border: "1px solid #ffc107",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                    zIndex: 1000,
+                    minWidth: "200px",
+                }}>
+                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
                         {t('sketchPad.submittingInSeconds', { countdown })}
                     </Typography>
                     <Button 
                         variant="contained" 
                         color="warning"
+                        size="small"
                         onClick={handleCancelSubmission}
+                        sx={{ width: "100%" }}
                     >
                         {t('sketchPad.cancelSubmission')}
                     </Button>
@@ -256,76 +282,92 @@ const SketchPad = ({ excalidrawData,
         );
     } else {
         return (
-        <div 
-        onMouseLeave={async () => {
-            const elements = excalidrawRef.current.elements;
-            const appState = excalidrawRef.current.state;
-            const files = excalidrawAPI?.getFiles();
+        <Box sx={{ m: 2, position: "relative" }}>
+            <div 
+            onMouseLeave={async () => {
+                const elements = excalidrawRef.current.elements;
+                const appState = excalidrawRef.current.state;
+                const files = excalidrawAPI?.getFiles();
 
-            const canvas = await exportToCanvas({
-                elements,
-                appState,
-                files,
-            });
+                // Check if anything was drawn - if not, just close without submitting
+                if (!elements || elements.length === 0) {
+                    setIsHovering(false);
+                    return;
+                }
 
-            const dataUrl = await canvas.toDataURL("image/png");
-            const justBase64 = dataUrl.split(",")[1];
-            setImageData(justBase64);
-            setIsHovering(false);
+                const canvas = await exportToCanvas({
+                    elements,
+                    appState,
+                    files,
+                });
 
-            // Start 10-second countdown before submitting
-            startSubmissionCountdown(justBase64, elements, appState);
+                const dataUrl = await canvas.toDataURL("image/png");
+                const justBase64 = dataUrl.split(",")[1];
+                setImageData(justBase64);
+                setIsHovering(false);
 
-        }}
-        style={{ 
-            height: "400px", 
-            width: "600px",
-            border: "3px solid #2196f3",
-            borderRadius: "4px",
-            boxShadow: "0 0 10px rgba(33, 150, 243, 0.5)",
-            position: "relative",
-            overflow: "hidden",
-        }}>
-            <Excalidraw
-            initialData={excalidrawData}
-            onChange={(elements, state) => {
-                excalidrawRef.current = { elements, state };
+                // Start 10-second countdown before submitting
+                startSubmissionCountdown(justBase64, elements, appState);
+
             }}
-            clearCanvas={true}
-            autoFocus={true}
-            excalidrawAPI={(api) => {
-                setExcalidrawAPI(api)}}
-            UIOptions={{
-                canvasActions: {
-                    changeViewBackgroundColor: false,
-                    clearCanvas: false,
-                    export: false,
-                    loadScene: false,
-                    saveToActiveFile: false,
-                    theme: false,
-                    saveAsImage: false,
-                },
-                tools: {
-                    image: false,
-                    text: false,
-                    arrow: false,
-                    line: false,
-                    rectangle: false,
-                    diamond: false,
-                    ellipse: false,
-                    freedraw: true,
-                    selection: false,
-                    eraser: true,
-                },
-                dockedSidebarBreakpoint: 0,
-                welcomeScreen: false,
-            }}
-            viewModeEnabled={false}
-            zenModeEnabled={false}
-            gridModeEnabled={false}
-            >
-            </Excalidraw>
-        </div>
+            style={{ 
+                height: "400px", 
+                width: "600px",
+                border: "3px solid #2196f3",
+                borderRadius: "4px",
+                boxShadow: "0 0 10px rgba(33, 150, 243, 0.5)",
+                position: "relative",
+            }}>
+                <Excalidraw
+                initialData={{
+                    ...excalidrawData,
+                    appState: {
+                        ...excalidrawData?.appState,
+                        activeTool: {
+                            type: "freedraw",
+                            locked: false,
+                        },
+                    },
+                }}
+                onChange={(elements, state) => {
+                    excalidrawRef.current = { elements, state };
+                }}
+                clearCanvas={true}
+                autoFocus={true}
+                excalidrawAPI={(api) => {
+                    setExcalidrawAPI(api)}}
+                UIOptions={{
+                    canvasActions: {
+                        changeViewBackgroundColor: false,
+                        clearCanvas: false,
+                        export: false,
+                        loadScene: false,
+                        saveToActiveFile: false,
+                        theme: false,
+                        saveAsImage: false,
+                    },
+                    tools: {
+                        image: false,
+                        text: false,
+                        arrow: false,
+                        line: false,
+                        rectangle: false,
+                        diamond: false,
+                        ellipse: false,
+                        freedraw: true,
+                        selection: false,
+                        eraser: true,
+                    },
+                    dockedSidebarBreakpoint: 0,
+                    welcomeScreen: false,
+                }}
+                viewModeEnabled={false}
+                zenModeEnabled={false}
+                gridModeEnabled={false}
+                >
+                </Excalidraw>
+            </div>
+        </Box>
         );
     }
 }

@@ -121,46 +121,30 @@ export const WithRecordedAnswer = {
         seedMockFiles([mockFileData]);
       }, []);
       
-      // Create mock contexts
-      const MockUnitProvider = ({ children }) => {
-        const mockUnitContextValue = {
-          grade: null,
-          createGrade: async () => ({ id: 'mock-grade-1', createdAt: new Date().toISOString() }),
-          saveGrade: async (data) => console.log('Mock saveGrade called with:', data),
-        };
-        
-        return (
-          <UnitContext.Provider value={mockUnitContextValue}>
-            {children}
-          </UnitContext.Provider>
-        );
-      };
+      // Memoize context values to prevent recreation on every render
+      const mockUnitContextValue = React.useMemo(() => ({
+        grade: null,
+        createGrade: async () => ({ id: 'mock-grade-1', createdAt: new Date().toISOString() }),
+        saveGrade: async (data) => console.log('Mock saveGrade called with:', data),
+      }), []);
       
-      const MockFilesProvider = ({ children }) => {
-        const mockFilesContextValue = {
-          audioFiles: mockAudioFiles,
-          myFiles: [mockFileData],
-          myPlaylistFiles: { [mockFileData.id]: mockFileData },
-          myPlaylistUrls: {},
-          session: {
-            identityId: 'us-east-1:mock-identity-123',
-          },
-          refreshAudioFiles: () => console.log('Mock refreshAudioFiles called'),
-        };
-        
-        return (
-          <FilesContext.Provider value={mockFilesContextValue}>
-            {children}
-          </FilesContext.Provider>
-        );
-      };
+      const mockFilesContextValue = React.useMemo(() => ({
+        audioFiles: mockAudioFiles,
+        myFiles: [mockFileData],
+        myPlaylistFiles: { [mockFileData.id]: mockFileData },
+        myPlaylistUrls: {},
+        session: {
+          identityId: 'us-east-1:mock-identity-123',
+        },
+        refreshAudioFiles: () => console.log('Mock refreshAudioFiles called'),
+      }), []);
       
       return (
-        <MockUnitProvider>
-          <MockFilesProvider>
+        <UnitContext.Provider value={mockUnitContextValue}>
+          <FilesContext.Provider value={mockFilesContextValue}>
             <Story />
-          </MockFilesProvider>
-        </MockUnitProvider>
+          </FilesContext.Provider>
+        </UnitContext.Provider>
       );
     },
   ],

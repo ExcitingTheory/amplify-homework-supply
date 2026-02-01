@@ -4,9 +4,10 @@ import UnitContext from '../../context/unitContext';
 import DictionaryContext from '../../context/dictionaryContext';
 import { shuffle } from './utils';
 import { DragBox } from './DragBox'
+import { CompletionScreen } from './CompletionScreen';
 
 
-import { Grid } from '@mui/material';
+import { Grid, Box } from '@mui/material';
 import { LinearProgressWithLabel, AnswerDrop } from '.';
 
 import { Word } from '../../models';
@@ -25,8 +26,14 @@ export const Hard = ({
   const [completedHard, setCompletedHard] = React.useState(0);
   const [startPositionHard, setStartPositionHard] = React.useState(0);
   const [verifiedAnswers, setVerifiedAnswers] = React.useState([]);
+  const [showCompletion, setShowCompletion] = React.useState(false);
 
   const isFirstRender = React.useRef(true);
+
+  // Reset completion screen when tab changes
+  React.useEffect(() => {
+    setShowCompletion(false);
+  }, [tabIndex]);
 
   const { wordMapId: dictionary } = React.useContext(DictionaryContext)
 
@@ -54,7 +61,7 @@ export const Hard = ({
       setCompletedHard(percentComplete);
       setStartPositionHard(verified.length);
     }
-  }, [inProgress])
+  }, [inProgress]);
 
   let vocabList = []
   let vocabListHard = []
@@ -161,7 +168,8 @@ export const Hard = ({
         allTabsComplete = true;
       }
 
-      newTab = 0;
+      // Don't auto-advance, show completion screen instead
+      // newTab = 0;
     }
 
     let savedGradeCopy = JSON.parse(JSON.stringify(grade?.data || {}));
@@ -195,6 +203,10 @@ export const Hard = ({
 
     await saveGrade(savedGradeCopy);
 
+    // Show completion screen if exercise is complete
+    if (thisExerciseComplete) {
+      setShowCompletion(true);
+    }
   }
 
   async function sendFail(phrase) {
@@ -246,26 +258,52 @@ export const Hard = ({
     // // console.log('sendPass')
   }
 
-  return (
+  const handleContinueFromCompletion = () => {
+    setShowCompletion(false);
+    setTabIndex(0); // Go back to Learn mode or could show final completion
+  };
 
-    <Grid container flexDirection="column">
+  // Check if all exercises are complete
+  const allComplete = inProgress?.easy?.complete && inProgress?.learn?.complete;
+
+  return (
+    <Box sx={{ position: 'relative', minHeight: '500px' }}>
+      {showCompletion && (
+        <CompletionScreen
+          levelName="Hard Mode"
+          accuracy={verifiedAnswers.length / (inProgress?.hard?.attemptsCount || 1)}
+          attempts={inProgress?.hard?.attemptsCount || 0}
+          onContinue={handleContinueFromCompletion}
+          nextLevelName="Learn Mode"
+          isLastLevel={allComplete}
+        />
+      )}
+
+      <Grid container direction="column" spacing={1}>
       <Grid item xs={12}>
         <LinearProgressWithLabel value={percentComplete} />
       </Grid>
-      <Grid container flexDirection="row">
-      <Grid xs={8}>
+      <Grid item xs={12} container direction="row" spacing={2} wrap="nowrap">
+      <Grid item xs={8} sm={8} md={8} lg={8}>
         <AnswerDrop
           correctAnswer={{ ...correctWord, progressAssignment, sendFail, sendPass }} />
       </Grid>
-      <Grid xs={4} style={{
-        marginBottom: '1rem',
-        paddingBottom: '1rem',
-        height: 'fit-content',
-        overflowY: 'auto'
-      }}>
-        {hardVocabList}
+      <Grid item xs={4} sm={4} md={4} lg={4}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 1,
+            maxHeight: '400px',
+            overflowY: 'auto',
+            padding: 1,
+          }}
+        >
+          {hardVocabList}
+        </Box>
       </Grid>
       </Grid>
     </Grid>
+    </Box>
   );
 };

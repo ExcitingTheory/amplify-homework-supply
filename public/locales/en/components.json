@@ -4117,7 +4117,26 @@
       },
       "value": "Clarity"
     },
-    "clickToRecord": "Click To Record",
+    "clickToRecord": {
+      "value": "Click To Record",
+      "_meta": {
+        "context": "This text appears as a button label in the enhanced recording studio interface, prompting users to initiate audio recording. Users see this when they enter the recording mode and need to start capturing their voice input for language learning exercises or content creation.",
+        "component": {
+          "location": "src/components/RecordingStudioEnhanced.jsx",
+          "description": "An enhanced recording studio component that provides audio recording functionality for language learning activities. This component likely offers improved recording controls and features compared to a basic recording interface, supporting both instructor content creation and student practice sessions."
+        },
+        "usage": "Button label that users click to begin audio recording",
+        "impact": "Critical - this is the primary call-to-action for initiating recordings, essential for voice-based language learning activities",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Start Recording",
+          "Begin Recording",
+          "Record Audio",
+          "Press to Record"
+        ]
+      }
+    },
     "cutTooltip": {
       "_meta": {
         "alternativeTerms": [
@@ -4312,7 +4331,26 @@
       },
       "value": "Could not access microphone"
     },
-    "noClips": "No Clips",
+    "noClips": {
+      "value": "No Clips",
+      "_meta": {
+        "context": "This text appears in the enhanced recording studio interface when no audio or video clips have been recorded or uploaded yet. Users see this empty state message in the clips management area before they start creating any recordings for their learning content.",
+        "component": {
+          "location": "src/components/RecordingStudioEnhanced.jsx",
+          "description": "An advanced recording studio component that allows instructors and students to record, edit, and manage audio/video clips for Japanese language learning content. It provides enhanced features beyond basic recording capabilities including clip management and editing tools."
+        },
+        "usage": "Empty state message displayed in the clips list area when no recordings are present.",
+        "impact": "Medium - This empty state message helps users understand the current status and guides them toward taking their first recording action.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "No Recordings",
+          "No Audio Files",
+          "No Content",
+          "Empty"
+        ]
+      }
+    },
     "noiseReduction": {
       "_meta": {
         "alternativeTerms": [
@@ -4464,7 +4502,26 @@
       },
       "value": "Enter text to generate audio..."
     },
-    "recording": "Recording",
+    "recording": {
+      "value": "Recording",
+      "_meta": {
+        "context": "This text appears as a status indicator or label within the RecordingStudioEnhanced component when users are actively recording audio content. It displays during the recording process to show the current state of the audio recording session.",
+        "component": {
+          "location": "src/components/RecordingStudioEnhanced.jsx",
+          "description": "An enhanced audio recording interface that allows users to record, edit, and manage audio content for learning materials. This component provides advanced recording capabilities with real-time feedback and controls for instructors creating audio-based learning content."
+        },
+        "usage": "Status label or indicator text that shows when audio recording is in progress.",
+        "impact": "High - This status indicator is crucial for users to understand when they are actively recording audio, preventing accidental recordings or missed content.",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Capturing",
+          "In Progress",
+          "Active",
+          "Live"
+        ]
+      }
+    },
     "selectToCut": {
       "_meta": {
         "alternativeTerms": [
@@ -5105,16 +5162,194 @@
     }
   },
   "vocabularyReview": {
-    "deselectAll": "Deselect All",
-    "filteringBySearch": "Filtering By Search",
-    "from": "From",
-    "hide": "Hide",
-    "importToDictionary": "Import To Dictionary",
-    "importedOn": "Imported On",
-    "learningObjectives": "Learning Objectives",
-    "loading": "Loading",
-    "noVocabulary": "No Vocabulary",
-    "pages": "Pages",
+    "deselectAll": {
+      "value": "Deselect All",
+      "_meta": {
+        "context": "This text appears as a button or link in the VocabularyReview2 component when users have selected multiple vocabulary items for review or editing. Users see this option when they want to quickly clear all their current selections and start over with their vocabulary review process.",
+        "component": {
+          "location": "src/components/VocabularyReview2.tsx",
+          "description": "An enhanced vocabulary review panel that allows instructors and students to manage vocabulary items with features like inline editing, virtual scrolling for large lists, search functionality, and bulk selection operations. Users interact with this component when reviewing, editing, or organizing vocabulary content for Japanese language learning units."
+        },
+        "usage": "Translation key: vocabularyReview.deselectAll",
+        "impact": "Provides information to users",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": []
+      }
+    },
+    "filteringBySearch": {
+      "value": "Filtering By Search",
+      "_meta": {
+        "context": "This text appears as a status indicator in the VocabularyReview2 component when users have entered search terms to filter vocabulary items. It displays above or alongside the filtered results to inform users that the current view is showing only items matching their search query rather than the complete vocabulary list.",
+        "component": {
+          "location": "src/components/VocabularyReview2.tsx",
+          "description": "An enhanced vocabulary review panel that allows users to browse, search, and edit vocabulary items with features like virtual scrolling, search highlighting, and inline editing. Users see this component when reviewing vocabulary content within learning units, with real-time search filtering capabilities."
+        },
+        "usage": "Status label that appears when search filtering is active to indicate the current view state.",
+        "impact": "Medium - helps users understand they are viewing filtered results rather than the complete vocabulary set, preventing confusion about missing items.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Filtered by Search",
+          "Search Results",
+          "Filtered View",
+          "Search Filter Active"
+        ]
+      }
+    },
+    "from": {
+      "value": "From",
+      "_meta": {
+        "context": "This text appears as a preposition label in the VocabularyReview2 component when displaying vocabulary entries that have source language information. Users see this when reviewing vocabulary items that show translation pairs or language origins.",
+        "component": {
+          "location": "src/components/VocabularyReview2.tsx",
+          "description": "Enhanced vocabulary review panel with lexical-powered inline editing, virtual scrolling for large lists, and search term highlighting. Students and instructors use this component to review and manage vocabulary entries with auto-save functionality and polished card design."
+        },
+        "usage": "Translation key: vocabularyReview.from",
+        "impact": "Provides information to users",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": []
+      }
+    },
+    "hide": {
+      "value": "Hide",
+      "_meta": {
+        "context": "This text appears on a button or control within the enhanced vocabulary review panel that allows users to collapse or hide expanded vocabulary card content. Users see this when vocabulary cards are in their expanded state showing detailed information, definitions, or additional content that can be minimized.",
+        "component": {
+          "location": "src/components/VocabularyReview2.tsx",
+          "description": "An enhanced vocabulary review panel component with lexical-powered inline editing, virtual scrolling for large vocabulary lists, and polished card design with expand/collapse functionality. The component provides vocabulary management features with auto-save capabilities and search highlighting for efficient content review and editing."
+        },
+        "usage": "Button or clickable control that collapses expanded vocabulary card content to show only basic information.",
+        "impact": "Medium - This control helps users manage information density and navigate through vocabulary content efficiently, improving the overall review experience.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Collapse",
+          "Minimize",
+          "Close",
+          "Conceal"
+        ]
+      }
+    },
+    "importToDictionary": {
+      "value": "Import To Dictionary",
+      "_meta": {
+        "context": "This text appears as a button label in the VocabularyReview2 component when users are reviewing vocabulary items. Users see this button when they want to add selected vocabulary terms from their review session to their personal dictionary for future reference.",
+        "component": {
+          "location": "src/components/VocabularyReview2.tsx",
+          "description": "An enhanced vocabulary review panel that allows users to review vocabulary items with inline editing capabilities, search functionality, and virtual scrolling for performance. The component provides tools for managing vocabulary lists including the ability to import items to personal dictionaries."
+        },
+        "usage": "Button label that triggers the action to save selected vocabulary terms to the user's personal dictionary.",
+        "impact": "High - This is a key feature that allows students to build their personal vocabulary collections from review sessions, directly supporting their learning progression.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Add To Dictionary",
+          "Save To Dictionary",
+          "Export To Dictionary"
+        ]
+      }
+    },
+    "importedOn": {
+      "value": "Imported On",
+      "_meta": {
+        "context": "This text appears as a label or header in the VocabularyReview2 component to indicate when a vocabulary item or list was imported into the system. Users see this when reviewing vocabulary cards that have been imported from external sources or bulk uploads.",
+        "component": {
+          "location": "src/components/VocabularyReview2.tsx",
+          "description": "Enhanced vocabulary review panel that displays vocabulary items with inline editing capabilities, search functionality, and import state indicators. Users interact with this component to review, edit, and manage vocabulary lists with visual indicators showing the import status and timestamps."
+        },
+        "usage": "Label or metadata field that displays the import date information for vocabulary items.",
+        "impact": "Medium - helps users track when vocabulary was imported for organizational and audit purposes.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Import Date",
+          "Date Imported",
+          "Added On",
+          "Upload Date"
+        ]
+      }
+    },
+    "learningObjectives": {
+      "value": "Learning Objectives",
+      "_meta": {
+        "context": "This text appears as a section heading within the VocabularyReview2 component when instructors are creating or editing vocabulary review content. It labels the section where learning objectives for the vocabulary lesson are displayed or edited.",
+        "component": {
+          "location": "src/components/VocabularyReview2.tsx",
+          "description": "An enhanced vocabulary review panel that allows instructors to create and edit vocabulary lessons with inline editing capabilities, search functionality, and auto-save features. The component provides a polished interface for managing vocabulary content with expandable cards and real-time editing."
+        },
+        "usage": "Section heading that labels the learning objectives area within the vocabulary review interface.",
+        "impact": "Important because it helps instructors clearly identify where to define or view the educational goals for their vocabulary lessons, supporting proper lesson structure.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Learning Goals",
+          "Educational Objectives",
+          "Lesson Outcomes",
+          "Learning Targets"
+        ]
+      }
+    },
+    "loading": {
+      "value": "Loading",
+      "_meta": {
+        "context": "This loading message appears in the vocabulary review panel while the component fetches and processes vocabulary data from the backend. Users see this text during the initial load of vocabulary items or when refreshing the review content.",
+        "component": {
+          "location": "src/components/VocabularyReview2.tsx",
+          "description": "An enhanced vocabulary review panel that provides inline editing capabilities, virtual scrolling for large vocabulary lists, and search functionality with term highlighting. Students and instructors use this component to review, edit, and manage vocabulary items within learning units."
+        },
+        "usage": "Loading indicator text displayed during data fetch operations in the vocabulary review interface.",
+        "impact": "Medium - provides important feedback to users about system state during data loading, preventing confusion about interface responsiveness.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Processing",
+          "Fetching",
+          "Retrieving"
+        ]
+      }
+    },
+    "noVocabulary": {
+      "value": "No Vocabulary",
+      "_meta": {
+        "context": "This text appears as a placeholder message in the VocabularyReview2 component when a learning unit contains no vocabulary items to display. Users see this empty state message when they open the vocabulary review panel for a unit that hasn't had any vocabulary terms added yet.",
+        "component": {
+          "location": "src/components/VocabularyReview2.tsx",
+          "description": "An enhanced vocabulary review panel that displays vocabulary terms with inline editing capabilities, search functionality, and virtual scrolling for large lists. The component shows vocabulary cards with polished design elements including badges and shadows, along with expand/collapse controls for detailed term information."
+        },
+        "usage": "Empty state message displayed as text when no vocabulary items are available in the vocabulary review panel.",
+        "impact": "Medium - This helps users understand the current state of their vocabulary collection and may prompt instructors to add vocabulary content.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "No Words",
+          "No Terms",
+          "No Vocabulary Items",
+          "Empty Vocabulary"
+        ]
+      }
+    },
+    "pages": {
+      "value": "Pages",
+      "_meta": {
+        "context": "This text appears as a pagination label in the VocabularyReview2 component, likely showing the current page position or total pages when vocabulary items are displayed across multiple pages. Users see this when browsing through large sets of vocabulary items that have been split into paginated views for better performance.",
+        "component": {
+          "location": "src/components/VocabularyReview2.tsx",
+          "description": "Enhanced vocabulary review panel with virtual scrolling, search highlighting, and inline editing capabilities for managing large vocabulary lists. The component provides instructors and students with tools to review, edit, and navigate through vocabulary items efficiently."
+        },
+        "usage": "Pagination label or indicator showing page information in the vocabulary review interface.",
+        "impact": "Medium - helps users understand their current position when navigating through large vocabulary sets, improving navigation clarity.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Sheets",
+          "Sections",
+          "Views",
+          "Screens"
+        ]
+      }
+    },
     "sectionHeading": {
       "_meta": {
         "alternativeTerms": [],
@@ -5131,11 +5366,104 @@
       },
       "value": "Vocabulary Review"
     },
-    "selectAll": "Select All",
-    "selectedCount": "Selected Count",
-    "show": "Show",
-    "summaries": "Summaries",
-    "summariesAndObjectives": "Summaries And Objectives"
+    "selectAll": {
+      "value": "Select All",
+      "_meta": {
+        "context": "This text appears as a button or link in the vocabulary review interface that allows users to select all vocabulary items in the current list at once. Users see this when they want to perform bulk actions on multiple vocabulary terms instead of selecting them individually.",
+        "component": {
+          "location": "src/components/VocabularyReview2.tsx",
+          "description": "An enhanced vocabulary review panel that displays vocabulary terms with virtual scrolling for large lists, search highlighting, and bulk selection capabilities. Users interact with this component when reviewing, editing, or managing vocabulary items within their learning units."
+        },
+        "usage": "Button or clickable link that triggers selection of all visible vocabulary items in the review list.",
+        "impact": "Medium - This convenience feature saves time for users managing large vocabulary lists, improving workflow efficiency when performing bulk operations.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Choose All",
+          "Select Everything",
+          "Pick All",
+          "Mark All"
+        ]
+      }
+    },
+    "selectedCount": {
+      "value": "Selected Count",
+      "_meta": {
+        "context": "This text appears in the VocabularyReview2 component as a label or header indicating how many vocabulary items have been selected by the user. Users see this when they are reviewing and selecting vocabulary terms, likely for batch operations or filtering purposes.",
+        "component": {
+          "location": "src/components/VocabularyReview2.tsx",
+          "description": "An enhanced vocabulary review panel that allows users to review, edit, and manage vocabulary items with features like inline editing, search highlighting, and virtual scrolling for performance. Users interact with this component when reviewing vocabulary content in learning units."
+        },
+        "usage": "Label or counter text that displays the number of currently selected vocabulary items in the review interface.",
+        "impact": "Medium - This helps users understand their current selection state when performing bulk operations on vocabulary items.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Selection Count",
+          "Items Selected",
+          "Chosen Items"
+        ]
+      }
+    },
+    "show": {
+      "value": "Show",
+      "_meta": {
+        "context": "This text appears as a button or link within the VocabularyReview2 component that allows users to reveal hidden or collapsed content. Users see this when interacting with vocabulary items that have expandable sections containing additional details, definitions, or examples.",
+        "component": {
+          "location": "src/components/VocabularyReview2.tsx",
+          "description": "Enhanced vocabulary review panel with inline editing capabilities, virtual scrolling for large vocabulary lists, and expandable card design. Users interact with this component to review, edit, and manage vocabulary items with expand/collapse affordances for detailed content."
+        },
+        "usage": "Button or interactive element that expands collapsed vocabulary content when clicked.",
+        "impact": "Medium - Essential for users to access full vocabulary details and complete their review effectively.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Display",
+          "Reveal",
+          "Expand",
+          "View"
+        ]
+      }
+    },
+    "summaries": {
+      "value": "Summaries",
+      "_meta": {
+        "context": "This text appears as a section heading or tab label within the VocabularyReview2 component when users are reviewing vocabulary items. It introduces a section that likely contains summary information or overview content related to the vocabulary being studied.",
+        "component": {
+          "location": "src/components/VocabularyReview2.tsx",
+          "description": "An enhanced vocabulary review panel that provides comprehensive vocabulary study tools with inline editing, search functionality, and virtual scrolling for performance. Users interact with this component to review, edit, and organize vocabulary items during their Japanese language learning sessions."
+        },
+        "usage": "Section heading or navigation tab that users click to access summary content within the vocabulary review interface.",
+        "impact": "Important because it helps users navigate to summary information that provides overview context for their vocabulary study session.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Overviews",
+          "Abstracts",
+          "Reviews",
+          "Synopses"
+        ]
+      }
+    },
+    "summariesAndObjectives": {
+      "value": "Summaries And Objectives",
+      "_meta": {
+        "context": "This text appears as a section heading or tab label within the VocabularyReview2 component when users are reviewing vocabulary content. It identifies a specific section that contains both summary information and learning objectives for the vocabulary being reviewed.",
+        "component": {
+          "location": "src/components/VocabularyReview2.tsx",
+          "description": "An enhanced vocabulary review panel that provides lexical-powered inline editing, virtual scrolling for large vocabulary lists, and search functionality with highlighting. Users see this component when reviewing and managing vocabulary content with features like auto-save, expandable cards, and import state indicators."
+        },
+        "usage": "Section heading or tab label that users click to access summaries and objectives content.",
+        "impact": "Important because it helps users navigate to key educational content that provides context and learning goals for vocabulary study.",
+        "userType": "all",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Overviews And Goals",
+          "Synopses And Aims",
+          "Reviews And Targets"
+        ]
+      }
+    }
   },
   "wordEmbedding": {
     "embeddingFailed": {
@@ -5172,7 +5500,255 @@
     }
   },
   "wordEmbeddingIntegration": {
-    "embeddingFailed": "Embedding Failed",
-    "embeddingGenerated": "Embedding Generated"
+    "embeddingFailed": {
+      "value": "Embedding Failed",
+      "_meta": {
+        "context": "This error message appears in the Word Editor component when the automatic embedding generation process fails during word save operations. Users see this message when the AI-powered embedding creation encounters an error, preventing the word from being properly indexed for search and recommendation features.",
+        "component": {
+          "location": "src/components/embeddings/WordEmbeddingIntegration.js",
+          "description": "Demonstrates integration of automatic embedding generation within the word editor, showing how vocabulary entries are enhanced with AI-generated embeddings for improved search and content recommendations. This component handles the embedding workflow when instructors save new vocabulary words in their learning units."
+        },
+        "usage": "Translation key: wordEmbeddingIntegration.embeddingFailed",
+        "impact": "Provides information to users",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Embedding Generation Failed",
+          "Vector Creation Failed",
+          "Indexing Failed"
+        ]
+      }
+    },
+    "embeddingGenerated": {
+      "value": "Embedding Generated",
+      "_meta": {
+        "context": "This text appears as a status notification or confirmation message when the system successfully generates an embedding for a word in the word editor. Users see this feedback after saving a word that triggers automatic embedding generation through the WordEmbeddingIntegration component.",
+        "component": {
+          "location": "src/components/embeddings/WordEmbeddingIntegration.js",
+          "description": "This component demonstrates integration between the word editor and automatic embedding generation functionality. It shows instructors how embeddings are automatically created when words are saved, providing AI-powered semantic understanding for vocabulary content."
+        },
+        "usage": "Status message or notification text that confirms successful embedding generation after a word save operation",
+        "impact": "Medium - This provides useful feedback to instructors about AI processing completion but doesn't block core functionality",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": [
+          "Embedding Created",
+          "Vector Generated",
+          "Semantic Encoding Complete"
+        ]
+      }
+    }
+  },
+  "instructorDashboard": {
+    "overallPerformance": {
+      "value": "Overall Performance",
+      "_meta": {
+        "context": "This heading appears in the instructor dashboard above aggregate statistics showing performance across all sections.",
+        "component": {
+          "location": "src/components/InstructorDashboard.js",
+          "description": "Dashboard component that displays aggregate performance metrics across all instructor's sections including total students, average grades, and completion rates."
+        },
+        "usage": "Heading text for the aggregate performance section",
+        "impact": "High - Helps instructors quickly understand their overall teaching performance",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Overall Statistics", "Aggregate Performance", "Performance Summary"]
+      }
+    },
+    "totalStudents": {
+      "value": "Total Students",
+      "_meta": {
+        "context": "Label for the metric showing total number of students across all instructor's sections.",
+        "component": {
+          "location": "src/components/InstructorDashboard.js",
+          "description": "Dashboard component displaying aggregate student count metric."
+        },
+        "usage": "Label text for total students count",
+        "impact": "Medium - Provides at-a-glance enrollment information",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Students", "Total Learners", "Enrolled Students"]
+      }
+    },
+    "totalAssignments": {
+      "value": "Total Assignments",
+      "_meta": {
+        "context": "Label for the metric showing total number of assignments across all sections.",
+        "component": {
+          "location": "src/components/InstructorDashboard.js",
+          "description": "Dashboard component displaying aggregate assignment count."
+        },
+        "usage": "Label text for total assignments count",
+        "impact": "Medium - Shows instructors their workload at a glance",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Assignments", "Total Tasks", "Active Assignments"]
+      }
+    },
+    "averageGrade": {
+      "value": "Average Grade",
+      "_meta": {
+        "context": "Label for the metric showing average grade across all students and sections.",
+        "component": {
+          "location": "src/components/InstructorDashboard.js",
+          "description": "Dashboard component displaying aggregate grade average."
+        },
+        "usage": "Label text for average grade metric",
+        "impact": "High - Key performance indicator for instructors",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Avg. Grade", "Mean Score", "Overall Average"]
+      }
+    },
+    "averageCompletion": {
+      "value": "Average Completion",
+      "_meta": {
+        "context": "Label for the metric showing average assignment completion rate across all students.",
+        "component": {
+          "location": "src/components/InstructorDashboard.js",
+          "description": "Dashboard component displaying aggregate completion rate."
+        },
+        "usage": "Label text for average completion percentage",
+        "impact": "High - Shows student engagement levels",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Completion Rate", "Avg. Completion", "Progress"]
+      }
+    },
+    "sectionLeaderboards": {
+      "value": "Section Leaderboards",
+      "_meta": {
+        "context": "Heading for the section showing top-performing students in each section.",
+        "component": {
+          "location": "src/components/InstructorDashboard.js",
+          "description": "Dashboard component displaying student rankings per section."
+        },
+        "usage": "Heading text for leaderboards section",
+        "impact": "High - Helps instructors identify high and low performers",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Top Performers", "Student Rankings", "Class Leaders"]
+      }
+    },
+    "students": {
+      "value": "students",
+      "_meta": {
+        "context": "Text used in chip showing student count for a section.",
+        "component": {
+          "location": "src/components/InstructorDashboard.js",
+          "description": "Dashboard component showing per-section student counts."
+        },
+        "usage": "Lowercase plural noun for student count labels",
+        "impact": "Low - Supporting text for metrics",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": ["learners", "pupils"]
+      }
+    },
+    "avg": {
+      "value": "avg",
+      "_meta": {
+        "context": "Abbreviation for 'average' used in compact metric displays.",
+        "component": {
+          "location": "src/components/InstructorDashboard.js",
+          "description": "Dashboard component showing abbreviated metrics."
+        },
+        "usage": "Abbreviated label for average values",
+        "impact": "Low - Space-saving abbreviation",
+        "userType": "instructors",
+        "tone": "technical",
+        "alternativeTerms": ["mean", "average"]
+      }
+    },
+    "noDataYet": {
+      "value": "No student data available yet",
+      "_meta": {
+        "context": "Message shown when a section has no completed assignments or student activity.",
+        "component": {
+          "location": "src/components/InstructorDashboard.js",
+          "description": "Dashboard component displaying empty state for sections without data."
+        },
+        "usage": "Empty state message for leaderboards with no data",
+        "impact": "Medium - Helps instructors understand why data is missing",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": ["No data available", "No activity yet", "Waiting for student submissions"]
+      }
+    },
+    "rank": {
+      "value": "Rank",
+      "_meta": {
+        "context": "Column header in leaderboard table showing student ranking position.",
+        "component": {
+          "location": "src/components/InstructorDashboard.js",
+          "description": "Dashboard component displaying student rankings."
+        },
+        "usage": "Table header for ranking column",
+        "impact": "Medium - Helps identify student positions",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Position", "Place", "#"]
+      }
+    },
+    "student": {
+      "value": "Student",
+      "_meta": {
+        "context": "Column header in leaderboard table showing student identifier.",
+        "component": {
+          "location": "src/components/InstructorDashboard.js",
+          "description": "Dashboard component displaying student information."
+        },
+        "usage": "Table header for student column",
+        "impact": "Medium - Identifies student column in table",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Learner", "Name", "User"]
+      }
+    },
+    "average": {
+      "value": "Average",
+      "_meta": {
+        "context": "Column header in leaderboard table showing student's average grade.",
+        "component": {
+          "location": "src/components/InstructorDashboard.js",
+          "description": "Dashboard component displaying grade averages."
+        },
+        "usage": "Table header for average grade column",
+        "impact": "High - Key metric for student performance",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Grade", "Score", "Performance"]
+      }
+    },
+    "completed": {
+      "value": "Completed",
+      "_meta": {
+        "context": "Column header showing number of assignments completed by student.",
+        "component": {
+          "location": "src/components/InstructorDashboard.js",
+          "description": "Dashboard component displaying completion counts."
+        },
+        "usage": "Table header for completed assignments column",
+        "impact": "Medium - Shows student progress",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Done", "Finished", "Submitted"]
+      }
+    },
+    "completion": {
+      "value": "Completion",
+      "_meta": {
+        "context": "Column header showing completion percentage for student.",
+        "component": {
+          "location": "src/components/InstructorDashboard.js",
+          "description": "Dashboard component displaying completion percentages."
+        },
+        "usage": "Table header for completion percentage column",
+        "impact": "Medium - Shows student engagement",
+        "userType": "instructors",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Progress", "% Complete", "Status"]
+      }
+    }
   }
 }

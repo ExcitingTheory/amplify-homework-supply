@@ -2087,44 +2087,39 @@ export const KeyboardShortcutsTest = {
     await userEvent.keyboard('{ArrowRight}');
     await userEvent.keyboard('{Enter}');
     
-    // Test Clear Formatting (Cmd+\ / Ctrl+\)
+    // Test Clear Formatting (Cmd+Shift+0 / Ctrl+Shift+0)
     await userEvent.keyboard('Text to clear');
     await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}');
     await userEvent.keyboard('{Meta>}b{/Meta}'); // Make it bold first
-    await userEvent.keyboard('{Meta>}\\{/Meta}'); // Clear formatting
+    await userEvent.keyboard('{Meta>}{Shift>}0{/Shift}{/Meta}'); // Clear formatting
     await userEvent.keyboard('{ArrowRight}');
     await userEvent.keyboard('{Enter}');
     
     // ========== BLOCK TYPE SHORTCUTS ==========
     
-    // Test Heading 1 (Cmd+Alt+1 / Ctrl+Alt+1)
+    // Test Heading 1 (Cmd+Shift+1 / Ctrl+Shift+1)
     await userEvent.keyboard('{Enter}Heading 1');
-    await userEvent.keyboard('{Meta>}{Alt>}1{/Alt}{/Meta}');
+    await userEvent.keyboard('{Meta>}{Shift>}1{/Shift}{/Meta}');
     await userEvent.keyboard('{Enter}');
     
-    // Test Heading 2 (Cmd+Alt+2 / Ctrl+Alt+2)
+    // Test Heading 2 (Cmd+Shift+2 / Ctrl+Shift+2)
     await userEvent.keyboard('Heading 2');
-    await userEvent.keyboard('{Meta>}{Alt>}2{/Alt}{/Meta}');
+    await userEvent.keyboard('{Meta>}{Shift>}2{/Shift}{/Meta}');
     await userEvent.keyboard('{Enter}');
     
-    // Test Heading 3 (Cmd+Alt+3 / Ctrl+Alt+3)
+    // Test Heading 3 (Cmd+Shift+3 / Ctrl+Shift+3)
     await userEvent.keyboard('Heading 3');
-    await userEvent.keyboard('{Meta>}{Alt>}3{/Alt}{/Meta}');
+    await userEvent.keyboard('{Meta>}{Shift>}3{/Shift}{/Meta}');
     await userEvent.keyboard('{Enter}');
     
-    // Test Paragraph (Cmd+Alt+0 / Ctrl+Alt+0)
-    await userEvent.keyboard('Back to paragraph');
-    await userEvent.keyboard('{Meta>}{Alt>}0{/Alt}{/Meta}');
-    await userEvent.keyboard('{Enter}');
-    
-    // Test Quote (Cmd+Shift+Q / Ctrl+Shift+Q)
+    // Test Quote (Cmd+' / Ctrl+')
     await userEvent.keyboard('This is a quote');
-    await userEvent.keyboard('{Meta>}{Shift>}q{/Shift}{/Meta}');
+    await userEvent.keyboard("{Meta>}'{/Meta}");
     await userEvent.keyboard('{Enter}');
     
-    // Test Code Block (Cmd+Alt+C / Ctrl+Alt+C)
+    // Test Code Block (Cmd+Shift+C / Ctrl+Shift+C)
     await userEvent.keyboard('const code = true;');
-    await userEvent.keyboard('{Meta>}{Alt>}c{/Alt}{/Meta}');
+    await userEvent.keyboard('{Meta>}{Shift>}c{/Shift}{/Meta}');
     await userEvent.keyboard('{Enter}{Enter}');
     
     // ========== LIST SHORTCUTS ==========
@@ -2164,3 +2159,122 @@ export const KeyboardShortcutsTest = {
     editorContent.scrollTop = 0;
   },
 };
+
+/**
+ * Keyboard Shortcuts Demo - Automated Playthrough
+ * 
+ * Comprehensive demonstration of all available keyboard shortcuts.
+ * This story uses the keyboard-shortcuts-script to automatically showcase:
+ * - Text formatting (Bold, Italic, Underline, Strikethrough)
+ * - Block types (Headings, Lists, Quotes, Code)
+ * - Alignment (Left, Center, Right, Justify)
+ * - Links (Insert/Edit)
+ * - Undo/Redo
+ * - Indentation (Tab/Shift+Tab)
+ * - Markdown shortcuts (#, -, >, etc.)
+ * - Selection shortcuts
+ * - Clear formatting
+ * 
+ * See docs/KEYBOARD_SHORTCUTS.md for complete reference.
+ */
+export const KeyboardShortcutsDemo = {
+  args: {},
+  render: () => <Editor />,
+  parameters: {
+    unitId: 'keyboard-shortcuts-demo-id',
+    initializeMockData: false,
+    docs: {
+      description: {
+        story: `
+**Automated Keyboard Shortcuts Demonstration**
+
+This story runs through all available keyboard shortcuts automatically. Watch as the editor:
+
+1. **Text Formatting** - Bold, Italic, Underline, Strikethrough
+2. **Block Types** - Headings (H1-H3), Lists (Bullet/Numbered), Quotes, Code Blocks
+3. **Alignment** - Left, Center, Right, Justify
+4. **Links** - Insert and edit links
+5. **Undo/Redo** - Revert and restore changes
+6. **Indentation** - Tab and Shift+Tab for nesting
+7. **Markdown** - Auto-conversion shortcuts
+8. **Selection** - Select all and extend selection
+9. **Clear Formatting** - Remove all formatting
+
+**Try it yourself:**
+- Click "Play" on this story to see the automation
+- Then try the shortcuts in the Editor manually
+- Reference **[Help → Keyboard Shortcuts](?path=/docs/help-keyboard-shortcuts--docs)** for the complete list
+- View the original doc: [KEYBOARD_SHORTCUTS.md](../../../docs/KEYBOARD_SHORTCUTS.md)
+
+**Platform Note:** Shortcuts shown use Mac notation (⌘ = Cmd). On Windows/Linux, use Ctrl instead.
+        `.trim(),
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    // Import the keyboard shortcuts script
+    const { createKeyboardShortcutsPlay } = await import('../../../.storybook/code/keyboard-shortcuts-script.ts');
+    
+    // Create and execute the play function
+    const playFn = createKeyboardShortcutsPlay(['all']);
+    await playFn({ canvasElement });
+  },
+};
+
+/**
+ * Keyboard Shortcuts - Text Formatting Only
+ * 
+ * Focused demo of text formatting shortcuts only.
+ */
+export const KeyboardShortcutsTextFormatting = {
+  args: {},
+  render: () => <Editor />,
+  parameters: {
+    unitId: 'keyboard-shortcuts-text-formatting-id',
+    initializeMockData: false,
+  },
+  play: async ({ canvasElement }) => {
+    const { createKeyboardShortcutsPlay } = await import('../../../.storybook/code/keyboard-shortcuts-script.ts');
+    const playFn = createKeyboardShortcutsPlay(['textFormatting', 'clearFormatting']);
+    await playFn({ canvasElement });
+  },
+};
+
+/**
+ * Keyboard Shortcuts - Block Types Only
+ * 
+ * Focused demo of block type shortcuts (headings, lists, quotes, code).
+ */
+export const KeyboardShortcutsBlockTypes = {
+  args: {},
+  render: () => <Editor />,
+  parameters: {
+    unitId: 'keyboard-shortcuts-block-types-id',
+    initializeMockData: false,
+  },
+  play: async ({ canvasElement }) => {
+    const { createKeyboardShortcutsPlay } = await import('../../../.storybook/code/keyboard-shortcuts-script.ts');
+    const playFn = createKeyboardShortcutsPlay(['blockTypes', 'markdown']);
+    await playFn({ canvasElement });
+  },
+};
+
+/**
+ * Keyboard Shortcuts - Alignment Only
+ * 
+ * Focused demo of text alignment shortcuts.
+ */
+export const KeyboardShortcutsAlignment = {
+  args: {},
+  render: () => <Editor />,
+  parameters: {
+    unitId: 'keyboard-shortcuts-alignment-id',
+    initializeMockData: false,
+  },
+  play: async ({ canvasElement }) => {
+    const { createKeyboardShortcutsPlay } = await import('../../../.storybook/code/keyboard-shortcuts-script.ts');
+    const playFn = createKeyboardShortcutsPlay(['alignment']);
+    await playFn({ canvasElement });
+  },
+};
+

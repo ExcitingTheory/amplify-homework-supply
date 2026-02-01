@@ -276,6 +276,10 @@ const schema = a.schema({
       learner: a.string(), // For student access
       owner: a.string(),
       identityId: a.string(),
+      // Gradebook curve settings
+      curveEnabled: a.boolean(),
+      curveMethod: a.string(), // 'scale-to-top' or 'linear-adjustment'
+      curveAssignments: a.string().array(), // Array of unitIDs to apply curve to
     })
     .authorization((allow) => [
       allow.owner(),

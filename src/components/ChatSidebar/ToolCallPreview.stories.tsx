@@ -15,7 +15,7 @@ import ToolCallPreview from './ToolCallPreview';
 import { toolDefinitions } from '../../utils/chatTools';
 
 const meta: Meta<typeof ToolCallPreview> = {
-  title: 'ChatSidebar/ToolCallPreview',
+  title: '💬 AI Assistant/Components/Tool Call Preview',
   component: ToolCallPreview,
   parameters: {
     layout: 'padded',

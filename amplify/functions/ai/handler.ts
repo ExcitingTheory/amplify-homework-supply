@@ -11,6 +11,10 @@
  */
 
 import type { Handler } from 'aws-lambda';
+import { initializePhoenixTracing, addTraceAttributes } from '../shared/phoenix-tracer';
+
+// Initialize Phoenix tracing at module load (cold start)
+initializePhoenixTracing();
 
 let openaiInstance: any = null;
 
@@ -33,6 +37,13 @@ export const handler: Handler = async (event: any, context: any) => {
   
 
   console.log(`[AI Content Handler] ${operationName}`, args);
+
+  // Add operation metadata to trace
+  addTraceAttributes({
+    'operation.name': operationName,
+    'lambda.requestId': context.requestId,
+    'user.id': event.identity?.sub || 'anonymous',
+  });
 
   try {
     switch (operationName) {

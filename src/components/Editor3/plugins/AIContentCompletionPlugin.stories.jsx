@@ -1,6 +1,6 @@
 /**
  * @fileoverview Storybook stories for AIContentCompletionPlugin
- * Demonstrates AI-powered content completion (like GitHub Copilot)
+ * Demonstrates AI-powered content completion
  */
 
 import React from 'react';
@@ -16,12 +16,13 @@ import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { Box, Paper, Typography, Alert } from '@mui/material';
 
 import AIContentCompletionPlugin from './AIContentCompletionPlugin';
+import { AIContentSuggestionNode, AILoadingNode } from '../components/AIContentSuggestionNode';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
 import { UnitProvider } from '../../../context/unitContext';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 
 export default {
-  title: '🔌 Editor Plugins/AI Content Completion',
+  title: '🔌 Editor Plugins/AI/Content Completion',
   component: AIContentCompletionPlugin,
   parameters: {
     layout: 'fullscreen',
@@ -48,6 +49,8 @@ const Template = ({ editorState, instructions, title }) => {
       CodeHighlightNode, 
       AutoLinkNode, 
       LinkNode,
+      AIContentSuggestionNode,
+      AILoadingNode,
     ],
   };
 

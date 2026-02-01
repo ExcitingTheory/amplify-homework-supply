@@ -22,7 +22,7 @@ import { UnitProvider } from '../../../context/unitContext';
 import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 
 export default {
-  title: '🔌 Editor Plugins/Auto Embed',
+  title: '🔌 Editor Plugins/Workflow/Auto Embed',
   component: AutoEmbedPlugin,
   parameters: {
     layout: 'fullscreen',

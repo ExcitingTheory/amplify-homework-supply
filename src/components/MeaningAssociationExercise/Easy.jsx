@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import UnitContext from '../../context/unitContext';
-import { Grid } from '@mui/material';
+import { Grid, Box } from '@mui/material';
 import { LinearProgressWithLabel, AnswerDrop } from '.';
+import { CompletionScreen } from './CompletionScreen';
 
 import DictionaryContext from '../../context/dictionaryContext';
 import { shuffle } from './utils';
@@ -24,8 +25,14 @@ export const Easy = ({
   const [verifiedAnswers, setVerifiedAnswers] = React.useState([]);
   const [completedEasy, setCompletedEasy] = React.useState(0);
   const [startPositionEasy, setStartPositionEasy] = React.useState(0);
+  const [showCompletion, setShowCompletion] = React.useState(false);
  
   const isFirstRender = React.useRef(true);
+
+  // Reset completion screen when tab changes
+  React.useEffect(() => {
+    setShowCompletion(false);
+  }, [tabIndex]);
 
   const { wordMapId: dictionary } = React.useContext(DictionaryContext)
 
@@ -35,7 +42,8 @@ export const Easy = ({
     console.log('MeaningAssociationExercise._vocabulary', _vocabulary)
     setAssignment([..._vocabulary])
     setAnswers([..._vocabulary])
-  }, [wordIDs, dictionary])
+  }, [wordIDs, dictionary]);
+  
   const { grade, saveGrade } = React.useContext(UnitContext);
 
   const inProgress = grade?.data?.[nodeKey] || {};
@@ -59,7 +67,7 @@ export const Easy = ({
       setCompletedEasy(percentComplete);
       setStartPositionEasy(verified.length);
     }
-  }, [inProgress])
+  }, [inProgress]);
 
   let vocabList = []
   let vocabListEasy = []
@@ -156,7 +164,8 @@ export const Easy = ({
         allTabsComplete = true;
       }
 
-      newTab++;
+      // Don't auto-advance, show completion screen instead
+      // newTab++;
     
     } 
 
@@ -193,6 +202,10 @@ export const Easy = ({
 
     await saveGrade(savedGradeCopy);
 
+    // Show completion screen if exercise is complete
+    if (thisExerciseComplete) {
+      setShowCompletion(true);
+    }
   }
 
   async function sendFail(phrase) {
@@ -248,27 +261,49 @@ export const Easy = ({
     console.log('sendPass');
   }
 
+  const handleContinueFromCompletion = () => {
+    setShowCompletion(false);
+    setTabIndex(2); // Move to Hard mode
+  };
 
   return (
+    <Box sx={{ position: 'relative', minHeight: '500px' }}>
+      {showCompletion && (
+        <CompletionScreen
+          levelName="Easy Mode"
+          accuracy={verifiedAnswers.length / (inProgress?.easy?.attemptsCount || 1)}
+          attempts={inProgress?.easy?.attemptsCount || 0}
+          onContinue={handleContinueFromCompletion}
+          nextLevelName="Hard Mode"
+          isLastLevel={false}
+        />
+      )}
 
-    <Grid container flexDirection="column">
-      <Grid xs={12} flexGrow={1} >
+      <Grid container direction="column" spacing={1}>
+      <Grid item xs={12}>
         <LinearProgressWithLabel value={percentComplete} />
       </Grid>
-      <Grid container flexDirection="row">
-      <Grid xs={8}>
+      <Grid item xs={12} container direction="row" spacing={2} wrap="nowrap">
+      <Grid item xs={8} sm={8} md={8} lg={8}>
         <AnswerDrop
           correctAnswer={{ ...correctWord, progressAssignment, sendFail, sendPass }} />
       </Grid>
-      <Grid xs={4} style={{
-        marginBottom: '1rem',
-        paddingBottom: '1rem',
-        height: 'fit-content',
-        overflowY: 'auto'
-      }}>
-        {easyVocab}
+      <Grid item xs={4} sm={4} md={4} lg={4}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 1,
+            maxHeight: '400px',
+            overflowY: 'auto',
+            padding: 1,
+          }}
+        >
+          {easyVocab}
+        </Box>
       </Grid>
       </Grid>
     </Grid>
+    </Box>
   );
 };

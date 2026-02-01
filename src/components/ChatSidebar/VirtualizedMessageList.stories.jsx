@@ -8,7 +8,7 @@ import React from 'react';
 import { VirtualizedMessageList } from './VirtualizedMessageList';
 
 export default {
-  title: 'ChatSidebar/VirtualizedMessageList',
+  title: '💬 AI Assistant/Components/Virtualized Message List',
   component: VirtualizedMessageList,
   parameters: {
     layout: 'fullscreen',

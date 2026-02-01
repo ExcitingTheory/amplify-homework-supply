@@ -1,11 +1,18 @@
 # Chatbot Tool Calling Implementation
 
-**Date**: January 4, 2026  
-**Status**: ✅ Complete
+**Date**: January 4, 2026 (Updated: February 1, 2026)  
+**Status**: ✅ Complete with Modern AI SDK v6 Patterns
 
 ## Overview
 
 The AI chatbot in [ChatSidebar.js](../src/components/ChatSidebar.js) now supports **tool calling** to perform actions directly in response to user requests. The chatbot can search content semantically, create/update/delete database records, manage assignments, **and generate markdown content suggestions for units**.
+
+**Latest Updates (Feb 2026)**:
+- ✅ Migrated to `experimental_tools` pattern (AI SDK v6)
+- ✅ Added `streamProtocol: 'data'` for proper SSE handling
+- ✅ Removed deprecated `onToolCall` callback
+- ✅ Implemented automatic tool execution with `experimental_sendAutomaticallyWhen`
+- ✅ All 12 client-side CRUD tools now working
 
 ## Architecture
 
@@ -177,17 +184,19 @@ The Edge Runtime used by `/api/chat` cannot import Amplify DataStore. Tool execu
   - Instructs GPT-4 to use tools for actions
 - **Note**: Edge Runtime, no DataStore access here
 
-### 3. [src/components/ChatSidebar.js](../src/components/ChatSidebar.js) (UPDATED)
+### 3. [src/components/ChatSidebar.js](../src/components/ChatSidebar.js) (✅ UPDATED Feb 2026)
 - **Changes**:
-  - Imports `toolDefinitions` and `executeTool` from `chatTools.js`
-  - Passes `tools` and `toolChoice: 'auto'` in `useChat` body
-  - Implements `async onToolCall({ toolCall })` callback
-  - Executes tool client-side, returns result to AI
+  - Uses `experimental_tools` to register 12 client-side CRUD tools
+  - Implements `experimental_sendAutomaticallyWhen` for automatic execution
+  - Added `streamProtocol: 'data'` to DefaultChatTransport
+  - Removed deprecated `onToolCall` callback pattern
+  - Removed `addToolOutputRef` workaround
   - Renders tool invocations in UI with status indicators
 - **UI Enhancements**:
   - Tool calls shown with 🔧 icon
   - Success/failure status displayed
   - Tool name visible to user
+  - Specialized rendering for search results, block insertions, and CRUD operations
 
 ## Usage Examples
 
@@ -368,22 +377,59 @@ Errors are:
 
 ## Testing
 
+### Automated LLM-as-a-Judge Testing (✅ AVAILABLE)
+
+**New in Feb 2026**: Use Claude 4.5 to automatically test all chat tools!
+
+```bash
+# Install dependency
+npm install chalk@5.3.0 --save-dev
+
+# Set API key
+export ANTHROPIC_API_KEY="your-key"
+
+# Run all tests
+npx tsx scripts/test-chat-tools-llm-judge.ts
+
+# Run with detailed output
+npx tsx scripts/test-chat-tools-llm-judge.ts --verbose
+
+# Test specific tool
+npx tsx scripts/test-chat-tools-llm-judge.ts --tool=create_section
+```
+
+**Features**:
+- 🤖 Claude 4.5 evaluates each tool execution (0-100 score)
+- 📊 Generates detailed JSON reports
+- 🎯 Tests all 12 CRUD tools automatically
+- 📈 Categorizes results by tool type
+- 💾 Tracks created resources
+
+See [LLM_JUDGE_TESTING.md](./LLM_JUDGE_TESTING.md) for complete documentation.
+
 ### Manual Testing Checklist
 
+**Client-Side CRUD Tools** (✅ Feb 2026 - Now Functional):
 - [ ] Search vocabulary by keyword
 - [ ] Search questions by topic
-- [ ] Create a new section
-- [ ] Create a new unit
-- [ ] Add timer to existing unit
-- [ ] Create assignment with due date
-- [ ] Delete assignment
-- [ ] Add vocabulary word
-- [ ] Add practice question
-- [ ] List all sections
-- [ ] List all units
-- [ ] Get details for specific unit
-- [ ] Update unit properties
+- [ ] **Create a new section** - Now working with experimental_tools
+- [ ] **Create a new unit** - Now working with experimental_tools
+- [ ] **Add timer to existing unit** - Now working with experimental_tools
+- [ ] **Create assignment with due date** - Now working with experimental_tools
+- [ ] **Delete assignment** - Now working with experimental_tools
+- [ ] **Add vocabulary word** - Now working with experimental_tools
+- [ ] **Add practice question** - Now working with experimental_tools
+- [ ] **List all sections** - Now working with experimental_tools
+- [ ] **List all units** - Now working with experimental_tools
+- [ ] **Get details for specific unit** - Now working with experimental_tools
+- [ ] **Update unit properties** - Now working with experimental_tools
 - [ ] Error handling (invalid IDs, missing params)
+
+**Server-Side Block Tools** (✅ Working):
+- [x] Insert quiz block
+- [x] Insert answer block  
+- [x] Insert meaning association block
+- [x] Insert custom answer block
 
 ### Test Commands
 

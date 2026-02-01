@@ -1,0 +1,132 @@
+{
+  "toolBarPlugin": {
+    "addDescription": {
+      "value": "Agregar Descripción",
+      "_meta": {
+        "alternativeTerms": [],
+        "category": "message",
+        "component": {
+          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
+          "location": "components/Editor3/plugins/ToolBarPlugin.js"
+        },
+        "context": "Used in ToolBarPlugin.js component",
+        "impact": "Provides message information to users",
+        "tone": "polite-formal",
+        "usage": "Message displayed for addDescription",
+        "userType": "all"
+      }
+    },
+    "align": {
+      "value": "Alinear",
+      "_meta": {
+        "alternativeTerms": [],
+        "category": "label",
+        "component": {
+          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
+          "location": "components/Editor3/plugins/ToolBarPlugin.js"
+        },
+        "context": "Used in ToolBarPlugin.js component",
+        "impact": "Provides label information to users",
+        "tone": "polite-formal",
+        "usage": "Label text for align field",
+        "userType": "all"
+      }
+    },
+    "alignCenter": {
+      "value": "Centrar",
+      "_meta": {
+        "alternativeTerms": [],
+        "category": "label",
+        "component": {
+          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
+          "location": "components/Editor3/plugins/ToolBarPlugin.js"
+        },
+        "context": "Used in ToolBarPlugin.js component",
+        "impact": "Provides label information to users",
+        "tone": "polite-formal",
+        "usage": "Label text for alignCenter field",
+        "userType": "all"
+      }
+    },
+    "alignLeft": {
+      "value": "Alinear a la izquierda",
+      "_meta": {
+        "alternativeTerms": [],
+        "category": "label",
+        "component": {
+          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
+          "location": "components/Editor3/plugins/ToolBarPlugin.js"
+        },
+        "context": "Used in ToolBarPlugin.js component",
+        "impact": "Provides label information to users",
+        "tone": "polite-formal",
+        "usage": "Label text for alignLeft field",
+        "userType": "all"
+      }
+    },
+    "alignRight": {
+      "value": "Alinear a la derecha",
+      "_meta": {
+        "alternativeTerms": [],
+        "category": "label",
+        "component": {
+          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
+          "location": "components/Editor3/plugins/ToolBarPlugin.js"
+        },
+        "context": "Used in ToolBarPlugin.js component",
+        "impact": "Provides label information to users",
+        "tone": "polite-formal",
+        "usage": "Label text for alignRight field",
+        "userType": "all"
+      }
+    },
+    "archived": {
+      "value": "Archivado",
+      "_meta": {
+        "alternativeTerms": [],
+        "category": "label",
+        "component": {
+          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
+          "location": "components/Editor3/plugins/ToolBarPlugin.js"
+        },
+        "context": "Used in ToolBarPlugin.js component",
+        "impact": "Provides label information to users",
+        "tone": "polite-formal",
+        "usage": "Label text for archived field",
+        "userType": "all"
+      }
+    },
+    "audioPlaylist": {
+      "value": "Lista de Reproducción de Audio",
+      "_meta": {
+        "alternativeTerms": [],
+        "category": "label",
+        "component": {
+          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
+          "location": "components/Editor3/plugins/ToolBarPlugin.js"
+        },
+        "context": "Used in ToolBarPlugin.js component",
+        "impact": "Provides label information to users",
+        "tone": "polite-formal",
+        "usage": "Label text for audioPlaylist field",
+        "userType": "all"
+      }
+    },
+    "bold": {
+      "value": "Negrita",
+      "_meta": {
+        "alternativeTerms": [],
+        "category": "label",
+        "component": {
+          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
+          "location": "components/Editor3/plugins/ToolBarPlugin.js"
+        },
+        "context": "Used in ToolBarPlugin.js component",
+        "impact": "Provides label information to users",
+        "tone": "polite-formal",
+        "usage": "Label text for bold field",
+        "userType": "all"
+      }
+    }
+  }
+}

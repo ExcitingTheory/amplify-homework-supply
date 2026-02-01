@@ -8,7 +8,7 @@ import PdfThumbnail, { PdfThumbnailGrid } from './PdfThumbnail';
 import { Box, Paper, Typography } from '@mui/material';
 
 const meta: Meta<typeof PdfThumbnail> = {
-    title: 'Components/PdfThumbnail',
+    title: '🧩 Components/PDF Thumbnail',
     component: PdfThumbnail,
     parameters: {
         layout: 'padded',
