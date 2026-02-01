@@ -29,7 +29,7 @@ export default function AIContentSuggestion({
   onAccept,
   onDismiss,
 }) {
-  const { t } = useTranslation('editor');
+  const { t } = useTranslation('editor.ai');
   const suggestionRef = useRef(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   

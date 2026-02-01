@@ -32,7 +32,7 @@ function MetadataField({
     required = false,
     variant = 'standard',
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.shared');
     const [localValue, setLocalValue] = React.useState(value);
     const [isDraft, setIsDraft] = React.useState(false);
     const saveTimeoutRef = React.useRef(null);

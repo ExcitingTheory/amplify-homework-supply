@@ -49,7 +49,7 @@ export default function AudioWaveformPlayer({
     metadata = {},
     onRecordingComplete
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.shared');
     const theme = useTheme();
     const mainColor = theme.palette.primary.main;
     const rgbColor = hexToRgb(mainColor);

@@ -59,7 +59,7 @@ export default function CustomAnswerComponent({
     allowedInput = [],
     promptMethod = [],
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('workbook');
     const [answers, setAnswers] = useState({});
     const [progress, setProgress] = useState(0);
     const [feedback, setFeedback] = useState({});

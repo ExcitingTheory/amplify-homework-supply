@@ -73,7 +73,7 @@ export default function TabsVerticalRight({
   setValue,
   setDrawerWidth,
 }) {
-  const { t } = useTranslation('editor');
+  const { t } = useTranslation('editor.authoring');
   const [isResizing, setIsResizing] = React.useState(false);
   const startXRef = React.useRef(0);
   const startWidthRef = React.useRef(0);

@@ -16,11 +16,43 @@
 * Editor selector
 */
 div[data-lexical-editor="true"] {
-    padding: 1rem;
+    padding: 1rem 2rem 1rem 0.5rem;
+    min-height: calc(100vh - var(--app-bar-height, 11rem));
 }
 
 div.ImageNode__contentEditable {
     padding: 0;
+}
+
+/**
+* Placeholder styling
+*/
+.editor-placeholder {
+    color: #757575;
+    overflow: hidden;
+    position: absolute;
+    text-overflow: ellipsis;
+    top: 1rem;
+    left: 2rem;
+    font-size: 16px;
+    user-select: none;
+    display: inline-block;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+@media (max-width: 1025px) {
+    .editor-placeholder {
+        left: 1rem;
+    }
+}
+
+.editor {
+    cursor: text;
+}
+
+.editor-container {
+    min-height: calc(100vh - var(--app-bar-height, 11rem));
 }
 
 .editor-textUnderline {
@@ -60,7 +92,7 @@ p {
     cursor: grab;
     opacity: 0;
     position: absolute;
-    left: 4px;
+    left: 2px;
     top: 0;
     will-change: transform;
     transition: opacity 0.2s ease;

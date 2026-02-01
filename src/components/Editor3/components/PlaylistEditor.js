@@ -104,7 +104,7 @@ export default function PlaylistEditor({
     // setFileIDs,
     fileIDs,
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.shared');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     // const [rows, setRows] = React.useState([]);

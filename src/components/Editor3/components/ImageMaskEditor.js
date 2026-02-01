@@ -30,7 +30,7 @@ export default function ImageMaskEditor({
     width = 800,
     height = 600,
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.shared');
     const canvasRef = useRef(null);
     const maskCanvasRef = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);

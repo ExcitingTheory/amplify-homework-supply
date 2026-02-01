@@ -34,27 +34,23 @@ All approaches use the same AI prompt template for consistency.
 
 ## When to Use
 
-**Invoke this skill when user asks to:**
-- Generate or update translation metadata
-- Enrich i18n/locale files with context
-- Extract component documentation
-- Sync locale files with codebase changes
-- Audit documentation coverage
-- Fix placeholder or incomplete metadata
-- Add metadata to entries missing it
+**AUTOMATICALLY INVOKE when user says:**
+- "update metadata" / "update translation metadata"
+- "generate metadata" / "add metadata"
+- "enrich locale files" / "enrich translations"
+- "fix placeholder metadata" / "fix [NEEDS_*"
+- "add missing _meta" / "metadata for translations"
+- "incomplete metadata" / "missing metadata"
+- "extract component documentation"
+- "sync locale files with code"
 
 **Script Selection Guide:**
-- "scan my code" / "find translations" → `auto-generate-metadata.ts`
-- "fix [NEEDS_*" / "regenerate placeholders" → `regenerate-placeholder-metadata.ts`
-- "add metadata to everything" / "fill in missing _meta" → `generate-missing-metadata.ts`
-
-**Typical phrases:**
-- "generate translation metadata"
-- "update i18n metadata" 
-- "enrich locale files"
-- "extract component docs"
-- "fix placeholder metadata"
-- "add missing metadata"
+- User wants **initial generation from codebase** → `auto-generate-metadata.ts`
+  - "scan my code", "find translations", "generate from code"
+- User wants **fix incomplete/placeholder metadata** → `regenerate-placeholder-metadata.ts`
+  - "fix [NEEDS_*", "regenerate placeholders", "fix incomplete"
+- User wants **add metadata to entries without it** → `generate-missing-metadata.ts`
+  - "add metadata", "fill in missing _meta", "update metadata" (most common)
 
 ## Available Scripts
 

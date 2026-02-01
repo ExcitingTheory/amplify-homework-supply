@@ -14,7 +14,7 @@ import { useTranslation } from 'next-i18next';
 const filter = createFilterOptions();
 
 export default function FreeSoloCreateOptionDialog() {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.shared');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
 

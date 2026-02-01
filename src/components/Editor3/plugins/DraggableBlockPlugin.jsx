@@ -312,9 +312,10 @@ function getBlockElement(
       const domRect = Rect.fromDOM(elem);
       const {marginTop, marginBottom} = getCollapsedMargins(elem);
 
+      // Extend the rect to the left edge (including gutter area) to make drag handle more accessible
       const rect = domRect.generateNewRect({
         bottom: domRect.bottom + marginBottom,
-        left: anchorElementRect.left,
+        left: anchorElementRect.left, // Extend to left edge of editor
         right: anchorElementRect.right,
         top: domRect.top - marginTop,
       });
@@ -366,10 +367,39 @@ function setMenuPosition(
   const targetRect = targetElem.getBoundingClientRect();
   const anchorElementRect = anchorElem.getBoundingClientRect();
   const floatingElemRect = floatingElem.getBoundingClientRect();
+  const scrollerElem = anchorElem.parentElement;
 
-  // Position in the left margin/gutter area
-  const top = targetRect.top - anchorElementRect.top;
-  const left = 8; // Position in the gutter area (with some padding)
+  // Calculate base position relative to anchor
+  let top = targetRect.top - anchorElementRect.top;
+  const left = 4; // Position in the gutter area (centered in thinner gutter)
+
+  // Get the scroll container to check for toolbar offset
+  if (scrollerElem) {
+    const scrollerRect = scrollerElem.getBoundingClientRect();
+    const scrollTop = scrollerElem.scrollTop;
+    
+    // The minimum top position should account for scrolled content
+    // When content scrolls, we want the handle to stay at the scroll position, not at top: 0
+    const minTop = scrollTop;
+    
+    // If the block's top would be above the scrolled area, clamp to minimum
+    if (top < minTop) {
+      top = minTop;
+    }
+  }
+  
+  // If the block's bottom is above the visible area, hide the handle
+  if (targetRect.bottom < anchorElementRect.top) {
+    floatingElem.style.opacity = '0';
+    floatingElem.style.transform = 'translate(-10000px, -10000px)';
+    return;
+  }
+  
+  // Ensure handle doesn't go below the visible editor area
+  const maxTop = anchorElementRect.height - floatingElemRect.height;
+  if (top > maxTop) {
+    top = maxTop;
+  }
 
   floatingElem.style.opacity = '1';
   floatingElem.style.transform = `translate(${left}px, ${top}px)`;
@@ -447,6 +477,7 @@ function useDraggableBlockMenu(
         return;
       }
 
+      // Keep the drag handle visible when hovering over it
       if (isOnMenu(target)) {
         return;
       }

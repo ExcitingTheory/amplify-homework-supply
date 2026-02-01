@@ -98,7 +98,7 @@ export default function FileMetadataComponent({
     search = '',
     index = 0
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.shared');
     const [isExpanded, setIsExpanded] = useState(false);
     const [isSelected, setIsSelected] = useState(false);
     const [editingFileName, setEditingFileName] = useState(false);

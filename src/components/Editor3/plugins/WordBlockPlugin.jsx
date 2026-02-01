@@ -46,7 +46,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
     nodeKey,
     wordID,
   }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.shared');
 
     const { wordMapId: dictionary } = useContext(DictionaryContext);
     const word = dictionary[wordID];

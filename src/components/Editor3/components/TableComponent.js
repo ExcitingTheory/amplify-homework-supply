@@ -19,6 +19,8 @@ import {
   $isRangeSelection,
   CLICK_COMMAND,
   COMMAND_PRIORITY_LOW,
+  COMMAND_PRIORITY_HIGH,
+  COMMAND_PRIORITY_CRITICAL,
   COPY_COMMAND,
   createEditor,
   CUT_COMMAND,
@@ -290,13 +292,19 @@ function TableCellEditor({cellEditor}) {
     return null;
   }
 
+  // Filter out TabIndentationPlugin to prevent conflicts in cell editors
+  const filteredPlugins = React.Children.toArray(cellEditorPlugins).filter(child => {
+    // Check if this is TabIndentationPlugin by checking the component type
+    return child?.type?.name !== 'TabIndentationPlugin';
+  });
+
   return (
     <LexicalNestedComposer
       initialEditor={cellEditor}
       initialTheme={cellEditorConfig.theme}
       initialNodes={cellEditorConfig.nodes}
       skipCollabChecks={true}>
-      {cellEditorPlugins}
+      {filteredPlugins}
     </LexicalNestedComposer>
   );
 }
@@ -326,8 +334,10 @@ function TableActionMenu({
   setSortingOptions,
   sortingOptions,
 }) {
-  const { t } = useTranslation('editor');
+  const { t } = useTranslation('editor.shared');
   const dropDownRef = useRef<null | HTMLDivElement>(null);
+  const coords = cellCoordMap.get(cell.id);
+  const [x, y] = coords || [0, 0];
 
   useEffect(() => {
     const dropdownElem = dropDownRef.current;
@@ -352,12 +362,10 @@ function TableActionMenu({
     window.addEventListener('click', handleClickOutside);
     return () => window.removeEventListener('click', handleClickOutside);
   }, [onClose]);
-  const coords = cellCoordMap.get(cell.id);
 
   if (coords === undefined) {
     return null;
   }
-  const [x, y] = coords;
 
   return (
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
@@ -390,7 +398,47 @@ function TableActionMenu({
           onClose();
         }}>
         <span className="text">
-          {cell.type === 'normal' ? t('tableComponent.makeHeader') : t('tableComponent.removeHeader')}
+          {cell.type === 'normal' ? '📌 ' + t('tableComponent.makeHeader') : '📄 ' + t('tableComponent.removeHeader')}
+        </span>
+      </button>
+      <button
+        className="item"
+        onClick={() => {
+          // Toggle entire row as header/normal
+          for (let col = 0; col < rows[y].cells.length; col++) {
+            updateTableNode((tableNode) => {
+              $addUpdateTag(HISTORY_PUSH_TAG);
+              tableNode.updateCellType(
+                col,
+                y,
+                cell.type === 'normal' ? 'header' : 'normal',
+              );
+            });
+          }
+          onClose();
+        }}>
+        <span className="text">
+          {cell.type === 'normal' ? '📌 ' + t('tableComponent.makeRowHeader') : '📄 ' + t('tableComponent.removeRowHeader')}
+        </span>
+      </button>
+      <button
+        className="item"
+        onClick={() => {
+          // Toggle entire column as header/normal
+          for (let row = 0; row < rows.length; row++) {
+            updateTableNode((tableNode) => {
+              $addUpdateTag(HISTORY_PUSH_TAG);
+              tableNode.updateCellType(
+                x,
+                row,
+                cell.type === 'normal' ? 'header' : 'normal',
+              );
+            });
+          }
+          onClose();
+        }}>
+        <span className="text">
+          {cell.type === 'normal' ? '📌 ' + t('tableComponent.makeColumnHeader') : '📄 ' + t('tableComponent.removeColumnHeader')}
         </span>
       </button>
       <button
@@ -547,6 +595,7 @@ function TableCell({
   setSortingOptions,
   sortingOptions,
 }) {
+  const { t } = useTranslation('editor.shared');
   const [showMenu, setShowMenu] = useState(false);
   const menuRootRef = useRef(null);
   const isHeader = cell.type !== 'normal';
@@ -574,7 +623,15 @@ function TableCell({
       }`}
       data-id={cell.id}
       tabIndex={-1}
-      style={{width: cellWidth !== null ? cellWidth : undefined}}>
+      style={{width: cellWidth !== null ? cellWidth : undefined}}
+      onContextMenu={(e) => {
+        // Right-click opens the menu if this cell is selected
+        if (isPrimarySelected && !isEditing) {
+          e.preventDefault();
+          e.stopPropagation();
+          setShowMenu(true);
+        }
+      }}>
       {isPrimarySelected && (
         <div
           className={`${theme.tableCellPrimarySelected} ${
@@ -802,7 +859,10 @@ export default function TableComponent({
     }
     const doc = getCurrentDocument(editor);
 
+    const getTableRect = () => tableElem.getBoundingClientRect();
+
     const isAtEdgeOfTable = (event) => {
+      const tableRect = getTableRect();
       const x = event.clientX - tableRect.x;
       const y = event.clientY - tableRect.y;
       return x < 5 || y < 5;
@@ -859,9 +919,9 @@ export default function TableComponent({
       }
     };
 
-    const tableRect = tableElem.getBoundingClientRect();
-
     const handlePointerMove = (event) => {
+      const tableRect = getTableRect();
+      
       if (resizingID !== null) {
         const tableResizerRulerElem = tableResizerRulerRef.current;
         if (tableResizerRulerElem !== null) {
@@ -1523,8 +1583,13 @@ export default function TableComponent({
       ),
       editor.registerCommand(
         KEY_TAB_COMMAND,
-        (event) => {
+        (event, targetEditor) => {
           const selection = $getSelection();
+          // Only handle tab in the main table editor, not in cell editors
+          // Cell editors have their own handler to prevent indent behavior
+          if (targetEditor !== editor) {
+            return false;
+          }
           // Handle tab when cell is selected (not editing)
           if (
             !isEditing &&
@@ -1643,7 +1708,7 @@ export default function TableComponent({
           }
           return false;
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_HIGH,
       ),
       editor.registerCommand(
         KEY_ARROW_UP_COMMAND,
@@ -1723,6 +1788,18 @@ export default function TableComponent({
               const [x, y] = cellCoordMap.get(cellID);
               if (y !== rows.length - 1) {
                 modifySelectedCells(x, y + 1, extend);
+                return true;
+              } else if (!extend && event.ctrlKey) {
+                // Ctrl+Arrow at edge adds row
+                event.preventDefault();
+                updateTableNode((tableNode) => {
+                  $addUpdateTag(HISTORY_PUSH_TAG);
+                  tableNode.addRows(1);
+                });
+                // Move to the new row
+                setTimeout(() => {
+                  modifySelectedCells(x, y + 1, false);
+                }, 0);
                 return true;
               } else if (!extend) {
                 // At last row, exit table downward
@@ -1831,6 +1908,14 @@ export default function TableComponent({
               if (x !== rows[y].cells.length - 1) {
                 modifySelectedCells(x + 1, y, extend);
                 return true;
+              } else if (!extend && event.ctrlKey) {
+                // Ctrl+Arrow at edge adds column
+                event.preventDefault();
+                updateTableNode((tableNode) => {
+                  $addUpdateTag(HISTORY_PUSH_TAG);
+                  tableNode.addColumns(1);
+                });
+                return true;
               }
             }
           }
@@ -1899,6 +1984,29 @@ export default function TableComponent({
     updateTableNode,
   ]);
 
+  // Ensure there's always a paragraph after the table on initial mount
+  // This prevents the table from being the last element and blocking content addition
+  const hasEnsuredParagraph = useRef(false);
+  useEffect(() => {
+    if (!hasEnsuredParagraph.current) {
+      hasEnsuredParagraph.current = true;
+      editor.getEditorState().read(() => {
+        const tableNode = $getNodeByKey(nodeKey);
+        if (tableNode && !tableNode.getNextSibling()) {
+          queueMicrotask(() => {
+            editor.update(() => {
+              const node = $getNodeByKey(nodeKey);
+              if (node && !node.getNextSibling()) {
+                const paragraph = $createParagraphNode();
+                node.insertAfter(paragraph);
+              }
+            });
+          });
+        }
+      });
+    }
+  }, [editor, nodeKey]);
+  
   if (cellEditor === null) {
     return;
   }

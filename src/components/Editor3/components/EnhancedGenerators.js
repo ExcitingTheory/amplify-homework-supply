@@ -15,7 +15,7 @@ const client = generateClient();
  * Enhanced Image Generation with mask support for targeted regeneration
  */
 export function EnhancedImageGenerator({ open, onClose }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.ai');
     const [showMaskEditor, setShowMaskEditor] = useState(false);
     const [currentImage, setCurrentImage] = useState(null);
 
@@ -184,7 +184,7 @@ export function EnhancedImageGenerator({ open, onClose }) {
  * Enhanced Audio Generation with RecordingStudio integration
  */
 export function EnhancedAudioGenerator({ open, onClose, gradeId, nodeKey }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.ai');
     const [showRecordingStudio, setShowRecordingStudio] = useState(false);
 
     const handleGenerate = async (prompt) => {
@@ -279,7 +279,7 @@ export function EnhancedAudioGenerator({ open, onClose, gradeId, nodeKey }) {
  * Button component for image generation that can be embedded in FileManager
  */
 export function ImageGeneratorButton({ open, onSuccess }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.ai');
     const [modalOpen, setModalOpen] = useState(false);
 
     // Auto-open when parent says open=true

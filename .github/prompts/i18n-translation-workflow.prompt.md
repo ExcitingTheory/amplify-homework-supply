@@ -99,12 +99,6 @@ Use these three models for translation (chosen for multilingual capability and a
 
 Before starting, create a comprehensive todo list with `manage_todo_list` tool to track all phases:
 
-**Available Agent Skills for This Workflow:**
-- 📚 **multi-model-ai-translation** (`.github/skills/multi-model-ai-translation/SKILL.md`) - Parallel translation with Claude/GPT/Gemma, consensus analysis, reverse verification
-- 📄 **extract-code-documentation** (`.github/skills/extract-code-documentation/SKILL.md`) - Extract component docblocks for translation metadata
-
-When the workflow instructions mention using these capabilities, use the `read_file` tool to get detailed instructions from the SKILL.md files.
-
 1. Phase 1: Pre-Translation Analysis
 2. Phase 2: Multi-Model Translation (per namespace/language)
 3. Phase 3: Consensus Analysis

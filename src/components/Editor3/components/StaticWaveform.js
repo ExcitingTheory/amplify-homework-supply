@@ -26,7 +26,7 @@ export default function StaticWaveform({
     backgroundColor = 'white',
     showLoading = true
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.shared');
     const canvasRef = useRef(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);

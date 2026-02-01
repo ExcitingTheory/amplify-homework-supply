@@ -464,7 +464,8 @@ const workbookWithProgressState = {
 export const WorkbookWithProgress = {
   loaders: [
     async () => {
-      const { seedMockWords, clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-datastore');
+      const { seedMockWords } = await import('../../../.storybook/__mocks__/aws-amplify-data');
+      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-datastore');
       const { MOCK_AUDIO_BASE64, mockWaveformData } = await import('../../../.storybook/__mocks__/media');
       
       clearMockData();
@@ -474,7 +475,7 @@ export const WorkbookWithProgress = {
         name: 'Sample Workbook with Progress',
         description: 'This workbook shows progress tracking with partial completion',
         data: JSON.stringify(workbookWithProgressState),
-        wordIDs: ['vocab-word-1', 'vocab-word-2', 'vocab-word-3'],
+        wordIDs: ['vocab-word-1', 'vocab-word-2', 'vocab-word-3', 'vocab-word-4', 'vocab-word-5'],
         _version: 1,
         owner: 'student-alice-sub',
       });
@@ -2078,7 +2079,8 @@ const kitchenSinkWorkbookState = {
 export const KitchenSink = {
   loaders: [
     async () => {
-      const { seedMockWords, seedMockFiles, seedMockGrade, clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-datastore');
+      const { seedMockWords, seedMockFiles, seedMockGrade } = await import('../../../.storybook/__mocks__/aws-amplify-data');
+      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-datastore');
       
       // Clear any existing mock data to ensure clean state
       clearMockData();
@@ -2088,11 +2090,12 @@ export const KitchenSink = {
         name: 'Kitchen Sink - All Workbook Blocks',
         description: 'Comprehensive workbook showing all available interactive exercise types',
         data: JSON.stringify(kitchenSinkWorkbookState),
-        wordIDs: ['vocab-word-1', 'vocab-word-2', 'vocab-word-3'],
+        wordIDs: ['vocab-word-1', 'vocab-word-2', 'vocab-word-3', 'vocab-word-4', 'vocab-word-5'],
         _version: 1,
         owner: 'mock-user-sub',
       });
       
+      // Grade 1: Empty/just started (current user)
       seedMockGrade({
         id: 'grade-kitchen-sink-1',
         unitID: 'kitchen-sink-workbook-id',
@@ -2103,6 +2106,275 @@ export const KitchenSink = {
         complete: false,
         timerStarted: false,
         data: {},
+        _version: 1,
+      });
+      
+      // Grade 2: In-progress with partial completion
+      seedMockGrade({
+        id: 'grade-kitchen-sink-2',
+        unitID: 'kitchen-sink-workbook-id',
+        owner: 'student-bob-sub',
+        unitVersion: 1,
+        percentComplete: 45,
+        accuracy: 72,
+        complete: false,
+        timerStarted: true,
+        data: JSON.stringify({
+          // Answer block - 2 out of 3 words completed
+          'vocab-word-1': {
+            complete: true,
+            accuracy: 100,
+            userAnswer: 'こんにちは',
+            correctAnswer: 'こんにちは',
+            timestamp: new Date('2024-01-20T10:30:00Z').toISOString(),
+          },
+          'vocab-word-2': {
+            complete: true,
+            accuracy: 100,
+            userAnswer: '猫',
+            correctAnswer: '猫',
+            timestamp: new Date('2024-01-20T10:32:00Z').toISOString(),
+          },
+          // vocab-word-3 not completed yet
+          
+          // Custom answer - completed
+          'custom-q-kitchen-1': {
+            complete: true,
+            accuracy: 85,
+            userAnswers: {
+              'question-1': {
+                text: 'The particle は (wa) marks the topic of the sentence.',
+                audio: null,
+                writing: null,
+              },
+              'question-2': {
+                text: 'Subject-Object-Verb order is common in Japanese.',
+                audio: null,
+                writing: null,
+              },
+            },
+            timestamp: new Date('2024-01-20T10:45:00Z').toISOString(),
+          },
+          
+          // Meaning association - partially completed
+          'vocab-word-4': {
+            complete: true,
+            accuracy: 100,
+            matchedDefinition: 'Dog (Japanese)',
+            timestamp: new Date('2024-01-20T11:00:00Z').toISOString(),
+          },
+          'vocab-word-5': {
+            complete: true,
+            accuracy: 0,
+            matchedDefinition: 'Thank you (Japanese)', // Wrong match
+            correctDefinition: 'Goodbye (Japanese)',
+            timestamp: new Date('2024-01-20T11:02:00Z').toISOString(),
+          },
+          
+          // Quiz - some questions answered
+          'quiz-q1': {
+            complete: true,
+            accuracy: 100,
+            selectedAnswer: 'Hello',
+            correctAnswer: 'Hello',
+            isCorrect: true,
+          },
+          'quiz-q2': {
+            complete: true,
+            accuracy: 0,
+            selectedAnswer: 'Thank you',
+            correctAnswer: 'Goodbye',
+            isCorrect: false,
+          },
+          'quiz-q6': {
+            complete: true,
+            accuracy: 100,
+            selectedAnswer: '猫 (neko)',
+            correctAnswer: '猫 (neko)',
+            isCorrect: true,
+          },
+          'quiz-q11': {
+            complete: true,
+            accuracy: 0,
+            selectedAnswer: 'こんにちは',
+            correctAnswer: 'ありがとう',
+            isCorrect: false,
+          },
+        }),
+        _version: 1,
+      });
+      
+      // Grade 3: Complete with high accuracy
+      seedMockGrade({
+        id: 'grade-kitchen-sink-3',
+        unitID: 'kitchen-sink-workbook-id',
+        owner: 'student-carol-sub',
+        unitVersion: 1,
+        percentComplete: 100,
+        accuracy: 92,
+        complete: true,
+        timerStarted: true,
+        data: JSON.stringify({
+          // Answer block - all 3 words completed
+          'vocab-word-1': {
+            complete: true,
+            accuracy: 100,
+            userAnswer: 'こんにちは',
+            correctAnswer: 'こんにちは',
+            timestamp: new Date('2024-01-19T14:15:00Z').toISOString(),
+          },
+          'vocab-word-2': {
+            complete: true,
+            accuracy: 100,
+            userAnswer: '猫',
+            correctAnswer: '猫',
+            timestamp: new Date('2024-01-19T14:17:00Z').toISOString(),
+          },
+          'vocab-word-3': {
+            complete: true,
+            accuracy: 100,
+            userAnswer: 'ありがとう',
+            correctAnswer: 'ありがとう',
+            timestamp: new Date('2024-01-19T14:19:00Z').toISOString(),
+          },
+          
+          // Custom answer - completed with good score
+          'custom-q-kitchen-1': {
+            complete: true,
+            accuracy: 95,
+            userAnswers: {
+              'question-1': {
+                text: 'The particle は (wa) indicates the topic of the sentence, while が (ga) marks the subject.',
+                audio: null,
+                writing: null,
+              },
+              'question-2': {
+                text: 'Japanese typically follows Subject-Object-Verb (SOV) word order, unlike English SVO.',
+                audio: null,
+                writing: null,
+              },
+            },
+            timestamp: new Date('2024-01-19T14:30:00Z').toISOString(),
+          },
+          
+          // Meaning association - all 5 words matched correctly
+          'vocab-word-1': {
+            complete: true,
+            accuracy: 100,
+            matchedDefinition: 'Hello (Japanese)',
+            timestamp: new Date('2024-01-19T14:40:00Z').toISOString(),
+          },
+          'vocab-word-2': {
+            complete: true,
+            accuracy: 100,
+            matchedDefinition: 'Cat (Japanese)',
+            timestamp: new Date('2024-01-19T14:41:00Z').toISOString(),
+          },
+          'vocab-word-3': {
+            complete: true,
+            accuracy: 100,
+            matchedDefinition: 'Thank you (Japanese)',
+            timestamp: new Date('2024-01-19T14:42:00Z').toISOString(),
+          },
+          'vocab-word-4': {
+            complete: true,
+            accuracy: 100,
+            matchedDefinition: 'Dog (Japanese)',
+            timestamp: new Date('2024-01-19T14:43:00Z').toISOString(),
+          },
+          'vocab-word-5': {
+            complete: true,
+            accuracy: 100,
+            matchedDefinition: 'Goodbye (Japanese)',
+            timestamp: new Date('2024-01-19T14:44:00Z').toISOString(),
+          },
+          
+          // Quiz - all questions answered, mostly correct
+          'quiz-q1': {
+            complete: true,
+            accuracy: 100,
+            selectedAnswer: 'Hello',
+            correctAnswer: 'Hello',
+            isCorrect: true,
+          },
+          'quiz-q2': {
+            complete: true,
+            accuracy: 100,
+            selectedAnswer: 'Goodbye',
+            correctAnswer: 'Goodbye',
+            isCorrect: true,
+          },
+          'quiz-q3': {
+            complete: true,
+            accuracy: 100,
+            selectedAnswer: 'Thank you',
+            correctAnswer: 'Thank you',
+            isCorrect: true,
+          },
+          'quiz-q4': {
+            complete: true,
+            accuracy: 100,
+            selectedAnswer: 'Please',
+            correctAnswer: 'Please',
+            isCorrect: true,
+          },
+          'quiz-q5': {
+            complete: true,
+            accuracy: 0,
+            selectedAnswer: '猫 (neko)',
+            correctAnswer: '犬 (inu)',
+            isCorrect: false,
+          },
+          'quiz-q6': {
+            complete: true,
+            accuracy: 100,
+            selectedAnswer: '猫 (neko)',
+            correctAnswer: '猫 (neko)',
+            isCorrect: true,
+          },
+          'quiz-q7': {
+            complete: true,
+            accuracy: 100,
+            selectedAnswer: '本 (hon)',
+            correctAnswer: '本 (hon)',
+            isCorrect: true,
+          },
+          'quiz-q8': {
+            complete: true,
+            accuracy: 100,
+            selectedAnswer: '水 (mizu)',
+            correctAnswer: '水 (mizu)',
+            isCorrect: true,
+          },
+          'quiz-q9': {
+            complete: true,
+            accuracy: 100,
+            selectedAnswer: 'さようなら',
+            correctAnswer: 'さようなら',
+            isCorrect: true,
+          },
+          'quiz-q10': {
+            complete: true,
+            accuracy: 100,
+            selectedAnswer: 'こんにちは',
+            correctAnswer: 'こんにちは',
+            isCorrect: true,
+          },
+          'quiz-q11': {
+            complete: true,
+            accuracy: 100,
+            selectedAnswer: 'ありがとう',
+            correctAnswer: 'ありがとう',
+            isCorrect: true,
+          },
+          'quiz-q12': {
+            complete: true,
+            accuracy: 0,
+            selectedAnswer: 'ありがとう',
+            correctAnswer: 'すみません',
+            isCorrect: false,
+          },
+        }),
         _version: 1,
       });
       

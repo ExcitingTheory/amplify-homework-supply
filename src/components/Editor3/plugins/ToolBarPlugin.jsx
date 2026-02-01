@@ -354,7 +354,7 @@ const LAYOUTS = [
 
 
 function LayoutModal({editor}) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.authoring');
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -464,7 +464,7 @@ function LayoutModal({editor}) {
 }
 
 function DeleteModal() {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.authoring');
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -561,7 +561,7 @@ const IFrame = ({
 
 
 const PreviewModal = () => {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.authoring');
     const {
         name,
         unit,
@@ -630,7 +630,7 @@ const PreviewModal = () => {
 
 
 const UnitTitleDescriptionEditor = () => {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.authoring');
     const {
         name,
         description,
@@ -744,7 +744,7 @@ const UnitTitleDescriptionEditor = () => {
 }
 
 const StatusSelect = () => {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.authoring');
     const {
         unit,
         handleStatusChange
@@ -839,7 +839,7 @@ const TextAlignmentDropdown = ({
     disabled = false,
     isRTL,
 }) => {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.authoring');
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -1038,7 +1038,7 @@ const InsertNodeDropDown = ({
     setTabValue,
     setOpenTab,
 }) => {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.authoring');
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -1255,7 +1255,7 @@ function TextFormatDropDown({
     isSuperscript,
     clearFormatting,
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.authoring');
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -1626,7 +1626,7 @@ function FontDropDown({
     style,
     disabled = false,
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.authoring');
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const handleClose = () => {
@@ -1726,7 +1726,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
     setOpen,
     setTabValue,
 }, ref) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.authoring');
     const [editor] = useLexicalComposerContext();
     const [activeEditor, setActiveEditor] = useState(editor);
     const [blockType, setBlockType] =

@@ -16,7 +16,7 @@ const LAYOUTS = [
 ];
 
 export default function InsertLayoutDialog({activeEditor, onClose}) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.shared');
     const [layout, setLayout] = useState(LAYOUTS[0].value);
     const buttonLabel = LAYOUTS.find((item) => item.value === layout)?.label;
 

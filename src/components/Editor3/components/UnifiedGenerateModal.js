@@ -33,7 +33,7 @@ export default function UnifiedGenerateModal({
     type = 'image', // 'image', 'audio', 'video'
     children, // Custom form inputs if needed
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.ai');
     const [mode, setMode] = useState('input'); // 'input', 'generating', 'preview', 'confirming-cancel'
     const [prompt, setPrompt] = useState('');
     const [generatedContent, setGeneratedContent] = useState(null);

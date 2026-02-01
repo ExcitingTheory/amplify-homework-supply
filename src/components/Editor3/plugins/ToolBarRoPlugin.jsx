@@ -191,7 +191,7 @@ export default function ToolBarRoPlugin({
     setOpen,
     setTabValue,
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('workbook');
     const {
         unit,
         finishedQuestions,

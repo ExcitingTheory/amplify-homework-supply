@@ -531,12 +531,32 @@ export const seedMockWords = (wordsArray) => {
   wordsArray.forEach(word => {
     dataStores.Word.set(word.id, word);
   });
+  
+  // Notify all Word subscribers about the new data
+  const items = Array.from(dataStores.Word.values());
+  activeSubscriptions.Word.forEach(subscription => {
+    console.log('[Mock Data] Notifying Word subscriber with', items.length, 'words');
+    if (subscription.next) {
+      const enhancedItems = items.map(item => addRelationshipAccessors(item, 'Word'));
+      subscription.next({ items: enhancedItems, isSynced: true });
+    }
+  });
 };
 
 export const seedMockQuestions = (questionsArray) => {
   console.log(`[Mock Data] seedMockQuestions: Adding ${questionsArray.length} questions`);
   questionsArray.forEach(question => {
     dataStores.Question.set(question.id, question);
+  });
+  
+  // Notify all Question subscribers about the new data
+  const items = Array.from(dataStores.Question.values());
+  activeSubscriptions.Question.forEach(subscription => {
+    console.log('[Mock Data] Notifying Question subscriber with', items.length, 'questions');
+    if (subscription.next) {
+      const enhancedItems = items.map(item => addRelationshipAccessors(item, 'Question'));
+      subscription.next({ items: enhancedItems, isSynced: true });
+    }
   });
 };
 

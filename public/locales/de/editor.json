@@ -1,0 +1,840 @@
+{
+  "toolbar": {
+    "bold": "Fett",
+    "italic": "Kursiv",
+    "underline": "Unterstreichen",
+    "strikethrough": "Durchgestrichen",
+    "heading": "Überschrift",
+    "paragraph": "Absatz",
+    "bullet_list": "Aufzählungsliste",
+    "numbered_list": "Nummerierte Liste",
+    "align_left": "Linksbündig",
+    "align_center": "Zentrieren",
+    "align_right": "Rechtsbündig ausrichten",
+    "insert_link": "Link einfügen",
+    "insert_image": "Bild einfügen",
+    "insert_table": "Tabelle einfügen",
+    "insert_code": "Codeblock einfügen"
+  },
+  "blocks": {
+    "answer": "Antwortblock",
+    "quiz": "Quiz-Block",
+    "custom_answer": "Benutzerdefinierte Antwort",
+    "meaning_association": "Bedeutungszuordnung"
+  },
+  "placeholders": {
+    "type_here": "Hier eingeben...",
+    "enter_text": "Text eingeben",
+    "search_words": "Wörter suchen..."
+  },
+  "answerComponent": {
+    "inputMethods": {
+      "text": "Text",
+      "audio": "Audio",
+      "writing": "Schreiben"
+    },
+    "errorMessages": {
+      "noAnswer": "Bitte geben Sie eine Antwort an",
+      "recordingFailed": "Aufnahme fehlgeschlagen"
+    },
+    "feedback": {
+      "correct": "Richtig!",
+      "incorrect": "Versuchen Sie es erneut"
+    },
+    "audioNotAvailable": "{{text}} (Audio nicht verfügbar)",
+    "audioNotAvailableParens": "(Audio nicht verfügbar)"
+  },
+  "answerEditor": {
+    "instructions": "Erstellen Sie Ihre Antwort unten",
+    "dialogTitle": "Antwort bearbeiten",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "emptyState": "Keine Antwort angegeben",
+    "addWordToDict": "Neues Wort zum Wörterbuch hinzufügen."
+  },
+  "assignmentConfiguration": {
+    "timerLabel": "Timer",
+    "dueDateLabel": "Fälligkeitsdatum",
+    "sectionLabel": "Abschnitt",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "addTimerQuestion": "Einen Timer zu dieser Einheit hinzufügen?",
+    "timerDescription": "Der Timer startet, nachdem der Benutzer auf die Schaltfläche „Start\" geklickt hat. Die Benutzer können fortfahren, nachdem der Timer abgelaufen ist, und es wird aufgezeichnet, wann die Aufgabe begonnen und abgeschlossen wurde. Der Countdown wird für die Dauer des Timers oben auf dem Bildschirm angezeigt.",
+    "addTimerButton": "Timer hinzufügen",
+    "assignDueDateQuestion": "Möchten Sie für diesen Lernabschnitt ein Fälligkeitsdatum für diese Einheit festlegen?",
+    "dueDateDescriptionLine1": "Benutzern wird es gestattet, nach Ablauf des Abgabetermins fortzufahren.",
+    "dueDateDescriptionLine2": "Das Fälligkeitsdatum wird verwendet, um die Einheiten im Klassenabschnitt zu sortieren.",
+    "selectSectionHelper": "Wählen Sie einen Bereich aus, dem Sie das Fälligkeitsdatum zuweisen möchten",
+    "addDueDateButton": "Fälligkeitsdatum hinzufügen",
+    "assignedToSectionsHeading": "Zugewiesen zu Bereichen",
+    "noDueDateSet": "Kein Fälligkeitsdatum festgelegt",
+    "noSectionSet": "Kein Abschnitt festgelegt"
+  },
+  "audioWaveformPlayer": {
+    "noAudioSource": "Keine Audioquelle bereitgestellt"
+  },
+  "autocompleteNode": {
+    "mobileHint": "(WISCHEN ⮕)",
+    "desktopHint": "(TAB)"
+  },
+  "blockSuggestionMenu": {
+    "aiTitle": "🤖 KI-gestützte Vorschläge",
+    "suggestionsTitle": "💡 Vorgeschlagene Blöcke",
+    "emptyState": "Noch keine Vorschläge verfügbar.",
+    "emptyStateHelper": "Beginnen Sie mit der Eingabe im Editor, um KI-gestützte Blockvorschläge zu sehen.",
+    "helper": "Klicken Sie auf einen Vorschlag, um ihn in Ihre Lektion einzufügen.",
+    "helperAI": "Klicken Sie auf einen Vorschlag oder drücken Sie Tab/Enter zum Einfügen",
+    "generateMore": "Weitere Vorschläge generieren"
+  },
+  "configurationManager": {
+    "pdfAnalysisSettings": "PDF-Analyse-Einstellungen",
+    "autoAnalyzeLabel": "Dokumente beim Hochladen automatisch analysieren",
+    "autoAnalyzeDescription": "Wenn aktiviert, werden PDFs unmittelbar nach dem Upload zur Vokabelextraktion an OpenAI gesendet.",
+    "uploadingImage": "Bild wird hochgeladen",
+    "uploadImagePrompt": "Bild hochladen",
+    "setFeaturedImage": "Titelbild festlegen",
+    "noFeaturedImage": "Kein Titelbild festgelegt.",
+    "dragDropPrompt": "Ziehen Sie hier ein Bild hinein, um es als Hauptbild festzulegen."
+  },
+  "documentUploader": {
+    "title": "Dokumente für {{extractionType}}-Extraktion hochladen",
+    "extractionTypes": {
+      "vocabulary": "Vokabular",
+      "question": "Frage",
+      "dictionary": "Wörterbuch",
+      "questions": "Fragen"
+    },
+    "dragDropPrompt": "Dokumente hier per Drag & Drop hinzufügen",
+    "supportedFormats": "Unterstützt: PDF, Word (.doc, .docx), Text (.txt), Excel (.xls, .xlsx, .csv)",
+    "browseFiles": "Dateien durchsuchen",
+    "uploadingProgress": "Wird hochgeladen... {{progress}}%",
+    "recentUploads": "Kürzlich hochgeladene Dateien",
+    "statusLabels": {
+      "processing": "Wird verarbeitet...",
+      "complete": "Abgeschlossen",
+      "failed": "Fehlgeschlagen"
+    },
+    "errorMessages": {
+      "noSupportedFiles": "Keine unterstützten Dokumente gefunden. Bitte laden Sie PDF-, Word-, Text- oder Excel-Dateien hoch.",
+      "skippedFiles": "Einige Dateien wurden übersprungen (nicht unterstützter Dateityp)",
+      "uploadFailed": "Fehler beim Hochladen von {{fileName}}: {{error}}"
+    },
+    "howItWorks": {
+      "title": "So funktioniert es:",
+      "step1": "1. Laden Sie Ihre Dokumente hoch (PDF-, Word-, Text- oder Excel-Dateien)",
+      "step2": "2. Die KI wird den Inhalt analysieren und {{extractionType}} extrahieren",
+      "step3": "3. Überprüfen und genehmigen Sie Vorschläge im Tab \"Vorschläge\"",
+      "step4": "4. Importieren Sie die ausgewählten Elemente in Ihr {{target}}"
+    }
+  },
+  "enhancedGenerators": {
+    "generateImage": "Bild generieren",
+    "generateAudio": "Audio generieren",
+    "imagePromptPlaceholder": "Beschreiben Sie das Bild, das Sie generieren möchten...",
+    "audioPromptPlaceholder": "Text zur Sprachkonvertierung eingeben...",
+    "editWithMask": "Mit Maske bearbeiten (Teil regenerieren)",
+    "openRecordingStudio": "Im Aufnahmestudio öffnen",
+    "backToGenerator": "Zurück zum Generator"
+  },
+  "metadataEditor": {
+    "fileMetadataHeading": "Datei-Metadaten",
+    "aiGenerationInfo": "KI-Generierungsinformationen",
+    "promptLabel": "Eingabeaufforderung",
+    "modelLabel": "Modell",
+    "variantLabel": "Variante",
+    "fileInfo": "Dateiinformationen",
+    "typeLabel": "Typ:",
+    "unknown": "Unbekannt",
+    "sizeLabel": "Größe:",
+    "pathLabel": "Pfad:",
+    "notSet": "Nicht festgelegt",
+    "protectionLabel": "Schutz:",
+    "createdLabel": "Erstellt:",
+    "updatedLabel": "Aktualisiert:"
+  },
+  "tabsVerticalRight": {
+    "aiSuggestionsHeading": "KI-Block-Vorschläge",
+    "aiSuggestionsDesc": "KI-gestützte Inhaltsblock-Vorschläge werden hier basierend auf Ihrem aktuellen Lektionsinhalt angezeigt.",
+    "comingSoon": "Demnächst verfügbar: Interaktives Vorschlagspanel mit Begründungen und Prioritätsindikatoren.",
+    "gradesHeading": "Einheitsnoten",
+    "gradesDesc": "Noten und Fortschritt für diese Lerneinheit anzeigen.",
+    "instructorsLabel": "📊 Dozenten:",
+    "instructorsDesc": "Alle Schülernoten und Abgaben anzeigen",
+    "learnersLabel": "✍️ Lernende:",
+    "learnersDesc": "Eigene Noten und Feedback anzeigen",
+    "cohortChatHeading": "Kohorte Chat",
+    "cohortChatDesc": "Arbeiten Sie mit Ihren Kommilitonen und Ihrem Dozenten zusammen.",
+    "tagKaiLabel": "💬 @kai markieren",
+    "tagKaiDesc": "KI-Unterstützung in der Diskussion erhalten",
+    "useTopicsLabel": "🏷️ Verwenden Sie #Themen",
+    "useTopicsDesc": "Gespräche nach Themen organisieren",
+    "shareInsights": "Erkenntnisse teilen, Fragen stellen und gemeinsam lernen",
+    "aiAssistantTab": "KI-Assistent",
+    "aiSuggestionsTab": "KI-Vorschläge",
+    "gradesTab": "Noten",
+    "cohortChatTab": "Kohorte-Chat"
+  },
+  "unifiedGenerateModal": {
+    "generating": "\"{{type}} wird generiert...\"",
+    "takeMoments": "Dies kann einige Augenblicke dauern",
+    "preview": "Vorschau",
+    "discardChanges": "Änderungen verwerfen?",
+    "lostWarning": "Ihr generierter {{type}} geht verloren, wenn Sie jetzt abbrechen.",
+    "cancel": "Abbrechen",
+    "generate": "Generieren",
+    "saveClose": "Speichern & Schließen",
+    "keepEditing": "Weiter bearbeiten",
+    "discard": "Verwerfen"
+  },
+  "verticalTabsRo": {
+    "previousAttempts": "Vorherige Versuche",
+    "aiAssistant": "KI-Assistent",
+    "settings": "Einstellungen"
+  },
+  "freeSoloCreateOptionDialog": {
+    "dialogTitle": "Ein neues Wort hinzufügen",
+    "description": "Fügen Sie ein neues Wort zum Wörterbuch hinzu.",
+    "label": "Freies Solo-Dialogfeld",
+    "cancel": "Abbrechen",
+    "create": "Hinzufügen"
+  },
+  "imageMaskEditor": {
+    "instructions": "**Anweisungen:** Übermalen Sie die Bereiche, die Sie regenerieren möchten. Verwenden Sie den Radierer, um Teile der Maske zu entfernen. Halten Sie die Umschalttaste gedrückt und ziehen Sie, um zu schwenken. Nutzen Sie die Zoom-Schaltflächen für detailliertere Ansichten.",
+    "brushSize": "Pinselgröße: {{size}}",
+    "zoomInfo": "Zoom: {{level}}% | Umschalttaste halten zum Verschieben",
+    "applyMask": "Maske anwenden & regenerieren",
+    "save": "Speichern",
+    "cancel": "Abbrechen"
+  },
+  "imageResizer": {
+    "addCaption": "Bildunterschrift hinzufügen"
+  },
+  "insertLayoutDialog": {
+    "cancel": "Abbrechen",
+    "insert": "Einfügen"
+  },
+  "meaningAssociationEditor": {
+    "removeFromAssignment": "Aus Aufgabe entfernen",
+    "addWordLabel": "Wort zur Übung hinzufügen",
+    "dialogTitle": "Ein neues Wort hinzufügen",
+    "dialogDescription": "Neues Wort zum Wörterbuch hinzufügen.",
+    "phraseLabel": "Phrase",
+    "pronunciationLabel": "Aussprache",
+    "definitionPlaceholder": "Definition",
+    "cancel": "Abbrechen",
+    "add": "Hinzufügen",
+    "emptyState": "Es wurden noch keine Wörter hinzugefügt. Verwenden Sie das Eingabefeld oben, um Wörter aus dem Wörterbuch hinzuzufügen. Falls das gewünschte Wort nicht im Wörterbuch enthalten ist, können Sie es hinzufügen, indem Sie auf \"Wort hinzufügen\" im Dropdown-Menü klicken oder den Wörterbuch-Editor in der Seitenleiste verwenden.",
+    "columnHeaders": {
+      "phrase": "Phrase",
+      "pronunciation": "Aussprache",
+      "definition": "Definition"
+    }
+  },
+  "mediaPlayerComponent": {
+    "titleHeader": "Titel"
+  },
+  "promptMethodSelector": {
+    "inputButton": "Eingabe",
+    "outputButton": "Ausgabe",
+    "menuItems": {
+      "text": "Text",
+      "audio": "Audio",
+      "image": "Bild",
+      "drawing": "Zeichnen",
+      "video": "Video"
+    }
+  },
+  "quizEditor": {
+    "edit": "Bearbeiten",
+    "reset": "Zurücksetzen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "done": "Fertig",
+    "invalid": "Ungültig",
+    "addAnswer": "Antwort hinzufügen",
+    "gradeDisplay": "Note: {{score}}",
+    "status": "Status"
+  },
+  "staticWaveform": {
+    "errorLoading": "Fehler beim Laden der Wellenform"
+  },
+  "suggestedContent": {
+    "ownerPlaceholder": "Eigentümer-ID",
+    "identityPlaceholder": "Identitäts-ID"
+  },
+  "tableComponent": {
+    "insertRow": "Zeile einfügen",
+    "insertColumn": "Spalte einfügen",
+    "deleteRow": "Zeile löschen",
+    "deleteColumn": "Spalte löschen",
+    "makeHeader": "Kopfzeile erstellen",
+    "removeHeader": "Kopfzeile entfernen",
+    "makeRowHeader": "Zeilenüberschrift erstellen",
+    "removeRowHeader": "Zeilenüberschrift entfernen",
+    "makeColumnHeader": "Spaltenüberschrift erstellen",
+    "removeColumnHeader": "Spaltenüberschrift entfernen",
+    "clearCell": "Zelle löschen",
+    "removeSorting": "Sortierung entfernen",
+    "sortAscending": "Aufsteigend sortieren",
+    "sortDescending": "Absteigend sortieren",
+    "insertRowAbove": "Zeile oberhalb einfügen",
+    "insertRowBelow": "Zeile darunter einfügen",
+    "insertColumnLeft": "Spalte links einfügen",
+    "insertColumnRight": "Spalte rechts einfügen",
+    "deleteTable": "Tabelle löschen",
+    "cellActionsLabel": "Zellenaktionen",
+    "cellActionsTitle": "Zellenaktionen-Menü öffnen"
+  },
+  "tableOfContents": {
+    "emptyState": "Keine Überschriften gefunden. Fügen Sie Überschriften zu Ihrem Dokument hinzu, um das Inhaltsverzeichnis anzuzeigen.",
+    "title": "Inhaltsverzeichnis"
+  },
+  "tabsVerticalLeft": {
+    "tabs": {
+      "assignments": "Aufgaben",
+      "tableOfContents": "Inhaltsverzeichnis",
+      "dictionary": "Wörterbuch",
+      "questions": "Fragen",
+      "files": "Dateien",
+      "aiAssistant": "KI-Assistent",
+      "configuration": "Konfiguration"
+    }
+  },
+  "customAnswerEditor": {
+    "title": "Benutzerdefinierte Antwortübung",
+    "description": "Erstellen Sie eine Kurze-Antwort-Übung, die dem Benutzer eine Frage stellt und eine kurze Antwort erwartet.",
+    "addWordLabel": "Wort zur Übung hinzufügen",
+    "remove": "Entfernen",
+    "dialogTitle": "Neue Frage hinzufügen",
+    "dialogDescription": "Fügen Sie ein neues Frage-Antwort-Paar hinzu.",
+    "ttsPreview": "Text-zu-Sprache-Vorschau",
+    "audioPreview": "Audio-Vorschau",
+    "promptLabel": "Eingabeaufforderung",
+    "answerLabel": "Antwort",
+    "answerPlaceholder": "Antwort",
+    "hintLabel": "Hinweis",
+    "hintPlaceholder": "Hinweis",
+    "cancel": "Abbrechen",
+    "add": "Hinzufügen",
+    "emptyState": "Es wurden noch keine Fragen hinzugefügt. Verwenden Sie das Eingabefeld oben, um Frage-Antwort-Paare hinzuzufügen.",
+    "generatingAudio": "Audiodatei wird erstellt...",
+    "successGeneratedAudio": "Audiodatei erfolgreich erstellt",
+    "errorGeneratingAudio": "Fehler beim Erstellen der Audiodatei",
+    "errorCreatingQuestion": "Fehler beim Erstellen der Frage",
+    "columnHeaders": {
+      "prompt": "Eingabeaufforderung",
+      "answer": "Antwort",
+      "id": "ID",
+      "promptAudio": "Eingabeaufforderung Audio",
+      "answerAudio": "Antwort-Audio",
+      "hint": "Hinweis"
+    }
+  },
+  "fileMetadataComponent": {
+    "collapse": "Einklappen",
+    "expand": "Erweitern",
+    "fileInfo": "Dateiinformationen",
+    "deleteFile": "Datei löschen",
+    "deleteConfirmation": "Datei \"{{fileName}}\" löschen?",
+    "filename": "Dateiname:",
+    "type": "Typ:",
+    "unknown": "Unbekannt",
+    "unknownSize": "Unbekannte Größe",
+    "path": "Pfad:",
+    "protectionLevel": "Schutzstufe:",
+    "unset": "NICHT GESETZT",
+    "created": "Erstellt:",
+    "searchPlaceholder": "Dateiinhalt durchsuchen...",
+    "basicInfo": "Grundlegende Informationen",
+    "rawMetadata": "Rohe Metadaten",
+    "parsedContent": "Verarbeiteter Inhalt",
+    "noMetadataAvailable": "Für diese Datei sind keine Metadaten verfügbar.",
+    "noParsedContentAvailable": "Für diese Datei sind keine analysierten Inhalte verfügbar.",
+    "vocabulary": "Vokabular",
+    "summaries": "Zusammenfassungen",
+    "objectives": "Lernziele",
+    "concepts": "Konzepte",
+    "questions": "Fragen",
+    "vocabularyCount": "Vokabular ({{count}})",
+    "summariesCount": "Zusammenfassungen ({{count}})",
+    "objectivesCount": "Lernziele ({{count}})",
+    "conceptsCount": "Konzepte ({{count}})",
+    "questionsCount": "Fragen ({{count}})",
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen"
+  },
+  "autoEmbedPlugin": {
+    "youtubeVideo": "YouTube-Video",
+    "dismiss": "Schließen",
+    "embedTitle": "\"{{contentName}} einbetten\"",
+    "embedOption": "\"{{contentName}} einbetten\"",
+    "embed": "Einbetten"
+  },
+  "floatingLinkEditorPlugin": {
+    "cancelLinkEditing": "Link-Bearbeitung abbrechen",
+    "linkUrl": "Link-URL",
+    "confirmLink": "Link bestätigen",
+    "closeLinkEditor": "Link-Editor schließen",
+    "youtubeEmbed": "YouTube-Einbettung",
+    "convertToYoutubeEmbed": "In YouTube-Einbettung konvertieren",
+    "editLink": "Link bearbeiten",
+    "removeLink": "Link entfernen"
+  },
+  "imagesPlugin": {
+    "upload": "Bild hochladen",
+    "insertFromUrl": "Von URL einfügen",
+    "imageUrl": "Bild-URL",
+    "imageUrlPlaceholder": "z.B. https://source.unsplash.com/random",
+    "altText": "Alternativtext",
+    "altTextPlaceholder": "Zufälliges Unsplash-Bild",
+    "altTextDescriptive": "Beschreibender Alternativtext",
+    "confirm": "Bestätigen",
+    "imageUpload": "Bild hochladen",
+    "sample": "Beispiel",
+    "url": "URL",
+    "file": "Datei",
+    "dropImagesHere": "Bilder hier ablegen"
+  },
+  "tablePlugin": {
+    "insertTable": "Tabelle einfügen",
+    "table": "Tabelle",
+    "chooseLayout": "Wählen Sie ein Layout",
+    "rowsPlaceholder": "Anzahl der Zeilen (1-500)",
+    "rows": "Zeilen",
+    "columnsPlaceholder": "Anzahl der Spalten (1-50)",
+    "columns": "Spalten",
+    "insert": "Einfügen"
+  },
+  "toolBarPlugin": {
+    "dialogTitle": "Format",
+    "bold": "Fett",
+    "italic": "Kursiv",
+    "underline": "Unterstreichen",
+    "strikethrough": "Durchgestrichen",
+    "insertLink": "Link einfügen",
+    "insertImage": "Bild einfügen",
+    "insertTable": "Tabelle einfügen",
+    "alignLeft": "Linksbündig ausrichten",
+    "alignCenter": "Zentrieren",
+    "alignRight": "Rechts ausrichten",
+    "justifyAlign": "Blocksatz",
+    "outdent": "Einzug verringern",
+    "indent": "Einzug",
+    "undo": "Rückgängig machen",
+    "redo": "Wiederholen",
+    "align": "Ausrichten",
+    "insert": "Einfügen",
+    "text": "Text",
+    "scrollToolbarLeft": "Symbolleiste nach links scrollen",
+    "scrollToolbarRight": "Symbolleiste nach rechts scrollen",
+    "columnsLayout": "Spaltenlayout",
+    "chooseLayout": "Layout auswählen",
+    "deleteUnitConfirmation": "Sind Sie sicher, dass Sie diese Einheit löschen möchten?",
+    "delete": "Löschen",
+    "cancel": "Abbrechen",
+    "closePreview": "Vorschau von {{name}} schließen",
+    "untitledUnit": "Unbenannte Einheit",
+    "addDescription": "Beschreibung hinzufügen",
+    "status": "Status",
+    "draft": "Entwurf",
+    "published": "Veröffentlicht",
+    "archived": "Archiviert",
+    "textAlignment": "Textausrichtung",
+    "textFormatting": "Formatierungsoptionen für Textausrichtung",
+    "moreTextFormatting": "Weitere Textformatierung",
+    "clearFormatting": "Formatierung entfernen",
+    "dueDate": "Fälligkeitsdatum",
+    "timer": "Timer",
+    "meaningAssociation": "Bedeutungszuordnung",
+    "wordBlock": "Wortblock",
+    "shortAnswerVocabulary": "Kurze Antwort: Vokabeln",
+    "shortAnswerCustom": "Kurze Antwort: Benutzerdefiniert",
+    "audioPlaylist": "Audiowiedergabeliste",
+    "multipleChoiceQuiz": "Multiple-Choice-Quiz",
+    "horizontalRule": "Horizontale Linie",
+    "formatTextStyles": "Formatierungsoptionen für Textstile",
+    "formatBold": "Text fett formatieren",
+    "formatItalic": "Text als kursiv formatieren",
+    "formatUnderline": "Text unterstreichen",
+    "strikethroughTitle": "Durchgestrichen",
+    "subscript": "Tiefgestellt",
+    "superscript": "Hochgestellt",
+    "clearTextFormatting": "Textformatierung löschen",
+    "formatStrikethrough": "Text mit Durchstreichung formatieren",
+    "formatSubscript": "Text mit Subscript formatieren",
+    "formatSuperscript": "Text als Hochstellung formatieren",
+    "clearAllTextFormatting": "Alle Textformatierungen entfernen",
+    "formattingTextColor": "Textfarbe formatieren",
+    "formattingBackgroundColor": "Hintergrundfarbe formatieren",
+    "font": "Schriftart",
+    "size": "Größe",
+    "formattingFont": "Formatierungsoptionen für Schriftart",
+    "formattingSize": "Formatierungsoptionen für die Schriftgröße"
+  },
+  "fileManager": {
+    "draftChanges": "Entwurfsänderungen",
+    "save": "Speichern",
+    "revert": "Rückgängig machen",
+    "create": "Erstellen",
+    "textToImagePreview": "Text-zu-Bild-Vorschau",
+    "textToSpeechPreview": "Text-to-Speech-Vorschau",
+    "close": "Schließen",
+    "errorRendering": "Fehler beim Rendern des Dateimanagers: {{message}}"
+  },
+  "pdfViewerComponent": {
+    "loadingPdf": "PDF wird geladen: {{filename}}",
+    "noPdfToDisplay": "Keine PDF-Datei zum Anzeigen vorhanden"
+  },
+  "quizComponent": {
+    "grade": "Note: {{note}}",
+    "gradeDisplay": "Bewertung: {{score}}%"
+  },
+  "playlistEditor": {
+    "noFilesMessage": "Es wurden noch keine Dateien hinzugefügt. Verwenden Sie das Eingabefeld oben, um Dateien zur Playlist hinzuzufügen.",
+    "menuAttribute": "Menü",
+    "emptyState": "Keine Elemente in der Playlist"
+  },
+  "unitCompletedPlugin": {
+    "completionMessage": "Einheit abgeschlossen!",
+    "sectionHeading": "Nächste Schritte",
+    "continueButton": "Fortfahren"
+  },
+  "mainToolbar": {
+    "menuAttribute": "Menü",
+    "newUnit": "Neue Einheit",
+    "save": "Speichern"
+  },
+  "meaningAssociationExercise": {
+    "layoutDirection": "Zeile"
+  },
+  "moderationBadge": {
+    "warning": "Inhalt zur Moderation markiert",
+    "category": "Kategorie",
+    "approved": "Inhalt genehmigt",
+    "flaggedForReview": "Inhalt zur Überprüfung markiert",
+    "categories": "Kategorien",
+    "savedMessage": "Der Inhalt wurde gespeichert. Bitte überprüfen Sie ihn gemäß den Richtlinien Ihrer Schule.",
+    "flagged": "Markiert",
+    "flaggedWithCategories": "Markiert: {{categories}}"
+  },
+  "moderationPanel": {
+    "title": "Inhaltsmoderation",
+    "categoryDescription": "Markierte Inhalte überprüfen",
+    "warning": "Dieser Inhalt erfordert eine Überprüfung",
+    "alertMessage": "Dieser Inhalt wurde durch die automatische Moderation markiert. Er wurde gespeichert, könnte aber gemäß den Richtlinien Ihrer Einrichtung einer Überprüfung bedürfen.",
+    "flaggedCategories": "Markierte Kategorien:",
+    "confidence": "Vertrauen: {{score}}%",
+    "checked": "Geprüft: {{date}}",
+    "model": "Modell: {{model}}",
+    "disclaimerNote": "Automatisierte Moderation ist nicht fehlerfrei. Bitte prüfen Sie diesen Inhalt im Kontext und handeln Sie entsprechend den spezifischen Richtlinien Ihrer Einrichtung und den Anforderungen der örtlichen Rechtsprechung.",
+    "disclaimerLabel": "Hinweis:",
+    "categories": {
+      "hate": "Inhalte, die Hass aufgrund von Herkunft, Geschlecht, Ethnizität, Religion usw. fördern.",
+      "hate threatening": "Hasserfüllte Inhalte mit Gewalt oder schweren Schäden",
+      "harassment": "Inhalte, die darauf abzielen, eine Person zu belästigen, zu bedrohen oder zu schikanieren",
+      "harassment threatening": "Belästigungsinhalte, die Gewalt oder schwerwiegende Schäden beinhalten",
+      "self-harm": "Inhalte, die Selbstverletzung fördern, ermutigen oder darstellen",
+      "self-harm intent": "Inhalte, in denen jemand die Absicht äußert, sich selbst zu verletzen",
+      "self-harm instructions": "Inhalte, die zu Selbstverletzung ermutigen oder Anleitungen dafür bereitstellen",
+      "sexual": "\"Inhalte, die sexuelle Erregung hervorrufen sollen\"",
+      "sexual minors": "Sexuelle Inhalte mit Personen unter 18 Jahren",
+      "violence": "Inhalte, die Tod, Gewalt oder körperliche Verletzungen darstellen",
+      "violence graphic": "Grafische Inhalte, die Tod, Gewalt oder körperliche Verletzungen darstellen",
+      "fallback": "Inhalt in dieser Kategorie gemeldet."
+    }
+  },
+  "questionBlock": {
+    "submit": "Absenden",
+    "gradeDisplay": "Note: {{score}}",
+    "status": "Status",
+    "answerLabel": "Antwort {{number}}",
+    "correct": "Richtig",
+    "incorrect": "Falsch",
+    "edit": "Bearbeiten",
+    "reset": "Zurücksetzen",
+    "done": "Fertig",
+    "invalid": "Ungültig",
+    "remove": "Entfernen",
+    "addAnswerPlaceholder": "Antwort hinzufügen"
+  },
+  "questionEditor": {
+    "dialogTitle": "Frage bearbeiten",
+    "cancel": "Abbrechen",
+    "save": "Speichern"
+  },
+  "questionsReview": {
+    "sectionHeading": "Fragenüberprüfung",
+    "alertMessage": "Überprüfen Sie alle Fragen vor dem Absenden",
+    "filterBy": "Filtern nach",
+    "cancel": "Abbrechen",
+    "submit": "Absenden",
+    "loading": "Fragen werden geladen...",
+    "noQuestions": "Für dieses Dokument wurden keine Fragen gefunden.",
+    "from": "Von",
+    "pages": "Seiten",
+    "importedOn": "Importiert am {{date}}",
+    "filteringBySearch": "Filterung nach Suche: \"{{searchTerm}}\" ({{count}} von {{total}} Elementen)",
+    "hide": "Ausblenden",
+    "show": "Anzeigen",
+    "summariesAndObjectives": "Zusammenfassungen & Lernziele",
+    "summaries": "Zusammenfassungen",
+    "learningObjectives": "Lernziele",
+    "selectAll": "Alle auswählen",
+    "deselectAll": "Alle abwählen",
+    "selectedCount": "{{count}} von {{total}} ausgewählt",
+    "importToQuestionBank": "In Fragenbank importieren",
+    "questionPrompt": "Frageaufforderung",
+    "enterQuestion": "Frage eingeben...",
+    "hintOptional": "Hinweis (optional)",
+    "enterHint": "Hinweis eingeben...",
+    "answer": "Antwort",
+    "enterAnswer": "Antwort eingeben...",
+    "hasAudio": "Hat Audio",
+    "hasImage": "Hat Bild"
+  },
+  "recordingStudio": {
+    "sectionHeading": "Aufnahmestudio",
+    "preview": "Vorschau"
+  },
+  "recordingStudio2": {
+    "recordingNumber": "Aufnahme {{number}}",
+    "existingRecordings": "Vorhandene Aufnahmen",
+    "staticWaveformPreview": "Statische Wellenform-Vorschau:",
+    "recordedAudioWaveform": "Aufgezeichnete Audio-Wellenform:"
+  },
+  "recordingStudio3": {
+    "record": "Aufnehmen",
+    "stop": "Stopp",
+    "play": "Abspielen",
+    "save": "Speichern",
+    "timeline": "Zeitachse",
+    "sectionHeading": "Aufnahmestudio",
+    "addLine": "Zeile hinzufügen",
+    "importJSON": "JSON importieren",
+    "exportJSON": "JSON exportieren",
+    "script": "Skript",
+    "speakers": "Lautsprecher",
+    "add": "Hinzufügen",
+    "unknown": "Unbekannt",
+    "empty": "(leer)",
+    "lineNumber": "Zeile #{{number}} - {{speaker}}",
+    "text": "Text",
+    "direction": "Richtung",
+    "emotion": "Emotion",
+    "directionPlaceholder": "z. B. atemlos eintretend",
+    "emotionPlaceholder": "z. B. fröhlich, müde",
+    "generateTTS": "TTS generieren",
+    "takes": "Aufnahmen",
+    "takeNumber": "Aufnahme {{number}} ({{type}})",
+    "name": "Name",
+    "lockedTrack": "Gesperrte Spur",
+    "voice": "Stimme",
+    "description": "Beschreibung",
+    "descriptionPlaceholder": "z.B. 30s, energisch, professionell",
+    "generateAllMissingTTS": "Alle fehlenden TTS generieren",
+    "processing": "Verarbeite {{count}} Zeilen...",
+    "selectDialogueFirst": "Bitte wählen Sie zuerst eine Dialogzeile aus",
+    "micAccessFailed": "Mikrofonzugriff fehlgeschlagen",
+    "recordingSaveFailed": "Aufzeichnung konnte nicht gespeichert werden",
+    "noTextToGenerate": "Kein Text zum Generieren",
+    "speakerNotFound": "Lautsprecher nicht gefunden",
+    "ttsGenerationFailed": "TTS-Audio konnte nicht generiert werden",
+    "noMissingAudio": "Keine fehlenden Audiodateien zu generieren",
+    "addSpeakerFirst": "Bitte fügen Sie zuerst einen Sprecher hinzu.",
+    "importFailed": "Fehler beim Importieren der JSON-Datei"
+  },
+  "screenplayEditor": {
+    "formatLabel": "Format",
+    "placeholder": "EINBLENDUNG:"
+  },
+  "recordingStudioEnhanced": {
+    "audioFilters": "Audiofilter",
+    "noiseReduction": "Rauschunterdrückung",
+    "speechEnhancement": "Sprachverbesserung",
+    "none": "Keine",
+    "light": "Hell",
+    "medium": "Mittel",
+    "heavy": "Schwer",
+    "clarity": "Klarheit",
+    "presence": "Anwesenheit",
+    "broadcast": "Übertragung",
+    "popClickTooltip": "\"Pops und Klicks entfernen\"",
+    "popClick": "Pop/Klick",
+    "highPassTooltip": "Tiefe Frequenzen entfernen",
+    "highPass": "Hochpass",
+    "lowPassTooltip": "Hohe Frequenzen entfernen",
+    "lowPass": "Tiefpassfilter",
+    "normalizeTooltip": "Audiopegel normalisieren",
+    "normalize": "Normalisieren",
+    "cutTooltip": "Ausgewählten Abschnitt ausschneiden",
+    "cutButton": "Schneiden",
+    "tracks": "Spuren",
+    "addTrack": "Spur hinzufügen",
+    "trackName": "Spur {{number}}",
+    "deleteLastTrackAlert": "Der letzte Track kann nicht gelöscht werden",
+    "voice": "Stimme",
+    "promptPlaceholder": "Text eingeben, um Audio zu generieren...",
+    "generate": "Generieren",
+    "record": "Aufnehmen",
+    "stop": "Stopp",
+    "selectToCut": "Bitte wählen Sie einen Audiobereich zum Ausschneiden aus",
+    "enterPrompt": "Bitte geben Sie eine Eingabeaufforderung für diese Spur ein",
+    "ttsNotImplemented": "Text-to-Speech-Generierung noch nicht implementiert",
+    "ttsGenerationFailed": "Audiogenerierung aus Eingabeaufforderung fehlgeschlagen",
+    "micAccessError": "Auf das Mikrofon konnte nicht zugegriffen werden"
+  },
+  "savedPdfThumbnail": {
+    "errorMessage": "Fehler beim Laden der PDF-Datei",
+    "pageOverlay": "Seite {{number}}"
+  },
+  "sectionAssigner": {
+    "dialogTitle": "Abschnitt zuweisen",
+    "selectSection": "Abschnitt auswählen",
+    "cancel": "Abbrechen",
+    "assign": "Zuweisen",
+    "dueDate": "Fälligkeitsdatum"
+  },
+  "svgPreview": {
+    "emptyState": "Keine SVG zur Vorschau verfügbar",
+    "caption": "Beschriftung"
+  },
+  "vocabularyReview": {
+    "sectionHeading": "Wortschatz-Wiederholung",
+    "alertMessage": "Vokabeln vor dem Fortfahren wiederholen",
+    "summary": "Zusammenfassung",
+    "cancel": "Abbrechen",
+    "continue": "Fortfahren"
+  },
+  "authenticator": {
+    "nameLabel": "Name:",
+    "namePlaceholder": "Geben Sie Ihren Namen ein:",
+    "emailLabel": "E-Mail:",
+    "emailPlaceholder": "E-Mail eingeben:",
+    "passwordLabel": "Passwort:",
+    "passwordPlaceholder": "Geben Sie Ihr Passwort ein:",
+    "confirmPasswordLabel": "Passwort bestätigen:"
+  },
+  "unitEmbeddingComponents": {
+    "generateButton": "Einbettungen generieren",
+    "successMessage": "Einbettungen generiert",
+    "errorMessage": "Fehler beim Generieren der Einbettungen"
+  },
+  "wordEmbeddingIntegration": {
+    "alertMessage": "Einbettungen werden generiert",
+    "successConfirmation": "Embeddings erfolgreich generiert"
+  },
+  "fileManager2": {
+    "metadataEditor": {
+      "heading": "Dateimetadaten",
+      "nameLabel": "Name",
+      "descriptionLabel": "Beschreibung",
+      "promptLabel": "Eingabeaufforderung (für KI-generierte Dateien)",
+      "modelLabel": "Modell",
+      "variantLabel": "Variante",
+      "typeLabel": "Typ",
+      "sizeLabel": "Größe",
+      "unknown": "Unbekannt",
+      "pathLabel": "Pfad",
+      "protectionLevelLabel": "Schutzstufe",
+      "createdLabel": "Erstellt",
+      "cancelButton": "Abbrechen",
+      "saveButton": "Speichern"
+    },
+    "expandedContent": {
+      "extractedContentHeading": "Extrahierter Inhalt",
+      "descriptionLabel": "Beschreibung:",
+      "transcriptionLabel": "Transkription:",
+      "reviewVocabularyMessage": "Vokabular aus dem Dokument überprüfen und importieren",
+      "noVocabularyExtracted": "Kein Vokabular extrahiert",
+      "reviewQuestionsMessage": "\"Fragen aus dem Dokument überprüfen und importieren\"",
+      "noQuestionsExtracted": "Keine Fragen extrahiert",
+      "noSummariesExtracted": "Keine Zusammenfassungen extrahiert",
+      "noObjectivesExtracted": "Keine Ziele extrahiert",
+      "noConceptsExtracted": "Keine Konzepte extrahiert",
+      "noContentAvailable": "Keine extrahierten Inhalte verfügbar"
+    },
+    "fileDetails": {
+      "noWaveformAvailable": "Keine Wellenform verfügbar",
+      "videoNotSupported": "Ihr Browser unterstützt das Video-Tag nicht.",
+      "insertTooltip": "In Editor einfügen",
+      "downloadTooltip": "Herunterladen",
+      "reAnalyzeTooltip": "Erneut analysieren",
+      "deleteTooltip": "Löschen"
+    },
+    "generators": {
+      "imagePromptPlaceholder": "Text, der in eine Bilddatei umgewandelt werden soll.",
+      "audioPromptPlaceholder": "Text, der in eine Audiodatei umgewandelt werden soll.",
+      "generatingImage": "Bilddatei wird generiert...",
+      "errorGeneratingImage": "\"Fehler beim Erstellen der Bilddatei\"",
+      "successfullyGeneratedImage": "Bilddatei erfolgreich generiert",
+      "generatingAudio": "Audiodatei wird erstellt...",
+      "errorGeneratingAudio": "Fehler beim Generieren der Audiodatei",
+      "successfullyGeneratedAudio": "Audio-Datei erfolgreich erstellt"
+    },
+    "selectedFileDetails": {
+      "emptyState": "Wählen Sie eine Datei aus, um Details und Metadaten anzuzeigen"
+    },
+    "toolbar": {
+      "selectAllTooltip": "Alle auswählen",
+      "searchPlaceholder": "Dateien durchsuchen...",
+      "uploadTooltip": "Dateien hochladen",
+      "actionsTooltip": "Aktionen"
+    },
+    "contextMenu": {
+      "deselectAll": "Alle abwählen",
+      "deleteConfirmMessage": "{{count}} ausgewählte Datei(en) löschen?",
+      "deleteSelected": "Ausgewählte löschen ({{count}})",
+      "reAnalyzeSelected": "\"Ausgewählte erneut analysieren ({{count}})\""
+    },
+    "mainView": {
+      "noFilesMessage": "Keine Dateien verfügbar. Laden Sie Dateien hoch, um zu beginnen."
+    }
+  },
+  "sortableAnswers": {
+    "answerLabel": "Antwort {{number}}",
+    "correct": "Richtig",
+    "incorrect": "Falsch"
+  },
+  "documentSourceBadge": {
+    "sourcePrefix": "Quelle:",
+    "pagePrefix": "Seite"
+  },
+  "pdfThumbnail": {
+    "failedToLoad": "PDF konnte nicht geladen werden",
+    "pageNumber": "{{current}} / {{total}}"
+  },
+  "unitEmbedding": {
+    "publishing": "Veröffentliche...",
+    "publishUnit": "Einheit veröffentlichen",
+    "publishSuccess": "Lerneinheit mit generierten Einbettungen veröffentlicht!",
+    "generating": "Wird generiert...",
+    "generateEmbeddings": "Einbettungen generieren",
+    "cached": "Im Cache gespeichert",
+    "wordsEmbedded": "{{count}} Wörter eingebettet",
+    "completedCount": "{{completed}}/{{total}} abgeschlossen",
+    "allSectionsComplete": "Alle Abschnitte abgeschlossen!"
+  },
+  "wordEmbedding": {
+    "embeddingFailed": "Wort gespeichert, aber Embedding-Generierung fehlgeschlagen: {{error}}",
+    "embeddingGenerated": "Einbettung generiert: {{count}} Wörter verarbeitet",
+    "questionSaveFailed": "Speichern mit Einbettungsfehler"
+  },
+  "toolBarRoPlugin": {
+    "fallbackText": "Format",
+    "untitledUnit": "Unbenannte Einheit",
+    "noDescription": "Keine Beschreibung"
+  },
+  "wordBlockPlugin": {
+    "wordNotFound": "Wort nicht gefunden: {{wordID}}",
+    "loadingAudio": "Audio wird geladen...",
+    "audioUnavailable": "Audio nicht verfügbar"
+  },
+  "metadataField": {
+    "unsavedChanges": "nicht gespeicherte Änderungen"
+  },
+  "sketchPad": {
+    "hoverToStartDrawing": "Zum Zeichnen mit der Maus darüberfahren",
+    "submittingInSeconds": "Zeichnung wird in {{countdown}} Sekunden zur Bewertung eingereicht...",
+    "cancelSubmission": "Übermittlung abbrechen"
+  }
+}

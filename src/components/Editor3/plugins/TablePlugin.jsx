@@ -66,7 +66,7 @@ export function TableContext({children}) {
 }
 
 export function InsertNewTableDialog({editor, onClose}) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.shared');
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -189,7 +189,8 @@ export function TablePlugin({cellEditorConfig, children}) {
                     Number(columns),
                     includeHeaders,
                 );
-                $insertNodes([tableNode]);
+                const paragraphNode = $createParagraphNode();
+                $insertNodes([tableNode, paragraphNode]);
                 // Save the editor state?
                 return true;
             },

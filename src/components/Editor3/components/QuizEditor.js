@@ -38,7 +38,7 @@ const QuizEditor = ({
     nodeKey,
     data,
 }) => {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.blocks');
     const [editMode, setEditMode] = useState(false);
     const [isLocked, setIsLocked] = useState(false);
     const [grade, setGrade] = useState(0.0);

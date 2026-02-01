@@ -54,7 +54,7 @@ const analyzeDocumentMutation = /* GraphQL */ `
  * Component for uploading and processing documents to extract vocabulary or questions
  */
 export default function DocumentUploader({ extractionType = 'vocabulary', onUploadComplete }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.files');
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [error, setError] = useState(null);

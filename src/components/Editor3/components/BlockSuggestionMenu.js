@@ -30,7 +30,7 @@ export default function BlockSuggestionMenu({
   useAI = false,
   onRequestMore,
 }) {  
-  const { t } = useTranslation('editor');
+  const { t } = useTranslation('editor.ai');
   const menuRef = useRef(null);
   const [hoveredIndex, setHoveredIndex] = React.useState(null);
   

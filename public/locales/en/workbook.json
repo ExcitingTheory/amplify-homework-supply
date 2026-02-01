@@ -1,0 +1,401 @@
+{
+  "answerComponent": {
+    "audioNotAvailable": {
+      "_meta": {
+        "alternativeTerms": [
+          "Audio Unavailable",
+          "No Audio Available"
+        ],
+        "component": {
+          "description": "Message shown to students when attempting to play audio that doesn't exist for vocabulary words or definitions.",
+          "location": "src/components/Editor3/components/AnswerComponent.js"
+        },
+        "context": "Error message displayed when audio content for a word or definition cannot be played because it is missing or unavailable.",
+        "impact": "Medium - informs students of limited functionality",
+        "tone": "polite-formal",
+        "usage": "Error/status message with optional text variable",
+        "userType": "students"
+      },
+      "value": "{{text}} (audio not available)"
+    },
+    "audioNotAvailableParens": {
+      "_meta": {
+        "alternativeTerms": [
+          "(no audio)",
+          "(audio missing)"
+        ],
+        "component": {
+          "description": "Inline status indicator for missing audio files.",
+          "location": "src/components/Editor3/components/AnswerComponent.js"
+        },
+        "context": "Parenthetical note displayed next to vocabulary words when audio is missing.",
+        "impact": "Low - supplementary information",
+        "tone": "polite-formal",
+        "usage": "Inline status note",
+        "userType": "students"
+      },
+      "value": "(audio not available)"
+    },
+    "errorMessages": {
+      "noAnswer": {
+        "_meta": {
+          "alternativeTerms": [],
+          "component": {
+            "description": "The answer component allows instructors to create and configure answer options for quiz questions and interactive exercises within the Lexical editor. It provides input fields and validation to ensure complete answer setup before content publishing.",
+            "location": "src/components/editor"
+          },
+          "context": "This error message appears in the editor when instructors are creating answer components for quizzes or interactive exercises but have not provided any answer text. It displays as a validation error to ensure all answer options have content before the learning unit can be saved or published.",
+          "impact": "Provides information to users",
+          "tone": "polite-formal",
+          "usage": "Translation key: answerComponent.errorMessages.noAnswer",
+          "userType": "all"
+        },
+        "value": "Please provide an answer"
+      },
+      "recordingFailed": {
+        "_meta": {
+          "alternativeTerms": [
+            "Recording unsuccessful",
+            "Recording error",
+            "Recording did not work",
+            "Unable to record"
+          ],
+          "component": {
+            "description": "The answer component handles user input for various types of responses including audio recordings in the content editor. This component manages the recording functionality and displays appropriate feedback when recording operations succeed or fail.",
+            "location": "src/components/editor"
+          },
+          "context": "This error message appears when a recording operation fails within the answer component of the content editor. Users see this message when attempting to record audio or video content for their assignments or learning materials and the recording process encounters a technical failure.",
+          "impact": "High - Recording failures prevent users from completing multimedia assignments and can cause frustration if not clearly communicated.",
+          "tone": "polite-formal",
+          "usage": "Error message displayed when audio or video recording fails during content creation or assignment submission.",
+          "userType": "all"
+        },
+        "value": "Recording failed"
+      }
+    },
+    "feedback": {
+      "correct": {
+        "_meta": {
+          "alternativeTerms": [
+            "Right",
+            "Excellent",
+            "Well done",
+            "Perfect"
+          ],
+          "component": {
+            "description": "The AnswerComponent handles the display and validation of student answers in interactive learning exercises. It provides immediate feedback to students based on their responses, showing success or error messages to guide their learning progress.",
+            "location": "components/Editor3/components/AnswerComponent.js"
+          },
+          "context": "This feedback text appears in the AnswerComponent when a student submits a correct answer to a quiz question or interactive exercise. The message is displayed immediately after the student selects or submits their answer, providing positive reinforcement for their successful response.",
+          "impact": "High - This positive feedback is crucial for student motivation and learning reinforcement in the Japanese language learning platform",
+          "tone": "polite-formal",
+          "usage": "Success feedback message displayed when students answer quiz questions correctly",
+          "userType": "students"
+        },
+        "value": "Correct!"
+      },
+      "incorrect": {
+        "_meta": {
+          "alternativeTerms": [
+            "Try once more",
+            "Give it another try",
+            "Attempt again",
+            "Please retry"
+          ],
+          "component": {
+            "description": "The AnswerComponent handles interactive quiz elements and answer validation within learning units. It displays feedback to students based on their submitted answers and manages the retry flow for incorrect responses.",
+            "location": "components/Editor3/components/AnswerComponent.js"
+          },
+          "context": "This text appears in the AnswerComponent when a student submits an incorrect answer to a quiz question or interactive exercise. It displays as feedback to encourage the student to make another attempt at answering the question correctly.",
+          "impact": "High - This message directly affects student motivation and learning progression by encouraging continued engagement after mistakes.",
+          "tone": "polite-formal",
+          "usage": "Feedback message that appears after incorrect answer submission, typically displayed as text or within a button to prompt retry action.",
+          "userType": "students"
+        },
+        "value": "Try again"
+      }
+    },
+    "inputMethods": {
+      "audio": {
+        "_meta": {
+          "alternativeTerms": [
+            "Voice",
+            "Sound",
+            "Recording",
+            "Speech"
+          ],
+          "component": {
+            "description": "The AnswerComponent allows instructors to configure how students will input their responses to questions or exercises. It provides multiple input method options including audio recording capabilities for language learning activities.",
+            "location": "components/Editor3/components/AnswerComponent.js"
+          },
+          "context": "This text appears as a label or option for audio input method in the Answer Component during content creation. Instructors see this when selecting how students can provide their answers, specifically when choosing audio recording as an input option.",
+          "impact": "High - Critical for instructors to understand available input methods when creating interactive language learning content that requires audio responses.",
+          "tone": "polite-formal",
+          "usage": "Label or option text for selecting audio as an answer input method.",
+          "userType": "instructors"
+        },
+        "value": "Audio"
+      },
+      "text": {
+        "_meta": {
+          "alternativeTerms": [
+            "Written",
+            "Textual",
+            "Typed"
+          ],
+          "component": {
+            "description": "The AnswerComponent handles the creation and configuration of answer input fields within the content editor. It provides various input method options for instructors to define how students will submit their responses to learning activities.",
+            "location": "components/Editor3/components/AnswerComponent.js"
+          },
+          "context": "This text appears as a label or option for text-based input when instructors are creating answer components within the Lexical editor. Users see this when selecting or configuring how students will provide their answers to questions or exercises.",
+          "impact": "Important because it helps instructors clearly understand and select the appropriate answer input type for their learning activities.",
+          "tone": "polite-formal",
+          "usage": "Label for a text input method option that instructors select when defining answer submission formats.",
+          "userType": "instructors"
+        },
+        "value": "Text"
+      },
+      "writing": {
+        "_meta": {
+          "alternativeTerms": [
+            "Text Input",
+            "Typing",
+            "Text Entry",
+            "Written Response"
+          ],
+          "component": {
+            "description": "The AnswerComponent handles different input methods for student responses in the eLearning platform. It provides multiple ways for students to submit answers, with writing being one of the available input options.",
+            "location": "components/Editor3/components/AnswerComponent.js"
+          },
+          "context": "This text appears as an input method option within the AnswerComponent, allowing users to select writing as their preferred method for providing answers. Students see this when choosing how to respond to questions or assignments in the learning platform.",
+          "impact": "High - This is essential for students to understand and select their preferred method of providing answers to assignments and quizzes",
+          "tone": "polite-formal",
+          "usage": "Option label in an input method selector that students click to choose text-based answer submission",
+          "userType": "students"
+        },
+        "value": "Writing"
+      }
+    },
+    "noDictionaryAvailable": "No Dictionary Available",
+    "submit": "Submit"
+  },
+  "toolBarRoPlugin": {
+    "fallbackText": {
+      "_meta": {
+        "alternativeTerms": [
+          "Formatting",
+          "Style",
+          "Layout",
+          "Appearance"
+        ],
+        "component": {
+          "description": "This component is part of the Lexical rich text editor toolbar system used by instructors to create learning content. It provides formatting tools and plugins for creating rich educational materials with various text styles and layouts.",
+          "location": "src/components/editor"
+        },
+        "context": "This text appears as fallback content for a read-only plugin in the rich text editor toolbar when the plugin fails to load or display properly. It serves as a generic label that users see in place of the intended formatting tool when there are technical issues or loading errors.",
+        "impact": "Medium - While not critical for core functionality, clear fallback text helps users understand available formatting options when plugins fail to load",
+        "tone": "polite-formal",
+        "usage": "Fallback text displayed in toolbar when a read-only formatting plugin cannot render properly",
+        "userType": "instructors"
+      },
+      "value": "Format"
+    },
+    "noDescription": {
+      "_meta": {
+        "alternativeTerms": [
+          "No Details",
+          "Description Missing"
+        ],
+        "component": {
+          "description": "Read-only toolbar component displaying unit metadata to students.",
+          "location": "src/components/Editor3/plugins/ToolBarRoPlugin.js"
+        },
+        "context": "Fallback text shown when a learning unit has no description. Appears in the toolbar below the unit title when viewing content.",
+        "impact": "Medium - indicates missing content to users",
+        "tone": "polite-formal",
+        "usage": "Fallback text for empty description field",
+        "userType": "all"
+      },
+      "value": "No Description"
+    },
+    "untitledUnit": {
+      "_meta": {
+        "alternativeTerms": [
+          "No Title",
+          "Unnamed Unit",
+          "Untitled"
+        ],
+        "component": {
+          "description": "Read-only toolbar component that displays unit information and timer for students viewing content.",
+          "location": "src/components/Editor3/plugins/ToolBarRoPlugin.js"
+        },
+        "context": "Default fallback text displayed in the read-only toolbar when a learning unit has no title set. Users see this in the header area when viewing content that hasn't been given a proper name.",
+        "impact": "Medium - helps users identify unnamed content",
+        "tone": "polite-formal",
+        "usage": "Fallback text for empty unit name field",
+        "userType": "all"
+      },
+      "value": "Untitled Unit"
+    }
+  },
+  "verticalTabsRo": {
+    "aiAssistant": {
+      "_meta": {
+        "alternativeTerms": [
+          "AI Helper",
+          "Copilot"
+        ],
+        "component": {
+          "description": "Tab for AI help in student workbook.",
+          "location": "src/components/Editor3/components/VerticalTabsRo.js"
+        },
+        "context": "Tab label for AI assistant chat.",
+        "impact": "High - primary AI feature access",
+        "tone": "polite-formal",
+        "usage": "Tab label and aria-label",
+        "userType": "students"
+      },
+      "value": "AI Assistant"
+    },
+    "previousAttempts": {
+      "_meta": {
+        "alternativeTerms": [
+          "History",
+          "Past Submissions"
+        ],
+        "component": {
+          "description": "Read-only vertical tabs for student workbook view.",
+          "location": "src/components/Editor3/components/VerticalTabsRo.js"
+        },
+        "context": "Tab label for viewing previous student attempts.",
+        "impact": "Medium - navigation label",
+        "tone": "polite-formal",
+        "usage": "Tab label and aria-label",
+        "userType": "students"
+      },
+      "value": "Previous Attempts"
+    },
+    "settings": {
+      "_meta": {
+        "alternativeTerms": [
+          "Preferences",
+          "Configuration"
+        ],
+        "component": {
+          "description": "Tab for student workbook configuration.",
+          "location": "src/components/Editor3/components/VerticalTabsRo.js"
+        },
+        "context": "Tab label for workbook settings.",
+        "impact": "Medium - configuration access",
+        "tone": "polite-formal",
+        "usage": "Tab label and aria-label",
+        "userType": "students"
+      },
+      "value": "Settings"
+    }
+  },
+  "unitCompletedPlugin": {
+    "completionMessage": {
+      "_meta": {
+        "alternativeTerms": [],
+        "category": "message",
+        "component": {
+          "description": "UnitCompletedPlugin - Displays unit completion modal. @module UnitCompletedPlugin  Shows a congratulatory modal when a unit is completed, displaying the unit name and top grades/scores.",
+          "location": "components/Editor3/plugins/UnitCompletedPlugin.js"
+        },
+        "context": "Used in UnitCompletedPlugin.js component",
+        "impact": "Provides message information to users",
+        "tone": "polite-formal",
+        "usage": "Message displayed for completionMessage",
+        "userType": "all"
+      },
+      "value": "Unit completed!"
+    },
+    "continueButton": {
+      "_meta": {
+        "alternativeTerms": [],
+        "category": "button",
+        "component": {
+          "description": "UnitCompletedPlugin - Displays unit completion modal. @module UnitCompletedPlugin  Shows a congratulatory modal when a unit is completed, displaying the unit name and top grades/scores.",
+          "location": "components/Editor3/plugins/UnitCompletedPlugin.js"
+        },
+        "context": "Used in UnitCompletedPlugin.js component",
+        "impact": "Triggers continueButton action when clicked",
+        "tone": "polite-formal",
+        "usage": "Button label for continueButton action",
+        "userType": "all"
+      },
+      "value": "Continue"
+    },
+    "sectionHeading": {
+      "_meta": {
+        "alternativeTerms": [],
+        "category": "heading",
+        "component": {
+          "description": "UnitCompletedPlugin - Displays unit completion modal. @module UnitCompletedPlugin  Shows a congratulatory modal when a unit is completed, displaying the unit name and top grades/scores.",
+          "location": "components/Editor3/plugins/UnitCompletedPlugin.js"
+        },
+        "context": "Used in UnitCompletedPlugin.js component",
+        "impact": "Labels the sectionHeading section for users",
+        "tone": "polite-formal",
+        "usage": "Heading text for sectionHeading section",
+        "userType": "all"
+      },
+      "value": "Next Steps"
+    }
+  },
+  "quizComponent": {
+    "gradeDisplay": {
+      "_meta": {
+        "alternativeTerms": [
+          "Score",
+          "Result",
+          "Mark",
+          "Performance"
+        ],
+        "component": {
+          "description": "The QuizComponent handles quiz functionality within learning units, allowing students to answer questions and receive immediate scoring feedback. It manages quiz state, scoring calculations, and displays results to students upon completion.",
+          "location": "components/Editor3/components/QuizComponent.js"
+        },
+        "context": "This text displays after a student completes a quiz within a learning unit, showing their performance as a percentage score. It appears in the quiz results section immediately after submission, providing immediate feedback on the student's performance.",
+        "impact": "High - This provides essential feedback to students about their learning progress and quiz performance.",
+        "tone": "polite-formal",
+        "usage": "Score display label that shows the calculated percentage grade after quiz completion.",
+        "userType": "students"
+      },
+      "value": "Grade: {{score}}%"
+    }
+  },
+  "meaningAssociationExercise": {
+    "layoutDirection": {
+      "_meta": {
+        "alternativeTerms": [],
+        "component": {
+          "description": "This editor component allows instructors to create and configure meaning association exercises for Japanese language learning units. The component provides layout options to arrange interactive elements that help students connect vocabulary words with their meanings or translations.",
+          "location": "src/components/editor"
+        },
+        "context": "This text specifies the layout direction for a meaning association exercise component within the content editor. It determines whether exercise elements are arranged horizontally ('row') or vertically ('column') in the user interface during exercise creation or editing.",
+        "impact": "Provides information to users",
+        "tone": "polite-formal",
+        "usage": "Translation key: meaningAssociationExercise.layoutDirection",
+        "userType": "all"
+      },
+      "value": "row"
+    }
+  },
+  "customAnswerComponent": {
+    "answerPlaceholder": "Answer Placeholder",
+    "answerQuestions": "Answer Questions",
+    "audio": "Audio",
+    "audioQuestion": "Audio Question",
+    "completedQuestion": "Completed Question",
+    "errorOccurred": "Error Occurred",
+    "loading": "Loading",
+    "promptNotAvailable": "Prompt Not Available",
+    "question": "Question",
+    "submit": "Submit",
+    "text": "Text",
+    "writing": "Writing",
+    "yourAnswer": "Your Answer"
+  }
+}

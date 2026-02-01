@@ -45,7 +45,7 @@ export default function MediaPlayerComponent({
     words,
     requestDefinition = false,
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.shared');
     const [gridSelection, setGridSelection] = React.useState([]);
     const [index, setIndex] = useState(0);
     const [sources, setSources] = useState([]);

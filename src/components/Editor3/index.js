@@ -99,6 +99,7 @@ import PdfViewerPlugin from './plugins/PdfViewerPlugin';
 import { PdfViewerNode } from './components/PdfViewerNode';
 
 import { LayoutPlugin } from './plugins/LayoutPlugin';
+import Placeholder from './components/Placeholder';
 import { LayoutContainerNode } from './components/LayoutContainerNode';
 import { LayoutItemNode } from './components/LayoutItemNode';
 
@@ -635,8 +636,8 @@ export default function Editor() {
                   className="editor-container"
                   style={{
                     position: 'relative',
-                    minHeight: '100%',
-                    paddingLeft: '2.5rem',
+                    minHeight: 'calc(100vh - var(--app-bar-height, 11rem))',
+                    paddingLeft: '1.5rem',
                   }}
                 >
                 <RichTextPlugin
@@ -644,14 +645,20 @@ export default function Editor() {
                     <ContentEditable
                       className="editor"
                       aria-label="Main editor content"
-                      aria-placeholder="Enter some text..."
+                      aria-placeholder="Start typing or use the toolbar above to add content..."
                       style={{
                         maxWidth: '100%',
                         outline: 'none',
+                        minHeight: 'calc(100vh - var(--app-bar-height, 11rem))',
+                        padding: '1rem 2rem 1rem 0.5rem',
                       }}
                     />
                   }
-                  placeholder={<div>Enter some text...</div>}
+                  placeholder={
+                    <Placeholder className="editor-placeholder">
+                      Start typing or use the toolbar above to add content...
+                    </Placeholder>
+                  }
                   ErrorBoundary={LexicalErrorBoundary}
                 />
                 <MyOnChangePlugin onChange={onChange} />
@@ -852,7 +859,7 @@ export function Workbook() {
             }}>
               <DrawerHeader
                 style={{
-                  minHeight: '11rem',
+                  minHeight: 'var(--app-bar-height, 11rem)',
                 }}
               />
 
@@ -863,8 +870,8 @@ export function Workbook() {
                     style={{
                       margin: '0',
                       padding: '0',
-                      paddingLeft: '2.5rem', // Space for draggable handles
-                      height: 'calc(100vh - 11rem)',
+                      paddingLeft: '1.5rem', // Space for draggable handles
+                      height: 'calc(100vh - var(--app-bar-height, 11rem))',
                       overflowY: 'auto',
                       width: '100%',
                       boxSizing: 'border-box',
@@ -876,6 +883,8 @@ export function Workbook() {
                         width: '100%',
                         maxWidth: '100%',
                         boxSizing: 'border-box',
+                        minHeight: 'calc(100vh - var(--app-bar-height, 11rem))',
+                        padding: '1rem 2rem 1rem 0.5rem',
                       }}
                     />
                   </div>

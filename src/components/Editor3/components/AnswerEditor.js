@@ -140,7 +140,7 @@ const AnswerEditor = React.memo(function AnswerEditor({
     allowedInput,
     promptMethod,
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.blocks');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     // const [rows, setRows] = React.useState([]);

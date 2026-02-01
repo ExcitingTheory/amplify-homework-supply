@@ -736,7 +736,7 @@ function FileNameField({ value, fileId, onSave, searchTerm }) {
 
 // Metadata Editor Component for editing file properties
 function MetadataEditor({ file, onUpdate, onClose }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.files');
     const [editing, setEditing] = React.useState(false);
     const [formData, setFormData] = React.useState({
         name: file.name || '',
@@ -877,7 +877,7 @@ function MetadataEditor({ file, onUpdate, onClose }) {
 }
 
 const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, parsedContent, search, editor }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.files');
     const [activeTab, setActiveTab] = React.useState(0);
 
     const handleInsertIntoEditor = () => {
@@ -1183,7 +1183,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
 });
 
 function NewImageFileForm({ open, toggleNewImageFileForm }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.files');
 
     const [newDescription, setNewDescription] = React.useState('');
     const [presignedUrl, setPresignedUrl] = React.useState('');
@@ -1488,7 +1488,7 @@ function NewVideoFileForm({ open, toggleNewVideoFileForm }) {
 }
 
 function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.files');
     const [newDescription, setNewDescription] = React.useState('');
     const [audioSrc, setAudioSrc] = React.useState('');
     const [presignedUrl, setPresignedUrl] = React.useState('');
@@ -1918,7 +1918,7 @@ const FileTypeSubheader = React.memo(function FileTypeSubheader({ label, fileTyp
 // =============================================================================
 
 const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentStatus, editor }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.files');
     const { setConfirmDialog } = useFileManager();
     const [imageUrl, setImageUrl] = React.useState(null);
     const [audioUrl, setAudioUrl] = React.useState(null);
@@ -2413,7 +2413,7 @@ function SelectedFileView({ selectedFile, documentStatus, search, editor }) {
  * Handles finding the selected file and wrapping with Suspense
  */
 function SelectedFileDetailsPanel({ selectedItems, files, documentStatuses, search, editor }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.files');
     if (selectedItems.size === 0) {
         return (
             <Box
@@ -2461,7 +2461,7 @@ function SelectedFileDetailsPanel({ selectedItems, files, documentStatuses, sear
 
 export default function FileManager2() {
     console.log('[FileManager2] Component render started');
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.files');
     const [editor] = useLexicalComposerContext();
     const [search, setSearch] = React.useState('');
     const [searchMode, setSearchMode] = React.useState('hybrid'); // 'keyword', 'semantic', 'hybrid'

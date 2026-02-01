@@ -29,7 +29,7 @@ import {
  * @returns {JSX.Element} Unit completion modal component
  */
 export default function UnitCompletedPlugin() {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('workbook');
 
     const {
         name,

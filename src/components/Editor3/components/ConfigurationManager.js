@@ -35,7 +35,7 @@ function FeaturedImage({ style, s3Key, identityId }) {
 
 export default function ConfigurationManager() {
 
-  const { t } = useTranslation('editor');
+  const { t } = useTranslation('editor.authoring');
   const [isDragging, setIsDragging] = React.useState(false);
   const [filesToUpload, setFilesToUpload] = React.useState([]);
   const [fileOperations, setFileOperations] = React.useState([]);

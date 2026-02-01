@@ -136,7 +136,7 @@ function FloatingLinkEditor({
     isLeftDrawerOpen = false,
     isRightDrawerOpen = false,
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.shared');
     const editorRef = useRef(null);
     const inputRef = useRef(null);
     const [linkUrl, setLinkUrl] = useState('');

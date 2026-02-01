@@ -117,7 +117,7 @@ export default function AnswerComponent({
     allowedInput,
     promptMethod,
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('workbook');
 
     /**
      * Answer Schema

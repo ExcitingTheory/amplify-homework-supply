@@ -23,6 +23,11 @@ import '../src/components/Editor3/theme.css';
 import '../src/components/Editor3/components/LanguageEditorTheme.css';
 import './storybook.css';
 
+// Import action tracking
+import { createTrackableActions } from './code/action-tracker';
+import { getStoryId } from './code/route-map';
+import { initializeTaskCompletion } from './code/task-completion';
+
 // Import real context providers
 import { FilesProvider } from '../src/context/fileContext';
 import { DictionaryProvider } from '../src/context/dictionaryContext';
@@ -85,6 +90,26 @@ global.fetch = async (url, options) => {
   return originalFetch(url, options);
 };
 
+// Initialize automatic task completion detection
+if (typeof window !== 'undefined') {
+  let taskCompletionUnsubscribe = null;
+  
+  // Initialize once when preview loads
+  setTimeout(() => {
+    if (!taskCompletionUnsubscribe) {
+      taskCompletionUnsubscribe = initializeTaskCompletion();
+      console.log('[Preview] Task completion detector initialized');
+    }
+  }, 1000);
+  
+  // Cleanup on unload
+  window.addEventListener('beforeunload', () => {
+    if (taskCompletionUnsubscribe) {
+      taskCompletionUnsubscribe();
+    }
+  });
+}
+
 // Create a basic theme - you can customize this to match your app's theme
 const theme = createTheme({
   palette: {
@@ -113,21 +138,30 @@ const theme = createTheme({
 const preview = {
   globalTypes,
   parameters: {
-    actions: { args: {
-      onClick: fn(),
-      onChange: fn(),
-      onSubmit: fn(),
-      onClose: fn(),
-      onOpen: fn(),
-      onSelect: fn(),
-      onDelete: fn(),
-      onAdd: fn(),
-      onRemove: fn(),
-      onToggle: fn(),
-      onHover: fn(),
-      onFocus: fn(),
-      onBlur: fn(),
-    } },
+    // Note: Base action handlers are defined here but will be wrapped
+    // with tracking in the decorator below based on story context
+    actions: { 
+      args: {
+        onClick: fn(),
+        onChange: fn(),
+        onSubmit: fn(),
+        onClose: fn(),
+        onOpen: fn(),
+        onSelect: fn(),
+        onDelete: fn(),
+        onAdd: fn(),
+        onRemove: fn(),
+        onToggle: fn(),
+        onHover: fn(),
+        onFocus: fn(),
+        onBlur: fn(),
+        onSave: fn(),
+        onCancel: fn(),
+        onEdit: fn(),
+        onUpdate: fn(),
+        onCreate: fn(),
+      } 
+    },
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -203,7 +237,7 @@ const preview = {
           '🧩 Components',
           ['Header', 'Button', 'Nodes', 'Meaning Association'],
           '🔌 Editor Plugins',
-          ['Editor3'],
+          //    ['Editor3'],
           'WIP',
           '*',
         ],
@@ -212,6 +246,47 @@ const preview = {
   tags: ['autodocs'],
   decorators: [
     withTranslationMode,
+    // Action tracking decorator - wraps actions with onboarding event tracking
+    (Story, context) => {
+      // Get story ID for tracking
+      const storyId = getStoryId(context);
+      const componentName = context.component?.name || context.title?.split('/').pop();
+      
+      // Create trackable versions of all action handlers
+      const trackableActions = createTrackableActions({
+        storyId,
+        componentName,
+        baseHandlers: {
+          onClick: fn(),
+          onChange: fn(),
+          onSubmit: fn(),
+          onClose: fn(),
+          onOpen: fn(),
+          onSelect: fn(),
+          onDelete: fn(),
+          onAdd: fn(),
+          onRemove: fn(),
+          onToggle: fn(),
+          onHover: fn(),
+          onFocus: fn(),
+          onBlur: fn(),
+          onSave: fn(),
+          onCancel: fn(),
+          onEdit: fn(),
+          onUpdate: fn(),
+          onCreate: fn(),
+        }
+      });
+      
+      // Merge tracked actions into context args
+      React.useEffect(() => {
+        if (context.args) {
+          Object.assign(context.args, trackableActions);
+        }
+      }, [context.args]);
+      
+      return <Story />;
+    },
     // Language switcher decorator - syncs with translation mode addon
     (Story, context) => {
       const [globals] = React.useState(context.globals || {});

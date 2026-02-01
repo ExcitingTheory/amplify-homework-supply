@@ -16,7 +16,7 @@ import { useTranslation } from 'next-i18next';
 import UnitContext from '../../../context/unitContext'
 
 export default function QuestionBlockRo(props) {
-  const { t } = useTranslation('editor');
+  const { t } = useTranslation('workbook');
   const { nodeKey, data } = props
   const { grade, saveGrade } = React.useContext(UnitContext)
   console.log('QuestionBlockRo.grade', grade)

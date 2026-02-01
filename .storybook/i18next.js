@@ -56,8 +56,19 @@ i18n
     fallbackLng: 'en',
     debug: false,
     
-    // Core namespaces
-    ns: ['auth', 'common', 'components', 'editor', 'pages'],
+    // Core namespaces (editor split into feature-based namespaces)
+    ns: [
+      'auth',
+      'common',
+      'components',
+      'pages',
+      'editor.authoring',    // Toolbars, drawers, configuration
+      'editor.files',        // File management
+      'editor.ai',           // AI features and generation
+      'editor.blocks',       // Block editors (quiz, answer, vocab)
+      'workbook',            // Student/learner interface
+      'editor.shared',       // Shared components and plugins
+    ],
     defaultNS: 'common',
     
     interpolation: {

@@ -185,7 +185,7 @@ export default function MetadataEditor({
     onUpdate,
     autoSaveDelay = 2000,
 }: MetadataEditorProps) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.shared');
     const [saving, setSaving] = useState(false);
     const [formData, setFormData] = useState<FormData>({
         name: file.name || '',

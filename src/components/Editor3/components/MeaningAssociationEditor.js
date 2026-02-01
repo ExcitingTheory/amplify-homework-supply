@@ -62,7 +62,7 @@ export function ActionsMenu({
     ids,
     removeWordIDs,
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.blocks');
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
@@ -116,7 +116,7 @@ export default function MeaningAssociationEditor({
     // setWordIDs,
     wordIDs,
 }) {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.blocks');
     const [value, setValue] = React.useState(null);
     const [open, toggleOpen] = React.useState(false);
     // const [rows, setRows] = React.useState([]);

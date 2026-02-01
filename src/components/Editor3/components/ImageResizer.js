@@ -24,7 +24,7 @@ export default function ImageResizer({
   setShowCaption,
   captionsEnabled,
 }) {
-  const { t } = useTranslation('editor');
+  const { t } = useTranslation('editor.shared');
   const controlWrapperRef = useRef(null);
   const userSelect = useRef({
     priority: '',

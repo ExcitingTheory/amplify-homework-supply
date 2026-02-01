@@ -61,7 +61,7 @@ export function $createAutocompleteNode(uuid) {
 }
 
 function AutocompleteComponent() {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.shared');
     const {
         suggestion,
     } = useContext(AutocompleteContext)

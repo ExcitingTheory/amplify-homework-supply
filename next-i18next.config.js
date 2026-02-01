@@ -19,7 +19,19 @@ module.exports = {
     : '/locales',
   
   // Namespace configuration
-  ns: ['auth', 'common', 'components', 'editor', 'pages'],
+  ns: [
+    'auth',
+    'common',
+    'components',
+    'pages',
+    // Editor namespaces (split from original 'editor' namespace)
+    'editor.authoring',    // Toolbars, drawers, configuration
+    'editor.files',        // File management
+    'editor.ai',           // AI features and generation
+    'editor.blocks',       // Block editors (quiz, answer, vocab)
+    'workbook',            // Student/learner interface
+    'editor.shared',       // Shared components and plugins
+  ],
   defaultNS: 'common',
   
   // React configuration

@@ -1,0 +1,823 @@
+{
+  "toolbar": {
+    "bold": "太字",
+    "italic": "イタリック",
+    "underline": "下線",
+    "strikethrough": "取り消し線",
+    "heading": "見出し",
+    "paragraph": "段落",
+    "bullet_list": "箇条書きリスト",
+    "numbered_list": "番号付きリスト",
+    "align_left": "左揃え",
+    "align_center": "中央揃え",
+    "align_right": "右揃え",
+    "insert_link": "リンクを挿入します",
+    "insert_image": "画像を挿入",
+    "insert_table": "表を挿入します",
+    "insert_code": "コードブロックを挿入します"
+  },
+  "blocks": {
+    "answer": "解答ブロック",
+    "quiz": "クイズブロック",
+    "custom_answer": "カスタム回答",
+    "meaning_association": "意味の関連付け"
+  },
+  "placeholders": {
+    "type_here": "ここに入力してください...",
+    "enter_text": "テキストを入力してください",
+    "search_words": "単語を検索..."
+  },
+  "answerComponent": {
+    "inputMethods": {
+      "text": "テキスト",
+      "audio": "オーディオ",
+      "writing": "記述"
+    },
+    "errorMessages": {
+      "noAnswer": "回答を入力してください",
+      "recordingFailed": "録画に失敗しました"
+    },
+    "feedback": {
+      "correct": "正解です！",
+      "incorrect": "もう一度試してください"
+    },
+    "audioNotAvailable": "{{text}}（音声利用不可）",
+    "audioNotAvailableParens": "（音声は利用できません）"
+  },
+  "answerEditor": {
+    "instructions": "以下に回答を作成してください",
+    "dialogTitle": "回答を編集",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "emptyState": "回答が入力されていません",
+    "addWordToDict": "辞書に新しい単語を追加します。"
+  },
+  "assignmentConfiguration": {
+    "timerLabel": "タイマー",
+    "dueDateLabel": "提出期限",
+    "sectionLabel": "セクション",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "addTimerQuestion": "このユニットにタイマーを追加しますか？",
+    "timerDescription": "ユーザーが「開始」ボタンをクリックした後にタイマーが開始されます。タイマーが終了した後もユーザーは続行することができ、課題が開始された時刻と完了した時刻が記録されます。タイマーの動作中は、画面上部にカウントダウンが表示されます。",
+    "addTimerButton": "タイマーを追加します",
+    "assignDueDateQuestion": "このユニットにセクションの期限日を設定しますか？",
+    "dueDateDescriptionLine1": "期限を過ぎた後も、ユーザーは続行することができます。",
+    "dueDateDescriptionLine2": "期限日はクラスセクション内のユニットを並び替えるために使用されます。",
+    "selectSectionHelper": "期限日を設定するセクションを選択してください",
+    "addDueDateButton": "期限を追加",
+    "assignedToSectionsHeading": "セクションに割り当て済み",
+    "noDueDateSet": "期限未設定です",
+    "noSectionSet": "セクションが設定されていません"
+  },
+  "audioWaveformPlayer": {
+    "noAudioSource": "オーディオソースが提供されていません"
+  },
+  "autocompleteNode": {
+    "mobileHint": "（スワイプ ⮕）",
+    "desktopHint": "（タブ）"
+  },
+  "blockSuggestionMenu": {
+    "aiTitle": "🤖 AIによる提案",
+    "suggestionsTitle": "💡 推奨ブロック",
+    "emptyState": "まだ提案がありません。",
+    "emptyStateHelper": "エディターで入力を開始すると、AI機能によるブロック候補が表示されます。",
+    "helper": "提案をクリックしてレッスンに挿入してください",
+    "helperAI": "候補をクリックするか、TabキーまたはEnterキーを押して挿入してください",
+    "generateMore": "さらに提案を生成します"
+  },
+  "configurationManager": {
+    "pdfAnalysisSettings": "PDF分析設定",
+    "autoAnalyzeLabel": "アップロード時に文書を自動分析します",
+    "autoAnalyzeDescription": "有効にすると、アップロード直後にPDFがOpenAIに送信され、語彙抽出が実行されます。",
+    "uploadingImage": "画像をアップロードしています",
+    "uploadImagePrompt": "画像をアップロードします",
+    "setFeaturedImage": "注目画像を設定",
+    "noFeaturedImage": "フィーチャー画像が設定されていません。",
+    "dragDropPrompt": "ここに画像をドラッグ＆ドロップして、注目画像として設定してください。"
+  },
+  "documentUploader": {
+    "title": "{{extractionType}}抽出用の書類をアップロードしてください",
+    "extractionTypes": {
+      "vocabulary": "語彙",
+      "question": "問題",
+      "dictionary": "辞書",
+      "questions": "質問です"
+    },
+    "dragDropPrompt": "ここにドキュメントをドラッグ&ドロップしてください",
+    "supportedFormats": "対応形式：PDF、Word（.doc、.docx）、テキスト（.txt）、Excel（.xls、.xlsx、.csv）",
+    "browseFiles": "ファイルを参照",
+    "uploadingProgress": "アップロード中... {{progress}}%",
+    "recentUploads": "最近のアップロード",
+    "statusLabels": {
+      "processing": "処理中...",
+      "complete": "完了しました",
+      "failed": "失敗しました"
+    },
+    "errorMessages": {
+      "noSupportedFiles": "サポートされているドキュメントが見つかりません。PDF、Word、テキスト、またはExcelファイルをアップロードしてください。",
+      "skippedFiles": "一部のファイルはスキップされました（サポートされていないファイル形式）",
+      "uploadFailed": "{{fileName}}のアップロードに失敗しました：{{error}}"
+    },
+    "howItWorks": {
+      "title": "仕組みについて：",
+      "step1": "1. 文書をアップロードしてください（PDF、Word、テキスト、またはExcelファイル）",
+      "step2": "2. AIがコンテンツを分析し、{{extractionType}}を抽出します",
+      "step3": "3. 「提案」タブで提案を確認し、承認してください",
+      "step4": "4. 選択したアイテムを{{target}}にインポートします"
+    }
+  },
+  "enhancedGenerators": {
+    "generateImage": "画像を生成します",
+    "generateAudio": "音声を生成",
+    "imagePromptPlaceholder": "生成したい画像について説明してください...",
+    "audioPromptPlaceholder": "音声に変換するテキストを入力してください...",
+    "editWithMask": "マスクで編集（部分再生成）",
+    "openRecordingStudio": "録音スタジオで開く",
+    "backToGenerator": "ジェネレーターに戻る"
+  },
+  "metadataEditor": {
+    "fileMetadataHeading": "ファイルメタデータ",
+    "aiGenerationInfo": "AI生成情報",
+    "promptLabel": "プロンプト",
+    "modelLabel": "モデル",
+    "variantLabel": "バリアント",
+    "fileInfo": "ファイル情報",
+    "typeLabel": "タイプ：",
+    "unknown": "不明です",
+    "sizeLabel": "サイズ：",
+    "pathLabel": "パス:",
+    "notSet": "未設定です",
+    "protectionLabel": "保護：",
+    "createdLabel": "作成日:",
+    "updatedLabel": "更新日:"
+  },
+  "tabsVerticalRight": {
+    "aiSuggestionsHeading": "AIブロック提案",
+    "aiSuggestionsDesc": "AIによるコンテンツブロックの提案が、現在のレッスン内容に基づいてここに表示されます。",
+    "comingSoon": "近日公開予定：推論と優先度インジケーター付きのインタラクティブ提案パネルです。",
+    "gradesHeading": "ユニットの成績",
+    "gradesDesc": "このユニットの成績と進捗を確認できます。",
+    "instructorsLabel": "📊 講師：",
+    "instructorsDesc": "すべての学生の成績と提出物を表示する",
+    "learnersLabel": "✍️ 学習者:",
+    "learnersDesc": "自分の成績とフィードバックを確認します",
+    "cohortChatHeading": "コホートチャット",
+    "cohortChatDesc": "クラスメートや講師と協力して学習しましょう。",
+    "tagKaiLabel": "💬 @kaiをタグ付け",
+    "tagKaiDesc": "ディスカッションでAIサポートを受ける",
+    "useTopicsLabel": "🏷️ #トピックを使用してください",
+    "useTopicsDesc": "テーマ別に会話を整理します",
+    "shareInsights": "知見を共有し、質問をして、一緒に学びましょう",
+    "aiAssistantTab": "AIアシスタント",
+    "aiSuggestionsTab": "AI提案",
+    "gradesTab": "成績",
+    "cohortChatTab": "コホートチャット"
+  },
+  "unifiedGenerateModal": {
+    "generating": "{{type}}を生成しています...",
+    "takeMoments": "しばらくお待ちください",
+    "preview": "プレビュー",
+    "discardChanges": "変更を破棄しますか？",
+    "lostWarning": "今キャンセルすると、生成された{{type}}は失われます。",
+    "cancel": "キャンセル",
+    "generate": "生成します",
+    "saveClose": "保存して閉じる",
+    "keepEditing": "編集を続ける",
+    "discard": "破棄します"
+  },
+  "verticalTabsRo": {
+    "previousAttempts": "以前の試行",
+    "aiAssistant": "AIアシスタント",
+    "settings": "設定"
+  },
+  "freeSoloCreateOptionDialog": {
+    "dialogTitle": "新しい単語を追加",
+    "description": "辞書に新しい単語を追加します。",
+    "label": "フリーソロダイアログ",
+    "cancel": "キャンセル",
+    "create": "追加します"
+  },
+  "imageMaskEditor": {
+    "instructions": "<strong>手順:</strong> 再生成したい領域をペイントしてください。消しゴムを使用してマスクの一部を削除できます。Shiftキーを押しながらドラッグするとパンできます。ズームボタンを使用してより詳細に表示できます。",
+    "brushSize": "ブラシサイズ: {{size}}",
+    "zoomInfo": "ズーム: {{level}}% | Shiftキーを押しながらパンします",
+    "applyMask": "マスクを適用して再生成します",
+    "save": "保存",
+    "cancel": "キャンセル"
+  },
+  "imageResizer": {
+    "addCaption": "キャプションを追加"
+  },
+  "insertLayoutDialog": {
+    "cancel": "キャンセル",
+    "insert": "挿入します"
+  },
+  "meaningAssociationEditor": {
+    "removeFromAssignment": "課題から削除",
+    "addWordLabel": "演習に単語を追加します",
+    "dialogTitle": "新しい単語を追加します",
+    "dialogDescription": "辞書に新しい単語を追加します。",
+    "phraseLabel": "フレーズ",
+    "pronunciationLabel": "発音",
+    "definitionPlaceholder": "定義",
+    "cancel": "キャンセル",
+    "add": "追加します",
+    "emptyState": "まだ単語が追加されていません。上の入力欄を使用して辞書から単語を追加してください。追加したい単語が辞書にない場合は、ドロップダウンの「単語を追加」項目をクリックするか、サイドバーの辞書エディターから追加することができます。",
+    "columnHeaders": {
+      "phrase": "フレーズ",
+      "pronunciation": "発音",
+      "definition": "定義"
+    }
+  },
+  "mediaPlayerComponent": {
+    "titleHeader": "タイトル"
+  },
+  "promptMethodSelector": {
+    "inputButton": "入力",
+    "outputButton": "出力",
+    "menuItems": {
+      "text": "テキスト",
+      "audio": "オーディオ",
+      "image": "画像",
+      "drawing": "描画",
+      "video": "ビデオ"
+    }
+  },
+  "quizEditor": {
+    "edit": "編集します",
+    "reset": "リセット",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "done": "完了しました",
+    "invalid": "無効です",
+    "addAnswer": "回答を追加",
+    "gradeDisplay": "成績: {{score}}",
+    "status": "ステータス"
+  },
+  "staticWaveform": {
+    "errorLoading": "波形の読み込みでエラーが発生しました"
+  },
+  "suggestedContent": {
+    "ownerPlaceholder": "オーナーID",
+    "identityPlaceholder": "身元ID"
+  },
+  "tableComponent": {
+    "insertRow": "行を挿入します",
+    "insertColumn": "列を挿入します",
+    "deleteRow": "行を削除します",
+    "deleteColumn": "列を削除します"
+  },
+  "tableOfContents": {
+    "emptyState": "見出しが見つかりません。目次を表示するには、文書に見出しを追加してください。",
+    "title": "目次"
+  },
+  "tabsVerticalLeft": {
+    "tabs": {
+      "assignments": "課題",
+      "tableOfContents": "目次",
+      "dictionary": "辞書",
+      "questions": "質問",
+      "files": "ファイル",
+      "aiAssistant": "AIアシスタント",
+      "configuration": "設定"
+    }
+  },
+  "customAnswerEditor": {
+    "title": "カスタム解答問題",
+    "description": "ユーザーに質問を表示し、短い回答を求める短答式問題を作成します。",
+    "addWordLabel": "演習に単語を追加",
+    "remove": "削除します",
+    "dialogTitle": "新しい質問を追加します",
+    "dialogDescription": "新しい質問と回答のペアを追加してください。",
+    "ttsPreview": "音声読み上げプレビュー",
+    "audioPreview": "音声プレビュー",
+    "promptLabel": "プロンプト",
+    "answerLabel": "回答",
+    "answerPlaceholder": "回答",
+    "hintLabel": "ヒント",
+    "hintPlaceholder": "ヒント",
+    "cancel": "キャンセル",
+    "add": "追加します",
+    "emptyState": "まだ質問が追加されていません。上記の入力欄を使用して、問題と回答のペアを追加してください。",
+    "generatingAudio": "音声ファイルを生成しています...",
+    "successGeneratedAudio": "音声ファイルの生成が完了しました",
+    "errorGeneratingAudio": "オーディオファイルの生成中にエラーが発生しました",
+    "errorCreatingQuestion": "問題の作成エラーです",
+    "columnHeaders": {
+      "prompt": "プロンプト",
+      "answer": "回答",
+      "id": "ID",
+      "promptAudio": "プロンプト音声",
+      "answerAudio": "回答音声",
+      "hint": "ヒント"
+    }
+  },
+  "fileMetadataComponent": {
+    "collapse": "折りたたむ",
+    "expand": "展開します",
+    "fileInfo": "ファイル情報",
+    "deleteFile": "ファイルを削除します",
+    "deleteConfirmation": "ファイル「{{fileName}}」を削除しますか？",
+    "filename": "ファイル名:",
+    "type": "タイプ:",
+    "unknown": "不明です",
+    "unknownSize": "サイズ不明",
+    "path": "パス:",
+    "protectionLevel": "保護レベル:",
+    "unset": "未設定",
+    "created": "作成日:",
+    "searchPlaceholder": "ファイル内容を検索...",
+    "basicInfo": "基本情報",
+    "rawMetadata": "生データ",
+    "parsedContent": "解析済みコンテンツ",
+    "noMetadataAvailable": "このファイルにはメタデータがありません。",
+    "noParsedContentAvailable": "このファイルには解析可能なコンテンツがありません。",
+    "vocabulary": "語彙",
+    "summaries": "要約",
+    "objectives": "目的",
+    "concepts": "概念",
+    "questions": "質問",
+    "vocabularyCount": "語彙（{{count}}）",
+    "summariesCount": "要約 ({{count}})",
+    "objectivesCount": "学習目標 ({{count}})",
+    "conceptsCount": "コンセプト ({{count}})",
+    "questionsCount": "質問（{{count}}）",
+    "confirm": "確認します",
+    "cancel": "キャンセル"
+  },
+  "autoEmbedPlugin": {
+    "youtubeVideo": "YouTube動画",
+    "dismiss": "閉じる",
+    "embedTitle": "{{contentName}}を埋め込み",
+    "embedOption": "{{contentName}}を埋め込む",
+    "embed": "埋め込みます"
+  },
+  "floatingLinkEditorPlugin": {
+    "cancelLinkEditing": "リンクの編集をキャンセル",
+    "linkUrl": "リンクURL",
+    "confirmLink": "リンクを確認します",
+    "closeLinkEditor": "リンクエディターを閉じる",
+    "youtubeEmbed": "YouTube埋め込み",
+    "convertToYoutubeEmbed": "YouTubeの埋め込みに変換します",
+    "editLink": "リンクを編集します",
+    "removeLink": "リンクを削除"
+  },
+  "imagesPlugin": {
+    "upload": "画像をアップロードします",
+    "insertFromUrl": "URLから挿入",
+    "imageUrl": "画像URL",
+    "imageUrlPlaceholder": "例：https://source.unsplash.com/random",
+    "altText": "代替テキスト",
+    "altTextPlaceholder": "ランダムなUnsplash画像",
+    "altTextDescriptive": "説明的な代替テキスト",
+    "confirm": "確認します",
+    "imageUpload": "画像アップロード",
+    "sample": "サンプル",
+    "url": "URL",
+    "file": "ファイル",
+    "dropImagesHere": "ここに画像をドロップしてください"
+  },
+  "tablePlugin": {
+    "insertTable": "表を挿入します",
+    "table": "表",
+    "chooseLayout": "レイアウトを選択してください",
+    "rowsPlaceholder": "行数 (1-500)",
+    "rows": "行",
+    "columnsPlaceholder": "列数 (1-50)",
+    "columns": "列",
+    "insert": "挿入"
+  },
+  "toolBarPlugin": {
+    "dialogTitle": "フォーマット",
+    "bold": "太字",
+    "italic": "イタリック",
+    "underline": "下線",
+    "strikethrough": "取り消し線",
+    "insertLink": "リンクを挿入します",
+    "insertImage": "画像を挿入",
+    "insertTable": "表を挿入します",
+    "alignLeft": "左揃え",
+    "alignCenter": "中央揃え",
+    "alignRight": "右揃え",
+    "justifyAlign": "両端揃え",
+    "outdent": "インデント解除",
+    "indent": "インデント",
+    "undo": "元に戻す",
+    "redo": "やり直し",
+    "align": "整列します",
+    "insert": "挿入します",
+    "text": "テキスト",
+    "scrollToolbarLeft": "ツールバーを左にスクロールします",
+    "scrollToolbarRight": "ツールバーを右にスクロールします",
+    "columnsLayout": "列レイアウト",
+    "chooseLayout": "レイアウトを選択してください",
+    "deleteUnitConfirmation": "このユニットを削除してもよろしいですか？",
+    "delete": "削除します",
+    "cancel": "キャンセル",
+    "closePreview": "{{name}}のプレビューを閉じる",
+    "untitledUnit": "無題のユニット",
+    "addDescription": "説明を追加します",
+    "status": "ステータス",
+    "draft": "下書き",
+    "published": "公開済み",
+    "archived": "アーカイブ済み",
+    "textAlignment": "テキストの配置",
+    "textFormatting": "テキスト配置の書式設定オプション",
+    "moreTextFormatting": "テキスト書式の詳細設定",
+    "clearFormatting": "書式をクリア",
+    "dueDate": "期限日",
+    "timer": "タイマー",
+    "meaningAssociation": "意味の関連付け",
+    "wordBlock": "ワードブロック",
+    "shortAnswerVocabulary": "短答式: 語彙",
+    "shortAnswerCustom": "短答式: カスタム",
+    "audioPlaylist": "オーディオプレイリスト",
+    "multipleChoiceQuiz": "選択問題クイズ",
+    "horizontalRule": "水平線",
+    "formatTextStyles": "テキストスタイルの書式設定オプション",
+    "formatBold": "テキストを太字にする",
+    "formatItalic": "テキストを斜体にする",
+    "formatUnderline": "テキストに下線を付ける",
+    "strikethroughTitle": "取り消し線",
+    "subscript": "下付き文字",
+    "superscript": "上付き文字",
+    "clearTextFormatting": "テキストの書式をクリア",
+    "formatStrikethrough": "取り消し線でテキストを書式設定します",
+    "formatSubscript": "テキストを下付き文字で書式設定します",
+    "formatSuperscript": "上付き文字で文字を書式設定します",
+    "clearAllTextFormatting": "すべてのテキスト書式を削除します",
+    "formattingTextColor": "テキストの色の書式設定",
+    "formattingBackgroundColor": "背景色の書式設定",
+    "font": "フォント",
+    "size": "サイズ",
+    "formattingFont": "フォントファミリーの書式設定オプション",
+    "formattingSize": "フォントサイズの書式設定オプション"
+  },
+  "fileManager": {
+    "draftChanges": "下書きの変更",
+    "save": "保存",
+    "revert": "元に戻す",
+    "create": "作成します",
+    "textToImagePreview": "テキストから画像へのプレビュー",
+    "textToSpeechPreview": "テキスト読み上げプレビュー",
+    "close": "閉じる",
+    "errorRendering": "ファイルマネージャーの表示エラー: {{message}}"
+  },
+  "pdfViewerComponent": {
+    "loadingPdf": "PDFを読み込み中: {{filename}}",
+    "noPdfToDisplay": "表示するPDFがありません"
+  },
+  "quizComponent": {
+    "grade": "成績: {{grade}}",
+    "gradeDisplay": "成績: {{score}}%"
+  },
+  "playlistEditor": {
+    "noFilesMessage": "ファイルはまだ追加されていません。上の入力欄を使用してプレイリストにファイルを追加してください。",
+    "menuAttribute": "メニュー",
+    "emptyState": "プレイリストにアイテムがありません"
+  },
+  "unitCompletedPlugin": {
+    "completionMessage": "ユニットが完了しました！",
+    "sectionHeading": "次のステップ",
+    "continueButton": "続ける"
+  },
+  "mainToolbar": {
+    "menuAttribute": "メニュー",
+    "newUnit": "新しいユニット",
+    "save": "保存"
+  },
+  "meaningAssociationExercise": {
+    "layoutDirection": "行"
+  },
+  "moderationBadge": {
+    "warning": "モデレーション対象としてフラグ付けされたコンテンツです",
+    "category": "カテゴリー",
+    "approved": "コンテンツ承認済み",
+    "flaggedForReview": "レビュー対象としてフラグされたコンテンツです",
+    "categories": "カテゴリー",
+    "savedMessage": "コンテンツが保存されました。学校のポリシーに従ってご確認ください。",
+    "flagged": "フラグ済み",
+    "flaggedWithCategories": "フラグ付き: {{categories}}"
+  },
+  "moderationPanel": {
+    "title": "コンテンツモデレーション",
+    "categoryDescription": "フラグ付きコンテンツを確認します",
+    "warning": "このコンテンツは確認が必要です",
+    "alertMessage": "このコンテンツは自動モデレーションによってフラグが付けられました。保存されましたが、お客様の機関のポリシーに従って審査が必要な場合があります。",
+    "flaggedCategories": "フラグ付きカテゴリ：",
+    "confidence": "信頼度: {{score}}%",
+    "checked": "確認済み: {{date}}",
+    "model": "モデル: {{model}}",
+    "disclaimerNote": "自動モデレーションは完璧ではありません。このコンテンツを文脈に沿って確認し、お客様の教育機関の特定のポリシーおよび現地の法的要件に従って対応してください。",
+    "disclaimerLabel": "注意：",
+    "categories": {
+      "hate": "人種、性別、民族、宗教などに基づく憎悪を助長するコンテンツ",
+      "hate threatening": "暴力や深刻な危害を含む憎悪的なコンテンツ",
+      "harassment": "個人に対する嫌がらせ、脅迫、またはいじめを意図したコンテンツ",
+      "harassment threatening": "暴力や深刻な危害を含む嫌がらせコンテンツ",
+      "self-harm": "自傷行為を推奨、奨励、または描写するコンテンツ",
+      "self-harm intent": "自傷行為を行う意図を表明するコンテンツです",
+      "self-harm instructions": "自傷行為を推奨または指示する内容",
+      "sexual": "性的興奮を誘発することを意図したコンテンツ",
+      "sexual minors": "18歳未満の個人が関与する性的コンテンツ",
+      "violence": "死、暴力、または身体的傷害を描写するコンテンツ",
+      "violence graphic": "死、暴力、または身体的傷害を描いたグラフィックコンテンツ",
+      "fallback": "このカテゴリでフラグが付けられたコンテンツです。"
+    }
+  },
+  "questionBlock": {
+    "submit": "提出する",
+    "gradeDisplay": "成績: {{score}}",
+    "status": "ステータス",
+    "answerLabel": "回答{{number}}",
+    "correct": "正解です",
+    "incorrect": "不正解です",
+    "edit": "編集します",
+    "reset": "リセット",
+    "done": "完了しました",
+    "invalid": "無効です",
+    "remove": "削除します",
+    "addAnswerPlaceholder": "回答を追加"
+  },
+  "questionEditor": {
+    "dialogTitle": "質問を編集",
+    "cancel": "キャンセル",
+    "save": "保存"
+  },
+  "questionsReview": {
+    "sectionHeading": "質問の確認",
+    "alertMessage": "提出前にすべての質問を確認してください",
+    "filterBy": "フィルター条件",
+    "cancel": "キャンセル",
+    "submit": "提出する",
+    "loading": "問題を読み込んでいます...",
+    "noQuestions": "この文書に対する質問は見つかりませんでした。",
+    "from": "から",
+    "pages": "ページ",
+    "importedOn": "{{date}}にインポートされました",
+    "filteringBySearch": "検索による絞り込み: \"{{searchTerm}}\" ({{total}}項目中{{count}}項目)",
+    "hide": "非表示にする",
+    "show": "表示",
+    "summariesAndObjectives": "要約と目標",
+    "summaries": "要約",
+    "learningObjectives": "学習目標",
+    "selectAll": "すべて選択",
+    "deselectAll": "すべて選択解除",
+    "selectedCount": "{{total}}件中{{count}}件を選択しています",
+    "importToQuestionBank": "問題バンクにインポート",
+    "questionPrompt": "問題文",
+    "enterQuestion": "質問を入力してください...",
+    "hintOptional": "ヒント（任意）",
+    "enterHint": "ヒントを入力してください...",
+    "answer": "回答",
+    "enterAnswer": "回答を入力してください...",
+    "hasAudio": "音声あり",
+    "hasImage": "画像があります"
+  },
+  "recordingStudio": {
+    "sectionHeading": "録音スタジオ",
+    "preview": "プレビュー"
+  },
+  "recordingStudio2": {
+    "recordingNumber": "録画{{number}}",
+    "existingRecordings": "既存の録画",
+    "staticWaveformPreview": "静的波形プレビュー：",
+    "recordedAudioWaveform": "録音された音声波形:"
+  },
+  "recordingStudio3": {
+    "record": "録画",
+    "stop": "停止します",
+    "play": "再生",
+    "save": "保存",
+    "timeline": "タイムライン",
+    "sectionHeading": "録音スタジオ",
+    "addLine": "行を追加します",
+    "importJSON": "JSONをインポート",
+    "exportJSON": "JSONをエクスポート",
+    "script": "スクリプト",
+    "speakers": "スピーカー",
+    "add": "追加します",
+    "unknown": "不明です",
+    "empty": "（空）",
+    "lineNumber": "{{number}}行目 - {{speaker}}",
+    "text": "テキスト",
+    "direction": "方向",
+    "emotion": "感情",
+    "directionPlaceholder": "例：息を切らしながら入ってくる",
+    "emotionPlaceholder": "例：明るい、疲れた",
+    "generateTTS": "TTS生成",
+    "takes": "テイク",
+    "takeNumber": "テイク{{number}}（{{type}}）",
+    "name": "名前",
+    "lockedTrack": "ロックされたトラック",
+    "voice": "音声",
+    "description": "説明",
+    "descriptionPlaceholder": "例：30秒、エネルギッシュ、プロフェッショナル",
+    "generateAllMissingTTS": "不足している音声を一括生成",
+    "processing": "{{count}}行を処理しています...",
+    "selectDialogueFirst": "まず対話の行を選択してください",
+    "micAccessFailed": "マイクにアクセスできませんでした",
+    "recordingSaveFailed": "録画の保存に失敗しました",
+    "noTextToGenerate": "生成するテキストがありません",
+    "speakerNotFound": "スピーカーが見つかりません",
+    "ttsGenerationFailed": "TTSオーディオの生成に失敗しました",
+    "noMissingAudio": "生成する不足音声はありません",
+    "addSpeakerFirst": "まずスピーカーを追加してください",
+    "importFailed": "JSONファイルのインポートに失敗しました"
+  },
+  "screenplayEditor": {
+    "formatLabel": "形式",
+    "placeholder": "フェードイン："
+  },
+  "recordingStudioEnhanced": {
+    "audioFilters": "オーディオフィルター",
+    "noiseReduction": "ノイズリダクション",
+    "speechEnhancement": "音声強調",
+    "none": "なし",
+    "light": "ライト",
+    "medium": "中程度",
+    "heavy": "ヘビー",
+    "clarity": "明瞭度",
+    "presence": "プレゼンス",
+    "broadcast": "配信",
+    "popClickTooltip": "ポップ音とクリック音を除去します",
+    "popClick": "ポップ/クリック",
+    "highPassTooltip": "低周波数を除去します",
+    "highPass": "ハイパス",
+    "lowPassTooltip": "高周波数を除去します",
+    "lowPass": "ローパス",
+    "normalizeTooltip": "音声レベルを正規化します",
+    "normalize": "正規化",
+    "cutTooltip": "選択した部分をカットします",
+    "cutButton": "カット",
+    "tracks": "トラック",
+    "addTrack": "トラックを追加します",
+    "trackName": "トラック{{number}}",
+    "deleteLastTrackAlert": "最後のトラックを削除することはできません",
+    "voice": "音声",
+    "promptPlaceholder": "音声を生成するためのテキストを入力してください...",
+    "generate": "生成します",
+    "record": "録画",
+    "stop": "停止します",
+    "selectToCut": "カットする音声の部分を選択してください",
+    "enterPrompt": "このトラックのプロンプトを入力してください",
+    "ttsNotImplemented": "テキスト読み上げ機能はまだ実装されていません",
+    "ttsGenerationFailed": "プロンプトから音声の生成に失敗しました",
+    "micAccessError": "マイクにアクセスできませんでした"
+  },
+  "savedPdfThumbnail": {
+    "errorMessage": "PDFの読み込みエラーです",
+    "pageOverlay": "{{number}}ページ目"
+  },
+  "sectionAssigner": {
+    "dialogTitle": "セクションに割り当てる",
+    "selectSection": "セクションを選択してください",
+    "cancel": "キャンセル",
+    "assign": "割り当てる",
+    "dueDate": "提出期限"
+  },
+  "svgPreview": {
+    "emptyState": "プレビューするSVGがありません",
+    "caption": "キャプション"
+  },
+  "vocabularyReview": {
+    "sectionHeading": "語彙の復習",
+    "alertMessage": "続行する前に語彙を復習してください",
+    "summary": "概要",
+    "cancel": "キャンセル",
+    "continue": "続行"
+  },
+  "authenticator": {
+    "nameLabel": "名前:",
+    "namePlaceholder": "お名前を入力してください：",
+    "emailLabel": "メールアドレス：",
+    "emailPlaceholder": "メールアドレスを入力してください：",
+    "passwordLabel": "パスワード：",
+    "passwordPlaceholder": "パスワードを入力してください：",
+    "confirmPasswordLabel": "パスワードの確認："
+  },
+  "unitEmbeddingComponents": {
+    "generateButton": "埋め込みを生成します",
+    "successMessage": "埋め込みが生成されました",
+    "errorMessage": "エンベディングの生成でエラーが発生しました"
+  },
+  "wordEmbeddingIntegration": {
+    "alertMessage": "埋め込みが生成されます",
+    "successConfirmation": "埋め込みが正常に生成されました"
+  },
+  "fileManager2": {
+    "metadataEditor": {
+      "heading": "ファイルメタデータ",
+      "nameLabel": "名前",
+      "descriptionLabel": "説明",
+      "promptLabel": "プロンプト（AI生成ファイル用）",
+      "modelLabel": "モデル",
+      "variantLabel": "バリアント",
+      "typeLabel": "タイプ",
+      "sizeLabel": "サイズ",
+      "unknown": "不明です",
+      "pathLabel": "パス",
+      "protectionLevelLabel": "保護レベル",
+      "createdLabel": "作成日",
+      "cancelButton": "キャンセル",
+      "saveButton": "保存"
+    },
+    "expandedContent": {
+      "extractedContentHeading": "抽出されたコンテンツ",
+      "descriptionLabel": "説明:",
+      "transcriptionLabel": "文字起こし：",
+      "reviewVocabularyMessage": "ドキュメントから語彙を確認してインポートします",
+      "noVocabularyExtracted": "語彙が抽出されませんでした",
+      "reviewQuestionsMessage": "ドキュメントから問題を確認してインポートします",
+      "noQuestionsExtracted": "質問が抽出されませんでした",
+      "noSummariesExtracted": "要約が抽出されませんでした",
+      "noObjectivesExtracted": "目標が抽出されませんでした",
+      "noConceptsExtracted": "概念が抽出されていません",
+      "noContentAvailable": "抽出されたコンテンツはありません"
+    },
+    "fileDetails": {
+      "noWaveformAvailable": "波形データがありません",
+      "videoNotSupported": "お使いのブラウザは動画タグをサポートしていません。",
+      "insertTooltip": "エディターに挿入",
+      "downloadTooltip": "ダウンロード",
+      "reAnalyzeTooltip": "再分析します",
+      "deleteTooltip": "削除します"
+    },
+    "generators": {
+      "imagePromptPlaceholder": "画像ファイルに変換するテキストです。",
+      "audioPromptPlaceholder": "音声ファイルに変換するテキストです。",
+      "generatingImage": "画像ファイルを生成しています...",
+      "errorGeneratingImage": "画像ファイルの生成中にエラーが発生しました",
+      "successfullyGeneratedImage": "画像ファイルの生成が完了しました",
+      "generatingAudio": "オーディオファイルを生成しています...",
+      "errorGeneratingAudio": "音声ファイルの生成エラーです",
+      "successfullyGeneratedAudio": "音声ファイルの生成が完了しました"
+    },
+    "selectedFileDetails": {
+      "emptyState": "ファイルを選択して詳細とメタデータを表示してください"
+    },
+    "toolbar": {
+      "selectAllTooltip": "すべて選択",
+      "searchPlaceholder": "ファイルを検索...",
+      "uploadTooltip": "ファイルをアップロードします",
+      "actionsTooltip": "アクション"
+    },
+    "contextMenu": {
+      "deselectAll": "すべて選択解除",
+      "deleteConfirmMessage": "選択した{{count}}個のファイルを削除しますか？",
+      "deleteSelected": "選択項目を削除 ({{count}})",
+      "reAnalyzeSelected": "選択項目を再分析 ({{count}})"
+    },
+    "mainView": {
+      "noFilesMessage": "ファイルがありません。開始するにはファイルをアップロードしてください。"
+    }
+  },
+  "sortableAnswers": {
+    "answerLabel": "回答{{number}}",
+    "correct": "正解です",
+    "incorrect": "不正解です"
+  },
+  "documentSourceBadge": {
+    "sourcePrefix": "出典：",
+    "pagePrefix": "ページ"
+  },
+  "pdfThumbnail": {
+    "failedToLoad": "PDFの読み込みに失敗しました",
+    "pageNumber": "{{current}} / {{total}}"
+  },
+  "unitEmbedding": {
+    "publishing": "公開中...",
+    "publishUnit": "ユニットを公開",
+    "publishSuccess": "ユニットが公開され、埋め込みが生成されました！",
+    "generating": "生成中...",
+    "generateEmbeddings": "埋め込みを生成します",
+    "cached": "キャッシュ済み",
+    "wordsEmbedded": "{{count}}語が埋め込まれました",
+    "completedCount": "{{completed}}/{{total}} 完了しました",
+    "allSectionsComplete": "すべてのセクションが完了しました！"
+  },
+  "wordEmbedding": {
+    "embeddingFailed": "単語は保存されましたが、埋め込み生成に失敗しました: {{error}}",
+    "embeddingGenerated": "埋め込み生成完了: {{count}}語を処理しました",
+    "questionSaveFailed": "埋め込みエラーで保存されました"
+  },
+  "toolBarRoPlugin": {
+    "fallbackText": "フォーマット",
+    "untitledUnit": "無題のユニット",
+    "noDescription": "説明がありません"
+  },
+  "wordBlockPlugin": {
+    "wordNotFound": "単語が見つかりません: {{wordID}}",
+    "loadingAudio": "オーディオを読み込んでいます...",
+    "audioUnavailable": "音声は利用できません"
+  },
+  "metadataField": {
+    "unsavedChanges": "未保存の変更"
+  },
+  "sketchPad": {
+    "hoverToStartDrawing": "ホバーして描画を開始してください",
+    "submittingInSeconds": "{{countdown}}秒後に描画を採点のため提出します...",
+    "cancelSubmission": "提出をキャンセルします"
+  }
+}

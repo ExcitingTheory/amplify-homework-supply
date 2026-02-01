@@ -219,7 +219,7 @@ export function AutoEmbedDialog({
   embedConfig,
   onClose,
 }) {
-  const { t } = useTranslation('editor');
+  const { t } = useTranslation('editor.shared');
   const [text, setText] = useState('');
   const [editor] = useLexicalComposerContext();
   const [embedResult, setEmbedResult] = useState(null);
@@ -277,7 +277,7 @@ export function AutoEmbedDialog({
 }
 
 export default function AutoEmbedPlugin() {
-  const { t } = useTranslation('editor');
+  const { t } = useTranslation('editor.shared');
   // const [modal, showModal] = useModal();
 
   const openEmbedModal = (embedConfig) => {

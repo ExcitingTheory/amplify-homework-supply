@@ -19,7 +19,7 @@ const SketchPad = ({ excalidrawData,
     feedback,
     questionID
  }) => {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.shared');
     const [isHovering, setIsHovering] = useState(false);
     const [excalidrawAPI, setExcalidrawAPI] = useState(null);
     const [imageData, setImageData] = useState(null);

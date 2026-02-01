@@ -13,7 +13,7 @@ export const AllowedInputSelector = React.memo(({
     ids, defaultAllowedInputs = ['text', 'audio'], allowedInput = [], setAllowedInput,
     // wordIDs,
 }) => {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.ai');
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [_allowedInputs, setAllowedInputs] = React.useState(allowedInput.length > 0 ? allowedInput : defaultAllowedInputs);
     const open = Boolean(anchorEl);
@@ -136,7 +136,7 @@ export const PromptMethodSelector = React.memo(({
     ids, defaultPromptMethods = ['text', 'audio', 'writing'], promptMethod = [], setPromptMethod,
     // wordIDs,
 }) => {
-    const { t } = useTranslation('editor');
+    const { t } = useTranslation('editor.ai');
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [_promptMethods, setPromptMethods] = React.useState(promptMethod.length > 0 ? promptMethod : []);
     const open = Boolean(anchorEl);

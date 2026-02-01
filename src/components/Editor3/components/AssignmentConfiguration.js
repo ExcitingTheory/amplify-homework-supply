@@ -54,7 +54,7 @@ const formatTime = (countDown) => {
 
 
 export default function AssignmentConfiguration() {
-  const { t } = useTranslation('editor');
+  const { t } = useTranslation('editor.authoring');
 
   const {
     sections, sectionMap, assignments

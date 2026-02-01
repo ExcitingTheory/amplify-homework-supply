@@ -1,6 +1,28 @@
 import { OnboardingTask, UserPersona } from './onboarding-events';
 
-export const ONBOARDING_TASKS: OnboardingTask[] = [
+/**
+ * Criteria for automatically completing a task
+ */
+export interface TaskCompletionCriteria {
+  /** Story ID where this task can be completed */
+  storyId?: string;
+  /** Actions that must be performed (OR logic - any one completes the task) */
+  requiredActions?: string[];
+  /** Sequence of actions that must be performed in order */
+  requiredSequence?: string[];
+  /** Custom completion function */
+  customCheck?: () => boolean;
+}
+
+/**
+ * Extended task with completion criteria
+ */
+export interface OnboardingTaskWithCriteria extends OnboardingTask {
+  /** How to automatically detect task completion */
+  completionCriteria?: TaskCompletionCriteria;
+}
+
+export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
   // ============ INSTRUCTOR TASKS ============
   {
     id: 'instructor-setup-class',
@@ -18,6 +40,10 @@ export const ONBOARDING_TASKS: OnboardingTask[] = [
     category: 'Getting Started',
     order: 1,
     estimatedTime: 300,
+    completionCriteria: {
+      storyId: 'pages-sections--default',
+      requiredActions: ['onClick', 'onCreate'], // Any create/save action
+    },
   },
   {
     id: 'instructor-create-unit',
@@ -31,6 +57,10 @@ export const ONBOARDING_TASKS: OnboardingTask[] = [
       'Add text, images, or media',
       'Save your unit',
     ],
+    completionCriteria: {
+      storyId: 'pages-units--default',
+      requiredActions: ['onClick', 'onCreate'], // Create button or save
+    },
     persona: 'instructor',
     category: 'Content Creation',
     order: 2,
@@ -49,6 +79,10 @@ export const ONBOARDING_TASKS: OnboardingTask[] = [
       'Mark the correct answer',
       'Save the unit',
     ],
+    completionCriteria: {
+      storyId: 'creating-lessons-editor--default',
+      requiredActions: ['onSave', 'onUpdate'], // Saving editor content
+    },
     persona: 'instructor',
     category: 'Content Creation',
     order: 3,
@@ -155,6 +189,10 @@ export const ONBOARDING_TASKS: OnboardingTask[] = [
       'Check due dates for each assignment',
       'Click on an assignment to open it',
     ],
+    completionCriteria: {
+      storyId: 'pages-section--default',
+      requiredActions: ['onClick'], // Viewing or clicking assignments
+    },
     persona: 'learner',
     category: 'Coursework',
     order: 2,
@@ -173,6 +211,10 @@ export const ONBOARDING_TASKS: OnboardingTask[] = [
       'Click "Submit" when done',
       'View your score immediately',
     ],
+    completionCriteria: {
+      storyId: 'pages-workbook--default',
+      requiredActions: ['onSubmit'], // Submitting work
+    },
     persona: 'learner',
     category: 'Coursework',
     order: 3,
