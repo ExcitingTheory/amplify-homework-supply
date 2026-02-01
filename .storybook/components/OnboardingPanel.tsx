@@ -20,6 +20,7 @@ import {
   Link,
   Collapse,
   IconButton,
+  List,
 } from '@mui/material';
 import { styled, keyframes } from '@mui/material/styles';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -53,20 +54,42 @@ const darkTheme = createTheme({
 const CardOutline = styled('div')({
   position: 'relative',
   width: '100%',
+  height: '100%',
   padding: 1,
   overflow: 'hidden',
   backgroundColor: '#1a1a1a',
   borderRadius: 4,
   boxShadow: 'inset 0 0 0 1px #3d3d3d',
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: 0,
 });
 
 const CardContentWrapper = styled('div')({
   borderRadius: 4,
   backgroundColor: '#1a1a1a',
   position: 'relative',
-  height: '100%',
-  overflow: 'auto',
+  flex: '1 1 auto',
+  minHeight: 0,
+  overflowY: 'auto',
+  overflowX: 'hidden',
   color: '#e0e0e0',
+  // Custom scrollbar styling
+  scrollbarWidth: 'thin',
+  scrollbarColor: 'rgba(255, 255, 255, 0.2) transparent',
+  '&::-webkit-scrollbar': {
+    width: '8px',
+  },
+  '&::-webkit-scrollbar-track': {
+    background: 'transparent',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    background: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: '4px',
+  },
+  '&::-webkit-scrollbar-thumb:hover': {
+    background: 'rgba(255, 255, 255, 0.3)',
+  },
 });
 
 interface PersonaOption {
@@ -155,7 +178,8 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
       setTabValue(0);
     }
   };
-toggleTaskExpanded = (taskId: string) => {
+
+  const toggleTaskExpanded = (taskId: string) => {
     setExpandedTasks(prev => {
       const next = new Set(prev);
       if (next.has(taskId)) {
@@ -185,7 +209,6 @@ toggleTaskExpanded = (taskId: string) => {
     }
   };
 
-  const 
   const renderContent = () => {
     if (!selectedPersona) {
       return renderPersonaSelection();
@@ -315,7 +338,16 @@ toggleTaskExpanded = (taskId: string) => {
           />
           <Chip
             label={`${tasks.length - completedTasks.size} Remaining`}
-            icon={<CircleIcon />}: OnboardingTaskWithCriteria) => {
+            icon={<CircleIcon />}
+            color="default"
+            variant="outlined"
+            size="small"
+          />
+        </Stack>
+
+        {/* Task List */}
+        <List>
+          {tasks.map((task: OnboardingTaskWithCriteria) => {
                 const isCompleted = completedTasks.has(task.id);
                 const isExpanded = expandedTasks.has(task.id);
                 const storyLink = getStoryLink(task);
@@ -441,46 +473,14 @@ toggleTaskExpanded = (taskId: string) => {
                                 </Box>
                               )}
                             </Box>
-                          </Collapse
-                    key={task.id}
-                    sx={{
-                      backgroundColor: isCompleted ? 'rgba(76, 175, 80, 0.05)' : 'transparent',
-                    }}
-                  >
-                    <CardContent sx={{ p: 1.5 }}>
-                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-                        <Checkbox
-                          checked={isCompleted}
-                          disabled
-                          size="small"
-                          sx={{ mt: 0.5, cursor: 'default' }}
-                        />
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography
-                            variant="subtitle2"
-                            sx={{
-                              fontWeight: 500,
-                              textDecoration: isCompleted ? 'line-through' : 'none',
-                              color: isCompleted ? 'text.secondary' : 'text.primary',
-                            }}
-                          >
-                            {task.title}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            sx={{ color: 'text.secondary', display: 'block', mt: 0.5 }}
-                          >
-                            {task.description}
-                          </Typography>
+                          </Collapse>
                         </Box>
                       </Box>
                     </CardContent>
                   </Card>
                 );
               })}
-            </Stack>
-          )}
-        </Box>
+            </List>
 
         {/* Reset Button */}
         <Divider sx={{ mb: 2, mx: 2 }} />

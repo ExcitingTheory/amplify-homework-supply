@@ -9,8 +9,7 @@ const config: StorybookConfig = {
   "stories": [
     "../src/**/*.mdx",
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)",
-    "./TranslationMode.stories.tsx",
-    "!**/node_modules/@storybook/addon-onboarding/**"
+    "./TranslationMode.stories.tsx"
   ],
   "addons": [
     "@chromatic-com/storybook",

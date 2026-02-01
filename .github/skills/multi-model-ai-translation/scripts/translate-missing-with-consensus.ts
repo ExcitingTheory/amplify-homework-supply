@@ -92,23 +92,36 @@ function buildTranslationPrompt(
     ? `\n\n**Context Information:**\n${contextParts.join('\n')}`
     : '';
   
-  return `Translate this UI text for a Japanese Language Learning eLearning Platform.
+  // Language-specific instructions
+  const langMap: Record<string, { name: string; formalityNote: string }> = {
+    'ja': { name: 'Japanese', formalityNote: 'Use です/ます form for polite-formal tone' },
+    'es': { name: 'Spanish', formalityNote: 'Use formal "usted" form for polite-formal tone' },
+    'de': { name: 'German', formalityNote: 'Use formal "Sie" form for polite-formal tone' },
+    'fr': { name: 'French', formalityNote: 'Use formal "vous" form for polite-formal tone' },
+    'zh': { name: 'Chinese (Simplified)', formalityNote: 'Use appropriate formal registers' }
+  };
+  
+  const langInfo = langMap[targetLang] || { name: targetLang, formalityNote: 'Use appropriate formal registers' };
+  
+  return `Translate this UI text for an eLearning Platform.
+The platform's content is in English and needs to be translated to ${langInfo.name} for international users.
 
 **Namespace**: ${namespace}
 **Key Path**: ${keyPath}
 **Source Text (English)**: "${sourceValue}"
-**Target Language**: ${targetLang}${contextInfo}
+**Target Language**: ${langInfo.name} (${targetLang})${contextInfo}
 
 **CRITICAL INSTRUCTIONS**:
-1. Return ONLY the translated text, nothing else
+1. Return ONLY the ${langInfo.name} translation, nothing else
 2. Preserve ALL placeholders exactly: {{variable}}, {count}, %s, etc.
 3. Match the specified tone: ${metadata.tone || 'polite-formal'}
 4. Consider the user type: ${metadata.userType || 'all users'}
 5. Keep the same formality level as the source text
-6. For Japanese: Use です/ます form for polite-formal tone
+6. ${langInfo.formalityNote}
 7. DO NOT add quotes, explanations, or extra formatting
+8. DO NOT translate to any language other than ${langInfo.name}
 
-**Translation:**`;
+**Translation (in ${langInfo.name}):**`;
 }
 
 /**

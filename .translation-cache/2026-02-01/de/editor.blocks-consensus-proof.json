@@ -1,0 +1,21 @@
+{
+  "namespace": "editor.blocks",
+  "sourceLang": "en",
+  "targetLang": "de",
+  "mode": "provable",
+  "timestamp": "2026-02-01T17:33:32.271Z",
+  "summary": {
+    "totalKeys": 56,
+    "existingKeys": 0,
+    "translatedKeys": 0,
+    "errors": 56,
+    "coverage": 0
+  },
+  "tokens": {
+    "claude": 0,
+    "gpt": 0,
+    "gemini": 0
+  },
+  "translations": [],
+  "fingerprint": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+}

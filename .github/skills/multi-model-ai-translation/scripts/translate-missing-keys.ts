@@ -127,7 +127,7 @@ async function translateKey(
     ? `\n\n**Context Information:**\n${contextParts.join('\n')}`
     : '';
   
-  const prompt = `Translate this UI text for a Japanese Language Learning eLearning Platform.
+  const prompt = `Translate this UI text for an eLearning Platform.
 
 **Namespace**: ${namespace}
 **Key Path**: ${keyPath}

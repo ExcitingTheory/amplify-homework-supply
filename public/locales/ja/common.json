@@ -1,69 +1,87 @@
 {
+  "actions": {
+    "add": "追加します",
+    "back": "戻る",
+    "cancel": "キャンセル",
+    "clear": "クリア",
+    "close": "閉じる",
+    "confirm": "確認します",
+    "continue": "続ける",
+    "copy": "コピーします",
+    "create": "作成します",
+    "delete": "削除します",
+    "download": "ダウンロード",
+    "edit": "編集します",
+    "finish": "完了",
+    "next": "次へ",
+    "remove": "削除します",
+    "reset": "リセット",
+    "retry": "再試行",
+    "save": "保存",
+    "send": "送信します",
+    "share": "共有",
+    "submit": "提出する",
+    "update": "更新します",
+    "upload": "アップロードします"
+  },
   "app": {
     "name": "宿題教材",
     "tagline": "日本語学習プラットフォーム"
   },
-  "actions": {
-    "save": "保存",
-    "cancel": "キャンセル",
-    "delete": "削除します",
-    "edit": "編集します",
-    "submit": "提出",
-    "close": "閉じる",
-    "create": "作成します",
-    "upload": "アップロードします",
-    "download": "ダウンロード",
-    "share": "共有",
-    "copy": "コピーします",
-    "send": "送信します",
-    "add": "追加します",
-    "remove": "削除します",
-    "update": "更新します",
-    "confirm": "確認します",
-    "clear": "クリア",
-    "reset": "リセット",
-    "retry": "再試行",
-    "back": "戻る",
-    "next": "次へ",
-    "finish": "完了",
-    "continue": "続行"
-  },
-  "navigation": {
-    "home": "ホーム",
-    "units": "ユニット",
-    "sections": "セクション",
-    "grades": "成績",
-    "profile": "プロフィール",
-    "workbook": "ワークブック"
-  },
-  "status": {
-    "loading": "読み込み中...",
-    "saving": "保存中...",
-    "success": "成功しました",
-    "error": "エラー",
-    "processing": "処理中です...",
-    "uploading": "アップロード中...",
-    "downloading": "ダウンロード中です...",
-    "complete": "完了しました",
-    "incomplete": "未完了です",
-    "pending": "保留中"
-  },
-  "time": {
-    "created": "作成日時",
-    "updated": "更新されました",
-    "due": "期限",
-    "completed": "完了しました"
-  },
   "common": {
-    "yes": "はい",
+    "about": "概要",
+    "filter": "フィルター",
+    "help": "ヘルプ",
     "no": "いいえ",
     "ok": "OK",
     "search": "検索",
-    "filter": "フィルター",
+    "settings": "設定",
     "sort": "並び替え",
     "view": "表示",
-    "settings": "設定",
+    "yes": "はい"
+  },
+  "mainToolbar": {
+    "addToSection": {
+      "add": "追加します",
+      "codeLabel": "コードラベル",
+      "description": "説明",
+      "title": "タイトル"
+    },
     "help": "ヘルプ",
-    "about": "概要"
+    "settings": {
+      "darkMode": "ダークモード",
+      "disableNotifications": "通知を無効にする",
+      "experimentalFeatures": "実験的機能",
+      "studentMode": "学習者モード"
+    }
+  },
+  "navigation": {
+    "grades": "成績",
+    "home": "ホーム",
+    "profile": "プロフィール",
+    "sections": "セクション",
+    "units": "ユニット",
+    "workbook": "ワークブック"
+  },
+  "quizComponent": {
+    "grade": "成績: {{grade}}"
+  },
+  "status": {
+    "complete": "完了しました",
+    "downloading": "ダウンロード中です...",
+    "error": "エラー",
+    "incomplete": "未完了",
+    "loading": "読み込み中...",
+    "pending": "保留中",
+    "processing": "処理中...",
+    "saving": "保存しています...",
+    "success": "成功しました",
+    "uploading": "アップロード中です..."
+  },
+  "time": {
+    "completed": "完了しました",
+    "created": "作成済み",
+    "due": "期限",
+    "updated": "更新されました"
   }
 }
