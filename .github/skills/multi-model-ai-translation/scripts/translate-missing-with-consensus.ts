@@ -71,6 +71,25 @@ interface ConsensusResult {
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Progress logging helpers
+function formatProgress(current: number, total: number, label: string): string {
+  const percentage = Math.round((current / total) * 100);
+  const bar = '█'.repeat(Math.floor(percentage / 5)) + '░'.repeat(20 - Math.floor(percentage / 5));
+  return `  [${bar}] ${percentage}% (${current}/${total}) ${label}`;
+}
+
+function estimateTimeRemaining(current: number, total: number, msPerItem: number): string {
+  const remaining = total - current;
+  const msRemaining = remaining * msPerItem;
+  const seconds = Math.floor(msRemaining / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  
+  if (hours > 0) return `~${hours}h ${minutes % 60}m remaining`;
+  if (minutes > 0) return `~${minutes}m ${seconds % 60}s remaining`;
+  return `~${seconds}s remaining`;
+}
+
 /**
  * Build translation prompt from metadata
  */
@@ -460,10 +479,11 @@ async function main() {
     process.exit(1);
   }
   
-  console.log(`🔍 Analyzing ${namespace} translations...\n`);
-  console.log(`   Mode: ${mode.toUpperCase()}`);
-  console.log(`   Source: ${sourceLang}/${namespace}.json`);
-  console.log(`   Target: ${targetLang}/${namespace}.json\n`);
+  console.log('\n' + '='.repeat(80));
+  console.log(`📚 TRANSLATING MISSING KEYS (${mode.toUpperCase()} MODE): ${namespace}`);
+  console.log(`   Source: ${sourceLang} → Target: ${targetLang}`);
+  console.log('='.repeat(80) + '\n');
+  console.log(`🔍 Analyzing translation coverage...`);
   
   // Load source file
   const sourceData = JSON.parse(fs.readFileSync(sourceFile, 'utf-8'));
@@ -491,14 +511,18 @@ async function main() {
   const missingKeys = sourceKeys.filter(key => !existingKeys.includes(key));
   
   if (missingKeys.length === 0) {
-    console.log('\n✅ All keys are already translated! Nothing to do.\n');
+    console.log('\n' + '='.repeat(80));
+    console.log('✅ All keys are already translated! Nothing to do.');
+    console.log('='.repeat(80) + '\n');
     return;
   }
   
+  const coveragePercent = Math.round((existingKeys.length / sourceKeys.length) * 100);
+  console.log(`   Current coverage: ${existingKeys.length}/${sourceKeys.length} (${coveragePercent}%)`);
   console.log(`   Missing translations: ${missingKeys.length}\n`);
   
   // Show sample of missing keys
-  console.log('📋 Missing keys to translate:');
+  console.log('📋 Sample of missing keys:');
   missingKeys.slice(0, 10).forEach(key => console.log(`   - ${key}`));
   if (missingKeys.length > 10) {
     console.log(`   ... and ${missingKeys.length - 10} more\n`);
@@ -507,19 +531,31 @@ async function main() {
   }
   
   // Translate missing keys with consensus
-  console.log(`🤖 Translating ${missingKeys.length} missing keys with ${mode === 'fake' ? '1 model (simulated consensus)' : '3-model consensus'}...\n`);
+  console.log(`\n🤖 Translation Phase - ${mode === 'fake' ? 'Single Model (Claude Simulated Consensus)' : '3-Model Consensus (Claude + GPT-4o + Gemma)'}`);
+  console.log('-'.repeat(80));
   
   let successCount = 0;
   let errorCount = 0;
   const proofData: any[] = [];
+  const translationStartTime = Date.now();
   
   let totalTokens = { claude: 0, gpt: 0, gemini: 0 };
+  let fullConsensus = 0;
+  let partialConsensus = 0;
+  let noConsensus = 0;
   
   for (let i = 0; i < missingKeys.length; i++) {
     const keyPath = missingKeys[i];
     
-    if (i > 0 && i % 5 === 0) {
-      console.log(`   Progress: ${i}/${missingKeys.length} keys translated...`);
+    // Show progress every 10% or at least every key for small batches
+    const shouldShowProgress = i % Math.max(1, Math.floor(missingKeys.length / 10)) === 0 || i === missingKeys.length - 1;
+    if (shouldShowProgress && i > 0) {
+      const elapsed = Date.now() - translationStartTime;
+      const avgTimePerKey = elapsed / i;
+      console.log(formatProgress(i, missingKeys.length, `Translating...`));
+      if (i < missingKeys.length - 1) {
+        console.log(`    ${estimateTimeRemaining(i, missingKeys.length, avgTimePerKey)}`);
+      }
     }
     
     try {
@@ -527,13 +563,32 @@ async function main() {
       const sourceValue = sourceEntry.value || sourceEntry;
       const metadata = sourceEntry._meta || {};
       
-      // Translate with all models
+      // Translate with all models (using allSettled for resilience)
       let results;
       if (mode === 'fake') {
         results = await translateWithFakeConsensus(sourceValue, metadata, targetLang, namespace, keyPath);
       } else {
-        results = await translateWithAllModels(sourceValue, metadata, targetLang, namespace, keyPath);
-      }
+        const settled = await Promise.allSettled([
+          translateWithClaude(sourceValue, metadata, targetLang, namespace, keyPath),
+          translateWithGPT(sourceValue, metadata, targetLang, namespace, keyPath),
+          translateWithGemma(sourceValue, metadata, targetLang, namespace, keyPath)
+        ]);
+        
+        // Extract results, using empty translation for failed models
+        const [claudeSettled, gptSettled, gemmaSettled] = settled;
+        const emptyResult = (model: string, provider: string) => ({ 
+          translation: '', 
+          metadata: { model, provider, timestamp: new Date().toISOString(), requestId: '', tokensUsed: 0, fingerprint: '' } 
+        });
+        
+        results = {
+          claude: claudeSettled.status === 'fulfilled' ? claudeSettled.value : emptyResult('claude-sonnet-4-20250514', 'anthropic'),
+          gpt: gptSettled.status === 'fulfilled' ? gptSettled.value : emptyResult('gpt-4o', 'openai'),
+          gemma: gemmaSettled.status === 'fulfilled' ? gemmaSettled.value : emptyResult('gemma-3-12b-it', 'google-gemma')
+        };
+        
+        // Log any failures
+        if (claudeSettled.status === 'rejected') console.warn(`      ⚠️  Claude failed for ${keyPath}: ${claudeSettled.reason}`);\n        if (gptSettled.status === 'rejected') console.warn(`      ⚠️  GPT failed for ${keyPath}: ${gptSettled.reason}`);\n        if (gemmaSettled.status === 'rejected') console.warn(`      ⚠️  Gemma failed for ${keyPath}: ${gemmaSettled.reason}`);\n      }
       
       // Analyze consensus
       const consensus = analyzeConsensus(
@@ -541,6 +596,11 @@ async function main() {
         results.gpt.translation,
         results.gemma.translation
       );
+      
+      // Track consensus levels
+      if (consensus.consensus === 'full') fullConsensus++;
+      else if (consensus.consensus === 'partial') partialConsensus++;
+      else noConsensus++;
       
       // Update token counts
       totalTokens.claude += results.claude.metadata.tokensUsed;
@@ -577,10 +637,10 @@ async function main() {
         }
       });
       
-      const consensusSymbol = consensus.consensus === 'full' ? '✅' : consensus.consensus === 'partial' ? '⚠️' : '❌';
-      console.log(`   ${consensusSymbol} ${keyPath}: "${consensus.translation}" [${consensus.consensus}]`);
-      
+      // Only show individual translations for no consensus or in verbose mode
       if (consensus.consensus === 'none') {
+        const consensusSymbol = '❌';
+        console.log(`   ${consensusSymbol} ${keyPath}: No consensus - using Claude`);
         console.log(`      Claude: "${results.claude.translation}"`);
         console.log(`      GPT:    "${results.gpt.translation}"`);
         console.log(`      Gemma:  "${results.gemma.translation}"`);
@@ -592,9 +652,14 @@ async function main() {
     }
   }
   
-  console.log(`\n   Translated ${successCount} keys (${errorCount} errors)\n`);
+  const translationElapsed = ((Date.now() - translationStartTime) / 1000).toFixed(1);
+  
+  // Final progress update
+  console.log(formatProgress(missingKeys.length, missingKeys.length, 'Complete'));
+  console.log(`  ✅ Translation completed in ${translationElapsed}s\n`);
   
   // Save updated target file
+  console.log('💾 Saving merged translation file...');
   fs.writeFileSync(targetFile, JSON.stringify(targetData, null, 2) + '\n', 'utf-8');
   
   // Save proof document
@@ -623,28 +688,42 @@ async function main() {
   
   const proofFile = path.join(cacheDir, `${namespace}-consensus-proof.json`);
   fs.writeFileSync(proofFile, JSON.stringify(proofDocument, null, 2) + '\n', 'utf-8');
+  console.log(`🔐 Cryptographic proof saved\n`);
   
-  console.log('✅ Translation complete!\n');
+  const finalCoverage = Math.round((existingKeys.length + successCount) / sourceKeys.length * 100);
+  
+  console.log('\n' + '='.repeat(80));
+  console.log('🎉 TRANSLATION COMPLETE');
+  console.log('='.repeat(80));
   console.log('📊 Summary:');
-  console.log(`   - Namespace: ${namespace}`);
-  console.log(`   - Target language: ${targetLang}`);
-  console.log(`   - Mode: ${mode}`);
-  console.log(`   - Total source keys: ${sourceKeys.length}`);
-  console.log(`   - Previously translated: ${existingKeys.length}`);
-  console.log(`   - Newly translated: ${successCount}`);
-  console.log(`   - Errors: ${errorCount}`);
-  console.log(`   - Coverage: ${Math.round((existingKeys.length + successCount) / sourceKeys.length * 100)}%`);
+  console.log(`   Namespace: ${namespace}`);
+  console.log(`   Target language: ${targetLang}`);
+  console.log(`   Mode: ${mode}`);
+  console.log(`   Total source keys: ${sourceKeys.length}`);
+  console.log(`   Previously translated: ${existingKeys.length}`);
+  console.log(`   Newly translated: ${successCount}`);
+  console.log(`   Errors: ${errorCount}`);
+  console.log(`   Final coverage: ${finalCoverage}% (${existingKeys.length + successCount}/${sourceKeys.length})`);
+  console.log(`   Time: ${translationElapsed}s`);
   
-  if (mode === 'provable') {
-    console.log(`\n💰 Token Usage:`);
-    console.log(`   - Claude: ${totalTokens.claude} tokens`);
-    console.log(`   - GPT-4o: ${totalTokens.gpt} tokens`);
-    console.log(`   - Gemma:  ${totalTokens.gemini} tokens`);
+  if (mode !== 'fake') {
+    console.log(`\n🤝 Consensus breakdown:`);
+    console.log(`   Full (3/3 match): ${fullConsensus} (${Math.round(fullConsensus/successCount*100)}%)`);
+    console.log(`   Partial (2/3 match): ${partialConsensus} (${Math.round(partialConsensus/successCount*100)}%)`);
+    console.log(`   None (defaulted to Claude): ${noConsensus} (${Math.round(noConsensus/successCount*100)}%)`);
   }
   
-  console.log(`\n💾 Files saved:`);
-  console.log(`   - Target: ${path.relative(workspaceRoot, targetFile)}`);
-  console.log(`   - Proof:  ${path.relative(workspaceRoot, proofFile)}\n`);
+  if (mode === 'provable') {
+    console.log(`\n💰 Token usage:`);
+    console.log(`   Claude: ${totalTokens.claude.toLocaleString()}`);
+    console.log(`   GPT-4o: ${totalTokens.gpt.toLocaleString()}`);
+    console.log(`   Gemma: ${totalTokens.gemini.toLocaleString()}`);
+  }
+  
+  console.log(`\n💾 Output files:`);
+  console.log(`   ${path.relative(workspaceRoot, targetFile)}`);
+  console.log(`   ${path.relative(workspaceRoot, proofFile)}`);
+  console.log('='.repeat(80) + '\n');
 }
 
 main().catch(console.error);

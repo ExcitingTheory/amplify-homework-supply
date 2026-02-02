@@ -34,20 +34,23 @@ export const DragBox = ({ answer, wordID }) => {
       component='div'
       ref={drag}
       variant="outlined"
-      // boxShadow={3}
-      boxShadow='0 0 3px rgba(0,0,0,0.1)'
+      boxShadow='0 2px 4px rgba(0,0,0,0.1)'
       onTouchStart={onTouchMove}
       style={{
         fontSize: '1.2rem',
         margin: '.3rem',
-        padding: '.6rem',
+        padding: '.8rem',
         display: 'inline-block',
-        cursor: 'pointer',
+        cursor: 'move',
         opacity: opacity,
-        borderRadius: '4px',
+        borderRadius: '8px',
         whiteSpace: 'nowrap',
-        border: `thin dotted #CCC`,
-        touchAction: 'none'
+        border: '2px solid #90caf9',
+        backgroundColor: '#fff',
+        color: '#1976d2',
+        fontWeight: 500,
+        touchAction: 'none',
+        transition: 'all 0.2s ease',
       }}>
       {answer}
     </Box>

@@ -155,6 +155,18 @@ const addRelationshipAccessors = (item, modelName) => {
     }
   }
 
+  // Parse JSON fields for Grade model
+  if (modelName === 'Grade') {
+    try {
+      enhancedItem.data = typeof item.data === 'string'
+        ? JSON.parse(item.data)
+        : (item.data || {});
+    } catch (e) {
+      console.error('[Mock Data] Error parsing Grade.data field:', e);
+      enhancedItem.data = {};
+    }
+  }
+
   // Add belongsTo accessors (properties that return Promises)
   if (modelRelationships.belongsTo) {
     Object.entries(modelRelationships.belongsTo).forEach(([relationName, config]) => {

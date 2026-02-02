@@ -172,22 +172,27 @@ async function reverseTranslateNamespace(
   
   // Cross-validation: reverse each translation with the OTHER 2 models
   console.log(`   Reversing Claude's translation with GPT & Gemma...`);
-  const [claudeByGPT, claudeByGemma] = await Promise.all([
+  const claudeReverseResults = await Promise.allSettled([
     reverseTranslateWithGPT(JSON.stringify(claudeForward), targetLang),
     reverseTranslateWithGemma(JSON.stringify(claudeForward), targetLang)
   ]);
-  
-  console.log(`   Reversing GPT's translation with Claude & Gemma...`);
-  const [gptByClaude, gptByGemma] = await Promise.all([
+  const claudeByGPT = claudeReverseResults[0].status === 'fulfilled' ? claudeReverseResults[0].value : {};
+  const claudeByGemma = claudeReverseResults[1].status === 'fulfilled' ? claudeReverseResults[1].value : {};
+  if (claudeReverseResults[0].status === 'rejected') console.warn(`   ⚠️  GPT reverse failed: ${claudeReverseResults[0].reason}`);\n  if (claudeReverseResults[1].status === 'rejected') console.warn(`   ⚠️  Gemma reverse failed: ${claudeReverseResults[1].reason}`);\n  \n  console.log(`   Reversing GPT's translation with Claude & Gemma...`);
+  const gptReverseResults = await Promise.allSettled([
     reverseTranslateWithClaude(JSON.stringify(gptForward), targetLang),
     reverseTranslateWithGemma(JSON.stringify(gptForward), targetLang)
   ]);
-  
-  console.log(`   Reversing Gemma's translation with Claude & GPT...`);
-  const [gemmaByClaude, gemmaByGPT] = await Promise.all([
+  const gptByClaude = gptReverseResults[0].status === 'fulfilled' ? gptReverseResults[0].value : {};
+  const gptByGemma = gptReverseResults[1].status === 'fulfilled' ? gptReverseResults[1].value : {};
+  if (gptReverseResults[0].status === 'rejected') console.warn(`   ⚠️  Claude reverse failed: ${gptReverseResults[0].reason}`);\n  if (gptReverseResults[1].status === 'rejected') console.warn(`   ⚠️  Gemma reverse failed: ${gptReverseResults[1].reason}`);\n  \n  console.log(`   Reversing Gemma's translation with Claude & GPT...`);
+  const gemmaReverseResults = await Promise.allSettled([
     reverseTranslateWithClaude(JSON.stringify(gemmaForward), targetLang),
     reverseTranslateWithGPT(JSON.stringify(gemmaForward), targetLang)
   ]);
+  const gemmaByClaude = gemmaReverseResults[0].status === 'fulfilled' ? gemmaReverseResults[0].value : {};
+  const gemmaByGPT = gemmaReverseResults[1].status === 'fulfilled' ? gemmaReverseResults[1].value : {};
+  if (gemmaReverseResults[0].status === 'rejected') console.warn(`   ⚠️  Claude reverse failed: ${gemmaReverseResults[0].reason}`);\n  if (gemmaReverseResults[1].status === 'rejected') console.warn(`   ⚠️  GPT reverse failed: ${gemmaReverseResults[1].reason}`);
   
   // Save reverse translations with cross-validation metadata
   const reverseResults = {

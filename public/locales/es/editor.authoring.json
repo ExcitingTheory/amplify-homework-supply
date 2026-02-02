@@ -1,132 +1,151 @@
 {
   "toolBarPlugin": {
-    "addDescription": {
-      "value": "Agregar Descripción",
-      "_meta": {
-        "alternativeTerms": [],
-        "category": "message",
-        "component": {
-          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
-          "location": "components/Editor3/plugins/ToolBarPlugin.js"
-        },
-        "context": "Used in ToolBarPlugin.js component",
-        "impact": "Provides message information to users",
-        "tone": "polite-formal",
-        "usage": "Message displayed for addDescription",
-        "userType": "all"
-      }
-    },
-    "align": {
-      "value": "Alinear",
-      "_meta": {
-        "alternativeTerms": [],
-        "category": "label",
-        "component": {
-          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
-          "location": "components/Editor3/plugins/ToolBarPlugin.js"
-        },
-        "context": "Used in ToolBarPlugin.js component",
-        "impact": "Provides label information to users",
-        "tone": "polite-formal",
-        "usage": "Label text for align field",
-        "userType": "all"
-      }
-    },
-    "alignCenter": {
-      "value": "Centrar",
-      "_meta": {
-        "alternativeTerms": [],
-        "category": "label",
-        "component": {
-          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
-          "location": "components/Editor3/plugins/ToolBarPlugin.js"
-        },
-        "context": "Used in ToolBarPlugin.js component",
-        "impact": "Provides label information to users",
-        "tone": "polite-formal",
-        "usage": "Label text for alignCenter field",
-        "userType": "all"
-      }
-    },
-    "alignLeft": {
-      "value": "Alinear a la izquierda",
-      "_meta": {
-        "alternativeTerms": [],
-        "category": "label",
-        "component": {
-          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
-          "location": "components/Editor3/plugins/ToolBarPlugin.js"
-        },
-        "context": "Used in ToolBarPlugin.js component",
-        "impact": "Provides label information to users",
-        "tone": "polite-formal",
-        "usage": "Label text for alignLeft field",
-        "userType": "all"
-      }
-    },
-    "alignRight": {
-      "value": "Alinear a la derecha",
-      "_meta": {
-        "alternativeTerms": [],
-        "category": "label",
-        "component": {
-          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
-          "location": "components/Editor3/plugins/ToolBarPlugin.js"
-        },
-        "context": "Used in ToolBarPlugin.js component",
-        "impact": "Provides label information to users",
-        "tone": "polite-formal",
-        "usage": "Label text for alignRight field",
-        "userType": "all"
-      }
-    },
-    "archived": {
-      "value": "Archivado",
-      "_meta": {
-        "alternativeTerms": [],
-        "category": "label",
-        "component": {
-          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
-          "location": "components/Editor3/plugins/ToolBarPlugin.js"
-        },
-        "context": "Used in ToolBarPlugin.js component",
-        "impact": "Provides label information to users",
-        "tone": "polite-formal",
-        "usage": "Label text for archived field",
-        "userType": "all"
-      }
-    },
-    "audioPlaylist": {
-      "value": "Lista de Reproducción de Audio",
-      "_meta": {
-        "alternativeTerms": [],
-        "category": "label",
-        "component": {
-          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
-          "location": "components/Editor3/plugins/ToolBarPlugin.js"
-        },
-        "context": "Used in ToolBarPlugin.js component",
-        "impact": "Provides label information to users",
-        "tone": "polite-formal",
-        "usage": "Label text for audioPlaylist field",
-        "userType": "all"
-      }
-    },
-    "bold": {
-      "value": "Negrita",
-      "_meta": {
-        "alternativeTerms": [],
-        "category": "label",
-        "component": {
-          "description": "ToolBarPlugin - Rich text editor toolbar with formatting controls. @module ToolBarPlugin  Provides a comprehensive toolbar for the Lexical editor with controls for: - Text formatting (bold, italic, underline, strikethrough, subscript, superscript) - Block types (headings, lists, quotes, code) - Alignment and indentation - Links and embeds - Custom educational nodes (quizzes, answers, word blocks, etc.) - Undo/redo operations",
-          "location": "components/Editor3/plugins/ToolBarPlugin.js"
-        },
-        "context": "Used in ToolBarPlugin.js component",
-        "impact": "Provides label information to users",
-        "tone": "polite-formal",
-        "usage": "Label text for bold field",
-        "userType": "all"
-      }
+    "addDescription": "Agregar Descripción",
+    "align": "Alinear",
+    "alignCenter": "Centrar",
+    "alignLeft": "Alinear a la izquierda",
+    "alignRight": "Alinear a la derecha",
+    "archived": "Archivado",
+    "audioPlaylist": "Lista de Reproducción de Audio",
+    "bold": "Negrita",
+    "cancel": "Cancelar",
+    "chooseLayout": "Elige un diseño",
+    "clearAllTextFormatting": "Borrar todo el formato de texto",
+    "clearFormatting": "Borrar formato",
+    "clearTextFormatting": "Borrar formato de texto",
+    "closePreview": "Cerrar vista previa de {{name}}",
+    "columnsLayout": "Diseño de Columnas",
+    "delete": "Eliminar",
+    "deleteUnitConfirmation": "¿Estás seguro de que quieres eliminar esta Unidad?",
+    "dialogTitle": "Formato",
+    "draft": "Borrador",
+    "dueDate": "Fecha de entrega",
+    "font": "Fuente",
+    "formatBold": "Formatear texto como negrita",
+    "formatItalic": "Formatear texto en cursiva",
+    "formatStrikethrough": "Formatear texto con tachado",
+    "formatSubscript": "Dar formato de subíndice al texto",
+    "formatSuperscript": "Dar formato al texto con superíndice",
+    "formatTextStyles": "Opciones de formato para estilos de texto",
+    "formatUnderline": "Formatear texto como subrayado",
+    "formattingBackgroundColor": "Formato de color de fondo",
+    "formattingFont": "Opciones de formato para la familia de fuentes",
+    "formattingSize": "Opciones de formato para el tamaño de fuente",
+    "formattingTextColor": "Formato del color del texto",
+    "horizontalRule": "Línea Horizontal",
+    "indent": "Sangría",
+    "insert": "Insertar",
+    "insertImage": "Insertar imagen",
+    "insertLink": "Insertar enlace",
+    "insertTable": "Insertar tabla",
+    "italic": "Cursiva",
+    "justifyAlign": "Alineación Justificada",
+    "meaningAssociation": "Asociación de Significados",
+    "moreTextFormatting": "Más Formato de Texto",
+    "multipleChoiceQuiz": "Cuestionario de opción múltiple",
+    "outdent": "Reducir sangría",
+    "published": "Publicado",
+    "redo": "Rehacer",
+    "scrollToolbarLeft": "Desplazar barra de herramientas hacia la izquierda",
+    "scrollToolbarRight": "Desplazar barra de herramientas hacia la derecha",
+    "shortAnswerCustom": "Respuesta Corta: Personalizada",
+    "shortAnswerVocabulary": "Respuesta Corta: Vocabulario",
+    "size": "Tamaño",
+    "status": "Estado",
+    "strikethrough": "Tachado",
+    "strikethroughTitle": "Tachado",
+    "subscript": "Subíndice",
+    "superscript": "Superíndice",
+    "text": "Texto",
+    "textAlignment": "Alineación de texto",
+    "textFormatting": "Opciones de formato para alineación de texto",
+    "timer": "Temporizador",
+    "underline": "Subrayar",
+    "undo": "Deshacer",
+    "untitledUnit": "Unidad sin título",
+    "wordBlock": "Bloque de Palabras"
+  },
+  "tabsVerticalRight": {
+    "aiAssistantTab": "Asistente de IA",
+    "aiSuggestionsDesc": "Las sugerencias de bloques de contenido impulsadas por IA aparecerán aquí según el contenido de tu lección actual.",
+    "aiSuggestionsHeading": "Sugerencias de Bloques de IA",
+    "aiSuggestionsTab": "Sugerencias de IA",
+    "cohortChatDesc": "Colabora con tus compañeros de clase e instructor.",
+    "cohortChatHeading": "Chat de Cohorte",
+    "cohortChatTab": "Chat de Cohorte",
+    "comingSoon": "Próximamente: Panel de sugerencias interactivas con razonamiento e indicadores de prioridad.",
+    "gradesDesc": "Ver calificaciones y progreso de esta unidad.",
+    "gradesHeading": "Calificaciones de la unidad",
+    "gradesTab": "Calificaciones",
+    "instructorsDesc": "Ver todas las calificaciones y entregas de los estudiantes",
+    "instructorsLabel": "📊 Instructores:",
+    "learnersDesc": "Ver tus propias calificaciones y comentarios",
+    "learnersLabel": "✍️ Estudiantes:",
+    "shareInsights": "Comparte conocimientos, haz preguntas y aprende en conjunto",
+    "tagKaiDesc": "Obtener asistencia de IA en la discusión",
+    "tagKaiLabel": "💬 Etiqueta a @kai",
+    "useTopicsDesc": "Organizar conversaciones por tema",
+    "useTopicsLabel": "🏷️ Usa #temas"
+  },
+  "assignmentConfiguration": {
+    "addDueDateButton": "Agregar Fecha de Vencimiento",
+    "addTimerButton": "Agregar Temporizador",
+    "addTimerQuestion": "¿Añadir un temporizador a esta unidad?",
+    "assignDueDateQuestion": "¿Asignar una fecha de entrega a esta unidad para una sección?",
+    "assignedToSectionsHeading": "Asignado a Secciones",
+    "cancel": "Cancelar",
+    "dueDateDescriptionLine1": "Los usuarios podrán continuar después de que haya pasado la fecha límite.",
+    "dueDateDescriptionLine2": "La fecha de vencimiento se utilizará para ordenar las unidades en la sección de clase.",
+    "dueDateLabel": "Fecha de entrega",
+    "noDueDateSet": "Sin fecha de vencimiento establecida",
+    "noSectionSet": "Ninguna sección configurada",
+    "save": "Guardar",
+    "sectionLabel": "Sección",
+    "selectSectionHelper": "Seleccione una sección para asignar la fecha de vencimiento",
+    "timerDescription": "El temporizador comenzará después de que el usuario haya hecho clic en el botón \"Iniciar\". Se permitirá a los usuarios continuar después de que el temporizador haya terminado, y se registrará cuándo se inició y completó la tarea. La cuenta regresiva se mostrará en la parte superior de la pantalla durante la duración del temporizador.",
+    "timerLabel": "Temporizador"
+  },
+  "toolbar": {
+    "align_center": "Centrar",
+    "align_left": "Alinear a la izquierda",
+    "align_right": "Alinear a la derecha",
+    "bold": "Negrita",
+    "bullet_list": "Lista con viñetas",
+    "heading": "Encabezado",
+    "insert_code": "Insertar Bloque de Código",
+    "insert_image": "Insertar imagen",
+    "insert_link": "Insertar enlace",
+    "insert_table": "Insertar tabla",
+    "italic": "Cursiva",
+    "numbered_list": "Lista numerada",
+    "paragraph": "Párrafo",
+    "strikethrough": "Tachado",
+    "underline": "Subrayar"
+  },
+  "configurationManager": {
+    "autoAnalyzeDescription": "Cuando esté habilitado, los PDFs se enviarán a OpenAI para la extracción de vocabulario inmediatamente después de la carga.",
+    "autoAnalyzeLabel": "Analizar documentos automáticamente al cargar",
+    "dragDropPrompt": "Arrastra y suelta una imagen aquí para establecerla como imagen destacada.",
+    "noFeaturedImage": "No se ha establecido una imagen destacada.",
+    "pdfAnalysisSettings": "Configuración de análisis de PDF",
+    "setFeaturedImage": "Establecer imagen destacada",
+    "uploadImagePrompt": "Subir imagen",
+    "uploadingImage": "Subiendo imagen"
+  },
+  "tabsVerticalLeft": {
+    "tabs": {
+      "aiAssistant": "Asistente de IA",
+      "assignments": "Tareas",
+      "configuration": "Configuración",
+      "dictionary": "Diccionario",
+      "files": "Archivos",
+      "questions": "Preguntas",
+      "tableOfContents": "Tabla de contenidos"
     }
+  },
+  "mainToolbar": {
+    "menuAttribute": "Menú",
+    "newUnit": "Nueva Unidad",
+    "save": "Guardar"
   }
 }

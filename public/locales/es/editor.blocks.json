@@ -1,1 +1,72 @@
-{}
+{
+  "customAnswerEditor": {
+    "add": "Agregar",
+    "addWordLabel": "Agregar palabra al ejercicio",
+    "answerLabel": "Respuesta",
+    "answerPlaceholder": "Respuesta",
+    "audioPreview": "Vista previa de audio",
+    "cancel": "Cancelar",
+    "columnHeaders": {
+      "answer": "Respuesta",
+      "answerAudio": "Audio de respuesta",
+      "hint": "Pista",
+      "id": "ID",
+      "prompt": "Indicación",
+      "promptAudio": "Audio de Instrucción"
+    },
+    "description": "Crea un ejercicio de respuesta corta, que puede presentar al usuario una pregunta y esperar una respuesta breve.",
+    "dialogDescription": "Agregar un nuevo par de pregunta y respuesta.",
+    "dialogTitle": "Agregar una nueva pregunta",
+    "emptyState": "Aún no se han agregado preguntas. Usa el campo de entrada de arriba para añadir pares de pregunta y respuesta.",
+    "errorCreatingQuestion": "Error al crear la pregunta",
+    "errorGeneratingAudio": "Error al generar el archivo de audio",
+    "generatingAudio": "Generando archivo de audio...",
+    "hintLabel": "Pista",
+    "hintPlaceholder": "Pista",
+    "promptLabel": "Indicación",
+    "remove": "eliminar",
+    "successGeneratedAudio": "Archivo de audio generado exitosamente",
+    "title": "Ejercicio de Respuesta Personalizada",
+    "ttsPreview": "Vista previa de texto a voz"
+  },
+  "meaningAssociationEditor": {
+    "add": "Agregar",
+    "addWordLabel": "Añadir palabra al ejercicio",
+    "cancel": "Cancelar",
+    "columnHeaders": {
+      "definition": "Definición",
+      "phrase": "Frase",
+      "pronunciation": "Pronunciación"
+    },
+    "definitionPlaceholder": "definición",
+    "dialogDescription": "Agregar una nueva palabra al diccionario.",
+    "dialogTitle": "Agregar una nueva palabra",
+    "emptyState": "Aún no se han agregado palabras. Usa el campo de entrada de arriba para agregar palabras del diccionario. Si la palabra que quieres agregar no está en el diccionario, puedes agregarla haciendo clic en el elemento \"Agregar Palabra\" en el menú desplegable o desde el editor de diccionario en la Barra Lateral.",
+    "phraseLabel": "frase",
+    "pronunciationLabel": "pronunciación",
+    "removeFromAssignment": "Quitar de la tarea"
+  },
+  "quizEditor": {
+    "addAnswer": "Agregar Respuesta",
+    "cancel": "Cancelar",
+    "done": "Hecho",
+    "edit": "Editar",
+    "gradeDisplay": "Calificación: {{score}}",
+    "invalid": "Inválido",
+    "reset": "Restablecer",
+    "save": "Guardar",
+    "status": "Estado"
+  },
+  "answerEditor": {
+    "addWordLabel": "Agregar Etiqueta de Palabra",
+    "addWordToDict": "Agregar una nueva palabra al diccionario.",
+    "cancel": "Cancelar",
+    "dialogTitle": "Editar respuesta",
+    "emptyState": "No se proporcionó respuesta",
+    "instructions": "Crea tu respuesta a continuación",
+    "save": "Guardar"
+  },
+  "questionEditor": {
+    "cancel": "Cancelar"
+  }
+}

@@ -78,10 +78,20 @@ const UnitProvider = ({ children, id }) => {
   }, [])
 
   React.useEffect(() => {
-    if (!isLoading.current) {
-      isLoading.current = true
-      fetchCurrentUsername()
-    }
+    let isMounted = true;
+    
+    const loadUsername = async () => {
+      if (!isLoading.current && isMounted) {
+        isLoading.current = true;
+        await fetchCurrentUsername();
+      }
+    };
+    
+    loadUsername();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [fetchCurrentUsername])
 
   const handleAuth = React.useCallback(

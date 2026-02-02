@@ -66,6 +66,7 @@ const FilesProvider = ({ children }) => {
   });
 
   const isLoading = React.useRef(false);
+  const isMounted = React.useRef(true);
   
   // Memoize to prevent recreating on every render
   const fetchCurrentUserAttributes = React.useCallback(async () => {
@@ -75,30 +76,42 @@ const FilesProvider = ({ children }) => {
         const idToken = authSession.tokens?.idToken;
         
         isLoading.current = false;
-        setSession(prev => {
-          // Only update if values actually changed
-          if (prev.identityId === identityId && prev.idToken === idToken && !prev.error) {
-            return prev;
-          }
-          return { identityId, idToken };
-        });
+        if (isMounted.current) {
+          setSession(prev => {
+            // Only update if values actually changed
+            if (prev.identityId === identityId && prev.idToken === idToken && !prev.error) {
+              return prev;
+            }
+            return { identityId, idToken };
+          });
+        }
       } catch (error) {
         // Suppress benign Cognito 400 errors in development
         isLoading.current = false;
-        setSession(prev => {
-          if (prev.error === error && !prev.identityId && !prev.idToken) {
-            return prev;
-          }
-          return { identityId: undefined, idToken: undefined, error };
-        });
+        if (isMounted.current) {
+          setSession(prev => {
+            if (prev.error === error && !prev.identityId && !prev.idToken) {
+              return prev;
+            }
+            return { identityId: undefined, idToken: undefined, error };
+          });
+        }
       }
   }, []);
 
   React.useEffect(() => {
-    if (!isLoading.current) {
-      isLoading.current = true;
-      fetchCurrentUserAttributes()
-    }
+    const loadAuth = async () => {
+      if (!isLoading.current && isMounted.current) {
+        isLoading.current = true;
+        await fetchCurrentUserAttributes();
+      }
+    };
+    
+    loadAuth();
+    
+    return () => {
+      isMounted.current = false;
+    };
   }, [fetchCurrentUserAttributes])
   
   // Early vector store initialization - load from IndexedDB on mount

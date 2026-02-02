@@ -100,20 +100,28 @@ export const QuizExample: StoryObj = {
 
 **What QuizMode Shows**:
 - Task instructions card with steps
-- **"Go to Application Pages →" button** (navigates to `📄 Pages → Application Pages`)
+- **Task-specific navigation button** (navigates to relevant component story based on task ID)
+- Alternative story links for additional practice options
 - Hint pointing to sidebar for progress tracking
 - Completion banner when done
 
 **Where Users Practice**:
-Users are directed to **Application Pages** (`/?path=/docs/📄-pages-application-pages--docs`) where they can:
-- Navigate actual app pages (Units, Sections, Assignments, etc.)
-- Perform real actions that trigger completion events
-- Experience the full application workflow
+Users are directed to **specific component stories** based on their task:
+- **Units task** → `📄 Pages → Units`, `Creating Lessons → Editor`
+- **Sections task** → `📄 Pages → Sections`, `Components → Section Assigner`
+- **Quiz task** → `Creating Lessons → Editor → Quiz Plugin`
+- **Vocabulary task** → `Creating Lessons → Editor → Word Block Plugin`
+- **AI task** → `Components → Chat Sidebar`, `Editor → AI Content Completion`
+- **Keyboard shortcuts** → `Help → Keyboard Shortcuts Trainer`
+
+Each task has a primary story link and optional alternative stories for different practice approaches.
+
+See [INSTRUCTOR_QUIZ_MODE_NAVIGATION.md](../../docs/INSTRUCTOR_QUIZ_MODE_NAVIGATION.md) for complete task-to-story mapping.
 
 **What QuizMode Does NOT Show**:
 - ❌ Progress bars (sidebar handles this)
 - ❌ N/M action counters (sidebar handles this)
-- ❌ Embedded iframes (users navigate to actual pages)
+- ❌ Embedded iframes (users navigate to actual stories)
 - ❌ Floating progress trackers (sidebar handles this)
 
 ## Action Tracking
@@ -165,13 +173,24 @@ Users can toggle between Tutorial and Quiz modes in the Onboarding panel:
 2. Select a persona (Instructor/Learner/Developer)
 3. Click "Tutorial" or "Quiz" chip to switch modes
 4. **In Tutorial mode**: See guided demos embedded in documentation
-5. **In Quiz mode**: Navigate to **📄 Pages → Application Pages** to practice with the real app
+5. **In Quiz mode**: Click on tasks to navigate to interactive component stories for hands-on practice
 
 **Quiz Mode Instructions** (shown in panel when active):
 > 🎯 Quiz Mode Active  
-> Navigate to **📄 Pages → Application Pages** to practice using the actual app. Complete tasks to track progress below.
+> Click on tasks below to navigate to interactive component stories. Each task will direct you to the specific Storybook story where you can practice. Complete actions to track progress automatically.
 
 The panel checkboxes are **illustrative only** - they update automatically when you complete actions in the app. You cannot manually check/uncheck them.
+
+**Task-Specific Navigation**:
+Each task in Quiz Mode has:
+- **Primary story link**: Main component/page for practicing the task
+- **Alternative links** (optional): Additional stories for different practice approaches
+
+Example: "Create Your First Unit" task provides:
+- Primary: `📄 Pages → Units`
+- Alternatives: `Creating Lessons → Editor`, `Unit Detail`
+
+See [INSTRUCTOR_QUIZ_MODE_NAVIGATION.md](../../docs/INSTRUCTOR_QUIZ_MODE_NAVIGATION.md) for the complete navigation guide.
 
 ## Route Mapping
 

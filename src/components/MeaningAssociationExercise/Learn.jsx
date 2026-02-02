@@ -5,14 +5,12 @@ import UnitContext from '../../context/unitContext';
 import {
   Grid, List,
   ListItem,
-  ListItemText,
-  Box
+  Box,
+  Typography
 } from '@mui/material';
 import { LinearProgressWithLabel, AnswerDropLearn } from '.';
 import { CompletionScreen } from './CompletionScreen';
-import { shuffle } from './utils';
 import { DragBox } from './DragBox';
-import { Word } from '../../models';
 
 
 
@@ -29,9 +27,8 @@ export const Learn = ({
   const [completedLearn, setCompletedLearn] = React.useState(0);
   const [startPositionLearn, setStartPositionLearn] = React.useState(0);
   const [dropAnswerVisibility, setDropAnswerVisibility] = React.useState([]);
+  const [droppedPairs, setDroppedPairs] = React.useState({}); // Track which answer was dropped on which target
   const [showCompletion, setShowCompletion] = React.useState(false);
-
-  const isFirstRender = React.useRef(true);
 
   // Reset completion screen when tab changes
   React.useEffect(() => {
@@ -58,11 +55,13 @@ export const Learn = ({
     if (inProgress && Object.keys(inProgress).length > 0) {
       const verified = inProgress?.learn?.verifiedAnswers || [];
       const percentComplete = (inProgress?.learn?.percentComplete || 0) * 100;
+      const pairs = inProgress?.learn?.droppedPairs || {};
       
       setFilterLearn(verified);
       setCompletedLearn(percentComplete);
       setStartPositionLearn(verified.length);
       setDropAnswerVisibility(verified);
+      setDroppedPairs(pairs);
     }
   }, [inProgress]);
 
@@ -83,13 +82,14 @@ export const Learn = ({
       }
     });
 
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      vocabList = shuffle(vocabList)
-      vocabListLearn = shuffle(vocabListLearn)
-      assignment = shuffle(assignment)
-      assignmentLearn = shuffle(assignmentLearn)
-    }
+    // Don't shuffle - keep vocabulary in original order
+    // if (isFirstRender.current) {
+    //   isFirstRender.current = false;
+    //   vocabList = shuffle(vocabList)
+    //   vocabListLearn = shuffle(vocabListLearn)
+    //   assignment = shuffle(assignment)
+    //   assignmentLearn = shuffle(assignmentLearn)
+    // }
   }
 
   const easyAssignment = assignmentLearn;
@@ -122,7 +122,12 @@ export const Learn = ({
     let thisExerciseComplete = false;
     
     // Use the current state values
-    let _verified = [...new Set([...filterLearn, wordID])];
+    // Track which answer was dropped on which target
+    let _droppedPairs = { ...droppedPairs };
+    _droppedPairs[correctId] = wordID; // Store the dropped wordID for this target
+
+    // Add correctly matched wordID to verified list
+    const _verified = [...new Set([...verifiedAnswers, correctId])];
 
     // Add to attempted answers
     let _attemptedAnswers = JSON.parse(JSON.stringify(loadAttemptedAnswers));
@@ -147,7 +152,16 @@ export const Learn = ({
       // newTab++;
     }
 
-    let savedGradeCopy = JSON.parse(JSON.stringify(grade?.data || {}));
+    // Handle grade.data - it might be a string or object
+    let gradeData = grade?.data || {};
+    if (typeof gradeData === 'string') {
+      try {
+        gradeData = JSON.parse(gradeData);
+      } catch (e) {
+        gradeData = {};
+      }
+    }
+    let savedGradeCopy = JSON.parse(JSON.stringify(gradeData));
 
     if (!savedGradeCopy[nodeKey]) {
       savedGradeCopy[nodeKey] = {
@@ -162,6 +176,7 @@ export const Learn = ({
       accuracy: _verified.length / attempts,
       percentComplete: newIndex / assignment.length,
       complete: thisExerciseComplete,
+      droppedPairs: _droppedPairs,
     };
 
     if (allTabsComplete) {
@@ -194,7 +209,16 @@ export const Learn = ({
     _attemptedAnswers[correctId].push(phrase);
     const attempts = attemptsCount + 1;
 
-    let savedGradeCopy = JSON.parse(JSON.stringify(grade?.data || {}));
+    // Handle grade.data - it might be a string or object
+    let gradeData = grade?.data || {};
+    if (typeof gradeData === 'string') {
+      try {
+        gradeData = JSON.parse(gradeData);
+      } catch (e) {
+        gradeData = {};
+      }
+    }
+    let savedGradeCopy = JSON.parse(JSON.stringify(gradeData));
 
     if (!savedGradeCopy[nodeKey]) {
       savedGradeCopy[nodeKey] = {
@@ -231,7 +255,7 @@ export const Learn = ({
   const maxHeight = '15rem';
 
   return (
-    <Box sx={{ position: 'relative' }}>
+    <Box sx={{ position: 'relative', minHeight: '400px' }}>
       {showCompletion && (
         <CompletionScreen
           levelName="Learn Mode"
@@ -260,8 +284,6 @@ export const Learn = ({
               _correctWord = listItem;
             }
 
-            // console.log('SimpleList _correctWord', _correctWord)
-            let answerSection = '';
             const phrase = _correctWord?.phrase;
             const definition = _correctWord?.definition;
             const pronunciation = _correctWord?.pronunciation;
@@ -275,31 +297,20 @@ export const Learn = ({
               audioFile = _correctWord?.audio[0];
             }
 
-            answerSection = <AnswerDropLearn
-              key={id}
+            // Check if this word has been matched
+            const matchedWordId = droppedPairs[_correctWord?.id];
+            const matchedWord = matchedWordId ? dictionary[matchedWordId] : null;
+
+            return <AnswerDropLearn 
+              key={_correctWord?.id}
               id={_correctWord?.id}
+              correctAnswer={{ ..._correctWord, progressAssignment, sendFail, sendPass }}
               pronunciation={pronunciation}
               definition={definition}
-              correctAnswer={{ ..._correctWord, progressAssignment, sendFail, sendPass }} />;
-            if (dropAnswerVisibility.includes(_correctWord?.id)) {
-              answerSection = <ListItem 
-                key={_correctWord?.id} 
-                style={{ 
-                  margin: '0.25rem 0', 
-                  padding: '0.5rem',
-                  backgroundColor: '#e8f5e9',
-                  borderRadius: '4px',
-                  border: '1px solid #4caf50'
-                }}>
-                <ListItemText 
-                  key={id} 
-                  primary={<span style={{ color: '#2e7d32', fontWeight: 500 }}>{phrase} ({pronunciation}) ✓</span>}
-                  secondary={<span style={{ color: '#1b5e20' }}>{definition}</span>} />
-              </ListItem>;
-
-            }
-
-            return answerSection;
+              phrase={phrase}
+              matchedWord={matchedWord}
+              isMatched={!!matchedWordId}
+            />;
 
           })}
 

@@ -62,18 +62,18 @@ const CardOutline = styled('div')({
   boxShadow: 'inset 0 0 0 1px #3d3d3d',
   display: 'flex',
   flexDirection: 'column',
-  minHeight: 0,
 });
 
 const CardContentWrapper = styled('div')({
   borderRadius: 4,
   backgroundColor: '#1a1a1a',
   position: 'relative',
-  flex: '1 1 auto',
+  flex: '1 1 0',
   minHeight: 0,
   overflowY: 'auto',
   overflowX: 'hidden',
   color: '#e0e0e0',
+  WebkitOverflowScrolling: 'touch',
   // Custom scrollbar styling
   scrollbarWidth: 'thin',
   scrollbarColor: 'rgba(255, 255, 255, 0.2) transparent',
@@ -322,7 +322,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
               🎯 Quiz Mode Active
             </Typography>
             <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-              Navigate to <strong>📄 Pages → Application Pages</strong> to practice using the actual app. Complete tasks to track progress below.
+              Click on tasks below to navigate to interactive component stories. Each task will direct you to the specific Storybook story where you can practice. Complete actions to track progress automatically.
             </Typography>
           </Box>
         )}
@@ -395,11 +395,11 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                                   size="small"
                                   sx={{ height: 18, fontSize: '0.65rem' }}
                                 />
-                                {mode === 'quiz' && storyLink && (
+                                {storyLink && (
                                   <Chip 
-                                    label="Practice Available"
+                                    label={mode === 'tutorial' ? 'Example Available' : 'Interactive Demo'}
                                     size="small"
-                                    color="primary"
+                                    color={mode === 'tutorial' ? 'success' : 'primary'}
                                     variant="outlined"
                                     sx={{ height: 18, fontSize: '0.65rem' }}
                                   />
@@ -424,11 +424,11 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                           {/* Expandable content */}
                           <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                             <Box sx={{ mt: 1.5, pt: 1.5, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                              {/* Instructions */}
-                              {hasInstructions && (
+                              {/* Instructions - Tutorial Mode Only */}
+                              {mode === 'tutorial' && hasInstructions && (
                                 <Box sx={{ mb: storyLink ? 1.5 : 0 }}>
                                   <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', display: 'block', mb: 0.5 }}>
-                                    📋 Steps:
+                                    📋 Step-by-Step Instructions:
                                   </Typography>
                                   <Box component="ol" sx={{ m: 0, pl: 2.5, fontSize: '0.7rem', color: 'text.secondary' }}>
                                     {task.instructions.map((instruction, i) => (
@@ -438,11 +438,20 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                                 </Box>
                               )}
                               
-                              {/* Story link for Quiz mode */}
+                              {/* Quiz Mode - Brief Reminder */}
+                              {mode === 'quiz' && (
+                                <Box sx={{ mb: storyLink ? 1.5 : 0 }}>
+                                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.7rem', fontStyle: 'italic' }}>
+                                    💡 Remember: {task.description}
+                                  </Typography>
+                                </Box>
+                              )}
+                              
+                              {/* Story Link - Both Modes */}
                               {storyLink && (
-                                <Box sx={{ p: 1, backgroundColor: 'rgba(33, 150, 243, 0.1)', borderRadius: 1, borderLeft: '3px solid #2196F3' }}>
+                                <Box sx={{ p: 1, backgroundColor: mode === 'tutorial' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(33, 150, 243, 0.1)', borderRadius: 1, borderLeft: mode === 'tutorial' ? '3px solid #4CAF50' : '3px solid #2196F3' }}>
                                   <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', display: 'block', mb: 0.5 }}>
-                                    {mode === 'quiz' ? '🎯 Practice Here:' : '📖 Learn More:'}
+                                    {mode === 'quiz' ? '🎯 Try It Out:' : '📖 View Example:'}
                                   </Typography>
                                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                     <Link
@@ -450,26 +459,28 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                                       variant="caption"
                                       onClick={() => task.completionCriteria?.storyId && handleNavigateToStory(task.completionCriteria.storyId)}
                                       sx={{ 
-                                        color: '#2196F3',
+                                        color: mode === 'tutorial' ? '#4CAF50' : '#2196F3',
                                         textAlign: 'left',
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: 0.5,
                                         fontSize: '0.7rem',
+                                        fontWeight: 600,
                                         '&:hover': {
                                           textDecoration: 'underline',
                                         }
                                       }}
                                     >
-                                      Go to {task.completionCriteria?.storyId?.split('--')[0].replace(/-/g, ' ')}
+                                      {mode === 'quiz' ? 'Open Interactive Demo' : 'See Documentation Example'}
                                       <LaunchIcon sx={{ fontSize: 12 }} />
                                     </Link>
                                   </Box>
-                                  {mode === 'quiz' && task.completionCriteria?.requiredActions && (
-                                    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.5, fontSize: '0.65rem', fontStyle: 'italic' }}>
-                                      Complete the actions to mark this task done automatically
-                                    </Typography>
-                                  )}
+                                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.5, fontSize: '0.65rem', fontStyle: 'italic' }}>
+                                    {mode === 'quiz' 
+                                      ? 'Complete the task in the story to check it off automatically'
+                                      : 'Follow along with the interactive example to learn how it works'
+                                    }
+                                  </Typography>
                                 </Box>
                               )}
                             </Box>

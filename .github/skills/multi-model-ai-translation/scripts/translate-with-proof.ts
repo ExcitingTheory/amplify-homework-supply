@@ -43,6 +43,25 @@ const gemini = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 // Rate limiting delay to avoid API quotas
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Progress logging helpers
+function formatProgress(current: number, total: number, label: string): string {
+  const percentage = Math.round((current / total) * 100);
+  const bar = '█'.repeat(Math.floor(percentage / 5)) + '░'.repeat(20 - Math.floor(percentage / 5));
+  return `  [${bar}] ${percentage}% ${label} (${current}/${total})`;
+}
+
+function estimateTimeRemaining(current: number, total: number, msPerItem: number): string {
+  const remaining = total - current;
+  const msRemaining = remaining * msPerItem;
+  const seconds = Math.floor(msRemaining / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  
+  if (hours > 0) return `~${hours}h ${minutes % 60}m remaining`;
+  if (minutes > 0) return `~${minutes}m ${seconds % 60}s remaining`;
+  return `~${seconds}s remaining`;
+}
+
 async function translateWithClaude(
   sourceData: TranslationSource,
   targetLang: string
@@ -51,12 +70,26 @@ async function translateWithClaude(
   let totalTokens = 0;
   let lastRequestId = '';
   const keys = Object.entries(sourceData);
+  const startTime = Date.now();
+
+  console.log(`\n🤖 Claude Sonnet 4 - Starting translation of ${keys.length} keys...`);
 
   for (let i = 0; i < keys.length; i++) {
     const [key, data] = keys[i];
     // Handle both legacy string format and new metadata format
     const isMetadataFormat = typeof data === 'object' && 'value' in data;
     const value = isMetadataFormat ? data.value : data;
+    
+    // Show progress every key or every 10% of keys (whichever is more frequent)
+    const shouldShowProgress = i % Math.max(1, Math.floor(keys.length / 10)) === 0 || i === keys.length - 1;
+    if (shouldShowProgress) {
+      const elapsed = Date.now() - startTime;
+      const avgTimePerKey = i > 0 ? elapsed / i : 500;
+      console.log(formatProgress(i + 1, keys.length, `Claude: "${key.substring(0, 30)}..."`));
+      if (i < keys.length - 1) {
+        console.log(`    ${estimateTimeRemaining(i + 1, keys.length, avgTimePerKey)}`);
+      }
+    }
     
     let prompt: string;
     
@@ -70,7 +103,7 @@ async function translateWithClaude(
 
 **Context:** ${metadata.context}
 
-**Component:** ${metadata.component.description}
+**Component:** ${metadata.component?.description || 'General UI'}
 
 **Usage:** ${metadata.usage}
 
@@ -131,6 +164,9 @@ async function translateWithClaude(
     }
   }
 
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  console.log(`  ✅ Claude completed in ${elapsed}s - ${totalTokens} tokens`);
+
   return {
     translation: translations,
     metadata: {
@@ -154,11 +190,25 @@ async function translateWithGPT(
   let totalTokens = 0;
   let lastRequestId = '';
   const keys = Object.entries(sourceData);
+  const startTime = Date.now();
+
+  console.log(`\n🤖 GPT-4o - Starting translation of ${keys.length} keys...`);
 
   for (let i = 0; i < keys.length; i++) {
     const [key, data] = keys[i];
     const isMetadataFormat = typeof data === 'object' && 'value' in data;
     const value = isMetadataFormat ? data.value : data;
+    
+    // Show progress every key or every 10% of keys
+    const shouldShowProgress = i % Math.max(1, Math.floor(keys.length / 10)) === 0 || i === keys.length - 1;
+    if (shouldShowProgress) {
+      const elapsed = Date.now() - startTime;
+      const avgTimePerKey = i > 0 ? elapsed / i : 500;
+      console.log(formatProgress(i + 1, keys.length, `GPT: "${key.substring(0, 30)}..."`));
+      if (i < keys.length - 1) {
+        console.log(`    ${estimateTimeRemaining(i + 1, keys.length, avgTimePerKey)}`);
+      }
+    }
     
     let prompt: string;
     
@@ -172,7 +222,7 @@ async function translateWithGPT(
 
 **Context:** ${metadata.context}
 
-**Component:** ${metadata.component.description}
+**Component:** ${metadata.component?.description || 'General UI'}
 
 **Usage:** ${metadata.usage}
 
@@ -232,6 +282,9 @@ async function translateWithGPT(
     }
   }
 
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  console.log(`  ✅ GPT completed in ${elapsed}s - ${totalTokens} tokens`);
+
   return {
     translation: translations,
     metadata: {
@@ -255,11 +308,26 @@ async function translateWithTranslateGemma(
   const translations: Record<string, string> = {};
   let totalTokens = 0;
   const keys = Object.entries(sourceData);
+  const startTime = Date.now();
+
+  console.log(`\n🤖 Gemma 3-12B - Starting translation of ${keys.length} keys...`);
+  console.log(`  ⚠️  Rate limited to 28 req/min (2.1s delay per key)`);
 
   for (let i = 0; i < keys.length; i++) {
     const [key, data] = keys[i];
     const isMetadataFormat = typeof data === 'object' && 'value' in data;
     const value = isMetadataFormat ? data.value : data;
+    
+    // Show progress every key or every 10% of keys
+    const shouldShowProgress = i % Math.max(1, Math.floor(keys.length / 10)) === 0 || i === keys.length - 1;
+    if (shouldShowProgress) {
+      const elapsed = Date.now() - startTime;
+      const avgTimePerKey = i > 0 ? elapsed / i : 2100;
+      console.log(formatProgress(i + 1, keys.length, `Gemma: "${key.substring(0, 30)}..."`));
+      if (i < keys.length - 1) {
+        console.log(`    ${estimateTimeRemaining(i + 1, keys.length, avgTimePerKey)}`);
+      }
+    }
     
     let prompt: string;
     
@@ -273,7 +341,7 @@ async function translateWithTranslateGemma(
 
 **Context:** ${metadata.context}
 
-**Component:** ${metadata.component.description}
+**Component:** ${metadata.component?.description || 'General UI'}
 
 **Usage:** ${metadata.usage}
 
@@ -325,13 +393,16 @@ async function translateWithTranslateGemma(
     }
   }
 
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  console.log(`  ✅ Gemma completed in ${elapsed}s - ${totalTokens} tokens (estimated)`);
+
   return {
     translation: translations,
     metadata: {
       model: 'gemma-3-12b-it',
-      provider: 'google-gemma',
+      provider: 'google',
       timestamp: new Date().toISOString(),
-      requestId: crypto.randomUUID(),
+      requestId: 'gemma-batch',
       tokensUsed: totalTokens,
       fingerprint: crypto.createHash('sha256')
         .update(JSON.stringify(translations))
@@ -340,21 +411,28 @@ async function translateWithTranslateGemma(
   };
 }
 
-// Main translation function
 async function translateNamespace(
   namespace: string,
   sourceLang: string,
   targetLang: string
 ) {
+  const overallStartTime = Date.now();
+  
+  console.log('\n' + '='.repeat(80));
+  console.log(`📚 TRANSLATING NAMESPACE: ${namespace}`);
+  console.log(`   Source: ${sourceLang} → Target: ${targetLang}`);
+  console.log('='.repeat(80));
+
   const sourcePath = `public/locales/${sourceLang}/${namespace}.json`;
   const sourceText = fs.readFileSync(sourcePath, 'utf-8');
   const sourceData: TranslationSource = JSON.parse(sourceText);
 
   // Flatten nested objects for translation
   const flattenedSource = flattenObject(sourceData);
+  const totalKeys = Object.keys(flattenedSource).length;
   
-  console.log(`Translating ${namespace} to ${targetLang}...`);
-  console.log(`Processing ${Object.keys(flattenedSource).length} keys with metadata-driven translation...`);
+  console.log(`\n📊 Translation scope: ${totalKeys} keys`);
+  console.log(`   Using metadata-driven translation with 3 AI models in parallel`);
 
   // Translate with all 3 models in parallel (now per-key with metadata)
   let claudeResult: TranslationResult;
@@ -362,69 +440,121 @@ async function translateNamespace(
   let translateGemmaResult: TranslationResult;
   
   try {
-    console.log('  Starting parallel translation with 3 models...');
+    console.log('\n🚀 Phase 1/3: Parallel Model Translation');
+    console.log('-'.repeat(80));
+    const translationStartTime = Date.now();
+    
     [claudeResult, gptResult, translateGemmaResult] = await Promise.all([
-      translateWithClaude(flattenedSource, targetLang).catch(err => {
-        throw new Error(`Claude translation failed: ${err.message}`);
-      }),
-      translateWithGPT(flattenedSource, targetLang).catch(err => {
-        throw new Error(`GPT translation failed: ${err.message}`);
-      }),
-      translateWithTranslateGemma(flattenedSource, targetLang).catch(err => {
-        throw new Error(`TranslateGemma translation failed: ${err.message}`);
-      })
+      translateWithClaude(flattenedSource, targetLang),
+      translateWithGPT(flattenedSource, targetLang),
+      translateWithTranslateGemma(flattenedSource, targetLang)
     ]);
-    console.log('  ✓ All models completed successfully');
+    
+    const translationElapsed = ((Date.now() - translationStartTime) / 1000).toFixed(1);
+    console.log('\n' + '='.repeat(80));
+    console.log(`✅ Phase 1 Complete - All 3 models finished in ${translationElapsed}s`);
+    console.log('='.repeat(80));
   } catch (error) {
-    console.error(`\\n❌ Translation failed: ${error instanceof Error ? error.message : String(error)}`);
-    console.error('  All models must complete successfully. Aborting.');
+    console.error(`\n❌ Translation failed: ${error instanceof Error ? error.message : String(error)}`);
+    console.error('   All models must complete successfully. Aborting.');
     process.exit(1);
   }
 
   // Save individual model outputs with metadata
+  console.log('\n💾 Phase 2/3: Consensus Analysis & Caching');
+  console.log('-'.repeat(80));
+  
   const cacheDir = `.translation-cache/${new Date().toISOString().split('T')[0]}/${targetLang}`;
-  fs.mkdirSync(cacheDir, { recursive: true });
+  fs.mkdirSync(cacheDir, { recursive: true});
 
-  fs.writeFileSync(
-    `${cacheDir}/${namespace}-claude.json`,
-    JSON.stringify(claudeResult.translation, null, 2)
-  );
-  fs.writeFileSync(
-    `${cacheDir}/${namespace}-claude-metadata.json`,
-    JSON.stringify(claudeResult.metadata, null, 2)
-  );
+  console.log(`   💾 Saving individual model outputs to: ${cacheDir}`);
+  
+  if (claudeResult) {
+    fs.writeFileSync(
+      `${cacheDir}/${namespace}-claude.json`,
+      JSON.stringify(claudeResult.translation, null, 2)
+    );
+    fs.writeFileSync(
+      `${cacheDir}/${namespace}-claude-metadata.json`,
+      JSON.stringify(claudeResult.metadata, null, 2)
+    );
+  }
 
-  fs.writeFileSync(
-    `${cacheDir}/${namespace}-gpt.json`,
-    JSON.stringify(gptResult.translation, null, 2)
-  );
-  fs.writeFileSync(
-    `${cacheDir}/${namespace}-gpt-metadata.json`,
-    JSON.stringify(gptResult.metadata, null, 2)
-  );
+  if (gptResult) {
+    fs.writeFileSync(
+      `${cacheDir}/${namespace}-gpt.json`,
+      JSON.stringify(gptResult.translation, null, 2)
+    );
+    fs.writeFileSync(
+      `${cacheDir}/${namespace}-gpt-metadata.json`,
+      JSON.stringify(gptResult.metadata, null, 2)
+    );
+  }
 
-  fs.writeFileSync(
-    `${cacheDir}/${namespace}-translategemma.json`,
-    JSON.stringify(translateGemmaResult.translation, null, 2)
-  );
-  fs.writeFileSync(
-    `${cacheDir}/${namespace}-translategemma-metadata.json`,
-    JSON.stringify(translateGemmaResult.metadata, null, 2)
-  );
+  if (translateGemmaResult) {
+    fs.writeFileSync(
+      `${cacheDir}/${namespace}-translategemma.json`,
+      JSON.stringify(translateGemmaResult.translation, null, 2)
+    );
+    fs.writeFileSync(
+      `${cacheDir}/${namespace}-translategemma-metadata.json`,
+      JSON.stringify(translateGemmaResult.metadata, null, 2)
+    );
+  }
 
-  // Perform consensus analysis
+  // Perform consensus analysis (handle null results from failed models)
+  console.log(`   🤝 Analyzing consensus across ${totalKeys} translations...`);
   const consensus = analyzeConsensus(
-    claudeResult.translation,
-    gptResult.translation,
-    translateGemmaResult.translation
+    claudeResult?.translation || {},
+    gptResult?.translation || {},
+    translateGemmaResult?.translation || {}
   );
+
+  // Calculate consensus statistics
+  let exactMatches = 0;
+  let twoOutOfThree = 0;
+  let noConsensus = 0;
+  
+  // Get all keys from successful translations
+  const allKeys = new Set([
+    ...Object.keys(claudeResult?.translation || {}),
+    ...Object.keys(gptResult?.translation || {}),
+    ...Object.keys(translateGemmaResult?.translation || {})
+  ]);
+  
+  for (const key of allKeys) {
+    const translations = [
+      claudeResult?.translation[key],
+      gptResult?.translation[key],
+      translateGemmaResult?.translation[key]
+    ].filter(t => t !== undefined);
+    
+    if (translations[0] === translations[1] && translations[1] === translations[2]) {
+      exactMatches++;
+    } else if (
+      translations[0] === translations[1] ||
+      translations[0] === translations[2] ||
+      translations[1] === translations[2]
+    ) {
+      twoOutOfThree++;
+    } else {
+      noConsensus++;
+    }
+  }
+
+  console.log(`   📊 Consensus breakdown:`);
+  console.log(`      - 3/3 exact match: ${exactMatches} (${Math.round(exactMatches/totalKeys*100)}%)`);
+  console.log(`      - 2/3 consensus: ${twoOutOfThree} (${Math.round(twoOutOfThree/totalKeys*100)}%)`);
+  console.log(`      - No consensus (defaulted to Claude): ${noConsensus} (${Math.round(noConsensus/totalKeys*100)}%)`);
+
+  console.log('\n💾 Phase 3/3: Saving Final Outputs');
+  console.log('-'.repeat(80));
 
   // Unflatten consensus back to nested structure and save
   const unflattened = unflattenObject(consensus);
-  fs.writeFileSync(
-    `public/locales/${targetLang}/${namespace}.json`,
-    JSON.stringify(unflattened, null, 2)
-  );
+  const outputPath = `public/locales/${targetLang}/${namespace}.json`;
+  fs.writeFileSync(outputPath, JSON.stringify(unflattened, null, 2));
+  console.log(`   ✅ Final translation saved: ${outputPath}`);
 
   // Generate proof document with source data included
   const proof = {
@@ -433,45 +563,58 @@ async function translateNamespace(
     targetLang,
     timestamp: new Date().toISOString(),
     models: [
-      {
+      ...(claudeResult ? [{
         name: claudeResult.metadata.model,
         provider: claudeResult.metadata.provider,
         requestId: claudeResult.metadata.requestId,
-        fingerprint: claudeResult.metadata.fingerprint
-      },
-      {
+        fingerprint: claudeResult.metadata.fingerprint,
+        status: 'success' as const
+      }] : [{ name: 'claude-sonnet-4-20250514', provider: 'anthropic', status: 'failed' as const }]),
+      ...(gptResult ? [{
         name: gptResult.metadata.model,
         provider: gptResult.metadata.provider,
         requestId: gptResult.metadata.requestId,
-        fingerprint: gptResult.metadata.fingerprint
-      },
-      {
+        fingerprint: gptResult.metadata.fingerprint,
+        status: 'success' as const
+      }] : [{ name: 'gpt-4o', provider: 'openai', status: 'failed' as const }]),
+      ...(translateGemmaResult ? [{
         name: translateGemmaResult.metadata.model,
         provider: translateGemmaResult.metadata.provider,
         requestId: translateGemmaResult.metadata.requestId,
-        fingerprint: translateGemmaResult.metadata.fingerprint
-      }
+        fingerprint: translateGemmaResult.metadata.fingerprint,
+        status: 'success' as const
+      }] : [{ name: 'gemma-3-12b-it', provider: 'google-gemma', status: 'failed' as const }])
     ],
     consensusFingerprint: crypto.createHash('sha256')
       .update(JSON.stringify(consensus))
       .digest('hex'),
     consensus: {
       source: extractValues(sourceData),
-      claude: claudeResult.translation,
-      gpt: gptResult.translation,
-      translategemma: translateGemmaResult.translation,
+      claude: claudeResult?.translation || null,
+      gpt: gptResult?.translation || null,
+      translategemma: translateGemmaResult?.translation || null,
       final: consensus
     }
   };
 
-  fs.writeFileSync(
-    `${cacheDir}/${namespace}-proof.json`,
-    JSON.stringify(proof, null, 2)
-  );
+  const proofPath = `${cacheDir}/${namespace}-proof.json`;
+  fs.writeFileSync(proofPath, JSON.stringify(proof, null, 2));
+  console.log(`   🔐 Cryptographic proof saved: ${proofPath}`);
 
-  console.log(`✅ Translation complete for ${namespace}!`);
-  console.log(`Cache: ${cacheDir}`);
-  console.log(`Total tokens: Claude=${claudeResult.metadata.tokensUsed}, GPT=${gptResult.metadata.tokensUsed}, TranslateGemma=${translateGemmaResult.metadata.tokensUsed}`);
+  const overallElapsed = ((Date.now() - overallStartTime) /1000).toFixed(1);
+  
+  console.log('\n' + '='.repeat(80));
+  console.log(`🎉 TRANSLATION COMPLETE: ${namespace}`);
+  console.log('='.repeat(80));
+  console.log(`   Total time: ${overallElapsed}s`);
+  console.log(`   Keys processed: ${totalKeys}`);
+  console.log(`   Token usage:`);
+  if (claudeResult) console.log(`      - Claude: ${claudeResult.metadata.tokensUsed.toLocaleString()}`);
+  if (gptResult) console.log(`      - GPT: ${gptResult.metadata.tokensUsed.toLocaleString()}`);
+  if (translateGemmaResult) console.log(`      - Gemma: ${translateGemmaResult.metadata.tokensUsed.toLocaleString()} (est)`);
+  console.log(`   Output: ${outputPath}`);
+  console.log(`   Cache: ${cacheDir}`);
+  console.log('='.repeat(80) + '\n');
 
   return proof;
 }
@@ -486,7 +629,7 @@ function flattenObject(obj: any, prefix = ''): Record<string, any> {
     
     // Check if it's a metadata object with 'value' field
     if (typeof value === 'object' && value !== null && 'value' in value) {
-      flattened[newKey] = value.value;
+      flattened[newKey] = value;
     }
     // Check if it's a nested object (but not metadata format)
     else if (typeof value === 'object' && value !== null && !Array.isArray(value) && !('value' in value)) {

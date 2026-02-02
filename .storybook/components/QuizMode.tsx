@@ -12,8 +12,143 @@ import { getOnboardingEmitter, UserPersona } from '../code/onboarding-events';
 import { findTaskById } from '../code/onboarding-tasks';
 import './QuizMode.css';
 
-// Application Pages URL
-const APP_PAGES_URL = '/?path=/docs/%F0%9F%93%84-pages-application-pages--docs';
+/**
+ * Task-specific navigation links for Quiz Mode
+ * Maps task IDs to their primary Storybook story and optional alternatives
+ */
+interface TaskNavigation {
+  primary: string;
+  label: string;
+  alternatives?: { url: string; label: string }[];
+}
+
+const TASK_NAVIGATION: Record<string, TaskNavigation> = {
+  'instructor-setup-class': {
+    primary: '?path=/story/📄-pages-application-pages--sections',
+    label: 'Open Sections Page',
+    alternatives: [
+      { url: '?path=/story/components-sectionassigner--default', label: 'Section Assigner Component' }
+    ]
+  },
+  'instructor-create-unit': {
+    primary: '?path=/story/📄-pages-application-pages--units',
+    label: 'Open Units Page',
+    alternatives: [
+      { url: '?path=/story/📚-creating-lessons-editor--default', label: 'Editor' },
+      { url: '?path=/story/📄-pages-application-pages--unit-detail', label: 'Unit Detail' }
+    ]
+  },
+  'instructor-add-quiz': {
+    primary: '?path=/story/📚-creating-lessons-editor-plugins-quizplugin--default',
+    label: 'Open Quiz Plugin',
+    alternatives: [
+      { url: '?path=/story/📚-creating-lessons-editor--default', label: 'Full Editor' }
+    ]
+  },
+  'instructor-create-vocabulary': {
+    primary: '?path=/story/📚-creating-lessons-editor-plugins-wordblockplugin--default',
+    label: 'Open Word Block Plugin',
+    alternatives: [
+      { url: '?path=/story/components-vocabularyreview2--default', label: 'Vocabulary Review' }
+    ]
+  },
+  'instructor-create-assignment': {
+    primary: '?path=/story/📄-pages-application-pages--section-detail',
+    label: 'Open Section Detail',
+    alternatives: [
+      { url: '?path=/story/components-sectionassigner--default', label: 'Section Assigner' }
+    ]
+  },
+  'instructor-view-grades': {
+    primary: '?path=/story/📄-pages-application-pages--section-detail',
+    label: 'Open Section Detail (Grades)',
+    alternatives: [
+      { url: '?path=/story/📄-pages-application-pages--workbook', label: 'Student Workbook View' }
+    ]
+  },
+  'instructor-use-ai-assistant': {
+    primary: '?path=/story/components-chatsidebar--default',
+    label: 'Open AI Chat Sidebar',
+    alternatives: [
+      { url: '?path=/story/📚-creating-lessons-editor-plugins-aicontentcompletionplugin--default', label: 'AI Content Completion' },
+      { url: '?path=/story/📚-creating-lessons-editor-components-enhancedgeneration--default', label: 'Enhanced Generation' }
+    ]
+  },
+  'instructor-learn-shortcuts': {
+    primary: '?path=/story/help-keyboard-shortcuts--keyboard-shortcut-trainer',
+    label: 'Open Keyboard Shortcuts Trainer',
+    alternatives: [
+      { url: '?path=/story/help-keyboard-shortcuts--automated-demo', label: 'Watch Demo' },
+      { url: '?path=/story/📚-creating-lessons-editor--default', label: 'Practice in Editor' }
+    ]
+  },
+  // Learner tasks
+  'learner-join-class': {
+    primary: '?path=/story/📄-pages-application-pages--sections',
+    label: 'Open Sections Page',
+  },
+  'learner-view-assignments': {
+    primary: '?path=/story/📄-pages-application-pages--section-detail-student',
+    label: 'Open My Section',
+  },
+  'learner-complete-assignment': {
+    primary: '?path=/story/📄-pages-application-pages--workbook',
+    label: 'Open Workbook',
+  },
+  'learner-review-feedback': {
+    primary: '?path=/story/📄-pages-application-pages--index',
+    label: 'Open Dashboard',
+    alternatives: [
+      { url: '?path=/story/📄-pages-application-pages--section-detail-student', label: 'My Section' }
+    ]
+  },
+  'learner-practice-vocabulary': {
+    primary: '?path=/story/components-vocabularyreview2--default',
+    label: 'Open Vocabulary Review',
+  },
+  'learner-use-chat-help': {
+    primary: '?path=/story/components-chatsidebar--default',
+    label: 'Open AI Chat',
+  },
+  // Developer tasks
+  'developer-explore-components': {
+    primary: '?path=/docs/getting-started-introduction--docs',
+    label: 'Browse Components',
+  },
+  'developer-understand-editor': {
+    primary: '?path=/docs/📚-creating-lessons-editor--docs',
+    label: 'Open Editor Docs',
+    alternatives: [
+      { url: '?path=/story/📚-creating-lessons-editor--default', label: 'Live Editor' }
+    ]
+  },
+  'developer-keyboard-shortcuts-demo': {
+    primary: '?path=/story/help-keyboard-shortcuts--keyboard-shortcut-trainer',
+    label: 'Open Keyboard Shortcuts',
+    alternatives: [
+      { url: '?path=/story/help-keyboard-shortcuts--automated-demo', label: 'Watch Automated Demo' }
+    ]
+  },
+  // Secret tasks
+  'secret-keyboard-master': {
+    primary: '?path=/story/help-keyboard-shortcuts--keyboard-shortcut-trainer',
+    label: 'Start Keyboard Master Challenge',
+  },
+  'secret-speed-demon': {
+    primary: '?path=/story/help-keyboard-shortcuts--keyboard-shortcut-trainer',
+    label: 'Start Speed Challenge',
+  },
+  'secret-achievement-hunter': {
+    primary: '?path=/story/help-keyboard-shortcuts--keyboard-shortcut-trainer',
+    label: 'Unlock Achievements',
+  },
+};
+
+// Fallback URL for tasks without specific navigation
+const DEFAULT_NAVIGATION = {
+  primary: '?path=/docs/📄-pages-application-pages--docs',
+  label: 'Browse Application Pages',
+};
 
 export interface QuizModeProps {
   /** Task ID being completed */
@@ -91,22 +226,22 @@ export function QuizMode({
     onComplete?.();
   };
 
-  const handleNavigateToApp = () => {
-    // Navigate to Application Pages
-    window.parent.location.href = APP_PAGES_URL;
+  const handleNavigateToStory = (url: string) => {
+    // Navigate to specific story
+    window.parent.location.href = url;
   };
+
+  const handleNavigateToAlternative = (url: string) => {
+    // Navigate to alternative story
+    window.parent.location.href = url;
+  };
+
+  // Get navigation info for this task
+  const navigation = TASK_NAVIGATION[taskId] || DEFAULT_NAVIGATION;
 
   if (!task) {
     return (
-      <div className="quiz-mode-error">
-        Task "{taskId}" not found
-      </div>
-    );
-  }
-
-  return (
-    <div className="quiz-mode-container">
-      {/* Task Instructions with Navigation to App */}
+      <div className="quiz-mode-error">Specific Story */}
       {!completed && (
         <div className="quiz-instructions-overlay">
           <div className="quiz-instructions-card">
@@ -123,16 +258,39 @@ export function QuizMode({
             </div>
 
             <div className="app-navigation-hint">
-              <div className="hint-icon">📄</div>
+              <div className="hint-icon">🎮</div>
               <div>
-                <strong>Practice with the actual app</strong>
-                <p>Click below to navigate to <strong>Application Pages</strong> where you can interact with the real interface.</p>
+                <strong>Practice with the interactive component</strong>
+                <p>Click below to navigate to the relevant Storybook story where you can practice this task.</p>
               </div>
             </div>
 
             <p className="sidebar-hint">
               💡 <strong>Tip:</strong> Track your progress in the Onboarding sidebar panel
             </p>
+
+            <div className="quiz-actions">
+              <button
+                className="quiz-button"
+                onClick={() => handleNavigateToStory(navigation.primary)}
+              >
+                {navigation.label} →
+              </button>
+              
+              {navigation.alternatives && navigation.alternatives.length > 0 && (
+                <div className="alternative-links">
+                  <p className="alternatives-label">Or try these:</p>
+                  {navigation.alternatives.map((alt, i) => (
+                    <button
+                      key={i}
+                      className="quiz-button alternative"
+                      onClick={() => handleNavigateToAlternative(alt.url)}
+                    >
+                      {alt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
 
             <div className="quiz-actions">
               <button

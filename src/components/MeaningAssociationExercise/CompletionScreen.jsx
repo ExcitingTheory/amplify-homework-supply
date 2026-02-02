@@ -25,9 +25,8 @@ const containerStyle = {
   alignItems: 'center',
   justifyContent: 'center',
   backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  zIndex: 1000,
-  padding: 4,
-  paddingBottom: 6,
+  zIndex: 10,
+  padding: 2,
   minHeight: '100%',
 };
 

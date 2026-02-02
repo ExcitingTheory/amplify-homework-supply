@@ -1,69 +1,87 @@
 {
-  "app": {
-    "name": "Suministro de Tareas",
-    "tagline": "Plataforma de Aprendizaje del Idioma Japonés"
-  },
   "actions": {
-    "save": "Guardar",
-    "cancel": "Cancelar",
-    "delete": "Eliminar",
-    "edit": "Editar",
-    "submit": "Enviar",
-    "close": "Cerrar",
-    "create": "Crear",
-    "upload": "Subir",
-    "download": "Descargar",
-    "share": "Compartir",
-    "copy": "Copiar",
-    "send": "Enviar",
     "add": "Agregar",
-    "remove": "Eliminar",
-    "update": "Actualizar",
-    "confirm": "Confirmar",
+    "back": "Atrás",
+    "cancel": "Cancelar",
     "clear": "Limpiar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "continue": "Continuar",
+    "copy": "Copiar",
+    "create": "Crear",
+    "delete": "Eliminar",
+    "download": "Descargar",
+    "edit": "Editar",
+    "finish": "Finalizar",
+    "next": "Siguiente",
+    "remove": "Eliminar",
     "reset": "Restablecer",
     "retry": "Reintentar",
-    "back": "Atrás",
-    "next": "Siguiente",
-    "finish": "Finalizar",
-    "continue": "Continuar"
+    "save": "Guardar",
+    "send": "Enviar",
+    "share": "Compartir",
+    "submit": "Enviar",
+    "update": "Actualizar",
+    "upload": "Subir"
   },
-  "navigation": {
-    "home": "Inicio",
-    "units": "Unidades",
-    "sections": "Secciones",
-    "grades": "Calificaciones",
-    "profile": "Perfil",
-    "workbook": "Cuaderno de trabajo"
-  },
-  "status": {
-    "loading": "Cargando...",
-    "saving": "Guardando...",
-    "success": "Éxito",
-    "error": "Error",
-    "processing": "Procesando...",
-    "uploading": "Subiendo...",
-    "downloading": "Descargando...",
-    "complete": "Completado",
-    "incomplete": "Incompleto",
-    "pending": "Pendiente"
-  },
-  "time": {
-    "created": "Creado",
-    "updated": "Actualizado",
-    "due": "Vence",
-    "completed": "Completado"
+  "app": {
+    "name": "Suministros de Tarea",
+    "tagline": "Plataforma de Aprendizaje de Idioma Japonés"
   },
   "common": {
-    "yes": "Sí",
+    "about": "Acerca de",
+    "filter": "Filtrar",
+    "help": "Ayuda",
     "no": "No",
     "ok": "Aceptar",
     "search": "Buscar",
-    "filter": "Filtrar",
+    "settings": "Configuración",
     "sort": "Ordenar",
     "view": "Ver",
-    "settings": "Configuración",
+    "yes": "Sí"
+  },
+  "mainToolbar": {
+    "addToSection": {
+      "add": "Agregar",
+      "codeLabel": "Etiqueta de código",
+      "description": "Descripción",
+      "title": "Título"
+    },
     "help": "Ayuda",
-    "about": "Acerca de"
+    "settings": {
+      "darkMode": "Modo oscuro",
+      "disableNotifications": "Desactivar notificaciones",
+      "experimentalFeatures": "Características Experimentales",
+      "studentMode": "Modo Estudiante"
+    }
+  },
+  "navigation": {
+    "grades": "Calificaciones",
+    "home": "Inicio",
+    "profile": "Perfil",
+    "sections": "Secciones",
+    "units": "Unidades",
+    "workbook": "Cuaderno"
+  },
+  "quizComponent": {
+    "grade": "Calificación: {{grade}}"
+  },
+  "status": {
+    "complete": "Completar",
+    "downloading": "Descargando...",
+    "error": "Error",
+    "incomplete": "Incompleto",
+    "loading": "Cargando...",
+    "pending": "Pendiente",
+    "processing": "Procesando...",
+    "saving": "Guardando...",
+    "success": "Éxito",
+    "uploading": "Subiendo..."
+  },
+  "time": {
+    "completed": "Completado",
+    "created": "Creado",
+    "due": "Vencimiento",
+    "updated": "Actualizado"
   }
 }

@@ -678,5 +678,400 @@
         ]
       }
     }
+  },
+  "gradeHistory": {
+    "title": {
+      "value": "Grade History",
+      "_meta": {
+        "context": "Title of the sidebar panel showing previous assignment attempts.",
+        "component": {
+          "location": "src/components/Editor3/components/GradeHistory.js",
+          "description": "Displays previous attempt statistics for workbook assignments."
+        },
+        "usage": "Panel heading",
+        "impact": "High - primary navigation element",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Previous Grades", "Score History", "Past Results"]
+      }
+    },
+    "noAttempts": {
+      "value": "No previous attempts",
+      "_meta": {
+        "context": "Message shown when student has not completed the assignment yet.",
+        "component": {
+          "location": "src/components/Editor3/components/GradeHistory.js",
+          "description": "Empty state message for grade history."
+        },
+        "usage": "Empty state message",
+        "impact": "Medium - informational",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["No submissions yet", "No history available"]
+      }
+    },
+    "completeFirstAttempt": {
+      "value": "Complete this assignment to see your progress here.",
+      "_meta": {
+        "context": "Encouragement message for first-time students.",
+        "component": {
+          "location": "src/components/Editor3/components/GradeHistory.js",
+          "description": "Guidance text in empty state."
+        },
+        "usage": "Helper text",
+        "impact": "Medium - motivational",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Start the assignment to track your progress"]
+      }
+    },
+    "attempts": {
+      "value": "attempts",
+      "_meta": {
+        "context": "Label for number of attempts made.",
+        "component": {
+          "location": "src/components/Editor3/components/GradeHistory.js",
+          "description": "Counter label for attempts."
+        },
+        "usage": "Chip label",
+        "impact": "Low - supplementary info",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["submissions", "tries"]
+      }
+    },
+    "trend": {
+      "up": {
+        "value": "Improving",
+        "_meta": {
+          "context": "Indicator that scores are improving.",
+          "component": {
+            "location": "src/components/Editor3/components/GradeHistory.js",
+            "description": "Trend indicator label."
+          },
+          "usage": "Chip label showing positive trend",
+          "impact": "Medium - motivational feedback",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": ["Getting better", "Progress up"]
+        }
+      },
+      "down": {
+        "value": "Review needed",
+        "_meta": {
+          "context": "Indicator that scores are declining.",
+          "component": {
+            "location": "src/components/Editor3/components/GradeHistory.js",
+            "description": "Trend indicator label."
+          },
+          "usage": "Chip label showing negative trend",
+          "impact": "Medium - constructive feedback",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": ["Needs practice", "Declining"]
+        }
+      },
+      "flat": {
+        "value": "Steady",
+        "_meta": {
+          "context": "Indicator that scores are stable.",
+          "component": {
+            "location": "src/components/Editor3/components/GradeHistory.js",
+            "description": "Trend indicator label."
+          },
+          "usage": "Chip label showing neutral trend",
+          "impact": "Low - informational",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": ["Stable", "Consistent"]
+        }
+      }
+    },
+    "bestScore": {
+      "value": "Best Score",
+      "_meta": {
+        "context": "Label for highest score achieved.",
+        "component": {
+          "location": "src/components/Editor3/components/GradeHistory.js",
+          "description": "Statistics label."
+        },
+        "usage": "Label for maximum score statistic",
+        "impact": "High - key performance metric",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Highest Score", "Top Score"]
+      }
+    },
+    "averageScore": {
+      "value": "Average Score",
+      "_meta": {
+        "context": "Label for mean score across attempts.",
+        "component": {
+          "location": "src/components/Editor3/components/GradeHistory.js",
+          "description": "Statistics label."
+        },
+        "usage": "Label for mean score statistic",
+        "impact": "Medium - performance metric",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Mean Score", "Typical Score"]
+      }
+    },
+    "recentAttempts": {
+      "value": "Recent Attempts",
+      "_meta": {
+        "context": "Section heading for attempt list.",
+        "component": {
+          "location": "src/components/Editor3/components/GradeHistory.js",
+          "description": "Subheading for attempt list."
+        },
+        "usage": "Section heading",
+        "impact": "Medium - organizational element",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Latest Attempts", "Recent Submissions"]
+      }
+    },
+    "complete": {
+      "value": "complete",
+      "_meta": {
+        "context": "Suffix for completion percentage.",
+        "component": {
+          "location": "src/components/Editor3/components/GradeHistory.js",
+          "description": "Completion percentage label."
+        },
+        "usage": "Label suffix for percentage",
+        "impact": "Low - supplementary info",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["finished", "done"]
+      }
+    },
+    "best": {
+      "value": "Best",
+      "_meta": {
+        "context": "Badge marking the highest scoring attempt.",
+        "component": {
+          "location": "src/components/Editor3/components/GradeHistory.js",
+          "description": "Badge for top score."
+        },
+        "usage": "Badge label",
+        "impact": "Medium - achievement indicator",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Top", "Highest"]
+      }
+    }
+  },
+  "workbookSettings": {
+    "title": {
+      "value": "Settings",
+      "_meta": {
+        "context": "Title of the settings panel for workbook view.",
+        "component": {
+          "location": "src/components/Editor3/components/WorkbookSettings.js",
+          "description": "Student-facing settings for workbook view."
+        },
+        "usage": "Panel heading",
+        "impact": "Medium - navigation element",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Preferences", "Configuration"]
+      }
+    },
+    "displayPreferences": {
+      "value": "Display Preferences",
+      "_meta": {
+        "context": "Section heading for visual settings.",
+        "component": {
+          "location": "src/components/Editor3/components/WorkbookSettings.js",
+          "description": "Section for display-related settings."
+        },
+        "usage": "Section heading",
+        "impact": "Low - organizational element",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Visual Settings", "Appearance"]
+      }
+    },
+    "highContrastMode": {
+      "value": "High Contrast Mode",
+      "_meta": {
+        "context": "Toggle for accessibility high contrast display.",
+        "component": {
+          "location": "src/components/Editor3/components/WorkbookSettings.js",
+          "description": "Accessibility setting."
+        },
+        "usage": "Switch label",
+        "impact": "High - accessibility feature",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Enhanced Contrast", "Contrast Boost"]
+      }
+    },
+    "highContrastModeDescription": {
+      "value": "Increases color contrast for better visibility",
+      "_meta": {
+        "context": "Description of high contrast mode benefit.",
+        "component": {
+          "location": "src/components/Editor3/components/WorkbookSettings.js",
+          "description": "Helper text for setting."
+        },
+        "usage": "Setting description",
+        "impact": "Medium - explanatory text",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Makes text easier to read"]
+      }
+    },
+    "reducedMotion": {
+      "value": "Reduced Motion",
+      "_meta": {
+        "context": "Toggle to reduce animations for accessibility.",
+        "component": {
+          "location": "src/components/Editor3/components/WorkbookSettings.js",
+          "description": "Accessibility setting."
+        },
+        "usage": "Switch label",
+        "impact": "High - accessibility feature",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Minimize Animations", "Less Movement"]
+      }
+    },
+    "reducedMotionDescription": {
+      "value": "Minimizes animations and transitions",
+      "_meta": {
+        "context": "Description of reduced motion benefit.",
+        "component": {
+          "location": "src/components/Editor3/components/WorkbookSettings.js",
+          "description": "Helper text for setting."
+        },
+        "usage": "Setting description",
+        "impact": "Medium - explanatory text",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Reduces visual effects"]
+      }
+    },
+    "audioPreferences": {
+      "value": "Audio Preferences",
+      "_meta": {
+        "context": "Section heading for audio settings.",
+        "component": {
+          "location": "src/components/Editor3/components/WorkbookSettings.js",
+          "description": "Section for audio-related settings."
+        },
+        "usage": "Section heading",
+        "impact": "Low - organizational element",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Sound Settings", "Audio Options"]
+      }
+    },
+    "autoPlayAudio": {
+      "value": "Auto-play Audio",
+      "_meta": {
+        "context": "Toggle for automatic audio playback.",
+        "component": {
+          "location": "src/components/Editor3/components/WorkbookSettings.js",
+          "description": "Audio playback setting."
+        },
+        "usage": "Switch label",
+        "impact": "Medium - user experience setting",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Automatic Audio", "Play Audio Automatically"]
+      }
+    },
+    "autoPlayAudioDescription": {
+      "value": "Automatically play audio when available",
+      "_meta": {
+        "context": "Description of auto-play audio feature.",
+        "component": {
+          "location": "src/components/Editor3/components/WorkbookSettings.js",
+          "description": "Helper text for setting."
+        },
+        "usage": "Setting description",
+        "impact": "Low - explanatory text",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Audio starts automatically"]
+      }
+    },
+    "showWaveforms": {
+      "value": "Show Audio Waveforms",
+      "_meta": {
+        "context": "Toggle for audio waveform visualization.",
+        "component": {
+          "location": "src/components/Editor3/components/WorkbookSettings.js",
+          "description": "Audio visualization setting."
+        },
+        "usage": "Switch label",
+        "impact": "Low - visual preference",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Display Audio Waves", "Audio Visualization"]
+      }
+    },
+    "showWaveformsDescription": {
+      "value": "Display visual waveforms for audio content",
+      "_meta": {
+        "context": "Description of waveform display feature.",
+        "component": {
+          "location": "src/components/Editor3/components/WorkbookSettings.js",
+          "description": "Helper text for setting."
+        },
+        "usage": "Setting description",
+        "impact": "Low - explanatory text",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Show sound waves"]
+      }
+    },
+    "feedbackPreferences": {
+      "value": "Feedback Preferences",
+      "_meta": {
+        "context": "Section heading for feedback settings.",
+        "component": {
+          "location": "src/components/Editor3/components/WorkbookSettings.js",
+          "description": "Section for feedback-related settings."
+        },
+        "usage": "Section heading",
+        "impact": "Low - organizational element",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Response Settings", "Feedback Options"]
+      }
+    },
+    "immediateFeedback": {
+      "value": "Immediate Feedback",
+      "_meta": {
+        "context": "Toggle for instant answer feedback.",
+        "component": {
+          "location": "src/components/Editor3/components/WorkbookSettings.js",
+          "description": "Feedback timing setting."
+        },
+        "usage": "Switch label",
+        "impact": "High - affects learning experience",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Instant Feedback", "Real-time Feedback"]
+      }
+    },
+    "immediateFeedbackDescription": {
+      "value": "Show correct/incorrect feedback right away",
+      "_meta": {
+        "context": "Description of immediate feedback feature.",
+        "component": {
+          "location": "src/components/Editor3/components/WorkbookSettings.js",
+          "description": "Helper text for setting."
+        },
+        "usage": "Setting description",
+        "impact": "Medium - explanatory text",
+        "userType": "students",
+        "tone": "polite-formal",
+        "alternativeTerms": ["Get instant results"]
+      }
+    }
   }
-}

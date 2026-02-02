@@ -9,8 +9,8 @@ import ChatIcon from '@mui/icons-material/Chat';
 import ConfigIcon from '@mui/icons-material/Settings';
 import HistoryIcon from '@mui/icons-material/History';
 
-import ConfigurationManager from './ConfigurationManager';
-import AssignmentConfiguration from './AssignmentConfiguration';
+import GradeHistory from './GradeHistory';
+import WorkbookSettings from './WorkbookSettings';
 
 function TabPanel(props) {
   const { children, value, index, overflowY, ...other } = props;
@@ -142,7 +142,7 @@ export default function VerticalTabsRo({
           width: '5px',
           cursor: 'ew-resize',
           backgroundColor: isResizing ? '#1976d2' : 'transparent',
-          zIndex: 1000,
+          zIndex: 100,
           transition: 'background-color 0.2s',
         }}
         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1976d2'}
@@ -201,8 +201,7 @@ export default function VerticalTabsRo({
         <Tab label="Item Seven" {...a11yProps(6)} /> */}
       </Tabs>
       <TabPanel value={value} index={0} overflowY='auto'>
-        {/* <Assignments /> */}
-
+        <GradeHistory />
       </TabPanel>
       <TabPanel value={value} index={1} overflowY='hidden'>
         <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -210,7 +209,7 @@ export default function VerticalTabsRo({
         </Box>
       </TabPanel>
       <TabPanel value={value} index={2} overflowY='auto'>
-        <ConfigurationManager />
+        <WorkbookSettings />
       </TabPanel>
       {/* <TabPanel value={value} index={3} overflowY='hidden'>
         <ChatSidebar />

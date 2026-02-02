@@ -46,7 +46,7 @@ export function LinearProgressWithLabel(props) {
   );
 }
 
-export const AnswerDropLearn = ({ correctAnswer, pronunciation, definition, id }) => {
+export const AnswerDropLearn = ({ correctAnswer, pronunciation, definition, id, phrase, matchedWord, isMatched }) => {
   const [{ canDrop, isOver }, drop] = useDrop({
     accept: 'box',
     drop: () => ({ correctAnswer: correctAnswer }),
@@ -58,16 +58,45 @@ export const AnswerDropLearn = ({ correctAnswer, pronunciation, definition, id }
 
   const isActive = canDrop && isOver
   let borderColor = '#CCC' //theme.palette.text.hint
+  
   if (isActive) {
     borderColor = '#333' //theme.palette.text.secondary
   } else if (canDrop) {
     borderColor = '#000' //theme.palette.text.primary
   }
+
   return (
-    <ListItem ref={drop} key={id} style={{ margin: '0.25rem 0', padding: '0.5rem', border: `thin dotted ${borderColor}` }}>
-      <ListItemText primary={pronunciation}
-        secondary={definition}
-      />
+    <ListItem 
+      ref={drop} 
+      key={id} 
+      style={{ 
+        margin: '0.25rem 0', 
+        padding: '0.5rem', 
+        border: `thin dotted ${borderColor}`,
+      }}
+    >
+      {isMatched ? (
+        // Show both phrase and pronunciation/definition when matched
+        <ListItemText 
+          primary={
+            <Box>
+              <Typography component="span" style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
+                {phrase}
+              </Typography>
+              <Typography component="span" color="textSecondary">
+                ({pronunciation})
+              </Typography>
+            </Box>
+          }
+          secondary={definition}
+        />
+      ) : (
+        // Show only pronunciation/definition when not matched
+        <ListItemText 
+          primary={pronunciation}
+          secondary={definition}
+        />
+      )}
     </ListItem>
   )
 }

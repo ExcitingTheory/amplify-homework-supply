@@ -396,7 +396,7 @@ export default function MainToolbar({ children }) {
             onOpen={toggleDrawer(anchor, true)}
             sx={{
               marginTop: '4rem',
-              zIndex: 1000
+              zIndex: (theme) => theme.zIndex.drawer + 3
             }}
             ModalProps={{
               keepMounted: true, // Better open performance on mobile.
