@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useDrag } from 'react-dnd';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 
 const onTouchMove = () => {
   window.navigator.vibrate(5);
@@ -27,7 +27,9 @@ export const DragBox = ({ answer, wordID }) => {
       isDragging: monitor.isDragging(),
     }),
   });
+  
   const opacity = isDragging ? 0.4 : 1;
+  
   return (
     <Box
       className='strokeorder'

@@ -47,8 +47,23 @@ export const Hard = ({
     setLength(_vocabulary.length)
   }, [wordIDs, dictionary]);
 
-  const { grade, saveGrade } = React.useContext(UnitContext)
-  const inProgress = grade?.data?.[nodeKey] || {}
+  const { grade, saveGrade } = React.useContext(UnitContext);
+  
+  // Parse grade.data if it's a string
+  const gradeData = React.useMemo(() => {
+    if (!grade?.data) return {};
+    if (typeof grade.data === 'string') {
+      try {
+        return JSON.parse(grade.data);
+      } catch (e) {
+        console.error('Failed to parse grade.data:', e);
+        return {};
+      }
+    }
+    return grade.data;
+  }, [grade?.data]);
+  
+  const inProgress = gradeData[nodeKey] || {};
 
   // Update progress state when grade data changes
   useEffect(() => {
@@ -172,7 +187,7 @@ export const Hard = ({
       // newTab = 0;
     }
 
-    let savedGradeCopy = JSON.parse(JSON.stringify(grade?.data || {}));
+    let savedGradeCopy = JSON.parse(JSON.stringify(gradeData));
 
     if (!savedGradeCopy[nodeKey]) {
       savedGradeCopy[nodeKey] = {
@@ -229,7 +244,7 @@ export const Hard = ({
     const attempts = attemptedAnswersLength;
     let newTab = tabIndex;
 
-    let savedGradeCopy = JSON.parse(JSON.stringify(grade?.data || {}));
+    let savedGradeCopy = JSON.parse(JSON.stringify(gradeData));
 
     if (!savedGradeCopy[nodeKey]) {
       savedGradeCopy[nodeKey] = {

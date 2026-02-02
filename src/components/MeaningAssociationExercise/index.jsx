@@ -58,8 +58,12 @@ export const AnswerDropLearn = ({ correctAnswer, pronunciation, definition, id, 
 
   const isActive = canDrop && isOver
   let borderColor = '#CCC' //theme.palette.text.hint
+  let backgroundColor = 'transparent'
   
-  if (isActive) {
+  if (isMatched) {
+    borderColor = '#e0e0e0'
+    backgroundColor = '#f5f5f5'
+  } else if (isActive) {
     borderColor = '#333' //theme.palette.text.secondary
   } else if (canDrop) {
     borderColor = '#000' //theme.palette.text.primary
@@ -71,20 +75,22 @@ export const AnswerDropLearn = ({ correctAnswer, pronunciation, definition, id, 
       key={id} 
       style={{ 
         margin: '0.25rem 0', 
-        padding: '0.5rem', 
-        border: `thin dotted ${borderColor}`,
+        padding: '0.75rem', 
+        border: `2px ${isMatched ? 'solid' : 'dotted'} ${borderColor}`,
+        backgroundColor: backgroundColor,
+        borderRadius: isMatched ? '8px' : '0',
       }}
     >
-      {isMatched ? (
-        // Show both phrase and pronunciation/definition when matched
+      {isMatched && matchedWord ? (
+        // Show complete information when matched
         <ListItemText 
           primary={
             <Box>
-              <Typography component="span" style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
-                {phrase}
+              <Typography component="span" style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.25rem', fontSize: '1.1rem' }}>
+                {matchedWord.phrase}
               </Typography>
-              <Typography component="span" color="textSecondary">
-                ({pronunciation})
+              <Typography component="span" style={{ display: 'block', fontStyle: 'italic', color: '#888', marginBottom: '0.25rem' }}>
+                {pronunciation}
               </Typography>
             </Box>
           }

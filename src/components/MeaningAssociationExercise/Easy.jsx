@@ -46,7 +46,21 @@ export const Easy = ({
   
   const { grade, saveGrade } = React.useContext(UnitContext);
 
-  const inProgress = grade?.data?.[nodeKey] || {};
+  // Parse grade.data if it's a string
+  const gradeData = React.useMemo(() => {
+    if (!grade?.data) return {};
+    if (typeof grade.data === 'string') {
+      try {
+        return JSON.parse(grade.data);
+      } catch (e) {
+        console.error('Failed to parse grade.data:', e);
+        return {};
+      }
+    }
+    return grade.data;
+  }, [grade?.data]);
+
+  const inProgress = gradeData[nodeKey] || {};
   
   console.log('Easy.nodeKey', nodeKey, 'type:', typeof nodeKey);
   console.log('Easy.grade:', grade);
@@ -169,7 +183,7 @@ export const Easy = ({
     
     } 
 
-    let savedGradeCopy = JSON.parse(JSON.stringify(grade?.data || {}));
+    let savedGradeCopy = JSON.parse(JSON.stringify(gradeData));
 
     if (!savedGradeCopy[nodeKey]) {
       savedGradeCopy[nodeKey] = {
@@ -230,7 +244,7 @@ export const Easy = ({
     // setAttemptsCount(attempts);
 
 
-    let savedGradeCopy = JSON.parse(JSON.stringify(grade?.data || {}));
+    let savedGradeCopy = JSON.parse(JSON.stringify(gradeData));
 
     if (!savedGradeCopy[nodeKey]) {
       savedGradeCopy[nodeKey] = {

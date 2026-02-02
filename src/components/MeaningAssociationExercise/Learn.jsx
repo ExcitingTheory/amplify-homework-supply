@@ -189,6 +189,7 @@ export const Learn = ({
     setFilterLearn(_verified);
     setStartPositionLearn(_verified.length);
     setCompletedLearn((newIndex / assignment.length) * 100);
+    setDroppedPairs(_droppedPairs);
 
     await saveGrade(savedGradeCopy);
 
