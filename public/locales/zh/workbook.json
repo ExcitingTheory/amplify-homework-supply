@@ -1,0 +1,89 @@
+{
+  "answerComponent": {
+    "audioNotAvailable": "{{text}}（音频不可用）",
+    "audioNotAvailableParens": "（音频不可用）",
+    "errorMessages": {
+      "noAnswer": "请提供答案",
+      "recordingFailed": "录制失败"
+    },
+    "feedback": {
+      "correct": "正确！",
+      "incorrect": "重试"
+    },
+    "inputMethods": {
+      "audio": "音频",
+      "text": "文本",
+      "writing": "写作"
+    },
+    "noDictionaryAvailable": "无可用词典",
+    "submit": "提交"
+  },
+  "toolBarRoPlugin": {
+    "fallbackText": "格式",
+    "noDescription": "无描述",
+    "untitledUnit": "未命名单元"
+  },
+  "verticalTabsRo": {
+    "aiAssistant": "AI助手",
+    "previousAttempts": "之前的尝试",
+    "settings": "设置"
+  },
+  "unitCompletedPlugin": {
+    "completionMessage": "单元已完成！",
+    "continueButton": "继续",
+    "sectionHeading": "下一步"
+  },
+  "quizComponent": {
+    "gradeDisplay": "成绩：{{score}}%"
+  },
+  "meaningAssociationExercise": {
+    "layoutDirection": "行"
+  },
+  "customAnswerComponent": {
+    "answerPlaceholder": "答案占位符",
+    "answerQuestions": "回答问题",
+    "audio": "音频",
+    "audioQuestion": "音频题目",
+    "completedQuestion": "已完成题目",
+    "errorOccurred": "发生错误",
+    "loading": "加载中",
+    "promptNotAvailable": "提示不可用",
+    "question": "问题",
+    "submit": "提交",
+    "text": "文本",
+    "writing": "写作",
+    "yourAnswer": "您的答案"
+  },
+  "gradeHistory": {
+    "title": "成绩记录",
+    "noAttempts": "无之前尝试记录",
+    "completeFirstAttempt": "完成此作业以查看您的进度。",
+    "attempts": "尝试次数",
+    "trend": {
+      "up": "改进中",
+      "down": "需要审核",
+      "flat": "稳定"
+    },
+    "bestScore": "最高分",
+    "averageScore": "平均分数",
+    "recentAttempts": "最近尝试",
+    "complete": "完成",
+    "best": "最佳"
+  },
+  "workbookSettings": {
+    "title": "设置",
+    "displayPreferences": "显示偏好设置",
+    "highContrastMode": "高对比度模式",
+    "highContrastModeDescription": "提高色彩对比度以获得更好的可见性",
+    "reducedMotion": "减少动画",
+    "reducedMotionDescription": "最小化动画和过渡效果",
+    "audioPreferences": "音频偏好设置",
+    "autoPlayAudio": "自动播放音频",
+    "autoPlayAudioDescription": "可用时自动播放音频",
+    "showWaveforms": "显示音频波形",
+    "showWaveformsDescription": "为音频内容显示可视化波形",
+    "feedbackPreferences": "反馈偏好设置",
+    "immediateFeedback": "即时反馈",
+    "immediateFeedbackDescription": "立即显示正确/错误反馈"
+  }
+}

@@ -12,7 +12,7 @@
     "delete": "Löschen",
     "download": "Herunterladen",
     "edit": "Bearbeiten",
-    "finish": "Fertigstellen",
+    "finish": "Beenden",
     "next": "Weiter",
     "remove": "Entfernen",
     "reset": "Zurücksetzen",
@@ -20,13 +20,13 @@
     "save": "Speichern",
     "send": "Senden",
     "share": "Teilen",
-    "submit": "Absenden",
+    "submit": "Senden",
     "update": "Aktualisieren",
     "upload": "Hochladen"
   },
   "app": {
     "name": "Hausaufgabenmaterial",
-    "tagline": "Japanische Sprachlernplattform"
+    "tagline": "E-Learning-Plattform"
   },
   "common": {
     "about": "Über",
@@ -43,7 +43,7 @@
   "mainToolbar": {
     "addToSection": {
       "add": "Hinzufügen",
-      "codeLabel": "Code-Label",
+      "codeLabel": "Code-Bezeichnung",
       "description": "Beschreibung",
       "title": "Titel"
     },
@@ -71,9 +71,9 @@
     "downloading": "Wird heruntergeladen...",
     "error": "Fehler",
     "incomplete": "Unvollständig",
-    "loading": "Lädt...",
+    "loading": "Wird geladen...",
     "pending": "Ausstehend",
-    "processing": "Verarbeitung...",
+    "processing": "Wird verarbeitet...",
     "saving": "Speichern...",
     "success": "Erfolg",
     "uploading": "Hochladen..."

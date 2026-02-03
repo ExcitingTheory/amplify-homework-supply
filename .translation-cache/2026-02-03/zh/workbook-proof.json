@@ -1,0 +1,1409 @@
+{
+  "namespace": "workbook",
+  "sourceLang": "en",
+  "targetLang": "zh",
+  "timestamp": "2026-02-03T10:26:49.594Z",
+  "models": [
+    {
+      "name": "claude-sonnet-4-20250514",
+      "provider": "anthropic",
+      "requestId": "msg_01PFocDggJZa6ts2tsNB57nb",
+      "fingerprint": "e743133f2707664b671702014c69e506cf7f9260b78c8f4fdaf050701998051c",
+      "status": "success"
+    },
+    {
+      "name": "gpt-4o",
+      "provider": "openai",
+      "requestId": "chatcmpl-D57pTOUi16km3I2XdSr16YxvotX51",
+      "fingerprint": "87fb732d9555dca360ccf63dacc8074c7514cb0bf1f14f4fd5516f322a2b64fd",
+      "status": "success"
+    },
+    {
+      "name": "gemma-3-12b-it",
+      "provider": "google",
+      "requestId": "gemma-batch",
+      "fingerprint": "f5246b9d005a7ea30249c4fb61c9af5903628cd3d67f66695a1c0ed3dc6788a0",
+      "status": "success"
+    }
+  ],
+  "consensusFingerprint": "84f8679e82febc42d237cfc168f35e6f449c0f3b8e0b400fc2da1d52bcdd479f",
+  "consensus": {
+    "source": {
+      "answerComponent.audioNotAvailable": {
+        "_meta": {
+          "alternativeTerms": [
+            "Audio Unavailable",
+            "No Audio Available"
+          ],
+          "component": {
+            "description": "Message shown to students when attempting to play audio that doesn't exist for vocabulary words or definitions.",
+            "location": "src/components/Editor3/components/AnswerComponent.js"
+          },
+          "context": "Error message displayed when audio content for a word or definition cannot be played because it is missing or unavailable.",
+          "impact": "Medium - informs students of limited functionality",
+          "tone": "polite-formal",
+          "usage": "Error/status message with optional text variable",
+          "userType": "students"
+        },
+        "value": "{{text}} (audio not available)"
+      },
+      "answerComponent.audioNotAvailableParens": {
+        "_meta": {
+          "alternativeTerms": [
+            "(no audio)",
+            "(audio missing)"
+          ],
+          "component": {
+            "description": "Inline status indicator for missing audio files.",
+            "location": "src/components/Editor3/components/AnswerComponent.js"
+          },
+          "context": "Parenthetical note displayed next to vocabulary words when audio is missing.",
+          "impact": "Low - supplementary information",
+          "tone": "polite-formal",
+          "usage": "Inline status note",
+          "userType": "students"
+        },
+        "value": "(audio not available)"
+      },
+      "answerComponent.errorMessages.noAnswer": {
+        "_meta": {
+          "alternativeTerms": [],
+          "component": {
+            "description": "The answer component allows instructors to create and configure answer options for quiz questions and interactive exercises within the Lexical editor. It provides input fields and validation to ensure complete answer setup before content publishing.",
+            "location": "src/components/editor"
+          },
+          "context": "This error message appears in the editor when instructors are creating answer components for quizzes or interactive exercises but have not provided any answer text. It displays as a validation error to ensure all answer options have content before the learning unit can be saved or published.",
+          "impact": "Provides information to users",
+          "tone": "polite-formal",
+          "usage": "Translation key: answerComponent.errorMessages.noAnswer",
+          "userType": "all"
+        },
+        "value": "Please provide an answer"
+      },
+      "answerComponent.errorMessages.recordingFailed": {
+        "_meta": {
+          "alternativeTerms": [
+            "Recording unsuccessful",
+            "Recording error",
+            "Recording did not work",
+            "Unable to record"
+          ],
+          "component": {
+            "description": "The answer component handles user input for various types of responses including audio recordings in the content editor. This component manages the recording functionality and displays appropriate feedback when recording operations succeed or fail.",
+            "location": "src/components/editor"
+          },
+          "context": "This error message appears when a recording operation fails within the answer component of the content editor. Users see this message when attempting to record audio or video content for their assignments or learning materials and the recording process encounters a technical failure.",
+          "impact": "High - Recording failures prevent users from completing multimedia assignments and can cause frustration if not clearly communicated.",
+          "tone": "polite-formal",
+          "usage": "Error message displayed when audio or video recording fails during content creation or assignment submission.",
+          "userType": "all"
+        },
+        "value": "Recording failed"
+      },
+      "answerComponent.feedback.correct": {
+        "_meta": {
+          "alternativeTerms": [
+            "Right",
+            "Excellent",
+            "Well done",
+            "Perfect"
+          ],
+          "component": {
+            "description": "The AnswerComponent handles the display and validation of student answers in interactive learning exercises. It provides immediate feedback to students based on their responses, showing success or error messages to guide their learning progress.",
+            "location": "components/Editor3/components/AnswerComponent.js"
+          },
+          "context": "This feedback text appears in the AnswerComponent when a student submits a correct answer to a quiz question or interactive exercise. The message is displayed immediately after the student selects or submits their answer, providing positive reinforcement for their successful response.",
+          "impact": "High - This positive feedback is crucial for student motivation and learning reinforcement in the elearning platform",
+          "tone": "polite-formal",
+          "usage": "Success feedback message displayed when students answer quiz questions correctly",
+          "userType": "students"
+        },
+        "value": "Correct!"
+      },
+      "answerComponent.feedback.incorrect": {
+        "_meta": {
+          "alternativeTerms": [
+            "Try once more",
+            "Give it another try",
+            "Attempt again",
+            "Please retry"
+          ],
+          "component": {
+            "description": "The AnswerComponent handles interactive quiz elements and answer validation within learning units. It displays feedback to students based on their submitted answers and manages the retry flow for incorrect responses.",
+            "location": "components/Editor3/components/AnswerComponent.js"
+          },
+          "context": "This text appears in the AnswerComponent when a student submits an incorrect answer to a quiz question or interactive exercise. It displays as feedback to encourage the student to make another attempt at answering the question correctly.",
+          "impact": "High - This message directly affects student motivation and learning progression by encouraging continued engagement after mistakes.",
+          "tone": "polite-formal",
+          "usage": "Feedback message that appears after incorrect answer submission, typically displayed as text or within a button to prompt retry action.",
+          "userType": "students"
+        },
+        "value": "Try again"
+      },
+      "answerComponent.inputMethods.audio": {
+        "_meta": {
+          "alternativeTerms": [
+            "Voice",
+            "Sound",
+            "Recording",
+            "Speech"
+          ],
+          "component": {
+            "description": "The AnswerComponent allows instructors to configure how students will input their responses to questions or exercises. It provides multiple input method options including audio recording capabilities for language learning activities.",
+            "location": "components/Editor3/components/AnswerComponent.js"
+          },
+          "context": "This text appears as a label or option for audio input method in the Answer Component during content creation. Instructors see this when selecting how students can provide their answers, specifically when choosing audio recording as an input option.",
+          "impact": "High - Critical for instructors to understand available input methods when creating interactive language learning content that requires audio responses.",
+          "tone": "polite-formal",
+          "usage": "Label or option text for selecting audio as an answer input method.",
+          "userType": "instructors"
+        },
+        "value": "Audio"
+      },
+      "answerComponent.inputMethods.text": {
+        "_meta": {
+          "alternativeTerms": [
+            "Written",
+            "Textual",
+            "Typed"
+          ],
+          "component": {
+            "description": "The AnswerComponent handles the creation and configuration of answer input fields within the content editor. It provides various input method options for instructors to define how students will submit their responses to learning activities.",
+            "location": "components/Editor3/components/AnswerComponent.js"
+          },
+          "context": "This text appears as a label or option for text-based input when instructors are creating answer components within the Lexical editor. Users see this when selecting or configuring how students will provide their answers to questions or exercises.",
+          "impact": "Important because it helps instructors clearly understand and select the appropriate answer input type for their learning activities.",
+          "tone": "polite-formal",
+          "usage": "Label for a text input method option that instructors select when defining answer submission formats.",
+          "userType": "instructors"
+        },
+        "value": "Text"
+      },
+      "answerComponent.inputMethods.writing": {
+        "_meta": {
+          "alternativeTerms": [
+            "Text Input",
+            "Typing",
+            "Text Entry",
+            "Written Response"
+          ],
+          "component": {
+            "description": "The AnswerComponent handles different input methods for student responses in the eLearning platform. It provides multiple ways for students to submit answers, with writing being one of the available input options.",
+            "location": "components/Editor3/components/AnswerComponent.js"
+          },
+          "context": "This text appears as an input method option within the AnswerComponent, allowing users to select writing as their preferred method for providing answers. Students see this when choosing how to respond to questions or assignments in the learning platform.",
+          "impact": "High - This is essential for students to understand and select their preferred method of providing answers to assignments and quizzes",
+          "tone": "polite-formal",
+          "usage": "Option label in an input method selector that students click to choose text-based answer submission",
+          "userType": "students"
+        },
+        "value": "Writing"
+      },
+      "answerComponent.noDictionaryAvailable": {
+        "value": "No Dictionary Available",
+        "_meta": {
+          "context": "This message appears in the AnswerComponent when students attempt to access dictionary functionality but no dictionary data is available for the current content. It likely displays as a fallback message when the dictionary service is unavailable or when the specific vocabulary items don't have dictionary entries.",
+          "component": {
+            "location": "src/components/Editor3/components/AnswerComponent.js",
+            "description": "AnswerComponent handles student interactions with answer fields in learning exercises, likely including dictionary lookup features for Japanese vocabulary. It provides feedback and tools to help students understand and complete their assignments."
+          },
+          "usage": "Error or informational message displayed when dictionary lookup functionality is unavailable",
+          "impact": "Medium - While not critical for core functionality, this affects the learning experience by informing students when supplementary dictionary resources are unavailable",
+          "userType": "all",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Dictionary Unavailable",
+            "No Dictionary Found",
+            "Dictionary Not Accessible"
+          ]
+        }
+      },
+      "answerComponent.submit": {
+        "value": "Submit",
+        "_meta": {
+          "context": "This text appears as a button label in the AnswerComponent within the Lexical editor interface. Students see this button when they need to submit their completed answers for exercises, quizzes, or assignment questions in their workbook.",
+          "component": {
+            "location": "src/components/Editor3/components/AnswerComponent.js",
+            "description": "A specialized component within the Lexical editor that handles student answer submission for various question types. Students interact with this component when completing exercises and need to finalize their responses for grading."
+          },
+          "usage": "Button label that triggers the submission of student answers when clicked.",
+          "impact": "Critical - this is essential for students to complete assignments and receive feedback on their work.",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Send",
+            "Confirm",
+            "Complete",
+            "Finish"
+          ]
+        }
+      },
+      "toolBarRoPlugin.fallbackText": {
+        "_meta": {
+          "alternativeTerms": [
+            "Formatting",
+            "Style",
+            "Layout",
+            "Appearance"
+          ],
+          "component": {
+            "description": "This component is part of the Lexical rich text editor toolbar system used by instructors to create learning content. It provides formatting tools and plugins for creating rich educational materials with various text styles and layouts.",
+            "location": "src/components/editor"
+          },
+          "context": "This text appears as fallback content for a read-only plugin in the rich text editor toolbar when the plugin fails to load or display properly. It serves as a generic label that users see in place of the intended formatting tool when there are technical issues or loading errors.",
+          "impact": "Medium - While not critical for core functionality, clear fallback text helps users understand available formatting options when plugins fail to load",
+          "tone": "polite-formal",
+          "usage": "Fallback text displayed in toolbar when a read-only formatting plugin cannot render properly",
+          "userType": "instructors"
+        },
+        "value": "Format"
+      },
+      "toolBarRoPlugin.noDescription": {
+        "_meta": {
+          "alternativeTerms": [
+            "No Details",
+            "Description Missing"
+          ],
+          "component": {
+            "description": "Read-only toolbar component displaying unit metadata to students.",
+            "location": "src/components/Editor3/plugins/ToolBarRoPlugin.js"
+          },
+          "context": "Fallback text shown when a learning unit has no description. Appears in the toolbar below the unit title when viewing content.",
+          "impact": "Medium - indicates missing content to users",
+          "tone": "polite-formal",
+          "usage": "Fallback text for empty description field",
+          "userType": "all"
+        },
+        "value": "No Description"
+      },
+      "toolBarRoPlugin.untitledUnit": {
+        "_meta": {
+          "alternativeTerms": [
+            "No Title",
+            "Unnamed Unit",
+            "Untitled"
+          ],
+          "component": {
+            "description": "Read-only toolbar component that displays unit information and timer for students viewing content.",
+            "location": "src/components/Editor3/plugins/ToolBarRoPlugin.js"
+          },
+          "context": "Default fallback text displayed in the read-only toolbar when a learning unit has no title set. Users see this in the header area when viewing content that hasn't been given a proper name.",
+          "impact": "Medium - helps users identify unnamed content",
+          "tone": "polite-formal",
+          "usage": "Fallback text for empty unit name field",
+          "userType": "all"
+        },
+        "value": "Untitled Unit"
+      },
+      "verticalTabsRo.aiAssistant": {
+        "_meta": {
+          "alternativeTerms": [
+            "AI Helper",
+            "Copilot"
+          ],
+          "component": {
+            "description": "Tab for AI help in student workbook.",
+            "location": "src/components/Editor3/components/VerticalTabsRo.js"
+          },
+          "context": "Tab label for AI assistant chat.",
+          "impact": "High - primary AI feature access",
+          "tone": "polite-formal",
+          "usage": "Tab label and aria-label",
+          "userType": "students"
+        },
+        "value": "AI Assistant"
+      },
+      "verticalTabsRo.previousAttempts": {
+        "_meta": {
+          "alternativeTerms": [
+            "History",
+            "Past Submissions"
+          ],
+          "component": {
+            "description": "Read-only vertical tabs for student workbook view.",
+            "location": "src/components/Editor3/components/VerticalTabsRo.js"
+          },
+          "context": "Tab label for viewing previous student attempts.",
+          "impact": "Medium - navigation label",
+          "tone": "polite-formal",
+          "usage": "Tab label and aria-label",
+          "userType": "students"
+        },
+        "value": "Previous Attempts"
+      },
+      "verticalTabsRo.settings": {
+        "_meta": {
+          "alternativeTerms": [
+            "Preferences",
+            "Configuration"
+          ],
+          "component": {
+            "description": "Tab for student workbook configuration.",
+            "location": "src/components/Editor3/components/VerticalTabsRo.js"
+          },
+          "context": "Tab label for workbook settings.",
+          "impact": "Medium - configuration access",
+          "tone": "polite-formal",
+          "usage": "Tab label and aria-label",
+          "userType": "students"
+        },
+        "value": "Settings"
+      },
+      "unitCompletedPlugin.completionMessage": {
+        "_meta": {
+          "alternativeTerms": [],
+          "category": "message",
+          "component": {
+            "description": "UnitCompletedPlugin - Displays unit completion modal. @module UnitCompletedPlugin  Shows a congratulatory modal when a unit is completed, displaying the unit name and top grades/scores.",
+            "location": "components/Editor3/plugins/UnitCompletedPlugin.js"
+          },
+          "context": "Used in UnitCompletedPlugin.js component",
+          "impact": "Provides message information to users",
+          "tone": "polite-formal",
+          "usage": "Message displayed for completionMessage",
+          "userType": "all"
+        },
+        "value": "Unit completed!"
+      },
+      "unitCompletedPlugin.continueButton": {
+        "_meta": {
+          "alternativeTerms": [],
+          "category": "button",
+          "component": {
+            "description": "UnitCompletedPlugin - Displays unit completion modal. @module UnitCompletedPlugin  Shows a congratulatory modal when a unit is completed, displaying the unit name and top grades/scores.",
+            "location": "components/Editor3/plugins/UnitCompletedPlugin.js"
+          },
+          "context": "Used in UnitCompletedPlugin.js component",
+          "impact": "Triggers continueButton action when clicked",
+          "tone": "polite-formal",
+          "usage": "Button label for continueButton action",
+          "userType": "all"
+        },
+        "value": "Continue"
+      },
+      "unitCompletedPlugin.sectionHeading": {
+        "_meta": {
+          "alternativeTerms": [],
+          "category": "heading",
+          "component": {
+            "description": "UnitCompletedPlugin - Displays unit completion modal. @module UnitCompletedPlugin  Shows a congratulatory modal when a unit is completed, displaying the unit name and top grades/scores.",
+            "location": "components/Editor3/plugins/UnitCompletedPlugin.js"
+          },
+          "context": "Used in UnitCompletedPlugin.js component",
+          "impact": "Labels the sectionHeading section for users",
+          "tone": "polite-formal",
+          "usage": "Heading text for sectionHeading section",
+          "userType": "all"
+        },
+        "value": "Next Steps"
+      },
+      "quizComponent.gradeDisplay": {
+        "_meta": {
+          "alternativeTerms": [
+            "Score",
+            "Result",
+            "Mark",
+            "Performance"
+          ],
+          "component": {
+            "description": "The QuizComponent handles quiz functionality within learning units, allowing students to answer questions and receive immediate scoring feedback. It manages quiz state, scoring calculations, and displays results to students upon completion.",
+            "location": "components/Editor3/components/QuizComponent.js"
+          },
+          "context": "This text displays after a student completes a quiz within a learning unit, showing their performance as a percentage score. It appears in the quiz results section immediately after submission, providing immediate feedback on the student's performance.",
+          "impact": "High - This provides essential feedback to students about their learning progress and quiz performance.",
+          "tone": "polite-formal",
+          "usage": "Score display label that shows the calculated percentage grade after quiz completion.",
+          "userType": "students"
+        },
+        "value": "Grade: {{score}}%"
+      },
+      "meaningAssociationExercise.layoutDirection": {
+        "_meta": {
+          "alternativeTerms": [],
+          "component": {
+            "description": "This editor component allows instructors to create and configure meaning association exercises for Japanese language learning units. The component provides layout options to arrange interactive elements that help students connect vocabulary words with their meanings or translations.",
+            "location": "src/components/editor"
+          },
+          "context": "This text specifies the layout direction for a meaning association exercise component within the content editor. It determines whether exercise elements are arranged horizontally ('row') or vertically ('column') in the user interface during exercise creation or editing.",
+          "impact": "Provides information to users",
+          "tone": "polite-formal",
+          "usage": "Translation key: meaningAssociationExercise.layoutDirection",
+          "userType": "all"
+        },
+        "value": "row"
+      },
+      "customAnswerComponent.answerPlaceholder": {
+        "value": "Answer Placeholder",
+        "_meta": {
+          "context": "This text appears as placeholder content within a custom answer input field in the Lexical editor when instructors are creating interactive workbook exercises. Students see this placeholder text before they begin typing their response to a question or prompt.",
+          "component": {
+            "location": "src/components/Editor3/nodes/CustomAnswerNode/CustomAnswerComponent.js",
+            "description": "A specialized Lexical editor node that creates interactive answer input fields within workbook content. This component allows instructors to embed answer collection points directly into their learning materials where students can submit text responses."
+          },
+          "usage": "Input field placeholder text that guides users on where to enter their answer",
+          "impact": "Medium - provides helpful guidance to students on where to input responses, improving the clarity of interactive exercises",
+          "userType": "all",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Response Hint",
+            "Input Guide",
+            "Answer Prompt"
+          ]
+        }
+      },
+      "customAnswerComponent.answerQuestions": {
+        "value": "Answer Questions",
+        "_meta": {
+          "context": "This text appears as a button or action label in the custom answer node editor component within the workbook authoring interface. Instructors see this when creating interactive question components that require student responses in their learning materials.",
+          "component": {
+            "location": "src/components/Editor3/nodes/CustomAnswerNode/CustomAnswerComponent.js",
+            "description": "A specialized editor node component that allows instructors to create interactive answer input fields within their workbook content. This component appears when instructors are building question-and-answer activities for student assignments."
+          },
+          "usage": "Button or action label that initiates the question answering interface for students",
+          "impact": "High - Essential for student engagement as it directly prompts learners to interact with assignment content and provide responses",
+          "userType": "all",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Respond to Questions",
+            "Complete Questions",
+            "Provide Answers",
+            "Submit Responses"
+          ]
+        }
+      },
+      "customAnswerComponent.audio": {
+        "value": "Audio",
+        "_meta": {
+          "context": "This text appears as a label or option within the CustomAnswerNode component of the Lexical editor, specifically related to audio functionality. Users see this when working with custom answer elements that involve audio content, likely when setting up audio-based questions or responses in workbook exercises.",
+          "component": {
+            "location": "src/components/Editor3/nodes/CustomAnswerNode/CustomAnswerComponent.js",
+            "description": "This component handles custom answer nodes within the Lexical editor, allowing instructors to create interactive answer elements with various media types including audio. It appears when instructors are authoring workbook content that requires audio-based student responses or audio playback functionality."
+          },
+          "usage": "Label text for an audio-related option or control within the custom answer component interface.",
+          "impact": "Medium - This label helps instructors understand they are working with audio functionality when creating interactive workbook content.",
+          "userType": "instructors",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Sound",
+            "Voice",
+            "Recording",
+            "Audio File"
+          ]
+        }
+      },
+      "customAnswerComponent.audioQuestion": {
+        "value": "Audio Question",
+        "_meta": {
+          "context": "This text appears as a label or identifier for audio-based question components within the workbook content editor. It is displayed when instructors are creating or editing interactive learning content that includes audio questions for students to respond to.",
+          "component": {
+            "location": "src/components/Editor3/nodes/CustomAnswerNode/CustomAnswerComponent.js",
+            "description": "This component renders custom answer nodes within the Lexical editor, specifically handling audio-based question types. It allows instructors to create interactive audio questions where students can listen to audio content and provide responses as part of their learning activities."
+          },
+          "usage": "Component label or type identifier displayed in the content editor interface when working with audio question elements.",
+          "impact": "High - This label helps instructors identify and work with audio question components, which are essential for creating engaging Japanese language learning content that includes listening comprehension exercises.",
+          "userType": "instructors",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Audio Quiz",
+            "Sound Question",
+            "Listening Question",
+            "Voice Question"
+          ]
+        }
+      },
+      "customAnswerComponent.completedQuestion": {
+        "value": "Completed Question",
+        "_meta": {
+          "context": "This text appears as a status indicator when a student has successfully completed an interactive question within a workbook assignment. It likely displays near or on a custom answer input component to confirm the question has been finished.",
+          "component": {
+            "location": "src/components/Editor3/nodes/CustomAnswerNode/CustomAnswerComponent.js",
+            "description": "A specialized node component within the Lexical editor that handles custom answer inputs for interactive questions in learning content. Students see this component when they encounter answer fields that require completion within workbook exercises."
+          },
+          "usage": "Status label or badge that appears after a student submits their answer to indicate completion",
+          "impact": "Important because it provides clear visual feedback to students about their progress through workbook questions and confirms successful completion",
+          "userType": "all",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Finished Question",
+            "Question Complete",
+            "Answered Question",
+            "Question Done"
+          ]
+        }
+      },
+      "customAnswerComponent.errorOccurred": {
+        "value": "Error Occurred",
+        "_meta": {
+          "context": "This error message appears in the CustomAnswerComponent within the Lexical editor when an unexpected error occurs during answer processing or validation. Users see this text when something goes wrong with custom answer functionality, such as AI processing failures, network issues, or data validation errors.",
+          "component": {
+            "location": "src/components/Editor3/nodes/CustomAnswerNode/CustomAnswerComponent.js",
+            "description": "A specialized Lexical editor node component that handles custom answer input and processing functionality. This component likely integrates with OpenAI services for answer validation or processing and displays this error when operations fail."
+          },
+          "usage": "Error message text displayed when custom answer processing encounters an unexpected failure.",
+          "impact": "High - Users need to understand when answer processing has failed so they can retry or seek help, making this critical for learning workflow continuity.",
+          "userType": "all",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Error Happened",
+            "Something Went Wrong",
+            "An Error Has Occurred",
+            "Error Encountered"
+          ]
+        }
+      },
+      "customAnswerComponent.loading": {
+        "value": "Loading",
+        "_meta": {
+          "context": "This loading message appears within custom answer components in the rich text editor when content is being processed or fetched. Users see this temporary state while the system loads answer data, processes AI-generated content, or synchronizes with the backend database.",
+          "component": {
+            "location": "src/components/Editor3/nodes/CustomAnswerNode/CustomAnswerComponent.js",
+            "description": "A specialized node component within the Lexical editor that handles custom answer elements for interactive learning content. This component manages the loading states when answer data is being retrieved or processed for instructors creating educational materials."
+          },
+          "usage": "Loading indicator text displayed during data fetching or processing operations.",
+          "impact": "Medium - Provides necessary feedback to users during wait times but is temporary and doesn't affect core functionality.",
+          "userType": "all",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Processing",
+            "Please wait",
+            "Fetching"
+          ]
+        }
+      },
+      "customAnswerComponent.promptNotAvailable": {
+        "value": "Prompt Not Available",
+        "_meta": {
+          "context": "This text appears in the custom answer node within the Lexical editor when an AI prompt is missing or unavailable for generating student responses. Users see this error state when the system cannot access the configured prompt needed to power the custom answer functionality.",
+          "component": {
+            "location": "src/components/Editor3/nodes/CustomAnswerNode/CustomAnswerComponent.js",
+            "description": "This component renders custom answer nodes in the Lexical editor that allow AI-powered response generation. It displays this error message when the required prompt configuration is missing or inaccessible."
+          },
+          "usage": "Error message displayed within a custom answer editor node when prompt data is unavailable.",
+          "impact": "Important because it alerts content creators that their AI-powered answer component won't function properly without the necessary prompt configuration.",
+          "userType": "all",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Prompt Unavailable",
+            "Prompt Missing",
+            "No Prompt Found"
+          ]
+        }
+      },
+      "customAnswerComponent.question": {
+        "value": "Question",
+        "_meta": {
+          "context": "This text appears as a label in the Lexical editor when instructors are creating custom answer components within workbook content. It identifies the question portion of an interactive answer element that students will see and respond to during their learning activities.",
+          "component": {
+            "location": "src/components/Editor3/nodes/CustomAnswerNode/CustomAnswerComponent.js",
+            "description": "This component renders a custom answer node within the Lexical editor, allowing instructors to create interactive question-and-answer elements. It provides the interface for authoring both the question text and expected answer format that students will encounter in their workbook assignments."
+          },
+          "usage": "Label text that identifies the question input field or section within the custom answer component editor.",
+          "impact": "Important because it helps instructors understand which part of the interactive element they are editing and ensures proper content structure for student learning materials.",
+          "userType": "instructors",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Query",
+            "Inquiry",
+            "Problem",
+            "Prompt"
+          ]
+        }
+      },
+      "customAnswerComponent.submit": {
+        "value": "Submit",
+        "_meta": {
+          "context": "This text appears on a submit button within a custom answer input component in the Lexical editor. Users see this when they need to submit their answer after entering text or selecting options in a custom answer field within a learning unit or assignment.",
+          "component": {
+            "location": "src/components/Editor3/nodes/CustomAnswerNode/CustomAnswerComponent.js",
+            "description": "This component renders a custom answer input node within the Lexical editor, allowing students to provide answers in various formats. It appears when students are completing interactive exercises or assignments that require text input or custom response formats."
+          },
+          "usage": "Button element that students click to submit their answer in a custom answer field.",
+          "impact": "Critical - This is essential for students to complete assignments and progress through learning materials.",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Send",
+            "Confirm",
+            "Complete",
+            "Finish"
+          ]
+        }
+      },
+      "customAnswerComponent.text": {
+        "value": "Text",
+        "_meta": {
+          "context": "This text appears as a label or button within a custom answer node in the Lexical editor used by instructors when creating interactive learning content. It likely represents an option for text-based answers in quiz or exercise components that students will interact with.",
+          "component": {
+            "location": "src/components/Editor3/nodes/CustomAnswerNode/CustomAnswerComponent.js",
+            "description": "This component renders custom answer options within the content editor, allowing instructors to create interactive elements where students can input or select text-based responses. It appears as part of the node system in the Lexical rich text editor used for authoring learning materials."
+          },
+          "usage": "Label or button text for selecting text-based answer input type in the content editor interface.",
+          "impact": "Medium - This helps instructors understand content creation options, but the simple nature of the word makes it relatively straightforward to comprehend.",
+          "userType": "all",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Content",
+            "Writing",
+            "Response",
+            "Input"
+          ]
+        }
+      },
+      "customAnswerComponent.writing": {
+        "value": "Writing",
+        "_meta": {
+          "context": "This text appears as a status indicator or label within a custom answer component in the Lexical editor. It is shown to instructors when they are creating or editing workbook content that includes interactive answer elements, specifically indicating that the current input mode or field is for written responses.",
+          "component": {
+            "location": "src/components/Editor3/nodes/CustomAnswerNode/CustomAnswerComponent.js",
+            "description": "This component renders custom answer input fields within the Lexical editor for workbook content creation. It allows instructors to configure different types of answer inputs for student assignments and displays the current input mode or field type."
+          },
+          "usage": "Label or status text displayed within an answer configuration interface in the content editor.",
+          "impact": "Medium - Helps instructors understand the current input mode when creating interactive content, though the functionality would remain clear even without perfect translation.",
+          "userType": "instructors",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Composing",
+            "Text Entry",
+            "Written Response",
+            "Text Input"
+          ]
+        }
+      },
+      "customAnswerComponent.yourAnswer": {
+        "value": "Your Answer",
+        "_meta": {
+          "context": "This text appears as a label or heading in a custom answer input component within the Lexical editor interface. Users see this when they encounter an interactive answer field while completing workbook exercises or assignments.",
+          "component": {
+            "location": "src/components/Editor3/nodes/CustomAnswerNode/CustomAnswerComponent.js",
+            "description": "A custom Lexical editor node that renders an interactive answer input field for workbook exercises. This component allows students to enter their responses to questions or prompts within the learning content."
+          },
+          "usage": "Label text displayed above or beside an answer input field to indicate where students should provide their response.",
+          "impact": "Important - This label helps students clearly identify where to input their answers, directly affecting their ability to complete assignments successfully.",
+          "userType": "all",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Your Response",
+            "Your Reply",
+            "Student Answer",
+            "Enter Answer"
+          ]
+        }
+      },
+      "gradeHistory.title": {
+        "value": "Grade History",
+        "_meta": {
+          "context": "Title of the sidebar panel showing previous assignment attempts.",
+          "component": {
+            "location": "src/components/Editor3/components/GradeHistory.js",
+            "description": "Displays previous attempt statistics for workbook assignments."
+          },
+          "usage": "Panel heading",
+          "impact": "High - primary navigation element",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Previous Grades",
+            "Score History",
+            "Past Results"
+          ]
+        }
+      },
+      "gradeHistory.noAttempts": {
+        "value": "No previous attempts",
+        "_meta": {
+          "context": "Message shown when student has not completed the assignment yet.",
+          "component": {
+            "location": "src/components/Editor3/components/GradeHistory.js",
+            "description": "Empty state message for grade history."
+          },
+          "usage": "Empty state message",
+          "impact": "Medium - informational",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "No submissions yet",
+            "No history available"
+          ]
+        }
+      },
+      "gradeHistory.completeFirstAttempt": {
+        "value": "Complete this assignment to see your progress here.",
+        "_meta": {
+          "context": "Encouragement message for first-time students.",
+          "component": {
+            "location": "src/components/Editor3/components/GradeHistory.js",
+            "description": "Guidance text in empty state."
+          },
+          "usage": "Helper text",
+          "impact": "Medium - motivational",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Start the assignment to track your progress"
+          ]
+        }
+      },
+      "gradeHistory.attempts": {
+        "value": "attempts",
+        "_meta": {
+          "context": "Label for number of attempts made.",
+          "component": {
+            "location": "src/components/Editor3/components/GradeHistory.js",
+            "description": "Counter label for attempts."
+          },
+          "usage": "Chip label",
+          "impact": "Low - supplementary info",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "submissions",
+            "tries"
+          ]
+        }
+      },
+      "gradeHistory.trend.up": {
+        "value": "Improving",
+        "_meta": {
+          "context": "Indicator that scores are improving.",
+          "component": {
+            "location": "src/components/Editor3/components/GradeHistory.js",
+            "description": "Trend indicator label."
+          },
+          "usage": "Chip label showing positive trend",
+          "impact": "Medium - motivational feedback",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Getting better",
+            "Progress up"
+          ]
+        }
+      },
+      "gradeHistory.trend.down": {
+        "value": "Review needed",
+        "_meta": {
+          "context": "Indicator that scores are declining.",
+          "component": {
+            "location": "src/components/Editor3/components/GradeHistory.js",
+            "description": "Trend indicator label."
+          },
+          "usage": "Chip label showing negative trend",
+          "impact": "Medium - constructive feedback",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Needs practice",
+            "Declining"
+          ]
+        }
+      },
+      "gradeHistory.trend.flat": {
+        "value": "Steady",
+        "_meta": {
+          "context": "Indicator that scores are stable.",
+          "component": {
+            "location": "src/components/Editor3/components/GradeHistory.js",
+            "description": "Trend indicator label."
+          },
+          "usage": "Chip label showing neutral trend",
+          "impact": "Low - informational",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Stable",
+            "Consistent"
+          ]
+        }
+      },
+      "gradeHistory.bestScore": {
+        "value": "Best Score",
+        "_meta": {
+          "context": "Label for highest score achieved.",
+          "component": {
+            "location": "src/components/Editor3/components/GradeHistory.js",
+            "description": "Statistics label."
+          },
+          "usage": "Label for maximum score statistic",
+          "impact": "High - key performance metric",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Highest Score",
+            "Top Score"
+          ]
+        }
+      },
+      "gradeHistory.averageScore": {
+        "value": "Average Score",
+        "_meta": {
+          "context": "Label for mean score across attempts.",
+          "component": {
+            "location": "src/components/Editor3/components/GradeHistory.js",
+            "description": "Statistics label."
+          },
+          "usage": "Label for mean score statistic",
+          "impact": "Medium - performance metric",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Mean Score",
+            "Typical Score"
+          ]
+        }
+      },
+      "gradeHistory.recentAttempts": {
+        "value": "Recent Attempts",
+        "_meta": {
+          "context": "Section heading for attempt list.",
+          "component": {
+            "location": "src/components/Editor3/components/GradeHistory.js",
+            "description": "Subheading for attempt list."
+          },
+          "usage": "Section heading",
+          "impact": "Medium - organizational element",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Latest Attempts",
+            "Recent Submissions"
+          ]
+        }
+      },
+      "gradeHistory.complete": {
+        "value": "complete",
+        "_meta": {
+          "context": "Suffix for completion percentage.",
+          "component": {
+            "location": "src/components/Editor3/components/GradeHistory.js",
+            "description": "Completion percentage label."
+          },
+          "usage": "Label suffix for percentage",
+          "impact": "Low - supplementary info",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "finished",
+            "done"
+          ]
+        }
+      },
+      "gradeHistory.best": {
+        "value": "Best",
+        "_meta": {
+          "context": "Badge marking the highest scoring attempt.",
+          "component": {
+            "location": "src/components/Editor3/components/GradeHistory.js",
+            "description": "Badge for top score."
+          },
+          "usage": "Badge label",
+          "impact": "Medium - achievement indicator",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Top",
+            "Highest"
+          ]
+        }
+      },
+      "workbookSettings.title": {
+        "value": "Settings",
+        "_meta": {
+          "context": "Title of the settings panel for workbook view.",
+          "component": {
+            "location": "src/components/Editor3/components/WorkbookSettings.js",
+            "description": "Student-facing settings for workbook view."
+          },
+          "usage": "Panel heading",
+          "impact": "Medium - navigation element",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Preferences",
+            "Configuration"
+          ]
+        }
+      },
+      "workbookSettings.displayPreferences": {
+        "value": "Display Preferences",
+        "_meta": {
+          "context": "Section heading for visual settings.",
+          "component": {
+            "location": "src/components/Editor3/components/WorkbookSettings.js",
+            "description": "Section for display-related settings."
+          },
+          "usage": "Section heading",
+          "impact": "Low - organizational element",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Visual Settings",
+            "Appearance"
+          ]
+        }
+      },
+      "workbookSettings.highContrastMode": {
+        "value": "High Contrast Mode",
+        "_meta": {
+          "context": "Toggle for accessibility high contrast display.",
+          "component": {
+            "location": "src/components/Editor3/components/WorkbookSettings.js",
+            "description": "Accessibility setting."
+          },
+          "usage": "Switch label",
+          "impact": "High - accessibility feature",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Enhanced Contrast",
+            "Contrast Boost"
+          ]
+        }
+      },
+      "workbookSettings.highContrastModeDescription": {
+        "value": "Increases color contrast for better visibility",
+        "_meta": {
+          "context": "Description of high contrast mode benefit.",
+          "component": {
+            "location": "src/components/Editor3/components/WorkbookSettings.js",
+            "description": "Helper text for setting."
+          },
+          "usage": "Setting description",
+          "impact": "Medium - explanatory text",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Makes text easier to read"
+          ]
+        }
+      },
+      "workbookSettings.reducedMotion": {
+        "value": "Reduced Motion",
+        "_meta": {
+          "context": "Toggle to reduce animations for accessibility.",
+          "component": {
+            "location": "src/components/Editor3/components/WorkbookSettings.js",
+            "description": "Accessibility setting."
+          },
+          "usage": "Switch label",
+          "impact": "High - accessibility feature",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Minimize Animations",
+            "Less Movement"
+          ]
+        }
+      },
+      "workbookSettings.reducedMotionDescription": {
+        "value": "Minimizes animations and transitions",
+        "_meta": {
+          "context": "Description of reduced motion benefit.",
+          "component": {
+            "location": "src/components/Editor3/components/WorkbookSettings.js",
+            "description": "Helper text for setting."
+          },
+          "usage": "Setting description",
+          "impact": "Medium - explanatory text",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Reduces visual effects"
+          ]
+        }
+      },
+      "workbookSettings.audioPreferences": {
+        "value": "Audio Preferences",
+        "_meta": {
+          "context": "Section heading for audio settings.",
+          "component": {
+            "location": "src/components/Editor3/components/WorkbookSettings.js",
+            "description": "Section for audio-related settings."
+          },
+          "usage": "Section heading",
+          "impact": "Low - organizational element",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Sound Settings",
+            "Audio Options"
+          ]
+        }
+      },
+      "workbookSettings.autoPlayAudio": {
+        "value": "Auto-play Audio",
+        "_meta": {
+          "context": "Toggle for automatic audio playback.",
+          "component": {
+            "location": "src/components/Editor3/components/WorkbookSettings.js",
+            "description": "Audio playback setting."
+          },
+          "usage": "Switch label",
+          "impact": "Medium - user experience setting",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Automatic Audio",
+            "Play Audio Automatically"
+          ]
+        }
+      },
+      "workbookSettings.autoPlayAudioDescription": {
+        "value": "Automatically play audio when available",
+        "_meta": {
+          "context": "Description of auto-play audio feature.",
+          "component": {
+            "location": "src/components/Editor3/components/WorkbookSettings.js",
+            "description": "Helper text for setting."
+          },
+          "usage": "Setting description",
+          "impact": "Low - explanatory text",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Audio starts automatically"
+          ]
+        }
+      },
+      "workbookSettings.showWaveforms": {
+        "value": "Show Audio Waveforms",
+        "_meta": {
+          "context": "Toggle for audio waveform visualization.",
+          "component": {
+            "location": "src/components/Editor3/components/WorkbookSettings.js",
+            "description": "Audio visualization setting."
+          },
+          "usage": "Switch label",
+          "impact": "Low - visual preference",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Display Audio Waves",
+            "Audio Visualization"
+          ]
+        }
+      },
+      "workbookSettings.showWaveformsDescription": {
+        "value": "Display visual waveforms for audio content",
+        "_meta": {
+          "context": "Description of waveform display feature.",
+          "component": {
+            "location": "src/components/Editor3/components/WorkbookSettings.js",
+            "description": "Helper text for setting."
+          },
+          "usage": "Setting description",
+          "impact": "Low - explanatory text",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Show sound waves"
+          ]
+        }
+      },
+      "workbookSettings.feedbackPreferences": {
+        "value": "Feedback Preferences",
+        "_meta": {
+          "context": "Section heading for feedback settings.",
+          "component": {
+            "location": "src/components/Editor3/components/WorkbookSettings.js",
+            "description": "Section for feedback-related settings."
+          },
+          "usage": "Section heading",
+          "impact": "Low - organizational element",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Response Settings",
+            "Feedback Options"
+          ]
+        }
+      },
+      "workbookSettings.immediateFeedback": {
+        "value": "Immediate Feedback",
+        "_meta": {
+          "context": "Toggle for instant answer feedback.",
+          "component": {
+            "location": "src/components/Editor3/components/WorkbookSettings.js",
+            "description": "Feedback timing setting."
+          },
+          "usage": "Switch label",
+          "impact": "High - affects learning experience",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Instant Feedback",
+            "Real-time Feedback"
+          ]
+        }
+      },
+      "workbookSettings.immediateFeedbackDescription": {
+        "value": "Show correct/incorrect feedback right away",
+        "_meta": {
+          "context": "Description of immediate feedback feature.",
+          "component": {
+            "location": "src/components/Editor3/components/WorkbookSettings.js",
+            "description": "Helper text for setting."
+          },
+          "usage": "Setting description",
+          "impact": "Medium - explanatory text",
+          "userType": "students",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Get instant results"
+          ]
+        }
+      }
+    },
+    "claude": {
+      "answerComponent.audioNotAvailable": "{{text}}（音频不可用）",
+      "answerComponent.audioNotAvailableParens": "（音频不可用）",
+      "answerComponent.errorMessages.noAnswer": "请提供答案",
+      "answerComponent.errorMessages.recordingFailed": "录制失败",
+      "answerComponent.feedback.correct": "正确！",
+      "answerComponent.feedback.incorrect": "重试",
+      "answerComponent.inputMethods.audio": "音频",
+      "answerComponent.inputMethods.text": "文本",
+      "answerComponent.inputMethods.writing": "写作",
+      "answerComponent.noDictionaryAvailable": "无可用词典",
+      "answerComponent.submit": "提交",
+      "toolBarRoPlugin.fallbackText": "格式",
+      "toolBarRoPlugin.noDescription": "无描述",
+      "toolBarRoPlugin.untitledUnit": "未命名单元",
+      "verticalTabsRo.aiAssistant": "AI助手",
+      "verticalTabsRo.previousAttempts": "之前的尝试",
+      "verticalTabsRo.settings": "设置",
+      "unitCompletedPlugin.completionMessage": "单元已完成！",
+      "unitCompletedPlugin.continueButton": "继续",
+      "unitCompletedPlugin.sectionHeading": "下一步",
+      "quizComponent.gradeDisplay": "成绩：{{score}}%",
+      "meaningAssociationExercise.layoutDirection": "行",
+      "customAnswerComponent.answerPlaceholder": "答案占位符",
+      "customAnswerComponent.answerQuestions": "回答问题",
+      "customAnswerComponent.audio": "音频",
+      "customAnswerComponent.audioQuestion": "音频题目",
+      "customAnswerComponent.completedQuestion": "已完成题目",
+      "customAnswerComponent.errorOccurred": "发生错误",
+      "customAnswerComponent.loading": "加载中",
+      "customAnswerComponent.promptNotAvailable": "提示不可用",
+      "customAnswerComponent.question": "问题",
+      "customAnswerComponent.submit": "提交",
+      "customAnswerComponent.text": "文本",
+      "customAnswerComponent.writing": "写作",
+      "customAnswerComponent.yourAnswer": "您的答案",
+      "gradeHistory.title": "成绩历史",
+      "gradeHistory.noAttempts": "无之前尝试记录",
+      "gradeHistory.completeFirstAttempt": "完成此作业以在此处查看您的进度。",
+      "gradeHistory.attempts": "尝试次数",
+      "gradeHistory.trend.up": "改进中",
+      "gradeHistory.trend.down": "需要审核",
+      "gradeHistory.trend.flat": "稳定",
+      "gradeHistory.bestScore": "最高分",
+      "gradeHistory.averageScore": "平均分数",
+      "gradeHistory.recentAttempts": "最近的尝试",
+      "gradeHistory.complete": "完成",
+      "gradeHistory.best": "最佳",
+      "workbookSettings.title": "设置",
+      "workbookSettings.displayPreferences": "显示偏好设置",
+      "workbookSettings.highContrastMode": "高对比度模式",
+      "workbookSettings.highContrastModeDescription": "提高色彩对比度以获得更好的可见性",
+      "workbookSettings.reducedMotion": "减少动画",
+      "workbookSettings.reducedMotionDescription": "最小化动画和过渡效果",
+      "workbookSettings.audioPreferences": "音频偏好设置",
+      "workbookSettings.autoPlayAudio": "自动播放音频",
+      "workbookSettings.autoPlayAudioDescription": "可用时自动播放音频",
+      "workbookSettings.showWaveforms": "显示音频波形",
+      "workbookSettings.showWaveformsDescription": "为音频内容显示可视化波形",
+      "workbookSettings.feedbackPreferences": "反馈偏好设置",
+      "workbookSettings.immediateFeedback": "即时反馈",
+      "workbookSettings.immediateFeedbackDescription": "立即显示正确/错误反馈"
+    },
+    "gpt": {
+      "answerComponent.audioNotAvailable": "“{{text}}（音频不可用）”",
+      "answerComponent.audioNotAvailableParens": "（音频不可用）",
+      "answerComponent.errorMessages.noAnswer": "请提供答案",
+      "answerComponent.errorMessages.recordingFailed": "录制失败",
+      "answerComponent.feedback.correct": "正确！",
+      "answerComponent.feedback.incorrect": "再试一次",
+      "answerComponent.inputMethods.audio": "音频",
+      "answerComponent.inputMethods.text": "文本",
+      "answerComponent.inputMethods.writing": "写作",
+      "answerComponent.noDictionaryAvailable": "无可用词典",
+      "answerComponent.submit": "提交",
+      "toolBarRoPlugin.fallbackText": "格式",
+      "toolBarRoPlugin.noDescription": "无描述",
+      "toolBarRoPlugin.untitledUnit": "未命名单元",
+      "verticalTabsRo.aiAssistant": "AI助手",
+      "verticalTabsRo.previousAttempts": "先前尝试",
+      "verticalTabsRo.settings": "设置",
+      "unitCompletedPlugin.completionMessage": "单元完成！",
+      "unitCompletedPlugin.continueButton": "继续",
+      "unitCompletedPlugin.sectionHeading": "后续步骤",
+      "quizComponent.gradeDisplay": "成绩：{{score}}%",
+      "meaningAssociationExercise.layoutDirection": "行",
+      "customAnswerComponent.answerPlaceholder": "答案占位符",
+      "customAnswerComponent.answerQuestions": "回答问题",
+      "customAnswerComponent.audio": "音频",
+      "customAnswerComponent.audioQuestion": "音频题目",
+      "customAnswerComponent.completedQuestion": "已完成问题",
+      "customAnswerComponent.errorOccurred": "发生错误",
+      "customAnswerComponent.loading": "加载",
+      "customAnswerComponent.promptNotAvailable": "提示不可用",
+      "customAnswerComponent.question": "问题",
+      "customAnswerComponent.submit": "提交",
+      "customAnswerComponent.text": "文本",
+      "customAnswerComponent.writing": "写作",
+      "customAnswerComponent.yourAnswer": "你的答案",
+      "gradeHistory.title": "成绩记录",
+      "gradeHistory.noAttempts": "没有之前的尝试",
+      "gradeHistory.completeFirstAttempt": "完成此作业以查看您的进度。",
+      "gradeHistory.attempts": "尝试次数",
+      "gradeHistory.trend.up": "改进",
+      "gradeHistory.trend.down": "需要审核",
+      "gradeHistory.trend.flat": "稳定",
+      "gradeHistory.bestScore": "最佳成绩",
+      "gradeHistory.averageScore": "平均分数",
+      "gradeHistory.recentAttempts": "最近尝试",
+      "gradeHistory.complete": "完成",
+      "gradeHistory.best": "最佳",
+      "workbookSettings.title": "设置",
+      "workbookSettings.displayPreferences": "显示偏好设置",
+      "workbookSettings.highContrastMode": "高对比度模式",
+      "workbookSettings.highContrastModeDescription": "提高颜色对比度以增强可见性",
+      "workbookSettings.reducedMotion": "减少动态效果",
+      "workbookSettings.reducedMotionDescription": "减少动画和过渡",
+      "workbookSettings.audioPreferences": "音频偏好设置",
+      "workbookSettings.autoPlayAudio": "自动播放音频",
+      "workbookSettings.autoPlayAudioDescription": "如果有可用音频，自动播放",
+      "workbookSettings.showWaveforms": "显示音频波形",
+      "workbookSettings.showWaveformsDescription": "为音频内容显示可视波形",
+      "workbookSettings.feedbackPreferences": "反馈偏好",
+      "workbookSettings.immediateFeedback": "即时反馈",
+      "workbookSettings.immediateFeedbackDescription": "立即显示正确/错误反馈"
+    },
+    "translategemma": {
+      "answerComponent.audioNotAvailable": "{{text}} (音频不可用)",
+      "answerComponent.audioNotAvailableParens": "(音频不可用)",
+      "answerComponent.errorMessages.noAnswer": "请提供答案",
+      "answerComponent.errorMessages.recordingFailed": "录制失败",
+      "answerComponent.feedback.correct": "正确！",
+      "answerComponent.feedback.incorrect": "再试",
+      "answerComponent.inputMethods.audio": "音频",
+      "answerComponent.inputMethods.text": "文本",
+      "answerComponent.inputMethods.writing": "写作",
+      "answerComponent.noDictionaryAvailable": "无词典可用",
+      "answerComponent.submit": "提交",
+      "toolBarRoPlugin.fallbackText": "格式",
+      "toolBarRoPlugin.noDescription": "无描述",
+      "toolBarRoPlugin.untitledUnit": "未命名单元",
+      "verticalTabsRo.aiAssistant": "AI助手",
+      "verticalTabsRo.previousAttempts": "以前的尝试",
+      "verticalTabsRo.settings": "设置",
+      "unitCompletedPlugin.completionMessage": "已完成单元！",
+      "unitCompletedPlugin.continueButton": "继续",
+      "unitCompletedPlugin.sectionHeading": "下一步",
+      "quizComponent.gradeDisplay": "得分: {{score}}%",
+      "meaningAssociationExercise.layoutDirection": "行",
+      "customAnswerComponent.answerPlaceholder": "答案占位符",
+      "customAnswerComponent.answerQuestions": "回答问题",
+      "customAnswerComponent.audio": "音频",
+      "customAnswerComponent.audioQuestion": "音频问题",
+      "customAnswerComponent.completedQuestion": "已完成的问题",
+      "customAnswerComponent.errorOccurred": "发生错误",
+      "customAnswerComponent.loading": "加载中",
+      "customAnswerComponent.promptNotAvailable": "提示不可用",
+      "customAnswerComponent.question": "问题",
+      "customAnswerComponent.submit": "提交",
+      "customAnswerComponent.text": "文本",
+      "customAnswerComponent.writing": "写作",
+      "customAnswerComponent.yourAnswer": "您的答案",
+      "gradeHistory.title": "成绩记录",
+      "gradeHistory.noAttempts": "无先前尝试",
+      "gradeHistory.completeFirstAttempt": "完成此作业以查看您的进度。",
+      "gradeHistory.attempts": "尝试",
+      "gradeHistory.trend.up": "提升",
+      "gradeHistory.trend.down": "需要审核",
+      "gradeHistory.trend.flat": "稳定",
+      "gradeHistory.bestScore": "最佳分数",
+      "gradeHistory.averageScore": "平均分数",
+      "gradeHistory.recentAttempts": "最近尝试",
+      "gradeHistory.complete": "完成",
+      "gradeHistory.best": "最佳",
+      "workbookSettings.title": "设置",
+      "workbookSettings.displayPreferences": "显示偏好设置",
+      "workbookSettings.highContrastMode": "高对比度模式",
+      "workbookSettings.highContrastModeDescription": "提高色彩对比度以增强可视性",
+      "workbookSettings.reducedMotion": "减少动画",
+      "workbookSettings.reducedMotionDescription": "减少动画和过渡效果",
+      "workbookSettings.audioPreferences": "音频偏好设置",
+      "workbookSettings.autoPlayAudio": "自动播放音频",
+      "workbookSettings.autoPlayAudioDescription": "当有音频时自动播放",
+      "workbookSettings.showWaveforms": "显示音频波形",
+      "workbookSettings.showWaveformsDescription": "显示音频内容的波形图",
+      "workbookSettings.feedbackPreferences": "反馈偏好设置",
+      "workbookSettings.immediateFeedback": "即时反馈",
+      "workbookSettings.immediateFeedbackDescription": "立即显示正确/错误反馈"
+    },
+    "final": {
+      "answerComponent.audioNotAvailable": "{{text}}（音频不可用）",
+      "answerComponent.audioNotAvailableParens": "（音频不可用）",
+      "answerComponent.errorMessages.noAnswer": "请提供答案",
+      "answerComponent.errorMessages.recordingFailed": "录制失败",
+      "answerComponent.feedback.correct": "正确！",
+      "answerComponent.feedback.incorrect": "重试",
+      "answerComponent.inputMethods.audio": "音频",
+      "answerComponent.inputMethods.text": "文本",
+      "answerComponent.inputMethods.writing": "写作",
+      "answerComponent.noDictionaryAvailable": "无可用词典",
+      "answerComponent.submit": "提交",
+      "toolBarRoPlugin.fallbackText": "格式",
+      "toolBarRoPlugin.noDescription": "无描述",
+      "toolBarRoPlugin.untitledUnit": "未命名单元",
+      "verticalTabsRo.aiAssistant": "AI助手",
+      "verticalTabsRo.previousAttempts": "之前的尝试",
+      "verticalTabsRo.settings": "设置",
+      "unitCompletedPlugin.completionMessage": "单元已完成！",
+      "unitCompletedPlugin.continueButton": "继续",
+      "unitCompletedPlugin.sectionHeading": "下一步",
+      "quizComponent.gradeDisplay": "成绩：{{score}}%",
+      "meaningAssociationExercise.layoutDirection": "行",
+      "customAnswerComponent.answerPlaceholder": "答案占位符",
+      "customAnswerComponent.answerQuestions": "回答问题",
+      "customAnswerComponent.audio": "音频",
+      "customAnswerComponent.audioQuestion": "音频题目",
+      "customAnswerComponent.completedQuestion": "已完成题目",
+      "customAnswerComponent.errorOccurred": "发生错误",
+      "customAnswerComponent.loading": "加载中",
+      "customAnswerComponent.promptNotAvailable": "提示不可用",
+      "customAnswerComponent.question": "问题",
+      "customAnswerComponent.submit": "提交",
+      "customAnswerComponent.text": "文本",
+      "customAnswerComponent.writing": "写作",
+      "customAnswerComponent.yourAnswer": "您的答案",
+      "gradeHistory.title": "成绩记录",
+      "gradeHistory.noAttempts": "无之前尝试记录",
+      "gradeHistory.completeFirstAttempt": "完成此作业以查看您的进度。",
+      "gradeHistory.attempts": "尝试次数",
+      "gradeHistory.trend.up": "改进中",
+      "gradeHistory.trend.down": "需要审核",
+      "gradeHistory.trend.flat": "稳定",
+      "gradeHistory.bestScore": "最高分",
+      "gradeHistory.averageScore": "平均分数",
+      "gradeHistory.recentAttempts": "最近尝试",
+      "gradeHistory.complete": "完成",
+      "gradeHistory.best": "最佳",
+      "workbookSettings.title": "设置",
+      "workbookSettings.displayPreferences": "显示偏好设置",
+      "workbookSettings.highContrastMode": "高对比度模式",
+      "workbookSettings.highContrastModeDescription": "提高色彩对比度以获得更好的可见性",
+      "workbookSettings.reducedMotion": "减少动画",
+      "workbookSettings.reducedMotionDescription": "最小化动画和过渡效果",
+      "workbookSettings.audioPreferences": "音频偏好设置",
+      "workbookSettings.autoPlayAudio": "自动播放音频",
+      "workbookSettings.autoPlayAudioDescription": "可用时自动播放音频",
+      "workbookSettings.showWaveforms": "显示音频波形",
+      "workbookSettings.showWaveformsDescription": "为音频内容显示可视化波形",
+      "workbookSettings.feedbackPreferences": "反馈偏好设置",
+      "workbookSettings.immediateFeedback": "即时反馈",
+      "workbookSettings.immediateFeedbackDescription": "立即显示正确/错误反馈"
+    }
+  }
+}

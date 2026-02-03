@@ -2,57 +2,57 @@
   "recordingStudio3": {
     "add": "添加",
     "addLine": "添加行",
-    "addSpeakerFirst": "请先添加发言人",
+    "addSpeakerFirst": "请先添加演讲者",
     "description": "描述",
-    "descriptionPlaceholder": "例如：30秒，充满活力，专业",
+    "descriptionPlaceholder": "例如，30多岁，精力充沛，专业",
     "direction": "方向",
-    "directionPlaceholder": "例如，进入时，上气不接下气",
+    "directionPlaceholder": "例如，进入时、上气不接下气",
     "emotion": "情感",
-    "emotionPlaceholder": "例如，开朗、疲倦",
+    "emotionPlaceholder": "例如：开朗、疲倦",
     "empty": "（空）",
-    "exportJSON": "导出 JSON",
+    "exportJSON": "导出JSON",
     "generateAllMissingTTS": "生成所有缺失的TTS",
     "generateTTS": "生成TTS",
-    "importFailed": "导入 JSON 文件失败",
+    "importFailed": "导入JSON文件失败",
     "importJSON": "导入JSON",
     "lineNumber": "第{{number}}行 - {{speaker}}",
-    "lockedTrack": "锁定轨道",
+    "lockedTrack": "锁定课程",
     "micAccessFailed": "无法访问麦克风",
-    "name": "名称",
-    "noMissingAudio": "没有缺失的音频需要生成",
+    "name": "姓名",
+    "noMissingAudio": "没有缺失音频需要生成",
     "noTextToGenerate": "无文本可生成",
     "play": "播放",
     "processing": "正在处理 {{count}} 行...",
-    "record": "录制",
-    "recordingSaveFailed": "保存录音失败",
+    "record": "记录",
+    "recordingSaveFailed": "录制保存失败",
     "save": "保存",
     "script": "脚本",
     "sectionHeading": "录音室",
     "selectDialogueFirst": "请先选择一行对话",
-    "speakerNotFound": "找不到讲师",
-    "speakers": "扬声器",
+    "speakerNotFound": "未找到演讲者",
+    "speakers": "演讲者",
     "stop": "停止",
-    "takeNumber": "第{{number}}次录制（{{type}}）",
-    "takes": "录音",
+    "takeNumber": "第{{number}}次 ({{type}})",
+    "takes": "需要",
     "text": "文本",
     "timeline": "时间轴",
-    "ttsGenerationFailed": "生成TTS音频失败",
+    "ttsGenerationFailed": "生成 TTS 音频失败",
     "unknown": "未知",
     "voice": "语音"
   },
   "recordingStudioEnhanced": {
     "cutButton": "剪切",
-    "highPass": "高通滤波",
+    "highPass": "高通",
     "highPassTooltip": "去除低频",
-    "lowPass": "低通滤波器",
-    "lowPassTooltip": "去除高频",
+    "lowPass": "低通",
+    "lowPassTooltip": "移除高频",
     "normalize": "标准化",
     "normalizeTooltip": "标准化音频电平",
-    "popClick": "爆音/点击音",
-    "popClickTooltip": "去除爆音和咔哒声",
-    "record": "录制",
+    "popClick": "点击/单击",
+    "popClickTooltip": "移除爆音和咔嗒声",
+    "record": "记录",
     "stop": "停止",
-    "tracks": "音轨"
+    "tracks": "课程轨道"
   },
   "recordingStudio": {
     "preview": "预览",
@@ -62,7 +62,7 @@
     "noAudioSource": "未提供音频源"
   },
   "staticWaveform": {
-    "errorLoading": "加载波形时出错"
+    "errorLoading": "波形加载错误"
   },
   "sketchPad": {
     "cancelSubmission": "取消提交",
@@ -71,48 +71,48 @@
   },
   "unitEmbedding": {
     "allSectionsComplete": "所有部分已完成！",
-    "cached": "已缓存",
-    "completedCount": "{{completed}}/{{total}} 已完成",
-    "generateEmbeddings": "生成嵌入向量",
-    "generating": "正在生成...",
+    "cached": "缓存",
+    "completedCount": "{{completed}}/{{total}} 完成",
+    "generateEmbeddings": "生成嵌入",
+    "generating": "生成中...",
     "publishSuccess": "单元已发布并生成嵌入内容！",
     "publishUnit": "发布单元",
     "publishing": "发布中...",
-    "wordsEmbedded": "已嵌入 {{count}} 个单词"
+    "wordsEmbedded": "已嵌入{{count}}个单词"
   },
   "autoEmbedPlugin": {
-    "dismiss": "关闭",
+    "dismiss": "忽略",
     "embed": "嵌入",
     "embedOption": "嵌入{{contentName}}",
     "embedTitle": "嵌入 {{contentName}}",
-    "youtubeVideo": "YouTube 视频"
+    "youtubeVideo": "YouTube视频"
   },
   "unitEmbeddingComponents": {
-    "errorMessage": "生成嵌入时出错",
-    "generateButton": "生成嵌入向量",
-    "successMessage": "嵌入已生成"
+    "errorMessage": "生成嵌入向量时出错",
+    "generateButton": "生成嵌入",
+    "successMessage": "生成的嵌入"
   },
   "wordEmbeddingIntegration": {
     "alertMessage": "将生成嵌入向量",
     "successConfirmation": "嵌入向量生成成功"
   },
   "wordEmbedding": {
-    "embeddingGenerated": "已生成嵌入向量：已处理 {{count}} 个词"
+    "embeddingGenerated": "已生成嵌入：已处理 {{count}} 个单词"
   },
   "imagesPlugin": {
     "altText": "替代文字",
     "altTextDescriptive": "描述性替代文本",
     "altTextPlaceholder": "随机 Unsplash 图片",
     "confirm": "确认",
-    "dropImagesHere": "拖拽图片到此处",
+    "dropImagesHere": "将图片拖拽到此处",
     "file": "文件",
     "imageUpload": "图片上传",
     "imageUrl": "图片网址",
-    "imageUrlPlaceholder": "即 https://source.unsplash.com/random",
-    "insertFromUrl": "从网址插入",
+    "imageUrlPlaceholder": "例如 https://source.unsplash.com/random",
+    "insertFromUrl": "从URL插入",
     "sample": "示例",
     "upload": "上传图片",
-    "url": "网址"
+    "url": "URL"
   },
   "tablePlugin": {
     "chooseLayout": "选择布局",
@@ -122,18 +122,18 @@
     "insertTable": "插入表格",
     "rows": "行",
     "rowsPlaceholder": "行数 (1-500)",
-    "table": "表格"
+    "table": "表"
   },
   "wordBlockPlugin": {
     "audioUnavailable": "音频不可用",
     "loadingAudio": "正在加载音频...",
-    "wordNotFound": "找不到单词：{{wordID}}"
+    "wordNotFound": "未找到词汇：{{wordID}}"
   },
   "vocabularyReview": {
-    "alertMessage": "继续之前请复习词汇",
+    "alertMessage": "继续前请复习词汇",
     "cancel": "取消",
     "continue": "继续",
-    "summary": "总结"
+    "summary": "摘要"
   },
   "questionsReview": {
     "alertMessage": "提交前请检查所有问题",
@@ -149,18 +149,18 @@
     "deleteRow": "删除行",
     "deleteTable": "删除表格",
     "insertColumn": "插入列",
-    "insertColumnLeft": "向左插入列",
+    "insertColumnLeft": "在左侧插入列",
     "insertColumnRight": "插入右侧列",
     "insertRow": "插入行",
     "insertRowAbove": "在上方插入行",
     "insertRowBelow": "在下方插入行",
     "makeColumnHeader": "设为列标题",
-    "makeHeader": "制作标题",
+    "makeHeader": "设为标题",
     "makeRowHeader": "设为行标题",
     "removeColumnHeader": "删除列标题",
     "removeHeader": "移除标题",
     "removeRowHeader": "删除行标题",
-    "removeSorting": "取消排序",
+    "removeSorting": "移除排序",
     "sortAscending": "升序排列",
     "sortDescending": "降序排列"
   },
@@ -168,11 +168,11 @@
     "titleHeader": "标题"
   },
   "pdfViewerComponent": {
-    "loadingPdf": "正在加载 PDF：{{filename}}",
-    "noPdfToDisplay": "无PDF可显示"
+    "loadingPdf": "正在加载PDF：{{filename}}",
+    "noPdfToDisplay": "没有PDF可显示"
   },
   "metadataEditor": {
-    "aiGenerationInfo": "AI 生成信息",
+    "aiGenerationInfo": "AI生成信息",
     "createdLabel": "创建时间：",
     "fileInfo": "文件信息",
     "fileMetadataHeading": "文件元数据",
@@ -180,7 +180,7 @@
     "notSet": "未设置",
     "pathLabel": "路径：",
     "promptLabel": "提示",
-    "protectionLabel": "保护：",
+    "protectionLabel": "防护：",
     "sizeLabel": "大小：",
     "typeLabel": "类型：",
     "unknown": "未知",
@@ -204,16 +204,16 @@
     "applyMask": "应用蒙版并重新生成",
     "brushSize": "画笔大小：{{size}}",
     "cancel": "取消",
-    "instructions": "<strong>操作说明：</strong>在您想要重新生成的区域上涂抹。使用橡皮擦工具移除遮罩的部分区域。按住Shift键并拖拽可以平移视图。使用缩放按钮查看更多细节。",
+    "instructions": "<strong>操作说明：</strong>在您想要重新生成的区域上涂抹。使用橡皮擦移除蒙版的部分区域。按住Shift键并拖动以平移视图。使用缩放按钮查看更多细节。",
     "save": "保存",
-    "zoomInfo": "缩放：{{level}}% | 按住Shift键平移"
+    "zoomInfo": "缩放: {{level}}% | 按住Shift键平移"
   },
   "freeSoloCreateOptionDialog": {
     "cancel": "取消",
     "create": "添加",
-    "description": "添加新词汇到词典。",
-    "dialogTitle": "添加新单词",
-    "label": "自由输入对话框"
+    "description": "添加新单词到词典。",
+    "dialogTitle": "添加新词",
+    "label": "自由独白对话框"
   },
   "insertLayoutDialog": {
     "cancel": "取消",
@@ -221,11 +221,11 @@
   },
   "placeholders": {
     "enter_text": "输入文本",
-    "search_words": "搜索词语...",
-    "type_here": "请在此输入..."
+    "search_words": "搜索词汇...",
+    "type_here": "在此输入..."
   },
   "blocks": {
-    "answer": "答案块",
+    "answer": "答题区块",
     "custom_answer": "自定义答案",
     "meaning_association": "意义关联",
     "quiz": "测验模块"
@@ -235,15 +235,15 @@
     "submit": "提交"
   },
   "autocompleteNode": {
-    "desktopHint": "（TAB键）",
-    "mobileHint": "(滑动 ⮕)"
+    "desktopHint": "(TAB)",
+    "mobileHint": "（向右滑动 ⮕）"
   },
   "tableOfContents": {
-    "emptyState": "未找到标题。请在您的文档中添加标题以查看目录。",
+    "emptyState": "未找到标题。请在文档中添加标题以查看目录。",
     "title": "目录"
   },
   "imageResizer": {
-    "addCaption": "添加标题"
+    "addCaption": "添加字幕"
   },
   "playlistEditor": {
     "emptyState": "播放列表中没有项目",

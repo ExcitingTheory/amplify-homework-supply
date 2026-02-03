@@ -461,7 +461,12 @@ export default function AudioWaveformPlayer({
 
             for (let i = 0; i < bufferLength; i++) {
                 barHeight = (dataArray[i] / max) * canvas.height / 2;
-                canvasCtx.fillStyle = `rgb(${barHeight + 100},${_g},${_b})`;
+                const amplitude = dataArray[i] / max;
+                const intensity = 0.3 + (amplitude * 0.7); // 0.3 to 1.0 range
+                const r = Math.floor(_r * intensity);
+                const g = Math.floor(_g * intensity);
+                const b = Math.floor(_b * intensity);
+                canvasCtx.fillStyle = `rgb(${r},${g},${b})`;
                 canvasCtx.fillRect(canvas.width - (x + barWidth / 2), canvas.height / 2 - (barHeight / 2), barWidth, barHeight);
                 x += barWidth + 1;
             }

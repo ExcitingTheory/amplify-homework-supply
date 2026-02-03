@@ -1,0 +1,807 @@
+{
+  "namespace": "editor.ai",
+  "sourceLang": "en",
+  "targetLang": "zh",
+  "timestamp": "2026-02-03T09:20:23.478Z",
+  "models": [
+    {
+      "name": "claude-sonnet-4-20250514",
+      "provider": "anthropic",
+      "requestId": "msg_01Y9vdodBELXSEbGgx9bvnZX",
+      "fingerprint": "89d12db45949471e9c98348c22fa0fd184fd3a19db2e59cb5a05bb7519fc940c",
+      "status": "success"
+    },
+    {
+      "name": "gpt-4o",
+      "provider": "openai",
+      "requestId": "chatcmpl-D56pY71imIgVZXKoCShsIEbsPw3xO",
+      "fingerprint": "8fe16c7b2f1795f62298025474ed68e75fdf9202486c140f83212de5a72ab5f9",
+      "status": "success"
+    },
+    {
+      "name": "gemma-3-12b-it",
+      "provider": "google",
+      "requestId": "gemma-batch",
+      "fingerprint": "c581eaedd4ab83aea769443b36549a151bec5f10f47e6d0c9e793317f8f53e34",
+      "status": "success"
+    }
+  ],
+  "consensusFingerprint": "0f33528faad55e525bdbd624529312d1ba715ebd4cb0aa894921b8b248b06887",
+  "consensus": {
+    "source": {
+      "unifiedGenerateModal.cancel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Close",
+            "Exit"
+          ],
+          "component": {
+            "description": "Cancel button for generation modal.",
+            "location": "src/components/Editor3/components/UnifiedGenerateModal.js"
+          },
+          "context": "Button to cancel modal action.",
+          "impact": "Medium - standard action",
+          "tone": "polite-formal",
+          "usage": "Button label",
+          "userType": "instructors"
+        },
+        "value": "Cancel"
+      },
+      "unifiedGenerateModal.discard": {
+        "_meta": {
+          "alternativeTerms": [
+            "Delete",
+            "Abandon"
+          ],
+          "component": {
+            "description": "Destructive action to abandon generated content.",
+            "location": "src/components/Editor3/components/UnifiedGenerateModal.js"
+          },
+          "context": "Button to confirm discarding generated content.",
+          "impact": "High - destructive action",
+          "tone": "polite-formal",
+          "usage": "Button label",
+          "userType": "instructors"
+        },
+        "value": "Discard"
+      },
+      "unifiedGenerateModal.discardChanges": {
+        "_meta": {
+          "alternativeTerms": [
+            "Cancel changes?",
+            "Abandon work?"
+          ],
+          "component": {
+            "description": "Warning before discarding generated content.",
+            "location": "src/components/Editor3/components/UnifiedGenerateModal.js"
+          },
+          "context": "Confirmation dialog heading when canceling.",
+          "impact": "High - prevents accidental data loss",
+          "tone": "polite-formal",
+          "usage": "Confirmation heading",
+          "userType": "instructors"
+        },
+        "value": "Discard changes?"
+      },
+      "unifiedGenerateModal.generate": {
+        "_meta": {
+          "alternativeTerms": [
+            "Create",
+            "Start"
+          ],
+          "component": {
+            "description": "Primary action button to generate content.",
+            "location": "src/components/Editor3/components/UnifiedGenerateModal.js"
+          },
+          "context": "Button to start AI generation.",
+          "impact": "High - primary action",
+          "tone": "polite-formal",
+          "usage": "Button label",
+          "userType": "instructors"
+        },
+        "value": "Generate"
+      },
+      "unifiedGenerateModal.generating": {
+        "_meta": {
+          "alternativeTerms": [
+            "Creating",
+            "Processing"
+          ],
+          "component": {
+            "description": "Unified modal for AI content generation workflow.",
+            "location": "src/components/Editor3/components/UnifiedGenerateModal.js"
+          },
+          "context": "Status message shown while AI generates content.",
+          "impact": "Medium - provides generation feedback",
+          "tone": "polite-formal",
+          "usage": "Loading indicator with content type variable",
+          "userType": "instructors"
+        },
+        "cancel": "Cancel",
+        "dialogTitle": "Generate Content",
+        "generate": "Generate",
+        "loading": "Generating...",
+        "preview": "Preview",
+        "value": "Generating {{type}}..."
+      },
+      "unifiedGenerateModal.keepEditing": {
+        "_meta": {
+          "alternativeTerms": [
+            "Continue",
+            "Go Back"
+          ],
+          "component": {
+            "description": "Option to continue editing instead of canceling.",
+            "location": "src/components/Editor3/components/UnifiedGenerateModal.js"
+          },
+          "context": "Button to return to preview without discarding.",
+          "impact": "Medium - preserves work",
+          "tone": "polite-formal",
+          "usage": "Button label",
+          "userType": "instructors"
+        },
+        "value": "Keep Editing"
+      },
+      "unifiedGenerateModal.lostWarning": {
+        "_meta": {
+          "alternativeTerms": [],
+          "component": {
+            "description": "Detailed warning about cancellation consequences.",
+            "location": "src/components/Editor3/components/UnifiedGenerateModal.js"
+          },
+          "context": "Warning message explaining data loss.",
+          "impact": "High - critical warning for user decision",
+          "tone": "polite-formal",
+          "usage": "Warning text with type variable",
+          "userType": "instructors"
+        },
+        "value": "Your generated {{type}} will be lost if you cancel now."
+      },
+      "unifiedGenerateModal.preview": {
+        "_meta": {
+          "alternativeTerms": [
+            "View",
+            "Result"
+          ],
+          "component": {
+            "description": "Header for generated content preview.",
+            "location": "src/components/Editor3/components/UnifiedGenerateModal.js"
+          },
+          "context": "Label for content preview section.",
+          "impact": "Medium - identifies preview area",
+          "tone": "polite-formal",
+          "usage": "Section label",
+          "userType": "instructors"
+        },
+        "value": "Preview"
+      },
+      "unifiedGenerateModal.saveClose": {
+        "_meta": {
+          "alternativeTerms": [
+            "Save",
+            "Confirm"
+          ],
+          "component": {
+            "description": "Confirmation button for preview mode.",
+            "location": "src/components/Editor3/components/UnifiedGenerateModal.js"
+          },
+          "context": "Button to save generated content and close modal.",
+          "impact": "High - commits generated content",
+          "tone": "polite-formal",
+          "usage": "Button label",
+          "userType": "instructors"
+        },
+        "value": "Save & Close"
+      },
+      "unifiedGenerateModal.takeMoments": {
+        "_meta": {
+          "alternativeTerms": [
+            "Please wait",
+            "Processing"
+          ],
+          "component": {
+            "description": "Secondary message explaining wait time.",
+            "location": "src/components/Editor3/components/UnifiedGenerateModal.js"
+          },
+          "context": "Explanatory text during generation process.",
+          "impact": "Low - sets user expectations",
+          "tone": "polite-formal",
+          "usage": "Helper text for loading state",
+          "userType": "instructors"
+        },
+        "value": "This may take a few moments"
+      },
+      "promptMethodSelector.inputButton": {
+        "_meta": {
+          "alternativeTerms": [
+            "Enter",
+            "Type",
+            "Manual Entry",
+            "Text Input"
+          ],
+          "component": {
+            "description": "This component provides users with different methods for entering prompts or input into the system. It appears when users need to choose between various input options, such as typing, uploading, or other input methods for AI-powered features.",
+            "location": "components/Editor3/components/PromptMethodSelector.js"
+          },
+          "context": "This text appears on a button within the PromptMethodSelector component that allows users to choose how they want to provide prompts or input to the system. Users see this when they need to select an input method, likely when interacting with AI-powered features or content creation tools.",
+          "impact": "High - This button is essential for users to access manual input functionality, which is likely a primary method for interacting with AI features and content creation tools.",
+          "tone": "polite-formal",
+          "usage": "Button text that users click to select manual text input as their preferred prompt entry method.",
+          "userType": "all"
+        },
+        "value": "Input"
+      },
+      "promptMethodSelector.menuItems.audio": {
+        "_meta": {
+          "alternativeTerms": [
+            "Voice",
+            "Sound",
+            "Speech",
+            "Recording"
+          ],
+          "component": {
+            "description": "The PromptMethodSelector component allows users to choose different methods for inputting prompts or content within the editor interface. It presents multiple input options to users, likely including text, audio, and other input modalities for content creation.",
+            "location": "components/Editor3/components/PromptMethodSelector.js"
+          },
+          "context": "This text appears as a menu item option within the Prompt Method Selector component in the content editor. Users see this when they are selecting different input methods for creating prompts or content, with 'Audio' being one of the available options in a dropdown or selection menu.",
+          "impact": "Important because it enables users to choose their preferred content input method, directly affecting how they can create and interact with learning materials.",
+          "tone": "polite-formal",
+          "usage": "Menu item label that users click to select audio input as their preferred prompt method.",
+          "userType": "all"
+        },
+        "value": "Audio"
+      },
+      "promptMethodSelector.menuItems.drawing": {
+        "_meta": {
+          "alternativeTerms": [
+            "Sketching",
+            "Illustration",
+            "Art",
+            "Visual input"
+          ],
+          "component": {
+            "description": "This component provides a selector interface for users to choose different prompt input methods. It presents various options including drawing capabilities for interactive content creation and response submission.",
+            "location": "components/Editor3/components/PromptMethodSelector.js"
+          },
+          "context": "This text appears as a menu item option within the PromptMethodSelector component, allowing users to choose drawing as their input method. Users see this when they need to select how they want to provide input or respond to a prompt in the editor interface.",
+          "impact": "Important - This enables users to access drawing functionality as an input method, which is valuable for visual learning and creative expression in Japanese language education.",
+          "tone": "polite-formal",
+          "usage": "Menu item label that users click to select drawing as their prompt input method.",
+          "userType": "all"
+        },
+        "value": "Drawing"
+      },
+      "promptMethodSelector.menuItems.image": {
+        "_meta": {
+          "alternativeTerms": [
+            "Picture",
+            "Photo",
+            "Visual",
+            "Graphic"
+          ],
+          "component": {
+            "description": "The PromptMethodSelector component allows users to choose different methods for generating or working with AI prompts in the content editor. It presents various input options including image-based prompting for creating educational content.",
+            "location": "components/Editor3/components/PromptMethodSelector.js"
+          },
+          "context": "This text appears as a menu item option in the PromptMethodSelector component within the Editor3 interface. Users see this when they are selecting how they want to generate or work with content prompts, specifically choosing image-based prompting methods.",
+          "impact": "Important - enables users to utilize visual content creation features which are essential for comprehensive Japanese language learning materials",
+          "tone": "polite-formal",
+          "usage": "Menu item option that users click to select image-based prompt generation method",
+          "userType": "instructors"
+        },
+        "value": "Image"
+      },
+      "promptMethodSelector.menuItems.text": {
+        "_meta": {
+          "alternativeTerms": [
+            "Written",
+            "Typed",
+            "Textual",
+            "Written Input"
+          ],
+          "component": {
+            "description": "This component provides a selector interface for choosing different prompt input methods when interacting with AI features. It appears in the content editor context where instructors can select various ways to input prompts for AI-assisted content creation or enhancement.",
+            "location": "components/Editor3/components/PromptMethodSelector.js"
+          },
+          "context": "This text appears as a menu item option in the PromptMethodSelector component, allowing users to choose text as their input method for AI prompts. Users see this when they access prompt-related functionality and need to select how they want to provide their input to the AI system.",
+          "impact": "Important because it enables users to clearly identify and select text-based prompt input, which is fundamental for AI feature accessibility and usability.",
+          "tone": "polite-formal",
+          "usage": "Menu item label that users click to select text as their prompt input method.",
+          "userType": "all"
+        },
+        "value": "Text"
+      },
+      "promptMethodSelector.menuItems.video": {
+        "_meta": {
+          "alternativeTerms": [
+            "Movie",
+            "Recording",
+            "Media clip",
+            "Visual content"
+          ],
+          "component": {
+            "description": "The PromptMethodSelector component provides users with different options for inputting or creating content within the editor. It presents various methods including video as selectable menu items for content creation workflows.",
+            "location": "components/Editor3/components/PromptMethodSelector.js"
+          },
+          "context": "This text appears as a menu item option within the PromptMethodSelector component in the content editor. Users see this when they are selecting different input methods or content types for creating learning materials.",
+          "impact": "High - This is essential for content creation as it allows instructors to specify video-based content input methods for their learning materials.",
+          "tone": "polite-formal",
+          "usage": "Menu item label that users can click to select video as their preferred prompt or input method.",
+          "userType": "instructors"
+        },
+        "value": "Video"
+      },
+      "promptMethodSelector.outputButton": {
+        "_meta": {
+          "alternativeTerms": [
+            "Result",
+            "Response",
+            "Generated Content",
+            "Preview"
+          ],
+          "component": {
+            "description": "The PromptMethodSelector component allows instructors to choose and configure different AI prompt methods when creating learning content. It provides options for selecting how AI will process and generate responses for educational materials.",
+            "location": "components/Editor3/components/PromptMethodSelector.js"
+          },
+          "context": "This text appears as a button label in the PromptMethodSelector component within the content editor interface. Users see this button when configuring AI prompt methods and need to view or access the output generated from their selected prompt configuration.",
+          "impact": "High - This button is essential for instructors to see the results of their AI prompt configurations and verify the generated content meets their educational objectives.",
+          "tone": "polite-formal",
+          "usage": "Button element that users click to view or access the generated output from their prompt method selection.",
+          "userType": "instructors"
+        },
+        "value": "Output"
+      },
+      "enhancedGenerators.audioPromptPlaceholder": {
+        "_meta": {
+          "alternativeTerms": [
+            "Type text for audio conversion",
+            "Input text for voice generation",
+            "Add text to create speech"
+          ],
+          "component": {
+            "description": "The EnhancedGenerators component provides AI-powered content generation tools for instructors creating learning materials. It includes various generators including text-to-speech functionality for creating audio content from text input.",
+            "location": "components/Editor3/components/EnhancedGenerators.js"
+          },
+          "context": "This placeholder text appears in a text input field within the Enhanced Generators component when instructors are using the audio generation feature. Users see this text as guidance when the input field is empty and they need to enter text for text-to-speech conversion.",
+          "impact": "Medium - Provides clear guidance for the text-to-speech feature, helping instructors understand how to generate audio content for their lessons",
+          "tone": "polite-formal",
+          "usage": "Placeholder text in a text input field that guides users to enter text for audio conversion",
+          "userType": "instructors"
+        },
+        "value": "Enter text to convert to speech..."
+      },
+      "enhancedGenerators.backToGenerator": {
+        "_meta": {
+          "alternativeTerms": [
+            "Return to Generator",
+            "Go Back to Generator",
+            "Generator Home"
+          ],
+          "component": {
+            "description": "This component provides enhanced AI-powered generation capabilities within the content editor, allowing instructors to create various types of learning content using OpenAI integration. Users interact with this component when utilizing AI tools to generate vocabulary lists, quiz questions, or other educational materials for their Japanese language learning units.",
+            "location": "components/Editor3/components/EnhancedGenerators.js"
+          },
+          "context": "This text appears as a navigation element within the EnhancedGenerators component when users are working with AI-powered content generation tools in the content editor. Users see this when they need to return from a specific generator view or result back to the main generator selection interface.",
+          "impact": "Important because it provides essential navigation flow for instructors using AI generation tools, preventing them from getting stuck in sub-interfaces during content creation.",
+          "tone": "polite-formal",
+          "usage": "Navigation button or link that allows users to return to the main generator interface from a sub-view or results page.",
+          "userType": "instructors"
+        },
+        "value": "Back to Generator"
+      },
+      "enhancedGenerators.editWithMask": {
+        "_meta": {
+          "alternativeTerms": [
+            "Edit Part of Image",
+            "Selective Regeneration",
+            "Mask Edit"
+          ],
+          "component": {
+            "description": "Enhanced image generator with mask-based selective regeneration capabilities.",
+            "location": "src/components/Editor3/components/EnhancedGenerators.js"
+          },
+          "context": "Button label for masked image editing feature that allows instructors to regenerate specific parts of AI-generated images.",
+          "impact": "Medium - advanced editing feature for instructors",
+          "tone": "technical",
+          "usage": "Button label for accessing image mask editor",
+          "userType": "instructors"
+        },
+        "value": "Edit with Mask (Regenerate Part)"
+      },
+      "enhancedGenerators.generateAudio": {
+        "_meta": {
+          "alternativeTerms": [
+            "Create Audio",
+            "Synthesize Audio",
+            "Generate Speech",
+            "Create Voice Content"
+          ],
+          "component": {
+            "description": "The Enhanced Generators component provides AI-powered content generation tools within the editor interface. It offers various generation capabilities including audio synthesis to help instructors create rich multimedia content for their lessons.",
+            "location": "components/Editor3/components/EnhancedGenerators.js"
+          },
+          "context": "This text appears as a button label in the Enhanced Generators component within the content editor. Users see this when they are in the editing interface and want to use AI-powered audio generation features to create spoken content for their learning materials.",
+          "impact": "High - This is a key feature button that enables instructors to create audio content using AI, which is essential for language learning materials and accessibility.",
+          "tone": "polite-formal",
+          "usage": "Button text that users click to initiate AI-powered audio generation functionality.",
+          "userType": "instructors"
+        },
+        "value": "Generate Audio"
+      },
+      "enhancedGenerators.generateImage": {
+        "_meta": {
+          "alternativeTerms": [
+            "Create Image",
+            "Make Picture",
+            "Produce Visual",
+            "Generate Visual"
+          ],
+          "component": {
+            "description": "The Enhanced Generators component provides AI-powered content generation tools within the rich text editor interface. It offers various generation capabilities including image creation to help instructors enrich their educational materials with visual content.",
+            "location": "components/Editor3/components/EnhancedGenerators.js"
+          },
+          "context": "This text appears as a button label in the Enhanced Generators component within the content editor, allowing users to create AI-generated images for their learning materials. Users see this when they are actively creating or editing educational content and want to add visual elements to enhance their lessons.",
+          "impact": "High - This is a key feature for content creation that enables instructors to enhance their educational materials with AI-generated visuals, directly impacting the quality and engagement of learning content.",
+          "tone": "polite-formal",
+          "usage": "Button text that triggers the AI image generation functionality when clicked by users.",
+          "userType": "all"
+        },
+        "value": "Generate Image"
+      },
+      "enhancedGenerators.imagePromptPlaceholder": {
+        "_meta": {
+          "alternativeTerms": [
+            "explain",
+            "detail",
+            "specify",
+            "outline"
+          ],
+          "component": {
+            "description": "The EnhancedGenerators component provides AI-powered content generation tools for instructors creating learning materials. It includes various generators for different content types, including an image generation feature that allows instructors to create visual content by describing what they need.",
+            "location": "components/Editor3/components/EnhancedGenerators.js"
+          },
+          "context": "This placeholder text appears in a text input field within the EnhancedGenerators component when instructors are using AI image generation features. Users see this prompt when the input field is empty, guiding them to describe what kind of image they want the AI to create for their learning content.",
+          "impact": "Important - This guidance helps instructors understand how to effectively use the AI image generation feature, which is crucial for creating engaging visual learning materials.",
+          "tone": "polite-formal",
+          "usage": "Placeholder text in a text input field that prompts users to enter their image description.",
+          "userType": "instructors"
+        },
+        "value": "Describe the image you want to generate..."
+      },
+      "enhancedGenerators.openRecordingStudio": {
+        "_meta": {
+          "alternativeTerms": [
+            "Launch Recording Studio",
+            "Access Recording Studio",
+            "Start Recording Studio"
+          ],
+          "component": {
+            "description": "The Enhanced Generators component provides advanced content creation tools and AI-powered features for instructors building learning materials. It offers various generation options and integrates with external tools like the Recording Studio for multimedia content creation.",
+            "location": "components/Editor3/components/EnhancedGenerators.js"
+          },
+          "context": "This text appears as a button or link within the Enhanced Generators component in the content editor, allowing instructors to access a dedicated recording interface. Users see this when creating or editing learning materials that require audio content such as pronunciation examples or voice instructions.",
+          "impact": "High - This is essential for instructors creating audio content for Japanese language learning, where pronunciation and listening components are critical.",
+          "tone": "polite-formal",
+          "usage": "Button or link that opens the Recording Studio interface when clicked by instructors.",
+          "userType": "instructors"
+        },
+        "value": "Open in Recording Studio"
+      },
+      "blockSuggestionMenu.aiTitle": {
+        "_meta": {
+          "alternativeTerms": [],
+          "category": "heading",
+          "component": {
+            "description": "BlockSuggestionMenu - Static sidebar menu for block suggestions.  Displays a list of suggested block types that would pedagogically follow the current content. Embedded in sidebar for non-intrusive suggestions.  @module BlockSuggestionMenu",
+            "location": "components/Editor3/components/BlockSuggestionMenu.js"
+          },
+          "context": "Used in BlockSuggestionMenu.js component",
+          "impact": "Labels the aiTitle section for users",
+          "tone": "polite-formal",
+          "usage": "Heading text for aiTitle section",
+          "userType": "all"
+        },
+        "value": "🤖 AI-Powered Suggestions"
+      },
+      "blockSuggestionMenu.emptyState": {
+        "_meta": {
+          "alternativeTerms": [],
+          "category": "navigation",
+          "component": {
+            "description": "BlockSuggestionMenu - Static sidebar menu for block suggestions.  Displays a list of suggested block types that would pedagogically follow the current content. Embedded in sidebar for non-intrusive suggestions.  @module BlockSuggestionMenu",
+            "location": "components/Editor3/components/BlockSuggestionMenu.js"
+          },
+          "context": "Used in BlockSuggestionMenu.js component",
+          "impact": "Provides navigation information to users",
+          "tone": "polite-formal",
+          "usage": "Navigation item for emptyState",
+          "userType": "all"
+        },
+        "value": "No suggestions available yet."
+      },
+      "blockSuggestionMenu.emptyStateHelper": {
+        "_meta": {
+          "alternativeTerms": [],
+          "category": "navigation",
+          "component": {
+            "description": "BlockSuggestionMenu - Static sidebar menu for block suggestions.  Displays a list of suggested block types that would pedagogically follow the current content. Embedded in sidebar for non-intrusive suggestions.  @module BlockSuggestionMenu",
+            "location": "components/Editor3/components/BlockSuggestionMenu.js"
+          },
+          "context": "Used in BlockSuggestionMenu.js component",
+          "impact": "Provides navigation information to users",
+          "tone": "polite-formal",
+          "usage": "Navigation item for emptyStateHelper",
+          "userType": "all"
+        },
+        "value": "Start typing in the editor to see AI-powered block suggestions."
+      },
+      "blockSuggestionMenu.generateMore": {
+        "_meta": {
+          "alternativeTerms": [],
+          "category": "navigation",
+          "component": {
+            "description": "BlockSuggestionMenu - Static sidebar menu for block suggestions.  Displays a list of suggested block types that would pedagogically follow the current content. Embedded in sidebar for non-intrusive suggestions.  @module BlockSuggestionMenu",
+            "location": "components/Editor3/components/BlockSuggestionMenu.js"
+          },
+          "context": "Used in BlockSuggestionMenu.js component",
+          "impact": "Provides navigation information to users",
+          "tone": "polite-formal",
+          "usage": "Navigation item for generateMore",
+          "userType": "all"
+        },
+        "value": "Generate More Suggestions"
+      },
+      "blockSuggestionMenu.helper": {
+        "_meta": {
+          "alternativeTerms": [],
+          "category": "navigation",
+          "component": {
+            "description": "BlockSuggestionMenu - Static sidebar menu for block suggestions.  Displays a list of suggested block types that would pedagogically follow the current content. Embedded in sidebar for non-intrusive suggestions.  @module BlockSuggestionMenu",
+            "location": "components/Editor3/components/BlockSuggestionMenu.js"
+          },
+          "context": "Used in BlockSuggestionMenu.js component",
+          "impact": "Provides navigation information to users",
+          "tone": "polite-formal",
+          "usage": "Navigation item for helper",
+          "userType": "all"
+        },
+        "value": "Click a suggestion to insert it into your lesson"
+      },
+      "blockSuggestionMenu.helperAI": {
+        "_meta": {
+          "alternativeTerms": [],
+          "category": "navigation",
+          "component": {
+            "description": "BlockSuggestionMenu - Static sidebar menu for block suggestions.  Displays a list of suggested block types that would pedagogically follow the current content. Embedded in sidebar for non-intrusive suggestions.  @module BlockSuggestionMenu",
+            "location": "components/Editor3/components/BlockSuggestionMenu.js"
+          },
+          "context": "Used in BlockSuggestionMenu.js component",
+          "impact": "Provides navigation information to users",
+          "tone": "polite-formal",
+          "usage": "Navigation item for helperAI",
+          "userType": "all"
+        },
+        "value": "Click a suggestion or press Tab/Enter to insert"
+      },
+      "blockSuggestionMenu.suggestionsTitle": {
+        "_meta": {
+          "alternativeTerms": [],
+          "category": "heading",
+          "component": {
+            "description": "BlockSuggestionMenu - Static sidebar menu for block suggestions.  Displays a list of suggested block types that would pedagogically follow the current content. Embedded in sidebar for non-intrusive suggestions.  @module BlockSuggestionMenu",
+            "location": "components/Editor3/components/BlockSuggestionMenu.js"
+          },
+          "context": "Used in BlockSuggestionMenu.js component",
+          "impact": "Labels the suggestionsTitle section for users",
+          "tone": "polite-formal",
+          "usage": "Heading text for suggestionsTitle section",
+          "userType": "all"
+        },
+        "value": "💡 Suggested Blocks"
+      },
+      "suggestedContent.identityPlaceholder": {
+        "_meta": {
+          "alternativeTerms": [
+            "User ID",
+            "Identifier",
+            "Identity Code",
+            "User Identifier"
+          ],
+          "component": {
+            "description": "This component is part of the editor's suggested content system that helps instructors discover and incorporate relevant learning materials into their lessons. It provides input fields for filtering or identifying specific content recommendations based on various criteria including identity-based parameters.",
+            "location": "src/components/editor"
+          },
+          "context": "This placeholder text appears in an input field within the editor's suggested content feature where instructors can specify an Identity ID for content recommendations. Users see this when they need to enter an identifier to fetch or filter suggested learning materials based on user identity or content categorization.",
+          "impact": "Medium - While not critical for core functionality, this text helps instructors understand how to effectively use the content suggestion feature to find relevant materials.",
+          "tone": "polite-formal",
+          "usage": "Input field placeholder text that guides instructors on what type of identifier to enter for content suggestions.",
+          "userType": "instructors"
+        },
+        "value": "Identity ID"
+      },
+      "suggestedContent.ownerPlaceholder": {
+        "_meta": {
+          "alternativeTerms": [
+            "Creator ID",
+            "Author ID",
+            "User ID",
+            "Content Owner"
+          ],
+          "component": {
+            "description": "This component manages the suggested content feature in the editor, allowing instructors to specify ownership and metadata for learning materials. It provides form fields for content attribution and organization within the eLearning platform.",
+            "location": "src/components/editor"
+          },
+          "context": "This text appears as placeholder text in an input field within the suggested content section of the editor interface. Users see this placeholder when the owner ID field is empty, providing guidance on what type of information should be entered to identify the content owner.",
+          "impact": "Medium - helps users understand the expected format for owner identification, supporting proper content attribution and organization.",
+          "tone": "technical",
+          "usage": "Input field placeholder text that guides users on entering owner identification information.",
+          "userType": "instructors"
+        },
+        "value": "Owner ID"
+      },
+      "aiContentSuggestion.tabToAccept": {
+        "value": "Tab To Accept",
+        "_meta": {
+          "context": "This text appears as an instructional hint within the AI content suggestion overlay in the rich text editor. Users see this guidance when an AI-generated text suggestion is displayed inline with their current typing, indicating how they can accept the suggested content.",
+          "component": {
+            "location": "src/components/Editor3/components/AIContentSuggestion.js",
+            "description": "Renders AI-generated text suggestions inline with the editor content, styled similarly to GitHub Copilot's ghost text. The component displays suggested content that users can accept or ignore while creating learning materials in the Lexical editor."
+          },
+          "usage": "Instructional label displayed within the AI suggestion overlay to guide user interaction.",
+          "impact": "High - Essential for users to understand how to interact with AI suggestions and efficiently incorporate generated content into their work.",
+          "userType": "all",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Press Tab to Accept",
+            "Tab Key to Accept",
+            "Use Tab to Accept"
+          ]
+        }
+      }
+    },
+    "claude": {
+      "unifiedGenerateModal.cancel": "取消",
+      "unifiedGenerateModal.discard": "丢弃",
+      "unifiedGenerateModal.discardChanges": "放弃更改？",
+      "unifiedGenerateModal.generate": "生成",
+      "unifiedGenerateModal.generating": "正在生成{{type}}...",
+      "unifiedGenerateModal.keepEditing": "继续编辑",
+      "unifiedGenerateModal.lostWarning": "如果您现在取消，您生成的{{type}}将会丢失。",
+      "unifiedGenerateModal.preview": "预览",
+      "unifiedGenerateModal.saveClose": "保存并关闭",
+      "unifiedGenerateModal.takeMoments": "这可能需要几分钟时间",
+      "promptMethodSelector.inputButton": "输入",
+      "promptMethodSelector.menuItems.audio": "音频",
+      "promptMethodSelector.menuItems.drawing": "绘图",
+      "promptMethodSelector.menuItems.image": "图像",
+      "promptMethodSelector.menuItems.text": "文本",
+      "promptMethodSelector.menuItems.video": "视频",
+      "promptMethodSelector.outputButton": "输出",
+      "enhancedGenerators.audioPromptPlaceholder": "输入要转换为语音的文本...",
+      "enhancedGenerators.backToGenerator": "返回生成器",
+      "enhancedGenerators.editWithMask": "使用蒙版编辑（重新生成部分）",
+      "enhancedGenerators.generateAudio": "生成音频",
+      "enhancedGenerators.generateImage": "生成图像",
+      "enhancedGenerators.imagePromptPlaceholder": "请描述您想要生成的图片...",
+      "enhancedGenerators.openRecordingStudio": "在录音工作室中打开",
+      "blockSuggestionMenu.aiTitle": "🤖 AI智能建议",
+      "blockSuggestionMenu.emptyState": "暂无建议",
+      "blockSuggestionMenu.emptyStateHelper": "开始在编辑器中输入以查看AI驱动的块建议。",
+      "blockSuggestionMenu.generateMore": "生成更多建议",
+      "blockSuggestionMenu.helper": "点击建议将其插入到您的课程中",
+      "blockSuggestionMenu.helperAI": "点击建议或按Tab/Enter键插入",
+      "blockSuggestionMenu.suggestionsTitle": "💡 推荐模块",
+      "suggestedContent.identityPlaceholder": "身份ID",
+      "suggestedContent.ownerPlaceholder": "所有者ID",
+      "aiContentSuggestion.tabToAccept": "按Tab键接受"
+    },
+    "gpt": {
+      "unifiedGenerateModal.cancel": "取消",
+      "unifiedGenerateModal.discard": "丢弃",
+      "unifiedGenerateModal.discardChanges": "放弃更改？",
+      "unifiedGenerateModal.generate": "生成",
+      "unifiedGenerateModal.generating": "正在生成{{type}}...",
+      "unifiedGenerateModal.keepEditing": "继续编辑",
+      "unifiedGenerateModal.lostWarning": "如果您现在取消，生成的{{type}}将会丢失。",
+      "unifiedGenerateModal.preview": "预览",
+      "unifiedGenerateModal.saveClose": "保存并关闭",
+      "unifiedGenerateModal.takeMoments": "这可能需要一些时间",
+      "promptMethodSelector.inputButton": "输入",
+      "promptMethodSelector.menuItems.audio": "音频",
+      "promptMethodSelector.menuItems.drawing": "绘图",
+      "promptMethodSelector.menuItems.image": "图像",
+      "promptMethodSelector.menuItems.text": "文本",
+      "promptMethodSelector.menuItems.video": "视频",
+      "promptMethodSelector.outputButton": "输出",
+      "enhancedGenerators.audioPromptPlaceholder": "输入文本以转换为语音...",
+      "enhancedGenerators.backToGenerator": "返回生成器",
+      "enhancedGenerators.editWithMask": "使用蒙版编辑（重新生成部分）",
+      "enhancedGenerators.generateAudio": "生成音频",
+      "enhancedGenerators.generateImage": "生成图像",
+      "enhancedGenerators.imagePromptPlaceholder": "描述您想生成的图像...",
+      "enhancedGenerators.openRecordingStudio": "在录音室中打开",
+      "blockSuggestionMenu.aiTitle": "🤖 AI驱动的建议",
+      "blockSuggestionMenu.emptyState": "暂无建议。",
+      "blockSuggestionMenu.emptyStateHelper": "在编辑器中开始输入以查看 AI 驱动的块建议。",
+      "blockSuggestionMenu.generateMore": "生成更多建议",
+      "blockSuggestionMenu.helper": "单击建议以将其插入到您的课程中",
+      "blockSuggestionMenu.helperAI": "单击建议或按 Tab/Enter 键插入",
+      "blockSuggestionMenu.suggestionsTitle": "💡 建议模块",
+      "suggestedContent.identityPlaceholder": "身份 ID",
+      "suggestedContent.ownerPlaceholder": "所有者ID",
+      "aiContentSuggestion.tabToAccept": "按下以接受"
+    },
+    "translategemma": {
+      "unifiedGenerateModal.cancel": "取消",
+      "unifiedGenerateModal.discard": "放弃",
+      "unifiedGenerateModal.discardChanges": "放弃更改？",
+      "unifiedGenerateModal.generate": "生成",
+      "unifiedGenerateModal.generating": "正在生成 {{type}}...",
+      "unifiedGenerateModal.keepEditing": "继续编辑",
+      "unifiedGenerateModal.lostWarning": "如果现在取消，您生成的 {{type}} 将会丢失。",
+      "unifiedGenerateModal.preview": "预览",
+      "unifiedGenerateModal.saveClose": "保存并关闭",
+      "unifiedGenerateModal.takeMoments": "这可能需要一些时间",
+      "promptMethodSelector.inputButton": "输入",
+      "promptMethodSelector.menuItems.audio": "音频",
+      "promptMethodSelector.menuItems.drawing": "绘画",
+      "promptMethodSelector.menuItems.image": "图片",
+      "promptMethodSelector.menuItems.text": "文本",
+      "promptMethodSelector.menuItems.video": "视频",
+      "promptMethodSelector.outputButton": "输出",
+      "enhancedGenerators.audioPromptPlaceholder": "输入要转换为语音的文本...",
+      "enhancedGenerators.backToGenerator": "返回生成器",
+      "enhancedGenerators.editWithMask": "使用蒙版编辑 (重新生成部分)",
+      "enhancedGenerators.generateAudio": "生成音频",
+      "enhancedGenerators.generateImage": "生成图片",
+      "enhancedGenerators.imagePromptPlaceholder": "描述您想要生成的图像...",
+      "enhancedGenerators.openRecordingStudio": "在录音室打开",
+      "blockSuggestionMenu.aiTitle": "🤖 AI 驱动的建议",
+      "blockSuggestionMenu.emptyState": "目前没有建议。",
+      "blockSuggestionMenu.emptyStateHelper": "在编辑器中开始输入，即可查看AI驱动的区块建议。",
+      "blockSuggestionMenu.generateMore": "生成更多建议",
+      "blockSuggestionMenu.helper": "点击建议以将其插入到您的课程中",
+      "blockSuggestionMenu.helperAI": "点击建议或按 Tab/Enter 键插入",
+      "blockSuggestionMenu.suggestionsTitle": "💡 推荐区块",
+      "suggestedContent.identityPlaceholder": "身份ID",
+      "suggestedContent.ownerPlaceholder": "所有者ID",
+      "aiContentSuggestion.tabToAccept": "点击接受"
+    },
+    "final": {
+      "unifiedGenerateModal.cancel": "取消",
+      "unifiedGenerateModal.discard": "丢弃",
+      "unifiedGenerateModal.discardChanges": "放弃更改？",
+      "unifiedGenerateModal.generate": "生成",
+      "unifiedGenerateModal.generating": "正在生成{{type}}...",
+      "unifiedGenerateModal.keepEditing": "继续编辑",
+      "unifiedGenerateModal.lostWarning": "如果您现在取消，您生成的{{type}}将会丢失。",
+      "unifiedGenerateModal.preview": "预览",
+      "unifiedGenerateModal.saveClose": "保存并关闭",
+      "unifiedGenerateModal.takeMoments": "这可能需要一些时间",
+      "promptMethodSelector.inputButton": "输入",
+      "promptMethodSelector.menuItems.audio": "音频",
+      "promptMethodSelector.menuItems.drawing": "绘图",
+      "promptMethodSelector.menuItems.image": "图像",
+      "promptMethodSelector.menuItems.text": "文本",
+      "promptMethodSelector.menuItems.video": "视频",
+      "promptMethodSelector.outputButton": "输出",
+      "enhancedGenerators.audioPromptPlaceholder": "输入要转换为语音的文本...",
+      "enhancedGenerators.backToGenerator": "返回生成器",
+      "enhancedGenerators.editWithMask": "使用蒙版编辑（重新生成部分）",
+      "enhancedGenerators.generateAudio": "生成音频",
+      "enhancedGenerators.generateImage": "生成图像",
+      "enhancedGenerators.imagePromptPlaceholder": "请描述您想要生成的图片...",
+      "enhancedGenerators.openRecordingStudio": "在录音工作室中打开",
+      "blockSuggestionMenu.aiTitle": "🤖 AI智能建议",
+      "blockSuggestionMenu.emptyState": "暂无建议",
+      "blockSuggestionMenu.emptyStateHelper": "开始在编辑器中输入以查看AI驱动的块建议。",
+      "blockSuggestionMenu.generateMore": "生成更多建议",
+      "blockSuggestionMenu.helper": "点击建议将其插入到您的课程中",
+      "blockSuggestionMenu.helperAI": "点击建议或按Tab/Enter键插入",
+      "blockSuggestionMenu.suggestionsTitle": "💡 推荐模块",
+      "suggestedContent.identityPlaceholder": "身份ID",
+      "suggestedContent.ownerPlaceholder": "所有者ID",
+      "aiContentSuggestion.tabToAccept": "按Tab键接受"
+    }
+  }
+}

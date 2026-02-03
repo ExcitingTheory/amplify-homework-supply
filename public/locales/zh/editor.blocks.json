@@ -1,21 +1,21 @@
 {
   "customAnswerEditor": {
     "add": "添加",
-    "addWordLabel": "添加词汇到练习",
+    "addWordLabel": "将单词添加到练习",
     "answerLabel": "答案",
     "answerPlaceholder": "答案",
     "audioPreview": "音频预览",
     "cancel": "取消",
     "columnHeaders": {
       "answer": "答案",
-      "answerAudio": "答案音频",
+      "answerAudio": "回答音频",
       "hint": "提示",
       "id": "ID",
       "prompt": "提示",
       "promptAudio": "提示音频"
     },
-    "description": "创建一个简答练习，可以向用户提出问题并期望得到简短的答案。",
-    "dialogDescription": "添加新的问答对",
+    "description": "创建一个简答练习，可以向用户提出问题并期望得到简短回答。",
+    "dialogDescription": "添加新的问答对。",
     "dialogTitle": "添加新问题",
     "emptyState": "尚未添加任何问题。请使用上方的输入框添加提示和答案对。",
     "errorCreatingQuestion": "创建问题时出错",
@@ -25,7 +25,7 @@
     "hintPlaceholder": "提示",
     "promptLabel": "提示",
     "remove": "移除",
-    "successGeneratedAudio": "音频文件生成成功",
+    "successGeneratedAudio": "成功生成音频文件",
     "title": "自定义答案练习",
     "ttsPreview": "文字转语音预览"
   },
@@ -41,7 +41,7 @@
     "definitionPlaceholder": "定义",
     "dialogDescription": "向词典添加新单词。",
     "dialogTitle": "添加新词",
-    "emptyState": "尚未添加任何单词。请使用上方的输入框从词典中添加单词。如果您要添加的单词不在词典中，可以点击下拉菜单中的\"添加单词\"选项，或从侧边栏的词典编辑器中添加。",
+    "emptyState": "尚未添加任何单词。请使用上方的输入框从词典中添加单词。如果您要添加的单词不在词典中，可以通过点击下拉菜单中的\"添加单词\"选项或侧边栏的词典编辑器来添加。",
     "phraseLabel": "短语",
     "pronunciationLabel": "发音",
     "removeFromAssignment": "从作业中移除"
@@ -63,7 +63,7 @@
     "cancel": "取消",
     "dialogTitle": "编辑答案",
     "emptyState": "未提供答案",
-    "instructions": "请在下方创建您的答案",
+    "instructions": "在下方创建您的答案",
     "save": "保存"
   },
   "questionEditor": {

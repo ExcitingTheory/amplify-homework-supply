@@ -33,7 +33,7 @@
 **Debug Panel Features**:
 - 🔍 **Component Tree View** - Visual hierarchy of React components with props/state
 - 📝 **Debug Logger** - Captured console logs, errors, warnings
-- 📊 **State Inspector** - DataStore models, context values, Redux state
+- 📊 **State Inspector** - Data models, context values, state
 - 📤 **S3 Upload** - One-click diagnostic export with shareable link
 - 🎯 **Session Recording** - User actions timeline
 - 🔔 **Error Boundary** - Automatic error capture and reporting
@@ -41,7 +41,7 @@
 **Use Cases**:
 1. Student encounters bug → Clicks "Report Issue" → Screenshot is Taken, The user can draw and comment on it → State uploaded to S3 → Support team investigates
 2. Instructor debugging student's work → Views component tree to see why quiz isn't loading
-3. Developer troubleshooting DataStore sync → Exports full state for analysis
+3. Developer troubleshooting Data sync → Exports full state for analysis
 4. Automated error reporting → Error boundary captures crash → Auto-uploads diagnostic
 
 ---
