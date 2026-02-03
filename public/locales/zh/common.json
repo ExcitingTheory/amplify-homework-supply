@@ -1,69 +1,87 @@
 {
+  "actions": {
+    "add": "添加",
+    "back": "返回",
+    "cancel": "取消",
+    "clear": "清除",
+    "close": "关闭",
+    "confirm": "确认",
+    "continue": "继续",
+    "copy": "复制",
+    "create": "创建",
+    "delete": "删除",
+    "download": "下载",
+    "edit": "编辑",
+    "finish": "完成",
+    "next": "下一步",
+    "remove": "移除",
+    "reset": "重置",
+    "retry": "重试",
+    "save": "保存",
+    "send": "发送",
+    "share": "分享",
+    "submit": "提交",
+    "update": "更新",
+    "upload": "上传"
+  },
   "app": {
     "name": "作业资源",
     "tagline": "日语学习平台"
   },
-  "actions": {
-    "save": "保存",
-    "cancel": "取消",
-    "delete": "删除",
-    "edit": "编辑",
-    "submit": "提交",
-    "close": "关闭",
-    "create": "创建",
-    "upload": "上传",
-    "download": "下载",
-    "share": "分享",
-    "copy": "复制",
-    "send": "发送",
-    "add": "添加",
-    "remove": "移除",
-    "update": "更新",
-    "confirm": "确认",
-    "clear": "清除",
-    "reset": "重置",
-    "retry": "重试",
-    "back": "返回",
-    "next": "下一步",
-    "finish": "完成",
-    "continue": "继续"
-  },
-  "navigation": {
-    "home": "首页",
-    "units": "单元",
-    "sections": "章节",
-    "grades": "成绩",
-    "profile": "个人资料",
-    "workbook": "练习册"
-  },
-  "status": {
-    "loading": "加载中...",
-    "saving": "正在保存...",
-    "success": "成功",
-    "error": "错误",
-    "processing": "正在处理...",
-    "uploading": "正在上传...",
-    "downloading": "正在下载...",
-    "complete": "完成",
-    "incomplete": "未完成",
-    "pending": "待处理"
-  },
-  "time": {
-    "created": "已创建",
-    "updated": "已更新",
-    "due": "截止日期",
-    "completed": "已完成"
-  },
   "common": {
-    "yes": "是",
+    "about": "关于",
+    "filter": "筛选",
+    "help": "帮助",
     "no": "否",
     "ok": "确定",
     "search": "搜索",
-    "filter": "筛选",
+    "settings": "设置",
     "sort": "排序",
     "view": "查看",
-    "settings": "设置",
+    "yes": "是"
+  },
+  "mainToolbar": {
+    "addToSection": {
+      "add": "添加",
+      "codeLabel": "代码标签",
+      "description": "描述",
+      "title": "标题"
+    },
     "help": "帮助",
-    "about": "关于"
+    "settings": {
+      "darkMode": "深色模式",
+      "disableNotifications": "禁用通知",
+      "experimentalFeatures": "实验性功能",
+      "studentMode": "学生模式"
+    }
+  },
+  "navigation": {
+    "grades": "成绩",
+    "home": "首页",
+    "profile": "个人资料",
+    "sections": "章节",
+    "units": "单元",
+    "workbook": "作业本"
+  },
+  "quizComponent": {
+    "grade": "成绩：{{grade}}"
+  },
+  "status": {
+    "complete": "完成",
+    "downloading": "正在下载...",
+    "error": "错误",
+    "incomplete": "未完成",
+    "loading": "加载中...",
+    "pending": "待处理",
+    "processing": "正在处理...",
+    "saving": "正在保存...",
+    "success": "成功",
+    "uploading": "正在上传..."
+  },
+  "time": {
+    "completed": "已完成",
+    "created": "已创建",
+    "due": "截止",
+    "updated": "已更新"
   }
 }

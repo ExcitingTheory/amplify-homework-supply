@@ -8,7 +8,7 @@ function TutorialBanner() {
       <div className="banner-content">
         <h3>Welcome to Homework Supply</h3>
         <p>
-          This is a Japanese language learning platform. Use this Storybook to explore components, 
+          This is a elearning platform. Use this Storybook to explore components, 
           learn the architecture, and test new features.
         </p>
       </div>

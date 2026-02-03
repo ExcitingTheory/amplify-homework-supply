@@ -90,7 +90,7 @@
             "location": "components/Editor3/components/AnswerComponent.js"
           },
           "context": "This feedback text appears in the AnswerComponent when a student submits a correct answer to a quiz question or interactive exercise. The message is displayed immediately after the student selects or submits their answer, providing positive reinforcement for their successful response.",
-          "impact": "High - This positive feedback is crucial for student motivation and learning reinforcement in the Japanese language learning platform",
+          "impact": "High - This positive feedback is crucial for student motivation and learning reinforcement in the elearning platform",
           "tone": "polite-formal",
           "usage": "Success feedback message displayed when students answer quiz questions correctly",
           "userType": "students"
@@ -4640,7 +4640,7 @@
           "Discard"
         ],
         "component": {
-          "description": "A specialized editor component that allows instructors to create and manage associations between vocabulary items and their meanings in the Japanese language learning platform. This component appears as a modal or overlay interface during content creation workflows.",
+          "description": "A specialized editor component that allows instructors to create and manage associations between vocabulary items and their meanings in the elearning platform. This component appears as a modal or overlay interface during content creation workflows.",
           "location": "components/Editor3/components/MeaningAssociationEditor.js"
         },
         "context": "This text appears on a cancel button within the Meaning Association Editor, which is likely used by instructors when creating or editing vocabulary content and associating meanings with words or phrases. Users see this when they want to discard their current editing session and return to the previous state without saving changes.",

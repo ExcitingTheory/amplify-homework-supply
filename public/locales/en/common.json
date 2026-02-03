@@ -509,7 +509,7 @@
         "usage": "Translation key: app.tagline",
         "userType": "all"
       },
-      "value": "Japanese Language Learning Platform"
+      "value": "elearning platform"
     }
   },
   "common": {
@@ -804,7 +804,7 @@
           "description": "The MainToolbar component renders the primary navigation bar that appears at the top of the application interface. It provides users with quick access to essential platform features and support options that remain consistently available throughout their learning or teaching session."
         },
         "usage": "Navigation button or link that users click to access help documentation or support resources.",
-        "impact": "High - Essential for user support and platform usability, especially important for new users learning to navigate the Japanese language learning platform.",
+        "impact": "High - Essential for user support and platform usability, especially important for new users learning to navigate the elearning platform.",
         "userType": "all",
         "tone": "polite-formal",
         "alternativeTerms": [
@@ -1049,7 +1049,7 @@
         "description": "Navigation component that provides menu items and links for accessing different sections of the platform. Users interact with this component to move between units, lessons, and other main platform areas.",
         "location": "src/components/common/Navigation.js"
       },
-      "context": "This text appears as a navigation menu item or section header that allows users to access learning units within the Japanese language learning platform. Users see this when navigating between different course sections or when browsing available learning content organized into units.",
+      "context": "This text appears as a navigation menu item or section header that allows users to access learning units within the elearning platform. Users see this when navigating between different course sections or when browsing available learning content organized into units.",
       "impact": "High - This is a core navigation element that helps users understand the platform's content organization and access their learning materials.",
       "tone": "casual",
       "usage": "Navigation menu item or section heading that users click to access learning units.",

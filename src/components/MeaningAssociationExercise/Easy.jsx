@@ -94,7 +94,7 @@ export const Easy = ({
       console.log('Easy.word.id', word?.id)
       if (answer) {
         vocabList.push(<DragBox answer={answer} wordID={word.id} key={word.id} />)
-        if (filterEasy.indexOf(word.id) === -1) {
+        if (!filterEasy.includes(word.id)) {
           vocabListEasy.push(<DragBox answer={answer} wordID={word.id} key={word.id} />)
           assignmentEasy.push(word)
         }
@@ -141,20 +141,25 @@ export const Easy = ({
   const easyAssignmentLength = easyAssignment.length;
 
 
-  async function progressAssignment(wordID) {
-    const newIndex = currentQuestion + 1;
+  async function progressAssignment(draggedWordID, targetWordID) {
+    // Verify the match is correct
+    if (draggedWordID !== targetWordID) {
+      console.error('Mismatch in Easy progressAssignment:', draggedWordID, targetWordID);
+      return;
+    }
+
     let newTab = tabIndex;
     let allTabsComplete = false;
     let thisExerciseComplete = false;
-    let _verified = [...new Set([...verifiedAnswers, wordID])];
+    let _verified = [...new Set([...verifiedAnswers, targetWordID])];
 
     let _attemptedAnswers = JSON.parse(JSON.stringify(loadAttemptedAnswers));
 
-    if (typeof _attemptedAnswers[correctId] === 'undefined') {
-      _attemptedAnswers[correctId] = [];
+    if (typeof _attemptedAnswers[targetWordID] === 'undefined') {
+      _attemptedAnswers[targetWordID] = [];
     }
 
-    _attemptedAnswers[correctId].push(wordID);
+    _attemptedAnswers[targetWordID].push(draggedWordID);
 
     // for each array in attempted answers sum the lengths
     let attemptedAnswersLength = 0;
@@ -168,7 +173,7 @@ export const Easy = ({
     // setAttemptsCount(attempts);
 
     // Check completion against the full assignment length, not filtered length
-    if (newIndex === assignment.length) {
+    if (_verified.length === assignment.length) {
       // // console.log('newIndex === length')
       thisExerciseComplete = true;
 
@@ -192,13 +197,12 @@ export const Easy = ({
     }
 
     // console.log('easy _verified.length / length,', _verified.length, assignment.length)
-    // console.log('easy newIndex / length', newIndex, assignment.length)
     savedGradeCopy[nodeKey]['easy'] = {
       verifiedAnswers: _verified,
       attemptedAnswers: _attemptedAnswers,
       attemptsCount: attempts,
       accuracy: _verified.length / attempts,
-      percentComplete: newIndex / assignment.length,
+      percentComplete: _verified.length / assignment.length,
       complete: thisExerciseComplete
     };
 
@@ -212,7 +216,7 @@ export const Easy = ({
     setFilterEasy(_verified);
     setVerifiedAnswers(_verified);
     setStartPositionEasy(_verified.length);
-    setCompletedEasy((newIndex / assignment.length) * 100);
+    setCompletedEasy((_verified.length / assignment.length) * 100);
 
     await saveGrade(savedGradeCopy);
 
@@ -222,16 +226,16 @@ export const Easy = ({
     }
   }
 
-  async function sendFail(phrase) {
+  async function sendFail(draggedWordID, targetWordID) {
 
     let _attemptedAnswers = JSON.parse(JSON.stringify(loadAttemptedAnswers));
 
-    if (typeof _attemptedAnswers[correctId] === 'undefined') {
-      _attemptedAnswers[correctId] = [];
+    if (typeof _attemptedAnswers[targetWordID] === 'undefined') {
+      _attemptedAnswers[targetWordID] = [];
     }
 
 
-    _attemptedAnswers[correctId].push(phrase);
+    _attemptedAnswers[targetWordID].push(draggedWordID);
 
     // for each array in attempted answers sum the lengths
     let attemptedAnswersLength = 0;

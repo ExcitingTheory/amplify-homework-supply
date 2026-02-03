@@ -10,16 +10,18 @@ export const DragBox = ({ answer, wordID }) => {
 
   const [{ isDragging }, drag] = useDrag({
     type: 'box',
-    item: { answer },
+    item: { answer, wordID },
     end: async (item, monitor) => {
       const dropResult = monitor.getDropResult();
       if (item && dropResult) {
-        if (item.answer === dropResult.correctAnswer.phrase) {
-          console.log('dropResult.wordID', wordID);
+        // Compare by word ID instead of phrase
+        if (item.wordID === dropResult.targetWordID) {
+          console.log('Correct match! Dragged:', item.wordID, 'Target:', dropResult.targetWordID);
           dropResult.correctAnswer.sendPass();
-          await dropResult.correctAnswer.progressAssignment(wordID);
+          await dropResult.correctAnswer.progressAssignment(item.wordID, dropResult.targetWordID);
         } else {
-          await dropResult.correctAnswer.sendFail(wordID);
+          console.log('Incorrect match! Dragged:', item.wordID, 'Target:', dropResult.targetWordID);
+          await dropResult.correctAnswer.sendFail(item.wordID, dropResult.targetWordID);
         }
       }
     },

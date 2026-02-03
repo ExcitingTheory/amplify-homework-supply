@@ -75,7 +75,7 @@ export const Learn = ({
       const answer = word?.phrase
       if (answer) {
         vocabList.push(<DragBox answer={answer} wordID={word.id} key={word.id} />)
-        if (filterLearn.indexOf(word.id) === -1) {
+        if (!filterLearn.includes(word.id)) {
           vocabListLearn.push(<DragBox answer={answer} wordID={word.id} key={word.id} />)
           assignmentLearn.push(word)
         }
@@ -115,8 +115,14 @@ export const Learn = ({
 
   const correctId = _correctAnswer?.id;
 
-  async function progressAssignment(wordID) {
-    const newIndex = currentQuestion + 1;
+  async function progressAssignment(draggedWordID, targetWordID) {
+    // Verify the match is correct
+    if (draggedWordID !== targetWordID) {
+      console.error('Mismatch in progressAssignment:', draggedWordID, targetWordID);
+      return;
+    }
+    
+    const newIndex = verifiedAnswers.length + 1;
     let newTab = tabIndex;
     let allTabsComplete = false;
     let thisExerciseComplete = false;
@@ -124,19 +130,19 @@ export const Learn = ({
     // Use the current state values
     // Track which answer was dropped on which target
     let _droppedPairs = { ...droppedPairs };
-    _droppedPairs[correctId] = wordID; // Store the dropped wordID for this target
+    _droppedPairs[targetWordID] = draggedWordID; // Store the dropped wordID for this target
 
     // Add correctly matched wordID to verified list
-    const _verified = [...new Set([...verifiedAnswers, correctId])];
+    const _verified = [...new Set([...verifiedAnswers, targetWordID])];
 
     // Add to attempted answers
     let _attemptedAnswers = JSON.parse(JSON.stringify(loadAttemptedAnswers));
 
-    if (typeof _attemptedAnswers[correctId] === 'undefined') {
-      _attemptedAnswers[correctId] = [];
+    if (typeof _attemptedAnswers[targetWordID] === 'undefined') {
+      _attemptedAnswers[targetWordID] = [];
     }
 
-    _attemptedAnswers[correctId].push(wordID);
+    _attemptedAnswers[targetWordID].push(draggedWordID);
     const attempts = attemptsCount + 1;
     
     if (_verified.length === easyAssignmentLength) {
@@ -199,15 +205,15 @@ export const Learn = ({
     }
   }
 
-  async function sendFail(phrase) {
+  async function sendFail(draggedWordID, targetWordID) {
     let _attemptedAnswers = JSON.parse(JSON.stringify(loadAttemptedAnswers));
 
-    if (typeof _attemptedAnswers[correctId] === 'undefined') {
-      _attemptedAnswers[correctId] = [];
+    if (typeof _attemptedAnswers[targetWordID] === 'undefined') {
+      _attemptedAnswers[targetWordID] = [];
     }
 
 
-    _attemptedAnswers[correctId].push(phrase);
+    _attemptedAnswers[targetWordID].push(draggedWordID);
     const attempts = attemptsCount + 1;
 
     // Handle grade.data - it might be a string or object

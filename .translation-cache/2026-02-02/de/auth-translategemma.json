@@ -1,0 +1,11 @@
+{
+  "sign_in": "Anmelden",
+  "sign_out": "Abmelden",
+  "sign_up": "Anmelden",
+  "username": "Benutzername",
+  "password": "Passwort",
+  "email": "E-Mail",
+  "forgot_password": "Passwort vergessen?",
+  "reset_password": "Passwort zurücksetzen",
+  "confirm_password": "Passwort bestätigen"
+}

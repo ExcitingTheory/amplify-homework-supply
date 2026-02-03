@@ -1,1 +1,89 @@
-{}
+{
+  "answerComponent": {
+    "audioNotAvailable": "{{text}} (audio non disponible)",
+    "audioNotAvailableParens": "(audio non disponible)",
+    "errorMessages": {
+      "noAnswer": "Veuillez fournir une réponse",
+      "recordingFailed": "Échec de l'enregistrement"
+    },
+    "feedback": {
+      "correct": "Correct !",
+      "incorrect": "Réessayer"
+    },
+    "inputMethods": {
+      "audio": "Audio",
+      "text": "Texte",
+      "writing": "Écriture"
+    },
+    "noDictionaryAvailable": "Aucun dictionnaire disponible",
+    "submit": "Soumettre"
+  },
+  "toolBarRoPlugin": {
+    "fallbackText": "Format",
+    "noDescription": "Aucune description",
+    "untitledUnit": "Unité sans titre"
+  },
+  "verticalTabsRo": {
+    "aiAssistant": "Assistant IA",
+    "previousAttempts": "Tentatives précédentes",
+    "settings": "Paramètres"
+  },
+  "unitCompletedPlugin": {
+    "completionMessage": "Unité terminée !",
+    "continueButton": "Continuer",
+    "sectionHeading": "Prochaines étapes"
+  },
+  "quizComponent": {
+    "gradeDisplay": "Note : {{score}} %"
+  },
+  "meaningAssociationExercise": {
+    "layoutDirection": "rangée"
+  },
+  "customAnswerComponent": {
+    "answerPlaceholder": "Espace réservé pour la réponse",
+    "answerQuestions": "Répondre aux questions",
+    "audio": "Audio",
+    "audioQuestion": "Question audio",
+    "completedQuestion": "Question terminée",
+    "errorOccurred": "Une erreur s'est produite",
+    "loading": "Chargement",
+    "promptNotAvailable": "Invite non disponible",
+    "question": "Question",
+    "submit": "Soumettre",
+    "text": "Texte",
+    "writing": "Écriture",
+    "yourAnswer": "Votre réponse"
+  },
+  "gradeHistory": {
+    "title": "Historique des notes",
+    "noAttempts": "Aucune tentative précédente",
+    "completeFirstAttempt": "Complétez ce devoir pour voir votre progression ici.",
+    "attempts": "tentatives",
+    "trend": {
+      "up": "Amélioration",
+      "down": "Révision nécessaire",
+      "flat": "Stable"
+    },
+    "bestScore": "Meilleur Score",
+    "averageScore": "Score moyen",
+    "recentAttempts": "Tentatives récentes",
+    "complete": "terminer",
+    "best": "Meilleur"
+  },
+  "workbookSettings": {
+    "title": "Paramètres",
+    "displayPreferences": "Préférences d'affichage",
+    "highContrastMode": "Mode Contraste Élevé",
+    "highContrastModeDescription": "Augmente le contraste des couleurs pour une meilleure visibilité",
+    "reducedMotion": "Mouvement réduit",
+    "reducedMotionDescription": "Minimise les animations et les transitions",
+    "audioPreferences": "Préférences audio",
+    "autoPlayAudio": "Lecture audio automatique",
+    "autoPlayAudioDescription": "Lire automatiquement l'audio lorsqu'il est disponible",
+    "showWaveforms": "Afficher les formes d'onde audio",
+    "showWaveformsDescription": "Afficher les formes d'onde visuelles pour le contenu audio",
+    "feedbackPreferences": "Préférences de commentaires",
+    "immediateFeedback": "Retour immédiat",
+    "immediateFeedbackDescription": "Afficher les commentaires corrects/incorrects immédiatement"
+  }
+}

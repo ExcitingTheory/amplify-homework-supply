@@ -3,12 +3,13 @@
  * This allows existing t() calls to work with Translation Mode without code changes
  */
 
-import { useContext, useCallback, useMemo, useRef } from 'react';
+import React, { useContext, useCallback, useMemo, useRef } from 'react';
 import { useTranslation as useI18nextTranslation } from 'react-i18next';
 import type { UseTranslationResponse } from 'react-i18next';
 import { TranslationCaptureContext } from '../contexts/TranslationCaptureContext';
 import { TranslationModeContext } from '../contexts/TranslationModeContext';
 import { loadTranslation } from '../utils/translationLoader';
+import { TranslationOverlay } from '../components/TranslationOverlay';
 
 /**
  * Enhanced useTranslation hook that captures and wraps t() calls for Translation Mode
@@ -33,12 +34,22 @@ export function useTranslationWithCapture(
       // Get the original translation
       const value = original.t(key, options);
 
+      console.log('[useTranslationWithCapture] t() called:', {
+        key,
+        namespace: primaryNamespace,
+        mode,
+        value
+      });
+
       // Capture this translation for Translation Mode (only once per key)
       if (mode !== 'off') {
         const captureKey = `${primaryNamespace}:${key}`;
         
+        console.log('[useTranslationWithCapture] Mode is active, checking if already captured:', captureKey);
+        
         // Only capture if we haven't captured this key yet
         if (!capturedKeys.current.has(captureKey)) {
+          console.log('[useTranslationWithCapture] First time seeing this key, capturing...');
           capturedKeys.current.add(captureKey);
           
           // Load metadata asynchronously (non-blocking)
@@ -54,6 +65,7 @@ export function useTranslationWithCapture(
               alternativeTerms: fullData.alternativeTerms,
             } : {};
 
+            console.log('[useTranslationWithCapture] Calling captureTranslation for:', key);
             captureTranslation({
               key,
               namespace: primaryNamespace,
@@ -62,27 +74,40 @@ export function useTranslationWithCapture(
               ...metadata,
             });
           });
+        } else {
+          console.log('[useTranslationWithCapture] Already captured:', captureKey);
         }
 
         // Check if we have a custom translation in context (user edited it)
         // Note: getTranslation is now stable and won't cause re-renders
         const customTranslation = getTranslation(key, primaryNamespace);
-        if (customTranslation?.value && displayLanguage === 'en') {
-          return customTranslation.value;
+        const displayValue = customTranslation?.value && displayLanguage === 'en' 
+          ? customTranslation.value 
+          : value;
+
+        // In highlight or edit mode, wrap the text in TranslationOverlay for visual feedback
+        if (mode === 'highlight' || mode === 'edit') {
+          console.log('[useTranslationWithCapture] Wrapping in TranslationOverlay:', key);
+          return React.createElement(
+            TranslationOverlay,
+            {
+              tKey: key,
+              namespace: primaryNamespace,
+              value: displayValue,
+              storyName,
+            },
+            displayValue
+          );
         }
 
-        // For other languages, load from translation files
-        if (displayLanguage !== 'en' && displayLanguage !== original.i18n.language) {
-          // This is handled by react-i18next, but we could intercept here
-          // if we want to show in-progress translations
-        }
+        return displayValue;
       }
 
       return value;
     },
     // Removed captureTranslation and getTranslation from deps - both are stable
     // Only depend on values that should trigger re-creation of enhancedT
-    [original.t, mode, primaryNamespace, displayLanguage, storyName]
+    [original.t, mode, primaryNamespace, displayLanguage, storyName, getTranslation, captureTranslation]
   );
 
   // Return enhanced version of UseTranslationResponse

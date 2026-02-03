@@ -1,16 +1,16 @@
 import React, { useContext, useEffect } from 'react';
 import type { Decorator } from '@storybook/react';
-import { addons } from 'storybook/preview-api';
-import { TranslationModeProvider, TranslationModeContext } from './contexts/TranslationModeContext';
+import { addons, useGlobals } from 'storybook/preview-api';
+import { TranslationModeProvider, TranslationModeContext, TranslationModeType } from './contexts/TranslationModeContext';
 import { TranslationCaptureProvider, TranslationCaptureContext } from './contexts/TranslationCaptureContext';
-import { useGlobals } from 'storybook/preview-api';
 
 /**
  * Decorator that wraps stories with translation mode functionality
  */
 export const withTranslationMode: Decorator = (Story, context) => {
+  // Call useGlobals at the decorator level (required by Storybook)
   const [globals] = useGlobals();
-  const translationMode = globals?.translationMode || 'off';
+  const translationMode = (globals?.translationMode || 'off') as TranslationModeType;
   const translationLanguage = globals?.translationLanguage || 'en';
   
   // Get story name from context
@@ -32,7 +32,7 @@ export const withTranslationMode: Decorator = (Story, context) => {
 };
 
 interface TranslationModeControllerProps {
-  mode: string;
+  mode: TranslationModeType;
   displayLanguage: string;
   storyName: string;
   children: React.ReactNode;
@@ -43,7 +43,8 @@ const TranslationModeController: React.FC<TranslationModeControllerProps> = ({ m
   const { translations, updateTranslation } = useContext(TranslationCaptureContext);
 
   useEffect(() => {
-    setMode(mode as any);
+    console.log(`[TranslationModeController] Setting mode to: ${mode}`);
+    setMode(mode);
   }, [mode, setMode]);
 
   useEffect(() => {

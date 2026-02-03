@@ -109,9 +109,17 @@ export function isShortcut(
   
   return (
     event.code === key &&
+    // Required modifiers must be pressed
     (!mod || modPressed) &&
     (!ctrl || ctrlPressed) &&
     (!shift || event.shiftKey) &&
-    (!alt || event.altKey)
+    (!alt || event.altKey) &&
+    // Unwanted modifiers must NOT be pressed (exclusivity check)
+    (shift || !event.shiftKey) &&
+    (alt || !event.altKey) &&
+    // If ctrl required (not mod), metaKey should be absent
+    (!ctrl || !event.metaKey) &&
+    // If neither mod nor ctrl required, both should be absent
+    (mod || ctrl || !modPressed)
   );
 }

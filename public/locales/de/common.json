@@ -1,69 +1,87 @@
 {
-  "app": {
-    "name": "Hausaufgaben-Bereitstellung",
-    "tagline": "Japanisch-Lernplattform"
-  },
   "actions": {
-    "save": "Speichern",
-    "cancel": "Abbrechen",
-    "delete": "Löschen",
-    "edit": "Bearbeiten",
-    "submit": "Absenden",
-    "close": "Schließen",
-    "create": "Erstellen",
-    "upload": "Hochladen",
-    "download": "Herunterladen",
-    "share": "Teilen",
-    "copy": "Kopieren",
-    "send": "Senden",
     "add": "Hinzufügen",
-    "remove": "Entfernen",
-    "update": "Aktualisieren",
-    "confirm": "Bestätigen",
-    "clear": "Löschen",
-    "reset": "Zurücksetzen",
-    "retry": "Erneut versuchen",
     "back": "Zurück",
+    "cancel": "Abbrechen",
+    "clear": "Löschen",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "continue": "Weiter",
+    "copy": "Kopieren",
+    "create": "Erstellen",
+    "delete": "Löschen",
+    "download": "Herunterladen",
+    "edit": "Bearbeiten",
+    "finish": "Fertigstellen",
     "next": "Weiter",
-    "finish": "Abschließen",
-    "continue": "Fortfahren"
+    "remove": "Entfernen",
+    "reset": "Zurücksetzen",
+    "retry": "Wiederholen",
+    "save": "Speichern",
+    "send": "Senden",
+    "share": "Teilen",
+    "submit": "Absenden",
+    "update": "Aktualisieren",
+    "upload": "Hochladen"
   },
-  "navigation": {
-    "home": "Startseite",
-    "units": "Einheiten",
-    "sections": "Abschnitte",
-    "grades": "Noten",
-    "profile": "Profil",
-    "workbook": "Arbeitsbuch"
-  },
-  "status": {
-    "loading": "Lädt...",
-    "saving": "Speichern...",
-    "success": "Erfolg",
-    "error": "Fehler",
-    "processing": "Wird verarbeitet...",
-    "uploading": "Wird hochgeladen...",
-    "downloading": "Wird heruntergeladen...",
-    "complete": "Abgeschlossen",
-    "incomplete": "Unvollständig",
-    "pending": "Ausstehend"
-  },
-  "time": {
-    "created": "Erstellt",
-    "updated": "Aktualisiert",
-    "due": "Fällig",
-    "completed": "Abgeschlossen"
+  "app": {
+    "name": "Hausaufgabenmaterial",
+    "tagline": "Japanische Sprachlernplattform"
   },
   "common": {
-    "yes": "Ja",
+    "about": "Über",
+    "filter": "Filter",
+    "help": "Hilfe",
     "no": "Nein",
     "ok": "OK",
     "search": "Suchen",
-    "filter": "Filtern",
+    "settings": "Einstellungen",
     "sort": "Sortieren",
     "view": "Ansehen",
-    "settings": "Einstellungen",
+    "yes": "Ja"
+  },
+  "mainToolbar": {
+    "addToSection": {
+      "add": "Hinzufügen",
+      "codeLabel": "Code-Label",
+      "description": "Beschreibung",
+      "title": "Titel"
+    },
     "help": "Hilfe",
-    "about": "Über"
+    "settings": {
+      "darkMode": "Dunkelmodus",
+      "disableNotifications": "Benachrichtigungen deaktivieren",
+      "experimentalFeatures": "Experimentelle Funktionen",
+      "studentMode": "Schülermodus"
+    }
+  },
+  "navigation": {
+    "grades": "Noten",
+    "home": "Startseite",
+    "profile": "Profil",
+    "sections": "Bereiche",
+    "units": "Einheiten",
+    "workbook": "Arbeitsbuch"
+  },
+  "quizComponent": {
+    "grade": "Note: {{grade}}"
+  },
+  "status": {
+    "complete": "Abschließen",
+    "downloading": "Wird heruntergeladen...",
+    "error": "Fehler",
+    "incomplete": "Unvollständig",
+    "loading": "Lädt...",
+    "pending": "Ausstehend",
+    "processing": "Verarbeitung...",
+    "saving": "Speichern...",
+    "success": "Erfolg",
+    "uploading": "Hochladen..."
+  },
+  "time": {
+    "completed": "Abgeschlossen",
+    "created": "Erstellt",
+    "due": "Fällig",
+    "updated": "Aktualisiert"
   }
 }

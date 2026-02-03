@@ -1,1 +1,145 @@
-{}
+{
+  "grades": {
+    "title": "Calificaciones",
+    "sections": "Secciones",
+    "mySections": "Mis secciones",
+    "studentHeader": "Estudiante",
+    "assignmentHeader": "Tarea",
+    "gradeHeader": "Calificación"
+  },
+  "index": {
+    "title": "Suministro de Tareas",
+    "assignments": "Tareas",
+    "viewWorkbook": "Ver Cuaderno de Trabajo",
+    "completedAssignments": "Tareas Completadas",
+    "myAssignments": "Mis tareas",
+    "editUnit": "Editar Unidad",
+    "noSectionsYet": "Aún no hay secciones",
+    "joinSection": "¿Unirse a la sección?",
+    "createNewSection": "Crear nueva sección",
+    "mySections": "Mis secciones",
+    "untitledSection": "Sección sin título",
+    "noDescription": "Sin descripción",
+    "viewSection": "Ver sección",
+    "sections": "Secciones"
+  },
+  "profile": {
+    "title": "Mi perfil",
+    "heading": "Mi perfil",
+    "description": "Ver y actualizar la información de tu perfil",
+    "userId": "ID de Usuario",
+    "identityId": "ID de Identidad",
+    "cancel": "Cancelar",
+    "updateProfile": "Actualizar perfil",
+    "confirmEmail": {
+      "title": "Confirma tu correo electrónico",
+      "message": "Por favor, revisa tu correo electrónico e ingresa el código de confirmación para verificar tu dirección de correo electrónico.",
+      "button": "Confirmar Correo Electrónico"
+    },
+    "changePassword": {
+      "heading": "Cambiar contraseña",
+      "description": "Actualiza la contraseña de tu cuenta por seguridad",
+      "button": "Cambiar contraseña"
+    },
+    "advanced": {
+      "heading": "Avanzado",
+      "description": "Administrar configuraciones avanzadas y borrar la caché de datos local",
+      "clearCache": "Borrar caché local",
+      "clearCacheDialog": {
+        "title": "¿Borrar caché de datos local?",
+        "message": "Esto borrará todos los datos almacenados localmente incluyendo las tareas sin conexión y el contenido sincronizado. Necesitarás recargar los datos desde el servidor.",
+        "cancel": "Cancelar",
+        "confirm": "Borrar caché"
+      }
+    }
+  },
+  "sections": {
+    "title": "Secciones",
+    "createNew": "Crear nuevo",
+    "noSectionsYet": "Aún no hay secciones",
+    "createNewSection": "Crear nueva sección",
+    "untitledSection": "Sección sin título",
+    "viewSection": "Ver sección",
+    "loading": "Cargando...",
+    "newSection": {
+      "title": "Nueva Sección",
+      "description": "Crea una nueva Sección ingresando la siguiente información",
+      "nameLabel": "Nombre",
+      "descriptionLabel": "Descripción",
+      "cancel": "Cancelar",
+      "create": "Crear"
+    }
+  },
+  "sectionDetail": {
+    "noFeaturedImage": "No se ha establecido imagen destacada",
+    "dragAndDropPrompt": "Arrastra y suelta una imagen aquí para establecerla como imagen destacada.",
+    "uploadingImage": "Subiendo imagen",
+    "uploadImagePrompt": "Subir imagen",
+    "uploadImageInvalidFile": "Por favor, carga un archivo de imagen con una extensión válida.",
+    "joinCode": "Código de Acceso:",
+    "studentView": "Vista del Estudiante",
+    "instructorView": "Vista del instructor",
+    "switchToInstructorView": "Cambiar a vista de instructor",
+    "previewStudentView": "Vista Previa del Estudiante",
+    "students": "Estudiantes",
+    "studentHeader": "Estudiante",
+    "emailHeader": "Email",
+    "actionsHeader": "Acciones",
+    "gradebook": "Libro de calificaciones",
+    "showingAssignments": "(Mostrando {{visible}} de {{total}} tareas)",
+    "showFutureAssignments": "Mostrar Futuro",
+    "showDraftAssignments": "Mostrar borradores",
+    "applyCurve": "Aplicar Curva",
+    "curveMethod": "Método de Curva",
+    "scaleToTopMethod": "Escalar a Puntuación Máxima (100%)",
+    "linearAdjustmentMethod": "Ajuste Lineal (75% promedio)",
+    "curveDebugInfo": "Depuración de Curva:",
+    "selectAssignmentsToCurve": "Seleccionar tareas para ajustar",
+    "selectAll": "Seleccionar todo",
+    "clearAll": "Borrar Todo",
+    "assignmentHeader": "Tarea",
+    "gradeHeader": "Calificación",
+    "totalAverage": "Promedio total",
+    "learnerHeader": "Estudiante",
+    "totalCompletion": "Total (Finalización)",
+    "editTooltip": "Editar",
+    "assignments": "Tareas",
+    "viewWorkbook": "Ver Cuaderno de Trabajo",
+    "deleteSection": "Eliminar sección",
+    "deleteSectionConfirm": "¿Estás seguro de que quieres eliminar esta sección?",
+    "loading": "Cargando...",
+    "overrideGrade": {
+      "title": "Anular Calificación",
+      "student": "Estudiante:",
+      "assignment": "Tarea:",
+      "currentGrade": "Calificación actual:",
+      "noGrade": "Sin calificación",
+      "prompt": "Ingrese nueva calificación (0-100):",
+      "label": "Calificación (%)",
+      "invalidScore": "Por favor, ingrese una puntuación válida entre 0 y 100",
+      "saveFailed": "No se pudo guardar la calificación. Por favor, inténtalo de nuevo.",
+      "cancel": "Cancelar",
+      "save": "Guardar Calificación"
+    }
+  },
+  "units": {
+    "title": "Unidades",
+    "createNew": "Crear nuevo",
+    "noPublishedUnits": "Aún no hay unidades publicadas",
+    "createNewUnit": "Crear nueva unidad",
+    "publishedUnits": "Unidades Publicadas",
+    "untitledUnit": "Unidad sin título",
+    "viewWorkbook": "Ver Cuaderno de Trabajo",
+    "editUnit": "Editar Unidad",
+    "myDrafts": "Mis borradores",
+    "archivedUnits": "Unidades archivadas"
+  },
+  "unitDetail": {
+    "loading": "Cargando…"
+  },
+  "workbook": {
+    "timerInstructions": "Este es un ejercicio con tiempo límite, presiona iniciar para comenzar el cronómetro y responder las preguntas.",
+    "start": "Iniciar",
+    "loading": "Cargando…"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "model": "claude-sonnet-4-20250514",
+  "provider": "anthropic",
+  "timestamp": "2026-02-02T20:12:02.914Z",
+  "requestId": "msg_01JGN8yMizaW9rASPK12Ck6M",
+  "tokensUsed": 7676,
+  "fingerprint": "11fd47a1138428b081cb70ce3b004e4126413257fd67bfd201415a1b6bb86057"
+}

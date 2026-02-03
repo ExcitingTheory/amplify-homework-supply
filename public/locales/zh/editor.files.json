@@ -1,0 +1,143 @@
+{
+  "fileManager2": {
+    "contextMenu": {
+      "deleteConfirmMessage": "删除{{count}}个选中的文件？",
+      "deleteSelected": "删除所选项 ({{count}})",
+      "deselectAll": "取消全选",
+      "reAnalyzeSelected": "重新分析所选项 ({{count}})"
+    },
+    "expandedContent": {
+      "descriptionLabel": "描述：",
+      "extractedContentHeading": "提取内容",
+      "noConceptsExtracted": "未提取概念",
+      "noContentAvailable": "无可提取内容",
+      "noObjectivesExtracted": "未提取目标",
+      "noQuestionsExtracted": "未提取问题",
+      "noSummariesExtracted": "未提取摘要",
+      "noVocabularyExtracted": "未提取词汇",
+      "reviewQuestionsMessage": "审核并从文档中导入问题",
+      "reviewVocabularyMessage": "检查并导入文档中的词汇",
+      "transcriptionLabel": "转录："
+    },
+    "fileDetails": {
+      "deleteTooltip": "删除",
+      "downloadTooltip": "下载",
+      "insertTooltip": "插入编辑器",
+      "noWaveformAvailable": "无可用波形",
+      "reAnalyzeTooltip": "重新分析",
+      "videoNotSupported": "您的浏览器不支持视频标签。"
+    },
+    "generators": {
+      "audioPromptPlaceholder": "要转换为音频文件的文本。",
+      "errorGeneratingAudio": "生成音频文件出错",
+      "errorGeneratingImage": "生成图像文件时出错",
+      "generatingAudio": "正在生成音频文件...",
+      "generatingImage": "正在生成图像文件...",
+      "imagePromptPlaceholder": "要转换为图像文件的文本。",
+      "successfullyGeneratedAudio": "音频文件生成成功",
+      "successfullyGeneratedImage": "成功生成图像文件"
+    },
+    "mainView": {
+      "noFilesMessage": "暂无文件。请上传文件以开始使用。"
+    },
+    "metadataEditor": {
+      "cancelButton": "取消",
+      "createdLabel": "已创建",
+      "descriptionLabel": "描述",
+      "heading": "文件元数据",
+      "modelLabel": "模型",
+      "nameLabel": "姓名",
+      "pathLabel": "路径",
+      "promptLabel": "提示词（用于AI生成文件）",
+      "protectionLevelLabel": "保护级别",
+      "saveButton": "保存",
+      "sizeLabel": "大小",
+      "typeLabel": "类型",
+      "unknown": "未知",
+      "variantLabel": "变体"
+    },
+    "selectedFileDetails": {
+      "emptyState": "选择文件以查看详细信息和元数据"
+    },
+    "toolbar": {
+      "actionsTooltip": "操作",
+      "searchPlaceholder": "搜索文件...",
+      "selectAllTooltip": "全选",
+      "uploadTooltip": "上传文件"
+    }
+  },
+  "fileMetadataComponent": {
+    "basicInfo": "基本信息",
+    "cancel": "取消",
+    "collapse": "收起",
+    "concepts": "概念",
+    "conceptsCount": "概念 ({{count}})",
+    "confirm": "确认",
+    "created": "创建时间：",
+    "deleteConfirmation": "删除文件：\"{{fileName}}\"？",
+    "deleteFile": "删除文件",
+    "expand": "展开",
+    "fileInfo": "文件信息",
+    "filename": "文件名：",
+    "noMetadataAvailable": "此文件没有可用的元数据。",
+    "noParsedContentAvailable": "此文件没有可解析的内容。",
+    "objectives": "目标",
+    "objectivesCount": "目标 ({{count}})",
+    "parsedContent": "解析内容",
+    "path": "路径：",
+    "protectionLevel": "防护等级：",
+    "questions": "问题",
+    "questionsCount": "问题 ({{count}})",
+    "rawMetadata": "原始元数据",
+    "searchPlaceholder": "搜索文件内容...",
+    "summaries": "摘要",
+    "summariesCount": "摘要 ({{count}})",
+    "type": "类型",
+    "unknown": "未知",
+    "unknownSize": "未知大小",
+    "unset": "未设置",
+    "vocabulary": "词汇",
+    "vocabularyCount": "词汇 ({{count}})"
+  },
+  "documentUploader": {
+    "browseFiles": "浏览文件",
+    "dragDropPrompt": "拖拽文档至此处",
+    "errorMessages": {
+      "noSupportedFiles": "未找到支持的文档。请上传PDF、Word、文本或Excel文件。",
+      "skippedFiles": "部分文件已跳过（不支持的文件类型）",
+      "uploadFailed": "上传{{fileName}}失败：{{error}}"
+    },
+    "extractionTypes": {
+      "dictionary": "字典",
+      "question": "问题",
+      "questions": "问题",
+      "vocabulary": "词汇"
+    },
+    "howItWorks": {
+      "step1": "1. 上传您的文档（PDF、Word、文本或Excel文件）",
+      "step2": "2. AI将分析内容并提取{{extractionType}}",
+      "step3": "3. 在\"建议\"选项卡中审核并批准建议",
+      "step4": "4. 将选定的项目导入到您的{{target}}",
+      "title": "工作原理："
+    },
+    "recentUploads": "最近上传",
+    "statusLabels": {
+      "complete": "完成",
+      "failed": "失败",
+      "processing": "处理中..."
+    },
+    "supportedFormats": "支持：PDF、Word (.doc, .docx)、文本 (.txt)、Excel (.xls, .xlsx, .csv)",
+    "title": "上传文档进行{{extractionType}}提取",
+    "uploadingProgress": "上传中... {{progress}}%"
+  },
+  "fileManager": {
+    "close": "关闭",
+    "create": "创建",
+    "draftChanges": "草稿更改",
+    "errorRendering": "渲染文件管理器时出错：{{message}}",
+    "revert": "恢复",
+    "save": "保存",
+    "textToImagePreview": "文本转图像预览",
+    "textToSpeechPreview": "文本转语音预览"
+  }
+}

@@ -1,6 +1,6 @@
 # Developer Onboarding Guide
 
-Welcome to the Homework Supply project! This guide will take you from zero knowledge to being a functional contributor to our Japanese language learning platform.
+Welcome to the Homework Supply project! This guide will take you from zero knowledge to being a functional contributor to our elearning platform.
 
 ## 📋 Table of Contents
 

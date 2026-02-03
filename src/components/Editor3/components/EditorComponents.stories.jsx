@@ -8,7 +8,7 @@ import AnswerComponent from './AnswerComponent';
 import ImageComponent from './ImageComponent';
 import MediaPlayerComponent from './MediaPlayerComponent';
 import { UnitProvider } from '../../../context/unitContext';
-import { seedMockUnit, seedMockFiles } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit, seedMockFiles } from '../../../../.storybook/__mocks__/aws-amplify-data';
 import { ImageNode } from './ImageNode';
 import LanguageEditorTheme from './LanguageEditorTheme';
 import { DemoBanner } from '../../../../.storybook/components/DemoBanner';

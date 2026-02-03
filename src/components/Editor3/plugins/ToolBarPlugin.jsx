@@ -2071,6 +2071,16 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
             (payload) => {
                 const event = payload;
                 
+                // Prevent browser defaults for Ctrl+Shift combinations EARLY
+                // This must happen before context checks to prevent browser from handling these events
+                if (event.ctrlKey && event.shiftKey && !event.metaKey && !event.altKey) {
+                    // Check if it's one of our handled Ctrl+Shift shortcuts
+                    const handledKeys = ['KeyX', 'Digit0', 'Digit1', 'Digit2', 'Digit3', 'KeyC', 'Digit7', 'Digit8', 'KeyL', 'KeyE', 'KeyR', 'KeyJ'];
+                    if (handledKeys.includes(event.code)) {
+                        event.preventDefault();
+                    }
+                }
+                
                 // Check if we're in a special context that should handle its own shortcuts
                 const selection = activeEditor.getEditorState().read(() => $getSelection());
                 
@@ -2110,15 +2120,15 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                 }
                 
                 // Strikethrough: Ctrl+Shift+X (Ctrl-only to avoid conflicts)
+                // preventDefault called early above
                 if (isShortcut(event, 'KeyX', { ctrl: true, shift: true })) {
-                    event.preventDefault();
                     activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough');
                     return true;
                 }
                 
                 // Clear formatting: Ctrl+Shift+0 (Ctrl-only, avoids conflicts)
+                // preventDefault called early above
                 if (isShortcut(event, 'Digit0', { ctrl: true, shift: true })) {
-                    event.preventDefault();
                     clearFormatting();
                     return true;
                 }
@@ -2126,8 +2136,8 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                 // BLOCK TYPE SHORTCUTS (Ctrl+Shift - works on Mac without conflicts!)
                 
                 // Heading 1: Ctrl+Shift+1 (uses Ctrl key on both Mac and Windows)
+                // preventDefault called early above
                 if (isShortcut(event, 'Digit1', { ctrl: true, shift: true })) {
-                    event.preventDefault();
                     activeEditor.update(() => {
                         if ($isRangeSelection(selection)) {
                             $setBlocksType(selection, () => $createHeadingNode('h1'));
@@ -2137,8 +2147,8 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                 }
                 
                 // Heading 2: Ctrl+Shift+2
+                // preventDefault called early above
                 if (isShortcut(event, 'Digit2', { ctrl: true, shift: true })) {
-                    event.preventDefault();
                     activeEditor.update(() => {
                         if ($isRangeSelection(selection)) {
                             $setBlocksType(selection, () => $createHeadingNode('h2'));
@@ -2148,8 +2158,8 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                 }
                 
                 // Heading 3: Ctrl+Shift+3
+                // preventDefault called early above
                 if (isShortcut(event, 'Digit3', { ctrl: true, shift: true })) {
-                    event.preventDefault();
                     activeEditor.update(() => {
                         if ($isRangeSelection(selection)) {
                             $setBlocksType(selection, () => $createHeadingNode('h3'));
@@ -2170,8 +2180,8 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                 }
                 
                 // Code Block: Ctrl+Shift+C (Ctrl-only on both platforms)
+                // preventDefault called early above
                 if (isShortcut(event, 'KeyC', { ctrl: true, shift: true })) {
-                    event.preventDefault();
                     activeEditor.update(() => {
                         if ($isRangeSelection(selection)) {
                             $setBlocksType(selection, () => $createCodeNode());
@@ -2183,15 +2193,15 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                 // LIST SHORTCUTS (Ctrl+Shift, not Cmd+Shift)
                 
                 // Bullet List: Ctrl+Shift+8
+                // preventDefault called early above
                 if (isShortcut(event, 'Digit8', { ctrl: true, shift: true })) {
-                    event.preventDefault();
                     activeEditor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
                     return true;
                 }
                 
                 // Numbered List: Ctrl+Shift+7
+                // preventDefault called early above
                 if (isShortcut(event, 'Digit7', { ctrl: true, shift: true })) {
-                    event.preventDefault();
                     activeEditor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
                     return true;
                 }
@@ -2199,29 +2209,29 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                 // ALIGNMENT SHORTCUTS (Ctrl+Shift only - avoids Mac conflicts)
                 
                 // Align Left: Ctrl+Shift+L
+                // preventDefault called early above
                 if (isShortcut(event, 'KeyL', { ctrl: true, shift: true })) {
-                    event.preventDefault();
                     activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left');
                     return true;
                 }
                 
                 // Align Center: Ctrl+Shift+E
+                // preventDefault called early above
                 if (isShortcut(event, 'KeyE', { ctrl: true, shift: true })) {
-                    event.preventDefault();
                     activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center');
                     return true;
                 }
                 
                 // Align Right: Ctrl+Shift+R
+                // preventDefault called early above
                 if (isShortcut(event, 'KeyR', { ctrl: true, shift: true })) {
-                    event.preventDefault();
                     activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right');
                     return true;
                 }
                 
                 // Justify: Ctrl+Shift+J
+                // preventDefault called early above
                 if (isShortcut(event, 'KeyJ', { ctrl: true, shift: true})) {
-                    event.preventDefault();
                     activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'justify');
                     return true;
                 }

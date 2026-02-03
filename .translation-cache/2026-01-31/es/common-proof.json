@@ -27,7 +27,7 @@
   "consensus": {
     "source": {
       "app.name": "Homework Supply",
-      "app.tagline": "Japanese Language Learning Platform",
+      "app.tagline": "elearning platform",
       "actions.save": "Save",
       "actions.cancel": "Cancel",
       "actions.delete": "Delete",

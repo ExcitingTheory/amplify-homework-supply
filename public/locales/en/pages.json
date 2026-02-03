@@ -148,7 +148,7 @@
         "context": "This text appears as a navigation element or section heading that allows users to access the assignments area of the eLearning platform. Students see this when navigating to view their homework assignments, while instructors use it to access assignment creation and management features.",
         "component": {
           "location": "src/components/pages",
-          "description": "This component serves as a page-level navigation or section identifier for the assignments functionality. It provides users with clear access to assignment-related features including viewing, creating, and managing homework tasks within the Japanese language learning platform."
+          "description": "This component serves as a page-level navigation or section identifier for the assignments functionality. It provides users with clear access to assignment-related features including viewing, creating, and managing homework tasks within the elearning platform."
         },
         "usage": "Navigation link or section heading that users click to access assignment features",
         "impact": "High - This is essential navigation text that helps users locate and access core platform functionality for homework management",

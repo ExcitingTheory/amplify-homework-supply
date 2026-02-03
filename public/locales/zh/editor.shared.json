@@ -1,0 +1,253 @@
+{
+  "recordingStudio3": {
+    "add": "添加",
+    "addLine": "添加行",
+    "addSpeakerFirst": "请先添加发言人",
+    "description": "描述",
+    "descriptionPlaceholder": "例如：30秒，充满活力，专业",
+    "direction": "方向",
+    "directionPlaceholder": "例如，进入时，上气不接下气",
+    "emotion": "情感",
+    "emotionPlaceholder": "例如，开朗、疲倦",
+    "empty": "（空）",
+    "exportJSON": "导出 JSON",
+    "generateAllMissingTTS": "生成所有缺失的TTS",
+    "generateTTS": "生成TTS",
+    "importFailed": "导入 JSON 文件失败",
+    "importJSON": "导入JSON",
+    "lineNumber": "第{{number}}行 - {{speaker}}",
+    "lockedTrack": "锁定轨道",
+    "micAccessFailed": "无法访问麦克风",
+    "name": "名称",
+    "noMissingAudio": "没有缺失的音频需要生成",
+    "noTextToGenerate": "无文本可生成",
+    "play": "播放",
+    "processing": "正在处理 {{count}} 行...",
+    "record": "录制",
+    "recordingSaveFailed": "保存录音失败",
+    "save": "保存",
+    "script": "脚本",
+    "sectionHeading": "录音室",
+    "selectDialogueFirst": "请先选择一行对话",
+    "speakerNotFound": "找不到讲师",
+    "speakers": "扬声器",
+    "stop": "停止",
+    "takeNumber": "第{{number}}次录制（{{type}}）",
+    "takes": "录音",
+    "text": "文本",
+    "timeline": "时间轴",
+    "ttsGenerationFailed": "生成TTS音频失败",
+    "unknown": "未知",
+    "voice": "语音"
+  },
+  "recordingStudioEnhanced": {
+    "cutButton": "剪切",
+    "highPass": "高通滤波",
+    "highPassTooltip": "去除低频",
+    "lowPass": "低通滤波器",
+    "lowPassTooltip": "去除高频",
+    "normalize": "标准化",
+    "normalizeTooltip": "标准化音频电平",
+    "popClick": "爆音/点击音",
+    "popClickTooltip": "去除爆音和咔哒声",
+    "record": "录制",
+    "stop": "停止",
+    "tracks": "音轨"
+  },
+  "recordingStudio": {
+    "preview": "预览",
+    "sectionHeading": "录音室"
+  },
+  "audioWaveformPlayer": {
+    "noAudioSource": "未提供音频源"
+  },
+  "staticWaveform": {
+    "errorLoading": "加载波形时出错"
+  },
+  "sketchPad": {
+    "cancelSubmission": "取消提交",
+    "hoverToStartDrawing": "悬停开始绘制",
+    "submittingInSeconds": "正在提交绘图作业进行评分，{{countdown}} 秒后完成..."
+  },
+  "unitEmbedding": {
+    "allSectionsComplete": "所有部分已完成！",
+    "cached": "已缓存",
+    "completedCount": "{{completed}}/{{total}} 已完成",
+    "generateEmbeddings": "生成嵌入向量",
+    "generating": "正在生成...",
+    "publishSuccess": "单元已发布并生成嵌入内容！",
+    "publishUnit": "发布单元",
+    "publishing": "发布中...",
+    "wordsEmbedded": "已嵌入 {{count}} 个单词"
+  },
+  "autoEmbedPlugin": {
+    "dismiss": "关闭",
+    "embed": "嵌入",
+    "embedOption": "嵌入{{contentName}}",
+    "embedTitle": "嵌入 {{contentName}}",
+    "youtubeVideo": "YouTube 视频"
+  },
+  "unitEmbeddingComponents": {
+    "errorMessage": "生成嵌入时出错",
+    "generateButton": "生成嵌入向量",
+    "successMessage": "嵌入已生成"
+  },
+  "wordEmbeddingIntegration": {
+    "alertMessage": "将生成嵌入向量",
+    "successConfirmation": "嵌入向量生成成功"
+  },
+  "wordEmbedding": {
+    "embeddingGenerated": "已生成嵌入向量：已处理 {{count}} 个词"
+  },
+  "imagesPlugin": {
+    "altText": "替代文字",
+    "altTextDescriptive": "描述性替代文本",
+    "altTextPlaceholder": "随机 Unsplash 图片",
+    "confirm": "确认",
+    "dropImagesHere": "拖拽图片到此处",
+    "file": "文件",
+    "imageUpload": "图片上传",
+    "imageUrl": "图片网址",
+    "imageUrlPlaceholder": "即 https://source.unsplash.com/random",
+    "insertFromUrl": "从网址插入",
+    "sample": "示例",
+    "upload": "上传图片",
+    "url": "网址"
+  },
+  "tablePlugin": {
+    "chooseLayout": "选择布局",
+    "columns": "列",
+    "columnsPlaceholder": "列数 (1-50)",
+    "insert": "插入",
+    "insertTable": "插入表格",
+    "rows": "行",
+    "rowsPlaceholder": "行数 (1-500)",
+    "table": "表格"
+  },
+  "wordBlockPlugin": {
+    "audioUnavailable": "音频不可用",
+    "loadingAudio": "正在加载音频...",
+    "wordNotFound": "找不到单词：{{wordID}}"
+  },
+  "vocabularyReview": {
+    "alertMessage": "继续之前请复习词汇",
+    "cancel": "取消",
+    "continue": "继续",
+    "summary": "总结"
+  },
+  "questionsReview": {
+    "alertMessage": "提交前请检查所有问题",
+    "cancel": "取消",
+    "filterBy": "筛选条件",
+    "submit": "提交"
+  },
+  "tableComponent": {
+    "cellActionsLabel": "单元格操作标签",
+    "cellActionsTitle": "单元格操作标题",
+    "clearCell": "清除单元格",
+    "deleteColumn": "删除列",
+    "deleteRow": "删除行",
+    "deleteTable": "删除表格",
+    "insertColumn": "插入列",
+    "insertColumnLeft": "向左插入列",
+    "insertColumnRight": "插入右侧列",
+    "insertRow": "插入行",
+    "insertRowAbove": "在上方插入行",
+    "insertRowBelow": "在下方插入行",
+    "makeColumnHeader": "设为列标题",
+    "makeHeader": "制作标题",
+    "makeRowHeader": "设为行标题",
+    "removeColumnHeader": "删除列标题",
+    "removeHeader": "移除标题",
+    "removeRowHeader": "删除行标题",
+    "removeSorting": "取消排序",
+    "sortAscending": "升序排列",
+    "sortDescending": "降序排列"
+  },
+  "mediaPlayerComponent": {
+    "titleHeader": "标题"
+  },
+  "pdfViewerComponent": {
+    "loadingPdf": "正在加载 PDF：{{filename}}",
+    "noPdfToDisplay": "无PDF可显示"
+  },
+  "metadataEditor": {
+    "aiGenerationInfo": "AI 生成信息",
+    "createdLabel": "创建时间：",
+    "fileInfo": "文件信息",
+    "fileMetadataHeading": "文件元数据",
+    "modelLabel": "模型",
+    "notSet": "未设置",
+    "pathLabel": "路径：",
+    "promptLabel": "提示",
+    "protectionLabel": "保护：",
+    "sizeLabel": "大小：",
+    "typeLabel": "类型：",
+    "unknown": "未知",
+    "updatedLabel": "更新时间：",
+    "variantLabel": "变体"
+  },
+  "metadataField": {
+    "unsavedChanges": "未保存的更改"
+  },
+  "floatingLinkEditorPlugin": {
+    "cancelLinkEditing": "取消链接编辑",
+    "closeLinkEditor": "关闭链接编辑器",
+    "confirmLink": "确认链接",
+    "convertToYoutubeEmbed": "转换为YouTube嵌入",
+    "editLink": "编辑链接",
+    "linkUrl": "链接网址",
+    "removeLink": "移除链接",
+    "youtubeEmbed": "YouTube 嵌入"
+  },
+  "imageMaskEditor": {
+    "applyMask": "应用蒙版并重新生成",
+    "brushSize": "画笔大小：{{size}}",
+    "cancel": "取消",
+    "instructions": "<strong>操作说明：</strong>在您想要重新生成的区域上涂抹。使用橡皮擦工具移除遮罩的部分区域。按住Shift键并拖拽可以平移视图。使用缩放按钮查看更多细节。",
+    "save": "保存",
+    "zoomInfo": "缩放：{{level}}% | 按住Shift键平移"
+  },
+  "freeSoloCreateOptionDialog": {
+    "cancel": "取消",
+    "create": "添加",
+    "description": "添加新词汇到词典。",
+    "dialogTitle": "添加新单词",
+    "label": "自由输入对话框"
+  },
+  "insertLayoutDialog": {
+    "cancel": "取消",
+    "insert": "插入"
+  },
+  "placeholders": {
+    "enter_text": "输入文本",
+    "search_words": "搜索词语...",
+    "type_here": "请在此输入..."
+  },
+  "blocks": {
+    "answer": "答案块",
+    "custom_answer": "自定义答案",
+    "meaning_association": "意义关联",
+    "quiz": "测验模块"
+  },
+  "questionBlock": {
+    "status": "状态",
+    "submit": "提交"
+  },
+  "autocompleteNode": {
+    "desktopHint": "（TAB键）",
+    "mobileHint": "(滑动 ⮕)"
+  },
+  "tableOfContents": {
+    "emptyState": "未找到标题。请在您的文档中添加标题以查看目录。",
+    "title": "目录"
+  },
+  "imageResizer": {
+    "addCaption": "添加标题"
+  },
+  "playlistEditor": {
+    "emptyState": "播放列表中没有项目",
+    "menuAttribute": "菜单",
+    "noFilesMessage": "尚未添加任何文件。请使用上方的输入框将文件添加到播放列表中。"
+  }
+}

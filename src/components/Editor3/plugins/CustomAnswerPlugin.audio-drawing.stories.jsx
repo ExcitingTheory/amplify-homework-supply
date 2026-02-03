@@ -12,7 +12,7 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { HeadingNode } from '@lexical/rich-text';
 
 import CustomAnswerPlugin, { CustomAnswerNode } from './CustomAnswerPlugin';
-import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 
 export default {
   title: '🔌 Editor Plugins/Content Blocks/Custom Answer (Audio & Drawing)',

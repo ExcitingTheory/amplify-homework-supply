@@ -18,7 +18,7 @@ import { Button } from '@mui/material';
 
 import AnswerPlugin, { INSERT_ANSWER_BLOCK_COMMAND, AnswerNode } from './AnswerPlugin';
 import LanguageEditorTheme from '../components/LanguageEditorTheme';
-import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-datastore';
+import { seedMockUnit } from '../../../../.storybook/__mocks__/aws-amplify-data';
 
 export default {
   title: '🔌 Editor Plugins/Content Blocks/Answer',

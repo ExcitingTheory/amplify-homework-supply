@@ -49,7 +49,7 @@ export function LinearProgressWithLabel(props) {
 export const AnswerDropLearn = ({ correctAnswer, pronunciation, definition, id, phrase, matchedWord, isMatched }) => {
   const [{ canDrop, isOver }, drop] = useDrop({
     accept: 'box',
-    drop: () => ({ correctAnswer: correctAnswer }),
+    drop: () => ({ correctAnswer: correctAnswer, targetWordID: id }),
     collect: (monitor) => ({
       isOver: monitor.isOver(),
       canDrop: monitor.canDrop(),
@@ -113,7 +113,7 @@ export const AnswerDrop = ({ correctAnswer }) => {
 
   const [{ canDrop, isOver }, drop] = useDrop({
     accept: 'box',
-    drop: () => ({ correctAnswer: correctAnswer }),
+    drop: () => ({ correctAnswer: correctAnswer, targetWordID: correctAnswer.id }),
     collect: (monitor) => ({
       isOver: monitor.isOver(),
       canDrop: monitor.canDrop(),

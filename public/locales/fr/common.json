@@ -1,69 +1,87 @@
 {
-  "app": {
-    "name": "Fournitures de devoirs",
-    "tagline": "Plateforme d'apprentissage de la langue japonaise"
-  },
   "actions": {
-    "save": "Enregistrer",
-    "cancel": "Annuler",
-    "delete": "Supprimer",
-    "edit": "Modifier",
-    "submit": "Soumettre",
-    "close": "Fermer",
-    "create": "Créer",
-    "upload": "Téléverser",
-    "download": "Télécharger",
-    "share": "Partager",
-    "copy": "Copier",
-    "send": "Envoyer",
     "add": "Ajouter",
-    "remove": "Supprimer",
-    "update": "Mettre à jour",
-    "confirm": "Confirmer",
+    "back": "Retour",
+    "cancel": "Annuler",
     "clear": "Effacer",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "continue": "Continuer",
+    "copy": "Copier",
+    "create": "Créer",
+    "delete": "Supprimer",
+    "download": "Télécharger",
+    "edit": "Modifier",
+    "finish": "Terminer",
+    "next": "Suivant",
+    "remove": "Supprimer",
     "reset": "Réinitialiser",
     "retry": "Réessayer",
-    "back": "Retour",
-    "next": "Suivant",
-    "finish": "Terminer",
-    "continue": "Continuer"
+    "save": "Enregistrer",
+    "send": "Envoyer",
+    "share": "Partager",
+    "submit": "Soumettre",
+    "update": "Mettre à jour",
+    "upload": "Téléverser"
   },
-  "navigation": {
-    "home": "Accueil",
-    "units": "Unités",
-    "sections": "Sections",
-    "grades": "Notes",
-    "profile": "Profil",
-    "workbook": "Cahier d'exercices"
-  },
-  "status": {
-    "loading": "Chargement...",
-    "saving": "Enregistrement...",
-    "success": "Succès",
-    "error": "Erreur",
-    "processing": "Traitement en cours...",
-    "uploading": "Téléchargement en cours...",
-    "downloading": "Téléchargement en cours...",
-    "complete": "Terminé",
-    "incomplete": "Incomplet",
-    "pending": "En attente"
-  },
-  "time": {
-    "created": "Créé",
-    "updated": "Mis à jour",
-    "due": "Échéance",
-    "completed": "Terminé"
+  "app": {
+    "name": "Ressources de devoirs",
+    "tagline": "Plateforme d'apprentissage de la langue japonaise"
   },
   "common": {
-    "yes": "Oui",
-    "no": "Non",
-    "ok": "D'accord",
-    "search": "Rechercher",
+    "about": "À propos",
     "filter": "Filtrer",
-    "sort": "Trier",
-    "view": "Afficher",
-    "settings": "Paramètres",
     "help": "Aide",
-    "about": "À propos"
+    "no": "Non",
+    "ok": "OK",
+    "search": "Rechercher",
+    "settings": "Paramètres",
+    "sort": "Trier",
+    "view": "Voir",
+    "yes": "Oui"
+  },
+  "mainToolbar": {
+    "addToSection": {
+      "add": "Ajouter",
+      "codeLabel": "Étiquette de code",
+      "description": "Description",
+      "title": "Titre"
+    },
+    "help": "Aide",
+    "settings": {
+      "darkMode": "Mode sombre",
+      "disableNotifications": "Désactiver les notifications",
+      "experimentalFeatures": "Fonctionnalités expérimentales",
+      "studentMode": "Mode Étudiant"
+    }
+  },
+  "navigation": {
+    "grades": "Notes",
+    "home": "Accueil",
+    "profile": "Profil",
+    "sections": "Sections",
+    "units": "Unités",
+    "workbook": "Cahier d'exercices"
+  },
+  "quizComponent": {
+    "grade": "Note : {{grade}}"
+  },
+  "status": {
+    "complete": "Terminer",
+    "downloading": "Téléchargement...",
+    "error": "Erreur",
+    "incomplete": "Incomplet",
+    "loading": "Chargement...",
+    "pending": "En attente",
+    "processing": "Traitement en cours...",
+    "saving": "Enregistrement...",
+    "success": "Succès",
+    "uploading": "Téléchargement..."
+  },
+  "time": {
+    "completed": "Terminé",
+    "created": "Créé",
+    "due": "À rendre",
+    "updated": "Mis à jour"
   }
 }

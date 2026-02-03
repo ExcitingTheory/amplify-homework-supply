@@ -1,1 +1,253 @@
-{}
+{
+  "recordingStudio3": {
+    "add": "Agregar",
+    "addLine": "Agregar Línea",
+    "addSpeakerFirst": "Por favor, agregue primero un orador",
+    "description": "Descripción",
+    "descriptionPlaceholder": "p. ej., 30s, enérgico, profesional",
+    "direction": "Dirección",
+    "directionPlaceholder": "p. ej., entrando, sin aliento",
+    "emotion": "Emoción",
+    "emotionPlaceholder": "p. ej., alegre, cansado",
+    "empty": "(vacío)",
+    "exportJSON": "Exportar JSON",
+    "generateAllMissingTTS": "Generar Todos los TTS Faltantes",
+    "generateTTS": "Generar TTS",
+    "importFailed": "Error al importar archivo JSON",
+    "importJSON": "Importar JSON",
+    "lineNumber": "Línea #{{number}} - {{speaker}}",
+    "lockedTrack": "Pista bloqueada",
+    "micAccessFailed": "No se pudo acceder al micrófono",
+    "name": "Nombre",
+    "noMissingAudio": "No hay audio faltante para generar",
+    "noTextToGenerate": "No hay texto para generar",
+    "play": "Reproducir",
+    "processing": "Procesando {{count}} líneas...",
+    "record": "Grabar",
+    "recordingSaveFailed": "No se pudo guardar la grabación",
+    "save": "Guardar",
+    "script": "Guion",
+    "sectionHeading": "Estudio de grabación",
+    "selectDialogueFirst": "Por favor, selecciona primero una línea de diálogo",
+    "speakerNotFound": "Altavoz no encontrado",
+    "speakers": "Altavoces",
+    "stop": "Detener",
+    "takeNumber": "Toma {{number}} ({{type}})",
+    "takes": "Toma",
+    "text": "Texto",
+    "timeline": "Cronología",
+    "ttsGenerationFailed": "Error al generar audio TTS",
+    "unknown": "Desconocido",
+    "voice": "Voz"
+  },
+  "recordingStudioEnhanced": {
+    "cutButton": "Cortar",
+    "highPass": "Paso Alto",
+    "highPassTooltip": "Eliminar bajas frecuencias",
+    "lowPass": "Pase Bajo",
+    "lowPassTooltip": "Eliminar altas frecuencias",
+    "normalize": "Normalizar",
+    "normalizeTooltip": "Normalizar niveles de audio",
+    "popClick": "Pop/Clic",
+    "popClickTooltip": "Eliminar chasquidos y clics",
+    "record": "Grabar",
+    "stop": "Detener",
+    "tracks": "Cursos"
+  },
+  "recordingStudio": {
+    "preview": "Vista previa",
+    "sectionHeading": "Estudio de grabación"
+  },
+  "audioWaveformPlayer": {
+    "noAudioSource": "No se proporcionó fuente de audio"
+  },
+  "staticWaveform": {
+    "errorLoading": "Error al cargar la forma de onda"
+  },
+  "sketchPad": {
+    "cancelSubmission": "Cancelar Envío",
+    "hoverToStartDrawing": "Pasa el cursor para empezar a dibujar",
+    "submittingInSeconds": "Enviando dibujo para calificación en {{countdown}} segundos..."
+  },
+  "unitEmbedding": {
+    "allSectionsComplete": "¡Todas las secciones completadas!",
+    "cached": "En caché",
+    "completedCount": "{{completed}}/{{total}} completados",
+    "generateEmbeddings": "Generar Incrustaciones",
+    "generating": "Generando...",
+    "publishSuccess": "¡Unidad publicada con incrustaciones generadas!",
+    "publishUnit": "Publicar Unidad",
+    "publishing": "Publicando...",
+    "wordsEmbedded": "{{count}} palabras incrustadas"
+  },
+  "autoEmbedPlugin": {
+    "dismiss": "Descartar",
+    "embed": "Insertar",
+    "embedOption": "Insertar {{contentName}}",
+    "embedTitle": "Insertar {{contentName}}",
+    "youtubeVideo": "Video de YouTube"
+  },
+  "unitEmbeddingComponents": {
+    "errorMessage": "Error al generar incrustaciones",
+    "generateButton": "Generar incrustaciones",
+    "successMessage": "Embeddings generados"
+  },
+  "wordEmbeddingIntegration": {
+    "alertMessage": "Se generarán incrustaciones",
+    "successConfirmation": "Embeddings generados exitosamente"
+  },
+  "wordEmbedding": {
+    "embeddingGenerated": "Incrustación generada: {{count}} palabras procesadas"
+  },
+  "imagesPlugin": {
+    "altText": "Texto alternativo",
+    "altTextDescriptive": "Texto alternativo descriptivo",
+    "altTextPlaceholder": "Imagen aleatoria de Unsplash",
+    "confirm": "Confirmar",
+    "dropImagesHere": "Arrastra las imágenes aquí",
+    "file": "Archivo",
+    "imageUpload": "Subir Imagen",
+    "imageUrl": "URL de la imagen",
+    "imageUrlPlaceholder": "p. ej. https://source.unsplash.com/random",
+    "insertFromUrl": "Insertar desde URL",
+    "sample": "Muestra",
+    "upload": "Subir imagen",
+    "url": "URL"
+  },
+  "tablePlugin": {
+    "chooseLayout": "Elige un diseño",
+    "columns": "Columnas",
+    "columnsPlaceholder": "# de columnas (1-50)",
+    "insert": "Insertar",
+    "insertTable": "Insertar tabla",
+    "rows": "Filas",
+    "rowsPlaceholder": "# de filas (1-500)",
+    "table": "Tabla"
+  },
+  "wordBlockPlugin": {
+    "audioUnavailable": "Audio no disponible",
+    "loadingAudio": "Cargando audio...",
+    "wordNotFound": "Palabra no encontrada: {{wordID}}"
+  },
+  "vocabularyReview": {
+    "alertMessage": "Revisa el vocabulario antes de continuar",
+    "cancel": "Cancelar",
+    "continue": "Continuar",
+    "summary": "Resumen"
+  },
+  "questionsReview": {
+    "alertMessage": "Revisa todas las preguntas antes de enviar",
+    "cancel": "Cancelar",
+    "filterBy": "Filtrar por",
+    "submit": "Enviar"
+  },
+  "tableComponent": {
+    "cellActionsLabel": "Etiqueta de acciones de celda",
+    "cellActionsTitle": "Título de Acciones de Celda",
+    "clearCell": "Limpiar celda",
+    "deleteColumn": "Eliminar columna",
+    "deleteRow": "Eliminar fila",
+    "deleteTable": "Eliminar tabla",
+    "insertColumn": "Insertar columna",
+    "insertColumnLeft": "Insertar columna a la izquierda",
+    "insertColumnRight": "Insertar columna a la derecha",
+    "insertRow": "Insertar fila",
+    "insertRowAbove": "Insertar fila arriba",
+    "insertRowBelow": "Insertar fila debajo",
+    "makeColumnHeader": "Convertir en Encabezado de Columna",
+    "makeHeader": "Crear Encabezado",
+    "makeRowHeader": "Convertir en encabezado de fila",
+    "removeColumnHeader": "Eliminar encabezado de columna",
+    "removeHeader": "Eliminar encabezado",
+    "removeRowHeader": "Eliminar encabezado de fila",
+    "removeSorting": "Quitar ordenación",
+    "sortAscending": "Ordenar Ascendente",
+    "sortDescending": "Ordenar descendente"
+  },
+  "mediaPlayerComponent": {
+    "titleHeader": "Título"
+  },
+  "pdfViewerComponent": {
+    "loadingPdf": "Cargando PDF: {{filename}}",
+    "noPdfToDisplay": "No hay PDF para mostrar"
+  },
+  "metadataEditor": {
+    "aiGenerationInfo": "Información de Generación de IA",
+    "createdLabel": "Creado:",
+    "fileInfo": "Información del archivo",
+    "fileMetadataHeading": "Metadatos del archivo",
+    "modelLabel": "Modelo",
+    "notSet": "No establecido",
+    "pathLabel": "Ruta:",
+    "promptLabel": "Indicación",
+    "protectionLabel": "Protección:",
+    "sizeLabel": "Tamaño:",
+    "typeLabel": "Tipo:",
+    "unknown": "Desconocido",
+    "updatedLabel": "Actualizado:",
+    "variantLabel": "Variante"
+  },
+  "metadataField": {
+    "unsavedChanges": "cambios no guardados"
+  },
+  "floatingLinkEditorPlugin": {
+    "cancelLinkEditing": "Cancelar edición de enlace",
+    "closeLinkEditor": "Cerrar editor de enlaces",
+    "confirmLink": "Confirmar enlace",
+    "convertToYoutubeEmbed": "Convertir a inserción de YouTube",
+    "editLink": "Editar enlace",
+    "linkUrl": "URL del enlace",
+    "removeLink": "Eliminar enlace",
+    "youtubeEmbed": "Incrustación de YouTube"
+  },
+  "imageMaskEditor": {
+    "applyMask": "Aplicar Máscara y Regenerar",
+    "brushSize": "Tamaño del pincel: {{size}}",
+    "cancel": "Cancelar",
+    "instructions": "<strong>Instrucciones:</strong> Pinta sobre las áreas que quieres regenerar. Usa el borrador para eliminar partes de la máscara. Mantén presionado Shift y arrastra para desplazarte. Usa los botones de zoom para ver más detalles.",
+    "save": "Guardar",
+    "zoomInfo": "Zoom: {{level}}% | Mantén Shift presionado para desplazar"
+  },
+  "freeSoloCreateOptionDialog": {
+    "cancel": "Cancelar",
+    "create": "Agregar",
+    "description": "Agregar una nueva palabra al diccionario.",
+    "dialogTitle": "Agregar una nueva palabra",
+    "label": "Diálogo libre individual"
+  },
+  "insertLayoutDialog": {
+    "cancel": "Cancelar",
+    "insert": "Insertar"
+  },
+  "placeholders": {
+    "enter_text": "Introducir texto",
+    "search_words": "Buscar palabras...",
+    "type_here": "Escribe aquí..."
+  },
+  "blocks": {
+    "answer": "Bloque de respuesta",
+    "custom_answer": "Respuesta personalizada",
+    "meaning_association": "Asociación de Significados",
+    "quiz": "Bloque de cuestionario"
+  },
+  "questionBlock": {
+    "status": "Estado",
+    "submit": "Enviar"
+  },
+  "autocompleteNode": {
+    "desktopHint": "(TAB)",
+    "mobileHint": "(DESLIZA ⮕)"
+  },
+  "tableOfContents": {
+    "emptyState": "No se encontraron encabezados. Añade encabezados a tu documento para ver la tabla de contenidos.",
+    "title": "Tabla de Contenidos"
+  },
+  "imageResizer": {
+    "addCaption": "Agregar Subtítulo"
+  },
+  "playlistEditor": {
+    "emptyState": "No hay elementos en la lista de reproducción",
+    "menuAttribute": "Menú",
+    "noFilesMessage": "No se han agregado archivos aún. Usa la entrada de arriba para agregar archivos a la lista de reproducción."
+  }
+}

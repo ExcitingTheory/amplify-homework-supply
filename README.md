@@ -1,6 +1,6 @@
 # Documentation Index
 
-Welcome to the Homework Supply documentation! This directory contains comprehensive guides for developers working on our Japanese language learning platform.
+Welcome to the Homework Supply documentation! This directory contains comprehensive guides for developers working on our elearning platform.
 
 ## 📚 Documentation Structure
 

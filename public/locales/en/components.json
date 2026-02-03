@@ -4086,7 +4086,7 @@
           "Transmit"
         ],
         "component": {
-          "description": "An enhanced recording studio component that provides advanced recording capabilities for instructors to create educational content. It includes features for live broadcasting, recording management, and real-time content sharing with students in the Japanese language learning platform.",
+          "description": "An enhanced recording studio component that provides advanced recording capabilities for instructors to create educational content. It includes features for live broadcasting, recording management, and real-time content sharing with students in the elearning platform.",
           "location": "components/RecordingStudioEnhanced.js"
         },
         "context": "This text appears as a button or control in the enhanced recording studio interface that allows instructors to share their recorded content in real-time with students or broadcast it to a wider audience. Users see this option when they want to distribute their recorded lessons or presentations live rather than saving them for later viewing.",

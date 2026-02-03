@@ -567,7 +567,7 @@
           "Discard"
         ],
         "component": {
-          "description": "A specialized editor component that allows instructors to create and manage associations between vocabulary items and their meanings in the Japanese language learning platform. This component appears as a modal or overlay interface during content creation workflows.",
+          "description": "A specialized editor component that allows instructors to create and manage associations between vocabulary items and their meanings in the elearning platform. This component appears as a modal or overlay interface during content creation workflows.",
           "location": "components/Editor3/components/MeaningAssociationEditor.js"
         },
         "context": "This text appears on a cancel button within the Meaning Association Editor, which is likely used by instructors when creating or editing vocabulary content and associating meanings with words or phrases. Users see this when they want to discard their current editing session and return to the previous state without saving changes.",

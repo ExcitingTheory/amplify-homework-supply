@@ -1,6 +1,6 @@
 # Copilot Instructions - Homework Supply
 
-Japanese language learning platform built with Next.js, AWS Amplify Gen 1, and OpenAI.
+elearning platform built with Next.js, AWS Amplify Gen 1, and OpenAI.
 
 ## Architecture Overview
 

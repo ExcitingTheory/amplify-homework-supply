@@ -1,1 +1,143 @@
-{}
+{
+  "fileManager2": {
+    "contextMenu": {
+      "deleteConfirmMessage": "Supprimer {{count}} fichier(s) sélectionné(s) ?",
+      "deleteSelected": "Supprimer la sélection ({{count}})",
+      "deselectAll": "Tout désélectionner",
+      "reAnalyzeSelected": "Ré-analyser la sélection ({{count}})"
+    },
+    "expandedContent": {
+      "descriptionLabel": "Description :",
+      "extractedContentHeading": "Contenu extrait",
+      "noConceptsExtracted": "Aucun concept extrait",
+      "noContentAvailable": "Aucun contenu extrait disponible",
+      "noObjectivesExtracted": "Aucun objectif extrait",
+      "noQuestionsExtracted": "Aucune question extraite",
+      "noSummariesExtracted": "Aucun résumé extrait",
+      "noVocabularyExtracted": "Aucun vocabulaire extrait",
+      "reviewQuestionsMessage": "Réviser et importer les questions du document",
+      "reviewVocabularyMessage": "Réviser et importer le vocabulaire du document",
+      "transcriptionLabel": "Transcription :"
+    },
+    "fileDetails": {
+      "deleteTooltip": "Supprimer",
+      "downloadTooltip": "Télécharger",
+      "insertTooltip": "Insérer dans l'éditeur",
+      "noWaveformAvailable": "Aucune forme d'onde disponible",
+      "reAnalyzeTooltip": "Réanalyser",
+      "videoNotSupported": "Votre navigateur ne prend pas en charge la balise vidéo."
+    },
+    "generators": {
+      "audioPromptPlaceholder": "Texte à transformer en fichier audio.",
+      "errorGeneratingAudio": "Erreur lors de la génération du fichier audio",
+      "errorGeneratingImage": "Erreur lors de la génération du fichier image",
+      "generatingAudio": "Génération du fichier audio...",
+      "generatingImage": "Génération du fichier image...",
+      "imagePromptPlaceholder": "Texte à transformer en fichier image.",
+      "successfullyGeneratedAudio": "Fichier audio généré avec succès",
+      "successfullyGeneratedImage": "Fichier image généré avec succès"
+    },
+    "mainView": {
+      "noFilesMessage": "Aucun fichier disponible. Téléchargez des fichiers pour commencer."
+    },
+    "metadataEditor": {
+      "cancelButton": "Annuler",
+      "createdLabel": "Créé",
+      "descriptionLabel": "Description",
+      "heading": "Métadonnées du fichier",
+      "modelLabel": "Modèle",
+      "nameLabel": "Nom",
+      "pathLabel": "Parcours",
+      "promptLabel": "Invite (pour fichiers générés par IA)",
+      "protectionLevelLabel": "Niveau de protection",
+      "saveButton": "Enregistrer",
+      "sizeLabel": "Taille",
+      "typeLabel": "Type",
+      "unknown": "Inconnu",
+      "variantLabel": "Variante"
+    },
+    "selectedFileDetails": {
+      "emptyState": "Sélectionnez un fichier pour afficher les détails et les métadonnées"
+    },
+    "toolbar": {
+      "actionsTooltip": "Actions",
+      "searchPlaceholder": "Rechercher des fichiers...",
+      "selectAllTooltip": "Tout sélectionner",
+      "uploadTooltip": "Téléverser des fichiers"
+    }
+  },
+  "fileMetadataComponent": {
+    "basicInfo": "Informations de base",
+    "cancel": "Annuler",
+    "collapse": "Réduire",
+    "concepts": "Concepts",
+    "conceptsCount": "Concepts ({{count}})",
+    "confirm": "Confirmer",
+    "created": "Créé :",
+    "deleteConfirmation": "Supprimer le fichier : \"{{fileName}}\" ?",
+    "deleteFile": "Supprimer le fichier",
+    "expand": "Développer",
+    "fileInfo": "Informations du fichier",
+    "filename": "Nom du fichier :",
+    "noMetadataAvailable": "Aucune métadonnée disponible pour ce fichier.",
+    "noParsedContentAvailable": "Aucun contenu analysé disponible pour ce fichier.",
+    "objectives": "Objectifs",
+    "objectivesCount": "Objectifs ({{count}})",
+    "parsedContent": "Contenu analysé",
+    "path": "Chemin :",
+    "protectionLevel": "Niveau de protection :",
+    "questions": "Questions",
+    "questionsCount": "Questions ({{count}})",
+    "rawMetadata": "Métadonnées brutes",
+    "searchPlaceholder": "Rechercher dans le contenu des fichiers...",
+    "summaries": "Résumés",
+    "summariesCount": "Résumés ({{count}})",
+    "type": "Type :",
+    "unknown": "Inconnu",
+    "unknownSize": "Taille inconnue",
+    "unset": "NON DÉFINI",
+    "vocabulary": "Vocabulaire",
+    "vocabularyCount": "Vocabulaire ({{count}})"
+  },
+  "documentUploader": {
+    "browseFiles": "Parcourir les fichiers",
+    "dragDropPrompt": "Glissez et déposez les documents ici",
+    "errorMessages": {
+      "noSupportedFiles": "Aucun document pris en charge trouvé. Veuillez télécharger des fichiers PDF, Word, Texte ou Excel.",
+      "skippedFiles": "Certains fichiers ont été ignorés (type non pris en charge)",
+      "uploadFailed": "Échec du téléchargement de {{fileName}} : {{error}}"
+    },
+    "extractionTypes": {
+      "dictionary": "dictionnaire",
+      "question": "Question",
+      "questions": "questions",
+      "vocabulary": "Vocabulaire"
+    },
+    "howItWorks": {
+      "step1": "1. Téléchargez vos documents (fichiers PDF, Word, texte ou Excel)",
+      "step2": "2. L'IA analysera le contenu et extraira {{extractionType}}",
+      "step3": "3. Examinez et approuvez les suggestions dans l'onglet \"Suggestions\"",
+      "step4": "4. Importer les éléments sélectionnés vers votre {{target}}",
+      "title": "Comment ça marche :"
+    },
+    "recentUploads": "Téléchargements récents",
+    "statusLabels": {
+      "complete": "Terminer",
+      "failed": "Échoué",
+      "processing": "Traitement en cours..."
+    },
+    "supportedFormats": "Pris en charge : PDF, Word (.doc, .docx), Texte (.txt), Excel (.xls, .xlsx, .csv)",
+    "title": "Télécharger des documents pour l'extraction {{extractionType}}",
+    "uploadingProgress": "Téléchargement... {{progress}}%"
+  },
+  "fileManager": {
+    "close": "Fermer",
+    "create": "Créer",
+    "draftChanges": "Brouillon des modifications",
+    "errorRendering": "Erreur lors du rendu de FileManager : {{message}}",
+    "revert": "Rétablir",
+    "save": "Enregistrer",
+    "textToImagePreview": "Aperçu Texte vers Image",
+    "textToSpeechPreview": "Aperçu de synthèse vocale"
+  }
+}

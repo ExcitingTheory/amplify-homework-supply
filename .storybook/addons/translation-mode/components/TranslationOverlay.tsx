@@ -36,6 +36,11 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
   // Use story name from props first, then context
   const storyName = propStoryName || contextStoryName;
 
+  // Debug logging for mode changes
+  useEffect(() => {
+    console.log(`[TranslationOverlay] Mode changed to: ${mode} for key: ${tKey}`);
+  }, [mode, tKey]);
+
   // Capture this translation on mount with full metadata - only once
   useEffect(() => {
     // Skip if already captured
@@ -122,6 +127,12 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
   const hasMissingTranslations = false; // TODO: Check if no translations exist
 
   const handleClick = (e: React.MouseEvent) => {
+    // Allow normal click-through when holding Shift or Cmd/Ctrl
+    if (e.shiftKey || e.metaKey || e.ctrlKey) {
+      console.log('[TranslationOverlay] Modifier key held, allowing click-through');
+      return; // Don't stop propagation, let the click pass through
+    }
+    
     e.stopPropagation();
     
     // Emit full translation data to the addon panel
@@ -158,25 +169,65 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
         p: 1,
         cursor: 'pointer',
         display: 'flex',
-        alignItems: 'center',
-        gap: 0.75,
+        flexDirection: 'column',
+        gap: 0.5,
       }}
     >
-      <EditIcon sx={{ fontSize: '1rem' }} />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+        <EditIcon sx={{ fontSize: '1rem' }} />
+        <Typography 
+          variant="caption" 
+          sx={{ 
+            fontSize: '0.75rem',
+            fontWeight: 500,
+            '&:hover': {
+              textDecoration: 'underline',
+            },
+          }}
+        >
+          Edit: {tooltipPath}
+        </Typography>
+      </Box>
       <Typography 
         variant="caption" 
         sx={{ 
-          fontSize: '0.75rem',
-          fontWeight: 500,
-          '&:hover': {
-            textDecoration: 'underline',
-          },
+          fontSize: '0.65rem',
+          opacity: 0.7,
+          fontStyle: 'italic',
         }}
       >
-        Edit: {tooltipPath}
+        Hold ⇧/⌘/Ctrl to click through
       </Typography>
     </Box>
   );
+
+  // In edit mode, don't use tooltip to avoid click event interference
+  if (mode === 'edit') {
+    return (
+      <Box
+        ref={elementRef}
+        component="span"
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        onClick={handleClick}
+        sx={{
+          display: 'inline',
+          position: 'relative',
+          cursor: 'pointer',
+          outline: hover ? `2px solid` : 'none',
+          outlineColor: getOutlineColor(),
+          outlineOffset: '2px',
+          borderRadius: '2px',
+          transition: 'outline 0.2s ease-in-out',
+          '&:hover': {
+            backgroundColor: 'action.hover',
+          },
+        }}
+      >
+        {translatedText || children}
+      </Box>
+    );
+  }
 
   return (
     <Tooltip 
@@ -196,15 +247,12 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
         sx={{
           display: 'inline',
           position: 'relative',
-          cursor: mode === 'edit' ? 'pointer' : 'default',
+          cursor: mode === 'highlight' ? 'pointer' : 'default',
           outline: hover ? `2px solid` : 'none',
           outlineColor: getOutlineColor(),
           outlineOffset: '2px',
           borderRadius: '2px',
           transition: 'outline 0.2s ease-in-out',
-          '&:hover': {
-            backgroundColor: mode === 'edit' ? 'action.hover' : 'transparent',
-          },
         }}
       >
         {translatedText || children}

@@ -1,1 +1,145 @@
-{}
+{
+  "grades": {
+    "title": "Notes",
+    "sections": "Sections",
+    "mySections": "Mes sections",
+    "studentHeader": "Étudiant",
+    "assignmentHeader": "Devoir",
+    "gradeHeader": "Note"
+  },
+  "index": {
+    "title": "Fournitures de devoirs",
+    "assignments": "Devoirs",
+    "viewWorkbook": "Voir le cahier d'exercices",
+    "completedAssignments": "Devoirs terminés",
+    "myAssignments": "Mes devoirs",
+    "editUnit": "Modifier l'unité",
+    "noSectionsYet": "Aucune section pour le moment",
+    "joinSection": "Rejoindre la section ?",
+    "createNewSection": "Créer une nouvelle section",
+    "mySections": "Mes sections",
+    "untitledSection": "Section sans titre",
+    "noDescription": "Aucune description",
+    "viewSection": "Voir la section",
+    "sections": "Sections"
+  },
+  "profile": {
+    "title": "Mon profil",
+    "heading": "Mon profil",
+    "description": "Afficher et modifier les informations de votre profil",
+    "userId": "Identifiant utilisateur",
+    "identityId": "Identité Id",
+    "cancel": "Annuler",
+    "updateProfile": "Mettre à jour le profil",
+    "confirmEmail": {
+      "title": "Confirmez votre e-mail",
+      "message": "Veuillez vérifier votre email et saisir le code de confirmation pour vérifier votre adresse email.",
+      "button": "Confirmer l'e-mail"
+    },
+    "changePassword": {
+      "heading": "Changer le mot de passe",
+      "description": "Mettez à jour le mot de passe de votre compte pour la sécurité",
+      "button": "Changer le mot de passe"
+    },
+    "advanced": {
+      "heading": "Avancé",
+      "description": "Gérer les paramètres avancés et vider le cache de données locales",
+      "clearCache": "Effacer le cache local",
+      "clearCacheDialog": {
+        "title": "Effacer le cache de données local ?",
+        "message": "Cela effacera toutes les données mises en cache localement, y compris les devoirs hors ligne et le contenu synchronisé. Vous devrez recharger les données depuis le serveur.",
+        "cancel": "Annuler",
+        "confirm": "Vider le cache"
+      }
+    }
+  },
+  "sections": {
+    "title": "Sections",
+    "createNew": "Créer nouveau",
+    "noSectionsYet": "Aucune section pour le moment",
+    "createNewSection": "Créer une nouvelle section",
+    "untitledSection": "Section sans titre",
+    "viewSection": "Voir la section",
+    "loading": "Chargement...",
+    "newSection": {
+      "title": "Nouvelle section",
+      "description": "Créez une nouvelle section en entrant les informations suivantes",
+      "nameLabel": "Nom",
+      "descriptionLabel": "Description",
+      "cancel": "Annuler",
+      "create": "Créer"
+    }
+  },
+  "sectionDetail": {
+    "noFeaturedImage": "Aucune image mise en avant définie",
+    "dragAndDropPrompt": "Glissez-déposez une image ici pour la définir comme image mise en avant.",
+    "uploadingImage": "Téléchargement de l'image",
+    "uploadImagePrompt": "Télécharger une image",
+    "uploadImageInvalidFile": "Veuillez télécharger un fichier image avec une extension valide.",
+    "joinCode": "Code de participation :",
+    "studentView": "Vue Étudiant",
+    "instructorView": "Vue Instructeur",
+    "switchToInstructorView": "Passer à la vue Instructeur",
+    "previewStudentView": "Aperçu de la vue étudiant",
+    "students": "Étudiants",
+    "studentHeader": "Étudiant",
+    "emailHeader": "E-mail",
+    "actionsHeader": "Actions",
+    "gradebook": "Carnet de notes",
+    "showingAssignments": "(Affichage de {{visible}} sur {{total}} devoirs)",
+    "showFutureAssignments": "Afficher l'avenir",
+    "showDraftAssignments": "Afficher les brouillons",
+    "applyCurve": "Appliquer la courbe",
+    "curveMethod": "Méthode de courbe",
+    "scaleToTopMethod": "Échelle vers le score maximum (100 %)",
+    "linearAdjustmentMethod": "Ajustement linéaire (75% moy.)",
+    "curveDebugInfo": "Débogage de courbe :",
+    "selectAssignmentsToCurve": "Sélectionner les devoirs à ajuster",
+    "selectAll": "Tout sélectionner",
+    "clearAll": "Tout effacer",
+    "assignmentHeader": "Devoir",
+    "gradeHeader": "Note",
+    "totalAverage": "Moyenne totale",
+    "learnerHeader": "Apprenant",
+    "totalCompletion": "Total (Achèvement)",
+    "editTooltip": "Modifier",
+    "assignments": "Devoirs",
+    "viewWorkbook": "Afficher le cahier d'exercices",
+    "deleteSection": "Supprimer la section",
+    "deleteSectionConfirm": "Êtes-vous sûr de vouloir supprimer cette section ?",
+    "loading": "Chargement...",
+    "overrideGrade": {
+      "title": "Remplacer la note",
+      "student": "Étudiant :",
+      "assignment": "Devoir :",
+      "currentGrade": "Note actuelle :",
+      "noGrade": "Aucune note",
+      "prompt": "Saisir la nouvelle note (0-100) :",
+      "label": "Note (%)",
+      "invalidScore": "Veuillez saisir un score valide entre 0 et 100",
+      "saveFailed": "Échec de l'enregistrement de la note. Veuillez réessayer.",
+      "cancel": "Annuler",
+      "save": "Enregistrer la note"
+    }
+  },
+  "units": {
+    "title": "Unités",
+    "createNew": "Créer nouveau",
+    "noPublishedUnits": "Aucune unité publiée pour le moment",
+    "createNewUnit": "Créer une nouvelle unité",
+    "publishedUnits": "Unités publiées",
+    "untitledUnit": "Unité sans titre",
+    "viewWorkbook": "Voir le cahier d'exercices",
+    "editUnit": "Modifier l'unité",
+    "myDrafts": "Mes brouillons",
+    "archivedUnits": "Unités archivées"
+  },
+  "unitDetail": {
+    "loading": "Chargement…"
+  },
+  "workbook": {
+    "timerInstructions": "Il s'agit d'un exercice chronométré, appuyez sur démarrer pour lancer le minuteur et répondre aux questions.",
+    "start": "Démarrer",
+    "loading": "Chargement…"
+  }
+}

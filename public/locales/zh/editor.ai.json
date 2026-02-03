@@ -1,0 +1,50 @@
+{
+  "unifiedGenerateModal": {
+    "cancel": "取消",
+    "discard": "放弃",
+    "discardChanges": "放弃更改？",
+    "generate": "生成",
+    "generating": "正在生成{{type}}...",
+    "keepEditing": "继续编辑",
+    "lostWarning": "如果您现在取消，您生成的{{type}}将会丢失。",
+    "preview": "预览",
+    "saveClose": "保存并关闭",
+    "takeMoments": "这可能需要几分钟时间"
+  },
+  "promptMethodSelector": {
+    "inputButton": "输入",
+    "menuItems": {
+      "audio": "音频",
+      "drawing": "绘图",
+      "image": "图像",
+      "text": "文本",
+      "video": "视频"
+    },
+    "outputButton": "输出"
+  },
+  "enhancedGenerators": {
+    "audioPromptPlaceholder": "输入要转换为语音的文本...",
+    "backToGenerator": "返回生成器",
+    "editWithMask": "使用遮罩编辑（重新生成部分）",
+    "generateAudio": "生成音频",
+    "generateImage": "生成图像",
+    "imagePromptPlaceholder": "请描述您想要生成的图像...",
+    "openRecordingStudio": "在录音室中打开"
+  },
+  "blockSuggestionMenu": {
+    "aiTitle": "🤖 AI驱动建议",
+    "emptyState": "暂无建议可用。",
+    "emptyStateHelper": "开始在编辑器中输入以查看AI智能块建议。",
+    "generateMore": "生成更多建议",
+    "helper": "点击建议将其插入到您的课程中",
+    "helperAI": "点击建议或按 Tab/Enter 键插入",
+    "suggestionsTitle": "💡 推荐模块"
+  },
+  "suggestedContent": {
+    "identityPlaceholder": "身份ID",
+    "ownerPlaceholder": "所有者ID"
+  },
+  "aiContentSuggestion": {
+    "tabToAccept": "按Tab键接受"
+  }
+}

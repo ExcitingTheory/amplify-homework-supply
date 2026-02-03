@@ -161,15 +161,17 @@ describe('keyboardUtils', () => {
       expect(isShortcut (event, 'KeyK', { mod: true, shift: true, alt: true })).toBe(true);
     });
 
-    it('should allow extra modifiers when not checking for them', () => {
+    it('should NOT allow extra modifiers (exclusive matching)', () => {
       const event = new KeyboardEvent('keydown', {
         code: 'KeyB',
         ctrlKey: true,
-        shiftKey: true // Extra modifier not required
+        shiftKey: true, // Extra unwanted modifier
+        metaKey: false,
+        altKey: false
       });
       
-      // Should still match because we only check required modifiers
-      expect(isShortcut(event, 'KeyB', { mod: true })).toBe(true);
+      // Should NOT match because shift is not specified in requirements
+      expect(isShortcut(event, 'KeyB', { mod: true })).toBe(false);
     });
 
     it('should handle empty modifiers object', () => {

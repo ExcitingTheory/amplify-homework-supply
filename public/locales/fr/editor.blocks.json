@@ -1,1 +1,72 @@
-{}
+{
+  "customAnswerEditor": {
+    "add": "Ajouter",
+    "addWordLabel": "Ajouter le mot à l'exercice",
+    "answerLabel": "Réponse",
+    "answerPlaceholder": "Réponse",
+    "audioPreview": "Aperçu audio",
+    "cancel": "Annuler",
+    "columnHeaders": {
+      "answer": "Réponse",
+      "answerAudio": "Audio de réponse",
+      "hint": "Indice",
+      "id": "ID",
+      "prompt": "Invite",
+      "promptAudio": "Audio d'invite"
+    },
+    "description": "Créez un exercice à réponse courte, qui peut présenter une question à l'utilisateur et attendre une réponse brève.",
+    "dialogDescription": "Ajouter une nouvelle paire de question et réponse.",
+    "dialogTitle": "Ajouter une nouvelle question",
+    "emptyState": "Aucune question n'a encore été ajoutée. Utilisez la zone de saisie ci-dessus pour ajouter des paires de questions et réponses.",
+    "errorCreatingQuestion": "Erreur lors de la création de la question",
+    "errorGeneratingAudio": "Erreur lors de la génération du fichier audio",
+    "generatingAudio": "Génération du fichier audio...",
+    "hintLabel": "Indice",
+    "hintPlaceholder": "Indice",
+    "promptLabel": "Invite",
+    "remove": "supprimer",
+    "successGeneratedAudio": "Fichier audio généré avec succès",
+    "title": "Exercice de réponse personnalisée",
+    "ttsPreview": "Aperçu de la synthèse vocale"
+  },
+  "meaningAssociationEditor": {
+    "add": "Ajouter",
+    "addWordLabel": "Ajouter un mot à l'exercice",
+    "cancel": "Annuler",
+    "columnHeaders": {
+      "definition": "Définition",
+      "phrase": "Phrase",
+      "pronunciation": "Prononciation"
+    },
+    "definitionPlaceholder": "définition",
+    "dialogDescription": "Ajouter un nouveau mot au dictionnaire.",
+    "dialogTitle": "Ajouter un nouveau mot",
+    "emptyState": "Aucun mot n'a encore été ajouté. Utilisez le champ de saisie ci-dessus pour ajouter des mots du dictionnaire. Si le mot que vous souhaitez ajouter ne se trouve pas dans le dictionnaire, vous pouvez l'ajouter en cliquant sur l'élément \"Ajouter un mot\" dans le menu déroulant ou depuis l'éditeur de dictionnaire dans la barre latérale.",
+    "phraseLabel": "phrase",
+    "pronunciationLabel": "prononciation",
+    "removeFromAssignment": "Retirer de l'affectation"
+  },
+  "quizEditor": {
+    "addAnswer": "Ajouter une réponse",
+    "cancel": "Annuler",
+    "done": "Terminé",
+    "edit": "Modifier",
+    "gradeDisplay": "Note : {{score}}",
+    "invalid": "Invalide",
+    "reset": "Réinitialiser",
+    "save": "Enregistrer",
+    "status": "Statut"
+  },
+  "answerEditor": {
+    "addWordLabel": "Ajouter une étiquette de mot",
+    "addWordToDict": "Ajouter un nouveau mot au dictionnaire.",
+    "cancel": "Annuler",
+    "dialogTitle": "Modifier la réponse",
+    "emptyState": "Aucune réponse fournie",
+    "instructions": "Créez votre réponse ci-dessous",
+    "save": "Enregistrer"
+  },
+  "questionEditor": {
+    "cancel": "Annuler"
+  }
+}

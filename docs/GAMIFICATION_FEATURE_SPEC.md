@@ -7,7 +7,7 @@
 
 ## Overview
 
-Transform the Japanese language learning platform into an engaging journey through a comprehensive gamification system featuring XP progression, achievements, badges, leaderboards, and social features.
+Transform the elearning platform into an engaging journey through a comprehensive gamification system featuring XP progression, achievements, badges, leaderboards, and social features.
 
 ## Goals
 
