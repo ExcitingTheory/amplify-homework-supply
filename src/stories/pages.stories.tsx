@@ -30,6 +30,7 @@ import WorkbookPage from '../../pages/workbook/[id].js';
 import { seedIndexPageData } from '../../.storybook/__mocks__/index-page-examples';
 import { setMockUser } from '../../.storybook/__mocks__/aws-amplify-auth';
 import { FilesProvider } from '../../src/context/fileContext';
+import { useRouter } from 'next/router';
 
 /**
  * Pages Stories - Storybook stories for all Next.js pages
@@ -228,11 +229,17 @@ export const Units = {
  * Section Detail Page
  * 
  * Individual section view:
- * - Section information
- * - Student roster
- * - Assignments for the section
- * - Grade overview
+ * - Section information (Japanese 101 with 4 students)
+ * - Student roster (Alice, Bob, Carol, Dave)
+ * - Assignments for the section (2 unit assignments)
+ * - Grade overview (gradebook showing all student scores)
  * - Upload featured image
+ * 
+ * Mock data includes:
+ * - Alice: 2 completed units (97%, 88%)
+ * - Bob: 2 completed units (87%, 82%)
+ * - Carol: 1 completed (91%), 1 in-progress (60%)
+ * - Dave: 2 completed units (78%, 84%)
  */
 export const SectionDetail = {
   decorators: [
@@ -240,12 +247,11 @@ export const SectionDetail = {
       setMockUser({
         username: 'teacher-1',
         attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
-        groups: [],
+        groups: ['Instructors'],
       });
       seedIndexPageData('instructor');
       
-      // Mock router to provide id from parameters
-      const { useRouter } = require('next/router');
+      // Mock router to provide section id from parameters
       const router = useRouter();
       if (context.parameters.nextRouter) {
         Object.assign(router, context.parameters.nextRouter);
@@ -269,7 +275,7 @@ export const SectionDetail = {
     },
     docs: {
       description: {
-        story: 'Section detail page for instructors - shows student roster, gradebook with all student scores, and assignments.',
+        story: 'Section detail page for instructors - shows student roster (4 students: Alice, Bob, Carol, Dave), gradebook with all student scores across 2 assignments, and section management tools. Mock data includes varied completion states and accuracy scores.',
       },
     },
   },
@@ -291,7 +297,6 @@ export const SectionDetailStudent = {
       seedIndexPageData('student');
       
       // Mock router to provide id from parameters
-      const { useRouter } = require('next/router');
       const router = useRouter();
       if (context.parameters.nextRouter) {
         Object.assign(router, context.parameters.nextRouter);
