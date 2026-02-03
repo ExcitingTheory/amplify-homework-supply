@@ -1,1 +1,72 @@
-{}
+{
+  "customAnswerEditor": {
+    "add": "Hinzufügen",
+    "addWordLabel": "Wort zur Übung hinzufügen",
+    "answerLabel": "Antwort",
+    "answerPlaceholder": "Antwort",
+    "audioPreview": "Audio-Vorschau",
+    "cancel": "Abbrechen",
+    "columnHeaders": {
+      "answer": "Antwort",
+      "answerAudio": "Audio-Antwort",
+      "hint": "Hinweis",
+      "id": "ID",
+      "prompt": "Eingabeaufforderung",
+      "promptAudio": "Eingabeaufforderung Audio"
+    },
+    "description": "Erstellen Sie eine Kurze-Antwort-Aufgabe, die dem Benutzer eine Frage stellen und eine kurze Antwort erwarten kann.",
+    "dialogDescription": "Fügen Sie ein neues Frage-und-Antwort-Paar hinzu.",
+    "dialogTitle": "Neue Frage hinzufügen",
+    "emptyState": "Es wurden noch keine Fragen hinzugefügt. Verwenden Sie das Eingabefeld oben, um Frage- und Antwortpaare hinzuzufügen.",
+    "errorCreatingQuestion": "Fehler beim Erstellen der Frage",
+    "errorGeneratingAudio": "Fehler beim Generieren der Audiodatei",
+    "generatingAudio": "Audio-Datei wird erstellt...",
+    "hintLabel": "Tipp",
+    "hintPlaceholder": "Hinweis",
+    "promptLabel": "Eingabeaufforderung",
+    "remove": "entfernen",
+    "successGeneratedAudio": "Audiodatei erfolgreich generiert",
+    "title": "Benutzerdefinierte Antwortübung",
+    "ttsPreview": "Text-zu-Sprache-Vorschau"
+  },
+  "meaningAssociationEditor": {
+    "add": "Hinzufügen",
+    "addWordLabel": "Wort zur Übung hinzufügen",
+    "cancel": "Abbrechen",
+    "columnHeaders": {
+      "definition": "Definition",
+      "phrase": "Phrase",
+      "pronunciation": "Aussprache"
+    },
+    "definitionPlaceholder": "Definition",
+    "dialogDescription": "Ein neues Wort zum Wörterbuch hinzufügen.",
+    "dialogTitle": "Ein neues Wort hinzufügen",
+    "emptyState": "Noch wurden keine Wörter hinzugefügt. Verwenden Sie die Eingabe oben, um Wörter aus dem Wörterbuch hinzuzufügen. Wenn das Wort, das Sie hinzufügen möchten, nicht im Wörterbuch enthalten ist, können Sie es hinzufügen, indem Sie auf „Wort hinzufügen\" im Dropdown-Menü klicken oder den Wörterbuch-Editor in der Seitenleiste verwenden.",
+    "phraseLabel": "Phrase",
+    "pronunciationLabel": "Aussprache",
+    "removeFromAssignment": "Aus Aufgabe entfernen"
+  },
+  "quizEditor": {
+    "addAnswer": "Antwort hinzufügen",
+    "cancel": "Abbrechen",
+    "done": "Fertig",
+    "edit": "Bearbeiten",
+    "gradeDisplay": "Note: {{score}}",
+    "invalid": "Ungültig",
+    "reset": "Zurücksetzen",
+    "save": "Speichern",
+    "status": "Status"
+  },
+  "answerEditor": {
+    "addWordLabel": "Wort-Label hinzufügen",
+    "addWordToDict": "Fügen Sie ein neues Wort zum Wörterbuch hinzu.",
+    "cancel": "Abbrechen",
+    "dialogTitle": "Antwort bearbeiten",
+    "emptyState": "Keine Antwort angegeben",
+    "instructions": "Erstellen Sie Ihre Antwort unten",
+    "save": "Speichern"
+  },
+  "questionEditor": {
+    "cancel": "Abbrechen"
+  }
+}

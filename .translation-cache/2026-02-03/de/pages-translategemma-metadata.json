@@ -1,0 +1,8 @@
+{
+  "model": "gemma-3-12b-it",
+  "provider": "google",
+  "timestamp": "2026-02-03T15:11:48.486Z",
+  "requestId": "gemma-batch",
+  "tokensUsed": 11500,
+  "fingerprint": "be2ddbcc9dad2d2aad365c5c4a39f2e204857de290c1f4856ca65eda9399bcd2"
+}

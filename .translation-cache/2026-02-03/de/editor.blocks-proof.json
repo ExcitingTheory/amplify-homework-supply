@@ -1,0 +1,1368 @@
+{
+  "namespace": "editor.blocks",
+  "sourceLang": "en",
+  "targetLang": "de",
+  "timestamp": "2026-02-03T13:59:35.913Z",
+  "models": [
+    {
+      "name": "claude-sonnet-4-20250514",
+      "provider": "anthropic",
+      "requestId": "msg_01A1VfB8oRWf9wrkXwUinkeP",
+      "fingerprint": "6f2ac32203b9417c6949f81f94ca2ebe155ca0539fd24f3ee5ce5aa690b809d6",
+      "status": "success"
+    },
+    {
+      "name": "gpt-4o",
+      "provider": "openai",
+      "requestId": "chatcmpl-D5B9rx7vifiwAMQBbHAIoTHzIGaMk",
+      "fingerprint": "a3f996f50fda00a08ffd232f85f19482f7153c1bb0b4822066c46d9b91c6f82e",
+      "status": "success"
+    },
+    {
+      "name": "gemma-3-12b-it",
+      "provider": "google",
+      "requestId": "gemma-batch",
+      "fingerprint": "0e505be464d26e4c82e25d7fe2eba1b18d19b8c104cb1c0e5e19a60ad1ed3f08",
+      "status": "success"
+    }
+  ],
+  "consensusFingerprint": "5a2f9e03c65ae0b32888070d158b8ff4b3ac0ed53b145afd92df8bdbea5bee93",
+  "consensus": {
+    "source": {
+      "customAnswerEditor.add": {
+        "_meta": {
+          "alternativeTerms": [
+            "Create",
+            "Insert",
+            "Include",
+            "Append"
+          ],
+          "component": {
+            "description": "This component provides an interface for instructors to create and manage custom answer choices within quiz questions. It appears when instructors are authoring interactive content and need to define multiple choice or custom response options for their students.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears on a button within the Custom Answer Editor component, which is part of the rich content authoring system. Users see this when they are creating or editing interactive quiz questions and need to add new custom answer options to their question.",
+          "impact": "High - This is essential for instructors to create interactive quiz content, directly affecting their ability to build engaging assessments for students.",
+          "tone": "polite-formal",
+          "usage": "Button that triggers the action to add a new custom answer option to a quiz question.",
+          "userType": "instructors"
+        },
+        "value": "Add"
+      },
+      "customAnswerEditor.addWordLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Add term to exercise",
+            "Insert word into activity",
+            "Include vocabulary in exercise",
+            "Append word to lesson"
+          ],
+          "component": {
+            "description": "This component provides an interface for instructors to create and edit custom answer fields within exercises. It allows instructors to add interactive elements where students can input responses or select from provided options during assignment completion.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as a label or button within the CustomAnswerEditor component when instructors are creating or editing exercise content. Users see this when they are in the process of adding interactive vocabulary words or terms to an exercise that students will need to complete.",
+          "impact": "Important - This text is crucial for instructors to understand how to build interactive vocabulary exercises, directly affecting the quality of learning content students receive.",
+          "tone": "polite-formal",
+          "usage": "Button or action label that instructors click to add a new word or term to an exercise they are creating.",
+          "userType": "instructors"
+        },
+        "value": "Add word to exercise"
+      },
+      "customAnswerEditor.answerLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Response",
+            "Solution",
+            "Reply",
+            "Result"
+          ],
+          "component": {
+            "description": "A specialized editor component for creating and editing answer content within custom answer nodes. This component allows instructors to input and format answer text for quiz questions and interactive learning activities.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as a label in the answer editor interface within the custom answer node component. Users see this when creating or editing answer content for quiz questions or interactive learning exercises in the rich content editor.",
+          "impact": "Important - This label helps instructors understand where to input answer content, which is essential for creating effective quiz questions and assessments.",
+          "tone": "polite-formal",
+          "usage": "Field label for the answer input area in the custom answer editor interface.",
+          "userType": "instructors"
+        },
+        "value": "Answer"
+      },
+      "customAnswerEditor.answerPlaceholder": {
+        "_meta": {
+          "alternativeTerms": [
+            "Response",
+            "Reply",
+            "Solution",
+            "Input"
+          ],
+          "component": {
+            "description": "This component provides an editable interface for creating custom answer fields within learning content. It allows instructors to set up interactive elements where students can input their responses to questions or exercises.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This placeholder text appears in the answer input field within a custom answer node in the content editor. Users see this when creating or editing interactive questions or exercises that require student responses.",
+          "impact": "Medium - provides helpful guidance for content creation but doesn't affect core functionality",
+          "tone": "polite-formal",
+          "usage": "Input field placeholder text that guides users on what content to enter",
+          "userType": "instructors"
+        },
+        "value": "Answer"
+      },
+      "customAnswerEditor.audioPreview": {
+        "_meta": {
+          "alternativeTerms": [
+            "Audio Playback",
+            "Sound Preview",
+            "Audio Player",
+            "Listen to Audio"
+          ],
+          "component": {
+            "description": "This component provides an editing interface for custom answer nodes within the Lexical editor, allowing instructors to create interactive answer elements with multimedia content. It appears when instructors are authoring learning units and need to configure answer options that may include audio, text, or other media elements.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as a label or heading in the custom answer editor component when instructors are creating or editing interactive answer nodes that include audio content. Users see this when they need to preview audio associated with answer choices in vocabulary exercises or quizzes.",
+          "impact": "Medium - helps instructors understand they can preview audio content while creating answer options, improving content creation workflow.",
+          "tone": "polite-formal",
+          "usage": "Label or section heading that identifies the audio preview functionality for answer choices.",
+          "userType": "instructors"
+        },
+        "value": "Audio Preview"
+      },
+      "customAnswerEditor.cancel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Abort",
+            "Discard",
+            "Exit",
+            "Close"
+          ],
+          "component": {
+            "description": "A specialized editor component that allows instructors to create and configure custom answer nodes within the Lexical editor for interactive learning content. This component provides the interface for setting up custom answer validation and feedback within learning units.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears on a cancel button within the custom answer editor interface when instructors are creating or editing custom answer nodes in the content authoring system. Users see this button when they want to discard their changes and exit the custom answer editing mode without saving.",
+          "impact": "Medium - Essential for providing users with a clear exit option when editing, preventing accidental data loss and maintaining user control over the editing workflow.",
+          "tone": "polite-formal",
+          "usage": "Cancel button that allows users to abort the current editing session without saving changes.",
+          "userType": "instructors"
+        },
+        "value": "Cancel"
+      },
+      "customAnswerEditor.columnHeaders.answer": {
+        "_meta": {
+          "alternativeTerms": [
+            "Response",
+            "Solution",
+            "Reply",
+            "Option"
+          ],
+          "component": {
+            "description": "This component provides an editor interface for creating and managing custom answer nodes within the Lexical editor. It allows instructors to configure answer options for quizzes and assessments, presenting them in a structured table format with column headers.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as a column header in a table or data grid within the Custom Answer Editor interface. Users see this when working with answer components that display multiple answer options in a structured format, typically during quiz or assessment creation.",
+          "impact": "Important because it helps instructors clearly identify and organize answer options when creating assessments, ensuring proper content structure.",
+          "tone": "polite-formal",
+          "usage": "Column header label in a data table that identifies the answer content column.",
+          "userType": "instructors"
+        },
+        "value": "Answer"
+      },
+      "customAnswerEditor.columnHeaders.answerAudio": {
+        "_meta": {
+          "alternativeTerms": [
+            "Audio Response",
+            "Answer Sound",
+            "Response Audio",
+            "Audio Content"
+          ],
+          "component": {
+            "description": "The CustomAnswerEditor component allows instructors to create and edit custom answer nodes with multiple media types including audio. This component provides a tabular interface for managing different aspects of answer options, with dedicated columns for various content types.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as a column header in a table or grid interface within the CustomAnswerEditor component. Users see this when editing custom answer nodes that include audio components, helping them identify the column containing audio files or audio-related controls for answer options.",
+          "impact": "Important because it helps instructors quickly identify and organize audio-enhanced answer choices, which are crucial for Japanese language learning exercises that rely on pronunciation and listening comprehension.",
+          "tone": "polite-formal",
+          "usage": "Column header label in a data table that identifies the audio content column for answer options.",
+          "userType": "instructors"
+        },
+        "value": "Answer Audio"
+      },
+      "customAnswerEditor.columnHeaders.hint": {
+        "_meta": {
+          "alternativeTerms": [
+            "Clue",
+            "Tip",
+            "Suggestion",
+            "Guide"
+          ],
+          "component": {
+            "description": "This component provides an editor interface for creating custom answer nodes within the Lexical editor system. It allows instructors to configure interactive answer elements with multiple properties including hints to guide student learning.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as a column header in the Custom Answer Editor, which is part of the rich content authoring system. Instructors see this when creating or editing interactive answer elements that can provide hints to help students complete exercises.",
+          "impact": "Important - This label helps instructors understand they can add helpful hints to guide students, which is crucial for effective learning design and student success.",
+          "tone": "polite-formal",
+          "usage": "Column header label in a data table or grid interface within the answer configuration editor.",
+          "userType": "instructors"
+        },
+        "value": "Hint"
+      },
+      "customAnswerEditor.columnHeaders.id": {
+        "_meta": {
+          "alternativeTerms": [
+            "Identifier",
+            "Reference",
+            "Number"
+          ],
+          "component": {
+            "description": "This component provides an interface for editing custom answer configurations within the Lexical editor. It displays answer data in a tabular format with column headers for organizing and identifying different answer properties.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as a column header in a data table or grid within the Custom Answer Editor component. Users see this when viewing or managing custom answer data that includes ID columns for identification purposes.",
+          "impact": "Medium - While not critical for core functionality, this label helps users understand data organization and navigate answer management efficiently.",
+          "tone": "technical",
+          "usage": "Column header label in a data table that identifies the ID field for custom answers.",
+          "userType": "instructors"
+        },
+        "value": "ID"
+      },
+      "customAnswerEditor.columnHeaders.prompt": {
+        "_meta": {
+          "alternativeTerms": [
+            "Question",
+            "Instruction",
+            "Query",
+            "Request"
+          ],
+          "component": {
+            "description": "The Custom Answer Editor allows instructors to configure custom answer types and responses for interactive learning content. This component provides a tabular interface for managing answer prompts, options, and feedback within the Lexical editor framework.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as a column header in a table within the Custom Answer Editor component, which is part of the content authoring interface. Instructors see this header when creating or editing custom answer configurations for interactive learning activities.",
+          "impact": "Important - This header helps instructors understand the data structure and organize their custom answer content effectively during lesson creation.",
+          "tone": "polite-formal",
+          "usage": "Column header label in a data table that identifies the prompt column for custom answer configurations.",
+          "userType": "instructors"
+        },
+        "value": "Prompt"
+      },
+      "customAnswerEditor.columnHeaders.promptAudio": {
+        "_meta": {
+          "alternativeTerms": [
+            "Audio Prompt",
+            "Voice Prompt",
+            "Audio Cue",
+            "Sound Prompt"
+          ],
+          "component": {
+            "description": "This component provides an interface for instructors to create and configure custom answer nodes within the Lexical editor. It displays tabular data with column headers to organize different aspects of answer configurations including audio elements.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as a column header in a data table within the custom answer editor interface. Users see this when they are viewing or editing custom answer configurations that include audio prompts for student interactions.",
+          "impact": "Important because it helps instructors organize and identify audio-based prompts when creating interactive learning content.",
+          "tone": "polite-formal",
+          "usage": "Column header label in a data table that identifies audio prompt content.",
+          "userType": "instructors"
+        },
+        "value": "Prompt Audio"
+      },
+      "customAnswerEditor.description": {
+        "_meta": {
+          "alternativeTerms": [
+            "brief response activity",
+            "text input exercise",
+            "written answer task",
+            "quick response question"
+          ],
+          "component": {
+            "description": "This editor component allows instructors to create and configure short answer exercise nodes within the Lexical editor. It provides the interface for setting up interactive questions that expect brief text responses from students.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This descriptive text appears in the content editor when instructors are selecting or configuring a short answer exercise node. It provides guidance about what type of interactive element they are about to create, helping them understand the functionality before adding it to their lesson content.",
+          "impact": "Important because it helps instructors understand the functionality and choose the appropriate exercise type for their educational content.",
+          "tone": "polite-formal",
+          "usage": "Descriptive text or tooltip that explains the purpose of the short answer exercise creation tool.",
+          "userType": "instructors"
+        },
+        "value": "Create a short answer exercise, that can prompt the user with a question and expect a short answer."
+      },
+      "customAnswerEditor.dialogDescription": {
+        "_meta": {
+          "alternativeTerms": [
+            "Create a new Q&A pair",
+            "Insert question and answer set",
+            "Add new question-response combination"
+          ],
+          "component": {
+            "description": "A specialized editor component that allows instructors to create and manage custom question-answer pairs within the Lexical editor. This component is part of the rich content authoring system used for building interactive learning materials.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as a description in a dialog modal that opens when instructors are working with the custom answer editor in the content authoring interface. Users see this when they're creating interactive Q&A content within their learning units.",
+          "impact": "Important because it helps instructors understand the functionality they're about to use when creating interactive Q&A content for their students.",
+          "tone": "polite-formal",
+          "usage": "Dialog description text that explains the purpose of the custom answer editor modal to instructors.",
+          "userType": "instructors"
+        },
+        "value": "Add a new question and answer pair."
+      },
+      "customAnswerEditor.dialogTitle": {
+        "_meta": {
+          "alternativeTerms": [
+            "Create new question",
+            "Insert question",
+            "Question setup",
+            "New quiz item"
+          ],
+          "component": {
+            "description": "This component renders a dialog interface for creating custom answer nodes within the Lexical editor. It allows instructors to add interactive question elements to their learning content, providing a modal interface for question configuration and setup.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as the title of a dialog box within the content editor when instructors are creating or editing learning materials. Users see this dialog when they click to add a new interactive question element to their lesson content.",
+          "impact": "High - This title helps instructors understand the purpose of the dialog and is essential for clear navigation during content creation workflows.",
+          "tone": "polite-formal",
+          "usage": "Dialog box title that appears when users initiate the action to create a new question element.",
+          "userType": "instructors"
+        },
+        "value": "Add a new question"
+      },
+      "customAnswerEditor.emptyState": {
+        "_meta": {
+          "alternativeTerms": [
+            "queries",
+            "prompts",
+            "items",
+            "entries"
+          ],
+          "component": {
+            "description": "A specialized editor component for creating custom answer nodes with prompt and answer pairs. This component allows instructors to build interactive Q&A content within the Lexical editor framework.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as an empty state message in the CustomAnswerEditor component when no question-answer pairs have been created yet. Users see this instructional message in the editor interface, guiding them to start adding content using the input field above.",
+          "impact": "Important - guides instructors through the initial content creation process and prevents confusion about how to start adding questions",
+          "tone": "polite-formal",
+          "usage": "Empty state message displayed when the editor has no content to show",
+          "userType": "instructors"
+        },
+        "value": "No questions have been added yet. Use the input above to add prompt and answer pairs."
+      },
+      "customAnswerEditor.errorCreatingQuestion": {
+        "_meta": {
+          "alternativeTerms": [
+            "Error generating question",
+            "Question creation failed",
+            "Unable to create question"
+          ],
+          "component": {
+            "description": "The Custom Answer Editor is a specialized node component within the Lexical editor that allows instructors to create interactive questions with custom answer formats for their learning units. This component handles the creation and editing of question content that students will later interact with during assignments.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This error message appears in the Custom Answer Editor component when an instructor is creating interactive question content and the system fails to save or create the question due to a technical issue. Users see this message as feedback when their question creation attempt is unsuccessful, typically displayed as an error notification or alert.",
+          "impact": "High - This error message is critical for instructors to understand when their content creation has failed and they need to retry or seek assistance.",
+          "tone": "polite-formal",
+          "usage": "Error message displayed when question creation fails in the custom answer editor interface.",
+          "userType": "instructors"
+        },
+        "value": "Error creating question"
+      },
+      "customAnswerEditor.errorGeneratingAudio": {
+        "_meta": {
+          "alternativeTerms": [
+            "Error creating audio",
+            "Audio generation failed",
+            "Unable to produce audio",
+            "Audio creation error"
+          ],
+          "component": {
+            "description": "The CustomAnswerEditor is a specialized node in the Lexical editor that allows instructors to create interactive answer components with multimedia features including audio generation. This component provides tools for creating rich educational content with text-to-speech capabilities for language learning exercises.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This error message appears in the custom answer editor when the system fails to generate an audio file for text-to-speech functionality. Users encounter this message when attempting to create audio content for learning materials and the OpenAI TTS service encounters an error or fails to process the request.",
+          "impact": "High - This error prevents instructors from creating audio-enhanced learning content, which is crucial for Japanese language learning where pronunciation and listening comprehension are essential",
+          "tone": "polite-formal",
+          "usage": "Error message displayed when audio file generation fails during content creation",
+          "userType": "instructors"
+        },
+        "value": "Error generating audio file"
+      },
+      "customAnswerEditor.generatingAudio": {
+        "_meta": {
+          "alternativeTerms": [
+            "Creating audio file",
+            "Processing audio",
+            "Building audio content",
+            "Producing sound file"
+          ],
+          "component": {
+            "description": "This component provides an editing interface for custom answer nodes within the Lexical editor, allowing instructors to create interactive answer elements with audio capabilities. It handles the generation of audio files from text content using AI-powered text-to-speech functionality.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This message appears as a loading indicator in the Custom Answer Editor when users request audio generation for their answer content. Users see this text displayed while the system processes their request to convert text to speech using OpenAI's text-to-speech service.",
+          "impact": "Medium - This status message helps users understand the system is processing their audio generation request and prevents confusion during the waiting period",
+          "tone": "polite-formal",
+          "usage": "Loading message displayed during audio file generation process triggered by user action",
+          "userType": "instructors"
+        },
+        "value": "Generating audio file..."
+      },
+      "customAnswerEditor.hintLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Clue",
+            "Tip",
+            "Help text",
+            "Guidance"
+          ],
+          "component": {
+            "description": "This component provides an editor interface for creating and configuring custom answer nodes within learning content. Instructors use this editor to set up interactive answer fields with associated hints and validation rules.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as a label for a hint input field within the custom answer editor interface. Instructors see this when creating or editing custom answer nodes in learning content, specifically when adding helpful hints that will guide students toward the correct answer.",
+          "impact": "Important because it helps instructors understand where to add helpful guidance for students, directly affecting the quality of learning interactions.",
+          "tone": "polite-formal",
+          "usage": "Form field label that identifies the hint input area for instructors creating custom answer components.",
+          "userType": "instructors"
+        },
+        "value": "Hint"
+      },
+      "customAnswerEditor.hintPlaceholder": {
+        "_meta": {
+          "alternativeTerms": [
+            "Clue",
+            "Tip",
+            "Suggestion",
+            "Help"
+          ],
+          "component": {
+            "description": "This component provides an editor interface for instructors to create and configure custom answer nodes in quiz questions. It allows instructors to set up interactive elements where students can input answers and receive hints or feedback.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This placeholder text appears in a hint input field within the custom answer editor when instructors are creating interactive quiz questions. Users see this when they click into the hint field to provide additional guidance for students answering the question.",
+          "impact": "Medium - helps instructors understand the purpose of the input field and encourages them to provide helpful hints that improve student learning experience.",
+          "tone": "polite-formal",
+          "usage": "Input field placeholder text that guides instructors to enter hint content for quiz questions.",
+          "userType": "instructors"
+        },
+        "value": "Hint"
+      },
+      "customAnswerEditor.promptLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Query",
+            "Input",
+            "Command",
+            "Request"
+          ],
+          "component": {
+            "description": "A specialized editor component for configuring custom answer nodes that integrate with OpenAI services. This component allows instructors to set up prompts and parameters for AI-generated responses in their learning content.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as a label in the custom answer node editor within the content creation interface. Users see this when they are configuring AI-powered custom answer nodes that use prompts to generate responses.",
+          "impact": "High - This label is essential for instructors to understand where to input their AI prompts for generating custom responses in learning activities.",
+          "tone": "polite-formal",
+          "usage": "Form field label for the prompt input area where instructors enter AI prompts.",
+          "userType": "instructors"
+        },
+        "value": "Prompt"
+      },
+      "customAnswerEditor.remove": {
+        "_meta": {
+          "alternativeTerms": [
+            "delete",
+            "eliminate",
+            "discard",
+            "erase"
+          ],
+          "component": {
+            "description": "This component provides an editing interface for custom answer options within interactive quiz questions or exercises. It allows instructors to modify, add, and remove answer choices when creating educational content in the Lexical editor.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as a button or action label within the custom answer editor component, allowing instructors to delete or remove answer options while creating interactive quiz questions or exercises. Users see this when editing custom answer nodes in the rich content editor during lesson creation.",
+          "impact": "Important because it enables instructors to efficiently manage answer choices and maintain clean, accurate quiz content for student assessments.",
+          "tone": "polite-formal",
+          "usage": "Button or clickable action that allows instructors to delete an answer option from a quiz question.",
+          "userType": "instructors"
+        },
+        "value": "remove"
+      },
+      "customAnswerEditor.successGeneratedAudio": {
+        "_meta": {
+          "alternativeTerms": [
+            "Successfully created audio",
+            "Audio generation completed",
+            "Audio file created successfully"
+          ],
+          "component": {
+            "description": "This component provides an editor interface for instructors to create and customize answer options within quiz or interactive content nodes. It includes functionality for generating audio files from text, likely using text-to-speech services to enhance accessibility and learning experience.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This success message appears in the CustomAnswerEditor component after an instructor successfully generates an audio file for a custom answer option. The message likely displays as a temporary notification or toast message to confirm that the text-to-speech conversion completed successfully.",
+          "impact": "Medium - provides important feedback to instructors confirming their audio generation request completed successfully, ensuring they know the feature worked properly",
+          "tone": "polite-formal",
+          "usage": "Success notification message displayed after successful audio file generation action",
+          "userType": "instructors"
+        },
+        "value": "Successfully generated audio file"
+      },
+      "customAnswerEditor.title": {
+        "_meta": {
+          "alternativeTerms": [
+            "Free Response Exercise",
+            "Open-ended Answer Activity",
+            "Custom Response Task"
+          ],
+          "component": {
+            "description": "This component provides an editor interface for instructors to create and configure custom answer exercises where students can input free-form responses. It appears when instructors select or create a custom answer node in the rich content editor for their learning units.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as a title in the Custom Answer Editor component when instructors are creating or editing a custom answer exercise node within the Lexical-based content editor. It displays at the top of the editor interface to identify the type of interactive exercise being configured.",
+          "impact": "Important - helps instructors clearly identify which type of interactive exercise they are editing, ensuring they configure the correct assessment tool for their learning objectives.",
+          "tone": "polite-formal",
+          "usage": "Displays as a heading or title element at the top of the custom answer exercise editor interface.",
+          "userType": "instructors"
+        },
+        "value": "Custom Answer Exercise"
+      },
+      "customAnswerEditor.ttsPreview": {
+        "_meta": {
+          "alternativeTerms": [
+            "Audio Preview",
+            "Speech Preview",
+            "Voice Preview",
+            "TTS Playback"
+          ],
+          "component": {
+            "description": "This component provides an interface for instructors to create and edit custom answer nodes within the Lexical editor. It includes text-to-speech preview functionality that allows instructors to hear how their answer content will sound to students.",
+            "location": "components/Editor3/nodes/CustomAnswerNode/CustomAnswerEditor.js"
+          },
+          "context": "This text appears as a label or heading in the Custom Answer Editor interface when instructors are creating or editing answer nodes with text-to-speech functionality. Users see this text when they want to preview how their answer text will sound when converted to speech audio.",
+          "impact": "Medium - This helps instructors verify audio quality and pronunciation for their content, which is important for language learning but not critical for core functionality.",
+          "tone": "polite-formal",
+          "usage": "Label or button text that identifies the text-to-speech preview feature in the answer editor interface.",
+          "userType": "instructors"
+        },
+        "value": "Text to Speech Preview"
+      },
+      "meaningAssociationEditor.add": {
+        "_meta": {
+          "alternativeTerms": [
+            "Insert",
+            "Create",
+            "Include",
+            "Append"
+          ],
+          "component": {
+            "description": "The MeaningAssociationEditor component allows instructors to create and manage semantic relationships between vocabulary terms and their meanings during content creation. This component is integrated within the Lexical editor system and enables the building of structured vocabulary learning materials with interconnected meanings.",
+            "location": "components/Editor3/components/MeaningAssociationEditor.js"
+          },
+          "context": "This text appears on a button in the Meaning Association Editor, which is part of the rich content creation interface used by instructors when building vocabulary learning materials. Users see this when they want to add a new meaning association to connect vocabulary terms with their definitions or related concepts.",
+          "impact": "Important because this enables instructors to create comprehensive vocabulary learning materials by establishing meaning relationships, which is fundamental to effective language learning content.",
+          "tone": "polite-formal",
+          "usage": "Button that triggers the action to add a new meaning association entry to the current vocabulary item being edited.",
+          "userType": "instructors"
+        },
+        "value": "Add"
+      },
+      "meaningAssociationEditor.addWordLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Include word in exercise",
+            "Insert word into activity",
+            "Append word to lesson"
+          ],
+          "component": {
+            "description": "This component provides an interface for instructors to create and edit meaning association exercises where students match words with their definitions or related concepts. It appears as part of the broader Editor3 system used for authoring interactive learning content.",
+            "location": "components/Editor3/components/MeaningAssociationEditor.js"
+          },
+          "context": "This text appears as a label or button text within the Meaning Association Editor component when instructors are creating or editing vocabulary exercises. Users see this when they want to add a new word to their meaning association exercise, which is likely a type of vocabulary matching or word association activity.",
+          "impact": "Important - This is essential for content creation workflow as it enables instructors to build vocabulary exercises by adding words to the activity.",
+          "tone": "polite-formal",
+          "usage": "Button or interactive label that instructors click to add a new vocabulary word to their meaning association exercise.",
+          "userType": "instructors"
+        },
+        "value": "Add word to exercise"
+      },
+      "meaningAssociationEditor.cancel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Abort",
+            "Dismiss",
+            "Close",
+            "Discard"
+          ],
+          "component": {
+            "description": "A specialized editor component that allows instructors to create and manage associations between vocabulary items and their meanings in the elearning platform. This component appears as a modal or overlay interface during content creation workflows.",
+            "location": "components/Editor3/components/MeaningAssociationEditor.js"
+          },
+          "context": "This text appears on a cancel button within the Meaning Association Editor, which is likely used by instructors when creating or editing vocabulary content and associating meanings with words or phrases. Users see this when they want to discard their current editing session and return to the previous state without saving changes.",
+          "impact": "High - Essential for providing users with a clear escape route from editing without losing confidence in the interface's predictability.",
+          "tone": "polite-formal",
+          "usage": "Button text that allows users to abort the current meaning association editing process.",
+          "userType": "instructors"
+        },
+        "value": "Cancel"
+      },
+      "meaningAssociationEditor.columnHeaders.definition": {
+        "_meta": {
+          "alternativeTerms": [
+            "Meaning",
+            "Explanation",
+            "Description"
+          ],
+          "component": {
+            "description": "The MeaningAssociationEditor component allows instructors to create and manage associations between vocabulary words and their definitions. It presents data in a tabular format where users can link words with multiple meanings and definitions.",
+            "location": "components/Editor3/components/MeaningAssociationEditor.js"
+          },
+          "context": "This text appears as a column header in a table within the Meaning Association Editor, which is used when creating or editing vocabulary learning content. Users see this when working with word definitions and their associated meanings in the content authoring interface.",
+          "impact": "High - this label is essential for instructors to understand which column contains word definitions when creating vocabulary learning content.",
+          "tone": "polite-formal",
+          "usage": "Table column header that labels the definition column in the meaning association interface.",
+          "userType": "instructors"
+        },
+        "value": "Definition"
+      },
+      "meaningAssociationEditor.columnHeaders.phrase": {
+        "_meta": {
+          "alternativeTerms": [
+            "Expression",
+            "Term",
+            "Word",
+            "Text"
+          ],
+          "component": {
+            "description": "The MeaningAssociationEditor allows instructors to create and manage associations between phrases and their meanings or translations in Japanese language learning content. It provides a tabular interface for organizing vocabulary items and their semantic relationships.",
+            "location": "components/Editor3/components/MeaningAssociationEditor.js"
+          },
+          "context": "This text appears as a column header in a table within the Meaning Association Editor component. Users see this when creating or editing meaning associations for vocabulary items, where phrases are listed alongside their corresponding meanings or translations.",
+          "impact": "Important - this label helps instructors understand the table structure and organize vocabulary content effectively for student learning.",
+          "tone": "polite-formal",
+          "usage": "Column header label in a data table that identifies the phrase column for vocabulary management.",
+          "userType": "instructors"
+        },
+        "value": "Phrase"
+      },
+      "meaningAssociationEditor.columnHeaders.pronunciation": {
+        "_meta": {
+          "alternativeTerms": [
+            "Phonetics",
+            "Reading",
+            "Sound"
+          ],
+          "component": {
+            "description": "The MeaningAssociationEditor component allows instructors to create and manage associations between vocabulary terms and their meanings, including pronunciation data. This component displays vocabulary information in a structured table format as part of the content authoring workflow.",
+            "location": "components/Editor3/components/MeaningAssociationEditor.js"
+          },
+          "context": "This text appears as a column header in a table within the Meaning Association Editor, specifically labeling the column that displays pronunciation information for vocabulary items. Users see this when viewing or editing meaning associations in the content creation interface.",
+          "impact": "Important because it helps instructors quickly identify and organize pronunciation data when creating Japanese language learning content.",
+          "tone": "polite-formal",
+          "usage": "Column header label in a data table that identifies the pronunciation information column.",
+          "userType": "instructors"
+        },
+        "value": "Pronunciation"
+      },
+      "meaningAssociationEditor.definitionPlaceholder": {
+        "_meta": {
+          "alternativeTerms": [
+            "meaning",
+            "explanation",
+            "description",
+            "interpretation"
+          ],
+          "component": {
+            "description": "This component provides an interface for creating and editing meaning associations between vocabulary terms and their definitions in Japanese language learning content. Instructors use this component to establish semantic relationships and provide clear explanations for language concepts.",
+            "location": "components/Editor3/components/MeaningAssociationEditor.js"
+          },
+          "context": "This placeholder text appears in an input field within the meaning association editor, guiding users to enter a definition for a vocabulary term or concept. Users see this when the definition field is empty and ready for input during content creation or editing.",
+          "impact": "Medium importance as it provides helpful guidance for content creation, ensuring instructors understand what type of information to enter in the definition field.",
+          "tone": "polite-formal",
+          "usage": "Input field placeholder text that appears when users click into an empty definition field.",
+          "userType": "instructors"
+        },
+        "value": "definition"
+      },
+      "meaningAssociationEditor.dialogDescription": {
+        "_meta": {
+          "alternativeTerms": [
+            "include",
+            "insert",
+            "create",
+            "register"
+          ],
+          "component": {
+            "description": "This component allows instructors to create and manage word-meaning associations in their Japanese language learning content. It provides an interface for adding vocabulary terms to a dictionary or glossary system within the course materials.",
+            "location": "components/Editor3/components/MeaningAssociationEditor.js"
+          },
+          "context": "This text appears as a description in a dialog box within the meaning association editor component, likely when instructors are adding vocabulary words to their learning content. The description provides guidance to users about the purpose of the dialog they have opened.",
+          "impact": "Important because it guides instructors through the vocabulary creation process, which is essential for building effective Japanese language learning materials.",
+          "tone": "polite-formal",
+          "usage": "Dialog description text that explains the action users can perform when the meaning association dialog is opened.",
+          "userType": "instructors"
+        },
+        "value": "Add a new word to the dictionary."
+      },
+      "meaningAssociationEditor.dialogTitle": {
+        "_meta": {
+          "alternativeTerms": [
+            "Add new vocabulary",
+            "Insert word",
+            "Create word entry",
+            "Add vocabulary term"
+          ],
+          "component": {
+            "description": "This component provides a dialog interface for instructors to add new vocabulary words and their associated meanings to learning content. It appears as a modal overlay when instructors are authoring vocabulary-rich educational materials in the Lexical editor.",
+            "location": "components/Editor3/components/MeaningAssociationEditor.js"
+          },
+          "context": "This text appears as the title of a dialog window that opens when instructors are creating or editing vocabulary content in the rich text editor. Users see this dialog when they click an action to add a new vocabulary word to their learning materials.",
+          "impact": "Important because it clearly communicates the purpose of the dialog to instructors who are creating vocabulary-focused learning content.",
+          "tone": "polite-formal",
+          "usage": "Dialog window title that appears when instructors initiate the action to add a vocabulary word.",
+          "userType": "instructors"
+        },
+        "value": "Add a new word"
+      },
+      "meaningAssociationEditor.emptyState": {
+        "_meta": {
+          "alternativeTerms": [
+            "vocabulary",
+            "terms",
+            "entries",
+            "lexicon"
+          ],
+          "component": {
+            "description": "A specialized editor component that allows instructors to create vocabulary exercises by adding and associating words with meanings. This component is part of the rich content authoring system used when creating Japanese language learning materials.",
+            "location": "components/Editor3/components/MeaningAssociationEditor.js"
+          },
+          "context": "This text appears as an empty state message in the Meaning Association Editor when no words have been added to a vocabulary exercise or learning unit. Users see this instructional text in the center of the empty editor area, guiding them on how to begin adding vocabulary words to their content.",
+          "impact": "High - This guidance is essential for instructors to understand how to start building vocabulary exercises and manage their dictionary content",
+          "tone": "polite-formal",
+          "usage": "Empty state instructional text displayed when the vocabulary word list is empty",
+          "userType": "instructors"
+        },
+        "value": "No words have been added yet. Use the input above to add words from the dictionary. If the word you want to add is not in the dictionary, you can add it by clicking the \"Add Word\" item in the dropdown or from the dictionary editor in the Sidebar."
+      },
+      "meaningAssociationEditor.phraseLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "expression",
+            "term",
+            "word group",
+            "text"
+          ],
+          "component": {
+            "description": "The MeaningAssociationEditor allows instructors to create connections between phrases and their meanings when authoring Japanese language learning content. This component provides interface elements for managing vocabulary associations within learning units.",
+            "location": "components/Editor3/components/MeaningAssociationEditor.js"
+          },
+          "context": "This text appears as a label in the Meaning Association Editor, which is part of the content authoring interface. Users see this when creating or editing vocabulary associations where they can link phrases to their meanings or definitions.",
+          "impact": "Medium - This label helps instructors understand what content to input in the phrase field, contributing to clear vocabulary lesson creation.",
+          "tone": "polite-formal",
+          "usage": "This is a form field label that identifies an input area where users enter phrase text.",
+          "userType": "instructors"
+        },
+        "value": "phrase"
+      },
+      "meaningAssociationEditor.pronunciationLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "phonetics",
+            "phonetic transcription",
+            "sound guide",
+            "vocal rendering"
+          ],
+          "component": {
+            "description": "The MeaningAssociationEditor component allows instructors to create and edit associations between meanings and various elements like pronunciation, definitions, or examples. It provides form fields and controls for building comprehensive vocabulary learning materials.",
+            "location": "components/Editor3/components/MeaningAssociationEditor.js"
+          },
+          "context": "This label appears in the Meaning Association Editor component, specifically identifying a pronunciation field or section. Users see this when working with vocabulary or language content that includes pronunciation guidance for words or phrases.",
+          "impact": "Important - this label helps instructors understand which field is for pronunciation data, ensuring proper organization of language learning content.",
+          "tone": "polite-formal",
+          "usage": "Field label that identifies the pronunciation input or display area within the meaning association form.",
+          "userType": "instructors"
+        },
+        "value": "pronunciation"
+      },
+      "meaningAssociationEditor.removeFromAssignment": {
+        "_meta": {
+          "alternativeTerms": [
+            "Exclude from Assignment",
+            "Delete from Assignment",
+            "Unassign Content"
+          ],
+          "component": {
+            "description": "This component manages vocabulary meaning associations within the content editor. It allows instructors to link vocabulary terms with their meanings and manage which items are included in specific assignments.",
+            "location": "components/Editor3/components/MeaningAssociationEditor.js"
+          },
+          "context": "This text appears in the meaning association editor when instructors are creating or editing vocabulary content. Users see this option when they need to remove a vocabulary item or meaning association from a specific assignment while keeping it in their content library.",
+          "impact": "Important - This action affects assignment content and student learning materials, requiring clear labeling to prevent accidental removal of educational content.",
+          "tone": "polite-formal",
+          "usage": "Button or link text that triggers the action to remove a vocabulary item from an assignment.",
+          "userType": "instructors"
+        },
+        "value": "Remove from Assignment"
+      },
+      "quizEditor.addAnswer": {
+        "_meta": {
+          "alternativeTerms": [
+            "Add Option",
+            "Insert Answer",
+            "Create Answer",
+            "New Answer"
+          ],
+          "component": {
+            "description": "The QuizEditor component provides instructors with tools to create and modify quiz questions within learning units. This component handles the interactive editing interface for building quizzes with multiple answer options and manages the question-answer structure.",
+            "location": "components/Editor3/components/QuizEditor.js"
+          },
+          "context": "This text appears as a button label in the quiz editor interface when instructors are creating or editing quiz questions. Users see this button after they have added a quiz question and need to add multiple choice answers or additional answer options to complete the question setup.",
+          "impact": "High - This is essential for quiz creation functionality as instructors need to add multiple answer choices to create effective multiple choice questions.",
+          "tone": "polite-formal",
+          "usage": "Button text that instructors click to add a new answer option to a quiz question they are creating.",
+          "userType": "instructors"
+        },
+        "value": "Add Answer"
+      },
+      "quizEditor.cancel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Abort",
+            "Exit",
+            "Discard",
+            "Back"
+          ],
+          "component": {
+            "description": "The quiz editor component allows instructors to create and modify quiz questions, set answer choices, configure scoring, and manage quiz settings. This component is part of the broader content authoring tools that enable instructors to build interactive assessments for their Japanese language learning units.",
+            "location": "src/components/editor"
+          },
+          "context": "This text appears on a cancel button in the quiz editor interface when instructors are creating or editing quiz questions and assessments. Users see this button as an option to abandon their current editing session and return to the previous state without saving changes.",
+          "impact": "Provides information to users",
+          "tone": "polite-formal",
+          "usage": "Translation key: quizEditor.cancel",
+          "userType": "instructors"
+        },
+        "value": "Cancel"
+      },
+      "quizEditor.done": {
+        "_meta": {
+          "alternativeTerms": [
+            "Complete",
+            "Finish",
+            "Save",
+            "Confirm"
+          ],
+          "component": {
+            "description": "The QuizEditor component provides instructors with tools to create and modify quiz questions within the learning content editor. It allows configuration of quiz parameters, question types, answers, and other quiz-specific settings before saving changes back to the learning unit.",
+            "location": "components/Editor3/components/QuizEditor.js"
+          },
+          "context": "This text appears as a button label in the QuizEditor component when instructors are creating or editing quiz questions within a learning unit. Users see this button after they have finished configuring quiz settings, adding questions, or making modifications to an existing quiz.",
+          "impact": "High importance because this is the primary action for instructors to finalize their quiz creation work and continue with course development.",
+          "tone": "polite-formal",
+          "usage": "Button label that instructors click to complete quiz editing and return to the main content editor.",
+          "userType": "instructors"
+        },
+        "value": "Done"
+      },
+      "quizEditor.edit": {
+        "_meta": {
+          "alternativeTerms": [
+            "Modify",
+            "Update",
+            "Change",
+            "Revise"
+          ],
+          "component": {
+            "description": "The QuizEditor component provides instructors with tools to create and modify quiz questions within the Lexical-based content editor. This component appears when instructors are authoring learning units and need to add interactive quiz elements to test student comprehension.",
+            "location": "components/Editor3/components/QuizEditor.js"
+          },
+          "context": "This text appears as a button or action element within the quiz editing interface, allowing instructors to modify existing quiz questions and settings. Users see this when they want to make changes to a previously created quiz component within their learning unit.",
+          "impact": "High - Essential for instructors to modify and improve their quiz content, directly affecting the quality of student assessments.",
+          "tone": "polite-formal",
+          "usage": "Button or clickable element that triggers quiz editing mode for instructors.",
+          "userType": "instructors"
+        },
+        "value": "Edit"
+      },
+      "quizEditor.gradeDisplay": {
+        "_meta": {
+          "alternativeTerms": [
+            "Score",
+            "Mark",
+            "Result",
+            "Points"
+          ],
+          "component": {
+            "description": "The QuizEditor component provides functionality for creating, editing, and displaying quizzes within the eLearning platform. It handles quiz content authoring for instructors and displays quiz results and grades for students after completion.",
+            "location": "components/Editor3/components/QuizEditor.js"
+          },
+          "context": "This text displays a student's quiz grade within the quiz editor interface, showing after a quiz has been completed and graded. The score is dynamically inserted where {{score}} appears, providing immediate feedback on quiz performance.",
+          "impact": "High - Essential feedback mechanism that communicates student performance and achievement on assessments.",
+          "tone": "polite-formal",
+          "usage": "Display label showing the numerical or percentage grade received on a completed quiz.",
+          "userType": "all"
+        },
+        "value": "Grade: {{score}}"
+      },
+      "quizEditor.invalid": {
+        "_meta": {
+          "alternativeTerms": [
+            "Incorrect",
+            "Not valid",
+            "Error",
+            "Wrong format"
+          ],
+          "component": {
+            "description": "The QuizEditor component allows instructors to create and modify quiz questions within learning units. It provides form fields for question text, answer options, and quiz configuration with real-time validation feedback.",
+            "location": "components/Editor3/components/QuizEditor.js"
+          },
+          "context": "This text appears as a validation error message in the quiz editor when instructors create or edit quiz questions. Users see this message when quiz input fields contain invalid data, such as malformed questions, incorrect answer formats, or missing required fields.",
+          "impact": "High - This validation message is crucial for helping instructors identify and fix quiz creation errors before publishing learning units.",
+          "tone": "polite-formal",
+          "usage": "Error message displayed near form fields or in validation summaries when quiz data is invalid.",
+          "userType": "instructors"
+        },
+        "value": "Invalid"
+      },
+      "quizEditor.reset": {
+        "_meta": {
+          "alternativeTerms": [
+            "Clear",
+            "Start Over",
+            "Restart"
+          ],
+          "component": {
+            "description": "The QuizEditor component provides instructors with tools to create and modify quiz questions within learning units. This component is part of the content authoring workflow where instructors build interactive assessments for their Japanese language learning materials.",
+            "location": "components/Editor3/components/QuizEditor.js"
+          },
+          "context": "This text appears as a button label in the quiz editing interface within the content authoring system. Instructors see this button when creating or editing quiz questions and need to clear all current quiz data and return the quiz to its initial empty state.",
+          "impact": "Important because it provides instructors with a quick way to start over when creating quiz content, preventing the need to manually delete all existing quiz data.",
+          "tone": "polite-formal",
+          "usage": "Button element that triggers clearing all quiz content and resetting the quiz editor to its default state.",
+          "userType": "instructors"
+        },
+        "value": "Reset"
+      },
+      "quizEditor.save": {
+        "_meta": {
+          "alternativeTerms": [],
+          "component": {
+            "description": "This component provides the quiz editing interface where instructors can create, modify, and manage quiz questions, answers, and settings. It appears when instructors are authoring quiz content within learning units and need to save their progress.",
+            "location": "src/components/editor"
+          },
+          "context": "This text appears on a button in the quiz editor interface when instructors are creating or editing quiz questions and answers. Users see this button after making changes to quiz content and need to persist their work to the database.",
+          "impact": "Provides information to users",
+          "tone": "polite-formal",
+          "usage": "Translation key: quizEditor.save",
+          "userType": "all"
+        },
+        "value": "Save"
+      },
+      "quizEditor.status": {
+        "_meta": {
+          "alternativeTerms": [
+            "State",
+            "Condition",
+            "Progress",
+            "Stage"
+          ],
+          "component": {
+            "description": "This component is part of the quiz editing interface where instructors create and manage quiz questions and settings. It provides tools for authoring quiz content and tracking the state of quiz elements throughout the creation process.",
+            "location": "src/components/editor"
+          },
+          "context": "This text appears as a column header or field label in the quiz editor interface, displaying the current publication or completion status of quiz items. Users see this when creating, editing, or reviewing quizzes to understand whether items are draft, published, completed, or require attention.",
+          "impact": "Important because it helps instructors quickly identify which quiz elements need attention and track their progress through the creation workflow",
+          "tone": "polite-formal",
+          "usage": "Column header or field label that identifies the status information for quiz items",
+          "userType": "instructors"
+        },
+        "value": "Status"
+      },
+      "answerEditor.addWordLabel": {
+        "value": "Add Word Label",
+        "_meta": {
+          "context": "This text appears as a label or button in the answer editor interface when instructors are creating interactive content blocks that require word-level labeling or tagging. Users see this when they want to add semantic labels or categories to individual words within answer options, likely for vocabulary exercises or language learning activities.",
+          "component": {
+            "location": "src/components/Editor3/components/AnswerEditor.js",
+            "description": "The AnswerEditor component allows instructors to create and configure answer options for interactive exercises and quizzes. It provides tools for setting up different types of answers including those that require word-level annotations or labels for language learning purposes."
+          },
+          "usage": "Button or clickable label that triggers the action to add a semantic label or tag to a specific word within an answer option.",
+          "impact": "Important - This enables instructors to create sophisticated vocabulary and language exercises with word-level annotations, which is essential for effective Japanese language learning content.",
+          "userType": "instructors",
+          "tone": "polite-formal",
+          "alternativeTerms": [
+            "Add Word Tag",
+            "Label Word",
+            "Add Word Annotation",
+            "Tag Word"
+          ]
+        }
+      },
+      "answerEditor.addWordToDict": {
+        "_meta": {
+          "alternativeTerms": [
+            "Create new dictionary entry",
+            "Add vocabulary word"
+          ],
+          "component": {
+            "description": "Dialog for adding new dictionary words during answer editing.",
+            "location": "src/components/Editor3/components/AnswerEditor.js"
+          },
+          "context": "Dialog content text prompting instructor to add a new vocabulary word.",
+          "impact": "Medium - guides vocabulary creation workflow",
+          "tone": "polite-formal",
+          "usage": "Dialog content text",
+          "userType": "instructors"
+        },
+        "value": "Add a new word to the dictionary."
+      },
+      "answerEditor.cancel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Abort",
+            "Discard",
+            "Close",
+            "Exit"
+          ],
+          "component": {
+            "description": "The AnswerEditor component provides an interface for instructors to create and modify quiz question answers within learning units. It appears when instructors are authoring educational content and need to define correct answers or answer choices for their quizzes.",
+            "location": "components/Editor3/components/AnswerEditor.js"
+          },
+          "context": "This text appears as a button label in the answer editor interface when instructors are creating or editing quiz questions and answers. Users see this button when they want to discard their current answer editing session and return to the previous state without saving changes.",
+          "impact": "Important because it provides users with a clear escape route when editing answers, preventing accidental data loss and maintaining user confidence in the editing interface.",
+          "tone": "polite-formal",
+          "usage": "Button label that allows users to abort the current answer editing action.",
+          "userType": "instructors"
+        },
+        "value": "Cancel"
+      },
+      "answerEditor.dialogTitle": {
+        "_meta": {
+          "alternativeTerms": [
+            "Modify Answer",
+            "Update Answer",
+            "Revise Answer",
+            "Answer Modification"
+          ],
+          "component": {
+            "description": "The AnswerEditor component renders a modal dialog interface that allows instructors to edit and modify answer content within the Lexical-based content editor. It provides editing capabilities for various types of answers including quiz responses, multiple choice options, and correct answer definitions.",
+            "location": "components/Editor3/components/AnswerEditor.js"
+          },
+          "context": "This text appears as the title of a modal dialog window that opens when an instructor clicks to modify an existing answer within the content editor. The dialog provides an interface for editing answer content, allowing instructors to update quiz responses, correct answers, or answer choices in their learning materials.",
+          "impact": "High - This title helps instructors understand the purpose of the editing dialog and provides clear context for the content modification workflow.",
+          "tone": "polite-formal",
+          "usage": "Modal dialog title that appears when instructors open the answer editing interface.",
+          "userType": "instructors"
+        },
+        "value": "Edit Answer"
+      },
+      "answerEditor.emptyState": {
+        "_meta": {
+          "alternativeTerms": [
+            "No response given",
+            "Answer field empty",
+            "No content entered"
+          ],
+          "component": {
+            "description": "A specialized editor component that allows users to create and edit answer content, likely part of a quiz or assignment creation workflow. This component provides the interface for inputting answer text or content within the broader Editor3 system.",
+            "location": "components/Editor3/components/AnswerEditor.js"
+          },
+          "context": "This text appears in the AnswerEditor component when no answer content has been provided or entered yet. Users see this empty state message as a placeholder or prompt indicating that the answer field is currently blank and needs content to be added.",
+          "impact": "Medium - helps users understand the current state of the answer field and guides them to add content",
+          "tone": "polite-formal",
+          "usage": "Empty state message displayed in the answer editor when no content has been provided",
+          "userType": "all"
+        },
+        "value": "No answer provided"
+      },
+      "answerEditor.instructions": {
+        "_meta": {
+          "alternativeTerms": [
+            "Write your response below",
+            "Enter your answer here",
+            "Compose your solution below",
+            "Provide your answer below"
+          ],
+          "component": {
+            "description": "A specialized editor component designed for students to input their answers to assignment questions or quiz items. It provides a text editing interface where students can compose and format their responses before submission.",
+            "location": "components/Editor3/components/AnswerEditor.js"
+          },
+          "context": "This instructional text appears in the answer editor component when students are completing assignments or quizzes. It serves as guidance text that prompts students to enter their response in the text editor field below.",
+          "impact": "Medium - Provides clear guidance to students on where to input their responses, helping reduce confusion during assignment completion.",
+          "tone": "polite-formal",
+          "usage": "Instructional label or helper text displayed above or within the answer input editor field.",
+          "userType": "students"
+        },
+        "value": "Create your answer below"
+      },
+      "answerEditor.save": {
+        "_meta": {
+          "alternativeTerms": [
+            "Store",
+            "Preserve",
+            "Keep",
+            "Submit"
+          ],
+          "component": {
+            "description": "The AnswerEditor component provides functionality for instructors to create and modify answer content for learning activities and quizzes. This component likely integrates with the Lexical editor to enable rich text editing of answer materials.",
+            "location": "components/Editor3/components/AnswerEditor.js"
+          },
+          "context": "This text appears on a save button within the Answer Editor component, which is used when instructors are creating or editing answer content for learning activities. Users see this when they need to preserve their answer content changes before navigating away or finalizing their work.",
+          "impact": "Critical - this is essential for content creation workflow as instructors must be able to save their work to prevent data loss and complete the authoring process.",
+          "tone": "polite-formal",
+          "usage": "Button text that triggers the save action for answer content when clicked by the user.",
+          "userType": "instructors"
+        },
+        "value": "Save"
+      },
+      "questionEditor.cancel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Discard",
+            "Abort",
+            "Exit",
+            "Back"
+          ],
+          "component": {
+            "description": "The question editor component provides instructors with tools to create, modify, and format quiz questions for their learning units. It likely includes form fields, rich text editing capabilities, and action buttons for saving or canceling changes.",
+            "location": "src/components/editor"
+          },
+          "context": "This text appears on a cancel button within the question editor interface, allowing users to discard changes and exit the editing mode without saving. Users see this when they are creating or modifying quiz questions and want to abort their current editing session.",
+          "impact": "Important because it provides users with a clear escape route from editing mode, preventing accidental data loss and giving confidence to explore the editor",
+          "tone": "polite-formal",
+          "usage": "Cancel button that allows users to exit question editing without saving changes",
+          "userType": "instructors"
+        },
+        "value": "Cancel"
+      }
+    },
+    "claude": {
+      "customAnswerEditor.add": "Hinzufügen",
+      "customAnswerEditor.addWordLabel": "Wort zur Übung hinzufügen",
+      "customAnswerEditor.answerLabel": "Antwort",
+      "customAnswerEditor.answerPlaceholder": "Antwort",
+      "customAnswerEditor.audioPreview": "Audio-Vorschau",
+      "customAnswerEditor.cancel": "Abbrechen",
+      "customAnswerEditor.columnHeaders.answer": "Antwort",
+      "customAnswerEditor.columnHeaders.answerAudio": "Audio-Antwort",
+      "customAnswerEditor.columnHeaders.hint": "Hinweis",
+      "customAnswerEditor.columnHeaders.id": "ID",
+      "customAnswerEditor.columnHeaders.prompt": "Eingabeaufforderung",
+      "customAnswerEditor.columnHeaders.promptAudio": "Eingabeaufforderung Audio",
+      "customAnswerEditor.description": "Erstellen Sie eine Kurze-Antwort-Aufgabe, die dem Benutzer eine Frage stellen und eine kurze Antwort erwarten kann.",
+      "customAnswerEditor.dialogDescription": "Fügen Sie ein neues Frage-und-Antwort-Paar hinzu.",
+      "customAnswerEditor.dialogTitle": "Neue Frage hinzufügen",
+      "customAnswerEditor.emptyState": "Es wurden noch keine Fragen hinzugefügt. Verwenden Sie das Eingabefeld oben, um Frage- und Antwortpaare hinzuzufügen.",
+      "customAnswerEditor.errorCreatingQuestion": "Fehler beim Erstellen der Frage",
+      "customAnswerEditor.errorGeneratingAudio": "Fehler beim Generieren der Audiodatei",
+      "customAnswerEditor.generatingAudio": "Audiodatei wird generiert...",
+      "customAnswerEditor.hintLabel": "Hinweis",
+      "customAnswerEditor.hintPlaceholder": "Hinweis",
+      "customAnswerEditor.promptLabel": "Eingabeaufforderung",
+      "customAnswerEditor.remove": "entfernen",
+      "customAnswerEditor.successGeneratedAudio": "Audiodatei erfolgreich generiert",
+      "customAnswerEditor.title": "Benutzerdefinierte Antwortübung",
+      "customAnswerEditor.ttsPreview": "Text-zu-Sprache-Vorschau",
+      "meaningAssociationEditor.add": "Hinzufügen",
+      "meaningAssociationEditor.addWordLabel": "Wort zur Übung hinzufügen",
+      "meaningAssociationEditor.cancel": "Abbrechen",
+      "meaningAssociationEditor.columnHeaders.definition": "Definition",
+      "meaningAssociationEditor.columnHeaders.phrase": "Phrase",
+      "meaningAssociationEditor.columnHeaders.pronunciation": "Aussprache",
+      "meaningAssociationEditor.definitionPlaceholder": "Definition",
+      "meaningAssociationEditor.dialogDescription": "Fügen Sie ein neues Wort zum Wörterbuch hinzu.",
+      "meaningAssociationEditor.dialogTitle": "Neues Wort hinzufügen",
+      "meaningAssociationEditor.emptyState": "Noch wurden keine Wörter hinzugefügt. Verwenden Sie die Eingabe oben, um Wörter aus dem Wörterbuch hinzuzufügen. Wenn das Wort, das Sie hinzufügen möchten, nicht im Wörterbuch enthalten ist, können Sie es hinzufügen, indem Sie auf „Wort hinzufügen\" im Dropdown-Menü klicken oder den Wörterbuch-Editor in der Seitenleiste verwenden.",
+      "meaningAssociationEditor.phraseLabel": "Phrase",
+      "meaningAssociationEditor.pronunciationLabel": "Aussprache",
+      "meaningAssociationEditor.removeFromAssignment": "Aus Aufgabe entfernen",
+      "quizEditor.addAnswer": "Antwort hinzufügen",
+      "quizEditor.cancel": "Abbrechen",
+      "quizEditor.done": "Fertig",
+      "quizEditor.edit": "Bearbeiten",
+      "quizEditor.gradeDisplay": "Note: {{score}}",
+      "quizEditor.invalid": "Ungültig",
+      "quizEditor.reset": "Zurücksetzen",
+      "quizEditor.save": "Speichern",
+      "quizEditor.status": "Status",
+      "answerEditor.addWordLabel": "Wort-Label hinzufügen",
+      "answerEditor.addWordToDict": "Fügen Sie ein neues Wort zum Wörterbuch hinzu.",
+      "answerEditor.cancel": "Abbrechen",
+      "answerEditor.dialogTitle": "Antwort bearbeiten",
+      "answerEditor.emptyState": "Keine Antwort angegeben",
+      "answerEditor.instructions": "Erstellen Sie Ihre Antwort unten",
+      "answerEditor.save": "Speichern",
+      "questionEditor.cancel": "Abbrechen"
+    },
+    "gpt": {
+      "customAnswerEditor.add": "Hinzufügen",
+      "customAnswerEditor.addWordLabel": "Wort zur Übung hinzufügen",
+      "customAnswerEditor.answerLabel": "Antwort",
+      "customAnswerEditor.answerPlaceholder": "Antwort",
+      "customAnswerEditor.audioPreview": "Audiovorschau",
+      "customAnswerEditor.cancel": "Abbrechen",
+      "customAnswerEditor.columnHeaders.answer": "Antwort",
+      "customAnswerEditor.columnHeaders.answerAudio": "Antwort-Audio",
+      "customAnswerEditor.columnHeaders.hint": "Hinweis",
+      "customAnswerEditor.columnHeaders.id": "ID",
+      "customAnswerEditor.columnHeaders.prompt": "Aufforderung",
+      "customAnswerEditor.columnHeaders.promptAudio": "Audioaufforderung",
+      "customAnswerEditor.description": "Erstellen Sie eine Kurzantwortübung, die den Benutzer mit einer Frage auffordern und eine kurze Antwort erwarten kann.",
+      "customAnswerEditor.dialogDescription": "Fügen Sie ein neues Frage-Antwort-Paar hinzu.",
+      "customAnswerEditor.dialogTitle": "Neue Frage hinzufügen",
+      "customAnswerEditor.emptyState": "Es wurden noch keine Fragen hinzugefügt. Verwenden Sie das obige Eingabefeld, um Aufforderungs- und Antwortpaare hinzuzufügen.",
+      "customAnswerEditor.errorCreatingQuestion": "Fehler beim Erstellen der Frage",
+      "customAnswerEditor.errorGeneratingAudio": "Fehler beim Erstellen der Audiodatei",
+      "customAnswerEditor.generatingAudio": "Audio-Datei wird erstellt...",
+      "customAnswerEditor.hintLabel": "Tipp",
+      "customAnswerEditor.hintPlaceholder": "Hinweis",
+      "customAnswerEditor.promptLabel": "Aufforderung",
+      "customAnswerEditor.remove": "entfernen",
+      "customAnswerEditor.successGeneratedAudio": "Erfolgreich generierte Audiodatei",
+      "customAnswerEditor.title": "Übung mit benutzerdefinierter Antwort",
+      "customAnswerEditor.ttsPreview": "Text-zu-Sprache-Vorschau",
+      "meaningAssociationEditor.add": "Hinzufügen",
+      "meaningAssociationEditor.addWordLabel": "Wort zur Übung hinzufügen",
+      "meaningAssociationEditor.cancel": "Abbrechen",
+      "meaningAssociationEditor.columnHeaders.definition": "Definition",
+      "meaningAssociationEditor.columnHeaders.phrase": "Phrase",
+      "meaningAssociationEditor.columnHeaders.pronunciation": "Aussprache",
+      "meaningAssociationEditor.definitionPlaceholder": "Definition",
+      "meaningAssociationEditor.dialogDescription": "Ein neues Wort zum Wörterbuch hinzufügen.",
+      "meaningAssociationEditor.dialogTitle": "Ein neues Wort hinzufügen",
+      "meaningAssociationEditor.emptyState": "Es wurden noch keine Wörter hinzugefügt. Verwenden Sie das obige Eingabefeld, um Wörter aus dem Wörterbuch hinzuzufügen. Wenn das Wort, das Sie hinzufügen möchten, nicht im Wörterbuch enthalten ist, können Sie es durch Klicken auf das Element \"Wort hinzufügen\" im Dropdown-Menü oder über den Wörterbuch-Editor in der Seitenleiste hinzufügen.",
+      "meaningAssociationEditor.phraseLabel": "Phrase",
+      "meaningAssociationEditor.pronunciationLabel": "Aussprache",
+      "meaningAssociationEditor.removeFromAssignment": "Aus Zuweisung entfernen",
+      "quizEditor.addAnswer": "Antwort hinzufügen",
+      "quizEditor.cancel": "Abbrechen",
+      "quizEditor.done": "Fertig",
+      "quizEditor.edit": "Bearbeiten",
+      "quizEditor.gradeDisplay": "Note: {{score}}",
+      "quizEditor.invalid": "Ungültig",
+      "quizEditor.reset": "Zurücksetzen",
+      "quizEditor.save": "Speichern",
+      "quizEditor.status": "Status",
+      "answerEditor.addWordLabel": "Wortbezeichnung hinzufügen",
+      "answerEditor.addWordToDict": "Fügen Sie dem Wörterbuch ein neues Wort hinzu.",
+      "answerEditor.cancel": "Abbrechen",
+      "answerEditor.dialogTitle": "Antwort bearbeiten",
+      "answerEditor.emptyState": "Keine Antwort gegeben",
+      "answerEditor.instructions": "Erstellen Sie Ihre Antwort unten",
+      "answerEditor.save": "Speichern",
+      "questionEditor.cancel": "Abbrechen"
+    },
+    "translategemma": {
+      "customAnswerEditor.add": "Hinzufügen",
+      "customAnswerEditor.addWordLabel": "Wort zur Übung hinzufügen",
+      "customAnswerEditor.answerLabel": "Antwort",
+      "customAnswerEditor.answerPlaceholder": "Antwort",
+      "customAnswerEditor.audioPreview": "Audio-Vorschau",
+      "customAnswerEditor.cancel": "Abbrechen",
+      "customAnswerEditor.columnHeaders.answer": "Antwort",
+      "customAnswerEditor.columnHeaders.answerAudio": "Antwortaudio",
+      "customAnswerEditor.columnHeaders.hint": "Tipp",
+      "customAnswerEditor.columnHeaders.id": "ID",
+      "customAnswerEditor.columnHeaders.prompt": "Eingabeaufforderung",
+      "customAnswerEditor.columnHeaders.promptAudio": "Eingesprochene Audio",
+      "customAnswerEditor.description": "Erstelle eine Kurzantwortaufgabe, die den Benutzer mit einer Frage anspricht und eine kurze Antwort erwartet.",
+      "customAnswerEditor.dialogDescription": "Ein neues Frage-Antwort-Paar hinzufügen.",
+      "customAnswerEditor.dialogTitle": "Eine neue Frage hinzufügen",
+      "customAnswerEditor.emptyState": "Noch wurden keine Fragen hinzugefügt. Verwenden Sie das Eingabefeld oben, um Prompt- und Antwortpaare hinzuzufügen.",
+      "customAnswerEditor.errorCreatingQuestion": "Fehler beim Erstellen der Frage",
+      "customAnswerEditor.errorGeneratingAudio": "Fehler beim Erzeugen der Audiodatei",
+      "customAnswerEditor.generatingAudio": "Audio-Datei wird erstellt...",
+      "customAnswerEditor.hintLabel": "Tipp",
+      "customAnswerEditor.hintPlaceholder": "Tipp",
+      "customAnswerEditor.promptLabel": "Eingabeaufforderung",
+      "customAnswerEditor.remove": "entfernen",
+      "customAnswerEditor.successGeneratedAudio": "Audio-Datei erfolgreich generiert",
+      "customAnswerEditor.title": "Benutzerdefinierte Antwortaufgabe",
+      "customAnswerEditor.ttsPreview": "Text-to-Speech-Vorschau",
+      "meaningAssociationEditor.add": "Hinzufügen",
+      "meaningAssociationEditor.addWordLabel": "Wort zur Übung hinzufügen",
+      "meaningAssociationEditor.cancel": "Abbrechen",
+      "meaningAssociationEditor.columnHeaders.definition": "Definition",
+      "meaningAssociationEditor.columnHeaders.phrase": "Phrase",
+      "meaningAssociationEditor.columnHeaders.pronunciation": "Aussprache",
+      "meaningAssociationEditor.definitionPlaceholder": "Definition",
+      "meaningAssociationEditor.dialogDescription": "Ein neues Wort zum Wörterbuch hinzufügen.",
+      "meaningAssociationEditor.dialogTitle": "Ein neues Wort hinzufügen",
+      "meaningAssociationEditor.emptyState": "Noch wurden keine Wörter hinzugefügt. Verwenden Sie das Eingabefeld oben, um Wörter aus dem Wörterbuch hinzuzufügen. Wenn das Wort, das Sie hinzufügen möchten, nicht im Wörterbuch enthalten ist, können Sie es hinzufügen, indem Sie auf den \"Wort hinzufügen\"-Eintrag im Dropdown-Menü oder im Wörterbuch-Editor in der Seitenleiste klicken.",
+      "meaningAssociationEditor.phraseLabel": "Phrase",
+      "meaningAssociationEditor.pronunciationLabel": "Aussprache",
+      "meaningAssociationEditor.removeFromAssignment": "Aus der Aufgabe entfernen",
+      "quizEditor.addAnswer": "Antwort hinzufügen",
+      "quizEditor.cancel": "Abbrechen",
+      "quizEditor.done": "Erledigt",
+      "quizEditor.edit": "Bearbeiten",
+      "quizEditor.gradeDisplay": "Note: {{score}}",
+      "quizEditor.invalid": "Ungültig",
+      "quizEditor.reset": "Zurücksetzen",
+      "quizEditor.save": "Speichern",
+      "quizEditor.status": "Status",
+      "answerEditor.addWordLabel": "Wortbeschriftung hinzufügen",
+      "answerEditor.addWordToDict": "Ein neues Wort zum Wörterbuch hinzufügen.",
+      "answerEditor.cancel": "Abbrechen",
+      "answerEditor.dialogTitle": "Antwort bearbeiten",
+      "answerEditor.emptyState": "Keine Antwort angegeben",
+      "answerEditor.instructions": "Erstellen Sie Ihre Antwort unten",
+      "answerEditor.save": "Speichern",
+      "questionEditor.cancel": "Abbrechen"
+    },
+    "final": {
+      "customAnswerEditor.add": "Hinzufügen",
+      "customAnswerEditor.addWordLabel": "Wort zur Übung hinzufügen",
+      "customAnswerEditor.answerLabel": "Antwort",
+      "customAnswerEditor.answerPlaceholder": "Antwort",
+      "customAnswerEditor.audioPreview": "Audio-Vorschau",
+      "customAnswerEditor.cancel": "Abbrechen",
+      "customAnswerEditor.columnHeaders.answer": "Antwort",
+      "customAnswerEditor.columnHeaders.answerAudio": "Audio-Antwort",
+      "customAnswerEditor.columnHeaders.hint": "Hinweis",
+      "customAnswerEditor.columnHeaders.id": "ID",
+      "customAnswerEditor.columnHeaders.prompt": "Eingabeaufforderung",
+      "customAnswerEditor.columnHeaders.promptAudio": "Eingabeaufforderung Audio",
+      "customAnswerEditor.description": "Erstellen Sie eine Kurze-Antwort-Aufgabe, die dem Benutzer eine Frage stellen und eine kurze Antwort erwarten kann.",
+      "customAnswerEditor.dialogDescription": "Fügen Sie ein neues Frage-und-Antwort-Paar hinzu.",
+      "customAnswerEditor.dialogTitle": "Neue Frage hinzufügen",
+      "customAnswerEditor.emptyState": "Es wurden noch keine Fragen hinzugefügt. Verwenden Sie das Eingabefeld oben, um Frage- und Antwortpaare hinzuzufügen.",
+      "customAnswerEditor.errorCreatingQuestion": "Fehler beim Erstellen der Frage",
+      "customAnswerEditor.errorGeneratingAudio": "Fehler beim Generieren der Audiodatei",
+      "customAnswerEditor.generatingAudio": "Audio-Datei wird erstellt...",
+      "customAnswerEditor.hintLabel": "Tipp",
+      "customAnswerEditor.hintPlaceholder": "Hinweis",
+      "customAnswerEditor.promptLabel": "Eingabeaufforderung",
+      "customAnswerEditor.remove": "entfernen",
+      "customAnswerEditor.successGeneratedAudio": "Audiodatei erfolgreich generiert",
+      "customAnswerEditor.title": "Benutzerdefinierte Antwortübung",
+      "customAnswerEditor.ttsPreview": "Text-zu-Sprache-Vorschau",
+      "meaningAssociationEditor.add": "Hinzufügen",
+      "meaningAssociationEditor.addWordLabel": "Wort zur Übung hinzufügen",
+      "meaningAssociationEditor.cancel": "Abbrechen",
+      "meaningAssociationEditor.columnHeaders.definition": "Definition",
+      "meaningAssociationEditor.columnHeaders.phrase": "Phrase",
+      "meaningAssociationEditor.columnHeaders.pronunciation": "Aussprache",
+      "meaningAssociationEditor.definitionPlaceholder": "Definition",
+      "meaningAssociationEditor.dialogDescription": "Ein neues Wort zum Wörterbuch hinzufügen.",
+      "meaningAssociationEditor.dialogTitle": "Ein neues Wort hinzufügen",
+      "meaningAssociationEditor.emptyState": "Noch wurden keine Wörter hinzugefügt. Verwenden Sie die Eingabe oben, um Wörter aus dem Wörterbuch hinzuzufügen. Wenn das Wort, das Sie hinzufügen möchten, nicht im Wörterbuch enthalten ist, können Sie es hinzufügen, indem Sie auf „Wort hinzufügen\" im Dropdown-Menü klicken oder den Wörterbuch-Editor in der Seitenleiste verwenden.",
+      "meaningAssociationEditor.phraseLabel": "Phrase",
+      "meaningAssociationEditor.pronunciationLabel": "Aussprache",
+      "meaningAssociationEditor.removeFromAssignment": "Aus Aufgabe entfernen",
+      "quizEditor.addAnswer": "Antwort hinzufügen",
+      "quizEditor.cancel": "Abbrechen",
+      "quizEditor.done": "Fertig",
+      "quizEditor.edit": "Bearbeiten",
+      "quizEditor.gradeDisplay": "Note: {{score}}",
+      "quizEditor.invalid": "Ungültig",
+      "quizEditor.reset": "Zurücksetzen",
+      "quizEditor.save": "Speichern",
+      "quizEditor.status": "Status",
+      "answerEditor.addWordLabel": "Wort-Label hinzufügen",
+      "answerEditor.addWordToDict": "Fügen Sie ein neues Wort zum Wörterbuch hinzu.",
+      "answerEditor.cancel": "Abbrechen",
+      "answerEditor.dialogTitle": "Antwort bearbeiten",
+      "answerEditor.emptyState": "Keine Antwort angegeben",
+      "answerEditor.instructions": "Erstellen Sie Ihre Antwort unten",
+      "answerEditor.save": "Speichern",
+      "questionEditor.cancel": "Abbrechen"
+    }
+  }
+}

@@ -1,1 +1,145 @@
-{}
+{
+  "grades": {
+    "title": "Noten",
+    "sections": "Abschnitte",
+    "mySections": "Meine Bereiche",
+    "studentHeader": "Student",
+    "assignmentHeader": "Aufgabe",
+    "gradeHeader": "Note"
+  },
+  "index": {
+    "title": "Hausaufgabenmaterial",
+    "assignments": "Aufgaben",
+    "viewWorkbook": "Arbeitsbuch anzeigen",
+    "completedAssignments": "Abgeschlossene Aufgaben",
+    "myAssignments": "Meine Aufgaben",
+    "editUnit": "Einheit bearbeiten",
+    "noSectionsYet": "Noch keine Abschnitte",
+    "joinSection": "Abschnitt beitreten?",
+    "createNewSection": "Neuen Abschnitt erstellen",
+    "mySections": "Meine Bereiche",
+    "untitledSection": "Unbenannter Abschnitt",
+    "noDescription": "Keine Beschreibung",
+    "viewSection": "Abschnitt anzeigen",
+    "sections": "Abschnitte"
+  },
+  "profile": {
+    "title": "Mein Profil",
+    "heading": "Mein Profil",
+    "description": "Ihre Profilinformationen anzeigen und aktualisieren",
+    "userId": "Benutzer-ID",
+    "identityId": "Identitäts-ID",
+    "cancel": "Abbrechen",
+    "updateProfile": "Profil aktualisieren",
+    "confirmEmail": {
+      "title": "E-Mail bestätigen",
+      "message": "Bitte überprüfen Sie Ihre E-Mail und geben Sie den Bestätigungscode ein, um Ihre E-Mail-Adresse zu verifizieren.",
+      "button": "E-Mail bestätigen"
+    },
+    "changePassword": {
+      "heading": "Passwort ändern",
+      "description": "Aktualisieren Sie Ihr Kontokennwort für die Sicherheit",
+      "button": "Passwort ändern"
+    },
+    "advanced": {
+      "heading": "Fortgeschritten",
+      "description": "Erweiterte Einstellungen verwalten und lokalen Datencache löschen",
+      "clearCache": "Lokalen Cache löschen",
+      "clearCacheDialog": {
+        "title": "Lokalen Daten-Cache löschen?",
+        "message": "Dies wird alle lokal zwischengespeicherten Daten einschließlich Offline-Aufgaben und synchronisierter Inhalte löschen. Sie müssen die Daten vom Server neu laden.",
+        "cancel": "Abbrechen",
+        "confirm": "Cache leeren"
+      }
+    }
+  },
+  "sections": {
+    "title": "Abschnitte",
+    "createNew": "Neu erstellen",
+    "noSectionsYet": "Noch keine Abschnitte",
+    "createNewSection": "Neuen Abschnitt erstellen",
+    "untitledSection": "Unbenannter Abschnitt",
+    "viewSection": "Abschnitt anzeigen",
+    "loading": "Wird geladen...",
+    "newSection": {
+      "title": "Neuer Abschnitt",
+      "description": "Erstellen Sie einen neuen Abschnitt, indem Sie die folgenden Informationen eingeben",
+      "nameLabel": "Name",
+      "descriptionLabel": "Beschreibung",
+      "cancel": "Abbrechen",
+      "create": "Erstellen"
+    }
+  },
+  "sectionDetail": {
+    "noFeaturedImage": "Kein Beitragsbild festgelegt",
+    "dragAndDropPrompt": "Ziehen Sie ein Bild hierher und legen Sie es ab, um es als Hauptbild festzulegen.",
+    "uploadingImage": "Bild hochladen",
+    "uploadImagePrompt": "Bild hochladen",
+    "uploadImageInvalidFile": "Bitte laden Sie eine Bilddatei mit einer gültigen Dateierweiterung hoch.",
+    "joinCode": "Beitrittscode:",
+    "studentView": "Schüleransicht",
+    "instructorView": "Dozenten-Ansicht",
+    "switchToInstructorView": "Zur Dozenten-Ansicht wechseln",
+    "previewStudentView": "Schüleransicht-Vorschau",
+    "students": "Studenten",
+    "studentHeader": "Schüler",
+    "emailHeader": "E-Mail",
+    "actionsHeader": "Aktionen",
+    "gradebook": "Notenbuch",
+    "showingAssignments": "(Zeige {{visible}} von {{total}} Aufgaben)",
+    "showFutureAssignments": "Zukunft anzeigen",
+    "showDraftAssignments": "Entwürfe anzeigen",
+    "applyCurve": "Kurve anwenden",
+    "curveMethod": "Kurvenmethode",
+    "scaleToTopMethod": "Auf Höchstpunktzahl skalieren (100%)",
+    "linearAdjustmentMethod": "Lineare Anpassung (75% Durchschn.)",
+    "curveDebugInfo": "Kurven-Debug:",
+    "selectAssignmentsToCurve": "Aufgaben zum Bewerten auswählen",
+    "selectAll": "Alle auswählen",
+    "clearAll": "Alle löschen",
+    "assignmentHeader": "Aufgabe",
+    "gradeHeader": "Note",
+    "totalAverage": "Gesamtdurchschnitt",
+    "learnerHeader": "Lernende",
+    "totalCompletion": "Gesamt (Abschluss)",
+    "editTooltip": "Bearbeiten",
+    "assignments": "Aufgaben",
+    "viewWorkbook": "Arbeitsbuch anzeigen",
+    "deleteSection": "Abschnitt löschen",
+    "deleteSectionConfirm": "Möchten Sie diesen Abschnitt wirklich löschen?",
+    "loading": "Wird geladen...",
+    "overrideGrade": {
+      "title": "Note überschreiben",
+      "student": "Student:",
+      "assignment": "Aufgabe:",
+      "currentGrade": "Aktuelle Note:",
+      "noGrade": "Keine Note",
+      "prompt": "Neue Note eingeben (0-100):",
+      "label": "Note (%)",
+      "invalidScore": "Bitte geben Sie eine gültige Punktzahl zwischen 0 und 100 ein",
+      "saveFailed": "Speichern der Note fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "cancel": "Abbrechen",
+      "save": "Note speichern"
+    }
+  },
+  "units": {
+    "title": "Einheiten",
+    "createNew": "Neu erstellen",
+    "noPublishedUnits": "Noch keine veröffentlichten Einheiten",
+    "createNewUnit": "Neue Einheit erstellen",
+    "publishedUnits": "Veröffentlichte Einheiten",
+    "untitledUnit": "Unbenannte Einheit",
+    "viewWorkbook": "Arbeitsheft anzeigen",
+    "editUnit": "Einheit bearbeiten",
+    "myDrafts": "Meine Entwürfe",
+    "archivedUnits": "Archivierte Einheiten"
+  },
+  "unitDetail": {
+    "loading": "Wird geladen…"
+  },
+  "workbook": {
+    "timerInstructions": "Dies ist eine zeitlich begrenzte Übung. Drücken Sie Start, um den Timer zu beginnen und die Fragen zu beantworten.",
+    "start": "Starten",
+    "loading": "Wird geladen…"
+  }
+}

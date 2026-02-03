@@ -1,1 +1,143 @@
-{}
+{
+  "fileManager2": {
+    "contextMenu": {
+      "deleteConfirmMessage": "{{count}} ausgewählte Datei(en) löschen?",
+      "deleteSelected": "Ausgewählte löschen ({{count}})",
+      "deselectAll": "Alle abwählen",
+      "reAnalyzeSelected": "Ausgewählte erneut analysieren ({{count}})"
+    },
+    "expandedContent": {
+      "descriptionLabel": "Beschreibung:",
+      "extractedContentHeading": "Extrahierter Inhalt",
+      "noConceptsExtracted": "Keine Konzepte extrahiert",
+      "noContentAvailable": "Kein extrahierter Inhalt verfügbar",
+      "noObjectivesExtracted": "Keine Ziele extrahiert",
+      "noQuestionsExtracted": "Keine Fragen extrahiert",
+      "noSummariesExtracted": "Keine Zusammenfassungen extrahiert",
+      "noVocabularyExtracted": "Keine Vokabeln extrahiert",
+      "reviewQuestionsMessage": "Fragen aus dem Dokument überprüfen und importieren",
+      "reviewVocabularyMessage": "Vokabular aus dem Dokument überprüfen und importieren",
+      "transcriptionLabel": "Transkription:"
+    },
+    "fileDetails": {
+      "deleteTooltip": "Löschen",
+      "downloadTooltip": "Herunterladen",
+      "insertTooltip": "In Editor einfügen",
+      "noWaveformAvailable": "Keine Wellenform verfügbar",
+      "reAnalyzeTooltip": "Erneut analysieren",
+      "videoNotSupported": "Ihr Browser unterstützt das Video-Tag nicht."
+    },
+    "generators": {
+      "audioPromptPlaceholder": "Text, der in eine Audiodatei umgewandelt werden soll.",
+      "errorGeneratingAudio": "Fehler beim Generieren der Audiodatei",
+      "errorGeneratingImage": "Fehler beim Erstellen der Bilddatei",
+      "generatingAudio": "Audio-Datei wird erstellt...",
+      "generatingImage": "Bilddatei wird erstellt...",
+      "imagePromptPlaceholder": "Text zur Umwandlung in eine Bilddatei.",
+      "successfullyGeneratedAudio": "Audiodatei erfolgreich erstellt",
+      "successfullyGeneratedImage": "Bilddatei erfolgreich erstellt"
+    },
+    "mainView": {
+      "noFilesMessage": "Keine Dateien verfügbar. Laden Sie Dateien hoch, um zu beginnen."
+    },
+    "metadataEditor": {
+      "cancelButton": "Abbrechen",
+      "createdLabel": "Erstellt",
+      "descriptionLabel": "Beschreibung",
+      "heading": "Datei-Metadaten",
+      "modelLabel": "Modell",
+      "nameLabel": "Name",
+      "pathLabel": "Pfad",
+      "promptLabel": "Eingabeaufforderung (für KI-generierte Dateien)",
+      "protectionLevelLabel": "Schutzstufe",
+      "saveButton": "Speichern",
+      "sizeLabel": "Größe",
+      "typeLabel": "Typ",
+      "unknown": "Unbekannt",
+      "variantLabel": "Variante"
+    },
+    "selectedFileDetails": {
+      "emptyState": "Wählen Sie eine Datei aus, um Details und Metadaten anzuzeigen"
+    },
+    "toolbar": {
+      "actionsTooltip": "Aktionen",
+      "searchPlaceholder": "Dateien suchen...",
+      "selectAllTooltip": "Alle auswählen",
+      "uploadTooltip": "Dateien hochladen"
+    }
+  },
+  "fileMetadataComponent": {
+    "basicInfo": "Grundlegende Informationen",
+    "cancel": "Abbrechen",
+    "collapse": "Einklappen",
+    "concepts": "Konzepte",
+    "conceptsCount": "Konzepte ({{count}})",
+    "confirm": "Bestätigen",
+    "created": "Erstellt:",
+    "deleteConfirmation": "Datei löschen: \"{{fileName}}\"?",
+    "deleteFile": "Datei löschen",
+    "expand": "Erweitern",
+    "fileInfo": "Dateiinformationen",
+    "filename": "Dateiname:",
+    "noMetadataAvailable": "Keine Metadaten für diese Datei verfügbar.",
+    "noParsedContentAvailable": "Für diese Datei sind keine analysierten Inhalte verfügbar.",
+    "objectives": "Ziele",
+    "objectivesCount": "Ziele ({{count}})",
+    "parsedContent": "Geparster Inhalt",
+    "path": "Pfad:",
+    "protectionLevel": "Schutzebene:",
+    "questions": "Fragen",
+    "questionsCount": "Fragen ({{count}})",
+    "rawMetadata": "Rohe Metadaten",
+    "searchPlaceholder": "Dateiinhalt durchsuchen...",
+    "summaries": "Zusammenfassungen",
+    "summariesCount": "Zusammenfassungen ({{count}})",
+    "type": "Typ:",
+    "unknown": "Unbekannt",
+    "unknownSize": "Unbekannte Größe",
+    "unset": "UNSET",
+    "vocabulary": "Vokabeln",
+    "vocabularyCount": "Vokabeln ({{count}})"
+  },
+  "documentUploader": {
+    "browseFiles": "Dateien durchsuchen",
+    "dragDropPrompt": "Dokumente hier per Drag & Drop ablegen",
+    "errorMessages": {
+      "noSupportedFiles": "Keine unterstützten Dokumente gefunden. Bitte laden Sie PDF-, Word-, Text- oder Excel-Dateien hoch.",
+      "skippedFiles": "Einige Dateien wurden übersprungen (nicht unterstützter Dateityp)",
+      "uploadFailed": "Upload von {{fileName}} fehlgeschlagen: {{error}}"
+    },
+    "extractionTypes": {
+      "dictionary": "Wörterbuch",
+      "question": "Frage",
+      "questions": "Fragen",
+      "vocabulary": "Vokabeln"
+    },
+    "howItWorks": {
+      "step1": "1. Laden Sie Ihre Dokumente hoch (PDF-, Word-, Text- oder Excel-Dateien)",
+      "step2": "2. KI wird den Inhalt analysieren und {{extractionType}} extrahieren",
+      "step3": "3. Überprüfen und genehmigen Sie Vorschläge im Tab \"Vorschläge\"",
+      "step4": "4. Ausgewählte Elemente in Ihr {{target}} importieren",
+      "title": "Wie es funktioniert:"
+    },
+    "recentUploads": "Neueste Uploads",
+    "statusLabels": {
+      "complete": "Abschließen",
+      "failed": "Fehlgeschlagen",
+      "processing": "Wird verarbeitet..."
+    },
+    "supportedFormats": "Unterstützt: PDF, Word (.doc, .docx), Text (.txt), Excel (.xls, .xlsx, .csv)",
+    "title": "Dokumente für {{extractionType}}-Extraktion hochladen",
+    "uploadingProgress": "Wird hochgeladen... {{progress}}%"
+  },
+  "fileManager": {
+    "close": "Schließen",
+    "create": "Erstellen",
+    "draftChanges": "Änderungen entwerfen",
+    "errorRendering": "Fehler beim Rendern von FileManager: {{message}}",
+    "revert": "Zurücksetzen",
+    "save": "Speichern",
+    "textToImagePreview": "Text-zu-Bild-Vorschau",
+    "textToSpeechPreview": "Text-zu-Sprache-Vorschau"
+  }
+}

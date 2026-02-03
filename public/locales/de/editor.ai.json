@@ -1,1 +1,50 @@
-{}
+{
+  "unifiedGenerateModal": {
+    "cancel": "Abbrechen",
+    "discard": "Verwerfen",
+    "discardChanges": "Änderungen verwerfen?",
+    "generate": "Generieren",
+    "generating": "{{type}} wird generiert...",
+    "keepEditing": "Weiter bearbeiten",
+    "lostWarning": "Ihr erstellter {{type}} geht verloren, wenn Sie jetzt abbrechen.",
+    "preview": "Vorschau",
+    "saveClose": "Speichern & Schließen",
+    "takeMoments": "Dies kann einen Moment dauern"
+  },
+  "promptMethodSelector": {
+    "inputButton": "Eingabe",
+    "menuItems": {
+      "audio": "Audio",
+      "drawing": "Zeichnung",
+      "image": "Bild",
+      "text": "Text",
+      "video": "Video"
+    },
+    "outputButton": "Ausgabe"
+  },
+  "enhancedGenerators": {
+    "audioPromptPlaceholder": "Text zur Sprachausgabe eingeben...",
+    "backToGenerator": "Zurück zum Generator",
+    "editWithMask": "Mit Maske bearbeiten (Teil regenerieren)",
+    "generateAudio": "Audio generieren",
+    "generateImage": "Bild generieren",
+    "imagePromptPlaceholder": "Beschreiben Sie das Bild, das Sie generieren möchten...",
+    "openRecordingStudio": "Im Aufnahmestudio öffnen"
+  },
+  "blockSuggestionMenu": {
+    "aiTitle": "🤖 KI-gestützte Vorschläge",
+    "emptyState": "Noch keine Vorschläge verfügbar.",
+    "emptyStateHelper": "Beginnen Sie mit der Eingabe im Editor, um KI-gestützte Blockvorschläge zu sehen.",
+    "generateMore": "Mehr Vorschläge generieren",
+    "helper": "Klicken Sie auf einen Vorschlag, um ihn in Ihre Lektion einzufügen",
+    "helperAI": "Klicken Sie auf einen Vorschlag oder drücken Sie Tab/Enter zum Einfügen",
+    "suggestionsTitle": "💡 Vorgeschlagene Blöcke"
+  },
+  "suggestedContent": {
+    "identityPlaceholder": "Identitäts-ID",
+    "ownerPlaceholder": "Besitzer-ID"
+  },
+  "aiContentSuggestion": {
+    "tabToAccept": "Tab zum Akzeptieren"
+  }
+}

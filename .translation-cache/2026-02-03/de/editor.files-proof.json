@@ -1,0 +1,2600 @@
+{
+  "namespace": "editor.files",
+  "sourceLang": "en",
+  "targetLang": "de",
+  "timestamp": "2026-02-03T14:10:36.665Z",
+  "models": [
+    {
+      "name": "claude-sonnet-4-20250514",
+      "provider": "anthropic",
+      "requestId": "msg_0129fdT8KnfLLjQMVuai7kkf",
+      "fingerprint": "751ccac05ca41fc87506e76c3cd474564e13071f7740e9094b71a90a38c9d3c1",
+      "status": "success"
+    },
+    {
+      "name": "gpt-4o",
+      "provider": "openai",
+      "requestId": "chatcmpl-D5BGQ1Mvs11Q0zfQloDnTHTcumnbJ",
+      "fingerprint": "999104d2d16ae7afa207c4a772edc4e3222dec9b739ea333cee1bae614b30d50",
+      "status": "success"
+    },
+    {
+      "name": "gemma-3-12b-it",
+      "provider": "google",
+      "requestId": "gemma-batch",
+      "fingerprint": "c0509906d518a1899bbaab55d32390e1ba37f579a14524647d5dd42bd603ed83",
+      "status": "success"
+    }
+  ],
+  "consensusFingerprint": "e40fdcd60a5a57ab12b1f1ccb0acb84049ce31c5d38346bedfd9e9f5a41cbb16",
+  "consensus": {
+    "source": {
+      "fileManager2.contextMenu.deleteConfirmMessage": {
+        "_meta": {
+          "alternativeTerms": [
+            "Remove",
+            "Erase",
+            "Discard",
+            "Eliminate"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component that allows users to upload, organize, and manage media files and documents within the content editor. It provides file operations through context menus and handles bulk actions like deleting multiple files at once.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This confirmation message appears in a modal dialog when users select one or more files in the file manager and choose to delete them from the context menu. The message dynamically shows the count of selected files and asks for user confirmation before proceeding with the destructive action.",
+          "impact": "Critical because it prevents accidental data loss by confirming destructive file operations that cannot be easily undone",
+          "tone": "polite-formal",
+          "usage": "Confirmation message text displayed in a modal dialog triggered by context menu delete action",
+          "userType": "instructors"
+        },
+        "value": "Delete {{count}} selected file(s)?"
+      },
+      "fileManager2.contextMenu.deleteSelected": {
+        "_meta": {
+          "alternativeTerms": [
+            "Remove Selected",
+            "Delete Multiple",
+            "Bulk Delete",
+            "Remove Chosen Items"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management interface component that allows users to browse, select, and perform operations on files and folders. It provides context menus with various actions including bulk operations for multiple selected items.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears in a context menu item within the file manager component when users have selected multiple files or folders. It shows the count of selected items in parentheses and allows users to delete all selected items at once.",
+          "impact": "High - This is a critical action for content management that helps instructors efficiently organize their learning materials by removing multiple files simultaneously.",
+          "tone": "polite-formal",
+          "usage": "Context menu item that appears when right-clicking with multiple files selected, enabling bulk deletion action.",
+          "userType": "instructors"
+        },
+        "value": "Delete Selected ({{count}})"
+      },
+      "fileManager2.contextMenu.deselectAll": {
+        "_meta": {
+          "alternativeTerms": [
+            "Clear Selection",
+            "Unselect All",
+            "Remove Selection",
+            "Clear All"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component within the Lexical editor that allows users to browse, select, and manage media files and documents. It provides context menu options for performing bulk operations on selected files.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears as an option in the context menu of the File Manager component when users have multiple files selected. Users see this when they right-click or access the context menu after selecting multiple files and want to clear their selection.",
+          "impact": "Medium - improves user efficiency by providing a quick way to clear multiple file selections without individual deselection.",
+          "tone": "polite-formal",
+          "usage": "Context menu item that allows users to clear all currently selected files with a single action.",
+          "userType": "all"
+        },
+        "value": "Deselect All"
+      },
+      "fileManager2.contextMenu.reAnalyzeSelected": {
+        "_meta": {
+          "alternativeTerms": [
+            "Reprocess Selected",
+            "Analyze Again Selected",
+            "Re-examine Selected"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management interface component that allows users to organize, select, and perform bulk operations on their files. It provides context menu functionality for performing actions on single or multiple selected files within the content editor.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears as a context menu option in the file manager when users have selected multiple files. Users see this option after right-clicking on their selected files, allowing them to trigger a re-analysis process on all chosen items simultaneously.",
+          "impact": "High - This is essential for instructors who need to efficiently process multiple files at once, significantly improving workflow efficiency when managing large amounts of content",
+          "tone": "polite-formal",
+          "usage": "Context menu item that appears when users right-click on multiple selected files in the file manager",
+          "userType": "instructors"
+        },
+        "value": "Re-analyze Selected ({{count}})"
+      },
+      "fileManager2.expandedContent.descriptionLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Details",
+            "Summary",
+            "File Description",
+            "Info"
+          ],
+          "component": {
+            "description": "A file management component that allows instructors to browse, organize, and manage files within the content editor. The component provides expanded views of file details including descriptions for better file organization and identification.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears as a label in an expanded file details view within the file manager component. Users see this when they expand or select a file to view its detailed information, specifically to identify the description field for that file.",
+          "impact": "Medium - helps instructors identify and understand file descriptions when managing their content library, improving content organization workflow.",
+          "tone": "polite-formal",
+          "usage": "Field label that precedes the description text of a selected file in an expanded details view.",
+          "userType": "instructors"
+        },
+        "value": "Description:"
+      },
+      "fileManager2.expandedContent.extractedContentHeading": {
+        "_meta": {
+          "alternativeTerms": [
+            "Parsed Content",
+            "Extracted Data",
+            "File Content",
+            "Retrieved Information"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component within the Lexical editor that handles file uploads, organization, and content extraction. It provides instructors with tools to manage media files and extract usable content for their learning units.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This heading appears in the File Manager component when users expand content to view extracted information from uploaded files. Users see this text when they have uploaded files that contain extractable content such as text from PDFs, transcripts from audio files, or other parseable data.",
+          "impact": "Important because it helps instructors understand and organize extracted content from their uploaded files for use in learning materials",
+          "tone": "polite-formal",
+          "usage": "Section heading that labels the area displaying content extracted from uploaded files",
+          "userType": "instructors"
+        },
+        "value": "Extracted Content"
+      },
+      "fileManager2.expandedContent.noConceptsExtracted": {
+        "_meta": {
+          "alternativeTerms": [],
+          "component": {
+            "description": "FileManager2 is a file management component within the Lexical editor that handles file uploads and processing for educational content creation. It displays file information and extracted metadata, including concepts that can be used for learning activities.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This message appears in the FileManager2 component when the system has processed a file but was unable to extract any learning concepts from its content. Users see this in an expanded content section, likely after uploading or analyzing educational materials where concept extraction has failed or returned empty results.",
+          "impact": "Provides information to users",
+          "tone": "polite-formal",
+          "usage": "Translation key: fileManager2.expandedContent.noConceptsExtracted",
+          "userType": "all"
+        },
+        "value": "No concepts extracted"
+      },
+      "fileManager2.expandedContent.noContentAvailable": {
+        "_meta": {
+          "alternativeTerms": [],
+          "component": {
+            "description": "FileManager2 is a file management component within the Lexical editor that allows instructors to upload, organize, and manage files for their learning content. It provides file expansion functionality to preview and extract content from uploaded files for use in lessons and assignments.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears in the FileManager2 component when a user expands a file but no extractable text content is available from that file. Users see this message in the expanded content area when they attempt to view or work with files that cannot be processed for text extraction, such as certain image formats or corrupted files.",
+          "impact": "Provides information to users",
+          "tone": "polite-formal",
+          "usage": "Translation key: fileManager2.expandedContent.noContentAvailable",
+          "userType": "all"
+        },
+        "value": "No extracted content available"
+      },
+      "fileManager2.expandedContent.noObjectivesExtracted": {
+        "_meta": {
+          "alternativeTerms": [
+            "No learning goals found",
+            "No targets identified",
+            "No aims detected",
+            "Objectives not found"
+          ],
+          "component": {
+            "description": "File Manager component that handles file uploads and processing in the content editor. It likely uses AI services to analyze uploaded documents and extract educational content like objectives, vocabulary, or other learning materials.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This message appears in the File Manager component when the system attempts to extract learning objectives from an uploaded file but finds none. It displays in an expanded content section, likely after a user has uploaded a document and the AI processing has completed but yielded no objectives.",
+          "impact": "Medium - Provides important feedback to instructors about the success of AI content extraction, helping them understand when manual objective entry may be needed",
+          "tone": "polite-formal",
+          "usage": "Status message displayed in the expanded content area when objective extraction fails to find results",
+          "userType": "instructors"
+        },
+        "value": "No objectives extracted"
+      },
+      "fileManager2.expandedContent.noQuestionsExtracted": {
+        "_meta": {
+          "alternativeTerms": [],
+          "component": {
+            "description": "FileManager2 is a file management component within the content editor that allows instructors to upload files and extract educational content like questions using AI processing. It provides feedback on the extraction results and manages file operations during content creation.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This message appears in the FileManager2 component when an instructor has uploaded a file and attempted to extract questions from it, but the AI extraction process found no usable questions in the file. It displays as feedback text to inform the instructor that no questions could be automatically generated from their uploaded content.",
+          "impact": "Provides information to users",
+          "tone": "polite-formal",
+          "usage": "Translation key: fileManager2.expandedContent.noQuestionsExtracted",
+          "userType": "all"
+        },
+        "value": "No questions extracted"
+      },
+      "fileManager2.expandedContent.noSummariesExtracted": {
+        "_meta": {
+          "alternativeTerms": [
+            "No summaries found",
+            "No summaries available",
+            "No extracted summaries",
+            "Summaries not available"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management interface within the Lexical editor that allows instructors to upload, organize, and manage educational content files. The component displays file information including expanded content views that can show extracted summaries and other processed content from uploaded documents.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears in the FileManager2 component within the Editor3 interface when expanded content is displayed but no document summaries have been extracted from uploaded files. Users see this message when they expand a file's content section expecting to find AI-generated summaries, but the extraction process either hasn't run yet or found no content to summarize.",
+          "impact": "Medium - This informational message helps instructors understand the current state of their file processing and sets expectations about content availability",
+          "tone": "polite-formal",
+          "usage": "Status message displayed in the expanded content section when no document summaries are available",
+          "userType": "instructors"
+        },
+        "value": "No summaries extracted"
+      },
+      "fileManager2.expandedContent.noVocabularyExtracted": {
+        "_meta": {
+          "alternativeTerms": [
+            "No vocabulary found",
+            "No vocabulary detected",
+            "No terms extracted"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component within the Lexical editor that handles file uploads, processing, and content extraction for learning materials. It displays file status information and extracted content like vocabulary terms to help instructors build educational content.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This message appears in the expanded content view of FileManager2 when a file has been processed for vocabulary extraction but no vocabulary terms were found or extracted from the content. Users see this as a status message indicating that the automatic vocabulary detection process completed but yielded no results.",
+          "impact": "Medium - helps instructors understand that vocabulary extraction was attempted but unsuccessful, allowing them to manually add vocabulary or try different content",
+          "tone": "polite-formal",
+          "usage": "Status message displayed in the expanded file content section when vocabulary extraction yields no results",
+          "userType": "instructors"
+        },
+        "value": "No vocabulary extracted"
+      },
+      "fileManager2.expandedContent.reviewQuestionsMessage": {
+        "_meta": {
+          "alternativeTerms": [],
+          "component": {
+            "description": "FileManager2 handles file operations and document processing within the Lexical editor environment. It provides functionality for importing and managing various file types, including extracting questions from uploaded documents for use in learning units.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This message appears in the FileManager2 component when users expand content related to importing questions from documents. It guides users through the process of reviewing extracted questions before finalizing the import into their learning units.",
+          "impact": "Provides information to users",
+          "tone": "polite-formal",
+          "usage": "Translation key: fileManager2.expandedContent.reviewQuestionsMessage",
+          "userType": "all"
+        },
+        "value": "Review and import questions from the document"
+      },
+      "fileManager2.expandedContent.reviewVocabularyMessage": {
+        "_meta": {
+          "alternativeTerms": [
+            "examine",
+            "analyze",
+            "extract",
+            "incorporate"
+          ],
+          "component": {
+            "description": "The FileManager2 component handles file operations within the editor, including document uploads, content preview, and vocabulary extraction features. It provides an interface for users to manage document assets and extract learning materials from uploaded files.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This message appears in the File Manager component when users expand document content to view vocabulary extraction options. It guides users through the process of reviewing and importing vocabulary terms that have been automatically extracted from uploaded documents.",
+          "impact": "Provides information to users",
+          "tone": "polite-formal",
+          "usage": "Translation key: fileManager2.expandedContent.reviewVocabularyMessage",
+          "userType": "instructors"
+        },
+        "value": "Review and import vocabulary from the document"
+      },
+      "fileManager2.expandedContent.transcriptionLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Script:",
+            "Text version:",
+            "Written text:",
+            "Audio text:"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component within the Lexical editor interface that allows instructors to upload, organize, and manage media files for their learning content. It displays file details and metadata in both collapsed and expanded views for better content organization.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This label appears in the FileManager2 component within the Editor3 interface, specifically in an expanded content view where file details are shown. Users see this when they expand or view detailed information about an uploaded file that has transcription capabilities, likely audio or video files.",
+          "impact": "Medium - helps instructors identify and organize transcribed content but is supplementary to core functionality.",
+          "tone": "polite-formal",
+          "usage": "Text label that precedes transcription content in an expanded file details view.",
+          "userType": "instructors"
+        },
+        "value": "Transcription:"
+      },
+      "fileManager2.fileDetails.deleteTooltip": {
+        "_meta": {
+          "alternativeTerms": [
+            "Remove",
+            "Erase",
+            "Discard"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component within the content editor that allows users to upload, organize, and manage media files and resources for their learning units. It provides file operations including viewing, organizing, and deleting files used in educational content creation.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This tooltip text appears when users hover over a delete button in the file manager component of the editor. Users see this confirmation text when they are about to delete a file from their project, providing clarity about the destructive action they are initiating.",
+          "impact": "High - Clear labeling of destructive actions is critical for preventing accidental file deletion and maintaining user confidence in file management operations.",
+          "tone": "polite-formal",
+          "usage": "Tooltip text that appears on hover over a delete button for file removal.",
+          "userType": "instructors"
+        },
+        "value": "Delete"
+      },
+      "fileManager2.fileDetails.downloadTooltip": {
+        "_meta": {
+          "alternativeTerms": [
+            "Save",
+            "Export",
+            "Retrieve",
+            "Get"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component within the Lexical editor that allows users to browse, upload, and manage media files and documents. It provides file operations including download functionality for retrieving files to the user's local device.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This tooltip text appears when users hover over a download button or icon within the FileManager2 component. Users see this tooltip when they mouse over the download action for files in the file management interface, providing them with clear guidance about what the button will do.",
+          "impact": "Medium - While not critical for core functionality, clear download tooltips help users confidently manage their files and understand available actions.",
+          "tone": "polite-formal",
+          "usage": "Tooltip text that appears on hover over a download button or icon.",
+          "userType": "all"
+        },
+        "value": "Download"
+      },
+      "fileManager2.fileDetails.insertTooltip": {
+        "_meta": {
+          "alternativeTerms": [
+            "Add to editor",
+            "Place in editor",
+            "Embed in content",
+            "Include in lesson"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component integrated within the Lexical editor that allows instructors to browse, select, and manage media files for their lessons. It provides functionality to insert various file types directly into the rich text editor for creating engaging learning content.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This tooltip text appears when users hover over a button or icon in the file manager interface within the content editor. It provides helpful guidance to instructors about inserting selected files (images, audio, documents) directly into their lesson content.",
+          "impact": "Important because it guides instructors on how to add multimedia content to their lessons, which is essential for creating engaging Japanese language learning materials.",
+          "tone": "polite-formal",
+          "usage": "Tooltip text that appears on hover over an insert button or icon in the file manager interface.",
+          "userType": "instructors"
+        },
+        "value": "Insert into editor"
+      },
+      "fileManager2.fileDetails.noWaveformAvailable": {
+        "_meta": {
+          "alternativeTerms": [
+            "No audio visualization available",
+            "Waveform not displayed",
+            "Audio visualization unavailable",
+            "No sound wave shown"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component within the Lexical editor that allows instructors to upload, organize, and manage media files for their learning content. It provides file details views including audio waveform visualizations when available for precise audio editing and trimming.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears in the file details section of the File Manager when an audio file is selected but its waveform visualization cannot be generated or displayed. Users see this message when they click on an audio file in the file manager and the system is unable to process or render the audio waveform for visual editing purposes.",
+          "impact": "Medium - This informs users why visual audio editing features are unavailable, helping them understand system limitations without blocking core functionality",
+          "tone": "polite-formal",
+          "usage": "Status message displayed in the file details panel when audio waveform cannot be rendered",
+          "userType": "instructors"
+        },
+        "value": "No waveform available"
+      },
+      "fileManager2.fileDetails.reAnalyzeTooltip": {
+        "_meta": {
+          "alternativeTerms": [
+            "Reprocess",
+            "Analyze again",
+            "Re-examine",
+            "Process again"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component that allows users to upload, view, and manage files within the content editor. It provides file details panels with various actions including analysis capabilities for processing uploaded content.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears as a tooltip when users hover over a re-analyze button in the file details panel of the file manager. Users see this when they want to trigger a re-analysis of an uploaded file, likely after making changes or when initial analysis failed.",
+          "impact": "Medium - Provides helpful context for a secondary action that helps users understand they can reprocess files when needed",
+          "tone": "polite-formal",
+          "usage": "Tooltip text that appears on hover over a re-analyze action button",
+          "userType": "instructors"
+        },
+        "value": "Re-analyze"
+      },
+      "fileManager2.fileDetails.videoNotSupported": {
+        "_meta": {
+          "alternativeTerms": [
+            "browser incompatible",
+            "video format unsupported",
+            "playback unavailable",
+            "media not supported"
+          ],
+          "component": {
+            "description": "FileManager2 is a file browsing and management interface within the Lexical editor that allows instructors to upload, organize, and insert media files into their learning content. This component handles various file types including videos and provides appropriate fallback messages when content cannot be displayed.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This error message appears in the File Manager component when a user attempts to view or play a video file but their browser lacks the necessary codec support or HTML5 video capabilities. Users will see this message displayed in place of the video player interface when the browser cannot render the selected video content.",
+          "impact": "Medium - While not critical to core functionality, this message helps users understand why video content is not displaying and may prompt them to use alternative browsers or update their current one",
+          "tone": "polite-formal",
+          "usage": "Error message displayed when video playback fails due to browser compatibility issues",
+          "userType": "all"
+        },
+        "value": "Your browser does not support the video tag."
+      },
+      "fileManager2.generators.audioPromptPlaceholder": {
+        "_meta": {
+          "alternativeTerms": [
+            "Content to convert to audio",
+            "Text for audio conversion",
+            "Input for speech synthesis"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component within the Lexical editor that handles various content generation features including AI-powered audio creation. It provides instructors with tools to generate and manage media files for their Japanese language learning content.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This placeholder text appears in a text input field within the FileManager2 component when users are creating audio content through AI text-to-speech generation. Users see this guidance text before they enter their own text that will be converted into an audio file for their learning materials.",
+          "impact": "Important because it helps instructors understand how to properly use the AI audio generation feature, which is essential for creating engaging Japanese language learning content with proper pronunciation examples",
+          "tone": "polite-formal",
+          "usage": "Placeholder text in a text input field that guides users on what content to enter for audio generation",
+          "userType": "instructors"
+        },
+        "value": "Text to transform into audio file."
+      },
+      "fileManager2.generators.errorGeneratingAudio": {
+        "_meta": {
+          "alternativeTerms": [
+            "Error creating audio file",
+            "Audio generation failed",
+            "Unable to produce audio file",
+            "Audio file creation error"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component within the Lexical editor that handles media file operations including uploading, processing, and generating audio files. It provides instructors with tools to manage and create multimedia content for their Japanese language learning units.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This error message appears in the FileManager component when the system fails to generate an audio file using text-to-speech or other audio generation features. Users see this message when they attempt to create audio content for their learning materials but the process encounters an error, likely due to API failures or processing issues.",
+          "impact": "High - This error prevents instructors from creating essential audio content for language learning, which is critical for pronunciation and listening exercises in Japanese education",
+          "tone": "polite-formal",
+          "usage": "Error message displayed when audio file generation fails during content creation",
+          "userType": "instructors"
+        },
+        "value": "Error generating audio file"
+      },
+      "fileManager2.generators.errorGeneratingImage": {
+        "_meta": {
+          "alternativeTerms": [],
+          "component": {
+            "description": "FileManager2 is a file management interface within the Lexical editor that handles media uploads, organization, and AI-generated content creation. It provides instructors with tools to manage images, audio, and other media assets for their learning materials, including integration with OpenAI for generating custom images.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This error message appears in the FileManager2 component when AI-powered image generation fails during content creation. Users see this when attempting to generate images using OpenAI integration and the process encounters an error, preventing the image from being created and added to their content.",
+          "impact": "Provides information to users",
+          "tone": "polite-formal",
+          "usage": "Translation key: fileManager2.generators.errorGeneratingImage",
+          "userType": "all"
+        },
+        "value": "Error generating image file"
+      },
+      "fileManager2.generators.generatingAudio": {
+        "_meta": {
+          "alternativeTerms": [
+            "Creating audio file",
+            "Processing audio",
+            "Building audio content"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component within the Lexical editor that handles various file operations including audio generation. It provides users with file upload, organization, and media creation capabilities during content authoring.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This status message appears in the FileManager2 component when users trigger audio generation for their content. Users see this loading message while the system processes their request to create an audio file, likely using text-to-speech functionality.",
+          "impact": "Medium - provides important feedback to users about ongoing process status to prevent confusion during potentially slow operations",
+          "tone": "polite-formal",
+          "usage": "Status message displayed during audio file generation process",
+          "userType": "instructors"
+        },
+        "value": "Generating audio file..."
+      },
+      "fileManager2.generators.generatingImage": {
+        "_meta": {
+          "alternativeTerms": [],
+          "component": {
+            "description": "File Manager component that handles media assets and file operations within the content editor. It provides file upload, management, and AI-powered content generation capabilities for instructors creating learning materials.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This loading message appears in the File Manager component when AI image generation is in progress. Users see this status indicator while the system uses OpenAI to create visual content for their learning materials.",
+          "impact": "Provides information to users",
+          "tone": "polite-formal",
+          "usage": "Translation key: fileManager2.generators.generatingImage",
+          "userType": "all"
+        },
+        "value": "Generating image file..."
+      },
+      "fileManager2.generators.imagePromptPlaceholder": {
+        "_meta": {
+          "alternativeTerms": [],
+          "component": {
+            "description": "FileManager2 is a file management component within the Lexical editor that handles various file operations including AI-powered image generation. It provides instructors with tools to create, upload, and manage multimedia content for their learning units.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This placeholder text appears in an input field within the FileManager2 component's image generation feature. Users see this guidance text when they need to enter a text prompt that will be converted into an image file using AI image generation capabilities.",
+          "impact": "Provides information to users",
+          "tone": "polite-formal",
+          "usage": "Translation key: fileManager2.generators.imagePromptPlaceholder",
+          "userType": "all"
+        },
+        "value": "Text to transform into image file."
+      },
+      "fileManager2.generators.successfullyGeneratedAudio": {
+        "_meta": {
+          "alternativeTerms": [
+            "Audio file created successfully",
+            "Audio generation completed",
+            "Audio file produced successfully",
+            "Audio creation successful"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component within the Lexical-based content editor that handles media assets including audio files. It provides functionality for uploading, organizing, and generating various file types including AI-generated audio content for learning materials.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This success message appears in the File Manager component within the content editor after an instructor has successfully generated an audio file using the platform's AI text-to-speech functionality. Users see this confirmation message immediately after the audio generation process completes, typically displayed as a temporary notification or toast message.",
+          "impact": "Important because it provides essential feedback confirming that the AI-powered audio generation was completed successfully, allowing instructors to proceed with confidence in their content creation workflow",
+          "tone": "polite-formal",
+          "usage": "Success notification message displayed after completing audio file generation",
+          "userType": "instructors"
+        },
+        "value": "Successfully generated audio file"
+      },
+      "fileManager2.generators.successfullyGeneratedImage": {
+        "_meta": {
+          "alternativeTerms": [
+            "Successfully created image file",
+            "Image generation completed successfully",
+            "Generated image saved successfully",
+            "AI image created successfully"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component within the Lexical editor that handles file operations including AI-powered image generation. It provides instructors with tools to manage, upload, and generate visual content for their learning materials.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This success message appears in the FileManager2 component when an AI-generated image has been successfully created and saved to the file system. Users see this confirmation message after using the AI image generation feature, typically through a toast notification or status message in the file management interface.",
+          "impact": "Important - Provides essential feedback confirming that the AI-generated image was created and saved, giving instructors confidence that their content creation was successful",
+          "tone": "polite-formal",
+          "usage": "Success notification message displayed after AI image generation completes successfully",
+          "userType": "instructors"
+        },
+        "value": "Successfully generated image file"
+      },
+      "fileManager2.mainView.noFilesMessage": {
+        "_meta": {
+          "alternativeTerms": [
+            "No files found",
+            "No documents available",
+            "Empty file list",
+            "Start by uploading files"
+          ],
+          "component": {
+            "description": "The FileManager2 component handles file upload, organization, and management functionality within the content editor. It displays uploaded files and provides an interface for users to manage their media assets during content creation.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This message appears in the FileManager2 component when users access the file management area but no files have been uploaded yet. It serves as an empty state message to guide users on their next action and appears in the main view area of the file manager interface.",
+          "impact": "Important because it prevents user confusion in empty states and provides clear guidance on how to begin using the file management feature",
+          "tone": "polite-formal",
+          "usage": "Empty state message displayed in the main file management area when no files are present",
+          "userType": "all"
+        },
+        "value": "No files available. Upload files to get started."
+      },
+      "fileManager2.metadataEditor.cancelButton": {
+        "_meta": {
+          "alternativeTerms": [
+            "Dismiss",
+            "Close",
+            "Abort",
+            "Discard"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management interface component that allows users to browse, upload, and manage files within the content editor. It includes functionality for editing file metadata and properties through a dedicated metadata editor interface.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This cancel button appears in the metadata editor interface within the file manager component of the content authoring system. Users encounter this when editing file properties or metadata and need to discard their changes and exit the editor without saving.",
+          "impact": "Important - Essential for giving users control over their editing workflow and preventing accidental data loss by allowing them to abandon unwanted changes.",
+          "tone": "polite-formal",
+          "usage": "Button element that allows users to exit the metadata editor without saving changes.",
+          "userType": "instructors"
+        },
+        "value": "Cancel"
+      },
+      "fileManager2.metadataEditor.createdLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Date Created",
+            "Creation Date",
+            "Generated",
+            "Made"
+          ],
+          "component": {
+            "description": "The FileManager2 component provides file management capabilities within the content editor, allowing users to upload, organize, and manage media assets. It includes a metadata editor that displays detailed information about selected files including creation timestamps.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This label appears in the metadata editor section of the file manager, displaying when a file or asset was originally created. Users see this when viewing or editing file properties within the content creation interface.",
+          "impact": "Medium - helps users understand file organization and track content creation history for better asset management.",
+          "tone": "polite-formal",
+          "usage": "Static label text that identifies the creation date/time field in the file metadata editor.",
+          "userType": "all"
+        },
+        "value": "Created"
+      },
+      "fileManager2.metadataEditor.descriptionLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Summary",
+            "Details",
+            "Information",
+            "Notes"
+          ],
+          "component": {
+            "description": "FileManager2 handles file upload, organization, and metadata editing within the content editor. It provides instructors with tools to manage media assets and document files used in their learning units.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This label appears in the file metadata editing interface within the file management system. Users see this when editing file properties to add or modify descriptive information about uploaded media or document files.",
+          "impact": "Important - helps users understand they can add meaningful descriptions to files, improving content organization and accessibility for both instructors and students.",
+          "tone": "polite-formal",
+          "usage": "Form field label that identifies the description input area where users can add detailed information about a file.",
+          "userType": "instructors"
+        },
+        "value": "Description"
+      },
+      "fileManager2.metadataEditor.heading": {
+        "_meta": {
+          "alternativeTerms": [
+            "File Properties",
+            "File Information",
+            "File Details",
+            "Media Metadata"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component that allows users to browse, organize, and manage uploaded files within the content editor. It provides functionality for viewing file properties and editing associated metadata through a dedicated editor interface.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This heading appears at the top of a metadata editor panel within the file manager interface. Users see this when they select a file and open its properties to view or edit metadata information like title, description, tags, or other file attributes.",
+          "impact": "Important because it clearly identifies the metadata editing functionality, helping users understand they can modify file information and improving content organization workflows.",
+          "tone": "polite-formal",
+          "usage": "Panel heading that labels the metadata editing section when users access file properties.",
+          "userType": "instructors"
+        },
+        "value": "File Metadata"
+      },
+      "fileManager2.metadataEditor.modelLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "AI Model",
+            "Generator",
+            "Engine",
+            "System"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component that allows users to upload, organize, and edit metadata for various media files and assets. It provides an interface for managing file properties including AI model associations for generated content.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This label appears in the metadata editor section of the file manager when users are editing properties of uploaded files or media assets. Users see this when they need to specify or view the AI model associated with a file, particularly for content generated using OpenAI features.",
+          "impact": "Medium importance as it helps users track and organize AI-generated content but doesn't affect core learning functionality",
+          "tone": "polite-formal",
+          "usage": "Form field label in the metadata editor for specifying which AI model was used to generate or process the file",
+          "userType": "all"
+        },
+        "value": "Model"
+      },
+      "fileManager2.metadataEditor.nameLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Title",
+            "Filename",
+            "File Name",
+            "Label"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component that allows users to browse, select, and manage files within the content editor. It includes a metadata editor section where users can view and modify file properties such as name, description, and other attributes.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears as a label in the file manager's metadata editor section, specifically labeling the input field where users can view or edit the name of a selected file. Users see this when they select a file in the file manager and access its metadata properties for editing.",
+          "impact": "High - This label is essential for users to understand which field controls the file name when managing their learning content files.",
+          "tone": "polite-formal",
+          "usage": "Input field label that identifies the text field for editing a file's name property.",
+          "userType": "instructors"
+        },
+        "value": "Name"
+      },
+      "fileManager2.metadataEditor.pathLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Location",
+            "File Path",
+            "Directory",
+            "File Location"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component that allows users to browse, organize, and manage files within the content editor. It includes metadata editing capabilities where users can view and modify file properties including location paths.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears as a label in the metadata editor section of the file manager, specifically identifying the file path field. Users see this when they are viewing or editing file properties and need to understand where a file is located within the system's directory structure.",
+          "impact": "Medium - This label helps users understand file organization and location, which is important for content management but not critical for core learning functionality.",
+          "tone": "technical",
+          "usage": "Label text that identifies the file path input field or display area in the metadata editor interface.",
+          "userType": "instructors"
+        },
+        "value": "Path"
+      },
+      "fileManager2.metadataEditor.promptLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "AI Instruction",
+            "Generation Command",
+            "AI Request",
+            "Generation Text"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component that allows users to browse, organize, and edit metadata for various files in the content editor. It provides an interface for viewing and modifying file properties including AI generation prompts.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This label appears in the file manager's metadata editor when users are viewing or editing properties of AI-generated files. Users see this when they select an AI-generated file and access its metadata editing interface to view or modify the prompt that was used to create the file.",
+          "impact": "Important because it helps users understand and manage the prompts used for AI-generated content, enabling better content organization and reuse.",
+          "tone": "polite-formal",
+          "usage": "Form label for a text input field where users can view or edit AI generation prompts.",
+          "userType": "instructors"
+        },
+        "value": "Prompt (for AI-generated files)"
+      },
+      "fileManager2.metadataEditor.protectionLevelLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Security Level",
+            "Access Control",
+            "File Security",
+            "Privacy Setting"
+          ],
+          "component": {
+            "description": "FileManager2 is an enhanced file management component that provides functionality for uploading, organizing, and managing files within the content editor. It includes metadata editing capabilities where users can configure file properties including security and access settings.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This label appears in the metadata editor section of the file manager, specifically identifying a field that allows users to set or view the protection level for uploaded files. Users see this when managing file properties and security settings within the content editor interface.",
+          "impact": "High - This label is essential for instructors to understand and configure appropriate file security settings for their educational content.",
+          "tone": "polite-formal",
+          "usage": "Field label in the metadata editor form that identifies the protection level setting control.",
+          "userType": "instructors"
+        },
+        "value": "Protection Level"
+      },
+      "fileManager2.metadataEditor.saveButton": {
+        "_meta": {
+          "alternativeTerms": [
+            "Store",
+            "Apply",
+            "Confirm",
+            "Update"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component that handles file operations and metadata editing within the Lexical editor environment. It provides users with the ability to manage, organize, and edit properties of files used in their learning content creation.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This save button appears in the metadata editor section of FileManager2, allowing users to save changes made to file metadata or properties. Users see this button when they are editing file information such as titles, descriptions, or other metadata fields and need to commit their changes to the system.",
+          "impact": "Critical because users need clear confirmation that their metadata changes will be saved, preventing data loss during content creation.",
+          "tone": "polite-formal",
+          "usage": "Button element that users click to save metadata changes in the file manager.",
+          "userType": "instructors"
+        },
+        "value": "Save"
+      },
+      "fileManager2.metadataEditor.sizeLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "File Size",
+            "Dimensions",
+            "Storage"
+          ],
+          "component": {
+            "description": "FileManager2 is a file browsing and management component integrated into the Lexical editor for handling media assets. It allows users to upload, organize, and select files for insertion into learning content with detailed file information display.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears as a column header or property label in the file manager interface within the rich content editor. Users see this when browsing, organizing, or viewing details about uploaded files and media assets used in their learning content.",
+          "impact": "Medium - helps users understand file storage usage and manage content efficiently, but not critical for core functionality.",
+          "tone": "polite-formal",
+          "usage": "Column header label in a file listing table that displays file size information.",
+          "userType": "instructors"
+        },
+        "value": "Size"
+      },
+      "fileManager2.metadataEditor.typeLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Format",
+            "Category",
+            "Kind",
+            "File Type"
+          ],
+          "component": {
+            "description": "The FileManager2 component provides file management capabilities within the content editor, allowing users to upload, organize, and manage media files and documents. It includes a metadata editor for viewing and modifying file properties and attributes.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This label appears in the metadata editor within the file manager component, specifically labeling a field that displays or allows selection of the file type. Users encounter this when viewing or editing file properties in the content creation interface.",
+          "impact": "Important because it helps users identify and categorize files correctly, which is essential for content organization and media management",
+          "tone": "polite-formal",
+          "usage": "Label text for a form field or display element showing file type information",
+          "userType": "instructors"
+        },
+        "value": "Type"
+      },
+      "fileManager2.metadataEditor.unknown": {
+        "_meta": {
+          "alternativeTerms": [
+            "Unidentified",
+            "Not specified",
+            "Undetermined",
+            "Not available"
+          ],
+          "component": {
+            "description": "The FileManager2 component handles file operations and displays file metadata within the content editor. It includes a metadata editor that shows file properties and attributes to help users manage their uploaded content.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears in the file manager's metadata editor when file information cannot be determined or is missing. Users see this placeholder when the system cannot identify specific file properties like type, size, or other metadata attributes.",
+          "impact": "Medium - helps users understand when file information is unavailable, maintaining transparency in the file management interface",
+          "tone": "polite-formal",
+          "usage": "Label or placeholder text displayed when file metadata values cannot be determined",
+          "userType": "all"
+        },
+        "value": "Unknown"
+      },
+      "fileManager2.metadataEditor.variantLabel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Version",
+            "Alternative",
+            "Format",
+            "Option"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management interface component that allows users to organize, upload, and edit metadata for learning resources. It provides tools for managing file properties, versions, and organizational details within the content editor.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears as a label in the metadata editor within the File Manager, specifically when users are editing properties of file variants. Users see this when they are configuring different versions or formats of the same file resource.",
+          "impact": "Medium - helps instructors understand they are working with file variants, which is important for organizing multiple versions of learning materials.",
+          "tone": "polite-formal",
+          "usage": "Label text for a form field or section header in the metadata editing interface.",
+          "userType": "instructors"
+        },
+        "value": "Variant"
+      },
+      "fileManager2.selectedFileDetails.emptyState": {
+        "_meta": {
+          "alternativeTerms": [
+            "Choose a file",
+            "Pick a file",
+            "Click on a file"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component within the content editor that allows users to browse, select, and manage media files. It displays file lists and detailed information panels for selected files used in learning content creation.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears as an empty state message in the file details panel of the file manager when no file is currently selected. Users see this instructional text to guide them on how to view file information and metadata within the content editor.",
+          "impact": "Medium - provides helpful guidance to users on how to interact with the file manager interface and access file information.",
+          "tone": "polite-formal",
+          "usage": "Empty state instructional text that appears when no file is selected in the file details panel.",
+          "userType": "instructors"
+        },
+        "value": "Select a file to view details and metadata"
+      },
+      "fileManager2.toolbar.actionsTooltip": {
+        "_meta": {
+          "alternativeTerms": [
+            "Operations",
+            "Commands",
+            "Functions",
+            "Options"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component integrated into the content editor that allows users to organize, upload, and manage media files and documents. It provides a toolbar with various file operations and controls for instructors creating learning content.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears as a tooltip for an actions button or dropdown menu in the file manager toolbar within the content editor. Users see this tooltip when hovering over the actions control that provides file management operations like delete, rename, or move files.",
+          "impact": "Medium - helps users understand the purpose of the actions control, improving discoverability of file management features.",
+          "tone": "polite-formal",
+          "usage": "Tooltip text that displays on hover over an actions button or dropdown trigger in the file manager toolbar.",
+          "userType": "instructors"
+        },
+        "value": "Actions"
+      },
+      "fileManager2.toolbar.searchPlaceholder": {
+        "_meta": {
+          "alternativeTerms": [
+            "Find files",
+            "Locate files",
+            "Browse files",
+            "File search"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management interface component that allows users to browse, search, and manage their uploaded files and media assets within the content editor. It provides search functionality to help users quickly locate specific files when creating learning content.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This placeholder text appears in a search input field within the FileManager2 component, which is used in the content editor. Users see this placeholder text when the search field is empty, guiding them to search through their uploaded files and media assets.",
+          "impact": "Medium - helps users understand the search functionality and encourages file discovery, improving content creation workflow efficiency",
+          "tone": "polite-formal",
+          "usage": "Search input field placeholder text that appears when the field is empty",
+          "userType": "instructors"
+        },
+        "value": "Search files..."
+      },
+      "fileManager2.toolbar.selectAllTooltip": {
+        "_meta": {
+          "alternativeTerms": [
+            "Choose All",
+            "Pick All",
+            "Select Everything"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management interface component that allows users to browse, select, and organize files within the content editor. It provides file operations through a toolbar with various action buttons including bulk selection capabilities.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears as a tooltip when users hover over the \"Select All\" button in the file manager toolbar within the content editor. Users see this tooltip when managing multiple files during content creation or when organizing media assets for their learning materials.",
+          "impact": "Medium - This tooltip helps users understand the bulk selection feature, improving efficiency when managing multiple files during content creation.",
+          "tone": "polite-formal",
+          "usage": "Tooltip text that appears on hover over a toolbar button for selecting all files in the file manager.",
+          "userType": "all"
+        },
+        "value": "Select All"
+      },
+      "fileManager2.toolbar.uploadTooltip": {
+        "_meta": {
+          "alternativeTerms": [
+            "Upload Documents",
+            "Add Files",
+            "Import Files",
+            "Submit Files"
+          ],
+          "component": {
+            "description": "FileManager2 is a file management component integrated within the content editor that allows users to browse, upload, and manage media files. It provides toolbar functionality for file operations during content creation and editing workflows.",
+            "location": "components/Editor3/components/FileManager2.js"
+          },
+          "context": "This text appears as a tooltip when users hover over the upload button in the file manager toolbar within the content editor. Users see this tooltip to understand what action the upload button performs when creating or editing learning content.",
+          "impact": "Medium - This tooltip provides helpful guidance for the upload functionality, improving user experience when managing files in the content editor.",
+          "tone": "polite-formal",
+          "usage": "Tooltip text that appears on hover over the upload button in the file manager toolbar.",
+          "userType": "all"
+        },
+        "value": "Upload Files"
+      },
+      "fileMetadataComponent.basicInfo": {
+        "_meta": {
+          "alternativeTerms": [
+            "General Info",
+            "Basic Details",
+            "Primary Information",
+            "Essential Data"
+          ],
+          "component": {
+            "description": "This component handles the display and editing of metadata for file nodes within the Lexical editor. It provides instructors with forms and interfaces to manage file properties and basic information when creating learning content.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears as a section header or tab label within the file metadata component in the Lexical editor. Users see this when they are configuring or viewing metadata information for file nodes in their learning content.",
+          "impact": "Medium - Important for content organization and helps instructors navigate metadata sections efficiently when managing file properties.",
+          "tone": "polite-formal",
+          "usage": "Section heading or tab label that organizes metadata fields into basic information categories.",
+          "userType": "instructors"
+        },
+        "value": "Basic Info"
+      },
+      "fileMetadataComponent.cancel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Discard",
+            "Abort",
+            "Close",
+            "Exit"
+          ],
+          "component": {
+            "description": "This component handles the display and editing of file metadata within the Lexical editor's file nodes. It provides an interface for instructors to configure properties and settings for uploaded files in their learning content.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears as a button label in the file metadata configuration dialog within the content editor. Users see this when they are editing file properties or metadata and want to discard their changes and close the dialog without saving.",
+          "impact": "Medium - Essential for providing users a clear way to exit the metadata editing process without saving changes, maintaining expected UI interaction patterns.",
+          "tone": "polite-formal",
+          "usage": "Button label that allows users to cancel the file metadata editing process and close the dialog.",
+          "userType": "instructors"
+        },
+        "value": "Cancel"
+      },
+      "fileMetadataComponent.collapse": {
+        "_meta": {
+          "alternativeTerms": [
+            "Minimize",
+            "Fold",
+            "Hide",
+            "Contract"
+          ],
+          "component": {
+            "description": "This component displays and manages metadata information for uploaded files within the Lexical editor interface. It provides expandable/collapsible views of file properties and details that instructors can review while creating learning content.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears on a collapse button within the file metadata interface of the content editor. Users see this when they want to minimize an expanded file metadata panel to save screen space while editing learning content.",
+          "impact": "Medium - helps maintain a clean editor interface by allowing users to manage screen real estate, though not critical for core functionality.",
+          "tone": "polite-formal",
+          "usage": "Button text that allows users to minimize an expanded metadata panel with a single click.",
+          "userType": "all"
+        },
+        "value": "Collapse"
+      },
+      "fileMetadataComponent.concepts": {
+        "_meta": {
+          "alternativeTerms": [
+            "Ideas",
+            "Principles",
+            "Topics",
+            "Themes"
+          ],
+          "component": {
+            "description": "This component displays and manages metadata information for files used in learning content creation. It provides instructors with organized sections to categorize and label different aspects of their educational materials during the content authoring process.",
+            "location": "src/components/editor"
+          },
+          "context": "This text appears in the file metadata component within the content editor when instructors are managing learning materials. It serves as a section header or label that identifies conceptual content associated with uploaded files or learning resources.",
+          "impact": "Important - helps instructors organize their content effectively and ensures students can understand the conceptual framework of learning materials.",
+          "tone": "polite-formal",
+          "usage": "Section heading or label that categorizes conceptual learning elements within file metadata.",
+          "userType": "instructors"
+        },
+        "value": "Concepts"
+      },
+      "fileMetadataComponent.conceptsCount": {
+        "_meta": {
+          "alternativeTerms": [
+            "Ideas",
+            "Topics",
+            "Themes"
+          ],
+          "component": {
+            "description": "Displays parsed content sections with counts for vocabulary, summaries, objectives, concepts, and questions extracted from uploaded files.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "Section header displaying the number of key concepts extracted from a parsed file. Users see this in the file metadata panels when viewing content analysis results.",
+          "impact": "Medium - helps users understand the volume of extracted content",
+          "tone": "polite-formal",
+          "usage": "Accordion section header with dynamic count",
+          "userType": "instructors"
+        },
+        "value": "Concepts ({{count}})"
+      },
+      "fileMetadataComponent.confirm": {
+        "_meta": {
+          "alternativeTerms": [
+            "Apply",
+            "Accept",
+            "Save",
+            "OK"
+          ],
+          "component": {
+            "description": "This component handles the display and editing of metadata for files uploaded within the Lexical editor. It allows instructors to manage file properties, descriptions, and other metadata when creating learning content.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears as a confirmation button in the File Metadata Node component within the Lexical editor interface. Users see this when they need to confirm and apply metadata settings or changes to uploaded files in their learning content.",
+          "impact": "High - Essential for completing file metadata workflows and ensuring instructors can properly configure their uploaded content.",
+          "tone": "polite-formal",
+          "usage": "Confirmation button that users click to apply or save file metadata changes.",
+          "userType": "instructors"
+        },
+        "value": "Confirm"
+      },
+      "fileMetadataComponent.created": {
+        "_meta": {
+          "alternativeTerms": [
+            "Date Created",
+            "Creation Date",
+            "Generated",
+            "Made"
+          ],
+          "component": {
+            "description": "This component displays metadata information for files embedded in learning content within the Lexical editor. It shows file properties like creation date, modification date, and other relevant file details to help instructors manage their content assets.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears as a label in the file metadata display section of the content editor, showing when a file was originally created. Users see this label when viewing or editing file properties within learning content, helping them track file creation timestamps for content management purposes.",
+          "impact": "Medium - helps instructors organize and track their content files, though not essential for core learning functionality.",
+          "tone": "polite-formal",
+          "usage": "Label text that precedes the file creation date/timestamp in the file metadata display panel.",
+          "userType": "all"
+        },
+        "value": "Created:"
+      },
+      "fileMetadataComponent.deleteConfirmation": {
+        "_meta": {
+          "alternativeTerms": [
+            "remove",
+            "erase",
+            "discard",
+            "eliminate"
+          ],
+          "component": {
+            "description": "This component manages file metadata display and actions within the Lexical editor's file nodes. It provides file management functionality including upload, preview, and deletion capabilities for instructors creating learning content.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This confirmation message appears in a modal dialog when an instructor attempts to delete a file that has been uploaded to their learning content. The message displays when users click a delete button on a file within the FileMetadataNode component in the content editor.",
+          "impact": "High - This prevents accidental deletion of important learning materials and ensures instructors can make informed decisions about removing files from their content.",
+          "tone": "polite-formal",
+          "usage": "Confirmation dialog text that appears before permanently deleting an uploaded file from learning content.",
+          "userType": "instructors"
+        },
+        "value": "Delete file: \"{{fileName}}\"?"
+      },
+      "fileMetadataComponent.deleteFile": {
+        "_meta": {
+          "alternativeTerms": [
+            "Remove File",
+            "Delete Document",
+            "Remove Document",
+            "Erase File"
+          ],
+          "component": {
+            "description": "This component manages file metadata and actions within the Lexical editor's file nodes. It displays file information and provides controls for file operations like deletion when instructors are creating or editing learning content.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears as a button or action label within the file metadata component in the Lexical editor. Users see this option when they have uploaded a file to their learning content and want to permanently remove it from their lesson or assignment.",
+          "impact": "High - This is a destructive action that permanently removes uploaded content, so clear labeling is essential to prevent accidental data loss.",
+          "tone": "polite-formal",
+          "usage": "Button or clickable action that triggers file removal functionality.",
+          "userType": "instructors"
+        },
+        "value": "Delete File"
+      },
+      "fileMetadataComponent.expand": {
+        "_meta": {
+          "alternativeTerms": [
+            "Show more",
+            "Open",
+            "Unfold",
+            "Show details"
+          ],
+          "component": {
+            "description": "This component displays metadata information for uploaded files within the Lexical editor nodes. It provides users with expandable/collapsible views of file details such as name, size, type, and other properties when creating learning content.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears on a button or interactive element within the file metadata display component in the content editor. Users see this when file information is currently collapsed or minimized and they need to view additional details about an uploaded file.",
+          "impact": "Medium - Essential for users to access complete file information when creating or reviewing learning content, though not critical for basic platform functionality.",
+          "tone": "polite-formal",
+          "usage": "Button or clickable element that expands a collapsed file metadata display section.",
+          "userType": "all"
+        },
+        "value": "Expand"
+      },
+      "fileMetadataComponent.fileInfo": {
+        "_meta": {
+          "alternativeTerms": [
+            "File Details",
+            "File Properties",
+            "File Data",
+            "Document Info"
+          ],
+          "component": {
+            "description": "This component handles the display and management of metadata for files uploaded to learning content. It provides instructors with access to file properties, details, and settings when working with file-based content nodes in the editor.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears as a heading or label within the File Metadata Node component of the content editor, where instructors can view and manage information about uploaded files. Users see this when they interact with file nodes in the rich content editor to access details about attached media, documents, or other learning materials.",
+          "impact": "Medium - helps instructors understand they are viewing file-related information, contributing to clear content organization but not critical for core learning functionality.",
+          "tone": "polite-formal",
+          "usage": "Section heading or label that introduces file metadata details and properties.",
+          "userType": "instructors"
+        },
+        "value": "File Info"
+      },
+      "fileMetadataComponent.filename": {
+        "_meta": {
+          "alternativeTerms": [
+            "File name",
+            "Name",
+            "Title"
+          ],
+          "component": {
+            "description": "This component displays metadata information for files that have been uploaded or attached to learning content. It renders file details including the filename, likely along with other metadata like file size, type, or upload date.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears as a label in the file metadata display component within the Lexical editor, specifically when instructors or users are viewing or editing file information. Users see this label alongside the actual filename when working with uploaded files or media assets in their learning content.",
+          "impact": "Medium - This label helps users identify and organize their file assets, contributing to content management clarity but not critical for core learning functionality.",
+          "tone": "polite-formal",
+          "usage": "Appears as a static label text that precedes the actual filename display in the file metadata interface.",
+          "userType": "all"
+        },
+        "value": "Filename:"
+      },
+      "fileMetadataComponent.noMetadataAvailable": {
+        "_meta": {
+          "alternativeTerms": [
+            "No file information available",
+            "Metadata not found",
+            "File details unavailable"
+          ],
+          "component": {
+            "description": "A specialized Lexical editor node component that displays metadata information for uploaded files within learning content. The component shows file properties and details to help instructors and students understand file characteristics when authoring or viewing educational materials.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This message appears in the file metadata display component within the Lexical editor when a file has been uploaded or referenced but no metadata information is available. Users see this when they interact with file metadata nodes that lack descriptive information such as file size, creation date, or other properties.",
+          "impact": "Medium - helps users understand why file information is not displayed and sets proper expectations about content availability",
+          "tone": "polite-formal",
+          "usage": "Informational message displayed when file metadata cannot be retrieved or is empty",
+          "userType": "all"
+        },
+        "value": "No metadata available for this file."
+      },
+      "fileMetadataComponent.noParsedContentAvailable": {
+        "_meta": {
+          "alternativeTerms": [
+            "extracted content",
+            "processed content",
+            "readable content",
+            "file content"
+          ],
+          "component": {
+            "description": "A specialized node component within the Lexical editor that displays metadata and parsed content for uploaded files. It shows file information, extracted content, and processing status to help instructors understand what data is available from their uploaded materials.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This error message appears in the FileMetadataComponent within the Lexical editor when an uploaded file has been processed but no readable content could be extracted from it. Users see this message when they attempt to view or work with file metadata for files that failed content parsing or contain no extractable text/data.",
+          "impact": "Medium - Informs users about file processing limitations and helps them understand why certain file operations may not be available",
+          "tone": "polite-formal",
+          "usage": "Error message displayed when file content parsing fails or returns empty results",
+          "userType": "all"
+        },
+        "value": "No parsed content available for this file."
+      },
+      "fileMetadataComponent.objectives": {
+        "_meta": {
+          "alternativeTerms": [
+            "Goals",
+            "Learning Goals",
+            "Targets",
+            "Aims"
+          ],
+          "component": {
+            "description": "The file metadata component manages and displays metadata information for uploaded files in the content editor. It provides instructors with fields to view and edit various file properties including learning objectives, descriptions, and other educational metadata.",
+            "location": "src/components/editor"
+          },
+          "context": "This text appears as a section header or label in the file metadata component within the content editor. Users see this when viewing or editing metadata properties for uploaded files, specifically in the section that displays learning objectives associated with the file.",
+          "impact": "Important because it helps instructors organize and categorize their educational content by clearly identifying where learning objectives are defined for each file.",
+          "tone": "polite-formal",
+          "usage": "Section header or label text that identifies the objectives metadata field in the file properties panel.",
+          "userType": "instructors"
+        },
+        "value": "Objectives"
+      },
+      "fileMetadataComponent.objectivesCount": {
+        "_meta": {
+          "alternativeTerms": [
+            "Goals",
+            "Learning Outcomes",
+            "Targets"
+          ],
+          "component": {
+            "description": "Displays parsed content sections with counts for vocabulary, summaries, objectives, concepts, and questions extracted from uploaded files.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "Section header displaying the number of learning objectives extracted from a parsed file. Users see this in the file metadata panels when viewing content analysis results.",
+          "impact": "Medium - helps users understand the volume of extracted content",
+          "tone": "polite-formal",
+          "usage": "Accordion section header with dynamic count",
+          "userType": "instructors"
+        },
+        "value": "Objectives ({{count}})"
+      },
+      "fileMetadataComponent.parsedContent": {
+        "_meta": {
+          "alternativeTerms": [
+            "Extracted Content",
+            "Text Content",
+            "File Text",
+            "Document Content"
+          ],
+          "component": {
+            "description": "This component displays metadata and extracted content information for files uploaded to the editor. It shows details about uploaded files including their parsed text content that can be used in learning units.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears as a label or heading in the File Metadata component within the Lexical editor, specifically when displaying content that has been extracted or parsed from an uploaded file. Users see this when working with files that have had their text content automatically extracted for use in learning materials.",
+          "impact": "Important because it helps instructors understand what textual content was successfully extracted from their uploaded files for use in learning materials.",
+          "tone": "polite-formal",
+          "usage": "Label or section heading that identifies the parsed text content section of a file metadata display.",
+          "userType": "instructors"
+        },
+        "value": "Parsed Content"
+      },
+      "fileMetadataComponent.path": {
+        "_meta": {
+          "alternativeTerms": [
+            "Location:",
+            "File Path:",
+            "Directory:",
+            "File Location:"
+          ],
+          "component": {
+            "description": "This component displays metadata information for files that have been uploaded or referenced in the Lexical editor. It shows file details including the path location to help users understand file organization and accessibility within their learning content.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears as a label in the file metadata display within the Lexical editor when users are viewing or editing file information. It precedes the file path information, helping users identify the location or directory structure of uploaded files in their learning content.",
+          "impact": "Medium - This label helps users understand file organization and locate resources, which is important for content management but not critical for core platform functionality.",
+          "tone": "polite-formal",
+          "usage": "Appears as a descriptive label preceding the file path information in the metadata display.",
+          "userType": "instructors"
+        },
+        "value": "Path:"
+      },
+      "fileMetadataComponent.protectionLevel": {
+        "_meta": {
+          "alternativeTerms": [
+            "Security Level",
+            "Access Level",
+            "Privacy Setting",
+            "File Security"
+          ],
+          "component": {
+            "description": "This component manages file metadata settings within the Lexical editor, allowing instructors to configure security and access properties for uploaded files. It provides form fields and controls for setting various file attributes including protection levels.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears as a label in the file metadata editor when instructors are configuring security settings for uploaded files within learning content. Users see this when they need to specify access control levels for documents, images, or other media files in their course materials.",
+          "impact": "Important because it helps instructors understand and configure appropriate access controls for sensitive or restricted educational materials.",
+          "tone": "polite-formal",
+          "usage": "Field label that precedes a dropdown or selection control for choosing file security settings.",
+          "userType": "instructors"
+        },
+        "value": "Protection Level:"
+      },
+      "fileMetadataComponent.questions": {
+        "_meta": {
+          "alternativeTerms": [
+            "Quiz Items",
+            "Assessment Questions",
+            "Inquiries",
+            "Prompts"
+          ],
+          "component": {
+            "description": "This component displays metadata and organizational information for files and content within learning units. It allows instructors to categorize, review, and manage different content types including questions, media files, and other learning materials in a structured interface.",
+            "location": "src/components/editor"
+          },
+          "context": "This text appears as a section heading or tab label in the file metadata component within the content editor. Users see this when they are reviewing or organizing different types of content associated with a learning unit, specifically to access the questions section that contains quiz items, assessment questions, or interactive prompts.",
+          "impact": "Important because it provides essential navigation for instructors to organize and access their quiz content and assessment materials efficiently.",
+          "tone": "polite-formal",
+          "usage": "Section heading or tab label that users click to navigate to the questions portion of their learning content.",
+          "userType": "instructors"
+        },
+        "value": "Questions"
+      },
+      "fileMetadataComponent.questionsCount": {
+        "_meta": {
+          "alternativeTerms": [
+            "Queries",
+            "Prompts",
+            "Exercises"
+          ],
+          "component": {
+            "description": "Displays parsed content sections with counts for vocabulary, summaries, objectives, concepts, and questions extracted from uploaded files.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "Section header displaying the number of questions extracted from a parsed file. Users see this in the file metadata panels when viewing content analysis results.",
+          "impact": "Medium - helps users understand the volume of extracted content",
+          "tone": "polite-formal",
+          "usage": "Accordion section header with dynamic count",
+          "userType": "instructors"
+        },
+        "value": "Questions ({{count}})"
+      },
+      "fileMetadataComponent.rawMetadata": {
+        "_meta": {
+          "alternativeTerms": [
+            "Unprocessed Metadata",
+            "Technical Metadata",
+            "File Properties",
+            "Raw Data"
+          ],
+          "component": {
+            "description": "This component displays and manages file metadata information within the Lexical editor as a specialized node. It allows instructors to view and potentially edit technical file properties when creating learning content.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears as a label or heading in the file metadata component within the Lexical editor, specifically when displaying technical file information. Users see this when viewing or editing detailed metadata properties of uploaded files in learning content.",
+          "impact": "Medium - This helps instructors understand technical file details when managing learning content, though not critical for basic platform functionality.",
+          "tone": "technical",
+          "usage": "Section heading or label that introduces raw technical metadata information for uploaded files.",
+          "userType": "instructors"
+        },
+        "value": "Raw Metadata"
+      },
+      "fileMetadataComponent.searchPlaceholder": {
+        "_meta": {
+          "alternativeTerms": [
+            "Find file content",
+            "Look up content",
+            "Filter file data",
+            "Browse content"
+          ],
+          "component": {
+            "description": "The FileMetadataComponent handles file metadata display and interaction within the Lexical editor nodes. It provides search functionality for users to locate specific content within files when creating or editing learning materials.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This placeholder text appears in a search input field within the File Metadata component of the Lexical editor. Users see this text when they need to search through file content while working with file metadata in the content creation interface.",
+          "impact": "Medium - helps users understand the search capability but not critical for core platform functionality.",
+          "tone": "polite-formal",
+          "usage": "Input field placeholder text that guides users on the search functionality available.",
+          "userType": "all"
+        },
+        "value": "Search file content..."
+      },
+      "fileMetadataComponent.summaries": {
+        "_meta": {
+          "alternativeTerms": [
+            "Overviews",
+            "Abstracts",
+            "Synopses",
+            "Briefs"
+          ],
+          "component": {
+            "description": "This component displays and manages metadata information for uploaded files in the content editor. It provides organized sections for different types of file metadata, including summaries that help users quickly understand file content without opening the full document.",
+            "location": "src/components/editor"
+          },
+          "context": "This text appears as a section label or tab heading in the file metadata component within the content editor. Users see it when viewing or managing metadata for uploaded files, specifically when accessing the summaries section that contains AI-generated or manual summaries of file content.",
+          "impact": "Important because it helps instructors quickly navigate to file summaries when organizing learning materials and content",
+          "tone": "polite-formal",
+          "usage": "Section heading or tab label that users click to view file summary information",
+          "userType": "all"
+        },
+        "value": "Summaries"
+      },
+      "fileMetadataComponent.summariesCount": {
+        "_meta": {
+          "alternativeTerms": [
+            "Abstracts",
+            "Overviews",
+            "Synopses"
+          ],
+          "component": {
+            "description": "Displays parsed content sections with counts for vocabulary, summaries, objectives, concepts, and questions extracted from uploaded files.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "Section header displaying the number of summary sections extracted from a parsed file. Users see this in the file metadata panels when viewing content analysis results.",
+          "impact": "Medium - helps users understand the volume of extracted content",
+          "tone": "polite-formal",
+          "usage": "Accordion section header with dynamic count",
+          "userType": "instructors"
+        },
+        "value": "Summaries ({{count}})"
+      },
+      "fileMetadataComponent.type": {
+        "_meta": {
+          "alternativeTerms": [
+            "Format",
+            "File Type",
+            "Category"
+          ],
+          "component": {
+            "description": "This component displays metadata information for files uploaded to learning content, showing details like file type, size, and other properties. It appears within the Lexical editor interface when instructors are working with media files in their learning units.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears as a label in the file metadata display section of the Lexical editor when instructors are creating or editing learning content. Users see this label alongside file information to identify the type of uploaded media or documents within their learning units.",
+          "impact": "Medium - helps instructors quickly identify file types when managing media content in their lessons.",
+          "tone": "polite-formal",
+          "usage": "Static text label that precedes the file type information in the metadata display.",
+          "userType": "all"
+        },
+        "value": "Type:"
+      },
+      "fileMetadataComponent.unknown": {
+        "_meta": {
+          "alternativeTerms": [
+            "Unidentified",
+            "Not available",
+            "Undefined",
+            "Cannot determine"
+          ],
+          "component": {
+            "description": "This component displays metadata information for uploaded files within the rich content editor. It shows file properties and handles cases where metadata cannot be retrieved or is missing.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears in the file metadata display component within the Lexical editor when file information cannot be determined or retrieved. Users see this when a file's properties like size, type, or upload date are unavailable or failed to load.",
+          "impact": "Medium - helps users understand when file information is unavailable, maintaining transparency about system limitations",
+          "tone": "polite-formal",
+          "usage": "Status text label that appears when file metadata cannot be determined or loaded",
+          "userType": "all"
+        },
+        "value": "Unknown"
+      },
+      "fileMetadataComponent.unknownSize": {
+        "_meta": {
+          "alternativeTerms": [
+            "Size unavailable",
+            "File size unknown",
+            "Size not determined"
+          ],
+          "component": {
+            "description": "This component displays metadata information for uploaded files within the Lexical editor, including file size, name, and type. It renders file details to help instructors and students understand the properties of embedded files in learning content.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears in the file metadata display when a file has been uploaded to a learning unit but its size cannot be determined or retrieved. Users see this message in the file information panel alongside other file details like name and type.",
+          "impact": "Medium - provides transparency about file information completeness but doesn't prevent core functionality",
+          "tone": "polite-formal",
+          "usage": "Status label displayed when file size information is unavailable or could not be calculated",
+          "userType": "all"
+        },
+        "value": "Unknown size"
+      },
+      "fileMetadataComponent.unset": {
+        "_meta": {
+          "alternativeTerms": [
+            "NOT SET",
+            "UNDEFINED",
+            "EMPTY",
+            "NULL"
+          ],
+          "component": {
+            "description": "This component displays and manages metadata information for uploaded files within the editor. It shows various file properties and their current values, displaying status indicators when metadata fields are undefined or not configured.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "This text appears in the file metadata component within the Lexical editor when a metadata field has not been assigned a value. Users see this status indicator when viewing or editing file properties where certain metadata attributes remain undefined.",
+          "impact": "Medium - helps instructors understand which file metadata fields need attention during content creation",
+          "tone": "technical",
+          "usage": "Status label displayed when a file metadata property has no assigned value",
+          "userType": "instructors"
+        },
+        "value": "UNSET"
+      },
+      "fileMetadataComponent.vocabulary": {
+        "_meta": {
+          "alternativeTerms": [
+            "Lexicon",
+            "Word List",
+            "Terminology",
+            "Language Terms"
+          ],
+          "component": {
+            "description": "This component handles the display and management of file metadata within the editor environment. It provides users with organized information about their content files, including categorization and labeling of different content types like vocabulary items.",
+            "location": "src/components/editor"
+          },
+          "context": "This text appears as a label or heading in the file metadata component within the editor interface. Users see this when they are working with vocabulary-related files or content sections that contain vocabulary items, helping them identify and organize vocabulary content within their learning materials.",
+          "impact": "Important - helps instructors organize and identify vocabulary content efficiently, which is essential for structured Japanese language learning materials.",
+          "tone": "polite-formal",
+          "usage": "Appears as a section label or category heading when users are viewing or editing file metadata.",
+          "userType": "instructors"
+        },
+        "value": "Vocabulary"
+      },
+      "fileMetadataComponent.vocabularyCount": {
+        "_meta": {
+          "alternativeTerms": [
+            "Words",
+            "Terms",
+            "Lexicon"
+          ],
+          "component": {
+            "description": "Displays parsed content sections with counts for vocabulary, summaries, objectives, concepts, and questions extracted from uploaded files.",
+            "location": "components/Editor3/nodes/FileMetadataNode/FileMetadataComponent.js"
+          },
+          "context": "Section header displaying the number of vocabulary terms extracted from a parsed file. Users see this in the file metadata panels when viewing content analysis results.",
+          "impact": "Medium - helps users understand the volume of extracted content",
+          "tone": "polite-formal",
+          "usage": "Accordion section header with dynamic count",
+          "userType": "instructors"
+        },
+        "value": "Vocabulary ({{count}})"
+      },
+      "documentUploader.browseFiles": {
+        "_meta": {
+          "alternativeTerms": [
+            "Select Files",
+            "Choose Files",
+            "Upload Documents",
+            "Add Files"
+          ],
+          "component": {
+            "description": "The DocumentUploader component provides functionality for users to upload document files into the content editor. It likely presents file selection options and handles the upload process for documents that will be embedded in learning materials.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This text appears as a button label in the DocumentUploader component within the Lexical editor interface. Users see this when they are creating or editing learning content and need to upload document files to include in their lessons or assignments.",
+          "impact": "Important - This is essential for content creation workflow as it enables instructors to add document resources to their learning materials.",
+          "tone": "polite-formal",
+          "usage": "Button text that users click to open a file browser dialog for selecting documents to upload.",
+          "userType": "instructors"
+        },
+        "value": "Browse Files"
+      },
+      "documentUploader.dragDropPrompt": {
+        "_meta": {
+          "alternativeTerms": [
+            "Drop files here",
+            "Drag files to upload",
+            "Upload documents by dragging here"
+          ],
+          "component": {
+            "description": "A file upload component that allows users to add documents to their learning content through drag and drop or click-to-browse functionality. This component appears within the rich text editor when instructors are creating or editing learning materials.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This text appears as a visual prompt within the document upload area of the content editor. Users see this instructional text when the upload zone is empty and ready to receive files via drag and drop functionality.",
+          "impact": "Important because it guides users on how to upload documents, which is essential for creating rich learning content with supplementary materials",
+          "tone": "polite-formal",
+          "usage": "Instructional prompt text displayed in an empty file drop zone area",
+          "userType": "all"
+        },
+        "value": "Drag and drop documents here"
+      },
+      "documentUploader.errorMessages.noSupportedFiles": {
+        "_meta": {
+          "alternativeTerms": [
+            "compatible files",
+            "accepted formats",
+            "valid documents",
+            "allowed file types"
+          ],
+          "component": {
+            "description": "The DocumentUploader component allows instructors to upload various document types to incorporate into their learning materials. It validates file types and provides feedback when unsupported formats are selected for upload.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This error message appears in the DocumentUploader component when users attempt to upload files that are not in supported formats. Users see this message after selecting and attempting to upload files that don't match the accepted file types (PDF, Word, Text, or Excel).",
+          "impact": "High - This message is critical for guiding instructors to use correct file formats when creating educational content.",
+          "tone": "polite-formal",
+          "usage": "Error message displayed after file validation failure when creating learning content.",
+          "userType": "instructors"
+        },
+        "value": "No supported documents found. Please upload PDF, Word, Text, or Excel files."
+      },
+      "documentUploader.errorMessages.skippedFiles": {
+        "_meta": {
+          "alternativeTerms": [
+            "bypassed files",
+            "excluded files",
+            "rejected files",
+            "ignored files"
+          ],
+          "component": {
+            "description": "A file upload component that allows users to select and upload documents to the learning platform. It validates file types and provides feedback when files cannot be processed due to format restrictions.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This error message appears in the document uploader component when users attempt to upload multiple files and some are rejected due to unsupported file formats. The message displays as a notification or alert to inform users that certain files from their selection could not be processed.",
+          "impact": "Important because it helps users understand why some of their files were not uploaded and guides them to use supported formats",
+          "tone": "polite-formal",
+          "usage": "Error message notification that appears when file upload validation fails for unsupported file types",
+          "userType": "all"
+        },
+        "value": "Some files were skipped (unsupported type)"
+      },
+      "documentUploader.errorMessages.uploadFailed": {
+        "_meta": {
+          "alternativeTerms": [
+            "upload unsuccessful",
+            "upload error",
+            "file upload failed",
+            "document upload unsuccessful"
+          ],
+          "component": {
+            "description": "A file upload component that allows users to select and upload documents to be included in their learning content. The component handles file selection, upload progress, and displays success or error states during the upload process.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This error message appears when document upload fails in the document uploader component, typically shown as a toast notification or inline error message. Users see this when attempting to upload files (PDFs, images, etc.) to their learning content and the upload process encounters an error due to network issues, file size limits, or server problems.",
+          "impact": "High - Users need clear feedback when uploads fail so they can understand what went wrong and retry the upload",
+          "tone": "polite-formal",
+          "usage": "Error message displayed in a notification or alert when document upload fails",
+          "userType": "instructors"
+        },
+        "value": "Failed to upload {{fileName}}: {{error}}"
+      },
+      "documentUploader.extractionTypes.dictionary": {
+        "_meta": {
+          "alternativeTerms": [
+            "vocabulary list",
+            "glossary",
+            "word reference",
+            "lexicon"
+          ],
+          "component": {
+            "description": "The DocumentUploader component allows instructors to upload documents and specify how the content should be processed or extracted for creating learning materials. It provides different extraction type options to handle various document formats and content structures appropriately.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This text appears as an option label in the DocumentUploader component when instructors are uploading documents to create learning content. Users see this option when selecting how they want to extract or process vocabulary content from their uploaded document, specifically when choosing to treat the document as a dictionary or vocabulary reference material.",
+          "impact": "High - This selection determines how the uploaded document content is processed and structured for learning activities, directly affecting the quality and organization of generated vocabulary lessons.",
+          "tone": "technical",
+          "usage": "Option label or radio button text that instructors click to specify document processing method.",
+          "userType": "instructors"
+        },
+        "value": "dictionary"
+      },
+      "documentUploader.extractionTypes.question": {
+        "_meta": {
+          "alternativeTerms": [
+            "Query",
+            "Problem",
+            "Inquiry",
+            "Quiz Item"
+          ],
+          "component": {
+            "description": "The DocumentUploader component allows users to upload documents and extract different types of content from them for use in learning materials. It provides various extraction options to help instructors convert document content into structured learning components.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This text appears as a label or option within the DocumentUploader component, specifically identifying one type of content extraction available when processing uploaded documents. Users see this when they are uploading documents and selecting what type of content they want to extract from those documents.",
+          "impact": "Important - helps instructors understand content extraction capabilities and choose the appropriate method for converting documents into interactive learning materials.",
+          "tone": "polite-formal",
+          "usage": "Label or option text that identifies the question extraction type in a selection interface.",
+          "userType": "instructors"
+        },
+        "value": "Question"
+      },
+      "documentUploader.extractionTypes.questions": {
+        "_meta": {
+          "alternativeTerms": [
+            "queries",
+            "inquiries",
+            "problems",
+            "exercises"
+          ],
+          "component": {
+            "description": "The DocumentUploader component allows instructors to upload documents and extract different types of educational content from them. It provides options for specifying what type of content should be extracted from uploaded documents to create learning materials.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This text appears as an option or label in the Document Uploader component when instructors are uploading documents and selecting what type of content to extract from them. Users see this when they're in the process of uploading a document and need to specify that they want to extract questions from the uploaded file.",
+          "impact": "Important because it helps instructors clearly identify and select the specific type of content they want to extract from their documents for creating learning units.",
+          "tone": "polite-formal",
+          "usage": "Label or option text displayed during the document upload process when selecting extraction types.",
+          "userType": "instructors"
+        },
+        "value": "questions"
+      },
+      "documentUploader.extractionTypes.vocabulary": {
+        "_meta": {
+          "alternativeTerms": [
+            "Words",
+            "Terms",
+            "Lexicon",
+            "Word List"
+          ],
+          "component": {
+            "description": "The DocumentUploader component allows instructors to upload documents and extract different types of educational content from them. It provides various extraction type options to help organize and categorize the imported content for Japanese language learning materials.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This text appears as an option in the DocumentUploader component when instructors are selecting what type of content to extract from uploaded documents. It represents one of the available extraction types that users can choose from when processing educational materials.",
+          "impact": "Important because it helps instructors categorize and organize vocabulary content when creating Japanese language learning materials",
+          "tone": "polite-formal",
+          "usage": "Option label in a selection interface for document content extraction types",
+          "userType": "instructors"
+        },
+        "value": "Vocabulary"
+      },
+      "documentUploader.howItWorks.step1": {
+        "_meta": {
+          "alternativeTerms": [
+            "Import your files",
+            "Add your documents",
+            "Submit your materials",
+            "Load your content"
+          ],
+          "component": {
+            "description": "A document upload component that allows instructors to upload various file types to create or enhance learning materials. This component provides step-by-step instructions to guide users through the document upload process.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This text appears as the first step in a \"How It Works\" instructional section within the Document Uploader component. Users see this when they need guidance on uploading documents to create learning content, typically displayed as part of an onboarding flow or help section.",
+          "impact": "High - This text is crucial for user onboarding as it clearly communicates supported file formats and sets expectations for the upload process.",
+          "tone": "polite-formal",
+          "usage": "Instructional text displayed as the first step in a numbered list or guide for document uploading functionality.",
+          "userType": "instructors"
+        },
+        "value": "1. Upload your documents (PDF, Word, Text, or Excel files)"
+      },
+      "documentUploader.howItWorks.step2": {
+        "_meta": {
+          "alternativeTerms": [
+            "examine",
+            "process",
+            "review",
+            "parse"
+          ],
+          "component": {
+            "description": "The DocumentUploader component allows instructors to upload documents for AI analysis and content extraction. It provides a guided interface explaining the document processing workflow and what users can expect from the AI analysis feature.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This text appears as the second step in a multi-step instructional guide within the Document Uploader component. Users see this explanation when they are learning how the AI-powered document analysis feature works, specifically describing what happens after a document is uploaded.",
+          "impact": "Important because it sets clear expectations for instructors about the AI analysis capabilities and helps them understand what type of content will be extracted from their uploaded documents.",
+          "tone": "polite-formal",
+          "usage": "Instructional text displayed as part of a step-by-step guide or help section within the document upload interface.",
+          "userType": "instructors"
+        },
+        "value": "2. AI will analyze the content and extract {{extractionType}}"
+      },
+      "documentUploader.howItWorks.step3": {
+        "_meta": {
+          "alternativeTerms": [
+            "examine",
+            "check",
+            "validate",
+            "confirm"
+          ],
+          "component": {
+            "description": "The DocumentUploader component allows users to upload documents and process them with AI assistance. It provides step-by-step guidance on how to upload, process, and review AI-generated suggestions from uploaded content.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This text appears as the third step in a \"How It Works\" instructional guide within the DocumentUploader component. Users see this step-by-step instruction when they are learning how to use the document upload and processing feature, specifically guiding them to the final review phase.",
+          "impact": "Important - This guides users through the critical final step of reviewing AI suggestions, ensuring they understand how to complete the document processing workflow effectively.",
+          "tone": "polite-formal",
+          "usage": "Instructional text displayed as step 3 in a numbered list or guide explaining the document upload workflow.",
+          "userType": "all"
+        },
+        "value": "3. Review and approve suggestions in the \"Suggestions\" tab"
+      },
+      "documentUploader.howItWorks.step4": {
+        "_meta": {
+          "alternativeTerms": [
+            "transfer",
+            "add",
+            "incorporate",
+            "integrate"
+          ],
+          "component": {
+            "description": "The DocumentUploader component provides functionality for users to upload and import documents into the learning platform. It includes a step-by-step guide to help users understand the document import workflow from upload to final integration with their content.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This text appears as the fourth and final step in the \"How It Works\" instructional guide within the DocumentUploader component. Users see this step description when they need guidance on the document upload and import process, specifically explaining how to finalize their selection by importing chosen items to their target destination.",
+          "impact": "Important because it provides clear guidance on completing the document import process, ensuring users understand how to finalize their content integration.",
+          "tone": "polite-formal",
+          "usage": "Step description text within an instructional guide that explains the final import action to users.",
+          "userType": "instructors"
+        },
+        "value": "4. Import selected items to your {{target}}"
+      },
+      "documentUploader.howItWorks.title": {
+        "_meta": {
+          "alternativeTerms": [
+            "How this works:",
+            "Process overview:",
+            "Upload process:",
+            "Getting started:"
+          ],
+          "component": {
+            "description": "A component that handles document upload functionality within the content editor, allowing users to upload files and providing guidance on the upload process. This component is integrated into the main editor interface for content creation workflows.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This text appears as a section heading in the document uploader interface within the content editor. Users see this title when they access the document upload functionality to understand the process of uploading and processing documents for their learning content.",
+          "impact": "Important because it helps users understand the document upload workflow, reducing confusion and improving successful completion rates",
+          "tone": "polite-formal",
+          "usage": "Section heading that introduces explanatory content about the document upload process",
+          "userType": "instructors"
+        },
+        "value": "How it works:"
+      },
+      "documentUploader.recentUploads": {
+        "_meta": {
+          "alternativeTerms": [
+            "Latest Uploads",
+            "Recently Added Files",
+            "Recent Documents"
+          ],
+          "component": {
+            "description": "The DocumentUploader component provides file upload functionality for instructors creating learning content. It displays recently uploaded documents to allow quick access and reuse of files during content authoring sessions.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This text appears as a section heading in the document uploader interface within the content editor. Users see this when they are uploading files and need to access or reference documents they have recently uploaded to the platform.",
+          "impact": "Important because it helps instructors quickly locate and reuse recently uploaded files, improving content creation efficiency and user experience.",
+          "tone": "polite-formal",
+          "usage": "Section heading that labels the area showing previously uploaded documents in the file uploader interface.",
+          "userType": "all"
+        },
+        "value": "Recent Uploads"
+      },
+      "documentUploader.statusLabels.complete": {
+        "_meta": {
+          "alternativeTerms": [
+            "Finished",
+            "Done",
+            "Completed",
+            "Success"
+          ],
+          "component": {
+            "description": "The DocumentUploader component handles file upload functionality within the content editor, allowing instructors to add documents to their learning materials. It displays various status messages to inform users about the upload progress and completion state.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This text appears as a status label in the document upload component, indicating that a file upload operation has finished successfully. Users see this status message after they have uploaded a document and the system has fully processed it.",
+          "impact": "Important because it provides essential feedback confirming that the upload process finished successfully, giving users confidence to proceed with their content creation.",
+          "tone": "polite-formal",
+          "usage": "Status label that appears after a successful document upload operation.",
+          "userType": "all"
+        },
+        "value": "Complete"
+      },
+      "documentUploader.statusLabels.failed": {
+        "_meta": {
+          "alternativeTerms": [
+            "Unsuccessful",
+            "Error",
+            "Upload Error",
+            "Not Completed"
+          ],
+          "component": {
+            "description": "The DocumentUploader component handles file upload functionality within the Lexical editor, allowing instructors to attach documents to their learning content. It provides real-time status feedback to users during the upload process, including success, progress, and failure states.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This status label appears in the DocumentUploader component when a document upload operation has failed. Users see this text as part of the upload status feedback system, typically displayed near the file name or in a status indicator after an unsuccessful upload attempt.",
+          "impact": "High - Users need clear feedback when uploads fail so they can retry or troubleshoot the issue to successfully add their content.",
+          "tone": "polite-formal",
+          "usage": "Status label text displayed to indicate an unsuccessful document upload operation.",
+          "userType": "all"
+        },
+        "value": "Failed"
+      },
+      "documentUploader.statusLabels.processing": {
+        "_meta": {
+          "alternativeTerms": [
+            "Loading",
+            "Working",
+            "In Progress",
+            "Please wait"
+          ],
+          "component": {
+            "description": "A document upload component that allows users to select and upload files to the platform. It provides visual feedback about the current state of the upload and processing operations through status labels.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This text appears as a status indicator in the document upload interface when users have selected a file and the system is actively processing it. Users see this message during the intermediate phase between file selection and completion of the upload/processing workflow.",
+          "impact": "High because it provides essential feedback to users about ongoing operations and prevents confusion about whether the system is responding.",
+          "tone": "polite-formal",
+          "usage": "Status label that displays during file processing operations to inform users of current system activity.",
+          "userType": "all"
+        },
+        "value": "Processing..."
+      },
+      "documentUploader.supportedFormats": {
+        "_meta": {
+          "alternativeTerms": [
+            "Accepted formats",
+            "Compatible file types",
+            "Allowed extensions",
+            "Valid file formats"
+          ],
+          "component": {
+            "description": "A document upload component that allows users to select and upload files to the platform. It provides visual feedback about acceptable file formats to prevent upload errors and guide user behavior.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This text appears in a document upload interface within the content editor, informing users about which file types they can upload. Users see this when they are attempting to upload documents to include in their learning materials or assignments.",
+          "impact": "Important because it prevents user frustration by clearly communicating upload requirements and reduces support requests for failed uploads",
+          "tone": "polite-formal",
+          "usage": "Informational text label displayed near a file upload area to guide file selection",
+          "userType": "all"
+        },
+        "value": "Supported: PDF, Word (.doc, .docx), Text (.txt), Excel (.xls, .xlsx, .csv)"
+      },
+      "documentUploader.title": {
+        "_meta": {
+          "alternativeTerms": [
+            "Import Documents",
+            "Add Files",
+            "Document Import",
+            "File Upload"
+          ],
+          "component": {
+            "description": "A file upload component that allows instructors to upload documents and specify what type of content should be extracted using AI processing. The component handles document validation, upload progress, and extraction type selection for creating learning materials.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This title text appears at the top of a document upload modal or section within the content editor, specifically when instructors are uploading documents for AI-powered content extraction. Users see this when they want to extract vocabulary, quiz questions, or other learning materials from uploaded documents.",
+          "impact": "High - This title helps instructors understand the purpose and context of the upload action, ensuring they upload appropriate documents for their intended extraction type.",
+          "tone": "polite-formal",
+          "usage": "Main heading that appears above the document upload interface when instructors select an extraction type for processing uploaded files.",
+          "userType": "instructors"
+        },
+        "value": "Upload Documents for {{extractionType}} Extraction"
+      },
+      "documentUploader.uploadingProgress": {
+        "_meta": {
+          "alternativeTerms": [
+            "Loading",
+            "Processing",
+            "Transferring",
+            "Sending"
+          ],
+          "component": {
+            "description": "The DocumentUploader component handles file uploads within the Lexical editor interface. It provides visual feedback during the upload process and manages file attachment functionality for learning content creation.",
+            "location": "components/Editor3/components/DocumentUploader.js"
+          },
+          "context": "This progress message appears in the document uploader component when users are uploading files to the platform. It displays the current upload percentage to inform users of the upload status and estimated completion time.",
+          "impact": "High - Essential feedback that prevents user confusion and abandonment during file upload operations",
+          "tone": "polite-formal",
+          "usage": "Status message displayed during file upload operations showing real-time progress percentage",
+          "userType": "all"
+        },
+        "value": "Uploading... {{progress}}%"
+      },
+      "fileManager.close": {
+        "_meta": {
+          "alternativeTerms": [
+            "Dismiss",
+            "Cancel",
+            "Exit"
+          ],
+          "component": {
+            "description": "File manager modal close button.",
+            "location": "src/components/Editor3/components/FileManager2.js"
+          },
+          "context": "Button to close preview modals without saving.",
+          "impact": "Medium - standard modal action",
+          "tone": "polite-formal",
+          "usage": "Close/dismiss button",
+          "userType": "all"
+        },
+        "value": "Close"
+      },
+      "fileManager.create": {
+        "_meta": {
+          "alternativeTerms": [
+            "Add",
+            "Generate",
+            "Make"
+          ],
+          "component": {
+            "description": "File manager create button for new files.",
+            "location": "src/components/Editor3/components/FileManager2.js"
+          },
+          "context": "Button to create new file entries in various file creation forms.",
+          "impact": "High - primary action for content creation",
+          "tone": "polite-formal",
+          "usage": "Create action button",
+          "userType": "instructors"
+        },
+        "value": "Create"
+      },
+      "fileManager.draftChanges": {
+        "_meta": {
+          "alternativeTerms": [
+            "Unsaved Changes",
+            "Changes Pending"
+          ],
+          "component": {
+            "description": "File manager with metadata editing and draft state tracking.",
+            "location": "src/components/Editor3/components/FileManager2.js"
+          },
+          "context": "Status indicator showing user has unsaved changes to file metadata.",
+          "impact": "High - critical user feedback",
+          "tone": "casual",
+          "usage": "Status label for unsaved changes",
+          "userType": "instructors"
+        },
+        "delete": "Delete",
+        "filterByType": "Filter by type",
+        "metadata": "Metadata",
+        "noFiles": "No files uploaded",
+        "processing": "Processing...",
+        "ready": "Ready",
+        "sortBy": "Sort by",
+        "status": "Status",
+        "upload": "Upload",
+        "uploading": "Uploading...",
+        "value": "Draft changes"
+      },
+      "fileManager.errorRendering": {
+        "_meta": {
+          "alternativeTerms": [
+            "Rendering Error",
+            "Component Error"
+          ],
+          "component": {
+            "description": "File manager error boundary message.",
+            "location": "src/components/Editor3/components/FileManager2.js"
+          },
+          "context": "Error message displayed when FileManager component fails to render.",
+          "impact": "High - critical error feedback",
+          "tone": "polite-formal",
+          "usage": "Error message with error details",
+          "userType": "all"
+        },
+        "value": "Error rendering FileManager: {{message}}"
+      },
+      "fileManager.revert": {
+        "_meta": {
+          "alternativeTerms": [
+            "Cancel",
+            "Discard",
+            "Undo"
+          ],
+          "component": {
+            "description": "File manager revert changes button.",
+            "location": "src/components/Editor3/components/FileManager2.js"
+          },
+          "context": "Button to discard unsaved changes and revert to last saved state.",
+          "impact": "Medium - prevents data loss",
+          "tone": "polite-formal",
+          "usage": "Revert action button",
+          "userType": "all"
+        },
+        "value": "Revert"
+      },
+      "fileManager.save": {
+        "_meta": {
+          "alternativeTerms": [
+            "Apply",
+            "Confirm"
+          ],
+          "component": {
+            "description": "File manager save button.",
+            "location": "src/components/Editor3/components/FileManager2.js"
+          },
+          "context": "Button to save draft changes to file metadata.",
+          "impact": "High - critical save action",
+          "tone": "polite-formal",
+          "usage": "Save action button",
+          "userType": "all"
+        },
+        "value": "Save"
+      },
+      "fileManager.textToImagePreview": {
+        "_meta": {
+          "alternativeTerms": [
+            "Image Generation Preview"
+          ],
+          "component": {
+            "description": "File manager text-to-image generation preview modal.",
+            "location": "src/components/Editor3/components/FileManager2.js"
+          },
+          "context": "Modal title for previewing AI-generated images from text prompts.",
+          "impact": "Medium - identifies modal purpose",
+          "tone": "technical",
+          "usage": "Modal heading",
+          "userType": "instructors"
+        },
+        "value": "Text to Image Preview"
+      },
+      "fileManager.textToSpeechPreview": {
+        "_meta": {
+          "alternativeTerms": [
+            "Audio Generation Preview",
+            "TTS Preview"
+          ],
+          "component": {
+            "description": "File manager text-to-speech generation preview modal.",
+            "location": "src/components/Editor3/components/FileManager2.js"
+          },
+          "context": "Modal title for previewing AI-generated audio from text.",
+          "impact": "Medium - identifies modal purpose",
+          "tone": "technical",
+          "usage": "Modal heading",
+          "userType": "instructors"
+        },
+        "value": "Text to Speech Preview"
+      }
+    },
+    "claude": {
+      "fileManager2.contextMenu.deleteConfirmMessage": "{{count}} ausgewählte Datei(en) löschen?",
+      "fileManager2.contextMenu.deleteSelected": "Ausgewählte löschen ({{count}})",
+      "fileManager2.contextMenu.deselectAll": "Alle abwählen",
+      "fileManager2.contextMenu.reAnalyzeSelected": "Ausgewählte erneut analysieren ({{count}})",
+      "fileManager2.expandedContent.descriptionLabel": "Beschreibung:",
+      "fileManager2.expandedContent.extractedContentHeading": "Extrahierter Inhalt",
+      "fileManager2.expandedContent.noConceptsExtracted": "Keine Konzepte extrahiert",
+      "fileManager2.expandedContent.noContentAvailable": "Kein extrahierter Inhalt verfügbar",
+      "fileManager2.expandedContent.noObjectivesExtracted": "Keine Lernziele extrahiert",
+      "fileManager2.expandedContent.noQuestionsExtracted": "Keine Fragen extrahiert",
+      "fileManager2.expandedContent.noSummariesExtracted": "Keine Zusammenfassungen extrahiert",
+      "fileManager2.expandedContent.noVocabularyExtracted": "Keine Vokabeln extrahiert",
+      "fileManager2.expandedContent.reviewQuestionsMessage": "Fragen aus dem Dokument überprüfen und importieren",
+      "fileManager2.expandedContent.reviewVocabularyMessage": "Vokabular aus dem Dokument überprüfen und importieren",
+      "fileManager2.expandedContent.transcriptionLabel": "Transkription:",
+      "fileManager2.fileDetails.deleteTooltip": "Löschen",
+      "fileManager2.fileDetails.downloadTooltip": "Herunterladen",
+      "fileManager2.fileDetails.insertTooltip": "In Editor einfügen",
+      "fileManager2.fileDetails.noWaveformAvailable": "Keine Wellenform verfügbar",
+      "fileManager2.fileDetails.reAnalyzeTooltip": "Erneut analysieren",
+      "fileManager2.fileDetails.videoNotSupported": "Ihr Browser unterstützt das Video-Tag nicht.",
+      "fileManager2.generators.audioPromptPlaceholder": "Text, der in eine Audiodatei umgewandelt werden soll.",
+      "fileManager2.generators.errorGeneratingAudio": "Fehler beim Generieren der Audiodatei",
+      "fileManager2.generators.errorGeneratingImage": "Fehler beim Generieren der Bilddatei",
+      "fileManager2.generators.generatingAudio": "Audiodatei wird erstellt...",
+      "fileManager2.generators.generatingImage": "Bilddatei wird erstellt...",
+      "fileManager2.generators.imagePromptPlaceholder": "Text zur Umwandlung in eine Bilddatei.",
+      "fileManager2.generators.successfullyGeneratedAudio": "Audiodatei erfolgreich erstellt",
+      "fileManager2.generators.successfullyGeneratedImage": "Bilddatei erfolgreich erstellt",
+      "fileManager2.mainView.noFilesMessage": "Keine Dateien verfügbar. Laden Sie Dateien hoch, um zu beginnen.",
+      "fileManager2.metadataEditor.cancelButton": "Abbrechen",
+      "fileManager2.metadataEditor.createdLabel": "Erstellt",
+      "fileManager2.metadataEditor.descriptionLabel": "Beschreibung",
+      "fileManager2.metadataEditor.heading": "Datei-Metadaten",
+      "fileManager2.metadataEditor.modelLabel": "Modell",
+      "fileManager2.metadataEditor.nameLabel": "Name",
+      "fileManager2.metadataEditor.pathLabel": "Pfad",
+      "fileManager2.metadataEditor.promptLabel": "Eingabeaufforderung (für KI-generierte Dateien)",
+      "fileManager2.metadataEditor.protectionLevelLabel": "Schutzebene",
+      "fileManager2.metadataEditor.saveButton": "Speichern",
+      "fileManager2.metadataEditor.sizeLabel": "Größe",
+      "fileManager2.metadataEditor.typeLabel": "Typ",
+      "fileManager2.metadataEditor.unknown": "Unbekannt",
+      "fileManager2.metadataEditor.variantLabel": "Variante",
+      "fileManager2.selectedFileDetails.emptyState": "Wählen Sie eine Datei aus, um Details und Metadaten anzuzeigen",
+      "fileManager2.toolbar.actionsTooltip": "Aktionen",
+      "fileManager2.toolbar.searchPlaceholder": "Dateien suchen...",
+      "fileManager2.toolbar.selectAllTooltip": "Alle auswählen",
+      "fileManager2.toolbar.uploadTooltip": "Dateien hochladen",
+      "fileMetadataComponent.basicInfo": "Grundlegende Informationen",
+      "fileMetadataComponent.cancel": "Abbrechen",
+      "fileMetadataComponent.collapse": "Einklappen",
+      "fileMetadataComponent.concepts": "Konzepte",
+      "fileMetadataComponent.conceptsCount": "Konzepte ({{count}})",
+      "fileMetadataComponent.confirm": "Bestätigen",
+      "fileMetadataComponent.created": "Erstellt:",
+      "fileMetadataComponent.deleteConfirmation": "Datei \"{{fileName}}\" löschen?",
+      "fileMetadataComponent.deleteFile": "Datei löschen",
+      "fileMetadataComponent.expand": "Erweitern",
+      "fileMetadataComponent.fileInfo": "Datei-Info",
+      "fileMetadataComponent.filename": "Dateiname:",
+      "fileMetadataComponent.noMetadataAvailable": "Für diese Datei sind keine Metadaten verfügbar.",
+      "fileMetadataComponent.noParsedContentAvailable": "Für diese Datei sind keine analysierten Inhalte verfügbar.",
+      "fileMetadataComponent.objectives": "Lernziele",
+      "fileMetadataComponent.objectivesCount": "Lernziele ({{count}})",
+      "fileMetadataComponent.parsedContent": "Geparster Inhalt",
+      "fileMetadataComponent.path": "Pfad:",
+      "fileMetadataComponent.protectionLevel": "Schutzebene:",
+      "fileMetadataComponent.questions": "Fragen",
+      "fileMetadataComponent.questionsCount": "Fragen ({{count}})",
+      "fileMetadataComponent.rawMetadata": "Rohe Metadaten",
+      "fileMetadataComponent.searchPlaceholder": "Dateiinhalt durchsuchen...",
+      "fileMetadataComponent.summaries": "Zusammenfassungen",
+      "fileMetadataComponent.summariesCount": "Zusammenfassungen ({{count}})",
+      "fileMetadataComponent.type": "Typ:",
+      "fileMetadataComponent.unknown": "Unbekannt",
+      "fileMetadataComponent.unknownSize": "Unbekannte Größe",
+      "fileMetadataComponent.unset": "NICHT GESETZT",
+      "fileMetadataComponent.vocabulary": "Wortschatz",
+      "fileMetadataComponent.vocabularyCount": "Vokabular ({{count}})",
+      "documentUploader.browseFiles": "Dateien durchsuchen",
+      "documentUploader.dragDropPrompt": "Dokumente hier per Drag & Drop ablegen",
+      "documentUploader.errorMessages.noSupportedFiles": "Keine unterstützten Dokumente gefunden. Bitte laden Sie PDF-, Word-, Text- oder Excel-Dateien hoch.",
+      "documentUploader.errorMessages.skippedFiles": "Einige Dateien wurden übersprungen (nicht unterstützter Dateityp)",
+      "documentUploader.errorMessages.uploadFailed": "Upload von {{fileName}} fehlgeschlagen: {{error}}",
+      "documentUploader.extractionTypes.dictionary": "Wörterbuch",
+      "documentUploader.extractionTypes.question": "Frage",
+      "documentUploader.extractionTypes.questions": "Fragen",
+      "documentUploader.extractionTypes.vocabulary": "Wortschatz",
+      "documentUploader.howItWorks.step1": "1. Laden Sie Ihre Dokumente hoch (PDF-, Word-, Text- oder Excel-Dateien)",
+      "documentUploader.howItWorks.step2": "2. Die KI wird den Inhalt analysieren und {{extractionType}} extrahieren",
+      "documentUploader.howItWorks.step3": "3. Überprüfen und genehmigen Sie Vorschläge im Tab \"Vorschläge\"",
+      "documentUploader.howItWorks.step4": "4. Ausgewählte Elemente in Ihr {{target}} importieren",
+      "documentUploader.howItWorks.title": "So funktioniert es:",
+      "documentUploader.recentUploads": "Neueste Uploads",
+      "documentUploader.statusLabels.complete": "Abschließen",
+      "documentUploader.statusLabels.failed": "Fehlgeschlagen",
+      "documentUploader.statusLabels.processing": "Wird verarbeitet...",
+      "documentUploader.supportedFormats": "Unterstützt: PDF, Word (.doc, .docx), Text (.txt), Excel (.xls, .xlsx, .csv)",
+      "documentUploader.title": "Dokumente für {{extractionType}}-Extraktion hochladen",
+      "documentUploader.uploadingProgress": "Wird hochgeladen... {{progress}}%",
+      "fileManager.close": "Schließen",
+      "fileManager.create": "Erstellen",
+      "fileManager.draftChanges": "Änderungen entwerfen",
+      "fileManager.errorRendering": "Fehler beim Rendern des FileManagers: {{message}}",
+      "fileManager.revert": "Zurücksetzen",
+      "fileManager.save": "Speichern",
+      "fileManager.textToImagePreview": "Text-zu-Bild-Vorschau",
+      "fileManager.textToSpeechPreview": "Text-zu-Sprache-Vorschau"
+    },
+    "gpt": {
+      "fileManager2.contextMenu.deleteConfirmMessage": "{{count}} ausgewählte Datei(en) löschen?",
+      "fileManager2.contextMenu.deleteSelected": "Ausgewählte löschen ({{count}})",
+      "fileManager2.contextMenu.deselectAll": "Alle abwählen",
+      "fileManager2.contextMenu.reAnalyzeSelected": "Ausgewählte erneut analysieren ({{count}})",
+      "fileManager2.expandedContent.descriptionLabel": "Beschreibung",
+      "fileManager2.expandedContent.extractedContentHeading": "Extrahierter Inhalt",
+      "fileManager2.expandedContent.noConceptsExtracted": "Keine Konzepte extrahiert",
+      "fileManager2.expandedContent.noContentAvailable": "Kein extrahierter Inhalt verfügbar",
+      "fileManager2.expandedContent.noObjectivesExtracted": "Keine Ziele extrahiert",
+      "fileManager2.expandedContent.noQuestionsExtracted": "Keine Fragen extrahiert",
+      "fileManager2.expandedContent.noSummariesExtracted": "Keine Zusammenfassungen extrahiert",
+      "fileManager2.expandedContent.noVocabularyExtracted": "Kein Vokabular extrahiert",
+      "fileManager2.expandedContent.reviewQuestionsMessage": "Fragen aus dem Dokument überprüfen und importieren",
+      "fileManager2.expandedContent.reviewVocabularyMessage": "Überprüfen und importieren Sie Vokabeln aus dem Dokument",
+      "fileManager2.expandedContent.transcriptionLabel": "Transkription",
+      "fileManager2.fileDetails.deleteTooltip": "Löschen",
+      "fileManager2.fileDetails.downloadTooltip": "Herunterladen",
+      "fileManager2.fileDetails.insertTooltip": "In den Editor einfügen",
+      "fileManager2.fileDetails.noWaveformAvailable": "Kein Wellenform verfügbar",
+      "fileManager2.fileDetails.reAnalyzeTooltip": "Erneut analysieren",
+      "fileManager2.fileDetails.videoNotSupported": "Ihr Browser unterstützt das Video-Tag nicht.",
+      "fileManager2.generators.audioPromptPlaceholder": "Text in Audiodatei umwandeln.",
+      "fileManager2.generators.errorGeneratingAudio": "Fehler beim Erstellen der Audiodatei",
+      "fileManager2.generators.errorGeneratingImage": "Fehler beim Erstellen der Bilddatei",
+      "fileManager2.generators.generatingAudio": "Audio-Datei wird erstellt...",
+      "fileManager2.generators.generatingImage": "Bilddatei wird erstellt...",
+      "fileManager2.generators.imagePromptPlaceholder": "Text in Bilddatei umwandeln.",
+      "fileManager2.generators.successfullyGeneratedAudio": "Erfolgreich erstellte Audiodatei",
+      "fileManager2.generators.successfullyGeneratedImage": "Bilddatei erfolgreich erstellt",
+      "fileManager2.mainView.noFilesMessage": "Keine Dateien verfügbar. Laden Sie Dateien hoch, um zu beginnen.",
+      "fileManager2.metadataEditor.cancelButton": "Abbrechen",
+      "fileManager2.metadataEditor.createdLabel": "Erstellt",
+      "fileManager2.metadataEditor.descriptionLabel": "Beschreibung",
+      "fileManager2.metadataEditor.heading": "Dateimetadaten",
+      "fileManager2.metadataEditor.modelLabel": "Modell",
+      "fileManager2.metadataEditor.nameLabel": "Name",
+      "fileManager2.metadataEditor.pathLabel": "Pfad",
+      "fileManager2.metadataEditor.promptLabel": "Eingabeaufforderung (für KI-generierte Dateien)",
+      "fileManager2.metadataEditor.protectionLevelLabel": "Schutzstufe",
+      "fileManager2.metadataEditor.saveButton": "Speichern",
+      "fileManager2.metadataEditor.sizeLabel": "Größe",
+      "fileManager2.metadataEditor.typeLabel": "Typ",
+      "fileManager2.metadataEditor.unknown": "Unbekannt",
+      "fileManager2.metadataEditor.variantLabel": "Variante",
+      "fileManager2.selectedFileDetails.emptyState": "Wählen Sie eine Datei aus, um Details und Metadaten anzuzeigen",
+      "fileManager2.toolbar.actionsTooltip": "Aktionen",
+      "fileManager2.toolbar.searchPlaceholder": "Dateien durchsuchen...",
+      "fileManager2.toolbar.selectAllTooltip": "Alle auswählen",
+      "fileManager2.toolbar.uploadTooltip": "Dateien hochladen",
+      "fileMetadataComponent.basicInfo": "Grundinformationen",
+      "fileMetadataComponent.cancel": "Abbrechen",
+      "fileMetadataComponent.collapse": "Einklappen",
+      "fileMetadataComponent.concepts": "Konzepte",
+      "fileMetadataComponent.conceptsCount": "Konzepte ({{count}})",
+      "fileMetadataComponent.confirm": "Bestätigen",
+      "fileMetadataComponent.created": "Erstellt:",
+      "fileMetadataComponent.deleteConfirmation": "Datei löschen: \"{{fileName}}\"?",
+      "fileMetadataComponent.deleteFile": "Datei löschen",
+      "fileMetadataComponent.expand": "Erweitern",
+      "fileMetadataComponent.fileInfo": "Dateiinformationen",
+      "fileMetadataComponent.filename": "Dateiname:",
+      "fileMetadataComponent.noMetadataAvailable": "Keine Metadaten für diese Datei verfügbar.",
+      "fileMetadataComponent.noParsedContentAvailable": "Kein analysierter Inhalt für diese Datei verfügbar.",
+      "fileMetadataComponent.objectives": "Ziele",
+      "fileMetadataComponent.objectivesCount": "Ziele ({{count}})",
+      "fileMetadataComponent.parsedContent": "Analysierte Inhalte",
+      "fileMetadataComponent.path": "Pfad:",
+      "fileMetadataComponent.protectionLevel": "Schutzstufe",
+      "fileMetadataComponent.questions": "Fragen",
+      "fileMetadataComponent.questionsCount": "Fragen ({{count}})",
+      "fileMetadataComponent.rawMetadata": "Rohmetadaten",
+      "fileMetadataComponent.searchPlaceholder": "Dateiinhalte durchsuchen...",
+      "fileMetadataComponent.summaries": "Zusammenfassungen",
+      "fileMetadataComponent.summariesCount": "Zusammenfassungen ({{count}})",
+      "fileMetadataComponent.type": "Typ:",
+      "fileMetadataComponent.unknown": "Unbekannt",
+      "fileMetadataComponent.unknownSize": "Unbekannte Größe",
+      "fileMetadataComponent.unset": "UNSET",
+      "fileMetadataComponent.vocabulary": "Vokabeln",
+      "fileMetadataComponent.vocabularyCount": "Vokabeln ({{count}})",
+      "documentUploader.browseFiles": "Dateien durchsuchen",
+      "documentUploader.dragDropPrompt": "Ziehen Sie Dokumente hierher und legen Sie sie ab",
+      "documentUploader.errorMessages.noSupportedFiles": "Keine unterstützten Dokumente gefunden. Bitte laden Sie PDF-, Word-, Text- oder Excel-Dateien hoch.",
+      "documentUploader.errorMessages.skippedFiles": "Einige Dateien wurden übersprungen (nicht unterstützter Typ)",
+      "documentUploader.errorMessages.uploadFailed": "Fehler beim Hochladen von {{fileName}}: {{error}}",
+      "documentUploader.extractionTypes.dictionary": "Wörterbuch",
+      "documentUploader.extractionTypes.question": "Frage",
+      "documentUploader.extractionTypes.questions": "Fragen",
+      "documentUploader.extractionTypes.vocabulary": "Vokabeln",
+      "documentUploader.howItWorks.step1": "1. Laden Sie Ihre Dokumente hoch (PDF-, Word-, Text- oder Excel-Dateien)",
+      "documentUploader.howItWorks.step2": "2. KI wird den Inhalt analysieren und {{extractionType}} extrahieren",
+      "documentUploader.howItWorks.step3": "Überprüfen und genehmigen Sie Vorschläge im Tab „Vorschläge“",
+      "documentUploader.howItWorks.step4": "Importieren Sie die ausgewählten Elemente in Ihr {{target}}",
+      "documentUploader.howItWorks.title": "Wie es funktioniert:",
+      "documentUploader.recentUploads": "Neueste Uploads",
+      "documentUploader.statusLabels.complete": "Abschließen",
+      "documentUploader.statusLabels.failed": "Fehlgeschlagen",
+      "documentUploader.statusLabels.processing": "Verarbeitung...",
+      "documentUploader.supportedFormats": "Unterstützt: PDF, Word (.doc, .docx), Text (.txt), Excel (.xls, .xlsx, .csv)",
+      "documentUploader.title": "Dokumente für {{extractionType}}-Extraktion hochladen",
+      "documentUploader.uploadingProgress": "Wird hochgeladen... {{progress}}%",
+      "fileManager.close": "Schließen",
+      "fileManager.create": "Erstellen",
+      "fileManager.draftChanges": "Änderungen speichern",
+      "fileManager.errorRendering": "Fehler beim Rendern von FileManager: {{message}}",
+      "fileManager.revert": "Zurücksetzen",
+      "fileManager.save": "Speichern",
+      "fileManager.textToImagePreview": "Text-zu-Bild-Vorschau",
+      "fileManager.textToSpeechPreview": "Text-zu-Sprache-Vorschau"
+    },
+    "translategemma": {
+      "fileManager2.contextMenu.deleteConfirmMessage": "{{count}} ausgewählte(n) Datei(en) löschen?",
+      "fileManager2.contextMenu.deleteSelected": "Löschen Ausgewählt ({{count}})",
+      "fileManager2.contextMenu.deselectAll": "Alles abwählen",
+      "fileManager2.contextMenu.reAnalyzeSelected": "Neu analysieren Ausgewählte ({{count}})",
+      "fileManager2.expandedContent.descriptionLabel": "Beschreibung:",
+      "fileManager2.expandedContent.extractedContentHeading": "Extrahiert Inhalte",
+      "fileManager2.expandedContent.noConceptsExtracted": "Keine Konzepte extrahiert",
+      "fileManager2.expandedContent.noContentAvailable": "Kein extrahierter Inhalt verfügbar",
+      "fileManager2.expandedContent.noObjectivesExtracted": "Keine Ziele extrahiert",
+      "fileManager2.expandedContent.noQuestionsExtracted": "Keine Fragen extrahiert",
+      "fileManager2.expandedContent.noSummariesExtracted": "Keine Zusammenfassungen extrahiert",
+      "fileManager2.expandedContent.noVocabularyExtracted": "Keine Vokabeln extrahiert",
+      "fileManager2.expandedContent.reviewQuestionsMessage": "Fragen aus dem Dokument überprüfen und importieren",
+      "fileManager2.expandedContent.reviewVocabularyMessage": "Vokabeln aus dem Dokument überprüfen und importieren",
+      "fileManager2.expandedContent.transcriptionLabel": "Abschrift:",
+      "fileManager2.fileDetails.deleteTooltip": "Löschen",
+      "fileManager2.fileDetails.downloadTooltip": "Herunterladen",
+      "fileManager2.fileDetails.insertTooltip": "In Editor einfügen",
+      "fileManager2.fileDetails.noWaveformAvailable": "Keine Wellenform verfügbar",
+      "fileManager2.fileDetails.reAnalyzeTooltip": "Neu analysieren",
+      "fileManager2.fileDetails.videoNotSupported": "Ihr Browser unterstützt das Videoelement nicht.",
+      "fileManager2.generators.audioPromptPlaceholder": "Text zur Umwandlung in eine Audiodatei.",
+      "fileManager2.generators.errorGeneratingAudio": "Fehler beim Erzeugen der Audiodatei",
+      "fileManager2.generators.errorGeneratingImage": "Fehler beim Erstellen der Bilddatei",
+      "fileManager2.generators.generatingAudio": "Audio-Datei wird erstellt...",
+      "fileManager2.generators.generatingImage": "Bilddatei wird generiert...",
+      "fileManager2.generators.imagePromptPlaceholder": "Text zur Umwandlung in eine Bilddatei.",
+      "fileManager2.generators.successfullyGeneratedAudio": "Audio-Datei erfolgreich generiert",
+      "fileManager2.generators.successfullyGeneratedImage": "Bilddatei erfolgreich generiert",
+      "fileManager2.mainView.noFilesMessage": "Keine Dateien verfügbar. Laden Sie Dateien hoch, um zu beginnen.",
+      "fileManager2.metadataEditor.cancelButton": "Abbrechen",
+      "fileManager2.metadataEditor.createdLabel": "Erstellt",
+      "fileManager2.metadataEditor.descriptionLabel": "Beschreibung",
+      "fileManager2.metadataEditor.heading": "Datei Metadaten",
+      "fileManager2.metadataEditor.modelLabel": "Modell",
+      "fileManager2.metadataEditor.nameLabel": "Name",
+      "fileManager2.metadataEditor.pathLabel": "Pfad",
+      "fileManager2.metadataEditor.promptLabel": "Eingabeaufforderung (für KI-generierte Dateien)",
+      "fileManager2.metadataEditor.protectionLevelLabel": "Schutzstufe",
+      "fileManager2.metadataEditor.saveButton": "Speichern",
+      "fileManager2.metadataEditor.sizeLabel": "Größe",
+      "fileManager2.metadataEditor.typeLabel": "Typ",
+      "fileManager2.metadataEditor.unknown": "Unbekannt",
+      "fileManager2.metadataEditor.variantLabel": "Variante",
+      "fileManager2.selectedFileDetails.emptyState": "Wähle eine Datei aus, um Details und Metadaten anzuzeigen",
+      "fileManager2.toolbar.actionsTooltip": "Aktionen",
+      "fileManager2.toolbar.searchPlaceholder": "Suche Dateien...",
+      "fileManager2.toolbar.selectAllTooltip": "Alle auswählen",
+      "fileManager2.toolbar.uploadTooltip": "Dateien hochladen",
+      "fileMetadataComponent.basicInfo": "Grundinformation",
+      "fileMetadataComponent.cancel": "Abbrechen",
+      "fileMetadataComponent.collapse": "Zusammenklappen",
+      "fileMetadataComponent.concepts": "Konzepte",
+      "fileMetadataComponent.conceptsCount": "Konzepte ({{count}})",
+      "fileMetadataComponent.confirm": "Bestätigen",
+      "fileMetadataComponent.created": "Erstellt:",
+      "fileMetadataComponent.deleteConfirmation": "Datei löschen: \"{{fileName}}\"?",
+      "fileMetadataComponent.deleteFile": "Datei löschen",
+      "fileMetadataComponent.expand": "Erweitern",
+      "fileMetadataComponent.fileInfo": "Dateiinformationen",
+      "fileMetadataComponent.filename": "Dateiname:",
+      "fileMetadataComponent.noMetadataAvailable": "Keine Metadaten für diese Datei verfügbar.",
+      "fileMetadataComponent.noParsedContentAvailable": "Keine geparsten Inhalte für diese Datei verfügbar.",
+      "fileMetadataComponent.objectives": "Ziele",
+      "fileMetadataComponent.objectivesCount": "Ziele ({{count}})",
+      "fileMetadataComponent.parsedContent": "Aufbereitete Inhalte",
+      "fileMetadataComponent.path": "Pfad:",
+      "fileMetadataComponent.protectionLevel": "Schutzstufe:",
+      "fileMetadataComponent.questions": "Fragen",
+      "fileMetadataComponent.questionsCount": "Fragen ({{count}})",
+      "fileMetadataComponent.rawMetadata": "Rohdaten",
+      "fileMetadataComponent.searchPlaceholder": "Inhalt durchsuchen...",
+      "fileMetadataComponent.summaries": "Zusammenfassungen",
+      "fileMetadataComponent.summariesCount": "Zusammenfassungen ({{count}})",
+      "fileMetadataComponent.type": "Typ:",
+      "fileMetadataComponent.unknown": "Unbekannt",
+      "fileMetadataComponent.unknownSize": "Unbekannte Größe",
+      "fileMetadataComponent.unset": "UNSET",
+      "fileMetadataComponent.vocabulary": "Vokabeln",
+      "fileMetadataComponent.vocabularyCount": "Vokabeln ({{count}})",
+      "documentUploader.browseFiles": "Dateien durchsuchen",
+      "documentUploader.dragDropPrompt": "Ziehen und Ablegen Sie Dokumente hier",
+      "documentUploader.errorMessages.noSupportedFiles": "Keine unterstützten Dokumente gefunden. Bitte laden Sie PDF-, Word-, Text- oder Excel-Dateien hoch.",
+      "documentUploader.errorMessages.skippedFiles": "Einige Dateien wurden übersprungen (un unterstütztes Format)",
+      "documentUploader.errorMessages.uploadFailed": "Hochladen von {{fileName}} fehlgeschlagen: {{error}}",
+      "documentUploader.extractionTypes.dictionary": "Wörterbuch",
+      "documentUploader.extractionTypes.question": "Frage",
+      "documentUploader.extractionTypes.questions": "Fragen",
+      "documentUploader.extractionTypes.vocabulary": "Vokabeln",
+      "documentUploader.howItWorks.step1": "1. Laden Sie Ihre Dokumente (PDF-, Word-, Text- oder Excel-Dateien) hoch",
+      "documentUploader.howItWorks.step2": "2. KI wird den Inhalt analysieren und {{extractionType}} extrahieren",
+      "documentUploader.howItWorks.step3": "3. Vorschläge im Reiter \"Vorschläge\" prüfen und genehmigen",
+      "documentUploader.howItWorks.step4": "4. Importierte ausgewählte Elemente in Ihr {{target}}",
+      "documentUploader.howItWorks.title": "Wie es funktioniert:",
+      "documentUploader.recentUploads": "Jüngste Uploads",
+      "documentUploader.statusLabels.complete": "Fertig",
+      "documentUploader.statusLabels.failed": "Fehlgeschlagen",
+      "documentUploader.statusLabels.processing": "Verarbeiten...",
+      "documentUploader.supportedFormats": "Unterstützt: PDF, Word (.doc, .docx), Text (.txt), Excel (.xls, .xlsx, .csv)",
+      "documentUploader.title": "Dokumente für {{extractionType}} Extraktion hochladen",
+      "documentUploader.uploadingProgress": "Hochladen... {{progress}}%",
+      "fileManager.close": "Schließen",
+      "fileManager.create": "Erstellen",
+      "fileManager.draftChanges": "Entwurf Änderungen",
+      "fileManager.errorRendering": "Fehler beim Rendern von FileManager: {{message}}",
+      "fileManager.revert": "Wiederherstellen",
+      "fileManager.save": "Speichern",
+      "fileManager.textToImagePreview": "Text-zu-Bild-Vorschau",
+      "fileManager.textToSpeechPreview": "Text-to-Speech-Vorschau"
+    },
+    "final": {
+      "fileManager2.contextMenu.deleteConfirmMessage": "{{count}} ausgewählte Datei(en) löschen?",
+      "fileManager2.contextMenu.deleteSelected": "Ausgewählte löschen ({{count}})",
+      "fileManager2.contextMenu.deselectAll": "Alle abwählen",
+      "fileManager2.contextMenu.reAnalyzeSelected": "Ausgewählte erneut analysieren ({{count}})",
+      "fileManager2.expandedContent.descriptionLabel": "Beschreibung:",
+      "fileManager2.expandedContent.extractedContentHeading": "Extrahierter Inhalt",
+      "fileManager2.expandedContent.noConceptsExtracted": "Keine Konzepte extrahiert",
+      "fileManager2.expandedContent.noContentAvailable": "Kein extrahierter Inhalt verfügbar",
+      "fileManager2.expandedContent.noObjectivesExtracted": "Keine Ziele extrahiert",
+      "fileManager2.expandedContent.noQuestionsExtracted": "Keine Fragen extrahiert",
+      "fileManager2.expandedContent.noSummariesExtracted": "Keine Zusammenfassungen extrahiert",
+      "fileManager2.expandedContent.noVocabularyExtracted": "Keine Vokabeln extrahiert",
+      "fileManager2.expandedContent.reviewQuestionsMessage": "Fragen aus dem Dokument überprüfen und importieren",
+      "fileManager2.expandedContent.reviewVocabularyMessage": "Vokabular aus dem Dokument überprüfen und importieren",
+      "fileManager2.expandedContent.transcriptionLabel": "Transkription:",
+      "fileManager2.fileDetails.deleteTooltip": "Löschen",
+      "fileManager2.fileDetails.downloadTooltip": "Herunterladen",
+      "fileManager2.fileDetails.insertTooltip": "In Editor einfügen",
+      "fileManager2.fileDetails.noWaveformAvailable": "Keine Wellenform verfügbar",
+      "fileManager2.fileDetails.reAnalyzeTooltip": "Erneut analysieren",
+      "fileManager2.fileDetails.videoNotSupported": "Ihr Browser unterstützt das Video-Tag nicht.",
+      "fileManager2.generators.audioPromptPlaceholder": "Text, der in eine Audiodatei umgewandelt werden soll.",
+      "fileManager2.generators.errorGeneratingAudio": "Fehler beim Generieren der Audiodatei",
+      "fileManager2.generators.errorGeneratingImage": "Fehler beim Erstellen der Bilddatei",
+      "fileManager2.generators.generatingAudio": "Audio-Datei wird erstellt...",
+      "fileManager2.generators.generatingImage": "Bilddatei wird erstellt...",
+      "fileManager2.generators.imagePromptPlaceholder": "Text zur Umwandlung in eine Bilddatei.",
+      "fileManager2.generators.successfullyGeneratedAudio": "Audiodatei erfolgreich erstellt",
+      "fileManager2.generators.successfullyGeneratedImage": "Bilddatei erfolgreich erstellt",
+      "fileManager2.mainView.noFilesMessage": "Keine Dateien verfügbar. Laden Sie Dateien hoch, um zu beginnen.",
+      "fileManager2.metadataEditor.cancelButton": "Abbrechen",
+      "fileManager2.metadataEditor.createdLabel": "Erstellt",
+      "fileManager2.metadataEditor.descriptionLabel": "Beschreibung",
+      "fileManager2.metadataEditor.heading": "Datei-Metadaten",
+      "fileManager2.metadataEditor.modelLabel": "Modell",
+      "fileManager2.metadataEditor.nameLabel": "Name",
+      "fileManager2.metadataEditor.pathLabel": "Pfad",
+      "fileManager2.metadataEditor.promptLabel": "Eingabeaufforderung (für KI-generierte Dateien)",
+      "fileManager2.metadataEditor.protectionLevelLabel": "Schutzstufe",
+      "fileManager2.metadataEditor.saveButton": "Speichern",
+      "fileManager2.metadataEditor.sizeLabel": "Größe",
+      "fileManager2.metadataEditor.typeLabel": "Typ",
+      "fileManager2.metadataEditor.unknown": "Unbekannt",
+      "fileManager2.metadataEditor.variantLabel": "Variante",
+      "fileManager2.selectedFileDetails.emptyState": "Wählen Sie eine Datei aus, um Details und Metadaten anzuzeigen",
+      "fileManager2.toolbar.actionsTooltip": "Aktionen",
+      "fileManager2.toolbar.searchPlaceholder": "Dateien suchen...",
+      "fileManager2.toolbar.selectAllTooltip": "Alle auswählen",
+      "fileManager2.toolbar.uploadTooltip": "Dateien hochladen",
+      "fileMetadataComponent.basicInfo": "Grundlegende Informationen",
+      "fileMetadataComponent.cancel": "Abbrechen",
+      "fileMetadataComponent.collapse": "Einklappen",
+      "fileMetadataComponent.concepts": "Konzepte",
+      "fileMetadataComponent.conceptsCount": "Konzepte ({{count}})",
+      "fileMetadataComponent.confirm": "Bestätigen",
+      "fileMetadataComponent.created": "Erstellt:",
+      "fileMetadataComponent.deleteConfirmation": "Datei löschen: \"{{fileName}}\"?",
+      "fileMetadataComponent.deleteFile": "Datei löschen",
+      "fileMetadataComponent.expand": "Erweitern",
+      "fileMetadataComponent.fileInfo": "Dateiinformationen",
+      "fileMetadataComponent.filename": "Dateiname:",
+      "fileMetadataComponent.noMetadataAvailable": "Keine Metadaten für diese Datei verfügbar.",
+      "fileMetadataComponent.noParsedContentAvailable": "Für diese Datei sind keine analysierten Inhalte verfügbar.",
+      "fileMetadataComponent.objectives": "Ziele",
+      "fileMetadataComponent.objectivesCount": "Ziele ({{count}})",
+      "fileMetadataComponent.parsedContent": "Geparster Inhalt",
+      "fileMetadataComponent.path": "Pfad:",
+      "fileMetadataComponent.protectionLevel": "Schutzebene:",
+      "fileMetadataComponent.questions": "Fragen",
+      "fileMetadataComponent.questionsCount": "Fragen ({{count}})",
+      "fileMetadataComponent.rawMetadata": "Rohe Metadaten",
+      "fileMetadataComponent.searchPlaceholder": "Dateiinhalt durchsuchen...",
+      "fileMetadataComponent.summaries": "Zusammenfassungen",
+      "fileMetadataComponent.summariesCount": "Zusammenfassungen ({{count}})",
+      "fileMetadataComponent.type": "Typ:",
+      "fileMetadataComponent.unknown": "Unbekannt",
+      "fileMetadataComponent.unknownSize": "Unbekannte Größe",
+      "fileMetadataComponent.unset": "UNSET",
+      "fileMetadataComponent.vocabulary": "Vokabeln",
+      "fileMetadataComponent.vocabularyCount": "Vokabeln ({{count}})",
+      "documentUploader.browseFiles": "Dateien durchsuchen",
+      "documentUploader.dragDropPrompt": "Dokumente hier per Drag & Drop ablegen",
+      "documentUploader.errorMessages.noSupportedFiles": "Keine unterstützten Dokumente gefunden. Bitte laden Sie PDF-, Word-, Text- oder Excel-Dateien hoch.",
+      "documentUploader.errorMessages.skippedFiles": "Einige Dateien wurden übersprungen (nicht unterstützter Dateityp)",
+      "documentUploader.errorMessages.uploadFailed": "Upload von {{fileName}} fehlgeschlagen: {{error}}",
+      "documentUploader.extractionTypes.dictionary": "Wörterbuch",
+      "documentUploader.extractionTypes.question": "Frage",
+      "documentUploader.extractionTypes.questions": "Fragen",
+      "documentUploader.extractionTypes.vocabulary": "Vokabeln",
+      "documentUploader.howItWorks.step1": "1. Laden Sie Ihre Dokumente hoch (PDF-, Word-, Text- oder Excel-Dateien)",
+      "documentUploader.howItWorks.step2": "2. KI wird den Inhalt analysieren und {{extractionType}} extrahieren",
+      "documentUploader.howItWorks.step3": "3. Überprüfen und genehmigen Sie Vorschläge im Tab \"Vorschläge\"",
+      "documentUploader.howItWorks.step4": "4. Ausgewählte Elemente in Ihr {{target}} importieren",
+      "documentUploader.howItWorks.title": "Wie es funktioniert:",
+      "documentUploader.recentUploads": "Neueste Uploads",
+      "documentUploader.statusLabels.complete": "Abschließen",
+      "documentUploader.statusLabels.failed": "Fehlgeschlagen",
+      "documentUploader.statusLabels.processing": "Wird verarbeitet...",
+      "documentUploader.supportedFormats": "Unterstützt: PDF, Word (.doc, .docx), Text (.txt), Excel (.xls, .xlsx, .csv)",
+      "documentUploader.title": "Dokumente für {{extractionType}}-Extraktion hochladen",
+      "documentUploader.uploadingProgress": "Wird hochgeladen... {{progress}}%",
+      "fileManager.close": "Schließen",
+      "fileManager.create": "Erstellen",
+      "fileManager.draftChanges": "Änderungen entwerfen",
+      "fileManager.errorRendering": "Fehler beim Rendern von FileManager: {{message}}",
+      "fileManager.revert": "Zurücksetzen",
+      "fileManager.save": "Speichern",
+      "fileManager.textToImagePreview": "Text-zu-Bild-Vorschau",
+      "fileManager.textToSpeechPreview": "Text-zu-Sprache-Vorschau"
+    }
+  }
+}
