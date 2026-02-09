@@ -21,13 +21,13 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { post } from 'aws-amplify/api';
 import { Amplify } from 'aws-amplify';
-import amplifyConfig from '../amplifyconfiguration.json';
+import outputs from '../amplify_outputs.json';
 import chalk from 'chalk';
 import fs from 'fs';
 import path from 'path';
 
 // Initialize Amplify
-Amplify.configure(amplifyConfig);
+Amplify.configure(outputs);
 
 interface ToolTest {
   toolName: string;
@@ -234,7 +234,7 @@ class LLMJudge {
       const duration = Date.now() - startTime;
 
       // Parse SSE stream
-      const reader = response.body.getReader();
+      const reader = (response.body as unknown as ReadableStream).getReader();
       const decoder = new TextDecoder();
       let buffer = '';
       const chunks: any[] = [];
@@ -328,12 +328,13 @@ Provide your evaluation in JSON format:
       }
     } catch (error) {
       console.error(chalk.red('Error getting judgment:'), error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
       return {
         score: 0,
-        reasoning: `Error: ${error.message}`,
+        reasoning: `Error: ${errorMessage}`,
         toolExecuted: false,
         responseQuality: 'poor',
-        issues: [error.message],
+        issues: [errorMessage],
       };
     }
   }
@@ -459,21 +460,24 @@ Provide your evaluation in JSON format:
       if (passed && test.category === 'create') {
         const resourceId = this.extractResourceId(chunks, test.toolName.replace('create_', ''));
         if (resourceId) {
-          const resourceType = test.toolName.replace('create_', '') + 's';
-          this.createdResources[resourceType]?.push(resourceId);
+          const resourceType = test.toolName.replace('create_', '') + 's' as keyof typeof this.createdResources;
+          if (this.createdResources[resourceType]) {
+            this.createdResources[resourceType].push(resourceId);
+          }
         }
       }
 
       this.results.push(result);
       return result;
     } catch (error) {
-      console.log(chalk.red(`   ✗ ERROR: ${error.message}`));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.log(chalk.red(`   ✗ ERROR: ${errorMessage}`));
       
       const result: TestResult = {
         toolName: test.toolName,
         passed: false,
         prompt: preparedPrompt,
-        error: error.message,
+        error: errorMessage,
         duration: 0,
       };
 

@@ -588,7 +588,10 @@ async function main() {
         };
         
         // Log any failures
-        if (claudeSettled.status === 'rejected') console.warn(`      ⚠️  Claude failed for ${keyPath}: ${claudeSettled.reason}`);\n        if (gptSettled.status === 'rejected') console.warn(`      ⚠️  GPT failed for ${keyPath}: ${gptSettled.reason}`);\n        if (gemmaSettled.status === 'rejected') console.warn(`      ⚠️  Gemma failed for ${keyPath}: ${gemmaSettled.reason}`);\n      }
+        if (claudeSettled.status === 'rejected') console.warn(`      ⚠️  Claude failed for ${keyPath}: ${claudeSettled.reason}`);
+        if (gptSettled.status === 'rejected') console.warn(`      ⚠️  GPT failed for ${keyPath}: ${gptSettled.reason}`);
+        if (gemmaSettled.status === 'rejected') console.warn(`      ⚠️  Gemma failed for ${keyPath}: ${gemmaSettled.reason}`);
+      }
       
       // Analyze consensus
       const consensus = analyzeConsensus(

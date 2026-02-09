@@ -182,12 +182,12 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
 
     // Subscribe to events
     const unsubscribe = emitter.on((event) => {
-      if (event.type === 'persona-selected') {
+      if (event.type === 'persona-selected' && event.persona) {
         setSelectedPersona(event.persona);
         const completed = emitter.getCompletedTasks(event.persona);
         setCompletedTasks(new Set(completed.map((e) => e.taskId)));
         updateCompletionPercentage(event.persona);
-      } else if (event.type === 'task-completed' && selectedPersona === event.persona) {
+      } else if (event.type === 'task-completed' && event.persona && selectedPersona === event.persona) {
         setCompletedTasks((prev) => new Set([...prev, event.taskId]));
         updateCompletionPercentage(event.persona);
       }
@@ -493,6 +493,8 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   );
 
   const renderTaskView = () => {
+    if (!selectedPersona) return null;
+    
     const persona = PERSONAS.find((p) => p.id === selectedPersona)!;
     const tasks = getTasksForPersona(selectedPersona);
     const tasksByCategory = getTasksByCategory(selectedPersona);

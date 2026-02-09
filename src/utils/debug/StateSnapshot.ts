@@ -5,7 +5,8 @@
  * Used for creating comprehensive diagnostic exports
  */
 
-import { generateClient } from 'aws-amplify/api';
+import { DataStore } from 'aws-amplify/datastore';
+import { Unit, Word, File, Question, Grade, Section } from '../../models';
 import { sanitizeModel } from './sanitizeComponentData';
 
 /**
@@ -128,20 +129,18 @@ function captureSessionStorage(): Record<string, string> {
 }
 
 /**
- * Capture DataStore state (Gen 2 API client)
+ * Capture DataStore state (Gen 1 DataStore)
  */
 async function captureDataStoreState(): Promise<DataStoreState> {
   try {
-    const client = generateClient();
-    
     // Query all major models
     const [units, words, files, questions, grades, sections] = await Promise.all([
-      client.models.Unit.list().then(res => res.data).catch(() => []),
-      client.models.Word.list().then(res => res.data).catch(() => []),
-      client.models.File.list().then(res => res.data).catch(() => []),
-      client.models.Question.list().then(res => res.data).catch(() => []),
-      client.models.Grade.list().then(res => res.data).catch(() => []),
-      client.models.Section.list().then(res => res.data).catch(() => []),
+      DataStore.query(Unit).catch(() => []),
+      DataStore.query(Word).catch(() => []),
+      DataStore.query(File).catch(() => []),
+      DataStore.query(Question).catch(() => []),
+      DataStore.query(Grade).catch(() => []),
+      DataStore.query(Section).catch(() => []),
     ]);
     
     return {

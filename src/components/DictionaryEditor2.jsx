@@ -682,7 +682,6 @@ class WordDecoratorNode extends DecoratorNode {
             version: this.__version,
             isExpanded: this.__isExpanded,
             index: this.__index,
-            version: 1,
         };
     }
 

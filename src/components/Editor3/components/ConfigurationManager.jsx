@@ -271,7 +271,6 @@ export default function ConfigurationManager() {
             color: '#000',
             fontSize: '2rem',
             fontWeight: 'bold',
-            textAlign: 'center',
             position: 'absolute',
             top: 0,
             left: 0,
