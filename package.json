@@ -2,6 +2,10 @@
   "name": "amplify-homework-supply",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "amplify",
+    "amplify/custom/websocket"
+  ],
   "sideEffects": [
     "*.css",
     "*.scss",

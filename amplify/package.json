@@ -1,3 +1,7 @@
 {
-  "type": "module"
+  "name": "@amplify-homework-supply/backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {}
 }

@@ -1,6 +1,7 @@
 {
-  "name": "websocket",
+  "name": "@amplify-homework-supply/websocket",
   "version": "1.0.0",
+  "private": true,
   "type": "module",
   "dependencies": {
     "@aws-sdk/client-apigatewaymanagementapi": "^3.0.0",
