@@ -16,6 +16,7 @@ import { OpenAIInstrumentation } from '@arizeai/openinference-instrumentation-op
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import type { Span } from '@opentelemetry/api';
 
 let isInitialized = false;
 
@@ -68,10 +69,7 @@ export function initializePhoenixTracing() {
     // Register OpenAI instrumentation
     registerInstrumentations({
       instrumentations: [
-        new OpenAIInstrumentation({
-          // Capture all request/response data
-          enableContentCapture: true,
-        }),
+        new OpenAIInstrumentation(),
       ],
     });
 
@@ -117,7 +115,7 @@ export async function traceOperation<T>(
     const { trace } = require('@opentelemetry/api');
     const tracer = trace.getTracer(process.env.AWS_LAMBDA_FUNCTION_NAME || 'homework-supply');
     
-    return await tracer.startActiveSpan(operationName, async (span) => {
+    return await tracer.startActiveSpan(operationName, async (span: Span) => {
       try {
         // Add custom attributes
         Object.entries(attributes).forEach(([key, value]) => {
