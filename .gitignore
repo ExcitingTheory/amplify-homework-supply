@@ -93,3 +93,6 @@ amplifyconfiguration*
 
 # translation metadata cache (can be regenerated)
 translation-cache/
+
+*.d.ts
+tsconfig.tsbuildinfo

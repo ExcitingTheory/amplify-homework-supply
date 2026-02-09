@@ -1,9 +1,6 @@
 import * as React from 'react';
 import { useContext, useState, useCallback, useRef, useEffect } from 'react';
 
-import './components/LanguageEditorTheme.css';
-import './theme.css';
-
 import { styled, useTheme } from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';

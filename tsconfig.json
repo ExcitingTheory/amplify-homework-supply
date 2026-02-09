@@ -30,6 +30,17 @@
   ],
   "exclude": [
     "node_modules",
-    "amplify"
+    "amplify",
+    "scripts",
+    "cypress",
+    ".storybook",
+    ".github",
+    "**/*.stories.ts",
+    "**/*.stories.tsx",
+    "**/*.stories.js",
+    "**/*.stories.jsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__/**"
   ]
 }
