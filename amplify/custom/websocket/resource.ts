@@ -47,7 +47,8 @@ export class WebSocketApiConstruct extends Construct {
         name: 'connectionId',
         type: AttributeType.STRING,
       },
-      tableName: 'WebSocketConnections',
+      // Let CDK auto-generate table name to avoid conflicts
+      // tableName: 'WebSocketConnections',
       billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: RemovalPolicy.DESTROY, // Use RETAIN for production
       timeToLiveAttribute: 'ttl', // Auto-cleanup stale connections
