@@ -146,6 +146,9 @@ const schema = a.schema({
 
   Unit: a
     .model({
+      // Ownership
+      owner: a.string(),
+      identityId: a.string(),
       number: a.float(),
       name: a.string(),
       description: a.string(),
