@@ -331,7 +331,7 @@ describe('Onboarding System', () => {
   describe('LocalStorage Persistence', () => {
     it('should save persona to localStorage', () => {
       cy.clearLocalStorage();
-      cy.visit(`${storybookUrl}/?path=/docs/getting-started-onboarding--docs`);
+      cy.visitStory('getting-started-onboarding--docs');
       cy.get('button[role="tab"]').contains('Onboarding').click();
       cy.contains('Instructor').parent().click();
       
@@ -344,7 +344,7 @@ describe('Onboarding System', () => {
 
     it('should save completed tasks to localStorage', () => {
       cy.clearLocalStorage();
-      cy.visit(`${storybookUrl}/?path=/story/onboarding-learning-modes--auto-complete-tutorial`);
+      cy.visitStory('onboarding-learning-modes--auto-complete-tutorial', 'story');
       cy.wait(1000);
       
       // Check localStorage for completed tasks
@@ -364,7 +364,7 @@ describe('Onboarding System', () => {
         }]));
       });
       
-      cy.visit(`${storybookUrl}/?path=/docs/getting-started-onboarding--docs`);
+      cy.visitStory('getting-started-onboarding--docs');
       cy.get('button[role="tab"]').contains('Onboarding').click();
       
       // Should show Learner persona

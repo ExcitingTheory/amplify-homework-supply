@@ -1,12 +1,11 @@
 /**
  * StateSnapshot - Captures full application state for diagnostics
  * 
- * Includes component tree, logs, DataStore,contexts, localStorage, and performance metrics
+ * Includes component tree, logs, Gen 2 data models, contexts, localStorage, and performance metrics
  * Used for creating comprehensive diagnostic exports
  */
 
-import { DataStore } from 'aws-amplify/datastore';
-import { Unit, Word, File, Question, Grade, Section } from '../../models';
+import { getAmplifyClient } from '../amplifyClient';
 import { sanitizeModel } from './sanitizeComponentData';
 
 /**
@@ -46,9 +45,9 @@ export interface PerformanceMetrics {
 }
 
 /**
- * DataStore sync state
+ * Gen 2 data models state
  */
-export interface DataStoreState {
+export interface AppDataState {
   units?: unknown[];
   words?: unknown[];
   files?: unknown[];
@@ -80,7 +79,7 @@ export interface StateSnapshot {
   sessionStorage: Record<string, string>;
   componentTree: string | null;
   logs: string | null;
-  dataStore: DataStoreState;
+  dataStore: AppDataState;
   contexts: Record<string, unknown>;
   performance: PerformanceMetrics | null;
   errors: ErrorInfo[];
@@ -129,19 +128,30 @@ function captureSessionStorage(): Record<string, string> {
 }
 
 /**
- * Capture DataStore state (Gen 1 DataStore)
+ * Capture Gen 2 data models state
  */
-async function captureDataStoreState(): Promise<DataStoreState> {
+async function captureDataStoreState(): Promise<AppDataState> {
   try {
-    // Query all major models
-    const [units, words, files, questions, grades, sections] = await Promise.all([
-      DataStore.query(Unit).catch(() => []),
-      DataStore.query(Word).catch(() => []),
-      DataStore.query(File).catch(() => []),
-      DataStore.query(Question).catch(() => []),
-      DataStore.query(Grade).catch(() => []),
-      DataStore.query(Section).catch(() => []),
-    ]);
+    const client = getAmplifyClient();
+    
+    // Query all major models using Gen 2 client
+    const [unitsResult, wordsResult, filesResult, questionsResult, gradesResult, sectionsResult] = 
+      await Promise.all([
+        client.models.Unit.list().catch(() => ({ data: [] })),
+        client.models.Word.list().catch(() => ({ data: [] })),
+        client.models.File.list().catch(() => ({ data: [] })),
+        client.models.Question.list().catch(() => ({ data: [] })),
+        client.models.Grade.list().catch(() => ({ data: [] })),
+        client.models.Section.list().catch(() => ({ data: [] })),
+      ]);
+    
+    // Extract data arrays from Gen 2 responses
+    const units = unitsResult.data || [];
+    const words = wordsResult.data || [];
+    const files = filesResult.data || [];
+    const questions = questionsResult.data || [];
+    const grades = gradesResult.data || [];
+    const sections = sectionsResult.data || [];
     
     return {
       units: units.map(sanitizeModel),
@@ -161,7 +171,7 @@ async function captureDataStoreState(): Promise<DataStoreState> {
     };
   } catch (error) {
     return { 
-      error: error instanceof Error ? error.message : 'Unknown error capturing DataStore state' 
+      error: error instanceof Error ? error.message : 'Unknown error capturing Gen 2 data state' 
     };
   }
 }

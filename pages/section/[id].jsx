@@ -967,7 +967,6 @@ function SectionDetail({ user, signOut }) {
                 zIndex: 100,
                 backgroundColor: 'rgb(255, 255, 255, 0.5)',
                 backdropFilter: 'blur(3px)',
-                textAlign: 'center',
                 verticalAlign: 'middle',
                 display: 'flex',
                 justifyContent: 'center',
