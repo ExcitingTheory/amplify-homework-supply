@@ -4,7 +4,11 @@ import { OnboardingTask, UserPersona } from './onboarding-events';
  * Criteria for automatically completing a task
  */
 export interface TaskCompletionCriteria {
-  /** Story ID where this task can be completed */
+  /** Story ID for tutorial mode (component stories) */
+  tutorialStoryId?: string;
+  /** Story ID for quiz mode (page stories) */
+  quizStoryId?: string;
+  /** Legacy: Single story ID for both modes (deprecated) */
   storyId?: string;
   /** Actions that must be performed (OR logic - any one completes the task) */
   requiredActions?: string[];
@@ -41,7 +45,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     order: 1,
     estimatedTime: 300,
     completionCriteria: {
-      storyId: 'pages-sections--default',
+      tutorialStoryId: '🧩-components-section-assigner--default', // Tutorial: Component story showing the dialog
+      quizStoryId: '📄-pages-application-pages--sections', // Quiz: Navigate to actual sections page
       requiredActions: ['onClick', 'onCreate'], // Any create/save action
     },
   },
@@ -58,7 +63,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       'Save your unit',
     ],
     completionCriteria: {
-      storyId: 'pages-units--default',
+      tutorialStoryId: '📄-pages-application-pages--units', // Tutorial: Units page (no separate component)
+      quizStoryId: '📄-pages-application-pages--units', // Quiz: Navigate to actual units page
       requiredActions: ['onClick', 'onCreate'], // Create button or save
     },
     persona: 'instructor',
@@ -80,7 +86,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       'Save the unit',
     ],
     completionCriteria: {
-      storyId: 'creating-lessons-editor--default',
+      tutorialStoryId: '📚-creating-lessons-editor--empty-editor-custom-blocks', // Tutorial: Editor with custom blocks menu visible
+      quizStoryId: '📄-pages-application-pages--unit-detail', // Quiz: Actual editor page
       requiredActions: ['onSave', 'onUpdate'], // Saving editor content
     },
     persona: 'instructor',
@@ -210,7 +217,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       'Click on an assignment to open it',
     ],
     completionCriteria: {
-      storyId: 'pages-section--default',
+      tutorialStoryId: '📄-pages-application-pages--section-detail', // Tutorial: Section page (no separate component)
+      quizStoryId: '📄-pages-application-pages--section-detail', // Quiz: Navigate to section page
       requiredActions: ['onClick'], // Viewing or clicking assignments
     },
     persona: 'learner',
@@ -232,7 +240,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       'View your score immediately',
     ],
     completionCriteria: {
-      storyId: 'pages-workbook--default',
+      tutorialStoryId: '📚-creating-lessons-workbook--workbook-with-content', // Tutorial: Workbook with actual content to learn from
+      quizStoryId: '📄-pages-application-pages--workbook', // Quiz: Actual workbook page
       requiredActions: ['onSubmit'], // Submitting work
     },
     persona: 'learner',
@@ -463,7 +472,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       'Bookmark the Help page for quick reference',
     ],
     completionCriteria: {
-      storyId: '📚 Creating Lessons/Editor',
+      tutorialStoryId: '📚-creating-lessons-editor--empty-editor-text-formatting', // Tutorial: Simple editor (no keyboard demo actions)
+      quizStoryId: '📄-pages-application-pages--unit-detail', // Quiz: Actual editor page
     },
     persona: 'developer',
     category: 'Learning',

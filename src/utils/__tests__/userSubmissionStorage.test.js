@@ -1,5 +1,5 @@
 /**
- * Unit tests for userSubmissionStorage.js
+ * Unit tests for userSubmissionStorage.jsx
  * Tests student submission file storage with privacy controls
  */
 
@@ -23,7 +23,7 @@ import {
   getGradeSubmissionsPrefix,
   getQuestionSubmissionsPrefix,
   validateSubmissionOwnership,
-} from '../userSubmissionStorage.js';
+} from '../userSubmissionStorage.jsx';
 import { uploadData, remove } from 'aws-amplify/storage';
 import { getCurrentUser } from 'aws-amplify/auth';
 

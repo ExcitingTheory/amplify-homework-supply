@@ -1,117 +1,128 @@
-{
-    "ecf2c67a-2750-4df0-8eea-0f611e1f7340": {
-        "status": "uploaded",
-        "pageCount": null,
-        "s3Key": "files/science-lesson-water-cycle.pdf",
-        "_version": 1
-    },
-    "cce4c1fe-08b7-4bbe-8f16-2088b9be9435": {
-        "status": "uploaded",
-        "pageCount": null,
-        "s3Key": "files/science-lesson-water-cycle.pdf",
-        "_version": 1
-    },
-    "76fdca5f-546f-4d0b-8fa2-510857235f79": {
-        "status": "failed",
-        "pageCount": null,
-        "s3Key": "files/science-lesson-water-cycle.pdf",
-        "_version": 3
-    },
-    "78e0af83-2eef-4d08-b955-7facf6d2be6a": {
-        "status": "uploaded",
-        "pageCount": null,
-        "s3Key": "files/science-lesson-water-cycle.pdf",
-        "_version": 1
-    },
-    "7d8dccfd-57ac-4323-b5bd-8d3d7bdda5d3": {
-        "status": "failed",
-        "pageCount": null,
-        "s3Key": "files/science-lesson-water-cycle.pdf",
-        "_version": 3
-    },
-    "90d6fc88-9a59-495c-b6a7-f23b1c9a8fd2": {
-        "status": "uploaded",
-        "pageCount": null,
-        "s3Key": "files/science-lesson-water-cycle.pdf",
-        "_version": 1
-    },
-    "8aa31c6f-c1d0-4efb-9433-b16efa1c2049": {
-        "status": "uploaded",
-        "pageCount": null,
-        "s3Key": "files/science-lesson-water-cycle.pdf",
-        "_version": 1
-    },
-    "f941e0c7-1325-4185-bc53-c9c0046630d0": {
-        "status": "uploaded",
-        "pageCount": null,
-        "s3Key": "files/science-lesson-water-cycle.pdf",
-        "_version": 1
-    },
-    "0e7f32b1-ce02-492f-8a82-ae2700741832": {
-        "status": "extracting",
-        "pageCount": null,
-        "s3Key": "files/Japanese Wind 1 ch1.pdf",
-        "_version": 2
-    },
-    "639c9661-6ff9-4f87-9e56-f688468e1331": {
-        "status": "extracting",
-        "pageCount": null,
-        "s3Key": "files/Japanese Wind 1.pdf",
-        "_version": 3
-    },
-    "5925bcd2-450c-40f4-be90-a7346321074b": {
-        "status": "uploaded",
-        "pageCount": null,
-        "s3Key": "files/science-lesson-water-cycle.pdf",
-        "_version": 1
-    },
-    "abf8003c-1ea8-4704-bcbc-385f220e323a": {
-        "status": "extracting",
-        "pageCount": null,
-        "s3Key": "files/Japanese Wind 1.pdf",
-        "_version": 2
-    },
-    "cd824b5b-2c66-41f8-8571-aa6794ff590c": {
-        "status": "completed",
-        "pageCount": 1,
-        "s3Key": "files/report.pdf",
-        "_version": 6
-    },
-    "7e6d93e4-b642-47b7-b3d8-ccda2baf8bc8": {
-        "status": "uploaded",
-        "pageCount": null,
-        "s3Key": "files/science-lesson-water-cycle.pdf",
-        "_version": 1
-    },
-    "1f0f8205-6d6b-422f-9138-a2efb6693382": {
-        "status": "failed",
-        "pageCount": null,
-        "s3Key": "files/science-lesson-water-cycle.pdf",
-        "_version": 3
-    },
-    "e01017e1-fe7a-4521-b71c-09ec31b18639": {
-        "status": "completed",
-        "pageCount": 160,
-        "s3Key": "files/Japanese Wind 1.pdf",
-        "_version": 13
-    },
-    "e02ef804-705b-454b-96f3-082f5b92e7c8": {
-        "status": "extracting",
-        "pageCount": null,
-        "s3Key": "files/Japanese Wind 1 ch1.pdf",
-        "_version": 2
-    },
-    "3278c033-ae45-4200-84e3-6aebab0ed69f": {
-        "status": "uploaded",
-        "pageCount": null,
-        "s3Key": "files/science-lesson-water-cycle.pdf",
-        "_version": 1
-    },
-    "2b77ed57-ef33-456f-b995-7ec01705518e": {
-        "status": "completed",
-        "pageCount": null,
-        "s3Key": "files/report.pdf",
-        "_version": 7
-    }
-}
+[
+  {
+    "id": "a57d7833-5fa7-4cb7-8b7a-ce7c6e10e551",
+    "name": "Japanese Wind 1.pdf",
+    "key": "files/Japanese Wind 1.pdf",
+    "owner": "64d81418-7021-701d-9fed-a4c2e0735711",
+    "identityId": "us-east-1:b0eadde9-f02c-c71b-17a6-22ffd37d89c8",
+    "description": "Japanese language textbook - Chapter 1",
+    "prompt": null,
+    "model": null,
+    "variant": null,
+    "mimeType": "application/pdf",
+    "level": "protected",
+    "type": "pdf",
+    "path": "files/Japanese Wind 1.pdf",
+    "duration": null,
+    "size": 4706654,
+    "generated": null,
+    "hex": null,
+    "byHex": null,
+    "thumbnail": null,
+    "waveformData": null,
+    "embedding": null,
+    "documentID": "e01017e1-fe7a-4521-b71c-09ec31b18639",
+    "parsedContentID": null,
+    "createdAt": "2026-01-06T15:02:53.253Z",
+    "updatedAt": "2026-01-06T15:02:53.253Z",
+    "_version": 1,
+    "_lastChangedAt": 1767711773285,
+    "_deleted": null
+  },
+  {
+    "id": "mock-pdf-file-2",
+    "name": "report.pdf",
+    "key": "files/report.pdf",
+    "owner": "mock-user-id",
+    "identityId": "us-east-1:mock-identity",
+    "description": "Sample report with vocabulary",
+    "mimeType": "application/pdf",
+    "level": "protected",
+    "type": "pdf",
+    "path": "files/report.pdf",
+    "size": 123456,
+    "generated": false,
+    "documentID": "cd824b5b-2c66-41f8-8571-aa6794ff590c",
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:30:00.000Z",
+    "_version": 2
+  },
+  {
+    "id": "mock-pdf-file-3",
+    "name": "vocabulary-lesson.pdf",
+    "key": "files/vocabulary-lesson.pdf",
+    "owner": "mock-user-id",
+    "identityId": "us-east-1:mock-identity",
+    "description": "Vocabulary lesson PDF with extracted content",
+    "mimeType": "application/pdf",
+    "level": "public",
+    "type": "pdf",
+    "path": "files/vocabulary-lesson.pdf",
+    "size": 567890,
+    "generated": false,
+    "documentID": "mock-document-3",
+    "createdAt": "2026-01-14T08:00:00.000Z",
+    "updatedAt": "2026-01-14T08:45:00.000Z",
+    "_version": 3
+  },
+  {
+    "id": "mock-audio-file-1",
+    "name": "pronunciation-demo.mp3",
+    "key": "audio/pronunciation-demo.mp3",
+    "owner": "mock-user-id",
+    "identityId": "us-east-1:mock-identity",
+    "description": "Sample pronunciation audio",
+    "mimeType": "audio/mpeg",
+    "level": "public",
+    "type": "audio",
+    "path": "audio/pronunciation-demo.mp3",
+    "duration": 3.5,
+    "size": 56789,
+    "generated": true,
+    "waveformData": "[0.1, 0.3, 0.5, 0.7, 0.9, 0.7, 0.5, 0.3, 0.1]",
+    "documentID": null,
+    "createdAt": "2026-01-20T10:00:00.000Z",
+    "updatedAt": "2026-01-20T10:00:00.000Z",
+    "_version": 1
+  },
+  {
+    "id": "mock-audio-file-2",
+    "name": "lesson-intro.mp3",
+    "key": "audio/lesson-intro.mp3",
+    "owner": "mock-user-id",
+    "identityId": "us-east-1:mock-identity",
+    "description": "Lesson introduction audio",
+    "mimeType": "audio/mpeg",
+    "level": "public",
+    "type": "audio",
+    "path": "audio/lesson-intro.mp3",
+    "duration": 5.2,
+    "size": 87654,
+    "generated": false,
+    "waveformData": "[0.2, 0.4, 0.6, 0.8, 1.0, 0.8, 0.6, 0.4, 0.2]",
+    "documentID": null,
+    "createdAt": "2026-01-19T14:30:00.000Z",
+    "updatedAt": "2026-01-19T14:30:00.000Z",
+    "_version": 1
+  },
+  {
+    "id": "mock-image-file-1",
+    "name": "hiragana-chart.png",
+    "key": "images/hiragana-chart.png",
+    "owner": "mock-user-id",
+    "identityId": "us-east-1:mock-identity",
+    "description": "Hiragana character chart",
+    "mimeType": "image/png",
+    "level": "public",
+    "type": "image",
+    "path": "images/hiragana-chart.png",
+    "size": 234567,
+    "generated": false,
+    "thumbnail": "thumbnails/hiragana-chart-thumb.png",
+    "documentID": null,
+    "createdAt": "2026-01-18T09:15:00.000Z",
+    "updatedAt": "2026-01-18T09:15:00.000Z",
+    "_version": 1
+  }
+]
 

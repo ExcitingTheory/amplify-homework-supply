@@ -132,6 +132,7 @@ export const SectionAssigner = ({ setOpenAssignmentDialog, openAssignmentDialog,
           <TextField
             sx={{ margin: '1rem' }}
             id="datetime-local"
+            data-tour="due-date-picker"
             label={t('sectionAssigner.dueDate')}
             required
             type="datetime-local"
@@ -155,6 +156,7 @@ export const SectionAssigner = ({ setOpenAssignmentDialog, openAssignmentDialog,
             <Select
               labelId="section-select-helper-label"
               id="section-select-helper"
+              data-tour="unit-selector"
               value={section}
               label={t('sectionAssigner.selectSection')}
               required
@@ -205,6 +207,7 @@ export const SectionAssigner = ({ setOpenAssignmentDialog, openAssignmentDialog,
         }}>
           <Button onClick={() => setOpenAssignmentDialog(false)}>{t('sectionAssigner.cancel')}</Button>
           <Button type="submit" autoFocus
+            data-tour="create-assignment-button"
             variant='contained'
             color='primary'
           >

@@ -90,3 +90,6 @@ next-env.d.ts
 .amplify
 amplify_outputs*
 amplifyconfiguration*
+
+# translation metadata cache (can be regenerated)
+translation-cache/

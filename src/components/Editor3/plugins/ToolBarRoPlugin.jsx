@@ -11,7 +11,6 @@ import { useEffect, useContext, useState } from 'react';
 import Head from 'next/head'
 import {
     Box,
-    IconButton,
     Toolbar,
     Typography,
     Chip,
@@ -25,8 +24,6 @@ import MainToolbar from '../../MainToolbar';
 import MuiAppBar from '@mui/material/AppBar';
 import { styled } from '@mui/material/styles';
 
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import TimerIcon from '@mui/icons-material/Timer';
 
 const drawerWidth = 400;
@@ -138,7 +135,16 @@ const TimeLeft = React.memo(() => {
 
     return (<>
         {timeLimitSeconds > 0 &&
-            <Chip icon={<TimerIcon />} label={timeString} color={chipColor} />
+            <Chip 
+                icon={<TimerIcon sx={{ display: { xs: 'none', sm: 'inline-flex' } }} />} 
+                label={timeString} 
+                color={chipColor}
+                sx={{
+                    '& .MuiChip-icon': {
+                        display: { xs: 'none', sm: 'inline-flex' }
+                    }
+                }}
+            />
         }
     </>)
 
@@ -169,17 +175,11 @@ export function getSelectedNode(
 const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
 })(({ theme, open }) => ({
-    transition: theme.transitions.create(['width', 'margin'], {
+    // Fixed width - no compression when drawer opens
+    width: '100%',
+    transition: theme.transitions.create(['margin'], {
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.leavingScreen,
-    }),
-    ...(open && {
-        marginLeft: drawerWidth,
-        width: `calc(100% - ${drawerWidth}px)`,
-        transition: theme.transitions.create(['width', 'margin'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
     }),
 }));
 
@@ -189,6 +189,7 @@ export default function ToolBarRoPlugin({
     open,
     setOpen,
     setTabValue,
+    isScrolled = false,
 }) {
     const { t } = useTranslation('workbook');
     const {
@@ -200,6 +201,32 @@ export default function ToolBarRoPlugin({
     const name = unit?.name;
     const description = unit?.description;
 
+    const firstAppBarRef = React.useRef(null);
+    const [firstAppBarHeight, setFirstAppBarHeight] = React.useState(0);
+
+    // Update CSS variable when app bar height changes
+    React.useEffect(() => {
+        const updateHeight = () => {
+            if (firstAppBarRef.current) {
+                const height = firstAppBarRef.current.offsetHeight;
+                setFirstAppBarHeight(height);
+                // Update CSS custom property - no second AppBar needed
+                document.documentElement.style.setProperty('--app-bar-height', `${height}px`);
+            }
+        };
+
+        updateHeight();
+
+        const resizeObserver = new ResizeObserver(updateHeight);
+        if (firstAppBarRef.current) {
+            resizeObserver.observe(firstAppBarRef.current);
+        }
+
+        return () => {
+            resizeObserver.disconnect();
+        };
+    }, [isScrolled]);
+
 
     return (
         <>
@@ -209,74 +236,100 @@ export default function ToolBarRoPlugin({
             }
             `}</style>
             <AppBar
-                position="absolute"
-                color="default"                open={open}                sx={{
-                    overflowX: 'visible',
-                    boxShadow: 'none',
-                    zIndex: (theme) => theme.zIndex.drawer + 2,
-                }}
-            >
-                <MainToolbar>
-                    <Box sx={{ flexGrow: 1, margin: '1rem' }}>
-                        <Head>
-                            <title>{name}</title>
-                        </Head>
-                        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                            {name || t('toolBarRoPlugin.untitledUnit')}
-                        </Typography>
-
-                        <Typography variant="p" component="div" sx={{ flexGrow: 1 }}>
-                            {description || t('toolBarRoPlugin.noDescription')}
-                        </Typography>
-
-                    </Box>
-                </MainToolbar>
-            </AppBar>
-            <AppBar
+                ref={firstAppBarRef}
                 position="absolute"
                 color="default"
                 sx={{
-                    overflowX: 'auto',
-                    zIndex: (theme) => theme.zIndex.drawer + 1,
-                    top: '5.25rem',
-                    paddingTop: '0.5rem',
+                    overflowX: 'hidden',
+                    overflowY: 'visible',
                     boxShadow: 'none',
-                    borderBottom: '1px solid #e0e0e0',
-                    paddingBottom: '0.25rem',
+                    zIndex: (theme) => theme.zIndex.drawer + 2,
+                    transition: 'all 0.3s ease',
+                    width: '100%',
+                    maxWidth: '100vw',
                 }}
             >
-                <Toolbar
-                    className='editor-toolbar'
-                    variant="dense"
-                    disableGutters={true}
-                    sx={{
-                        margin: 'auto'
-                    }}
-                >
+                <MainToolbar>
+                    <Box sx={{
+                        flexGrow: 1,
+                        margin: isScrolled ? '0.5rem 1rem' : '1rem',
+                        transition: 'all 0.3s ease',
+                        display: 'flex',
+                        alignItems: isScrolled ? 'center' : 'flex-start',
+                        flexDirection: isScrolled ? 'row' : 'column',
+                        gap: isScrolled ? 2 : 0,
+                        width: '100%',
+                        maxWidth: '100%',
+                        overflow: 'hidden',
+                        boxSizing: 'border-box',
+                    }}>
+                        <Box sx={{ flexGrow: 1, minWidth: 0, overflow: 'hidden' }}>
+                            <Head>
+                                <title>{name}</title>
+                            </Head>
+                            <Typography
+                                variant={isScrolled ? "body1" : "h6"}
+                                component="div"
+                                sx={{
+                                    flexGrow: 1,
+                                    transition: 'all 0.3s ease',
+                                    fontWeight: isScrolled ? 500 : 400,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                {name || t('toolBarRoPlugin.untitledUnit')}
+                            </Typography>
 
-                    <Stack direction="row" spacing={1}
-                        sx={{
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}
-                    >
+                            {!isScrolled && (
+                                <Typography
+                                    variant="p"
+                                    component="div"
+                                    sx={{
+                                        flexGrow: 1,
+                                        transition: 'opacity 0.3s ease',
+                                        display: { xs: 'none', sm: 'block' },
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    {description || t('toolBarRoPlugin.noDescription')}
+                                </Typography>
+                            )}
+                        </Box>
 
-                    <IconButton
-                        color="inherit"
-                        onClick={() => {
-                            setOpen(!open);
-                        }}
-                        title="Toggle Sidebar"
-                        aria-label="Toggle Sidebar"
-                    > {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-                    </IconButton>
-                    
-                    <TimeLeft />
+                        <Stack 
+                            direction="row" 
+                            spacing={1}
+                            sx={{
+                                alignItems: 'center',
+                                flexShrink: 0,
+                                minWidth: 0,
+                                overflow: 'hidden',
+                            }}
+                        >
+                            <TimeLeft />
+                            <Chip 
+                                label={
+                                    <Box component="span">
+                                        {`${finishedQuestions} of ${rubric?.length || 0}`}
+                                        <Box 
+                                            component="span" 
+                                            sx={{ display: { xs: 'none', sm: 'inline' }, ml: 0.5 }}
+                                        >
+                                            Questions Completed
+                                        </Box>
+                                    </Box>
+                                } 
+                                variant="outlined"
+                                size={isScrolled ? "small" : "medium"}
+                            />
+                        </Stack>
 
-                    <Chip label={`${finishedQuestions} of ${rubric?.length || 0} Questions Completed`} variant="outlined" />
-                    </Stack>
-
-                </Toolbar>
+                    </Box>
+                </MainToolbar>
             </AppBar>
         </>
     );

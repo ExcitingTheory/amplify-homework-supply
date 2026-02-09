@@ -109,6 +109,7 @@ function Answer({ data, index, answers, onQuestionReorder, onQuestionChange, onC
                     />
                     <FormControlLabel
                         value={data.correct}
+                        data-tour="correct-checkbox"
                         control={<Switch color="primary" checked={data.correct} />}
                         label={data.correct ? t('sortableAnswers.correct') : t('sortableAnswers.incorrect')}
                         onChange={(event) => { onCorrectChange(event, index) }}

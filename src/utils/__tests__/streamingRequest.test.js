@@ -1,5 +1,5 @@
 /**
- * Unit tests for streamingRequest.js
+ * Unit tests for streamingRequest.jsx
  * Tests authenticated streaming with AWS SigV4
  */
 
@@ -31,7 +31,7 @@ vi.mock('aws-amplify', () => ({
 import {
   createStreamingRequest,
   createAISDKFetch,
-} from '../streamingRequest.js';
+} from '../streamingRequest.jsx';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { post } from 'aws-amplify/api';
 

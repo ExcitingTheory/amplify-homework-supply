@@ -73,12 +73,16 @@ export const AnswerDropLearn = ({ correctAnswer, pronunciation, definition, id, 
     <ListItem 
       ref={drop} 
       key={id} 
-      style={{ 
+      sx={{ 
         margin: '0.25rem 0', 
         padding: '0.75rem', 
         border: `2px ${isMatched ? 'solid' : 'dotted'} ${borderColor}`,
         backgroundColor: backgroundColor,
         borderRadius: isMatched ? '8px' : '0',
+        boxSizing: 'border-box',
+        width: { xs: '220px', sm: 'auto' },
+        maxWidth: { xs: '220px', sm: '100%' },
+        flexShrink: 0,
       }}
     >
       {isMatched && matchedWord ? (
@@ -135,16 +139,16 @@ export const AnswerDrop = ({ correctAnswer }) => {
         border={1}
         style={{
           borderStyle: 'dashed',
-          // minHeight: '5rem',
-          height: '15rem',
-          overflow: 'auto',
+          width: '100%',
+          maxWidth: '100%',
+          minWidth: '0',
+          height: '100%',
+          maxHeight: '100%',
+          overflow: 'hidden',
           alignContent: 'center',
           justifyContent: 'center',
           display: 'flex',
           flexDirection: 'column',
-
-          paddingTop: '8vh',
-          margin: '0 1rem 0 0',
           padding: '1rem',
           borderRadius: '3px',
           border: `thin dotted ${borderColor}`
@@ -153,12 +157,13 @@ export const AnswerDrop = ({ correctAnswer }) => {
 
         <div
           style={{
-            width: 'fit-content',
+            width: '100%',
             alignItems: 'center',
-            alignSelf: 'center',
             display: 'flex',
             flexDirection: 'column',
-
+            textAlign: 'center',
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word',
           }}
         
         >
@@ -184,6 +189,12 @@ function TabPanel(props) {
       hidden={value !== index}
       id={`scrollable-auto-tabpanel-${index}`}
       aria-labelledby={`scrollable-auto-tab-${index}`}
+      style={{
+        width: '100%',
+        maxWidth: '100vw',
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+      }}
       {...other}
     >
       {children}
@@ -228,7 +239,7 @@ const MeaningAssociationTabs = ({
   const hardComplete = inProgress?.hard?.complete || false;
 
   return (
-    <>
+    <Box sx={{ width: '100%', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
       <AppBar
 
         elevation={2}
@@ -316,7 +327,7 @@ const MeaningAssociationTabs = ({
           </TabPanel>
         )}
       {/* </DndWrapper> */}
-    </>
+    </Box>
   )
 }
 
@@ -330,8 +341,11 @@ const MeaningAssociationExercise = ({
     <div style={{
       flexGrow: 1,
       width: '100%',
+      maxWidth: '100vw',
       margin: 0,
       padding: 0,
+      overflow: 'hidden',
+      boxSizing: 'border-box',
     }}>
       <MeaningAssociationTabs
         nodeKey={nodeKey}

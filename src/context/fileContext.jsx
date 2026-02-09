@@ -358,8 +358,11 @@ const FilesProvider = ({ children }) => {
 
         // Query all files regardless of owner - we'll track by identityId for lookup
         // Include parsedContent relationship for PDFs
+        // Note: Amplify Gen 2 doesn't support '*' wildcard - it fetches all scalar fields by default
         subscriptionRef.current = client.models.File.observeQuery({
-          selectionSet: ['*', 'document.*', 'parsedContent.*']
+          selectionSet: ['id', 'owner', 'identityId', 'name', 'description', 'mimeType', 'level', 'path', 
+                        'size', 'duration', 'generated', 'thumbnail', 'waveformData', 'createdAt', 'updatedAt',
+                        'document.id', 'document.filename', 'parsedContent.id', 'parsedContent.vocabularyJSON']
         }).subscribe({
           next: ({ items, isSynced }) => {
             console.log('[FilesContext] File observeQuery subscription triggered:');

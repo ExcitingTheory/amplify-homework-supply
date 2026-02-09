@@ -28,7 +28,18 @@ export const Hard = ({
   const [verifiedAnswers, setVerifiedAnswers] = React.useState([]);
   const [showCompletion, setShowCompletion] = React.useState(false);
 
-  const isFirstRender = React.useRef(true);
+  // Generate consistent seed from nodeKey for deterministic shuffling
+  // Include mode name to ensure different ordering between modes
+  const shuffleSeed = React.useMemo(() => {
+    if (!nodeKey) return 0;
+    let hash = 0;
+    const str = String(nodeKey) + '-hard';
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash = hash & hash;
+    }
+    return Math.abs(hash);
+  }, [nodeKey]);
 
   // Reset completion screen when tab changes
   React.useEffect(() => {
@@ -65,6 +76,16 @@ export const Hard = ({
   
   const inProgress = gradeData[nodeKey] || {};
 
+  // Show/hide completion screen based on completion status and tab index
+  React.useEffect(() => {
+    const isComplete = inProgress?.hard?.complete;
+    if (isComplete) {
+      setShowCompletion(true);
+    } else {
+      setShowCompletion(false);
+    }
+  }, [tabIndex, inProgress?.hard?.complete]);
+
   // Update progress state when grade data changes
   useEffect(() => {
     if (inProgress && Object.keys(inProgress).length > 0) {
@@ -98,13 +119,11 @@ export const Hard = ({
     // console.log('MeaningAssociationExercise.vocabList', vocabList)
     // console.log('MeaningAssociationExercise.vocabListHard', vocabListHard)
 
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      vocabList = shuffle(vocabList)
-      vocabListHard = shuffle(vocabListHard)
-      assignment = shuffle(assignment)
-      assignmentHard = shuffle(assignmentHard)
-    }
+    // Always shuffle using seeded random for consistent ordering
+    vocabList = shuffle(vocabList, shuffleSeed)
+    vocabListHard = shuffle(vocabListHard, shuffleSeed + 1)
+    assignment = shuffle(assignment, shuffleSeed + 2)
+    assignmentHard = shuffle(assignmentHard, shuffleSeed + 3)
   }
 
 
@@ -175,10 +194,16 @@ export const Hard = ({
     
     const attempts = attemptedAnswersLength;
 
-    console.log('newIndex, hardAssignmentLength, _attemptedAnswers', newIndex, hardAssignmentLength, _attemptedAnswers)
+    console.log('Hard progress:', {
+      verified: _verified.length, 
+      total: assignment.length,
+      remaining: hardAssignmentLength,
+      attempts,
+      attemptedAnswers: _attemptedAnswers
+    });
 
-    if (_verified.length === hardAssignmentLength) {
-      // Last question
+    // Check completion against the full assignment length, not filtered length
+    if (_verified.length === assignment.length) {
       thisExerciseComplete = true;
       const completedEasy = inProgress.easy?.complete;
       const completedLearn = inProgress.learn?.complete;
@@ -285,36 +310,62 @@ export const Hard = ({
   const allComplete = inProgress?.easy?.complete && inProgress?.learn?.complete;
 
   return (
-    <Box sx={{ position: 'relative', minHeight: '500px' }}>
+    <Box sx={{ 
+      position: 'relative', 
+      height: 'calc(100vh - var(--app-bar-height, 11rem))',
+      maxHeight: 'calc(100vh - var(--app-bar-height, 11rem))',
+      overflow: 'hidden',
+      width: '100%',
+      maxWidth: '100vw',
+    }}>
       {showCompletion && (
-        <CompletionScreen
-          levelName="Hard Mode"
-          accuracy={verifiedAnswers.length / (inProgress?.hard?.attemptsCount || 1)}
-          attempts={inProgress?.hard?.attemptsCount || 0}
-          onContinue={handleContinueFromCompletion}
-          nextLevelName="Learn Mode"
-          isLastLevel={allComplete}
-        />
+        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 5 }}>
+          <CompletionScreen
+            levelName="Hard Mode"
+            accuracy={verifiedAnswers.length / (inProgress?.hard?.attemptsCount || 1)}
+            attempts={inProgress?.hard?.attemptsCount || 0}
+            onContinue={handleContinueFromCompletion}
+            nextLevelName="Learn Mode"
+            isLastLevel={allComplete}
+            disableAutoAdvance={true}
+          />
+        </Box>
       )}
 
-      <Grid container direction="column" spacing={1}>
-      <Grid item xs={12}>
+      <Grid container direction="column" spacing={1} sx={{ overflow: 'hidden', height: '100%', width: '100%', maxWidth: '100%' }}>
+      <Grid item xs={12} sx={{ flexShrink: 0, width: '100%' }}>
         <LinearProgressWithLabel value={percentComplete} />
       </Grid>
-      <Grid item xs={12} container direction="row" spacing={2} wrap="nowrap">
-      <Grid item xs={8} sm={8} md={8} lg={8}>
-        <AnswerDrop
-          correctAnswer={{ ...correctWord, progressAssignment, sendFail, sendPass }} />
+      <Grid item xs={12} container direction={{ xs: 'column', sm: 'row' }} spacing={1} wrap="nowrap" sx={{ overflow: 'hidden', flex: '1 1 auto', minHeight: 0, width: '100%', maxWidth: '100%' }}>
+      <Grid item xs={12} sm={8} md={8} lg={8} sx={{ minWidth: 0, height: { xs: 'auto', sm: '100%' }, flexShrink: 0 }}>
+        <Box
+          sx={{
+            height: { xs: '200px', sm: '100%' },
+            maxHeight: { xs: '200px', sm: '100%' },
+            overflowY: 'hidden',
+            overflowX: 'auto',
+            display: 'flex',
+          }}
+        >
+          <AnswerDrop
+            correctAnswer={{ ...correctWord, progressAssignment, sendFail, sendPass }} />
+        </Box>
       </Grid>
-      <Grid item xs={4} sm={4} md={4} lg={4}>
+      <Grid item xs={12} sm={4} md={4} lg={4} sx={{ minWidth: 0, flex: { xs: '1 1 auto', sm: '0 0 auto' }, height: { xs: 'auto', sm: '100%' }, maxWidth: { xs: '100%', sm: '33.333333%' } }}>
         <Box
           sx={{
             display: 'flex',
             flexWrap: 'wrap',
-            gap: 1,
-            maxHeight: '400px',
+            gap: 0,
+            height: { xs: 'auto', sm: '100%' },
+            maxHeight: { xs: 'none', sm: '100%' },
             overflowY: 'auto',
-            padding: 1,
+            overflowX: 'hidden',
+            padding: 0.5,
+            alignContent: 'flex-start',
+            width: '100%',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
           }}
         >
           {hardVocabList}

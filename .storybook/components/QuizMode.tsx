@@ -241,7 +241,15 @@ export function QuizMode({
 
   if (!task) {
     return (
-      <div className="quiz-mode-error">Specific Story */}
+      <div className="quiz-mode-error">
+        <p>Task not found: {taskId}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="quiz-mode-container">
+      {/* Task Instructions Overlay */}
       {!completed && (
         <div className="quiz-instructions-overlay">
           <div className="quiz-instructions-card">
@@ -292,14 +300,6 @@ export function QuizMode({
                 </div>
               )}
 
-            <div className="quiz-actions">
-              <button
-                className="quiz-button"
-                onClick={handleNavigateToApp}
-              >
-                Go to Application Pages →
-              </button>
-              
               {requiredActions.length === 0 && (
                 <button
                   className="quiz-button secondary"

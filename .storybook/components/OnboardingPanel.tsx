@@ -33,6 +33,8 @@ import LaunchIcon from '@mui/icons-material/Launch';
 import { useTheme } from '@mui/material/styles';
 import { getOnboardingEmitter, UserPersona } from '../code/onboarding-events';
 import { ONBOARDING_TASKS, getTasksForPersona, getTasksByCategory, OnboardingTaskWithCriteria } from '../code/onboarding-tasks';
+import SpotlightOverlay, { SpotlightStep } from './SpotlightOverlay';
+import { getSpotlightConfigForTask } from '../code/spotlight-configs';
 
 import './OnboardingPanel.css';
 
@@ -128,8 +130,43 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [mode, setMode] = useState<'tutorial' | 'quiz'>('tutorial');
   const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
+  const [apiReady, setApiReady] = useState(false);
+  
+  // Spotlight state
+  const [spotlightOpen, setSpotlightOpen] = useState(false);
+  const [spotlightSteps, setSpotlightSteps] = useState<SpotlightStep[]>([]);
+  const [spotlightCurrentStep, setSpotlightCurrentStep] = useState(0);
+  const [activeTask, setActiveTask] = useState<OnboardingTaskWithCriteria | null>(null);
 
   const emitter = getOnboardingEmitter();
+
+  // Wait for Storybook API to be ready
+  useEffect(() => {
+    if (!api) {
+      setApiReady(false);
+      return;
+    }
+    
+    // Check if store is ready
+    const checkReady = async () => {
+      try {
+        if (api.store?.readyPromise) {
+          await api.store.readyPromise;
+          console.log('[OnboardingPanel] Storybook store is ready');
+          setApiReady(true);
+        } else if (api.selectStory) {
+          // API exists but no readyPromise, assume it's ready
+          console.log('[OnboardingPanel] API available without readyPromise');
+          setApiReady(true);
+        }
+      } catch (error) {
+        console.warn('[OnboardingPanel] Error waiting for store:', error);
+        setApiReady(false);
+      }
+    };
+    
+    checkReady();
+  }, [api]);
 
   useEffect(() => {
     console.log('[OnboardingPanel] Panel mounted - select a persona to begin');
@@ -191,8 +228,28 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     });
   };
 
+  /**
+   * Get the appropriate story ID based on current mode
+   */
+  const getStoryIdForMode = (task: OnboardingTaskWithCriteria): string | null => {
+    if (!task.completionCriteria) return null;
+    
+    const { tutorialStoryId, quizStoryId, storyId } = task.completionCriteria;
+    
+    // Use mode-specific story ID if available
+    if (mode === 'tutorial' && tutorialStoryId) {
+      return tutorialStoryId;
+    }
+    if (mode === 'quiz' && quizStoryId) {
+      return quizStoryId;
+    }
+    
+    // Fall back to legacy single storyId
+    return storyId || null;
+  };
+
   const getStoryLink = (task: OnboardingTaskWithCriteria): string | null => {
-    const storyId = task.completionCriteria?.storyId;
+    const storyId = getStoryIdForMode(task);
     if (!storyId) return null;
     
     // Convert story ID to URL path
@@ -200,13 +257,192 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   };
 
   const handleNavigateToStory = (storyId: string) => {
-    if (api?.selectStory) {
-      // Use Storybook API if available
-      api.selectStory(storyId);
-    } else {
-      // Navigate directly
-      window.parent.location.href = `/?path=/story/${storyId}`;
+    console.log('🚀 Navigating to story:', storyId);
+    console.log('🔧 API available:', !!api?.selectStory);
+    console.log('✅ API ready:', apiReady);
+    console.log('🌍 Window parent:', window.parent);
+    
+    // Only use API if it's ready
+    if (api?.selectStory && apiReady) {
+      // Use Storybook API if available and ready
+      try {
+        console.log('📍 Using Storybook API to navigate');
+        api.selectStory(storyId);
+        return; // Success, exit early
+      } catch (error) {
+        console.error('❌ Error selecting story:', error);
+        // Fall through to URL navigation
+      }
     }
+    
+    // Fallback to URL navigation if API not ready or failed
+    console.log('🌐 Using window.parent.location.href');
+    const url = `/?path=/story/${encodeURIComponent(storyId)}`;
+    console.log('🔗 URL:', url);
+    
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.location.href = url;
+      } else {
+        window.location.href = url;
+      }
+    } catch (error) {
+      console.error('❌ Navigation failed:', error);
+    }
+  };
+
+  /**
+   * Generate spotlight steps from a task
+   */
+  const generateSpotlightSteps = (task: OnboardingTaskWithCriteria): SpotlightStep[] => {
+    // Try to get configured steps for this task
+    const configuredSteps = getSpotlightConfigForTask(task.id, mode);
+    
+    if (configuredSteps && configuredSteps.length > 0) {
+      return configuredSteps;
+    }
+
+    // Fallback to auto-generated steps if no configuration exists
+    const steps: SpotlightStep[] = [];
+
+    // Introduction step
+    steps.push({
+      id: `${task.id}-intro`,
+      title: task.title,
+      description: task.description,
+      tooltipPosition: 'center',
+      actions: mode === 'tutorial' && task.instructions ? task.instructions : undefined,
+    });
+
+    // If there's a story link, add a step for navigation
+    const storyId = getStoryIdForMode(task);
+    if (storyId) {
+      steps.push({
+        id: `${task.id}-navigate`,
+        title: mode === 'tutorial' ? 'View Documentation' : 'Try It Out',
+        description: mode === 'tutorial' 
+          ? 'We\'ll navigate to the component documentation where you can see examples and interact with the component.'
+          : 'Navigate to the interactive demo and complete the task on your own.',
+        tooltipPosition: 'center',
+        actions: mode === 'tutorial' ? [
+          'The story will open automatically',
+          'Explore the interactive examples',
+          'Try different configurations',
+          'Read the component documentation',
+        ] : undefined,
+      });
+    }
+
+    // Completion step
+    steps.push({
+      id: `${task.id}-complete`,
+      title: 'Task Complete!',
+      description: mode === 'tutorial'
+        ? 'Great job! You\'ve learned about this feature. Click Complete to mark this task as done.'
+        : 'Did you successfully complete the task? Click Complete if you did, or Skip to try again later.',
+      tooltipPosition: 'center',
+      isLast: true,
+    });
+
+    return steps;
+  };
+
+  /**
+   * Handle clicking on a task to start spotlight tour
+   */
+  const handleTaskClick = (task: OnboardingTaskWithCriteria) => {
+    console.log('🎯 Task clicked:', task.id, task.title);
+    
+    // Don't start spotlight for already completed tasks in quiz mode
+    if (mode === 'quiz' && completedTasks.has(task.id)) {
+      console.log('⏭️ Task already completed in quiz mode, skipping');
+      return;
+    }
+
+    // In quiz mode, navigate directly to the story without tutorial
+    if (mode === 'quiz') {
+      console.log('🎯 Quiz mode: Navigating directly to task page');
+      const storyId = getStoryIdForMode(task);
+      if (storyId) {
+        handleNavigateToStory(storyId);
+      } else {
+        console.warn('⚠️ No story ID found for quiz mode task:', task.id);
+      }
+      return;
+    }
+
+    // Tutorial mode: Show spotlight tour
+    console.log('✨ Tutorial mode: Starting spotlight tour...');
+    setActiveTask(task);
+    const steps = generateSpotlightSteps(task);
+    console.log('📋 Generated steps:', steps.length);
+    setSpotlightSteps(steps);
+    setSpotlightCurrentStep(0);
+    setSpotlightOpen(true);
+    
+    // Navigate to the story immediately in tutorial mode
+    const storyId = getStoryIdForMode(task);
+    if (storyId) {
+      console.log('📍 Navigating to tutorial story:', storyId);
+      handleNavigateToStory(storyId);
+    }
+  };
+
+  /**
+   * Handle moving to next spotlight step
+   */
+  const handleSpotlightNext = () => {
+    const nextStepIndex = spotlightCurrentStep + 1;
+    setSpotlightCurrentStep(nextStepIndex);
+  };
+
+  /**
+   * Handle completing the spotlight tour
+   */
+  const handleSpotlightComplete = () => {
+    if (activeTask && selectedPersona) {
+      // Mark task as complete
+      emitter.emit({
+        type: 'task-completed',
+        taskId: activeTask.id,
+        persona: selectedPersona,
+        timestamp: Date.now(),
+        metadata: { completedViaSpotlight: true, mode },
+      });
+    }
+    
+    setSpotlightOpen(false);
+    setSpotlightCurrentStep(0);
+    setActiveTask(null);
+  };
+
+  /**
+   * Handle skipping the spotlight tour
+   */
+  const handleSpotlightSkip = () => {
+    if (activeTask && selectedPersona) {
+      // Emit skip event
+      emitter.emit({
+        type: 'task-skipped',
+        taskId: activeTask.id,
+        persona: selectedPersona,
+        timestamp: Date.now(),
+        metadata: { skippedFromSpotlight: true },
+      });
+    }
+    
+    setSpotlightOpen(false);
+    setSpotlightCurrentStep(0);
+    setActiveTask(null);
+  };
+
+  /**
+   * Handle closing the spotlight tour
+   */
+  const handleSpotlightClose = () => {
+    setSpotlightOpen(false);
+    setSpotlightCurrentStep(0);
+    setActiveTask(null);
   };
 
   const renderContent = () => {
@@ -346,7 +582,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
         </Stack>
 
         {/* Task List */}
-        <List>
+        <List sx={{ px: 2 }}>
           {tasks.map((task: OnboardingTaskWithCriteria) => {
                 const isCompleted = completedTasks.has(task.id);
                 const isExpanded = expandedTasks.has(task.id);
@@ -357,18 +593,33 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                   <Card
                     key={task.id}
                     sx={{
+                      mb: 1.5,
                       backgroundColor: isCompleted ? 'rgba(76, 175, 80, 0.05)' : 'transparent',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        backgroundColor: isCompleted 
+                          ? 'rgba(76, 175, 80, 0.08)' 
+                          : 'rgba(255, 255, 255, 0.05)',
+                        boxShadow: 2,
+                        '& .spotlight-hint': {
+                          opacity: 1,
+                        },
+                      },
                     }}
                   >
-                    <CardContent sx={{ p: 1.5, pb: hasInstructions || storyLink ? 1 : 1.5 }}>
+                    <CardContent 
+                      sx={{ p: 1.5, pb: hasInstructions || storyLink ? 1 : 1.5, cursor: 'pointer' }}
+                      onClick={() => handleTaskClick(task)}
+                    >
                       <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
                         <Checkbox
                           checked={isCompleted}
                           disabled
                           size="small"
-                          sx={{ mt: 0.5, cursor: 'default' }}
+                          sx={{ mt: 0.5, cursor: 'default', pointerEvents: 'none' }}
                         />
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Box sx={{ flex: 1, minWidth: 0, pointerEvents: 'none' }}>
                           <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                             <Box sx={{ flex: 1 }}>
                               <Typography
@@ -389,11 +640,11 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                               </Typography>
                               
                               {/* Estimated time and mode indicator */}
-                              <Box sx={{ display: 'flex', gap: 1, mt: 0.5, alignItems: 'center' }}>
+                              <Box sx={{ display: 'flex', gap: 1, mt: 0.5, alignItems: 'center', pointerEvents: 'none' }}>
                                 <Chip 
                                   label={`~${Math.ceil(task.estimatedTime / 60)} min`}
                                   size="small"
-                                  sx={{ height: 18, fontSize: '0.65rem' }}
+                                  sx={{ height: 18, fontSize: '0.65rem', pointerEvents: 'none' }}
                                 />
                                 {storyLink && (
                                   <Chip 
@@ -401,19 +652,37 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                                     size="small"
                                     color={mode === 'tutorial' ? 'success' : 'primary'}
                                     variant="outlined"
-                                    sx={{ height: 18, fontSize: '0.65rem' }}
+                                    sx={{ height: 18, fontSize: '0.65rem', pointerEvents: 'none' }}
                                   />
                                 )}
+                                <Chip 
+                                  label="Click to start"
+                                  size="small"
+                                  color="info"
+                                  variant="outlined"
+                                  className="spotlight-hint"
+                                  sx={{ 
+                                    height: 18, 
+                                    fontSize: '0.65rem',
+                                    opacity: isCompleted ? 0 : 0.6,
+                                    transition: 'opacity 0.2s',
+                                    pointerEvents: 'none',
+                                  }}
+                                />
                               </Box>
                             </Box>
                             
                             {(hasInstructions || storyLink) && (
                               <IconButton
                                 size="small"
-                                onClick={() => toggleTaskExpanded(task.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleTaskExpanded(task.id);
+                                }}
                                 sx={{
                                   transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                                   transition: 'transform 0.2s',
+                                  pointerEvents: 'auto',
                                 }}
                               >
                                 <ExpandMoreIcon fontSize="small" />
@@ -457,7 +726,11 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                                     <Link
                                       component="button"
                                       variant="caption"
-                                      onClick={() => task.completionCriteria?.storyId && handleNavigateToStory(task.completionCriteria.storyId)}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const storyId = getStoryIdForMode(task);
+                                        storyId && handleNavigateToStory(storyId);
+                                      }}
                                       sx={{ 
                                         color: mode === 'tutorial' ? '#4CAF50' : '#2196F3',
                                         textAlign: 'left',
@@ -466,6 +739,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                                         gap: 0.5,
                                         fontSize: '0.7rem',
                                         fontWeight: 600,
+                                        pointerEvents: 'auto',
                                         '&:hover': {
                                           textDecoration: 'underline',
                                         }
@@ -517,6 +791,18 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
           {renderContent()}
         </CardContentWrapper>
       </CardOutline>
+      
+      {/* Spotlight Overlay */}
+      <SpotlightOverlay
+        steps={spotlightSteps}
+        currentStepIndex={spotlightCurrentStep}
+        isOpen={spotlightOpen}
+        mode={mode}
+        onNext={handleSpotlightNext}
+        onSkip={handleSpotlightSkip}
+        onComplete={handleSpotlightComplete}
+        onClose={handleSpotlightClose}
+      />
     </ThemeProvider>
   );
 };

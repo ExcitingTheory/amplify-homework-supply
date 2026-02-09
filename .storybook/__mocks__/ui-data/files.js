@@ -4,123 +4,10 @@
  */
 
 import fileDetailsJson from './file-details.json';
-import documentsJson from './files.json';
+import filesJson from './files.json';
 
-// Mock File records
-export const mockFiles = [
-  {
-    id: "a57d7833-5fa7-4cb7-8b7a-ce7c6e10e551",
-    name: "Japanese Wind 1.pdf",
-    owner: "64d81418-7021-701d-9fed-a4c2e0735711",
-    identityId: "us-east-1:b0eadde9-f02c-c71b-17a6-22ffd37d89c8",
-    description: "Japanese language textbook - Chapter 1",
-    prompt: null,
-    model: null,
-    variant: null,
-    mimeType: "application/pdf",
-    level: "PROTECTED",
-    path: "files/Japanese Wind 1.pdf",
-    duration: null,
-    size: 4706654,
-    generated: null,
-    hex: null,
-    byHex: null,
-    thumbnail: null,
-    waveformData: null,
-    embedding: null,
-    documentID: "e01017e1-fe7a-4521-b71c-09ec31b18639",
-    createdAt: "2026-01-06T15:02:53.253Z",
-    updatedAt: "2026-01-06T15:02:53.253Z",
-    _version: 1,
-    _lastChangedAt: 1767711773285,
-    _deleted: null
-  },
-  {
-    id: "mock-pdf-file-2",
-    name: "report.pdf",
-    owner: "mock-user-id",
-    identityId: "us-east-1:mock-identity",
-    description: "Sample report with vocabulary",
-    mimeType: "application/pdf",
-    level: "PROTECTED",
-    path: "files/report.pdf",
-    size: 123456,
-    generated: false,
-    documentID: "cd824b5b-2c66-41f8-8571-aa6794ff590c",
-    createdAt: "2026-01-15T10:00:00.000Z",
-    updatedAt: "2026-01-15T10:30:00.000Z",
-    _version: 2,
-  },
-  {
-    id: "mock-pdf-file-3",
-    name: "vocabulary-lesson.pdf",
-    owner: "mock-user-id",
-    identityId: "us-east-1:mock-identity",
-    description: "Vocabulary lesson PDF with extracted content",
-    mimeType: "application/pdf",
-    level: "PUBLIC",
-    path: "files/vocabulary-lesson.pdf",
-    size: 567890,
-    generated: false,
-    documentID: "mock-document-3",
-    createdAt: "2026-01-14T08:00:00.000Z",
-    updatedAt: "2026-01-14T08:45:00.000Z",
-    _version: 3,
-  },
-  {
-    id: "mock-audio-file-1",
-    name: "pronunciation-demo.mp3",
-    owner: "mock-user-id",
-    identityId: "us-east-1:mock-identity",
-    description: "Sample pronunciation audio",
-    mimeType: "audio/mpeg",
-    level: "PUBLIC",
-    path: "audio/pronunciation-demo.mp3",
-    duration: 3.5,
-    size: 56789,
-    generated: true,
-    waveformData: JSON.stringify([0.1, 0.3, 0.5, 0.7, 0.9, 0.7, 0.5, 0.3, 0.1]),
-    documentID: null,
-    createdAt: "2026-01-20T10:00:00.000Z",
-    updatedAt: "2026-01-20T10:00:00.000Z",
-    _version: 1,
-  },
-  {
-    id: "mock-audio-file-2",
-    name: "lesson-intro.mp3",
-    owner: "mock-user-id",
-    identityId: "us-east-1:mock-identity",
-    description: "Lesson introduction audio",
-    mimeType: "audio/mpeg",
-    level: "PUBLIC",
-    path: "audio/lesson-intro.mp3",
-    duration: 5.2,
-    size: 87654,
-    generated: false,
-    waveformData: JSON.stringify([0.2, 0.4, 0.6, 0.8, 1.0, 0.8, 0.6, 0.4, 0.2]),
-    documentID: null,
-    createdAt: "2026-01-19T14:30:00.000Z",
-    updatedAt: "2026-01-19T14:30:00.000Z",
-    _version: 1,
-  },
-  {
-    id: "mock-image-file-1",
-    name: "hiragana-chart.png",
-    owner: "mock-user-id",
-    identityId: "us-east-1:mock-identity",
-    description: "Hiragana character chart",
-    mimeType: "image/png",
-    level: "PUBLIC",
-    path: "images/hiragana-chart.png",
-    size: 234567,
-    generated: false,
-    thumbnail: "thumbnails/hiragana-chart-thumb.png",
-    documentID: null,
-    createdAt: "2026-01-18T09:15:00.000Z",
-    updatedAt: "2026-01-18T09:15:00.000Z",
-    _version: 1,
-  }
-];
+// Mock File records - imported from files.json (now an array)
+export const mockFiles = filesJson;
 
 // Mock Document records (keyed by ID)
 export const mockDocuments = {
@@ -171,31 +58,7 @@ export const mockDocuments = {
     createdAt: "2026-01-14T08:00:00.000Z",
     updatedAt: "2026-01-14T08:45:00.000Z",
     _version: 3,
-  },
-  ...Object.fromEntries(
-    Object.entries(documentsJson).map(([id, doc]) => [
-      id,
-      {
-        id,
-        owner: doc.owner || "mock-user-id",
-        identityId: doc.identityId || "us-east-1:mock-identity",
-        filename: doc.filename || doc.s3Key?.split('/').pop() || "document.pdf",
-        s3Key: doc.s3Key,
-        status: doc.status,
-        pageCount: doc.pageCount,
-        extractedText: doc.extractedText || null,
-        fileSize: doc.fileSize || null,
-        mimeType: doc.mimeType || "application/pdf",
-        uploadedAt: doc.uploadedAt || "2026-01-06T15:02:53.253Z",
-        pageEmbeddings: doc.pageEmbeddings || null,
-        embeddingsS3Key: doc.embeddingsS3Key || null,
-        metadata: doc.metadata || null,
-        createdAt: "2026-01-06T15:02:53.253Z",
-        updatedAt: "2026-01-06T15:02:53.253Z",
-        _version: doc._version || 1,
-      }
-    ])
-  )
+  }
 };
 
 // Mock ParsedContent records (extracted vocabulary and questions from documents)

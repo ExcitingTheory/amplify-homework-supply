@@ -21,7 +21,7 @@ const meta: Meta<typeof MetadataEditor> = {
     title: '📚 Creating Lessons/Metadata Editor',
     component: MetadataEditor,
     parameters: {
-        layout: 'padded',
+        layout: 'fullscreen',
         docs: {
             description: {
                 component: `
@@ -98,7 +98,14 @@ const createMockFile = (overrides = {}) => ({
 
 // Story wrapper component for better presentation
 const StoryWrapper = ({ children, title, description }: { children: React.ReactNode; title?: string; description?: string }) => (
-    <Box sx={{ maxWidth: 800, mx: 'auto', p: 2 }}>
+    <Box sx={{ 
+        maxWidth: 800, 
+        mx: 'auto', 
+        p: 2,
+        height: '100vh',
+        overflow: 'auto',
+        boxSizing: 'border-box',
+    }}>
         {title && (
             <Typography variant="h5" gutterBottom sx={{ mb: 1 }}>
                 {title}
@@ -264,7 +271,15 @@ export const TTSAudioFile: Story = {
  */
 export const AllFileTypes: Story = {
     render: () => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, p: 2 }}>
+        <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: 4, 
+            p: 2,
+            height: '100vh',
+            overflow: 'auto',
+            boxSizing: 'border-box',
+        }}>
             <Paper elevation={0} sx={{ p: 2, bgcolor: 'grey.50' }}>
                 <Typography variant="h6" gutterBottom>PDF Document</Typography>
                 <MetadataEditor file={createMockFile()} autoSaveDelay={2000} />

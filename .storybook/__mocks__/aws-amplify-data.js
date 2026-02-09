@@ -3,7 +3,7 @@
  * Provides GraphQL client compatible with Amplify Gen 2 API
  */
 
-import { mockFiles, mockDocuments, mockParsedContent } from './ui-data/files';
+import { mockFiles as initialMockFiles, mockDocuments as initialMockDocuments, mockParsedContent as initialMockParsedContent } from './ui-data/files';
 import { allChatData } from './chatDataLoader';
 
 /**
@@ -58,17 +58,17 @@ const activeSubscriptions = {
  */
 const initializeStores = () => {
   // Populate File store
-  mockFiles.forEach(file => {
+  initialMockFiles.forEach(file => {
     dataStores.File.set(file.id, file);
   });
 
   // Populate Document store
-  Object.values(mockDocuments).forEach(doc => {
+  Object.values(initialMockDocuments).forEach(doc => {
     dataStores.Document.set(doc.id, doc);
   });
 
   // Populate ParsedContent store
-  mockParsedContent.forEach(parsed => {
+  initialMockParsedContent.forEach(parsed => {
     dataStores.ParsedContent.set(parsed.id, parsed);
   });
 
@@ -713,6 +713,134 @@ export const clearMockData = () => {
   Object.values(dataStores).forEach(store => store.clear());
   console.log('[Mock Data] All data stores cleared');
 };
+
+/**
+ * Track active analysis timeouts for document processing simulation
+ */
+const activeAnalysisTimeouts = {};
+
+/**
+ * Simulate document analysis workflow for Storybook demos
+ * Progressively updates document status: uploaded → extracting → extracted → analyzing → completed
+ */
+export const simulateDocumentAnalysis = (documentId) => {
+  console.log('[Mock Data] Simulating analysis for document:', documentId);
+  
+  // Clear any existing timeouts for this document
+  if (activeAnalysisTimeouts[documentId]) {
+    activeAnalysisTimeouts[documentId].forEach(timeout => clearTimeout(timeout));
+  }
+  activeAnalysisTimeouts[documentId] = [];
+  
+  // Update to extracting
+  const timeout1 = setTimeout(() => {
+    const document = dataStores.Document.get(documentId);
+    if (document) {
+      const updated = { ...document, status: 'extracting' };
+      dataStores.Document.set(documentId, updated);
+      
+      // Notify subscriptions
+      if (activeSubscriptions.Document.length > 0) {
+        const items = Array.from(dataStores.Document.values());
+        const enhancedItems = items.map(item => addRelationshipAccessors(item, 'Document'));
+        activeSubscriptions.Document.forEach(subscription => {
+          subscription.next({ items: enhancedItems, isSynced: true });
+        });
+      }
+    }
+  }, 1000);
+  activeAnalysisTimeouts[documentId].push(timeout1);
+  
+  // Update to extracted
+  const timeout2 = setTimeout(() => {
+    const document = dataStores.Document.get(documentId);
+    if (document) {
+      const updated = { 
+        ...document, 
+        status: 'extracted',
+        pageCount: Math.floor(Math.random() * 50) + 10 
+      };
+      dataStores.Document.set(documentId, updated);
+      
+      if (activeSubscriptions.Document.length > 0) {
+        const items = Array.from(dataStores.Document.values());
+        const enhancedItems = items.map(item => addRelationshipAccessors(item, 'Document'));
+        activeSubscriptions.Document.forEach(subscription => {
+          subscription.next({ items: enhancedItems, isSynced: true });
+        });
+      }
+    }
+  }, 2500);
+  activeAnalysisTimeouts[documentId].push(timeout2);
+  
+  // Update to analyzing
+  const timeout3 = setTimeout(() => {
+    const document = dataStores.Document.get(documentId);
+    if (document) {
+      const updated = { ...document, status: 'analyzing' };
+      dataStores.Document.set(documentId, updated);
+      
+      if (activeSubscriptions.Document.length > 0) {
+        const items = Array.from(dataStores.Document.values());
+        const enhancedItems = items.map(item => addRelationshipAccessors(item, 'Document'));
+        activeSubscriptions.Document.forEach(subscription => {
+          subscription.next({ items: enhancedItems, isSynced: true });
+        });
+      }
+    }
+  }, 4000);
+  activeAnalysisTimeouts[documentId].push(timeout3);
+  
+  // Update to completed
+  const timeout4 = setTimeout(() => {
+    const document = dataStores.Document.get(documentId);
+    if (document) {
+      const updated = { ...document, status: 'completed' };
+      dataStores.Document.set(documentId, updated);
+      
+      if (activeSubscriptions.Document.length > 0) {
+        const items = Array.from(dataStores.Document.values());
+        const enhancedItems = items.map(item => addRelationshipAccessors(item, 'Document'));
+        activeSubscriptions.Document.forEach(subscription => {
+          subscription.next({ items: enhancedItems, isSynced: true });
+        });
+      }
+      
+      // Clean up timeouts
+      delete activeAnalysisTimeouts[documentId];
+    }
+  }, 6000);
+  activeAnalysisTimeouts[documentId].push(timeout4);
+};
+
+/**
+ * Cancel document analysis workflow
+ * Clears pending timeouts and resets status to 'uploaded'
+ */
+export const cancelDocumentAnalysis = (documentId) => {
+  console.log('[Mock Data] Cancelling analysis for document:', documentId);
+  
+  // Clear all pending timeouts
+  if (activeAnalysisTimeouts[documentId]) {
+    activeAnalysisTimeouts[documentId].forEach(timeout => clearTimeout(timeout));
+    delete activeAnalysisTimeouts[documentId];
+  }
+  
+  // Reset status to uploaded
+  const document = dataStores.Document.get(documentId);
+  if (document) {
+    const updated = { ...document, status: 'uploaded' };
+    dataStores.Document.set(documentId, updated);
+    
+    if (activeSubscriptions.Document.length > 0) {
+      const items = Array.from(dataStores.Document.values());
+      const enhancedItems = items.map(item => addRelationshipAccessors(item, 'Document'));
+      activeSubscriptions.Document.forEach(subscription => {
+        subscription.next({ items: enhancedItems, isSynced: true });
+      });
+    }
+  }
+};
 /**
  * Initialize default mock data for Storybook
  * Call this from preview.jsx to seed Gen 2 mock data
@@ -727,13 +855,117 @@ export const initializeMockData = () => {
   }
   
   // Seed Files and Documents
-  if (mockFiles && mockFiles.length > 0) {
-    seedMockFiles(mockFiles);
-    console.log('[Mock Data Gen 2] Seeded Files:', mockFiles.length);
+  if (initialMockFiles && initialMockFiles.length > 0) {
+    seedMockFiles(initialMockFiles);
+    console.log('[Mock Data Gen 2] Seeded Files:', initialMockFiles.length);
   }
   
-  if (mockDocuments && mockDocuments.length > 0) {
-    seedMockDocuments(mockDocuments);
-    console.log('[Mock Data Gen 2] Seeded Documents:', mockDocuments.length);
+  if (initialMockDocuments && initialMockDocuments.length > 0) {
+    seedMockDocuments(initialMockDocuments);
+    console.log('[Mock Data Gen 2] Seeded Documents:', initialMockDocuments.length);
   }
 };
+
+/**
+ * Export data stores as plain objects for backward compatibility
+ * Some stories and utilities access these directly (e.g., mockDocuments[id])
+ * These are proxies to the Map-based stores
+ */
+export const mockUnits = new Proxy({}, {
+  get: (target, prop) => dataStores.Unit.get(prop),
+  set: (target, prop, value) => { dataStores.Unit.set(prop, value); return true; },
+  deleteProperty: (target, prop) => { dataStores.Unit.delete(prop); return true; },
+  has: (target, prop) => dataStores.Unit.has(prop),
+  ownKeys: () => Array.from(dataStores.Unit.keys()),
+  getOwnPropertyDescriptor: (target, prop) => dataStores.Unit.has(prop) ? { enumerable: true, configurable: true } : undefined
+});
+
+export const mockGrades = new Proxy({}, {
+  get: (target, prop) => dataStores.Grade.get(prop),
+  set: (target, prop, value) => { dataStores.Grade.set(prop, value); return true; },
+  deleteProperty: (target, prop) => { dataStores.Grade.delete(prop); return true; },
+  has: (target, prop) => dataStores.Grade.has(prop),
+  ownKeys: () => Array.from(dataStores.Grade.keys()),
+  getOwnPropertyDescriptor: (target, prop) => dataStores.Grade.has(prop) ? { enumerable: true, configurable: true } : undefined
+});
+
+export const mockFiles = new Proxy({}, {
+  get: (target, prop) => dataStores.File.get(prop),
+  set: (target, prop, value) => { dataStores.File.set(prop, value); return true; },
+  deleteProperty: (target, prop) => { dataStores.File.delete(prop); return true; },
+  has: (target, prop) => dataStores.File.has(prop),
+  ownKeys: () => Array.from(dataStores.File.keys()),
+  getOwnPropertyDescriptor: (target, prop) => dataStores.File.has(prop) ? { enumerable: true, configurable: true } : undefined
+});
+
+export const mockDocuments = new Proxy({}, {
+  get: (target, prop) => dataStores.Document.get(prop),
+  set: (target, prop, value) => { dataStores.Document.set(prop, value); return true; },
+  deleteProperty: (target, prop) => { dataStores.Document.delete(prop); return true; },
+  has: (target, prop) => dataStores.Document.has(prop),
+  ownKeys: () => Array.from(dataStores.Document.keys()),
+  getOwnPropertyDescriptor: (target, prop) => dataStores.Document.has(prop) ? { enumerable: true, configurable: true } : undefined
+});
+
+export const mockParsedContent = new Proxy({}, {
+  get: (target, prop) => dataStores.ParsedContent.get(prop),
+  set: (target, prop, value) => { dataStores.ParsedContent.set(prop, value); return true; },
+  deleteProperty: (target, prop) => { dataStores.ParsedContent.delete(prop); return true; },
+  has: (target, prop) => dataStores.ParsedContent.has(prop),
+  ownKeys: () => Array.from(dataStores.ParsedContent.keys()),
+  getOwnPropertyDescriptor: (target, prop) => dataStores.ParsedContent.has(prop) ? { enumerable: true, configurable: true } : undefined
+});
+
+export const mockWords = new Proxy({}, {
+  get: (target, prop) => dataStores.Word.get(prop),
+  set: (target, prop, value) => { dataStores.Word.set(prop, value); return true; },
+  deleteProperty: (target, prop) => { dataStores.Word.delete(prop); return true; },
+  has: (target, prop) => dataStores.Word.has(prop),
+  ownKeys: () => Array.from(dataStores.Word.keys()),
+  getOwnPropertyDescriptor: (target, prop) => dataStores.Word.has(prop) ? { enumerable: true, configurable: true } : undefined
+});
+
+export const mockQuestions = new Proxy({}, {
+  get: (target, prop) => dataStores.Question.get(prop),
+  set: (target, prop, value) => { dataStores.Question.set(prop, value); return true; },
+  deleteProperty: (target, prop) => { dataStores.Question.delete(prop); return true; },
+  has: (target, prop) => dataStores.Question.has(prop),
+  ownKeys: () => Array.from(dataStores.Question.keys()),
+  getOwnPropertyDescriptor: (target, prop) => dataStores.Question.has(prop) ? { enumerable: true, configurable: true } : undefined
+});
+
+export const mockSections = new Proxy({}, {
+  get: (target, prop) => dataStores.Section.get(prop),
+  set: (target, prop, value) => { dataStores.Section.set(prop, value); return true; },
+  deleteProperty: (target, prop) => { dataStores.Section.delete(prop); return true; },
+  has: (target, prop) => dataStores.Section.has(prop),
+  ownKeys: () => Array.from(dataStores.Section.keys()),
+  getOwnPropertyDescriptor: (target, prop) => dataStores.Section.has(prop) ? { enumerable: true, configurable: true } : undefined
+});
+
+export const mockAssignments = new Proxy({}, {
+  get: (target, prop) => dataStores.Assignment.get(prop),
+  set: (target, prop, value) => { dataStores.Assignment.set(prop, value); return true; },
+  deleteProperty: (target, prop) => { dataStores.Assignment.delete(prop); return true; },
+  has: (target, prop) => dataStores.Assignment.has(prop),
+  ownKeys: () => Array.from(dataStores.Assignment.keys()),
+  getOwnPropertyDescriptor: (target, prop) => dataStores.Assignment.has(prop) ? { enumerable: true, configurable: true } : undefined
+});
+
+export const mockSettings = new Proxy({}, {
+  get: (target, prop) => dataStores.Settings.get(prop),
+  set: (target, prop, value) => { dataStores.Settings.set(prop, value); return true; },
+  deleteProperty: (target, prop) => { dataStores.Settings.delete(prop); return true; },
+  has: (target, prop) => dataStores.Settings.has(prop),
+  ownKeys: () => Array.from(dataStores.Settings.keys()),
+  getOwnPropertyDescriptor: (target, prop) => dataStores.Settings.has(prop) ? { enumerable: true, configurable: true } : undefined
+});
+
+export const mockAssistantChats = new Proxy({}, {
+  get: (target, prop) => dataStores.AssistantChat.get(prop),
+  set: (target, prop, value) => { dataStores.AssistantChat.set(prop, value); return true; },
+  deleteProperty: (target, prop) => { dataStores.AssistantChat.delete(prop); return true; },
+  has: (target, prop) => dataStores.AssistantChat.has(prop),
+  ownKeys: () => Array.from(dataStores.AssistantChat.keys()),
+  getOwnPropertyDescriptor: (target, prop) => dataStores.AssistantChat.has(prop) ? { enumerable: true, configurable: true } : undefined
+});

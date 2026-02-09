@@ -2340,6 +2340,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                 ref={secondAppBarRef}
                 position="fixed"
                 color="default"
+                data-tour="editor-toolbar"
                 sx={{
                     overflowX: 'visible',
                     boxShadow: 'none',

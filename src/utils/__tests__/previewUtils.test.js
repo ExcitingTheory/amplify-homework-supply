@@ -1,5 +1,5 @@
 /**
- * Unit tests for previewUtils.js
+ * Unit tests for previewUtils.jsx
  * Tests responsive preview image utilities
  */
 
@@ -16,7 +16,7 @@ import {
   getResponsiveImageProps,
   hasPreview,
   getBestPreview,
-} from '../previewUtils.js';
+} from '../previewUtils.jsx';
 import { getUrl } from 'aws-amplify/storage';
 
 describe('previewUtils', () => {

@@ -47,6 +47,12 @@ import * as React from 'react';
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen={true}
           title="YouTube video"
+          style={{
+            maxWidth: '100%',
+            width: '100%',
+            height: 'auto',
+            aspectRatio: '16 / 9',
+          }}
         />
       </BlockWithAlignableContents>
     );

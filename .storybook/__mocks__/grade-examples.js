@@ -551,10 +551,10 @@ export const multipleAttempts = [
 
 /**
  * Helper function to seed grade data in Storybook
- * Import seedMockGrade from aws-amplify-datastore mock
+ * Import seedMockGrade from aws-amplify-data mock
  */
 export function seedGradeExamples(scenario = 'empty') {
-  const { seedMockGrade } = require('./aws-amplify-datastore');
+  const { seedMockGrade } = require('./aws-amplify-data');
   
   switch (scenario) {
     case 'empty':

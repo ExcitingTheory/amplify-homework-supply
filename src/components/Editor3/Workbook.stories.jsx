@@ -2,7 +2,7 @@ import React from 'react';
 import { Workbook } from './index';
 import { seedMockUnit, seedMockGrade } from '../../../.storybook/__mocks__/aws-amplify-data';
 import { MOCK_IMAGE_URL_1 } from '../../../.storybook/__mocks__/media';
-import { userEvent, within, waitFor, expect } from 'storybook/test';
+import { within, waitFor, userEvent } from 'storybook/test';
 
 export default {
   title: '📚 Creating Lessons/Workbook',
@@ -161,7 +161,7 @@ const sampleWorkbookState = {
 export const EmptyWorkbook = {
   loaders: [
     async () => {
-      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-datastore');
+      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-data');
       clearMockData();
       
       seedMockUnit({
@@ -206,7 +206,7 @@ export const EmptyWorkbook = {
 export const WorkbookWithContent = {
   loaders: [
     async () => {
-      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-datastore');
+      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-data');
       clearMockData();
       
       seedMockUnit({
@@ -698,7 +698,7 @@ export const WorkbookWithProgress = {
   loaders: [
     async () => {
       const { seedMockWords } = await import('../../../.storybook/__mocks__/aws-amplify-data');
-      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-datastore');
+      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-data');
       const { MOCK_AUDIO_BASE64, mockWaveformData } = await import('../../../.storybook/__mocks__/media');
       
       clearMockData();
@@ -2362,7 +2362,7 @@ export const KitchenSink = {
   loaders: [
     async () => {
       const { seedMockWords, seedMockFiles, seedMockGrade } = await import('../../../.storybook/__mocks__/aws-amplify-data');
-      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-datastore');
+      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-data');
       
       // Clear any existing mock data to ensure clean state
       clearMockData();
@@ -2373,6 +2373,7 @@ export const KitchenSink = {
         description: 'Comprehensive workbook showing all available interactive exercise types',
         data: JSON.stringify(kitchenSinkWorkbookState),
         wordIDs: ['vocab-word-1', 'vocab-word-2', 'vocab-word-3', 'vocab-word-4', 'vocab-word-5'],
+        timeLimitSeconds: 1800, // 30 minutes
         _version: 1,
         owner: 'mock-user-sub',
       });
@@ -2386,7 +2387,7 @@ export const KitchenSink = {
         percentComplete: 0,
         accuracy: 0,
         complete: false,
-        timerStarted: false,
+        timerStarted: true,
         data: JSON.stringify({}),
         _version: 1,
       });
@@ -3084,14 +3085,14 @@ const dataPluginWorkbookState = {
 export const DataPluginDemo = {
   loaders: [
     async () => {
-      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-datastore');
+      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-data');
       clearMockData();
       
       seedMockUnit({
         id: 'data-plugin-workbook-demo-id',
         name: 'DataPlugin Workbook Demo',
         description: 'Shows how DataPlugin loads workbook content and preserves student state',
-        data: dataPluginWorkbookState,
+        data: JSON.stringify(dataPluginWorkbookState),
         _version: 1,
         owner: 'mock-user-sub',
       });

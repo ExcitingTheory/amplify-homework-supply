@@ -53,6 +53,44 @@ div.ImageNode__contentEditable {
 
 .editor-container {
     /* min-height: calc(100vh - var(--app-bar-height, 11rem)); */
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+.editor-container * {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.editor-container img {
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+}
+
+.editor-image {
+    max-width: 100%;
+    overflow: hidden;
+    display: block;
+    box-sizing: border-box;
+}
+
+.editor-image img {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+}
+
+.inline-editor-image {
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.inline-editor-image img {
+    max-width: 100% !important;
+    height: auto !important;
 }
 
 .editor-textUnderline {

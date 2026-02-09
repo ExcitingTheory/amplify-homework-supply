@@ -27,12 +27,18 @@ export const Easy = ({
   const [startPositionEasy, setStartPositionEasy] = React.useState(0);
   const [showCompletion, setShowCompletion] = React.useState(false);
  
-  const isFirstRender = React.useRef(true);
-
-  // Reset completion screen when tab changes
-  React.useEffect(() => {
-    setShowCompletion(false);
-  }, [tabIndex]);
+  // Generate consistent seed from nodeKey for deterministic shuffling
+  // Include mode name to ensure different ordering between modes
+  const shuffleSeed = React.useMemo(() => {
+    if (!nodeKey) return 0;
+    let hash = 0;
+    const str = String(nodeKey) + '-easy';
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash = hash & hash;
+    }
+    return Math.abs(hash);
+  }, [nodeKey]);
 
   const { wordMapId: dictionary } = React.useContext(DictionaryContext)
 
@@ -61,6 +67,16 @@ export const Easy = ({
   }, [grade?.data]);
 
   const inProgress = gradeData[nodeKey] || {};
+  
+  // Show/hide completion screen based on completion status and tab index
+  React.useEffect(() => {
+    const isComplete = inProgress?.easy?.complete;
+    if (isComplete) {
+      setShowCompletion(true);
+    } else {
+      setShowCompletion(false);
+    }
+  }, [tabIndex, inProgress?.easy?.complete]);
   
   console.log('Easy.nodeKey', nodeKey, 'type:', typeof nodeKey);
   console.log('Easy.grade:', grade);
@@ -105,13 +121,11 @@ export const Easy = ({
   console.log('Easy.vocabList', vocabList)
   console.log('Easy.vocabListEasy', vocabListEasy)
 
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      vocabList = shuffle(vocabList)
-      vocabListEasy = shuffle(vocabListEasy)
-      assignment = shuffle(assignment)
-      assignmentEasy = shuffle(assignmentEasy)
-    }
+    // Always shuffle using seeded random for consistent ordering
+    vocabList = shuffle(vocabList, shuffleSeed)
+    vocabListEasy = shuffle(vocabListEasy, shuffleSeed + 1)
+    assignment = shuffle(assignment, shuffleSeed + 2)
+    assignmentEasy = shuffle(assignmentEasy, shuffleSeed + 3)
   }
 
   const correctAnswer = assignment[startPositionEasy]
@@ -285,36 +299,61 @@ export const Easy = ({
   };
 
   return (
-    <Box sx={{ position: 'relative', minHeight: '500px' }}>
+    <Box sx={{ 
+      position: 'relative', 
+      height: 'calc(100vh - var(--app-bar-height, 11rem))',
+      maxHeight: 'calc(100vh - var(--app-bar-height, 11rem))',
+      overflow: 'hidden',
+      width: '100%',
+      maxWidth: '100vw',
+    }}>
       {showCompletion && (
-        <CompletionScreen
-          levelName="Easy Mode"
-          accuracy={verifiedAnswers.length / (inProgress?.easy?.attemptsCount || 1)}
-          attempts={inProgress?.easy?.attemptsCount || 0}
-          onContinue={handleContinueFromCompletion}
-          nextLevelName="Hard Mode"
-          isLastLevel={false}
-        />
+        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 5 }}>
+          <CompletionScreen
+            levelName="Easy Mode"
+            accuracy={verifiedAnswers.length / (inProgress?.easy?.attemptsCount || 1)}
+            attempts={inProgress?.easy?.attemptsCount || 0}
+            onContinue={handleContinueFromCompletion}
+            nextLevelName="Hard Mode"
+            isLastLevel={false}
+          />
+        </Box>
       )}
 
-      <Grid container direction="column" spacing={1}>
-      <Grid item xs={12}>
+      <Grid container direction="column" spacing={1} sx={{ overflow: 'hidden', height: '100%', width: '100%', maxWidth: '100%' }}>
+      <Grid item xs={12} sx={{ flexShrink: 0, width: '100%' }}>
         <LinearProgressWithLabel value={percentComplete} />
       </Grid>
-      <Grid item xs={12} container direction="row" spacing={2} wrap="nowrap">
-      <Grid item xs={8} sm={8} md={8} lg={8}>
-        <AnswerDrop
-          correctAnswer={{ ...correctWord, progressAssignment, sendFail, sendPass }} />
+      <Grid item xs={12} container direction={{ xs: 'column', sm: 'row' }} spacing={1} wrap="nowrap" sx={{ overflow: 'hidden', flex: '1 1 auto', minHeight: 0, width: '100%', maxWidth: '100%' }}>
+      <Grid item xs={12} sm={8} md={8} lg={8} sx={{ minWidth: 0, height: { xs: 'auto', sm: '100%' }, flexShrink: 0 }}>
+        <Box
+          sx={{
+            height: { xs: '200px', sm: '100%' },
+            maxHeight: { xs: '200px', sm: '100%' },
+            overflowY: 'hidden',
+            overflowX: 'auto',
+            display: 'flex',
+          }}
+        >
+          <AnswerDrop
+            correctAnswer={{ ...correctWord, progressAssignment, sendFail, sendPass }} />
+        </Box>
       </Grid>
-      <Grid item xs={4} sm={4} md={4} lg={4}>
+      <Grid item xs={12} sm={4} md={4} lg={4} sx={{ minWidth: 0, flex: { xs: '1 1 auto', sm: '0 0 auto' }, height: { xs: 'auto', sm: '100%' }, maxWidth: { xs: '100%', sm: '33.333333%' } }}>
         <Box
           sx={{
             display: 'flex',
             flexWrap: 'wrap',
-            gap: 1,
-            maxHeight: '400px',
+            gap: 0,
+            height: { xs: 'auto', sm: '100%' },
+            maxHeight: { xs: 'none', sm: '100%' },
             overflowY: 'auto',
-            padding: 1,
+            overflowX: 'hidden',
+            padding: 0.5,
+            alignContent: 'flex-start',
+            width: '100%',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
           }}
         >
           {easyVocab}

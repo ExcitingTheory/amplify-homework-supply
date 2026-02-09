@@ -1,6 +1,16 @@
-{
-    "query": "hiragana",
-    "type": "all",
-    "limit": 10
-}
+[
+    {
+        "query": "hiragana",
+        "type": "all",
+        "limit": 10,
+        "role": "user",
+        "id": "query-msg-1",
+        "parts": [
+            {
+                "type": "text",
+                "text": "search for hiragana content with type=all and limit=10"
+            }
+        ]
+    }
+]
 

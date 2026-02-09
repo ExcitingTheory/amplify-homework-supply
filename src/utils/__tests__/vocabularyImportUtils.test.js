@@ -1,5 +1,5 @@
 /**
- * Unit tests for vocabularyImportUtils.js
+ * Unit tests for vocabularyImportUtils.jsx
  * Tests vocabulary import from ParsedContent to Word dictionary
  */
 
@@ -54,7 +54,7 @@ import {
   importVocabularyToUnit,
   getVocabularyImportStatus,
   updateVocabularyItem,
-} from '../vocabularyImportUtils.js';
+} from '../vocabularyImportUtils.jsx';
 
 describe('vocabularyImportUtils', () => {
   beforeEach(() => {

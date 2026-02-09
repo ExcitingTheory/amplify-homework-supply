@@ -11,6 +11,7 @@ import {
 import { LinearProgressWithLabel, AnswerDropLearn } from '.';
 import { CompletionScreen } from './CompletionScreen';
 import { DragBox } from './DragBox';
+import { shuffle } from './utils';
 
 
 
@@ -30,10 +31,18 @@ export const Learn = ({
   const [droppedPairs, setDroppedPairs] = React.useState({}); // Track which answer was dropped on which target
   const [showCompletion, setShowCompletion] = React.useState(false);
 
-  // Reset completion screen when tab changes
-  React.useEffect(() => {
-    setShowCompletion(false);
-  }, [tabIndex]);
+  // Generate consistent seed from nodeKey for deterministic shuffling
+  // Include mode name to ensure different ordering between modes
+  const shuffleSeed = React.useMemo(() => {
+    if (!nodeKey) return 0;
+    let hash = 0;
+    const str = String(nodeKey) + '-learn';
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash = hash & hash;
+    }
+    return Math.abs(hash);
+  }, [nodeKey]);
 
   const { wordMapId: dictionary } = React.useContext(DictionaryContext);
 
@@ -49,6 +58,16 @@ export const Learn = ({
   
   const { grade, saveGrade } = React.useContext(UnitContext);
   const inProgress = grade?.data?.[nodeKey] || {};
+
+  // Show/hide completion screen based on completion status and tab index
+  React.useEffect(() => {
+    const isComplete = inProgress?.learn?.complete;
+    if (isComplete) {
+      setShowCompletion(true);
+    } else {
+      setShowCompletion(false);
+    }
+  }, [tabIndex, inProgress?.learn?.complete]);
 
   // Update progress state when grade data changes
   useEffect(() => {
@@ -82,14 +101,11 @@ export const Learn = ({
       }
     });
 
-    // Don't shuffle - keep vocabulary in original order
-    // if (isFirstRender.current) {
-    //   isFirstRender.current = false;
-    //   vocabList = shuffle(vocabList)
-    //   vocabListLearn = shuffle(vocabListLearn)
-    //   assignment = shuffle(assignment)
-    //   assignmentLearn = shuffle(assignmentLearn)
-    // }
+    // Always shuffle using seeded random for consistent ordering
+    vocabList = shuffle(vocabList, shuffleSeed)
+    vocabListLearn = shuffle(vocabListLearn, shuffleSeed + 1)
+    assignment = shuffle(assignment, shuffleSeed + 2)
+    assignmentLearn = shuffle(assignmentLearn, shuffleSeed + 3)
   }
 
   const easyAssignment = assignmentLearn;
@@ -262,7 +278,14 @@ export const Learn = ({
   const maxHeight = '15rem';
 
   return (
-    <Box sx={{ position: 'relative', minHeight: '400px' }}>
+    <Box sx={{ 
+      position: 'relative', 
+      height: 'calc(100vh - var(--app-bar-height, 11rem))',
+      maxHeight: 'calc(100vh - var(--app-bar-height, 11rem))',
+      overflow: 'hidden',
+      width: '100%',
+      maxWidth: '100vw',
+    }}>
       {showCompletion && (
         <CompletionScreen
           levelName="Learn Mode"
@@ -271,16 +294,78 @@ export const Learn = ({
           onContinue={handleContinueFromCompletion}
           nextLevelName="Easy Mode"
           isLastLevel={false}
+          vocabularyList={
+            <Box>
+              {dropAnswerVisibility.map((wordId) => {
+                const word = words.find(w => w.id === wordId) || dictionary[wordId];
+                if (!word) return null;
+                return (
+                  <Box key={wordId} sx={{ mb: 1, pb: 1, borderBottom: '1px solid #e0e0e0' }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      {word.phrase}
+                      {word.pronunciation && (
+                        <Typography component="span" variant="body2" color="textSecondary" sx={{ ml: 1 }}>
+                          ({word.pronunciation})
+                        </Typography>
+                      )}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {word.definition}
+                    </Typography>
+                  </Box>
+                );
+              })}
+            </Box>
+          }
         />
       )}
 
-      <Grid container direction="column" spacing={0}>
-      <Grid item>
+      <Grid container direction="column" spacing={1} sx={{ overflow: 'hidden', height: '100%', width: '100%', maxWidth: '100%' }}>
+      <Grid item xs={12} sx={{ flexShrink: 0, width: '100%' }}>
         <LinearProgressWithLabel value={percentComplete} />
       </Grid>
-      <Grid item container direction="row" spacing={2} wrap="nowrap">
-      <Grid item xs={8} sm={8} md={8} lg={8}>
-        <List>
+      <Grid item xs={12} container direction={{ xs: 'column', sm: 'row' }} spacing={1} wrap="nowrap" sx={{ overflow: 'hidden', flex: '1 1 auto', minHeight: 0, width: '100%', maxWidth: '100%' }}>
+      <Grid item xs={12} sm={4} md={4} lg={4} sx={{ minWidth: 0, flex: { xs: '1 1 auto', sm: '0 0 auto' }, height: { xs: 'auto', sm: '100%' }, maxWidth: { xs: '100%', sm: '33.333333%' }, order: { xs: 2, sm: 2 } }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 0,
+            height: { xs: 'auto', sm: '100%' },
+            maxHeight: { xs: 'none', sm: '100%' },
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            padding: 0.5,
+            width: '100%',
+            maxWidth: '100%',
+            alignContent: 'flex-start',
+            boxSizing: 'border-box',
+          }}
+        >
+          {easyVocab}
+        </Box>
+      </Grid>
+      <Grid item xs={12} sm={8} md={8} lg={8} sx={{ minWidth: 0, height: { xs: '120px', sm: '100%' }, maxHeight: { xs: '120px', sm: '100%' }, flexShrink: 0, maxWidth: { xs: '100%', sm: '66.666667%' }, order: { xs: 1, sm: 1 } }}>
+        <Box
+          sx={{
+            height: '100%',
+            maxHeight: '100%',
+            overflowY: { xs: 'hidden', sm: 'auto' },
+            overflowX: { xs: 'auto', sm: 'hidden' },
+            display: { xs: 'flex', sm: 'block' },
+            flexDirection: { xs: 'row', sm: 'column' },
+            width: { xs: '100%', sm: 'auto' },
+          }}
+        >
+          <List
+            sx={{
+              display: { xs: 'flex', sm: 'block' },
+              flexDirection: { xs: 'row', sm: 'column' },
+              padding: 0,
+              gap: { xs: 1, sm: 0 },
+              width: { xs: 'max-content', sm: 'auto' },
+            }}
+          >
           {easyAssignment.map((listItem, id) => {
             // console.log('SimpleList listItem', listItem)
             let _correctWord = '';
@@ -322,17 +407,6 @@ export const Learn = ({
           })}
 
         </List>
-      </Grid>
-      <Grid item xs={4} sm={4} md={4} lg={4}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 1,
-            padding: 1,
-          }}
-        >
-          {easyVocab}
         </Box>
       </Grid>
       </Grid>

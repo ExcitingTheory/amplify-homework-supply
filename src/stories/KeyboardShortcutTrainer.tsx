@@ -70,9 +70,20 @@ export const KeyboardShortcutTrainer: React.FC = () => {
   // Check if keys match a shortcut
   const checkShortcut = useCallback((keys: Set<string>) => {
     for (const shortcut of SHORTCUTS) {
-      // No normalization needed - shortcuts explicitly use 'Meta' or 'Control'
-      const allKeysPressed = shortcut.keys.every(key => keys.has(key));
-      const noExtraKeys = keys.size === shortcut.keys.length;
+      // Create a normalized version of pressed keys for comparison
+      const normalizedKeys = new Set(keys);
+      
+      // On Windows, map Control to Meta for OS-standard shortcuts (those using Meta)
+      // This allows Ctrl to work for Bold, Italic, etc. on Windows
+      if (!navigator.platform.includes('Mac') && normalizedKeys.has('Control')) {
+        if (shortcut.keys.includes('Meta')) {
+          normalizedKeys.delete('Control');
+          normalizedKeys.add('Meta');
+        }
+      }
+      
+      const allKeysPressed = shortcut.keys.every(key => normalizedKeys.has(key));
+      const noExtraKeys = normalizedKeys.size === shortcut.keys.length;
       
       if (allKeysPressed && noExtraKeys) {
         return shortcut;
@@ -83,13 +94,19 @@ export const KeyboardShortcutTrainer: React.FC = () => {
 
   // Handle key down
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    // Prevent default for our tracked shortcuts
+    // Capture actual keys pressed (no platform normalization here)
     const newKeys = new Set(pressedKeys);
     
-    if (e.metaKey || e.ctrlKey) newKeys.add(navigator.platform.includes('Mac') ? 'Meta' : 'Control');
+    // Add the actual modifier keys that are pressed
+    if (e.metaKey) newKeys.add('Meta');
+    if (e.ctrlKey) newKeys.add('Control');
     if (e.shiftKey) newKeys.add('Shift');
     if (e.altKey) newKeys.add('Alt');
-    if (e.key && !['Meta', 'Control', 'Shift', 'Alt'].includes(e.key)) {
+    
+    // For number keys, use e.code to get the physical key (handles Shift+2 = "@" issue)
+    if (e.code && e.code.startsWith('Digit')) {
+      newKeys.add(e.code.replace('Digit', '').toLowerCase());
+    } else if (e.key && !['Meta', 'Control', 'Shift', 'Alt'].includes(e.key)) {
       newKeys.add(e.key.toLowerCase());
     }
     

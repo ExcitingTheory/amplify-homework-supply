@@ -346,7 +346,13 @@ export default function MainToolbar({ children }) {
     <>
       <Toolbar
         variant="dense"
-        sx={{ minHeight: '48px' }}
+        sx={{ 
+          minHeight: '48px',
+          width: '100%',
+          maxWidth: '100%',
+          overflow: 'hidden',
+          boxSizing: 'border-box',
+        }}
       >
         <IconButton
           edge="start"

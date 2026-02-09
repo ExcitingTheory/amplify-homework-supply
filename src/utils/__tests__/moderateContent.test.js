@@ -1,5 +1,5 @@
 /**
- * Unit tests for moderateContent.js
+ * Unit tests for moderateContent.jsx
  * Tests content moderation using OpenAI Moderation API
  */
 
@@ -18,7 +18,7 @@ import {
   moderateAndSave,
   getModerationStatus,
   shouldShowModerationWarning
-} from '../moderateContent.js';
+} from '../moderateContent.jsx';
 import { generateClient } from 'aws-amplify/api';
 
 describe('moderateContent', () => {

@@ -1,5 +1,5 @@
 /**
- * Unit tests for fileUploadUtils.js
+ * Unit tests for fileUploadUtils.jsx
  * Tests S3 uploads, PDF analysis, and embedding generation
  */
 
@@ -66,7 +66,7 @@ import {
   cancelPDFAnalysis,
   uploadAndAnalyzePDF,
   generateEmbeddings,
-} from '../fileUploadUtils.js';
+} from '../fileUploadUtils.jsx';
 import { DataStore } from 'aws-amplify/datastore';
 import { uploadData } from 'aws-amplify/storage';
 import { generateClient } from 'aws-amplify/api';

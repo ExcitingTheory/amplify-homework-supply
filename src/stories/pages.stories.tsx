@@ -18,18 +18,18 @@
 // Import page components
 // Note: These are wrapped with MyAuth so we need to provide mock auth context
 import React from 'react';
-import IndexPage from '../../pages/index.js';
-import ProfilePage from '../../pages/profile.js';
-import SectionsPage from '../../pages/sections.js';
-import UnitsPage from '../../pages/units.js';
-import { SectionDetail as SectionDetailPage } from '../../pages/section/[id].js';
-import UnitDetailPage from '../../pages/unit/[id].js';
-import WorkbookPage from '../../pages/workbook/[id].js';
+import IndexPage from '../../pages/index.jsx';
+import ProfilePage from '../../pages/profile.jsx';
+import SectionsPage from '../../pages/sections.jsx';
+import UnitsPage from '../../pages/units.jsx';
+import { SectionDetail as SectionDetailPage } from '../../pages/section/[id].jsx';
+import UnitDetailPage from '../../pages/unit/[id].jsx';
+import WorkbookPage from '../../pages/workbook/[id].jsx';
 
 // Mock data imports
 import { seedIndexPageData } from '../../.storybook/__mocks__/index-page-examples';
 import { setMockUser } from '../../.storybook/__mocks__/aws-amplify-auth';
-import { FilesProvider } from '../../src/context/fileContext';
+import { FilesProvider } from '../context/fileContext';
 import { useRouter } from 'next/router';
 
 /**

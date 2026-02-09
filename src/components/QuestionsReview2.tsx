@@ -237,6 +237,7 @@ export function QuestionCard({
     onToggleExpand,
     onUpdate,
 }: QuestionCardProps) {
+    const { t } = useTranslation('components');
     const isEvenRow = index % 2 === 0;
 
     return (
@@ -481,10 +482,20 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                 const content = parsedContents[0];
                 setParsedContent(content);
                 
-                // Parse questions
-                const questions = content.questionsJSON 
-                    ? JSON.parse(String(content.questionsJSON)) 
-                    : [];
+                // Parse questions - handle both string and object formats
+                const questions = (() => {
+                    if (!content.questionsJSON) return [];
+                    if (typeof content.questionsJSON === 'string') {
+                        try {
+                            return JSON.parse(content.questionsJSON);
+                        } catch (e) {
+                            console.error('Error parsing questionsJSON:', e);
+                            return [];
+                        }
+                    }
+                    // Already an object/array
+                    return Array.isArray(content.questionsJSON) ? content.questionsJSON : [];
+                })();
                 
                 // Enrich questions with source metadata
                 const enrichedQuestions = questions.map((q: QuestionItem) => ({
@@ -496,16 +507,34 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                 
                 setQuestionItems(enrichedQuestions);
                 
-                // Parse summaries
-                const sums = content.summariesJSON 
-                    ? JSON.parse(String(content.summariesJSON)) 
-                    : [];
+                // Parse summaries - handle both string and object formats
+                const sums = (() => {
+                    if (!content.summariesJSON) return [];
+                    if (typeof content.summariesJSON === 'string') {
+                        try {
+                            return JSON.parse(content.summariesJSON);
+                        } catch (e) {
+                            console.error('Error parsing summariesJSON:', e);
+                            return [];
+                        }
+                    }
+                    return Array.isArray(content.summariesJSON) ? content.summariesJSON : [];
+                })();
                 setSummaries(sums);
                 
-                // Parse objectives
-                const objs = content.objectivesJSON 
-                    ? JSON.parse(String(content.objectivesJSON)) 
-                    : [];
+                // Parse objectives - handle both string and object formats
+                const objs = (() => {
+                    if (!content.objectivesJSON) return [];
+                    if (typeof content.objectivesJSON === 'string') {
+                        try {
+                            return JSON.parse(content.objectivesJSON);
+                        } catch (e) {
+                            console.error('Error parsing objectivesJSON:', e);
+                            return [];
+                        }
+                    }
+                    return Array.isArray(content.objectivesJSON) ? content.objectivesJSON : [];
+                })();
                 setObjectives(objs);
                 
                 // Auto-select all items by default if not imported

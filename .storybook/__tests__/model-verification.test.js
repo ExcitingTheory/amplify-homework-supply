@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 
 // Simulate the webpack alias by importing our mock
-import * as DataStoreMock from '../__mocks__/aws-amplify-datastore.js';
+import * as DataMock from '../__mocks__/aws-amplify-data.js';
 
 // Import the schema like the real models/index.js does
 import { schema } from '../../src/models/schema.js';

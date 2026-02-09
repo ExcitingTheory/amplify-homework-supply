@@ -1,0 +1,157 @@
+/**
+ * Storybook stories for StateInspector component
+ */
+
+import type { Meta, StoryObj } from '@storybook/react';
+import { StateInspector } from './StateInspector';
+import { StateSnapshot } from '../../utils/debug/StateSnapshot';
+
+const meta: Meta<typeof StateInspector> = {
+  title: 'Components/DebugPanel/StateInspector',
+  component: StateInspector,
+  tags: ['autodocs'],
+};
+
+export default meta;
+type Story = StoryObj<typeof StateInspector>;
+
+const mockSnapshot: StateSnapshot = {
+  timestamp: Date.now(),
+  environment: {
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+    viewport: '1920x1080',
+    url: 'http://localhost:3000/unit/test-unit',
+  },
+  localStorage: {
+    'user-preferences': JSON.stringify({ theme: 'dark', language: 'en' }),
+    'recent-units': JSON.stringify(['unit-1', 'unit-2', 'unit-3']),
+  },
+  sessionStorage: {
+    'current-session': JSON.stringify({ id: 'session-123', startTime: Date.now() - 3600000 }),
+  },
+  componentTree: JSON.stringify([
+    {
+      id: 'editor-main',
+      name: 'Editor3',
+      props: { unitId: 'test-unit', readOnly: false },
+      state: { editorState: '[Lexical State]', isSaving: false },
+      renderCount: 3,
+    },
+    {
+      id: 'toolbar-1',
+      name: 'ToolbarPlugin',
+      props: { editor: '[Lexical Editor]' },
+      state: {},
+      renderCount: 1,
+    },
+    {
+      id: 'unit-context',
+      name: 'UnitContext',
+      props: {},
+      state: { currentUnit: '[Unit Object]', isLoading: false },
+      renderCount: 2,
+    },
+  ]),
+  logs: JSON.stringify([
+    { timestamp: Date.now() - 5000, level: 'info', message: 'Application started' },
+    { timestamp: Date.now() - 3000, level: 'warn', message: 'Slow network detected' },
+    { timestamp: Date.now() - 1000, level: 'error', message: 'Failed to save', stack: 'Error: Network timeout' },
+  ]),
+  dataStore: {
+    models: [
+      { name: 'Unit', count: 15, syncStatus: 'synced' },
+      { name: 'Grade', count: 42, syncStatus: 'synced' },
+      { name: 'Word', count: 128, syncStatus: 'pending' },
+    ],
+  },
+  performance: {
+    memory: {
+      usedJSHeapSize: 25000000,
+      totalJSHeapSize: 50000000,
+      jsHeapSizeLimit: 2000000000,
+    },
+    navigation: {
+      loadTime: 1250,
+      domContentLoaded: 850,
+      domComplete: 1100,
+    },
+  },
+  errors: [
+    { message: 'Network timeout', timestamp: Date.now() - 2000, stack: 'Error: timeout\n  at fetch...' },
+  ],
+};
+
+const emptySnapshot: StateSnapshot = {
+  timestamp: Date.now(),
+  environment: {
+    userAgent: 'Mozilla/5.0',
+    viewport: '1920x1080',
+    url: 'http://localhost:3000',
+  },
+  localStorage: {},
+  sessionStorage: {},
+  componentTree: JSON.stringify([]),
+  logs: JSON.stringify([]),
+  dataStore: { models: [] },
+  performance: {
+    memory: { usedJSHeapSize: 0, totalJSHeapSize: 0, jsHeapSizeLimit: 0 },
+    navigation: { loadTime: 0, domContentLoaded: 0, domComplete: 0 },
+  },
+  errors: [],
+};
+
+export const Default: Story = {
+  args: {
+    snapshot: mockSnapshot,
+    onRefresh: () => console.log('Refresh clicked'),
+    onExport: (snapshot) => console.log('Export:', snapshot),
+  },
+};
+
+export const EmptyState: Story = {
+  args: {
+    snapshot: emptySnapshot,
+    onRefresh: () => console.log('Refresh clicked'),
+    onExport: (snapshot) => console.log('Export:', snapshot),
+  },
+};
+
+export const WithErrors: Story = {
+  args: {
+    snapshot: {
+      ...mockSnapshot,
+      errors: [
+        { message: 'TypeError: Cannot read property', timestamp: Date.now() - 5000, stack: 'TypeError...' },
+        { message: 'Network error', timestamp: Date.now() - 3000, stack: 'Error: ECONNREFUSED' },
+        { message: 'Authentication failed', timestamp: Date.now() - 1000, stack: 'Error: 401 Unauthorized' },
+      ],
+    },
+    onRefresh: () => console.log('Refresh clicked'),
+    onExport: (snapshot) => console.log('Export:', snapshot),
+  },
+};
+
+export const LargeDataSet: Story = {
+  args: {
+    snapshot: {
+      ...mockSnapshot,
+      localStorage: Object.fromEntries(
+        Array.from({ length: 20 }, (_, i) => [`key-${i}`, `value-${i}`])
+      ),
+      componentTree: Array.from({ length: 50 }, (_, i) => ({
+        id: `component-${i}`,
+        name: `Component${i}`,
+        props: { id: i, active: i % 2 === 0 },
+        state: { count: i },
+        renderCount: Math.floor(Math.random() * 10) + 1,
+      })),
+      logs: Array.from({ length: 100 }, (_, i) => ({
+        timestamp: Date.now() - i * 1000,
+        level: (['info', 'warn', 'error'] as const)[i % 3],
+        message: `Log message ${i}`,
+      })),
+    },
+    onRefresh: () => console.log('Refresh clicked'),
+    onExport: (snapshot) => console.log('Export:', snapshot),
+  },
+};

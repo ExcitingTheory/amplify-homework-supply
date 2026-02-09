@@ -6,7 +6,7 @@
  */
 
 // Re-export the initSchema function and all DataStore functionality
-export * from './aws-amplify-datastore.js';
+export * from './aws-amplify-data.js';
 
 // Re-export auth, storage, utils, and api mocks
 export * from './aws-amplify-auth.js';

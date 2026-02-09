@@ -36,7 +36,7 @@ import { UnitProvider } from '../src/context/unitContext';
 import { AudioPlayerProvider } from '../src/components/Editor3/context/AudioPlayerContext';
 
 // Import mock helpers
-import { clearMockData, initializeMockData } from './__mocks__/aws-amplify-datastore';
+import { clearMockData, initializeMockData } from './__mocks__/aws-amplify-data';
 import { initializeMockData as initializeGen2MockData } from './__mocks__/aws-amplify-data';
 import { mockChatAPI } from './__mocks__/chat-api';
 
@@ -51,8 +51,8 @@ import { globalTypes } from './addons/translation-mode/globalTypes';
 import i18n from './i18next';
 
 // Mock fetch for /api/chat endpoint
-const originalFetch = global.fetch;
-global.fetch = async (url, options) => {
+const originalFetch = globalThis.fetch;
+globalThis.fetch = async (url, options) => {
   // Intercept chat API calls
   if (typeof url === 'string' && url.includes('/api/chat')) {
     console.log('[Mock Fetch] Intercepted /api/chat');
@@ -142,6 +142,7 @@ const preview = {
     onboarding: {
       disabled: true,
     },
+
     // Note: Base action handlers are defined here but will be wrapped
     // with tracking in the decorator below based on story context
     actions: { 
@@ -166,6 +167,7 @@ const preview = {
         onCreate: fn(),
       } 
     },
+
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -174,9 +176,11 @@ const preview = {
       expanded: true,
       sort: 'requiredFirst',
     },
+
     nextjs: {
       appDirectory: false,
     },
+
     // Add viewport configuration for better responsive testing
     viewport: {
       defaultViewport: 'responsive',
@@ -198,8 +202,10 @@ const preview = {
         },
       },
     },
+
     // Configure layout settings
     layout: 'padded',
+
     // Better docs display
     docs: {
       toc: true,
@@ -207,11 +213,13 @@ const preview = {
         state: 'open',
       },
     },
+
     // Enable toolbar and panel by default for all stories and docs
     options: {
       showPanel: true,
       showToolbar: true,
     },
+
     // Background options for testing
     backgrounds: {
       default: 'light',
@@ -221,6 +229,13 @@ const preview = {
         { name: 'gray', value: '#f5f5f5' },
       ],
     },
+
+    a11y: {
+      // 'todo' - show a11y violations in the test UI only
+      // 'error' - fail CI on a11y violations
+      // 'off' - skip a11y checks entirely
+      test: 'todo'
+    }
   },
       options: {
       storySort: {

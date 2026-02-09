@@ -17,25 +17,26 @@ function getFormFields(t) {
     return {
         signUp: {
             name: {
-                label: t('components:authenticator.nameLabel'),
-                placeholder: t('components:authenticator.namePlaceholder'),
+                label: t('authenticator.nameLabel'),
+                placeholder: t('authenticator.namePlaceholder'),
                 isRequired: true,
                 order: 1,
             },
             email: {
-                label: t('components:authenticator.emailLabel'),
-                placeholder: t('components:authenticator.emailPlaceholder'),
+                label: t('authenticator.emailLabel'),
+                placeholder: t('authenticator.emailPlaceholder'),
                 isRequired: true,
                 order: 2,
             },
             password: {
-                label: t('components:authenticator.passwordLabel'),
-                placeholder: t('components:authenticator.passwordPlaceholder'),
+                label: t('authenticator.passwordLabel'),
+                placeholder: t('authenticator.passwordPlaceholder'),
                 isRequired: false,
                 order: 3,
             },
             confirm_password: {
-                label: t('components:authenticator.confirmPasswordLabel'),
+                label: t('authenticator.confirmPasswordLabel'),
+                placeholder: t('authenticator.confirmPasswordPlaceholder'),
                 order: 4,
             },
         },
@@ -44,7 +45,7 @@ function getFormFields(t) {
 
 
 export default function MyAuth({ children }) {
-    const { t } = useTranslation();
+    const { t } = useTranslation('components');
     const formFields = getFormFields(t);
     
     return (

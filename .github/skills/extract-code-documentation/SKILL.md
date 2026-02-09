@@ -15,22 +15,63 @@ Provides three approaches to generate AI-powered metadata for i18n locale files:
 1. **Discover** translation keys from actual code usage (`useTranslation()`, `t()`)
 2. **Extract** component descriptions from JSDoc `@fileoverview`
 3. **Generate** metadata with Claude Sonnet 4 (context, usage, tone, alternatives)
-4. **Update** locale JSON files with `_meta` objects
-5. **Report** missing translations not yet in locale files
+4. **Write** flat translations to `public/locales/{lang}/{namespace}.json`
+5. **Write** metadata to `translation-cache/{lang}/{namespace}.meta.json`
+6. **Report** missing translations not yet in locale files
 
 ### Approach 2: Fix Placeholders (regenerate-placeholder-metadata.ts)
-1. **Scan** locale files for entries with `[NEEDS_*` or "functionality not documented"
+1. **Scan** translation-cache for entries with `[NEEDS_*` or "functionality not documented"
 2. **Regenerate** metadata for incomplete entries only
 3. **Preserve** existing complete metadata
-4. **Update** locale files with proper metadata
+4. **Update** translation-cache with proper metadata (locale files unchanged)
 
 ### Approach 3: Fill Missing (generate-missing-metadata.ts)
-1. **Scan** locale files for entries without `_meta` fields
-2. **Convert** plain string values to `{value, _meta}` structure
-3. **Generate** metadata for entries missing it
-4. **Update** locale files with new metadata
+1. **Scan** locale files for translation keys without metadata in cache
+2. **Generate** metadata for entries missing it
+3. **Write** metadata to `translation-cache/{lang}/{namespace}.meta.json`
+4. **Update** locale files to flat structure if needed
 
 All approaches use the same AI prompt template for consistency.
+
+## File Structure
+
+**Translations** (`public/locales/{lang}/{namespace}.json`):
+```json
+{
+  "key": "The actual translation text",
+  "nested": {
+    "key": "More text"
+  }
+}
+```
+
+**Metadata** (`translation-cache/{lang}/{namespace}.meta.json`):
+```json
+{
+  "key": {
+    "context": "When and where this appears",
+    "usage": "How it's used in the UI",
+    "component": {
+      "location": "path/to/component.tsx",
+      "description": "Component description from JSDoc"
+    },
+    "tone": "polite-formal",
+    "userType": "all",
+    "impact": "Critical for navigation",
+    "alternativeTerms": ["Option 1", "Option 2"]
+  },
+  "nested.key": {
+    "context": "...",
+    "..."
+  }
+}
+```
+
+**Benefits:**
+- i18next gets clean, flat translation files (no `.value` accessor needed)
+- Metadata preserved separately for documentation and translation workflows
+- Smaller bundle size (metadata not shipped to clients)
+- Easier debugging (translations are plain key-value pairs)
 
 ## When to Use
 

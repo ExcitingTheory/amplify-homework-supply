@@ -1,5 +1,5 @@
 /**
- * Unit tests for vectorStoreDB.js
+ * Unit tests for vectorStoreDB.jsx
  * Tests IndexedDB wrapper for vector embeddings
  */
 
@@ -55,7 +55,7 @@ import {
   getStats,
   getEmbeddingsTimestamp,
   loadEmbeddingsFromS3,
-} from '../vectorStoreDB.js';
+} from '../vectorStoreDB.jsx';
 import { openDB } from 'idb';
 import { downloadData } from 'aws-amplify/storage';
 import pako from 'pako';

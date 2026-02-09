@@ -435,6 +435,21 @@
 }
 .LanguageEditorTheme__embedBlock {
   user-select: none;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.LanguageEditorTheme__embedBlock iframe,
+.LanguageEditorTheme__embedBlock img {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+  box-sizing: border-box;
+}
+.LanguageEditorTheme__embedBlock > div {
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 .LanguageEditorTheme__embedBlockFocus {
   outline: 2px solid rgb(60, 132, 244);

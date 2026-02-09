@@ -13,6 +13,7 @@
  * @module stories/OnboardingExamples.stories
  */
 
+import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 import { useState, useEffect } from 'react';
 import {
@@ -382,3 +383,90 @@ export const EventEmissionExample: StoryObj = {
     );
   },
 };
+
+/**
+ * Spotlight Integration Example
+ * Demonstrates the spotlight overlay system for guided tours
+ */
+export const SpotlightIntegration: StoryObj = {
+  render: () => {
+    return (
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Card>
+          <CardContent>
+            <Typography variant="h5" gutterBottom>
+              Spotlight Overlay Demo
+            </Typography>
+            <Typography variant="body1" paragraph>
+              The spotlight overlay is integrated with the Onboarding Panel. When you click on any task in the panel, 
+              a guided tour opens with:
+            </Typography>
+            
+            <Box component="ul" sx={{ mb: 2 }}>
+              <li>Semi-transparent overlay that dims the background</li>
+              <li>Highlighted spotlight on target UI elements</li>
+              <li>Contextual tooltip with step-by-step instructions</li>
+              <li>Navigation controls (Next, Skip, Complete)</li>
+              <li>Tutorial mode (detailed guidance) or Quiz mode (self-assessment)</li>
+            </Box>
+
+            <Alert severity="info" sx={{ mb: 3 }}>
+              <strong>📖 To Try It:</strong>
+              <ol style={{ margin: '8px 0 0 0', paddingLeft: '20px' }}>
+                <li>Open the <strong>Onboarding Panel</strong> (right sidebar)</li>
+                <li>Select a persona (Instructor, Learner, or Developer)</li>
+                <li>Click on any task to launch the spotlight tour</li>
+                <li>Follow the guided steps</li>
+                <li>Try switching between Tutorial (📖) and Quiz (🎯) modes</li>
+              </ol>
+            </Alert>
+
+            <Stack direction="row" spacing={2}>
+              <Box>
+                <Typography variant="subtitle2" gutterBottom>
+                  Features
+                </Typography>
+                <Box component="ul" sx={{ fontSize: '0.875rem', pl: 2 }}>
+                  <li>Automatic navigation to relevant stories</li>
+                  <li>Responsive positioning</li>
+                  <li>Keyboard navigation support</li>
+                  <li>Progress tracking</li>
+                  <li>Event emission for analytics</li>
+                </Box>
+              </Box>
+              
+              <Box>
+                <Typography variant="subtitle2" gutterBottom>
+                  Color Coding
+                </Typography>
+                <Box component="ul" sx={{ fontSize: '0.875rem', pl: 2 }}>
+                  <li><span style={{ color: '#4CAF50', fontWeight: 'bold' }}>Green</span> - Tutorial Mode</li>
+                  <li><span style={{ color: '#2196F3', fontWeight: 'bold' }}>Blue</span> - Quiz Mode</li>
+                  <li>Pulsing glow - Active highlight</li>
+                </Box>
+              </Box>
+            </Stack>
+
+            <Box sx={{ mt: 3, p: 2, bgcolor: 'rgba(0,0,0,0.05)', borderRadius: 1 }}>
+              <Typography variant="caption" sx={{ display: 'block', mb: 1, fontWeight: 'bold' }}>
+                Developer Info:
+              </Typography>
+              <Typography variant="caption" component="pre" sx={{ fontSize: '0.7rem', overflow: 'auto' }}>
+{`// Component source
+.storybook/components/SpotlightOverlay.tsx
+
+// Integration in OnboardingPanel
+.storybook/components/OnboardingPanel.tsx
+
+// Documentation
+docs/SPOTLIGHT_OVERLAY_GUIDE.md
+docs/SPOTLIGHT_QUICK_REFERENCE.md`}
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      </Container>
+    );
+  },
+};
+

@@ -9,6 +9,7 @@
 ### Getting Started
 - **[Setup Guide](./ONBOARDING_SETUP_GUIDE.md)** - Quick start for developers
 - **[Example Stories](./src/stories/OnboardingExamples.stories.tsx)** - Live working examples
+- **✨ [Spotlight Quick Start](./ONBOARDING_SPOTLIGHT_QUICK_START.md)** - Add guided tours in 5 minutes
 
 ### Documentation
 - **[Full Documentation](./docs/ONBOARDING_SYSTEM.md)** - Comprehensive guide with all APIs
@@ -16,11 +17,20 @@
 - **[Architecture Diagrams](./ONBOARDING_ARCHITECTURE.md)** - Visual system design
 - **[Addon Readme](./​.storybook/code/myOnboarding/README.md)** - Addon-specific info
 
+### ✨ Spotlight System (NEW)
+- **[Spotlight Summary](./ONBOARDING_SPOTLIGHT_SUMMARY.md)** - Complete overview
+- **[Task Reference](./ONBOARDING_SPOTLIGHT_TASK_REFERENCE.md)** - All 28 tasks with spotlight configs
+- **[Implementation Guide](./ONBOARDING_SPOTLIGHT_IMPLEMENTATION.md)** - How to add data-tour attributes
+- **[Component API](./ONBOARDING_SPOTLIGHT_COMPONENT.md)** - SpotlightOverlay component reference
+- **[Configuration Reference](./ONBOARDING_SPOTLIGHT_CONFIGS.md)** - Spotlight config system
+
 ### Source Code
 - **[Event System](./​.storybook/code/onboarding-events.ts)** - Core event emitter
-- **[Task Definitions](./​.storybook/code/onboarding-tasks.ts)** - 21 tasks for 3 personas
+- **[Task Definitions](./​.storybook/code/onboarding-tasks.ts)** - 28 tasks for 3 personas
 - **[React Hooks](./​.storybook/code/useOnboarding.ts)** - Integration hooks
-- **[UI Component](./​.storybook/components/OnboardingPanel.jsx)** - Right-side panel
+- **[UI Component](./​.storybook/components/OnboardingPanel.tsx)** - Right-side panel with spotlight
+- **✨ [SpotlightOverlay](./​.storybook/components/SpotlightOverlay.tsx)** - Guided tour component
+- **✨ [Spotlight Configs](./​.storybook/code/spotlight-configs.ts)** - All tour configurations
 
 ## 🎯 What It Does
 
@@ -32,6 +42,7 @@ A complete onboarding tracking system for Storybook that:
 ✅ Shows **real-time UI** updates in Storybook panel  
 ✅ Provides **React hooks** for easy integration  
 ✅ **Auto-detects** task completion in components  
+✅ **✨ NEW: Guided spotlight tours** with highlighted UI elements and tooltips  
 
 ## 🚀 Quick Start
 
@@ -54,14 +65,51 @@ export const MyPage = () => {
 
 ## 📊 Task Breakdown
 
-### Instructor (7 tasks)
-Getting Started → Content Creation → Management → Assignments → Assessment → AI Tools
+### Instructor (8 tasks, ~47 min tutorial / ~24 min quiz)
+Getting Started → Content Creation → Management → Assignments → Assessment → AI Tools → Skills
 
-### Learner (6 tasks)
-Getting Started → Coursework → Progress → Practice → Learning Support
+1. Set Up Your First Class
+2. Create Your First Unit
+3. Add a Quiz Block
+4. Add Vocabulary Words
+5. Assign Work to Students
+6. View Student Grades
+7. Use AI to Generate Content
+8. Master Editor Shortcuts ✨ (with spotlight)
 
-### Developer (8 tasks)
-Onboarding → Architecture → AI Features → Codebase → Development
+### Learner (7 tasks, ~36 min tutorial / ~18 min quiz)
+Getting Started → Coursework → Progress → Practice → Learning Support → Skills
+
+1. Join Your First Class
+2. View Your Assignments
+3. Complete an Assignment
+4. Review Your Feedback
+5. Practice Vocabulary
+6. Get Help from AI Assistant
+7. Learn Helpful Shortcuts ✨ (with spotlight)
+
+### Developer (9 tasks, ~104 min tutorial / ~52 min quiz)
+Onboarding → Architecture → AI Features → Codebase → Development → Learning
+
+1. Explore Component Documentation
+2. Understand the Editor System
+3. Learn DataStore Patterns
+4. Review AI Integration
+5. Set Up Development Environment
+6. Explore File Structure
+7. Run Tests and Linting
+8. Customize Storybook Setup
+9. Learn Keyboard Shortcuts ✨ (with spotlight demo)
+
+### Secret Tasks (4 tasks, ~52 min tutorial / ~26 min quiz) 🎁
+Extra Credit challenges with achievements
+
+1. 👑 Keyboard Master Challenge
+2. ⚡ Speed Demon
+3. 🏅 Achievement Hunter
+4. 📢 Shortcut Evangelist
+
+**Total: 28 tasks** across all personas with complete spotlight configurations
 
 ## 🔧 Integration Methods
 
@@ -247,15 +295,57 @@ Requirements:
 3. **Need details?** → [ONBOARDING_SYSTEM.md](./docs/ONBOARDING_SYSTEM.md)
 4. **Visual learner?** → [ONBOARDING_ARCHITECTURE.md](./ONBOARDING_ARCHITECTURE.md)
 5. **Integrating?** → See "Integration Methods" above
+✨ Spotlight Guided Tours (NEW!)
 
-## 🤝 Contributing
+The onboarding system now includes **interactive guided tours** that highlight UI elements and walk users through tasks step-by-step.
 
-To extend the system:
+### Features
+- **Semi-transparent overlay** focuses attention on target elements
+- **Positioned tooltips** with instructions and action lists
+- **Tutorial mode**: Detailed, step-by-step guidance for learning
+- **Quiz mode**: Minimal hints for testing knowledge
+- **Auto-navigation** to relevant Storybook stories
+- **Pulse animations** to draw attention to interactive elements
+- **28 complete task configurations** across all personas
 
-1. **Add new tasks**: Edit `onboarding-tasks.ts`
-2. **Create new hooks**: Add to `useOnboarding.ts`
-3. **Customize UI**: Modify `OnboardingPanel.jsx`
-4. **Emit events**: Use `getOnboardingEmitter()`
+### How It Works
+1. User clicks a task in the OnboardingPanel
+2. System loads the spotlight configuration for that task
+3. SpotlightOverlay highlights the target element with a "spotlight" effect
+4. Tooltip displays instructions and guidance
+5. User clicks Next to progress through steps
+6. Task marked complete when finished
+
+### Quick Start
+```tsx
+// 1. Add data-tour attribute to your component
+<Button data-tour="create-section-button">Create Section</Button>
+
+// 2. Test in Storybook
+// Navigate to OnboardingPanel → Select persona → Click task
+
+// That's it! Spotlight will highlight your button automatically
+```
+
+### Documentation
+- **[Quick Start Guide](./ONBOARDING_SPOTLIGHT_QUICK_START.md)** - Get started in 5 minutes
+- **[Task Reference](./ONBOARDING_SPOTLIGHT_TASK_REFERENCE.md)** - See all 28 task configurations
+- **[Implementation Guide](./ONBOARDING_SPOTLIGHT_IMPLEMENTATION.md)** - Complete integration guide
+- **[Summary](./ONBOARDING_SPOTLIGHT_SUMMARY.md)** - Full system overview
+
+### Status
+✅ **Complete**: SpotlightOverlay component, all 28 task configurations, documentation  
+⚠️ **Pending**: Adding `data-tour` attributes to UI components (see [Task Reference](./ONBOARDING_SPOTLIGHT_TASK_REFERENCE.md))
+
+## 🔮 Future Enhancements
+
+- [ ] Analytics dashboard
+- [x] ✨ **Guided tours with overlays** (COMPLETED!)
+- [ ] Achievements/badges UI (system exists, needs visual component)
+- [ ] Export event logs
+- [ ] A/B testing different orderings
+- [ ] Conditional task branching
+- [ ] Multi-language support for spotlight toursOnboardingEmitter()`
 
 ## 🔮 Future Enhancements
 

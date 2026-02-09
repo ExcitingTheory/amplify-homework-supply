@@ -12,44 +12,13 @@
  */
 
 import { MOCK_MEDIA } from './mockMediaData';
-// Gen 1 DataStore seed functions (for legacy pages)
-import { 
-  seedMockUnit as seedMockUnitGen1, 
-  seedMockGrade as seedMockGradeGen1, 
-  seedMockSections as seedMockSectionsGen1, 
-  seedMockAssignments as seedMockAssignmentsGen1 
-} from './aws-amplify-datastore';
-// Gen 2 API seed functions (for new pages)
+// Gen 2 API seed functions
 import {
-  seedMockUnit as seedMockUnitGen2,
-  seedMockGrade as seedMockGradeGen2,
-  seedMockSections as seedMockSectionsGen2,
-  seedMockAssignments as seedMockAssignmentsGen2
+  seedMockUnit,
+  seedMockGrade,
+  seedMockSections,
+  seedMockAssignments
 } from './aws-amplify-data';
-
-/**
- * Dual seed function that seeds both Gen 1 DataStore and Gen 2 API mocks
- * This ensures compatibility with pages using either Amplify generation
- */
-function seedMockUnit(unit) {
-  seedMockUnitGen1(unit);
-  seedMockUnitGen2(unit);
-}
-
-function seedMockGrade(grade) {
-  seedMockGradeGen1(grade);
-  seedMockGradeGen2(grade);
-}
-
-function seedMockSections(sections) {
-  seedMockSectionsGen1(sections);
-  seedMockSectionsGen2(sections);
-}
-
-function seedMockAssignments(assignments) {
-  seedMockAssignmentsGen1(assignments);
-  seedMockAssignmentsGen2(assignments);
-}
 
 /**
  * Mock Units for Index Page

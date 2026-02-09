@@ -12,6 +12,8 @@ The onboarding system provides:
 - **Interactive UI panel** - Right-side panel in Storybook showing tasks and progress
 - **Automatic detection** - React hooks to auto-detect when users reach certain screens
 - **Customizable tasks** - 20+ predefined tasks with instructions and time estimates
+- **Spotlight overlay** - Guided tour system with highlighted UI elements and step-by-step instructions
+- **Tutorial and Quiz modes** - Choose between detailed guidance or self-assessment
 
 ## Three Personas
 
@@ -418,9 +420,40 @@ describe('Onboarding System', () => {
 ## Future Enhancements
 
 - [ ] Analytics dashboard to view user journey data
-- [ ] Guided tour overlays on actual UI
 - [ ] Timed reminders for incomplete tasks
 - [ ] Achievements/badges for milestones
 - [ ] Export event logs for user research
 - [ ] A/B testing different task orderings
 - [ ] Conditional task branching based on user choices
+- [x] Guided tour overlays on actual UI (implemented as Spotlight Overlay)
+
+## Spotlight Overlay System
+
+The onboarding system includes a **Spotlight Overlay** feature for guided tours. When users click on a task in the OnboardingPanel, a spotlight highlights relevant UI elements and provides step-by-step guidance.
+
+### Features
+
+- **Semi-transparent overlay** dims non-focused content
+- **Spotlight effect** highlights target UI elements
+- **Contextual tooltips** with instructions and navigation
+- **Tutorial mode** - Detailed step-by-step guidance
+- **Quiz mode** - Self-assessment with minimal hints
+- **Automatic navigation** to relevant Storybook stories
+
+### Usage
+
+The spotlight is automatically integrated with the OnboardingPanel. When a user clicks any task:
+
+1. A spotlight overlay appears
+2. The system shows introduction and instructions
+3. If a story is linked, it navigates to that story
+4. User progresses through steps using Next/Skip buttons
+5. Task is marked complete upon finishing
+
+### Documentation
+
+For detailed information about the Spotlight Overlay system, see:
+- [Spotlight Overlay Guide](SPOTLIGHT_OVERLAY_GUIDE.md)
+- Component: [.storybook/components/SpotlightOverlay.tsx](.storybook/components/SpotlightOverlay.tsx)
+- Stories: [.storybook/components/SpotlightOverlay.stories.tsx](.storybook/components/SpotlightOverlay.stories.tsx)
+

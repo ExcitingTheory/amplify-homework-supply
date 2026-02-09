@@ -66,6 +66,7 @@ export default function UnitCompletedPlugin() {
 
         >
             <Card
+                data-tour="results"
                 sx={{
                     position: 'absolute',
                     top: '50%',

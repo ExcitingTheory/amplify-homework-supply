@@ -118,17 +118,7 @@ describe('Onboarding System', () => {
 
   describe('Quiz Mode', () => {
     beforeEach(() => {
-      cy.clearLocalStorage();
-      cy.visit(`${storybookUrl}/?path=/docs/getting-started-onboarding--docs`);
-      cy.get('button[role="tab"]').contains('Onboarding').click();
-      cy.contains('Instructor').parent().click();
-    });
-
-    it('should switch to quiz mode and show instructions', () => {
-      // Click Quiz chip
-      cy.contains('.MuiChip-root', 'Quiz').click();
-      
-      // ShoulOnboardingProgress();
+      cy.clearOnboardingProgress();
       cy.visitStory('getting-started-onboarding--docs');
       cy.openOnboardingPanel();
       cy.selectPersona('instructor');
@@ -159,30 +149,7 @@ describe('Onboarding System', () => {
       cy.contains('button', 'Go to Application Pages').click();
       
       // Should navigate to Application Pages docs
-      cy.url().should('include', 'pages-application-pages--docs'
-
-    it('should toggle between Tutorial and Quiz modes', () => {
-      // Should start in Tutorial mode
-      cy.contains('📖 Tutorial Mode').should('be.visible');
-      
-      // Switch to Quiz mode
-      cy.contains('.MuiChip-root', 'Quiz').click();
-      cy.contains('🎯 Quiz Mode').should('be.visible');
-      cy.contains('Navigate to').should('be.visible');
-      
-      // Switch back to Tutorial mode
-      cy.contains('.MuiChip-root', 'Tutorial').click();
-      cy.contains('📖 Tutorial Mode').should('be.visible');
-      cy.contains('Navigate to').should('not.exist');
-    });
-
-    it('should persist mode selection on navigation', () => {
-      // Switch to Quiz mode
-      cy.contains('.MuiChip-root', 'Quiz').click();
-      cy.contaOnboardingProgress();
-      cy.visitStory('getting-started-onboarding--docs');
-      cy.openOnboardingPanel();
-      cy.selectPersona('instructor');
+      cy.url().should('include', 'pages-application-pages--docs');
     });
 
     it('should toggle between Tutorial and Quiz modes', () => {
@@ -207,7 +174,20 @@ describe('Onboarding System', () => {
       
       // Go back to onboarding
       cy.visitStory('getting-started-onboarding--docs');
-      cy.openOnboardingPanel
+      cy.openOnboardingPanel();
+      
+      // Should still be in Quiz mode
+      cy.contains('Navigate to').should('be.visible');
+    });
+  });
+
+  describe('Progress Tracking', () => {
+    beforeEach(() => {
+      cy.clearOnboardingProgress();
+      cy.visitStory('getting-started-onboarding--docs');
+      cy.openOnboardingPanel();
+      cy.selectPersona('instructor');
+    })
     it('should show completed vs remaining task chips', () => {
       // Should show completed chip
       cy.contains('.MuiChip-root', 'Completed').should('be.visible');
@@ -217,9 +197,6 @@ describe('Onboarding System', () => {
     });
 
     it('should update progress when task completed', () => {
-      // Navigate to tutorial and complete a task
-      cy.visit(`${storybookUrl}/?path=/story/onboarding-learning-modes--tutorial-mode-example`);
-      OnboardingProgress();
       cy.visitStory('onboarding-learning-modes--tutorial-mode-example', 'story');
       
       cy.get('input[type="text"]').type('Test Unit');
@@ -250,13 +227,15 @@ describe('Onboarding System', () => {
       
       // Select persona again
       cy.selectPersona('instructor');
+    });
+  });
 
   describe('Task Categories', () => {
     beforeEach(() => {
-      cy.clearLocalStorage();
-      cy.visit(`${storybookUrl}/?path=/docs/getting-started-onboarding--docs`);
-      cy.get('button[role="tab"]').contains('Onboarding').click();
-      cy.contains('Instructor').parent().click();
+      cy.clearOnboardingProgress();
+      cy.visitStory('getting-started-onboarding--docs');
+      cy.openOnboardingPanel();
+      cy.selectPersona('instructor');
     });
 
     it('should show different task categories in tabs', () => {
@@ -268,10 +247,8 @@ describe('Onboarding System', () => {
       // Get all category tabs
       cy.get('.MuiTabs-root .MuiTab-root').then($tabs => {
         if ($tabs.length > 1) {
-          // COnboardingProgress();
-      cy.visitStory('getting-started-onboarding--docs');
-      cy.openOnboardingPanel();
-      cy.selectPersona('instructor'
+          // Click second tab
+          cy.wrap($tabs[1]).click();
           cy.get('.MuiCard-root').should('be.visible');
         }
       });
@@ -285,20 +262,9 @@ describe('Onboarding System', () => {
 
   describe('Multiple Tutorial Steps', () => {
     it('should display chained workflow of tutorial steps', () => {
-      cy.visit(`${storybookUrl}/?path=/story/onboarding-learning-modes--multiple-tutorial-steps`);
+      cy.visitStory('onboarding-learning-modes--multiple-tutorial-steps', 'story');
       
       // Should show multiple TutorialStep components
-      cy.contains('1. Create a Section').should('be.visible');
-      cy.contains('2. Create a Unit').should('be.visible');
-      cy.contains('3. Create an Assignment').should('be.visible');
-      
-      // Each step should have "Try it Yourself" button
-      cy.get('button').contains('Try it Yourself').should('have.length.at.least', 3);
-    });
-  });
-
-  describe('AuStory('onboarding-learning-modes--multiple-tutorial-steps', 'story');
-      
       cy.contains('1. Create a Section').should('be.visible');
       cy.contains('2. Create a Unit').should('be.visible');
       cy.contains('3. Create an Assignment').should('be.visible');
@@ -321,6 +287,19 @@ describe('Onboarding System', () => {
       cy.wait(1000);
       
       cy.openOnboardingPanel();
+      
+      // Should show non-zero completion
+      cy.contains(/\d+% Complete/).should('not.contain', '0% Complete');
+    });
+  });
+
+  describe('Accessibility', () => {
+    beforeEach(() => {
+      cy.clearOnboardingProgress();
+      cy.visitStory('getting-started-onboarding--docs');
+      cy.openOnboardingPanel();
+      cy.selectPersona('instructor');
+    });
     it('should have accessible checkboxes that are disabled', () => {
       // Checkboxes should have disabled attribute
       cy.get('input[type="checkbox"]').first().should('have.attr', 'disabled');
@@ -335,10 +314,7 @@ describe('Onboarding System', () => {
       cy.contains('.MuiChip-root', 'Quiz').should('be.visible');
       
       // Change persona button
-      cy.contaOnboardingProgress();
-      cy.visitStory('getting-started-onboarding--docs');
-      cy.openOnboardingPanel();
-      cy.selectPersona('instructor'hould('be.visible');
+      cy.contains('button', 'Change').should('be.visible');
     });
 
     it('should have keyboard navigation support', () => {

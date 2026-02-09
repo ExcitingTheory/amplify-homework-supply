@@ -5,7 +5,7 @@
  * Import and use these in story loaders or decorators.
  */
 
-import { seedMockUnit, seedMockGrade, seedMockFiles, seedMockSettings } from './aws-amplify-datastore';
+import { seedMockUnit, seedMockGrade, seedMockFiles, seedMockSettings } from './aws-amplify-data';
 import { Document, ParsedContent, Word, Unit } from '../../src/models';
 
 /**
@@ -77,7 +77,7 @@ export const seedVocabularyReviewData = {
         const identityIdVal = identityId || 'us-east-1:123';
 
         // Import directly into DataStore mock storage
-        const { mockDocuments, mockParsedContent } = await import('./aws-amplify-datastore');
+        const { mockDocuments, mockParsedContent } = await import('./aws-amplify-data');
         
         // Create document
         const document = {
@@ -131,7 +131,7 @@ export const seedVocabularyReviewData = {
         const ownerVal = owner || 'test-user';
         const identityIdVal = identityId || 'us-east-1:123';
 
-        const { mockDocuments, mockParsedContent } = await import('./aws-amplify-datastore');
+        const { mockDocuments, mockParsedContent } = await import('./aws-amplify-data');
         
         // Create document
         const document = {
@@ -187,7 +187,7 @@ export const seedVocabularyReviewData = {
             identityId
         });
 
-        const { mockWords } = await import('./aws-amplify-datastore');
+        const { mockWords } = await import('./aws-amplify-data');
         
         // Add some existing words to dictionary
         mockWords['word-1'] = {
@@ -222,7 +222,7 @@ export const seedVocabularyReviewData = {
         const ownerVal = owner || 'test-user';
         const identityIdVal = identityId || 'us-east-1:123';
 
-        const { mockDocuments } = await import('./aws-amplify-datastore');
+        const { mockDocuments } = await import('./aws-amplify-data');
         
         // Create document without ParsedContent
         const document = {

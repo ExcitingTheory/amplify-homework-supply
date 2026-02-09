@@ -3,7 +3,7 @@
  * Supports both GraphQL (legacy) and REST API (new)
  */
 
-import { simulateDocumentAnalysis } from './aws-amplify-datastore.js';
+import { simulateDocumentAnalysis } from './aws-amplify-data.js';
 import { 
   mockContentCompletion, 
   mockSuggestBlocks,
@@ -361,7 +361,7 @@ export const generateClient = () => ({
       console.log('[Mock API] Cancelling Document analysis:', variables);
       
       // Trigger cancellation in mock
-      const { cancelDocumentAnalysis } = await import('./aws-amplify-datastore.js');
+      const { cancelDocumentAnalysis } = await import('./aws-amplify-data.js');
       cancelDocumentAnalysis(variables.documentID);
       
       await new Promise(resolve => setTimeout(resolve, 300));

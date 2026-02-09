@@ -24,7 +24,7 @@ import {
   wordsSchema,
   questionSchema,
   questionsSchema,
-} from '../schemas';
+} from '../schemas/index';
 
 const MOCKS_DIR = path.resolve(process.cwd(), '.storybook/__mocks__');
 const UI_DATA_DIR = path.join(MOCKS_DIR, 'ui-data');
