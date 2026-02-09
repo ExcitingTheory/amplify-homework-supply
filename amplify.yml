@@ -3,8 +3,9 @@ backend:
   phases:
     build:
       commands:
-        - '# Execute Amplify CLI with the helper script'
-        - amplifyPush --simple
+        - '# Gen 2: Install backend dependencies and deploy'
+        - npm ci --prefix amplify
+        - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
 frontend:
   phases:
     preBuild:
