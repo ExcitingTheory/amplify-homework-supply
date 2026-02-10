@@ -41,6 +41,12 @@
       "description": "Actualiza la contraseña de tu cuenta por seguridad",
       "button": "Cambiar contraseña"
     },
+    "languagePreference": {
+      "heading": "Preferencia de idioma",
+      "description": "Selecciona tu idioma preferido para la interfaz del sitio web",
+      "selectLanguage": "Seleccionar idioma",
+      "changeSuccess": "Preferencia de idioma guardada exitosamente"
+    },
     "advanced": {
       "heading": "Avanzado",
       "description": "Administrar configuraciones avanzadas y borrar la caché de datos local",

@@ -41,6 +41,12 @@
       "description": "セキュリティのためにアカウントのパスワードを更新してください",
       "button": "パスワードを変更"
     },
+    "languagePreference": {
+      "heading": "言語設定",
+      "description": "ウェブサイトのインターフェースで使用する言語を選択します",
+      "selectLanguage": "言語を選択",
+      "changeSuccess": "言語設定が正常に保存されました"
+    },
     "advanced": {
       "heading": "上級",
       "description": "高度な設定を管理し、ローカルデータキャッシュをクリアします",

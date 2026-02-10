@@ -59,14 +59,13 @@ export default function InstructorDashboard({ sections = [] }) {
     
     const subscription = client.models.Grade.observeQuery({
       filter: {
-        and: [
-          { complete: { eq: true } },
-          { accuracy: { ne: null } }
-        ]
+        complete: { eq: true }
       }
     }).subscribe({
       next: ({ items }) => {
-        setAllGrades(items);
+        // Filter out grades without accuracy scores (client-side filtering)
+        const validGrades = items.filter(grade => grade.accuracy != null);
+        setAllGrades(validGrades);
       },
       error: (err) => console.error('Grades subscription error:', err)
     });

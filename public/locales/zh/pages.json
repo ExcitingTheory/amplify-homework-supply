@@ -41,6 +41,12 @@
       "description": "更新您的账户密码以确保安全",
       "button": "修改密码"
     },
+    "languagePreference": {
+      "heading": "语言偏好",
+      "description": "选择您为网站界面使用的首选语言",
+      "selectLanguage": "选择语言",
+      "changeSuccess": "语言偏好保存成功"
+    },
     "advanced": {
       "heading": "高级",
       "description": "管理高级设置并清除本地数据缓存",

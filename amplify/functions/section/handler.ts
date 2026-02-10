@@ -13,6 +13,7 @@ import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/data';
 import { GroupManager } from './groupManager';
 import { CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
+import { fromEnv } from '@aws-sdk/credential-providers';
 
 // Cache for User Pool ID discovery
 let cachedUserPoolId: string | null = null;
@@ -57,15 +58,27 @@ async function getUserPoolId(): Promise<string> {
 
 // In Gen 2, Lambda resolvers automatically get AppSync endpoint via env vars
 // Configure Amplify with the endpoint for data client operations
-Amplify.configure({
-  API: {
-    GraphQL: {
-      endpoint: process.env.API_ENDPOINT || '',
-      region: process.env.AWS_REGION || 'us-east-1',
-      defaultAuthMode: 'iam', // Lambda uses IAM auth to call AppSync
+Amplify.configure(
+  {
+    API: {
+      GraphQL: {
+        endpoint: process.env.API_ENDPOINT || '',
+        region: process.env.AWS_REGION || 'us-east-1',
+        defaultAuthMode: 'iam', // Lambda uses IAM auth to call AppSync
+      },
     },
   },
-});
+  {
+    Auth: {
+      credentialsProvider: {
+        getCredentialsAndIdentityId: async () => ({
+          credentials: await fromEnv()(),
+        }),
+        clearCredentialsAndIdentityId: () => {},
+      },
+    },
+  }
+);
 
 // Raw GraphQL operations - .models API doesn't work in Lambda resolvers
 const CREATE_SECTION = /* GraphQL */ `
@@ -75,6 +88,16 @@ const CREATE_SECTION = /* GraphQL */ `
       name
       code
       createdAt
+    }
+  }
+`;
+
+const UPDATE_SECTION = /* GraphQL */ `
+  mutation UpdateSection($input: UpdateSectionInput!) {
+    updateSection(input: $input) {
+      id
+      readableGroups
+      writableGroups
     }
   }
 `;
@@ -119,10 +142,8 @@ function getClient() {
     if (!process.env.API_ENDPOINT) {
       throw new Error('API_ENDPOINT environment variable not set. Lambda must be configured as AppSync resolver.');
     }
-    // Create client with IAM auth mode explicitly
-    client = generateClient<Schema>({
-      authMode: 'iam',
-    });
+    // Create client - authMode is already set in Amplify.configure()
+    client = generateClient<Schema>();
   }
   return client;
 }
@@ -216,6 +237,22 @@ async function handleCreateSectionGroup(
             // Add the creator as an instructor
             await groupManager.addInstructor(username, sectionId);
             console.log(`[Section] Groups created successfully, ${username} added as instructor`);
+            
+            // Update Section with dynamic groups for authorization
+            const readableGroups = [`instructor-${sectionId}`, `learner-${sectionId}`];
+            const writableGroups = [`instructor-${sectionId}`];
+            
+            await client.graphql({
+                query: UPDATE_SECTION,
+                variables: {
+                    input: {
+                        id: sectionId,
+                        readableGroups,
+                        writableGroups,
+                    },
+                },
+            });
+            console.log(`[Section] Updated section with group authorization`);
         } catch (groupError) {
             console.error(`[Section] Warning: Failed to create/manage groups:`, groupError);
             // Don't fail section creation if groups fail - groups are for authorization only

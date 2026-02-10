@@ -41,6 +41,12 @@
       "description": "Mettez à jour le mot de passe de votre compte pour la sécurité",
       "button": "Changer le mot de passe"
     },
+    "languagePreference": {
+      "heading": "Préférence de langue",
+      "description": "Sélectionnez votre langue préférée pour l'interface du site web",
+      "selectLanguage": "Sélectionner la langue",
+      "changeSuccess": "Préférence de langue enregistrée avec succès"
+    },
     "advanced": {
       "heading": "Avancé",
       "description": "Gérer les paramètres avancés et vider le cache de données locales",

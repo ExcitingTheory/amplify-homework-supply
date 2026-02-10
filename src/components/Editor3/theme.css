@@ -105,10 +105,8 @@ div.ImageNode__contentEditable {
     font-style: italic;
 }
 
-body {
-    min-height: unset !important;
-    overflow: hidden;
-}
+/* Removed global body overflow:hidden - was preventing page scroll
+   Editor containers handle their own overflow */
 
 ul li.editor-listItem.editor-nested-listitem {
     list-style-type: none;

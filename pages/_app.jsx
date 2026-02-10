@@ -1,6 +1,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { CacheProvider } from '@emotion/react';
@@ -65,6 +66,20 @@ function MyApp(props) {
    * 
    */
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
+  const router = useRouter();
+
+  // Check for saved locale preference on mount and apply it
+  React.useEffect(() => {
+    const savedLocale = localStorage.getItem('preferredLocale');
+    const supportedLocales = nextI18NextConfig.i18n.locales;
+    
+    if (savedLocale && 
+        supportedLocales.includes(savedLocale) && 
+        router.locale !== savedLocale) {
+      // Redirect to the same page with the saved locale preference
+      router.push(router.pathname, router.asPath, { locale: savedLocale });
+    }
+  }, []); // Only run once on mount
 
   return (
     <CacheProvider value={emotionCache}>

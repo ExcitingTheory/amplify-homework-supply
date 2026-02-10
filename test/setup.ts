@@ -7,6 +7,25 @@
 import { expect, vi, beforeAll, afterAll, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { existsSync, readFileSync } from 'fs';
+import { resolve } from 'path';
+
+// Load test environment variables from .env.test
+const envPath = resolve(process.cwd(), '.env.test');
+if (existsSync(envPath)) {
+  const envConfig = readFileSync(envPath, 'utf-8');
+  envConfig.split('\n').forEach((line) => {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#')) {
+      const [key, ...valueParts] = trimmed.split('=');
+      const value = valueParts.join('=').trim();
+      if (key && value) {
+        process.env[key] = value;
+      }
+    }
+  });
+  console.info('✓ Loaded .env.test');
+}
 
 // Cleanup after each test
 afterEach(() => {

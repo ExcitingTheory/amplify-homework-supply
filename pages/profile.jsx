@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import nextI18nextConfig from '../next-i18next.config';
@@ -23,7 +24,7 @@ import MyAuth from '../src/components/authenticator';
 import Snackbar from '@mui/material/Snackbar';
 
 import Button from '@mui/material/Button';
-import { CircularProgress, Modal, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
+import { CircularProgress, Modal, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, MenuItem, Select, InputLabel } from '@mui/material';
 import { Label } from '@mui/icons-material';
 
 function Profile() {
@@ -40,7 +41,8 @@ function Profile() {
    * So they can delete their account.
    */
 
-  const { t } = useTranslation('pages');
+  const { t, i18n } = useTranslation('pages');
+  const router = useRouter();
   const [user, setUser] = React.useState({})
   const [oldPassword, setOldPassword] = React.useState('')
   const [newPassword, setNewPassword] = React.useState('')
@@ -48,7 +50,7 @@ function Profile() {
   const [email, setEmail] = React.useState('')
   const [name, setName] = React.useState('')
   const [username, setUsername] = React.useState('')
-  const [language, setLanguage] = React.useState('')
+  const [selectedLocale, setSelectedLocale] = React.useState(router.locale || 'en')
   const [isWorking, setIsWorking] = React.useState(false)
   const [needsConfirmation, setNeedsConfirmation] = React.useState(false)
   const [confirmationCode, setConfirmationCode] = React.useState('')
@@ -56,6 +58,16 @@ function Profile() {
 
   const [successMessage, setSuccessMessage] = React.useState('')
   const [clearDataStoreDialogOpen, setClearDataStoreDialogOpen] = React.useState(false)
+
+  // Available locales from next-i18next config
+  const availableLocales = [
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Español' },
+    { code: 'fr', name: 'Français' },
+    { code: 'de', name: 'Deutsch' },
+    { code: 'ja', name: '日本語' },
+    { code: 'zh', name: '中文' },
+  ]
 
 
   const updateEmailConfirmation = async (event) => {
@@ -174,6 +186,24 @@ function Profile() {
     }
   }
 
+  const handleLocaleChange = async (event) => {
+    const newLocale = event.target.value
+    setSelectedLocale(newLocale)
+    
+    try {
+      // Save to localStorage
+      localStorage.setItem('preferredLocale', newLocale)
+      
+      // Navigate to the same page with the new locale
+      await router.push(router.pathname, router.asPath, { locale: newLocale })
+      
+      setSuccessMessage(t('profile.languagePreference.changeSuccess'))
+    } catch (error) {
+      console.error('Error changing locale:', error)
+      alert('Error changing language: ' + error.message)
+    }
+  }
+
   React.useEffect(() => {
     fetchUser()
     async function fetchUser() {
@@ -188,8 +218,15 @@ function Profile() {
       setName(userAttributes?.name || '')
       setEmail(userAttributes?.email || '')
       setUsername(userAttributes?.sub || '')
-      // setLanguage(userAttributes?.language || '')
       setIdentityId(identityId)
+      
+      // Load preferred locale from localStorage
+      const savedLocale = localStorage.getItem('preferredLocale')
+      if (savedLocale && router.locale !== savedLocale) {
+        setSelectedLocale(savedLocale)
+      } else {
+        setSelectedLocale(router.locale || 'en')
+      }
     }
   }, [])
 
@@ -479,6 +516,35 @@ function Profile() {
             </FormControl>
           </form>
 
+        </Card>
+
+        <Card sx={{
+          padding: '2rem 1rem',
+          margin: '1rem auto',
+          height: 'fit-content',
+          maxWidth: '60rem',
+        }}>
+          <h1>{t('profile.languagePreference.heading')}</h1>
+          <p>{t('profile.languagePreference.description')}</p>
+          
+          <FormControl fullWidth sx={{ mt: 2 }}>
+            <InputLabel id="locale-select-label">
+              {t('profile.languagePreference.selectLanguage')}
+            </InputLabel>
+            <Select
+              labelId="locale-select-label"
+              id="locale-select"
+              value={selectedLocale}
+              label={t('profile.languagePreference.selectLanguage')}
+              onChange={handleLocaleChange}
+            >
+              {availableLocales.map((locale) => (
+                <MenuItem key={locale.code} value={locale.code}>
+                  {locale.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Card>
 
         <Card sx={{

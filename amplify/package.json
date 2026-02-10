@@ -3,5 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "dependencies": {}
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.709.0",
+    "@aws-sdk/client-cloudformation": "^3.709.0",
+    "@aws-sdk/client-s3": "^3.709.0",
+    "@aws-sdk/client-lambda": "^3.709.0",
+    "@aws-sdk/client-ssm": "^3.709.0",
+    "@aws-sdk/credential-providers": "^3.709.0",
+    "aws-amplify": "^6.11.1"
+  }
 }

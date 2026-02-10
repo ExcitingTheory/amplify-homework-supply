@@ -560,7 +560,7 @@ const schema = a.schema({
    */  Document: a
     .model({
       // Ownership - auto-populated by Cognito, tracks document creator
-      owner: a.string().required(),
+      owner: a.string(),
       identityId: a.string(),
       learner: a.string(), // Alternate learner reference
       // Section context - for section-based authorization
@@ -599,6 +599,8 @@ const schema = a.schema({
       allow.owner(),
       // Admins have full access
       allow.group('Admins'),
+      // Instructors can create and manage documents
+      allow.group('Instructors'),
       // Dynamic group authorization: section instructors and learners can read
       // This enables collaborative document analysis within sections
       allow.groupsDefinedIn('readableGroups').to(['read']),

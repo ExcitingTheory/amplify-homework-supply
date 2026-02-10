@@ -3,11 +3,9 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import nextI18nextConfig from '../next-i18next.config';
 import { getAmplifyClient } from "../src/utils/amplifyClient";
-import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 
 import { createSectionGroup } from '../src/graphql/mutations';
-import { fetchAuthSession } from 'aws-amplify/auth';
 
 import PeopleIcon from '@mui/icons-material/People';
 
@@ -123,14 +121,7 @@ function Sections() {
         setIsWorking(true)
         event.preventDefault()
 
-        const currentUser = await getCurrentUser();
-        const { username: owner } = currentUser;
-
-
-        console.log('event', event)
-
         const form = new FormData(event.target)
-        let response
 
         try {
             const createInput = {
@@ -140,45 +131,28 @@ function Sections() {
 
             console.log('createInput', createInput);
 
-            response = await client.graphql({
+            const response = await client.graphql({
                 query: createSectionGroup,
                 variables: createInput,
             })
 
             console.log('createSectionGroup.response', response)
 
-        } catch (errors) {
-            console.error(errors)
-            //   throw new Error(errors[0].message)
-        }
-
-        try {
-            const {
-                identityId,
-            } = await fetchAuthSession();
-
-            const amplifyClient = getAmplifyClient();
-            const sectionResponse = await amplifyClient.models.Section.create({
-                name: form.get('name').toString(),
-                description: form.get('description').toString(),
-                code: response.data.createSectionGroup,
-                learner: response.data.createSectionGroup,
-                identityId
-            });
-            
-            if (sectionResponse.errors) {
-                console.error('Error creating section:', sectionResponse.errors);
-                throw new Error(sectionResponse.errors[0].message);
+            if (response.errors || !response.data?.createSectionGroup) {
+                throw new Error(response.errors?.[0]?.message || 'Failed to create section');
             }
 
+            // Parse the JSON response from Lambda
+            const result = JSON.parse(response.data.createSectionGroup);
+            console.log('Section created:', result);
+            
             setIsWorking(false);
-        } catch (errors) {
-            console.error(errors);
+            setOpen(false);
+
+        } catch (error) {
+            console.error('Error creating section:', error);
             setIsWorking(false);
         }
-
-        setOpen(false);
-
     }
 
 
@@ -292,11 +266,8 @@ function Sections() {
                     sx={{
                         display: 'flex',
                         flexDirection: 'column',
-                        flexGrow: 1,
                         margin: '1rem auto',
                     }}
-
-
                 >
 
                     <div style={{

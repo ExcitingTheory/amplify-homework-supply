@@ -41,6 +41,12 @@
       "description": "Aktualisieren Sie Ihr Kontokennwort für die Sicherheit",
       "button": "Passwort ändern"
     },
+    "languagePreference": {
+      "heading": "Spracheinstellung",
+      "description": "Wählen Sie Ihre bevorzugte Sprache für die Website-Oberfläche",
+      "selectLanguage": "Sprache auswählen",
+      "changeSuccess": "Spracheinstellung erfolgreich gespeichert"
+    },
     "advanced": {
       "heading": "Fortgeschritten",
       "description": "Erweiterte Einstellungen verwalten und lokalen Datencache löschen",

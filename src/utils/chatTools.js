@@ -5,7 +5,7 @@
 
 import { getAmplifyClient } from './amplifyClient';
 import { Unit, Section, Assignment, Word, Question, File as FileModel } from '../models';
-import { generateEmbedding } from '../graphql/mutations';
+import { generateEmbedding, createSectionGroup as createSectionGroupMutation } from '../graphql/mutations';
 import { generateClient } from 'aws-amplify/api';
 import * as EmbeddingWorker from './embeddingWorkerManager';
 
@@ -59,7 +59,7 @@ export const toolDefinitions = [
     type: 'function',
     function: {
       name: 'create_section',
-      description: 'Create a new class section (group of students)',
+      description: 'Create a new class section (group of students). This automatically creates Cognito groups and generates a join code for students.',
       parameters: {
         type: 'object',
         properties: {
@@ -70,10 +70,6 @@ export const toolDefinitions = [
           description: {
             type: 'string',
             description: 'Description of the section'
-          },
-          learner: {
-            type: 'string',
-            description: 'Learner group name or identifier'
           }
         },
         required: ['name']
@@ -675,22 +671,33 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
   }
 }
 
-export async function executeCreateSection({ name, description, learner }) {
+export async function executeCreateSection({ name, description }) {
   try {
     const client = getAmplifyClient();
-    const { data: newSection } = await client.models.Section.create({
-      name,
-      description: description || '',
-      learner: learner || ''
+    
+    // Use the custom mutation that creates Cognito groups
+    const { data, errors } = await client.graphql({
+      query: createSectionGroupMutation,
+      variables: {
+        name,
+        description: description || ''
+      }
     });
+
+    if (errors || !data?.createSectionGroup) {
+      throw new Error(errors?.[0]?.message || 'Failed to create section');
+    }
+
+    // Parse the JSON response from the Lambda
+    const result = JSON.parse(data.createSectionGroup);
 
     return {
       success: true,
       section: {
-        id: newSection.id,
-        name: newSection.name,
-        description: newSection.description,
-        learner: newSection.learner
+        id: result.sectionId,
+        name: result.name,
+        code: result.code,
+        message: result.message
       }
     };
   } catch (error) {

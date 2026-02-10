@@ -41,6 +41,12 @@
       "description": "Update your account password for security",
       "button": "Change Password"
     },
+    "languagePreference": {
+      "heading": "Language Preference",
+      "description": "Select your preferred language for the website interface",
+      "selectLanguage": "Select Language",
+      "changeSuccess": "Language preference saved successfully"
+    },
     "advanced": {
       "heading": "Advanced",
       "description": "Manage advanced settings and clear local data cache",
