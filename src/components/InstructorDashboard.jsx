@@ -67,7 +67,17 @@ export default function InstructorDashboard({ sections = [] }) {
         const validGrades = items.filter(grade => grade.accuracy != null);
         setAllGrades(validGrades);
       },
-      error: (err) => console.error('Grades subscription error:', err)
+      error: (err) => {
+        console.error('Grades subscription error:', err);
+        // Stop retrying on auth errors to prevent rate limiting
+        if (err?.message?.includes('No current user') || 
+            err?.message?.includes('NoSignedUser') ||
+            err?.message?.includes('401') ||
+            err?.message?.includes('403')) {
+          console.warn('[InstructorDashboard] Auth error, stopping Grades subscription retries');
+          subscription.unsubscribe();
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -87,7 +97,17 @@ export default function InstructorDashboard({ sections = [] }) {
       next: ({ items }) => {
         setAllAssignments(items);
       },
-      error: (err) => console.error('Assignments subscription error:', err)
+      error: (err) => {
+        console.error('Assignments subscription error:', err);
+        // Stop retrying on auth errors to prevent rate limiting
+        if (err?.message?.includes('No current user') || 
+            err?.message?.includes('NoSignedUser') ||
+            err?.message?.includes('401') ||
+            err?.message?.includes('403')) {
+          console.warn('[InstructorDashboard] Auth error, stopping Assignments subscription retries');
+          subscription.unsubscribe();
+        }
+      }
     });
 
     return () => subscription.unsubscribe();

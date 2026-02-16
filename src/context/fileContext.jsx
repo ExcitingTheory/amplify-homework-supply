@@ -1,11 +1,9 @@
 import React, { createContext } from "react";
 import { list } from "aws-amplify/storage";
-import { getCurrentUser } from "aws-amplify/auth";
 import { getAmplifyClient } from '../utils/amplifyClient';
+import AuthContext from './authContext';
 
 import { Hub, Cache } from "aws-amplify/utils";
-
-import { fetchAuthSession } from "aws-amplify/auth";
 
 // Import vector store for early initialization
 import { CourseVectorStore } from "../components/Editor3/components/FileManager2";
@@ -41,6 +39,8 @@ export const ACCEPTABLE_PLAYLIST_TYPES = [
 
 // Provider will be exported wrapped in ConfigProvider component.
 const FilesProvider = ({ children }) => {
+  // Get auth state from centralized context
+  const { user, session, isLoading: authLoading } = React.useContext(AuthContext);
 
   const [audioFiles, setAudioFiles] = React.useState({})
   // const [files, setFiles] = React.useState({})
@@ -59,60 +59,6 @@ const FilesProvider = ({ children }) => {
   const [vectorStoreReady, setVectorStoreReady] = React.useState(false);
   const loadedVersions = React.useRef(new Map()); // Track loaded document versions
 
-  const [session, setSession] = React.useState({
-    error: undefined,
-    identityId: undefined,
-    idToken: undefined,
-  });
-
-  const isLoading = React.useRef(false);
-  const isMounted = React.useRef(true);
-  
-  // Memoize to prevent recreating on every render
-  const fetchCurrentUserAttributes = React.useCallback(async () => {
-      try {
-        const authSession = await fetchAuthSession({ forceRefresh: false });
-        const identityId = authSession.identityId;
-        const idToken = authSession.tokens?.idToken;
-        
-        isLoading.current = false;
-        if (isMounted.current) {
-          setSession(prev => {
-            // Only update if values actually changed
-            if (prev.identityId === identityId && prev.idToken === idToken && !prev.error) {
-              return prev;
-            }
-            return { identityId, idToken };
-          });
-        }
-      } catch (error) {
-        // Suppress benign Cognito 400 errors in development
-        isLoading.current = false;
-        if (isMounted.current) {
-          setSession(prev => {
-            if (prev.error === error && !prev.identityId && !prev.idToken) {
-              return prev;
-            }
-            return { identityId: undefined, idToken: undefined, error };
-          });
-        }
-      }
-  }, []);
-
-  React.useEffect(() => {
-    const loadAuth = async () => {
-      if (!isLoading.current && isMounted.current) {
-        isLoading.current = true;
-        await fetchCurrentUserAttributes();
-      }
-    };
-    
-    loadAuth();
-    
-    return () => {
-      isMounted.current = false;
-    };
-  }, [fetchCurrentUserAttributes])
   
   // Early vector store initialization - load from IndexedDB on mount
   React.useEffect(() => {
@@ -281,53 +227,14 @@ const FilesProvider = ({ children }) => {
   }, [myFiles, documents, vectorStore]);
 
   // reload the current user attributes when the auth event is triggered
-
-  const handleAuth = React.useCallback(
-    ({ payload }) => {
-      switch (payload.event) {
-        case "signedIn":
-        case "signUp":
-        case "tokenRefresh":
-        case "autoSignIn": {
-          if (!isLoading.current) {
-            isLoading.current = true;
-            fetchCurrentUserAttributes();
-          }
-          
-          break;
-        }
-        case "signedOut": {
-          isLoading.current = false;
-          setSession({ identityId: undefined, idToken: undefined, error: undefined});
-          break;
-        }
-        case "tokenRefresh_failure":
-        case "signIn_failure": {
-          isLoading.current = false
-          setSession({ error: payload.data });
-          break;
-        }
-        case "autoSignIn_failure": {
-          isLoading.current = false
-          setSession({ error: new Error(payload.message) });
-          break;
-        }
-        default: {
-          break;
-        }
-      }
-    },
-    [fetchCurrentUserAttributes]
-  );
+  // NOTE: This is now handled by the centralized AuthContext
 
   React.useEffect(() => {
-    const unsubscribe = Hub.listen("auth", handleAuth, "useAuth");
-    return unsubscribe;
-  }, [handleAuth]);
+    // Wait for auth to be ready
+    if (authLoading || !user || !session) {
+      return;
+    }
 
-
-
-  React.useEffect(() => {
     // Prevent duplicate subscriptions
     if (filesFetchedRef.current) {
       console.log('[FilesContext] fetchFiles already called, skipping');
@@ -337,13 +244,10 @@ const FilesProvider = ({ children }) => {
     async function fetchFiles() {
       console.log('[FilesContext] fetchFiles called');
       try {
-        // Check if user is authenticated first
-        const user = await getCurrentUser();
-        console.log('[FilesContext] getCurrentUser returned:', user?.username);
-        const authSession = await fetchAuthSession();
-        console.log('[FilesContext] fetchAuthSession returned:', authSession?.identityId);
-        const { username: myUserId, userId, signInDetails } = user;
-        const { identityId } = authSession;
+        console.log('[FilesContext] User authenticated:', user.attributes.sub);
+        console.log('[FilesContext] Identity ID:', session.identityId);
+        const myUserId = user.attributes.sub;
+        const { identityId } = session;
 
         if (!myUserId) {
           console.log('[FilesContext] No myUserId, returning');
@@ -439,7 +343,7 @@ const FilesProvider = ({ children }) => {
       subscriptionRef.current?.unsubscribe();
       filesFetchedRef.current = false;
     };
-  }, []);
+  }, [user, authLoading, session]);
 
   // Subscribe to Document status changes
   React.useEffect(() => {
@@ -528,7 +432,7 @@ const FilesProvider = ({ children }) => {
     myPlaylistUrls,
     myPdfs,
     documents,
-    session,
+    session: session || { identityId: undefined, idToken: undefined }, // Provide safe default
     filesVersion,
     vectorStore, // Stable ref, doesn't cause re-renders
     vectorStoreReady

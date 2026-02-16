@@ -1,6 +1,6 @@
 import React from "react";
-import { getCurrentUser } from "aws-amplify/auth";
 import { getAmplifyClient } from '../utils/amplifyClient';
+import AuthContext from './authContext';
 
 const SectionContext = React.createContext({
     sections: [],
@@ -9,19 +9,23 @@ const SectionContext = React.createContext({
 });
 
 const SectionProvider = ({ children, unitId }) => {
+    // Get auth state from centralized context
+    const { user, isLoading: authLoading } = React.useContext(AuthContext);
 
     const [sections, setSections] = React.useState([]);
     const [sectionMap, setSectionMap] = React.useState({});
     const [assignments, setAssignments] = React.useState([]);
 
     React.useEffect(() => {
+        // Wait for auth to be ready
+        if (authLoading || !user) {
+            return;
+        }
 
         let subscription;
 
         async function fetchSections() {
-            const {
-                username,
-              } = await getCurrentUser();
+            const username = user.attributes.sub;
 
             const client = getAmplifyClient();
 
@@ -68,7 +72,7 @@ const SectionProvider = ({ children, unitId }) => {
         return () => {
             subscription?.unsubscribe();
         };
-    }, []);
+    }, [user, authLoading]);
 
     React.useEffect(() => {
         if(!unitId) return

@@ -18,15 +18,12 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { uploadData } from 'aws-amplify/storage';
-import { generateClient } from 'aws-amplify/api';
 import { getAmplifyClient } from '../../../utils/amplifyClient';
 // Note: Type import commented out for .js file
 // import type { Schema } from '../../../../amplify/data/resource';
 import UnitContext from '../../../context/unitContext';
 import FilesContext from '../../../context/fileContext';
 import { useTranslation } from 'next-i18next';
-
-const client = generateClient();
 
 const SUPPORTED_DOCUMENT_TYPES = {
     'application/pdf': { ext: '.pdf', label: 'PDF' },
@@ -38,20 +35,11 @@ const SUPPORTED_DOCUMENT_TYPES = {
     'text/csv': { ext: '.csv', label: 'CSV' },
 };
 
-const analyzeDocumentMutation = /* GraphQL */ `
-  mutation AnalyzeDocument($documentID: ID!) {
-    analyzeDocument(documentID: $documentID) {
-      success
-      documentID
-      responseId
-      pageCount
-      message
-    }
-  }
-`;
-
 /**
  * Component for uploading and processing documents to extract vocabulary or questions
+ */
+
+const DocumentUploader = ({
  */
 export default function DocumentUploader({ extractionType = 'vocabulary', onUploadComplete }) {
     const { t } = useTranslation('editor.files');
@@ -155,9 +143,9 @@ export default function DocumentUploader({ extractionType = 'vocabulary', onUplo
 
             // Trigger analysis
             try {
-                await client.graphql({
-                    query: analyzeDocumentMutation,
-                    variables: { documentID: documentModel.id }
+                const client = getAmplifyClient();
+                await client.mutations.analyzeDocument({
+                    documentID: documentModel.id
                 });
 
                 setUploadedDocs(prev => [...prev, {

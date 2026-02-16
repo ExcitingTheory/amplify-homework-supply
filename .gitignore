@@ -91,8 +91,5 @@ next-env.d.ts
 amplify_outputs*
 amplifyconfiguration*
 
-# translation metadata cache (can be regenerated)
-translation-cache/
-
 *.d.ts
 tsconfig.tsbuildinfo

@@ -10,10 +10,8 @@
 
 import { useState, useEffect } from 'react';
 import { getCurrentUser } from 'aws-amplify/auth';
-import { generateClient } from 'aws-amplify/api';
+import { getAmplifyClient } from './amplifyClient';
 import getCachedUrl from './getCachedUrl';
-
-const client = generateClient();
 
 /**
  * Get student submission URL with appropriate access method
@@ -60,25 +58,14 @@ export function useStudentSubmission({ submissionKey, grade, userGroups = [] }) 
           // Teacher accessing student file - use GraphQL endpoint
           console.log('[useStudentSubmission] Teacher access - using GraphQL endpoint');
           
-          const GET_SUBMISSION_URL = /* GraphQL */ `
-            query GetStudentSubmissionUrl($gradeId: ID!, $submissionKey: String!) {
-              getStudentSubmissionUrl(gradeId: $gradeId, submissionKey: $submissionKey) {
-                url
-                expiresAt
-                metadata
-              }
-            }
-          `;
+          const client = getAmplifyClient();
 
-          const response = await client.graphql({
-            query: GET_SUBMISSION_URL,
-            variables: {
-              gradeId: grade.id,
-              submissionKey: submissionKey,
-            },
+          const response = await client.queries.getStudentSubmissionUrl({
+            gradeId: grade.id,
+            submissionKey: submissionKey,
           });
 
-          const teacherUrl = response.data.getStudentSubmissionUrl.url;
+          const teacherUrl = response.data?.url;
           setUrl(teacherUrl);
         } else {
           throw new Error('Unauthorized: Must be the student owner or an instructor');
@@ -136,25 +123,14 @@ export function useStudentSubmissions({ submissionKeys = [], grade, userGroups =
               const directUrl = await getCachedUrl(key, 'private', grade.identityId);
               return [key, directUrl];
             } else if (isInstructor) {
-              const GET_SUBMISSION_URL = /* GraphQL */ `
-                query GetStudentSubmissionUrl($gradeId: ID!, $submissionKey: String!) {
-                  getStudentSubmissionUrl(gradeId: $gradeId, submissionKey: $submissionKey) {
-                    url
-                    expiresAt
-                    metadata
-                  }
-                }
-              `;
+              const client = getAmplifyClient();
 
-              const response = await client.graphql({
-                query: GET_SUBMISSION_URL,
-                variables: {
-                  gradeId: grade.id,
-                  submissionKey: key,
-                },
+              const response = await client.queries.getStudentSubmissionUrl({
+                gradeId: grade.id,
+                submissionKey: key,
               });
 
-              return [key, response.data.getStudentSubmissionUrl.url];
+              return [key, response.data?.url];
             }
             throw new Error('Unauthorized');
           } catch (err) {

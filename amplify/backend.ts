@@ -1,5 +1,7 @@
 import { defineBackend } from '@aws-amplify/backend';
-import { Stack } from 'aws-cdk-lib';
+import { Stack, Aspects, IAspect } from 'aws-cdk-lib';
+import { IConstruct } from 'constructs';
+import { CfnResolver, CfnDataSource } from 'aws-cdk-lib/aws-appsync';
 import {
   CorsHttpMethod,
   HttpApi,
@@ -25,6 +27,55 @@ import { moderationHandler } from './functions/moderation/resource';
 import { websocketHandler, WebSocketApiConstruct } from './custom/websocket/resource';
 
 /**
+ * CDK Aspect to configure AppSync conflict detection on DynamoDB resolvers
+ * This enables _version, _lastChangedAt, and _deleted fields for optimistic concurrency control
+ */
+class AppSyncConflictDetectionAspect implements IAspect {
+  private dynamoDbDataSources = new Set<string>();
+  
+  visit(node: IConstruct): void {
+    // First pass: collect all DynamoDB data source logical IDs
+    if (node instanceof CfnDataSource) {
+      const dataSource = node as CfnDataSource;
+      if (dataSource.type === 'AMAZON_DYNAMODB') {
+        const logicalId = Stack.of(node).getLogicalId(dataSource);
+        this.dynamoDbDataSources.add(logicalId);
+        
+        // Enable versioning on DynamoDB data source using property override
+        // This preserves existing properties like awsRegion and tableName
+        dataSource.addPropertyOverride('DynamoDBConfig.Versioned', true);
+        console.log(`[ConflictDetectionAspect] Enabled versioning on data source: ${logicalId}`);
+      }
+    }
+    
+    // Second pass: configure resolvers that use DynamoDB data sources
+    if (node instanceof CfnResolver) {
+      const resolver = node as CfnResolver;
+      
+      // Check resolver properties without using names
+      // Only apply to resolvers that have:
+      // 1. A dataSourceName (not a pipeline or local resolver)
+      // 2. typeName is Mutation or Query (not a field resolver, not Subscription)
+      // 3. No code/runtime property (those indicate Lambda resolvers)
+      
+      const hasDataSource = resolver.dataSourceName !== undefined && resolver.dataSourceName !== null;
+      const isOperation = resolver.typeName === 'Mutation' || resolver.typeName === 'Query';
+      const isNotLambda = !resolver.code && !resolver.runtime;
+      const isNotPipeline = !resolver.pipelineConfig;
+      
+      if (hasDataSource && isOperation && isNotLambda && isNotPipeline) {
+        // Apply syncConfig for conflict detection
+        resolver.syncConfig = {
+          conflictDetection: 'VERSION',
+          conflictHandler: 'AUTOMERGE',
+        };
+        console.log(`[ConflictDetectionAspect] Applied syncConfig to: ${resolver.typeName}.${resolver.fieldName}`);
+      }
+    }
+  }
+}
+
+/**
  * @see https://docs.amplify.aws/gen2/build-a-backend/ to learn how to build backends with Amplify.
  * @see https://docs.amplify.aws/gen2/build-a-backend/data/data-modeling/ to learn more about modeling your data with the Data category.
  * @see https://docs.amplify.aws/gen2/build-a-backend/auth/authentication/ to learn more about Amplify authentication.
@@ -47,6 +98,16 @@ export const backend = defineBackend({
   moderationHandler,
   websocketHandler,
 });
+
+// Enable conflict detection and resolution for AppSync API
+// This enables _version, _lastChangedAt, and _deleted fields per AWS AppSync documentation
+// https://docs.aws.amazon.com/appsync/latest/devguide/conflict-detection-and-sync.html
+
+// Apply Aspect to configure both data sources and resolvers
+// The Aspect uses construct properties (not names) to determine which resolvers to configure
+const dataStack = backend.data.resources.cfnResources.cfnGraphqlApi.stack;
+Aspects.of(dataStack).add(new AppSyncConflictDetectionAspect());
+console.log('[Amplify Backend] Applied ConflictDetectionAspect to data stack');
 
 // Grant Cognito permissions to section handler via IAM policy (not via auth.access() to avoid circular dependency)
 const cognitoPolicy = new Policy(backend.sectionHandler.resources.lambda.stack, 'SectionHandlerCognitoPolicy', {
@@ -225,8 +286,6 @@ backend.addOutput({
  * 
  * Uses custom CDK construct for WebSocket infrastructure
  */
-const dataStack = backend.data.resources.cfnResources.cfnGraphqlApi.stack;
-
 const websocketApi = new WebSocketApiConstruct(dataStack, 'WebSocketApi', {
   unitTable: backend.data.resources.tables['Unit'],
   websocketLambda: backend.websocketHandler.resources.lambda,

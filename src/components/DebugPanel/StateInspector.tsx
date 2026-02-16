@@ -20,9 +20,11 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import DownloadIcon from '@mui/icons-material/Download';
+import SendIcon from '@mui/icons-material/Send';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 import { StateInspectorProps } from './types';
+import { isDiscordWebhookConfigured } from '../../utils/debug/discordWebhook';
 
 /**
  * Format bytes to human-readable size
@@ -38,8 +40,9 @@ function formatBytes(bytes: number): string {
 /**
  * StateInspector component
  */
-export function StateInspector({ snapshot, onRefresh, onExport }: StateInspectorProps) {
+export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord }: StateInspectorProps) {
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
+  const discordEnabled = isDiscordWebhookConfigured();
 
   const handleCopySection = (sectionName: string, data: unknown) => {
     const json = JSON.stringify(data, null, 2);
@@ -84,6 +87,17 @@ export function StateInspector({ snapshot, onRefresh, onExport }: StateInspector
             <RefreshIcon fontSize="small" />
           </IconButton>
         </Tooltip>
+        {discordEnabled && (
+          <Tooltip title="Send to Discord support channel">
+            <IconButton
+              size="small"
+              onClick={() => onSendToDiscord?.(snapshot)}
+              color="primary"
+            >
+              <SendIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
         <Tooltip title="Export snapshot">
           <IconButton size="small" onClick={() => onExport?.(snapshot)}>
             <DownloadIcon fontSize="small" />

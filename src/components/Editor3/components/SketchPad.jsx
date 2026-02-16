@@ -2,14 +2,11 @@ import { Excalidraw } from "@excalidraw/excalidraw";
 import "@excalidraw/excalidraw/index.css";
 import { useState, useEffect, useRef, useContext } from "react";
 import { exportToCanvas } from "@excalidraw/excalidraw";
-import { generateClient } from "aws-amplify/api";
-import { verifyImage } from "../../../graphql/queries";
+import { getAmplifyClient } from "../../../utils/amplifyClient";
 import { uploadStudentSubmission } from "../../../utils/userSubmissionStorage";
 import UnitContext from "../../../context/unitContext";
 import { Button, Box, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
-
-const client = generateClient();
 // TODO Add a version to the data so that we can update the data when the version is higher than the current working copy, which should be one above the last saved version
 
 const SketchPad = ({ excalidrawData,
@@ -124,28 +121,26 @@ const SketchPad = ({ excalidrawData,
         }
 
         try {
-            const response = await client.graphql({
-                query: verifyImage,
-                variables: {
-                    expected: expect,
-                    image: justBase64,
-                    model: "gpt-4o",
-                },
+            const client = getAmplifyClient();
+            const { data, errors } = await client.queries.verifyImage({
+                expected: expect,
+                image: justBase64,
+                model: "gpt-4o",
             });
             
-            if (!response?.data?.verifyImage) {
+            if (errors || !data) {
                 throw new Error('No response from verification API');
             }
             
-            const mainData = JSON.parse(response.data.verifyImage);
+            const mainData = JSON.parse(data);
             
             if (!mainData?.choices?.[0]?.message?.content) {
                 throw new Error('Invalid API response format');
             }
             
-            const data = JSON.parse(mainData.choices[0].message.content);
+            const feedbackData = JSON.parse(mainData.choices[0].message.content);
             
-            setFeedback(data);
+            setFeedback(feedbackData);
         } catch (error) {
             console.error(error);
             setFeedback({ error: error.message });

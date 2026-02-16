@@ -5,11 +5,7 @@
 
 import { getAmplifyClient } from './amplifyClient';
 import { Unit, Section, Assignment, Word, Question, File as FileModel } from '../models';
-import { generateEmbedding, createSectionGroup as createSectionGroupMutation } from '../graphql/mutations';
-import { generateClient } from 'aws-amplify/api';
 import * as EmbeddingWorker from './embeddingWorkerManager';
-
-const client = generateClient();
 
 // Vector store instance - will be set from context
 let vectorStoreSearchFunction = null;
@@ -544,16 +540,18 @@ export async function executeSearchContent({ query, type = 'all', limit = 10 }) 
     
     // Generate embedding for the query
     console.log('[executeSearchContent] Calling generateEmbedding mutation...');
-    const response = await client.graphql({
-      query: generateEmbedding,  // Use the imported mutation
-      variables: {
-        content: query,  // Changed from 'text' to 'content'
-        model: 'text-embedding-3-small',
-        dimensions: 512
-      }
+    const client = getAmplifyClient();
+    const { data, errors } = await client.mutations.generateEmbedding({
+      content: query,
+      model: 'text-embedding-3-small',
+      dimensions: 512
     });
 
-    const queryEmbedding = response.data.generateEmbedding.embedding;
+    if (errors || !data?.embedding) {
+      throw new Error('Failed to generate query embedding');
+    }
+
+    const queryEmbedding = data.embedding;
     console.log(`[executeSearchContent] Query embedding generated: ${queryEmbedding.length} dimensions`);
     
     const results = [];
@@ -676,20 +674,17 @@ export async function executeCreateSection({ name, description }) {
     const client = getAmplifyClient();
     
     // Use the custom mutation that creates Cognito groups
-    const { data, errors } = await client.graphql({
-      query: createSectionGroupMutation,
-      variables: {
-        name,
-        description: description || ''
-      }
+    const { data, errors } = await client.mutations.createSectionGroup({
+      name,
+      description: description || ''
     });
 
-    if (errors || !data?.createSectionGroup) {
+    if (errors || !data) {
       throw new Error(errors?.[0]?.message || 'Failed to create section');
     }
 
     // Parse the JSON response from the Lambda
-    const result = JSON.parse(data.createSectionGroup);
+    const result = JSON.parse(data);
 
     return {
       success: true,

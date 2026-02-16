@@ -58,14 +58,11 @@ import {
   GraphicEq as WaveformIcon,
   Settings as SettingsIcon,
 } from '@mui/icons-material';
-import { generateClient } from 'aws-amplify/api';
 import { uploadStudentSubmission } from '../utils/userSubmissionStorage';
 import { calculateWaveformData } from '../utils/calculateWaveformData';
 import getCachedUrl from '../utils/getCachedUrl';
 import AudioWaveformPlayer from './Editor3/components/AudioWaveformPlayer';
 import StaticWaveform from './Editor3/components/StaticWaveform';
-
-const client = generateClient();
 
 // Available TTS voices
 const TTS_VOICES = [
@@ -451,17 +448,16 @@ export default function RecordingStudio3({
         : null;
 
       // Call generateAudioFile mutation
-      const { generateAudioFile } = await import('../graphql/mutations');
-      const response = await client.graphql({
-        query: generateAudioFile,
-        variables: {
-          phrase: dialogue.text,
-          voice: speaker.voice || 'alloy',
-          model: 'tts-1-hd',
-        },
+      const client = getAmplifyClient();
+      const { data: fileData, errors } = await client.mutations.generateAudioFile({
+        phrase: dialogue.text,
+        voice: speaker.voice || 'alloy',
+        model: 'tts-1-hd',
       });
-
-      const fileData = response.data.generateAudioFile;
+      
+      if (errors || !fileData?.path) {
+        throw new Error('Failed to generate audio file');
+      }
       
       // Get audio URL
       const audioUrl = await getCachedUrl(fileData.path, 'protected', fileData.identityId);

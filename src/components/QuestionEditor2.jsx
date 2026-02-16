@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { generateClient } from 'aws-amplify/api';
+import { getAmplifyClient } from '../utils/amplifyClient';
 import { uploadData } from 'aws-amplify/storage';
 
 // Lexical imports
@@ -68,11 +68,6 @@ import { useTranslation } from 'next-i18next';
 
 // Import QuestionCard from QuestionsReview2
 import { QuestionCard } from './QuestionsReview2';
-
-// GraphQL imports
-import { createQuestion, updateQuestion, deleteQuestion } from '../graphql/mutations';
-
-const client = generateClient();
 
 // Commands for question operations
 const UPDATE_QUESTION_COMMAND = createCommand('UPDATE_QUESTION');
@@ -849,17 +844,18 @@ function QuestionsPlugin({
 
   const handleUpdateQuestion = async (questionId, updates, currentVersion) => {
     try {
-      const result = await client.graphql({
-        query: updateQuestion,
-        variables: {
-          input: {
-            id: questionId,
-            ...updates,
-            _version: currentVersion,
-          },
-        },
+      const client = getAmplifyClient();
+      const { data, errors } = await client.models.Question.update({
+        id: questionId,
+        ...updates,
+        _version: currentVersion,
       });
-      console.log('Question updated:', result);
+      
+      if (errors) {
+        console.error('Error updating question:', errors);
+      } else {
+        console.log('Question updated:', data);
+      }
     } catch (error) {
       console.error('Error updating question:', error);
     }
@@ -879,14 +875,9 @@ function QuestionsPlugin({
       onConfirm: async () => {
         try {
           const question = fullQuestionBank[questionId];
-          await client.graphql({
-            query: deleteQuestion,
-            variables: {
-              input: {
-                id: questionId,
-                _version: question._version,
-              },
-            },
+          const client = getAmplifyClient();
+          await client.models.Question.delete({
+            id: questionId,
           });
           console.log('Question deleted:', questionId);
           setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
@@ -1005,15 +996,18 @@ export function QuestionEditor2() {
       message: `Delete ${selectedItems.size} questions?`,
       severity: 'error',
       onConfirm: async () => {
+        const client = getAmplifyClient();
         for (const id of selectedItems) {
           try {
             const question = questionBank[id];
-            await client.graphql({
-              query: deleteQuestion,
-              variables: {
-                input: { id, _version: question._version },
-              },
+            const { errors } = await client.models.Question.delete({
+              id,
+              _version: question._version,
             });
+            
+            if (errors) {
+              console.error('Error deleting question:', id, errors);
+            }
           } catch (error) {
             console.error('Error deleting question:', id, error);
           }
@@ -1044,20 +1038,21 @@ export function QuestionEditor2() {
     }
 
     try {
-      const result = await client.graphql({
-        query: createQuestion,
-        variables: {
-          input: {
-            prompt: newPrompt,
-            hint: newHint,
-            answer: newAnswer,
-            unitID: unit.id,
-            audio: [],
-          },
-        },
+      const client = getAmplifyClient();
+      const { data, errors } = await client.models.Question.create({
+        prompt: newPrompt,
+        hint: newHint,
+        answer: newAnswer,
+        unitID: unit.id,
+        audio: [],
       });
 
-      console.log('Question created:', result);
+      if (errors) {
+        console.error('Error creating question:', errors);
+      } else {
+        console.log('Question created:', data);
+      }
+      
       setNewPrompt('');
       setNewHint('');
       setNewAnswer('');

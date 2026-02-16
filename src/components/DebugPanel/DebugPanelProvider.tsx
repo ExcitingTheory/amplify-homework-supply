@@ -2,16 +2,25 @@
  * Global DebugPanel provider
  * 
  * Wraps the application and provides debug panel access
+ * 
+ * Debug panel is enabled:
+ * - Always in development mode
+ * - In production when localStorage 'debug-mode-enabled' is 'true'
+ * 
+ * To enable in production:
+ * - Click menu icon 7 times within 3 seconds
+ * - Or set localStorage: localStorage.setItem('debug-mode-enabled', 'true')
+ * - Then use keyboard shortcut: Cmd/Ctrl + Shift + D to open
  */
 
 import React from 'react';
 import { DebugPanel } from './DebugPanel';
-import { useDebugPanel } from './useDebugPanel';
+import { useDebugPanel, isDebugModeEnabled } from './useDebugPanel';
 
 export interface DebugPanelProviderProps {
   /** Children to render */
   children: React.ReactNode;
-  /** Whether to enable debug panel (default: true in development) */
+  /** Whether to force enable debug panel (overrides default logic) */
   enabled?: boolean;
 }
 
@@ -20,11 +29,17 @@ export interface DebugPanelProviderProps {
  */
 export function DebugPanelProvider({
   children,
-  enabled = process.env.NODE_ENV === 'development',
+  enabled,
 }: DebugPanelProviderProps) {
   const { isOpen, close } = useDebugPanel();
 
-  if (!enabled) {
+  // Enable debug panel if:
+  // 1. Explicitly enabled via prop
+  // 2. In development mode
+  // 3. Debug mode is enabled in localStorage (production)
+  const shouldEnable = enabled ?? (process.env.NODE_ENV === 'development' || isDebugModeEnabled());
+
+  if (!shouldEnable) {
     return <>{children}</>;
   }
 

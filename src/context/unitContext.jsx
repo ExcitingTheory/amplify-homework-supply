@@ -1,10 +1,10 @@
 import * as React from "react";
 import { useState, useRef, createContext } from "react";
-import { fetchUserAttributes } from "aws-amplify/auth";
 import { useRouter } from 'next/router';
 import { Hub, Cache } from "aws-amplify/utils";
 import { moderateContent, buildModerationFields } from '../utils/moderateContent';
 import { getAmplifyClient } from '../utils/amplifyClient';
+import AuthContext from './authContext';
 
 import getCachedUrl from '../utils/getCachedUrl'
 // Provider and Consumer are connected through their "parent" context
@@ -17,6 +17,8 @@ export const gradedBlockTypes = [
   'custom-answer',
 ]
 const UnitProvider = ({ children, id }) => {
+  // Get auth state from centralized context
+  const { user, session: authSession, isLoading: authLoading } = React.useContext(AuthContext);
 
   const [unit, setUnit] = useState({});
   const [dictionary, setDictionary] = useState({});
@@ -44,12 +46,6 @@ const UnitProvider = ({ children, id }) => {
 
   const [grade, setGrade] = React.useState({});
   const [recentGrades, setRecentGrades] = React.useState([]);
-  const [session, setSession] = React.useState({
-    error: undefined,
-    username: undefined,
-  });
-
-  const isLoading = React.useRef(false)
 
   // const [featuredImageUrl, setFeaturedImageUrl] = React.useState(null);
 
@@ -58,85 +54,15 @@ const UnitProvider = ({ children, id }) => {
   const unitVersion = React.useMemo(() => unit?._version || 0, [unit?._version]);
   const unitOwner = React.useMemo(() => unit?.owner || '', [unit?.owner]);
 
-  // 
-  // cache username
-
-
-  const fetchCurrentUsername = React.useCallback(async () => {
-      try {
-        const { sub: username } = await fetchUserAttributes();
-        isLoading.current = false
-        usernameRef.current = username;
-        setSession({username});
-      } catch (error) {
-        // Suppress benign Cognito 400 errors in development
-        if (error?.name !== 'NotAuthorizedException' && error?.statusCode !== 400) {
-          console.error('[UnitContext] Error fetching user attributes:', error);
-        }
-        isLoading.current = false;
-      }
-  }, [])
-
+  // NOTE: Authentication is now handled by centralized AuthContext
+  // Update usernameRef when user changes
   React.useEffect(() => {
-    let isMounted = true;
-    
-    const loadUsername = async () => {
-      if (!isLoading.current && isMounted) {
-        isLoading.current = true;
-        await fetchCurrentUsername();
-      }
-    };
-    
-    loadUsername();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, [fetchCurrentUsername])
-
-  const handleAuth = React.useCallback(
-    ({ payload }) => {
-      switch (payload.event) {
-        case "signedIn":
-        case "signUp":
-        case "tokenRefresh":
-        case "autoSignIn": {
-        if (!isLoading.current) {
-          isLoading.current = true
-          fetchCurrentUsername({force: true});
-          }
-          break;
-          
-        }
-        case "signedOut": {
-          isLoading.current = false
-          usernameRef.current = null;
-          setSession({ username: undefined, error: undefined });
-          break;
-        }
-        case "tokenRefresh_failure":
-        case "signIn_failure": {
-          isLoading.current = false
-          setSession({ error: payload.data });
-          break;
-        }
-        case "autoSignIn_failure": {
-          isLoading.current = false
-          setSession({ error: new Error(payload.message) });
-          break;
-        }
-        default: {
-          break;
-        }
-      }
-    },
-    [fetchCurrentUsername]
-  );
-
-  React.useEffect(() => {
-    const unsubscribe = Hub.listen("auth", handleAuth, "useAuth");
-    return unsubscribe;
-  }, [handleAuth]);
+    if (user?.attributes?.sub) {
+      usernameRef.current = user.attributes.sub;
+    } else {
+      usernameRef.current = null;
+    }
+  }, [user]);
 
 
 
@@ -232,7 +158,7 @@ const UnitProvider = ({ children, id }) => {
       if (moderationResult.flagged) {
         console.warn('[UnitContext] Student submission flagged by moderation, saving for instructor review', {
           categories: moderationResult.categories,
-          username: session.username
+          username: user?.attributes?.sub
         });
       }
 
@@ -307,14 +233,19 @@ const UnitProvider = ({ children, id }) => {
       // Re-throw to let calling code handle it
       throw error
     }
-  }, [rubricLength, grade, createGrade, timeLimitSeconds, fetchCurrentUsername]);
+  }, [rubricLength, grade, createGrade, timeLimitSeconds]);
 
   React.useEffect(() => {
-    if (!id || !unitVersion || !session.username) {
+    // Wait for auth to be ready
+    if (authLoading || !user) {
+      return;
+    }
+
+    if (!id || !unitVersion) {
       return
     }
 
-    const username = session.username;
+    const username = user.attributes.sub;
     const client = getAmplifyClient();
 
     // Subscribe to grades for this unit and user
@@ -368,6 +299,14 @@ const UnitProvider = ({ children, id }) => {
       },
       error: (error) => {
         console.error('[UnitContext] Grade subscription error:', error);
+        // Stop retrying on auth errors to prevent rate limiting
+        if (error?.message?.includes('No current user') || 
+            error?.message?.includes('NoSignedUser') ||
+            error?.message?.includes('401') ||
+            error?.message?.includes('403')) {
+          console.warn('[UnitContext] Auth error, stopping Grade subscription retries');
+          subscription.unsubscribe();
+        }
       }
     });
 
@@ -375,7 +314,7 @@ const UnitProvider = ({ children, id }) => {
       subscription.unsubscribe();
     };
 
-  }, [id, unitVersion, session.username]);
+  }, [id, unitVersion, user, authLoading]);
 
   React.useEffect(() => {
     if (!id) return
@@ -502,6 +441,14 @@ const UnitProvider = ({ children, id }) => {
       },
       error: (error) => {
         console.error('[UnitContext] Unit subscription error:', error);
+        // Stop retrying on auth errors to prevent rate limiting
+        if (error?.message?.includes('No current user') || 
+            error?.message?.includes('NoSignedUser') ||
+            error?.message?.includes('401') ||
+            error?.message?.includes('403')) {
+          console.warn('[UnitContext] Auth error, stopping Unit subscription retries');
+          subscription.unsubscribe();
+        }
       }
     });
     
@@ -635,6 +582,12 @@ const UnitProvider = ({ children, id }) => {
     }
 
   }, []);
+
+  // Create session object for backward compatibility with components expecting session.username
+  const session = React.useMemo(() => ({
+    username: user?.attributes?.sub,
+    error: authSession?.error,
+  }), [user?.attributes?.sub, authSession?.error]);
 
   const contextValue = React.useMemo(() => ({
     unit,

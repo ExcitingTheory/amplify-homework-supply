@@ -34,7 +34,6 @@ import BatteryUnknownIcon from '@mui/icons-material/BatteryUnknown';
 import HomeIcon from '@mui/icons-material/Home';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import PeopleIcon from '@mui/icons-material/People';
-import { addSelfToSection } from '../../src/graphql/mutations';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { signOut } from 'aws-amplify/auth';
 import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
@@ -53,10 +52,7 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/router';
 import { Help, Settings } from '@mui/icons-material';
-
-import { generateClient } from 'aws-amplify/api';
-
-const client = generateClient();
+import { getAmplifyClient } from '../utils/amplifyClient';
 
 function ToggleMenuItem(props) {
   const [checked, setChecked] = React.useState(true);
@@ -262,6 +258,23 @@ export default function MainToolbar({ children }) {
 
   const [openAddStudentToSection, setOpenAddStudentToSection] = React.useState(false);
 
+  // Secret debug mode activation: Click menu icon 7 times within 3 seconds
+  const clickTimestamps = React.useRef([]);
+  const handleSecretDebugActivation = React.useCallback(() => {
+    const now = Date.now();
+    clickTimestamps.current.push(now);
+    
+    // Keep only clicks from the last 3 seconds
+    clickTimestamps.current = clickTimestamps.current.filter(time => now - time < 3000);
+    
+    // If 7 clicks within 3 seconds, enable debug mode
+    if (clickTimestamps.current.length >= 7) {
+      localStorage.setItem('debug-mode-enabled', 'true');
+      clickTimestamps.current = [];
+      alert('🐛 Debug mode enabled! Refresh the page to activate the debug panel.\n\nUse Cmd/Ctrl + Shift + D to open the debug panel.');
+    }
+  }, []);
+
   const toggleDrawer = (anchor, open) =>
     (event) => {
       if (
@@ -296,11 +309,9 @@ export default function MainToolbar({ children }) {
       }
 
       console.log('addSelfToSection.createInput', createInput);
+      const client = getAmplifyClient();
 
-      response = await client.graphql({
-        query: addSelfToSection,
-        variables: createInput,
-      })
+      response = await client.mutations.addSelfToSection(createInput);
 
       console.log('addSelfToSection.response', response)
 
@@ -358,7 +369,10 @@ export default function MainToolbar({ children }) {
           edge="start"
           color="inherit"
           aria-label="menu"
-          onClick={toggleDrawer('left', true)}
+          onClick={(e) => {
+            handleSecretDebugActivation();
+            toggleDrawer('left', true)(e);
+          }}
         >
           <MenuIcon />
         </IconButton>

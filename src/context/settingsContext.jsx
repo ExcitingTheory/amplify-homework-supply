@@ -39,6 +39,14 @@ const SettingsProvider = ({ children }) => {
       },
       error: (error) => {
         console.error('[SettingsContext] Settings subscription error:', error);
+        // Stop retrying on auth errors to prevent rate limiting
+        if (error?.message?.includes('No current user') || 
+            error?.message?.includes('NoSignedUser') ||
+            error?.message?.includes('401') ||
+            error?.message?.includes('403')) {
+          console.warn('[SettingsContext] Auth error, stopping Settings subscription retries');
+          subscription.unsubscribe();
+        }
         setIsLoading(false);
       }
     });

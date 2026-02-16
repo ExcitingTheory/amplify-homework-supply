@@ -65,19 +65,15 @@ import FilesContext from '../context/fileContext';
 import UnitContext from '../context/unitContext';
 import { useTabContext } from '../context/tabContext';
 
+// Virtualization
+import { useVirtualizer } from '@tanstack/react-virtual';
+
 // Import VocabularyCard from VocabularyReview2
 import { VocabularyCard } from './VocabularyReview2';
 
-// GraphQL imports
-import { generateClient } from 'aws-amplify/api';
-import { createWord, updateWord as updateWordMutation, deleteWord as deleteWordMutation } from '../graphql/mutations';
+// Gen 2 client import
 import { getAmplifyClient } from '../utils/amplifyClient';
 import { uploadData } from 'aws-amplify/storage';
-
-// TanStack Virtual
-import { useVirtualizer } from '@tanstack/react-virtual';
-
-const client = generateClient();
 
 // Commands for word operations
 const UPDATE_WORD_COMMAND = createCommand('UPDATE_WORD');

@@ -6,22 +6,7 @@
  * handle flagged content according to their school policies.
  */
 
-import { generateClient } from 'aws-amplify/api';
-
-const client = generateClient();
-
-// GraphQL mutation for moderation
-const moderateContentMutation = /* GraphQL */ `
-  mutation ModerateContent($content: String!) {
-    moderateContent(content: $content) {
-      flagged
-      categories
-      categoryScores
-      model
-      error
-    }
-  }
-`;
+import { getAmplifyClient } from './amplifyClient';
 
 /**
  * Extract text content from various data structures for moderation
@@ -95,9 +80,9 @@ export async function moderateContent(content) {
     }
     
     // Call the moderation mutation
-    const response = await client.graphql({
-      query: moderateContentMutation,
-      variables: { content: textToModerate }
+    const client = getAmplifyClient();
+    const response = await client.mutations.moderateContent({
+      content: textToModerate
     });
     
     return response.data.moderateContent;

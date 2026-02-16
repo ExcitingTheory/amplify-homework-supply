@@ -66,7 +66,6 @@ import SettingsContext from "../../../context/settingsContext";
 import { getAmplifyClient } from '../../../utils/amplifyClient';
 import { uploadData, remove } from 'aws-amplify/storage';
 import { fetchAuthSession } from 'aws-amplify/auth';
-import { generateClient } from 'aws-amplify/api';
 import { calculateWaveformData } from '../../../utils/calculateWaveformData';
 import { uploadFile, uploadAndAnalyzePDF, analyzePDF, cancelPDFAnalysis, generateEmbeddings } from '../../../utils/fileUploadUtils';
 import {
@@ -133,16 +132,10 @@ import TextareaAutosize from '@mui/material/TextareaAutosize';
 
 import { useTheme } from '@mui/material/styles';
 
-import {
-    generateAudioFile,
-    generateImageFile,
-} from '../../../graphql/mutations';
 import { hexToRgb } from "../../../utils/hexToRgb";
 import { ImageGeneratorButton, AudioGeneratorButton } from './EnhancedGenerators';
 import { SuggestedVocabulary, SuggestedQuestions } from './SuggestedContent';
 import RecordingStudio3 from "../../RecordingStudio3";
-
-const client = generateClient();
 
 // Utility functions for hybrid search
 const debounce = (func, wait) => {
@@ -1279,24 +1272,14 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
                                 tokens: { idToken },
                             } = await fetchAuthSession()
                             // send graphql mutation to create new image file
+                        const client = getAmplifyClient();
 
-                            const fileGenerator = await client.graphql({
-                                query: generateImageFile,
-                                variables: {
-                                    phrase: newDescription,
-                                    model: 'dall-e-3',
-                                }
-                            },
-                                {
-                                    'x-api-identity': idToken.toString(),
-                                });
+                        const fileGenerator = await client.mutations.generateImageFile({
+                            phrase: newDescription,
+                            model: 'dall-e-3',
+                        });
 
-                            // set the presignedUrl from the response
-
-                            console.log('fileGenerator', fileGenerator)
-
-
-                            const path = fileGenerator?.data?.generateImageFile?.path;
+                            const path = fileGenerator?.data?.path;
 
                             if (path) {
                                 console.log('s3Key', path, identityId)
@@ -1674,25 +1657,15 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
                                 tokens: { idToken },
                             } = await fetchAuthSession()
                             // send graphql mutation to create new audio file
+                        const client = getAmplifyClient();
 
-                            const fileGenerator = await client.graphql({
-                                query: generateAudioFile,
-                                variables: {
-                                    phrase: newDescription,
-                                    voice: 'shimmer',
-                                    model: 'tts-1-hd',
-                                }
-                            },
-                                {
-                                    'x-api-identity': idToken.toString(),
-                                });
+                        const fileGenerator = await client.mutations.generateAudioFile({
+                            phrase: newDescription,
+                            voice: 'shimmer',
+                            model: 'tts-1-hd',
+                        });
 
-                            // set the presignedUrl from the response
-
-                            console.log('fileGenerator', fileGenerator)
-
-
-                            const path = fileGenerator?.data?.generateAudioFile?.path;
+                            const path = fileGenerator?.data?.path;
 
                             if (path) {
                                 console.log('s3Key', path, identityId)
@@ -3307,25 +3280,14 @@ export default function FileManager2() {
 
         try {
             // Generate embedding for the query
-            const response = await client.graphql({
-                query: /* GraphQL */ `
-                    mutation GenerateEmbedding($content: String!, $model: String, $dimensions: Int) {
-                        generateEmbedding(content: $content, model: $model, dimensions: $dimensions) {
-                            embedding
-                            model
-                            dimensions
-                            tokenCount
-                        }
-                    }
-                `,
-                variables: {
-                    content: query,
-                    model: 'text-embedding-3-small',
-                    dimensions: 512
-                }
+            const client = getAmplifyClient();
+            const response = await client.mutations.generateEmbedding({
+                content: query,
+                model: 'text-embedding-3-small',
+                dimensions: 1536
             });
 
-            const queryEmbedding = response.data.generateEmbedding.embedding;
+            const queryEmbedding = response.data?.embedding;
             console.log(`[FileManager2.performVectorSearch] Generated ${queryEmbedding.length}D embedding`);
 
             // Search vector store (now async due to worker usage)

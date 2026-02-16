@@ -11,6 +11,7 @@
 
 import React, { createContext } from "react";
 import { getAmplifyClient } from '../utils/amplifyClient';
+import AuthContext from './authContext';
 
 
 // Provider and Consumer are connected through their "parent" context
@@ -35,6 +36,7 @@ const DictionaryProvider = ({ children }) => {
     // TODO add a sort to the dictionary?
     // TODO add keep a map of refs to the words in the dictionary for scrolling to the word in the editor?
 
+    const { user, isLoading: authLoading } = React.useContext(AuthContext);
     const [words, setWords] = React.useState({})
     const [filteredWords, setFilteredWords] = React.useState({})
     const [wordMapId, setWordMapId] = React.useState({})
@@ -153,9 +155,16 @@ const DictionaryProvider = ({ children }) => {
     }, [filter, filterWords])
 
     React.useEffect(() => {
-        const client = getAmplifyClient();
+        // Wait for auth to be ready
+        if (authLoading || !user) {
+            return;
+        }
 
-        const subscription = client.models.Word.observeQuery().subscribe({
+        const client = getAmplifyClient();
+        let subscription;
+
+        const setupSubscription = async () => {
+            subscription = client.models.Word.observeQuery().subscribe({
             next: ({ items }) => {
                 const wordMap = {}
                 const _wordMapId = {}
@@ -198,15 +207,25 @@ const DictionaryProvider = ({ children }) => {
                 console.error('[DictionaryContext] Word subscription error:', error);
             }
         });
-        return function cleanup() {
-            subscription.unsubscribe();
         };
-    }, []);
+
+        setupSubscription();
+        return function cleanup() {
+            if (subscription) subscription.unsubscribe();
+        };
+    }, [user, authLoading]);
 
     React.useEffect(() => {
-        const client = getAmplifyClient();
+        // Wait for auth to be ready
+        if (authLoading || !user) {
+            return;
+        }
 
-        const subscription = client.models.Question.observeQuery().subscribe({
+        const client = getAmplifyClient();
+        let subscription;
+
+        const setupSubscription = async () => {
+            subscription = client.models.Question.observeQuery().subscribe({
             next: ({ items }) => {
                 const questionMap = {}
 
@@ -224,10 +243,13 @@ const DictionaryProvider = ({ children }) => {
                 console.error('[DictionaryContext] Question subscription error:', error);
             }
         });
-        return function cleanup() {
-            subscription.unsubscribe();
         };
-    }, []);
+
+        setupSubscription();
+        return function cleanup() {
+            if (subscription) subscription.unsubscribe();
+        };
+    }, [user, authLoading]);
 
     const contextValue = React.useMemo(() => ({
         dictionary: words,

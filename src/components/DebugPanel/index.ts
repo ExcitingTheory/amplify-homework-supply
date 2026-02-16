@@ -4,7 +4,7 @@
 
 export { DebugPanel } from './DebugPanel';
 export { DebugPanelProvider } from './DebugPanelProvider';
-export { useDebugPanel } from './useDebugPanel';
+export { useDebugPanel, isDebugModeEnabled, enableDebugMode, disableDebugMode } from './useDebugPanel';
 export { StateInspector } from './StateInspector';
 export { ComponentTreeView } from './ComponentTreeView';
 export { LogViewer } from './LogViewer';

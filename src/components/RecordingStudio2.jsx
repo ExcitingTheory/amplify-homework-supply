@@ -16,16 +16,12 @@ import { useTheme } from '@mui/material/styles';
 
 import { hexToRgb } from "../utils/hexToRgb";
 
-import { verifyAudioUrl } from '../graphql/queries';
 import getCachedUrl from '../utils/getCachedUrl';
 import UnitContext from '../context/unitContext';
 import { uploadStudentSubmission } from '../utils/userSubmissionStorage';
 
 import { fetchAuthSession } from 'aws-amplify/auth';
-import { generateClient } from 'aws-amplify/api';
 import { getAmplifyClient } from '../utils/amplifyClient';
-
-const client = generateClient();
 
 // Component to handle async audio URL loading
 function AudioRecordingCard({ file, index, identityId }) {
@@ -220,30 +216,29 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
         const url = await getCachedUrl(uploadResult.path, 'private', identityId);
 
         // verify the audio file
-
-        const response = await client.graphql({
-          query: verifyAudioUrl,
-          variables: {
-            expected: requestDefinition? definition : phrase,
-            audioUrl: url,
-            model: 'whisper-1',
-            chatModel: 'gpt-3.5-turbo',
-          },
+        const { data, errors } = await client.queries.verifyAudioUrl({
+          expected: requestDefinition? definition : phrase,
+          audioUrl: url,
+          model: 'whisper-1',
+          chatModel: 'gpt-3.5-turbo',
         });
 
-        console.log('response', response);
+        if (errors) {
+          console.error('Error verifying audio:', errors);
+          return;
+        }
 
-        // "{"transcription":{"text":"at this time."},"completion":{"id":"chatcmpl-9TM7qi7QZ8FnyeDLEml6v8NLJrnXt","object":"chat.completion","created":1716783590,"model":"gpt-3.5-turbo-0125","choices":[{"index":0,"message":{"role":"assistant","content":"{\"answer\": false, \"reason\": \"because the correct transcription is: \\\"at the present time or moment.\\\"\"}"},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":91,"completion_tokens":24,"total_tokens":115},"system_fingerprint":null}}"
+        console.log('verify response data:', data);
 
-        const mainData = JSON.parse(response?.data?.verifyAudioUrl) || {}
+        const mainData = JSON.parse(data) || {}
 
         console.log('mainData', mainData);
 
-        const data = JSON.parse(mainData?.completion?.choices[0]?.message?.content) || {}
+        const feedbackData = JSON.parse(mainData?.completion?.choices[0]?.message?.content) || {}
 
-        console.log('data', data);
+        console.log('feedbackData', feedbackData);
 
-          setFeedback(data);
+          setFeedback(feedbackData);
 
       }
 

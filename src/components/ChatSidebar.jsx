@@ -43,6 +43,7 @@ import { Section, Document, AssistantChat, File } from "../models";
 import UnitContext from "../context/unitContext";
 import SectionContext from "../context/sectionContext";
 import VectorStoreContext from "../context/vectorStoreContext";
+import AuthContext from "../context/authContext";
 import { useTabContext } from "../context/tabContext";
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
@@ -221,7 +222,11 @@ const ChatSidebar = () => {
         chatHistories,
         setCurrentChat,
         isLoadingChat,
+        chatCreationError,
     } = tabContext;
+
+    // Get auth state
+    const { user, isLoading: authLoading } = React.useContext(AuthContext);
 
 
 
@@ -269,7 +274,12 @@ const ChatSidebar = () => {
     // Load chat data when chat changes
     useEffect(() => {
         if (!assistantChat || isLoadingChat) return;
-        if (assistantChat._version == null) return;
+        
+        // Log warning if version is missing but don't block loading
+        // In Gen 2, _version may be undefined during initial observeQuery sync
+        if (assistantChat._version == null) {
+            console.warn('[ChatSidebar] Chat missing _version field (may populate after sync):', assistantChat.id);
+        }
 
         const chatChanged = lastChatId !== assistantChat.id;
 
@@ -277,8 +287,20 @@ const ChatSidebar = () => {
             dispatch({ type: ACTIONS.SET_LAST_CHAT_ID, payload: assistantChat.id });
 
             // Load messages - ensure it's always an array
-            const rawMessages = assistantChat.messages || [];
-            const messagesArray = Array.isArray(rawMessages) ? rawMessages : [];
+            // Messages are stored as JSON string in database
+            let messagesArray = [];
+            const rawMessages = assistantChat.messages;
+            if (Array.isArray(rawMessages)) {
+                messagesArray = rawMessages;
+            } else if (typeof rawMessages === 'string' && rawMessages) {
+                try {
+                    messagesArray = JSON.parse(rawMessages);
+                    if (!Array.isArray(messagesArray)) messagesArray = [];
+                } catch (e) {
+                    console.error('[ChatSidebar] Failed to parse messages:', e);
+                    messagesArray = [];
+                }
+            }
             console.log('[ChatSidebar] Loading messages for chat:', assistantChat.id, 'count:', messagesArray.length);
             setMessages(deepCloneMessages(messagesArray));
 
@@ -339,9 +361,17 @@ const ChatSidebar = () => {
 
     // Memoize the fetch function to prevent recreation on every render
     const customFetch = useCallback(async (url, options) => {
-        console.log('[ChatSidebar] Custom fetch with Amplify post client, ignoring url:', url);
+        console.log('[ChatSidebar] Custom fetch with Amplify post client, ignoring AI SDK url:', url);
 
         try {
+            // Get the current auth session to include the token
+            const { tokens } = await fetchAuthSession();
+            const idToken = tokens?.idToken?.toString();
+
+            if (!idToken) {
+                throw new Error('No authentication token available');
+            }
+
             // Parse the request body from AI SDK
             const requestBody = options.body ? JSON.parse(options.body) : {};
 
@@ -358,11 +388,16 @@ const ChatSidebar = () => {
                 wordsCount: contextData.dictionary?.length || 0,
             });
 
-            // Use Amplify's post which handles auth automatically
+            // Use Amplify's post with custom headers including auth token
             const restOperation = post({
-                apiName: 'completions',
+                apiName: 'homeworkSupplyStreamApi',
                 path: '/chat',
-                options: { body: bodyWithContext },
+                options: { 
+                    body: bodyWithContext,
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`,
+                    },
+                },
             });
 
             const response = await restOperation.response;
@@ -373,6 +408,7 @@ const ChatSidebar = () => {
                 bodyType: typeof response.body,
                 hasBody: !!response.body,
             });
+            
             // Convert Amplify headers to Headers object
             const webHeaders = new Headers({
                 'Content-Type': 'text/event-stream',
@@ -467,7 +503,7 @@ const ChatSidebar = () => {
             await client.models.AssistantChat.update({
                 id: chat.id,
                 draft: draftText,
-                messages: currentMessages
+                messages: JSON.stringify(currentMessages) // messages field is AWSJSON type (string)
             });
         } catch (error) {
             console.error('[ChatSidebar] Error saving draft:', error);
@@ -482,7 +518,7 @@ const ChatSidebar = () => {
             const client = getAmplifyClient();
             await client.models.AssistantChat.update({
                 id: chat.id,
-                messages: clonedMessages,
+                messages: JSON.stringify(clonedMessages), // messages field is AWSJSON type (string)
                 draft: currentDraft
             });
         } catch (error) {
@@ -497,13 +533,13 @@ const ChatSidebar = () => {
             const client = getAmplifyClient();
             // Query existing associations
             const { data: currentAssociations } = await client.models.AssistantChatFile.list({
-                filter: { assistantChatId: { eq: chat.id } }
+                filter: { chatID: { eq: chat.id } }
             });
-            const currentFileIds = new Set(currentAssociations.map(a => a.fileId));
+            const currentFileIds = new Set(currentAssociations.map(a => a.fileID));
             const uploadedFileIds = new Set(files.filter(f => f.id).map(f => f.id));
 
             const filesToAdd = files.filter(f => f.id && !currentFileIds.has(f.id));
-            const associationsToRemove = currentAssociations.filter(a => !uploadedFileIds.has(a.fileId));
+            const associationsToRemove = currentAssociations.filter(a => !uploadedFileIds.has(a.fileID));
 
             if (filesToAdd.length === 0 && associationsToRemove.length === 0) return;
 
@@ -513,8 +549,8 @@ const ChatSidebar = () => {
 
             for (const file of filesToAdd) {
                 await client.models.AssistantChatFile.create({
-                    assistantChatId: chat.id,
-                    fileId: file.id
+                    chatID: chat.id,
+                    fileID: file.id
                 });
             }
         } catch (error) {
@@ -643,14 +679,14 @@ const ChatSidebar = () => {
                     };
                 });
 
-                // Only update if versions have actually changed
+                // Only update if _version has actually changed
                 const hasChanges = items.some(doc => {
                     const prevDoc = documentStatuses[doc.id];
                     return !prevDoc || (doc._version || 0) > (prevDoc._version || 0);
                 });
 
                 if (hasChanges) {
-                    // Include version info for future comparisons
+                    // Include _version for future comparisons
                     items.forEach(doc => {
                         statusMap[doc.id]._version = doc._version;
                     });
@@ -658,7 +694,17 @@ const ChatSidebar = () => {
                     dispatch({ type: ACTIONS.SET_DOCUMENT_STATUSES, payload: statusMap });
                 }
             },
-            error: (error) => console.error('[ChatSidebar] Document subscription error:', error)
+            error: (error) => {
+                console.error('[ChatSidebar] Document subscription error:', error);
+                // Stop retrying on auth errors to prevent rate limiting
+                if (error?.message?.includes('No current user') || 
+                    error?.message?.includes('NoSignedUser') ||
+                    error?.message?.includes('401') ||
+                    error?.message?.includes('403')) {
+                    console.warn('[ChatSidebar] Auth error, stopping Document subscription retries');
+                    subscription.unsubscribe();
+                }
+            }
         });
 
         return () => subscription.unsubscribe();
@@ -1063,17 +1109,31 @@ const ChatSidebar = () => {
 
                                             // Create new AssistantChat directly
                                             const client = getAmplifyClient();
-                                            const { data: newChat } = await client.models.AssistantChat.create({
+                                            const result = await client.models.AssistantChat.create({
                                                 model: 'gpt-4',
-                                                messages: [],
+                                                messages: JSON.stringify([]), // messages field is AWSJSON type (string)
                                                 threadInstructions: '',
                                                 additionalInstructions: '',
                                             });
-                                            console.log('[ChatSidebar] Created new chat:', newChat.id);
+                                            
+                                            console.log('[ChatSidebar] Create result:', result);
+                                            
+                                            if (result.errors && result.errors.length > 0) {
+                                                console.error('[ChatSidebar] Errors creating chat:', result.errors);
+                                                throw new Error(result.errors[0].message);
+                                            }
+                                            
+                                            if (!result.data) {
+                                                console.error('[ChatSidebar] No data returned from create. Full result:', JSON.stringify(result, null, 2));
+                                                throw new Error('Failed to create chat - no data returned. Check that backend is deployed and accessible.');
+                                            }
+                                            
+                                            console.log('[ChatSidebar] Created new chat:', result.data.id, '_version:', result.data._version);
                                             
                                             // TabContext subscription will pick up the new chat automatically
                                         } catch (error) {
                                             console.error('[ChatSidebar] Error creating new chat:', error);
+                                            alert('Failed to create new chat. Please check that the backend is running and try again.');
                                         }
                                     }}
                                     title={t('chatSidebar.newChat')}
@@ -1167,15 +1227,30 @@ const ChatSidebar = () => {
                                                     let historyMessages = [];
                                                     let historyDraft = '';
                                                     try {
-                                                        historyMessages = history?.messages?.length ? history.messages : [];
+                                                        // Ensure messages is always an array (stored as JSON string in DB)
+                                                        const rawMessages = history?.messages;
+                                                        if (Array.isArray(rawMessages)) {
+                                                            historyMessages = rawMessages;
+                                                        } else if (typeof rawMessages === 'string' && rawMessages) {
+                                                            historyMessages = JSON.parse(rawMessages);
+                                                            if (!Array.isArray(historyMessages)) historyMessages = [];
+                                                        }
                                                         historyDraft = history?.draft || '';
                                                     } catch (err) {
                                                         console.error('[ChatSidebar] Error parsing messages:', err);
+                                                        historyMessages = [];
                                                     }
                                                     const messageCount = historyMessages.length;
                                                     const firstUserMessage = historyMessages.find(m => m.role === 'user');
                                                     console.log('First user message for history', history.id, ':', firstUserMessage, historyMessages);
-                                                    const preview = firstUserMessage?.part || historyDraft || t('chatSidebar.emptyChat');
+                                                    // Extract text from message.parts array (AI SDK v6 format)
+                                                    let preview = historyDraft || t('chatSidebar.emptyChat');
+                                                    if (firstUserMessage?.parts && Array.isArray(firstUserMessage.parts)) {
+                                                        preview = firstUserMessage.parts
+                                                            .filter(p => p.type === 'text')
+                                                            .map(p => p.text)
+                                                            .join('');
+                                                    }
                                                     const displayPreview = typeof preview === 'string' ? preview : JSON.stringify(preview);
                                                     const createdAt = history.createdAt ? new Date(history.createdAt).toLocaleDateString() : t('chatSidebar.unknown');
 
@@ -1257,14 +1332,29 @@ const ChatSidebar = () => {
                                                     let historyMessages = [];
                                                     let historyDraft = '';
                                                     try {
-                                                        historyMessages = history?.messages?.length ? history.messages : [];
+                                                        // Ensure messages is always an array (stored as JSON string in DB)
+                                                        const rawMessages = history?.messages;
+                                                        if (Array.isArray(rawMessages)) {
+                                                            historyMessages = rawMessages;
+                                                        } else if (typeof rawMessages === 'string' && rawMessages) {
+                                                            historyMessages = JSON.parse(rawMessages);
+                                                            if (!Array.isArray(historyMessages)) historyMessages = [];
+                                                        }
                                                         historyDraft = history?.draft || '';
                                                     } catch (err) {
                                                         console.error('[ChatSidebar] Error parsing messages:', err);
+                                                        historyMessages = [];
                                                     }
                                                     const messageCount = historyMessages.length;
                                                     const firstUserMessage = historyMessages.find(m => m.role === 'user');
-                                                    const preview = firstUserMessage?.content || historyDraft || t('chatSidebar.emptyChat');
+                                                    // Extract text from message.parts array (AI SDK v6 format)
+                                                    let preview = historyDraft || t('chatSidebar.emptyChat');
+                                                    if (firstUserMessage?.parts && Array.isArray(firstUserMessage.parts)) {
+                                                        preview = firstUserMessage.parts
+                                                            .filter(p => p.type === 'text')
+                                                            .map(p => p.text)
+                                                            .join('');
+                                                    }
                                                     const displayPreview = typeof preview === 'string' ? preview : JSON.stringify(preview);
                                                     const createdAt = history.createdAt ? new Date(history.createdAt).toLocaleDateString() : t('chatSidebar.unknown');
 
@@ -2020,6 +2110,41 @@ const ChatSidebar = () => {
                         </Box>
                     )} */}
 
+                    {/* Chat creation error */}
+                    {chatCreationError && (
+                        <Box sx={{ mb: 2, p: 2, bgcolor: 'error.light', borderRadius: 1, border: '1px solid', borderColor: 'error.main' }}>
+                            <Typography variant="body2" color="error.dark" sx={{ mb: 1, fontWeight: 600 }}>
+                                ⚠️ Failed to create chat session
+                            </Typography>
+                            <Typography variant="body2" color="error.dark" sx={{ mb: 1.5 }}>
+                                {chatCreationError}
+                            </Typography>
+                            <Typography variant="caption" color="error.dark" sx={{ display: 'block', mb: 2 }}>
+                                Possible causes: Backend not deployed, authentication issue, or network error
+                            </Typography>
+                            <Button
+                                size="small"
+                                variant="contained"
+                                color="error"
+                                onClick={() => window.location.reload()}
+                            >
+                                Reload Page
+                            </Button>
+                        </Box>
+                    )}
+
+                    {/* Authentication required message */}
+                    {!authLoading && !user && !chatCreationError && (
+                        <Box sx={{ mb: 2, p: 2, bgcolor: 'info.light', borderRadius: 1, border: '1px solid', borderColor: 'info.main' }}>
+                            <Typography variant="body2" color="info.dark" sx={{ mb: 1, fontWeight: 600 }}>
+                                🔐 Authentication Required
+                            </Typography>
+                            <Typography variant="body2" color="info.dark">
+                                Please sign in to use the AI Assistant chat feature.
+                            </Typography>
+                        </Box>
+                    )}
+
                     <Box sx={{ display: 'flex', gap: 1 }}>
                         {/* Hidden file input */}
                         <input
@@ -2052,11 +2177,13 @@ const ChatSidebar = () => {
                                 }
                             }}
                             placeholder={
-                                !assistantChat?._version
+                                !user && !authLoading
+                                    ? 'Please sign in to use chat'
+                                    : !assistantChat?.id
                                     ? t('chatSidebar.settingUpChat')
                                     : t('chatSidebar.askMeAnything')
                             }
-                            disabled={isLoading || !assistantChat?._version}
+                            disabled={isLoading || !assistantChat?.id || !user}
                             multiline
                             maxRows={4}
                             variant="outlined"
@@ -2069,7 +2196,7 @@ const ChatSidebar = () => {
                         <Button
                             type="submit"
                             variant="contained"
-                            disabled={isLoading || !assistantChat?.id}
+                            disabled={isLoading || !assistantChat?.id || !user}
                             sx={{
                                 minWidth: 'auto',
                                 px: 2,

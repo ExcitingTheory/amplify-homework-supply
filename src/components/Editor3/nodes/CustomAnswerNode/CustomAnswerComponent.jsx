@@ -1,9 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { useTranslation } from 'next-i18next';
-import {
-    verifyShortAnswer,
-} from "../../../../graphql/queries";
-import { generateClient } from 'aws-amplify/api';
+import { getAmplifyClient } from '../../../../utils/amplifyClient';
 
 import { useEffect, useState, useRef } from 'react';
 
@@ -30,7 +27,6 @@ import AudioWaveformPlayer from '../../components/AudioWaveformPlayer';
 
 import UnitContext from '../../../../context/unitContext';
 import DictionaryContext from '../../../../context/dictionaryContext';
-const client = generateClient();
 
 function LinearProgressWithLabel({ value }) {
     return (
@@ -382,15 +378,13 @@ export default function CustomAnswerComponent({
                                     try {
 
                                         // verifyShortAnswer(expected: String!, answer: String!, prompt: String!, model: String): String @function(name: "openai-${env}")
+                                        const client = getAmplifyClient();
 
-                                        const response = await client.graphql({
-                                            query: verifyShortAnswer,
-                                            variables: {
-                                                answer: answers[questionID],
-                                                prompt: prompt,
-                                                expected: answer,
-                                                model: 'gpt-3.5-turbo',
-                                            },
+                                        const response = await client.queries.verifyShortAnswer({
+                                            answer: answers[questionID],
+                                            prompt: prompt,
+                                            expected: answer,
+                                            model: 'gpt-3.5-turbo',
                                         });
 
                                         console.log('response', response)

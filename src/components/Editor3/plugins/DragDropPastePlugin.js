@@ -79,13 +79,21 @@ export default function DragDropPaste() {
     const [editor] = useLexicalComposerContext();
 
     const {
-        session: { identityId },
+        session,
     } = React.useContext(FilesContext);
+    
+    const identityId = session?.identityId;
 
     const [fileOperations, setFileOperations] = React.useState([]);
     // const [filesToUpload, setFilesToUpload] = React.useState([]);
 
     useEffect(() => {
+        // Don't register command if not authenticated
+        if (!identityId) {
+            console.log('[DragDropPaste] Skipping command registration - no identityId');
+            return;
+        }
+
         return editor.registerCommand(DRAG_DROP_PASTE, (files) => {
             (async () => {
                 const _fileOperations = files.map((f) => ({ name: f.name, progress: '0%' }));

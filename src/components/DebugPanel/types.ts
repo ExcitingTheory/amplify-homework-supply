@@ -62,8 +62,8 @@ export interface StateInspectorProps {
   /** Callback to refresh snapshot */
   onRefresh?: () => void;
   /** Callback to export snapshot */
-  onExport?: (snapshot: StateSnapshot) => void;
-}
+  onExport?: (snapshot: StateSnapshot) => void;  /** Callback to send snapshot to Discord */
+  onSendToDiscord?: (snapshot: StateSnapshot) => void;}
 
 /**
  * Filter options for logs

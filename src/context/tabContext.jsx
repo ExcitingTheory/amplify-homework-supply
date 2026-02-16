@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getAmplifyClient } from '../utils/amplifyClient';
+import AuthContext from './authContext';
 
 const client = getAmplifyClient();
 
@@ -61,31 +62,48 @@ export function useTabContext() {
  * Provider component for tab state
  */
 export function TabProvider({ children, value }) {
+    // Get auth state from centralized context
+    const { user, isLoading: authLoading } = useContext(AuthContext);
+
     const [assistantChat, setAssistantChat] = useState(null);
     const [chatHistories, setChatHistories] = useState([]);
     const [isLoadingChat, setIsLoadingChat] = useState(false);
     const [chatCreationError, setChatCreationError] = useState(null);
     const [subscriptionReady, setSubscriptionReady] = useState(false);
-    const chatVersionRef = React.useRef(null);
+    const chatVersionRef = React.useRef(null); // Track by _version for optimistic concurrency (Gen 2 auto-returns)
     const subscriptionInitializedRef = React.useRef(false);
 
     // Observe AssistantChat - single consolidated model
     useEffect(() => {
+        // Wait for auth to be ready
+        if (authLoading || !user) {
+            console.log('[TabContext] Waiting for auth...');
+            return;
+        }
+
         console.log('[TabContext] Setting up observeQuery for AssistantChat');
         let isSubscribed = true;
         let chatSubscription;
         
-        const setupSubscription = async () => {
+        const setupSubscription = () => {
             if (!isSubscribed) return;
             
-            try {
-                // Observe AssistantChat sorted by createdAt
-                chatSubscription = client.models.AssistantChat.observeQuery({
+            // Observe AssistantChat sorted by createdAt
+            chatSubscription = client.models.AssistantChat.observeQuery({
                     sortDirection: 'DESC',
                     sortField: 'createdAt'
                 }).subscribe({
                     next: ({ items, isSynced }) => {
                         console.log('[TabContext] AssistantChat query update:', items.length, 'items', isSynced ? '(synced)' : '(not synced)');
+                        
+                        // Log _version for debugging
+                        if (items.length > 0) {
+                            console.log('[TabContext] First item details:', {
+                                id: items[0].id,
+                                _version: items[0]._version,
+                                updatedAt: items[0].updatedAt
+                            });
+                        }
 
                         if (!isSynced) {
                             console.log('[TabContext] Waiting for AssistantChat sync...');
@@ -127,7 +145,7 @@ export function TabProvider({ children, value }) {
                                     if (prevCurrent.archived) {
                                         if (mostRecentChat) {
                                             chatVersionRef.current = mostRecentChat._version;
-                                            console.log('[TabContext] Current chat archived, switching to:', mostRecentChat.id, 'version:', mostRecentChat._version);
+                                            console.log('[TabContext] Current chat archived, switching to:', mostRecentChat.id, '_version:', mostRecentChat._version);
                                             return mostRecentChat;
                                         } else {
                                             // All chats are archived - set to null, creation effect will make a new one
@@ -139,7 +157,7 @@ export function TabProvider({ children, value }) {
                                     
                                     // Find updated version of current chat
                                     const updatedCurrent = items.find(item => item.id === prevCurrent.id);
-                                    // Only update if version has actually changed (like Grade pattern)
+                                    // Only update if _version has actually changed (optimistic concurrency pattern)
                                     if (updatedCurrent && chatVersionRef.current !== updatedCurrent._version) {
                                         const prevVersion = chatVersionRef.current;
                                         chatVersionRef.current = updatedCurrent._version;
@@ -160,9 +178,6 @@ export function TabProvider({ children, value }) {
                         console.error('[TabContext] AssistantChat subscription error:', error);
                     }
                 });
-            } catch (error) {
-                console.error('[TabContext] Error setting up AssistantChat subscription:', error);
-            }
         };
         
         setupSubscription();
@@ -172,13 +187,19 @@ export function TabProvider({ children, value }) {
             isSubscribed = false;
             if (chatSubscription) chatSubscription.unsubscribe();
         };
-    }, []);
+    }, [user, authLoading]);
 
     // Create AssistantChat if needed
     useEffect(() => {
         // Don't create anything until subscription has initialized
         if (!subscriptionInitializedRef.current) {
             console.log('[TabContext] Waiting for subscription to initialize');
+            return;
+        }
+        
+        // Wait for auth to be fully ready
+        if (!user || authLoading) {
+            console.log('[TabContext] Waiting for auth to be ready before creating chat');
             return;
         }
         
@@ -204,24 +225,49 @@ export function TabProvider({ children, value }) {
 
         // Create new AssistantChat
         async function createChat() {
-            console.log('[TabContext] Creating AssistantChat');
+            console.log('[TabContext] Creating AssistantChat with user:', user?.username);
+            setIsLoadingChat(true);
             
             try {
-                await client.models.AssistantChat.create({
+                // Gen 2 API
+                const result = await client.models.AssistantChat.create({
                     model: 'gpt-4',
-                    messages: JSON.stringify([]),
-                    threadInstructions: '',
-                    additionalInstructions: '',
+                    archived: false
                 });
-                console.log('[TabContext] Created AssistantChat, waiting for subscription');
+                
+                console.log('[TabContext] Create result:', {
+                    hasData: !!result.data,
+                    hasErrors: !!result.errors,
+                    data: result.data,
+                    errors: result.errors
+                });
+                
+                // Check for GraphQL errors
+                if (result.errors && result.errors.length > 0) {
+                    console.error('[TabContext] GraphQL errors creating chat:', result.errors);
+                    setChatCreationError(result.errors[0].message || 'Failed to create chat');
+                    setIsLoadingChat(false);
+                    return;
+                }
+                
+                if (!result.data) {
+                    console.error('[TabContext] No data returned from create operation. Full result:', result);
+                    setChatCreationError('Failed to create chat - no data returned');
+                    setIsLoadingChat(false);
+                    return;
+                }
+                
+                console.log('[TabContext] Created AssistantChat:', result.data.id, '_version:', result.data._version);
+                setIsLoadingChat(false);
             } catch (error) {
                 console.error('[TabContext] Error creating chat:', error);
                 setChatCreationError(error.message || 'Failed to create chat');
+                setIsLoadingChat(false);
             }
         }
 
         createChat();
-    }, [subscriptionReady, assistantChat?.id, assistantChat?.archived, chatHistories.length]);
+    }, [subscriptionReady, assistantChat?.id, assistantChat?.archived, chatHistories.length, user, authLoading]);
 
     // Memoize context value using primitive dependencies to prevent unnecessary re-renders
     const contextValue = React.useMemo(() => ({

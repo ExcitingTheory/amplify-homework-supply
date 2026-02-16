@@ -1,8 +1,0 @@
-{
-  "model": "gemma-3-12b-it",
-  "provider": "google-gemma",
-  "timestamp": "2026-01-31T18:43:19.221Z",
-  "requestId": "fbe17a31-993c-4c1c-9d95-05db24f226a8",
-  "tokensUsed": 16400,
-  "fingerprint": "911f84c8cd60f6a1b63a296c1fe3edbd925d81c8dcf52a134550eb76b3ffcf09"
-}

@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, Collapse } from '@mui/material';
 import { fetchAuthSession } from 'aws-amplify/auth';
-import { generateClient } from 'aws-amplify/api';
-import { generateImageFile, generateAudioFile } from '../../../graphql/mutations';
+import { getAmplifyClient } from '../../../utils/amplifyClient';
 import getCachedUrl from '../../../utils/getCachedUrl';
 import UnifiedGenerateModal from './UnifiedGenerateModal';
 import ImageMaskEditor from './ImageMaskEditor';
 import RecordingStudioEnhanced from '../../RecordingStudioEnhanced';
 import { useTranslation } from 'next-i18next';
-
-const client = generateClient();
 
 /**
  * Enhanced Image Generation with mask support for targeted regeneration
@@ -25,24 +22,17 @@ export function EnhancedImageGenerator({ open, onClose }) {
             tokens: { idToken },
         } = await fetchAuthSession();
 
-        const result = await client.graphql(
-            {
-                query: generateImageFile,
-                variables: {
-                    phrase: prompt,
-                    model: 'dall-e-3',
-                },
-            },
-            {
-                'x-api-identity': idToken.toString(),
-            }
-        );
+        const client = getAmplifyClient();
+        const { data, errors } = await client.mutations.generateImageFile({
+            phrase: prompt,
+            model: 'dall-e-3',
+        });
 
-        const path = result?.data?.generateImageFile?.path;
-
-        if (!path) {
+        if (errors || !data?.path) {
             throw new Error('Failed to generate image');
         }
+
+        const path = data.path;
 
         const presignedUrl = await getCachedUrl(path, 'protected', identityId);
 
@@ -99,21 +89,14 @@ export function EnhancedImageGenerator({ open, onClose }) {
             variables.originalImage = previousImage.path;
         }
 
-        const result = await client.graphql(
-            {
-                query: generateImageFile,
-                variables,
-            },
-            {
-                'x-api-identity': idToken.toString(),
-            }
-        );
+        const client = getAmplifyClient();
+        const { data, errors } = await client.mutations.generateImageFile(variables);
 
-        const path = result?.data?.generateImageFile?.path;
-
-        if (!path) {
+        if (errors || !data?.path) {
             throw new Error('Failed to regenerate image');
         }
+
+        const path = data.path;
 
         const presignedUrl = await getCachedUrl(path, 'protected', identityId);
 
@@ -193,25 +176,18 @@ export function EnhancedAudioGenerator({ open, onClose, gradeId, nodeKey }) {
             tokens: { idToken },
         } = await fetchAuthSession();
 
-        const result = await client.graphql(
-            {
-                query: generateAudioFile,
-                variables: {
-                    phrase: prompt,
-                    voice: 'alloy',
-                    model: 'tts-1',
-                },
-            },
-            {
-                'x-api-identity': idToken.toString(),
-            }
-        );
+        const client = getAmplifyClient();
+        const { data, errors } = await client.mutations.generateAudioFile({
+            phrase: prompt,
+            voice: 'alloy',
+            model: 'tts-1',
+        });
 
-        const path = result?.data?.generateAudioFile?.path;
-
-        if (!path) {
+        if (errors || !data?.path) {
             throw new Error('Failed to generate audio');
         }
+
+        const path = data.path;
 
         const presignedUrl = await getCachedUrl(path, 'protected', identityId);
 
@@ -295,24 +271,17 @@ export function ImageGeneratorButton({ open, onSuccess }) {
             tokens: { idToken },
         } = await fetchAuthSession();
 
-        const result = await client.graphql(
-            {
-                query: generateImageFile,
-                variables: {
-                    phrase: prompt,
-                    model: 'dall-e-3',
-                },
-            },
-            {
-                'x-api-identity': idToken.toString(),
-            }
-        );
+        const client = getAmplifyClient();
+        const { data, errors } = await client.mutations.generateImageFile({
+            phrase: prompt,
+            model: 'dall-e-3',
+        });
 
-        const path = result?.data?.generateImageFile?.path;
-
-        if (!path) {
+        if (errors || !data?.path) {
             throw new Error('Failed to generate image');
         }
+
+        const path = data.path;
 
         const presignedUrl = await getCachedUrl(path, 'protected', identityId);
 
@@ -375,25 +344,18 @@ export function AudioGeneratorButton({ open, onSuccess }) {
             tokens: { idToken },
         } = await fetchAuthSession();
 
-        const result = await client.graphql(
-            {
-                query: generateAudioFile,
-                variables: {
-                    phrase: prompt,
-                    voice: 'alloy',
-                    model: 'tts-1',
-                },
-            },
-            {
-                'x-api-identity': idToken.toString(),
-            }
-        );
+        const client = getAmplifyClient();
+        const { data, errors } = await client.mutations.generateAudioFile({
+            phrase: prompt,
+            voice: 'alloy',
+            model: 'tts-1',
+        });
 
-        const path = result?.data?.generateAudioFile?.path;
-
-        if (!path) {
+        if (errors || !data?.path) {
             throw new Error('Failed to generate audio');
         }
+
+        const path = data.path;
 
         const presignedUrl = await getCachedUrl(path, 'protected', identityId);
 

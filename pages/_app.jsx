@@ -14,10 +14,26 @@ import outputs from '../amplify_outputs.json';
 import '../src/components/Editor3/theme.css';
 import '../src/components/Editor3/components/LanguageEditorTheme.css';
 import { Amplify } from 'aws-amplify';
+import { parseAmplifyConfig } from 'aws-amplify/utils';
 import { DebugPanelProvider } from '../src/components/DebugPanel';
+import { AuthProvider } from '../src/context/authContext';
 
-// Configure Amplify Gen 2
-Amplify.configure(outputs);
+// Configure Amplify Gen 2 with existing REST API resources
+const amplifyConfig = parseAmplifyConfig(outputs);
+
+Amplify.configure({
+  ...amplifyConfig,
+  API: {
+    ...amplifyConfig.API,
+    REST: {
+      ...amplifyConfig.API?.REST,
+      homeworkSupplyStreamApi: {
+        endpoint: outputs.custom.homeworkSupplyStreamApi.endpoint,
+        region: outputs.custom.homeworkSupplyStreamApi.region,
+      }
+    }
+  }
+});
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -90,7 +106,9 @@ function MyApp(props) {
         {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
         <CssBaseline />
         <DebugPanelProvider>
-          <Component {...pageProps} />
+          <AuthProvider>
+            <Component {...pageProps} />
+          </AuthProvider>
         </DebugPanelProvider>
       </ThemeProvider>
     </CacheProvider>

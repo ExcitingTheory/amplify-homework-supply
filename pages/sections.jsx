@@ -3,9 +3,6 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import nextI18nextConfig from '../next-i18next.config';
 import { getAmplifyClient } from "../src/utils/amplifyClient";
-import { generateClient } from 'aws-amplify/api';
-
-import { createSectionGroup } from '../src/graphql/mutations';
 
 import PeopleIcon from '@mui/icons-material/People';
 
@@ -33,9 +30,6 @@ import MainToolbar from '../src/components/MainToolbar'
 import MyAuth from "../src/components/authenticator";
 import getCachedUrl from "../src/utils/getCachedUrl";
 import InstructorDashboard from '../src/components/InstructorDashboard';
-
-const client = generateClient();
-
 
 function CardMediaComponent({ s3Key, identityId, level = 'protected' }) {
     const [url, setUrl] = React.useState(null);
@@ -130,21 +124,28 @@ function Sections() {
             }
 
             console.log('createInput', createInput);
+            const client = getAmplifyClient();
 
-            const response = await client.graphql({
-                query: createSectionGroup,
-                variables: createInput,
-            })
+            const response = await client.mutations.createSectionGroup(createInput);
 
             console.log('createSectionGroup.response', response)
 
-            if (response.errors || !response.data?.createSectionGroup) {
+            if (response.errors || !response.data) {
                 throw new Error(response.errors?.[0]?.message || 'Failed to create section');
             }
 
             // Parse the JSON response from Lambda
-            const result = JSON.parse(response.data.createSectionGroup);
+            const result = JSON.parse(response.data);
             console.log('Section created:', result);
+            const newSection = {
+                id: result.sectionId,
+                name: result.name,
+                code: result.code,
+                description: form.get('description').toString(),
+                createdAt: result.createdAt,
+            };
+            
+            setSections(prevSections => [newSection, ...prevSections]);
             
             setIsWorking(false);
             setOpen(false);
@@ -164,7 +165,20 @@ function Sections() {
             next: ({ items }) => {
                 console.log('[Sections] Section subscription update:', items.length, 'sections');
                 console.log('sectionData', items);
-                setSections(items);
+                
+                // Update sections, preserving order and deduplicating
+                setSections(prevSections => {
+                    // Create a map of existing sections by ID
+                    const existingIds = new Set(prevSections.map(s => s.id));
+                    const newSectionIds = new Set(items.map(s => s.id));
+                    
+                    // If no new sections from subscription, keep optimistic updates
+                    if (items.length === 0) return prevSections;
+                    
+                    // Merge: keep optimistic updates that haven't arrived yet, add subscription items
+                    const optimisticOnly = prevSections.filter(s => !newSectionIds.has(s.id));
+                    return [...optimisticOnly, ...items];
+                });
             },
             error: (error) => {
                 console.error('[Sections] Section subscription error:', error);

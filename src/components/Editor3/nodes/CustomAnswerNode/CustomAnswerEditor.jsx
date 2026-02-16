@@ -52,18 +52,12 @@ import { getAmplifyClient } from '../../../../utils/amplifyClient';
 import { $isCustomAnswerNode } from '../../plugins/CustomAnswerPlugin';
 
 import { PromptMethodSelector, AllowedInputSelector } from '../../components/PromptMethodSelector';
-import { generateAudioFile } from '../../../../graphql/mutations';
 import { fetchAuthSession } from 'aws-amplify/auth';
-
-import { generateClient } from 'aws-amplify/api';
 
 import getCachedUrl from '../../../../utils/getCachedUrl';
 import { Remove } from '@mui/icons-material';
 
 const filter = createFilterOptions();
-
-const client = generateClient();
-
 
 const useColumns = (t) => [
     { field: 'prompt', headerName: t('customAnswerEditor.columnHeaders.prompt'), flex: 1, minWidth: 100 },
@@ -393,18 +387,13 @@ export default React.memo(function CustomAnswerEditor({
             tokens: { idToken },
         } = await fetchAuthSession()
         // send graphql mutation to create new audio file
+        const client = getAmplifyClient();
 
-        const fileGenerator = await client.graphql({
-            query: generateAudioFile,
-            variables: {
-                phrase: prompt,
-                voice: 'shimmer',
-                model: 'tts-1-hd',
-            }
-        },
-            {
-                'x-api-identity': idToken.toString(),
-            });
+        const fileGenerator = await client.mutations.generateAudioFile({
+            phrase: prompt,
+            voice: 'shimmer',
+            model: 'tts-1-hd',
+        });
 
         // set the presignedUrl from the response
 

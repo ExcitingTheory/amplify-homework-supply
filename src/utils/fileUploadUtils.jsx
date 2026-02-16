@@ -4,7 +4,6 @@
  */
 
 import { uploadData } from 'aws-amplify/storage';
-import { generateClient } from 'aws-amplify/api';
 import { getAmplifyClient } from './amplifyClient';
 // Type import removed - not needed in runtime JS
 import { calculateWaveformData } from './calculateWaveformData';
@@ -15,65 +14,9 @@ import {
     ACCEPTABLE_FILE_TYPES,
     ACCEPTABLE_IMAGE_TYPES,
 } from '../components/Editor3/plugins/DragDropPastePlugin';
-import { generateEmbedding } from '../graphql/mutations';
 
-const client = generateClient();
-
-const analyzeDocumentMutation = /* GraphQL */ `
-  mutation AnalyzeDocument($fileID: ID!) {
-    analyzeDocument(fileID: $fileID) {
-      success
-      fileID
-      documentID
-      responseId
-      pageCount
-      message
-    }
-  }
-`;
-
-const cancelDocumentAnalysisMutation = /* GraphQL */ `
-  mutation CancelDocumentAnalysis($fileID: ID!) {
-    cancelDocumentAnalysis(fileID: $fileID) {
-      success
-      fileID
-      documentID
-      message
-    }
-  }
-`;
-
-const generateEmbeddingsMutation = /* GraphQL */ `
-  mutation GenerateEmbeddings($fileID: ID!) {
-    generateEmbeddings(fileID: $fileID) {
-      success
-      fileID
-      documentID
-      embeddingCount
-      message
-    }
-  }
-`;
-
-const generateEmbeddingMutation = /* GraphQL */ `
-  mutation GenerateEmbedding(
-    $content: String!
-    $model: String
-    $dimensions: Int
-  ) {
-    generateEmbedding(
-      content: $content
-      model: $model
-      dimensions: $dimensions
-    ) {
-      success
-      embedding
-      model
-      dimensions
-      message
-    }
-  }
-`;
+// Gen 2: Custom mutations/queries are accessed via client.mutations/queries
+// No need to define GraphQL strings - schema handles this
 
 /**
  * Trigger embedding generation for a file
@@ -82,41 +25,30 @@ const generateEmbeddingMutation = /* GraphQL */ `
  */
 export async function generateEmbeddings(fileID) {
     try {
-        const result = await client.graphql({
-            query: generateEmbeddingsMutation,
-            variables: { fileID }
-        });
+        const client = getAmplifyClient();
+        const { data, errors } = await client.mutations.generateEmbeddings({ fileID });
 
-        if (result.data?.generateEmbeddings?.success) {
-            console.log('Embeddings generation started:', result.data.generateEmbeddings);
-            return result.data.generateEmbeddings;
-        } else {
-            throw new Error(result.data?.generateEmbeddings?.message || 'Embeddings generation failed');
+        if (errors || !data?.success) {
+            throw new Error(data?.message || 'Embeddings generation failed');
         }
+        
+        console.log('Embeddings generation started:', data);
+        return data;
     } catch (error) {
         console.error('Error in generateEmbeddings:', error);
-        
-        // Handle GraphQL errors
-        if (error.errors && error.errors.length > 0) {
-            const graphQLError = error.errors[0];
-            throw new Error(graphQLError.message || 'Failed to generate embeddings');
-        }
-        
         throw new Error(error.message || 'Failed to generate embeddings - unknown error');
     }
 }
 
 async function triggerEmbeddingGeneration(fileID) {
     try {
-        const result = await client.graphql({
-            query: generateEmbeddingsMutation,
-            variables: { fileID }
-        });
+        const client = getAmplifyClient();
+        const { data, errors } = await client.mutations.generateEmbeddings({ fileID });
         
-        if (result.data?.generateEmbeddings?.success) {
-            console.log('[Embedding] Started background processing for file:', fileID);
+        if (errors || !data?.success) {
+            console.warn('[Embedding] Failed to start:', data?.message);
         } else {
-            console.warn('[Embedding] Failed to start:', result.data?.generateEmbeddings?.message);
+            console.log('[Embedding] Started background processing for file:', fileID);
         }
     } catch (error) {
         console.error('[Embedding] Error starting generation:', error);
@@ -132,15 +64,13 @@ async function triggerEmbeddingGeneration(fileID) {
  */
 async function triggerEmbeddingsGeneration(fileID) {
     try {
-        const result = await client.graphql({
-            query: generateEmbeddingsMutation,
-            variables: { fileID }
-        });
+        const client = getAmplifyClient();
+        const { data, errors } = await client.mutations.generateEmbeddings({ fileID });
         
-        if (result.data?.generateEmbeddings?.success) {
-            console.log('[Embeddings] Started background processing for file:', fileID);
+        if (errors || !data?.success) {
+            console.warn('[Embeddings] Failed to start:', data?.message);
         } else {
-            console.warn('[Embeddings] Failed to start:', result.data?.generateEmbeddings?.message);
+            console.log('[Embeddings] Started background processing for file:', fileID);
         }
     } catch (error) {
         console.error('[Embeddings] Error starting generation:', error);
@@ -312,38 +242,32 @@ async function waitForDocumentSync(documentId) {
  */
 export async function analyzePDF(fileID) {
     try {
-        const result = await client.graphql({
-            query: analyzeDocumentMutation,
-            variables: { fileID }
-        });
+        const client = getAmplifyClient();
+        const { data, errors } = await client.mutations.analyzeDocument({ fileID });
 
-        // Check if the mutation returned null (Lambda error or conflict)
-        if (!result.data.analyzeDocument) {
-            // Check for specific error types in errors array
-            if (result.errors && result.errors.length > 0) {
-                const error = result.errors[0];
-                
-                // Handle conflict errors
-                if (error.errorType === 'ConflictUnhandled' || error.message?.includes('Conflict resolver rejects')) {
-                    throw new Error('Document is currently being processed. Please wait a moment and try again.');
-                }
-                
-                // Handle Lambda errors
-                if (error.errorType === 'Lambda:Unhandled') {
-                    throw new Error('Server error while analyzing PDF. Please check the document and try again.');
-                }
-                
-                throw new Error(error.message || 'Analysis request failed');
+        // Check for errors
+        if (errors && errors.length > 0) {
+            const error = errors[0];
+            
+            // Handle conflict errors
+            if (error.errorType === 'ConflictUnhandled' || error.message?.includes('Conflict resolver rejects')) {
+                throw new Error('Document is currently being processed. Please wait a moment and try again.');
             }
-            throw new Error('Analysis request returned no data');
+            
+            // Handle Lambda errors
+            if (error.errorType === 'Lambda:Unhandled') {
+                throw new Error('Server error while analyzing PDF. Please check the document and try again.');
+            }
+            
+            throw new Error(error.message || 'Analysis request failed');
+        }
+        
+        if (!data || !data.success) {
+            throw new Error(data?.message || 'Analysis failed');
         }
 
-        if (result.data.analyzeDocument.success) {
-            console.log('Document analysis started:', result.data.analyzeDocument);
-            return result.data.analyzeDocument;
-        } else {
-            throw new Error(result.data.analyzeDocument.message || 'Analysis failed');
-        }
+        console.log('Document analysis started:', data);
+        return data;
     } catch (error) {
         console.error('Error in analyzePDF:', error);
         
@@ -352,15 +276,6 @@ export async function analyzePDF(fileID) {
             error.message?.includes('Server error') ||
             error.message?.includes('Document is')) {
             throw error;
-        }
-        
-        // Handle GraphQL errors
-        if (error.errors && error.errors.length > 0) {
-            const graphQLError = error.errors[0];
-            if (graphQLError.errorType === 'ConflictUnhandled' || graphQLError.message?.includes('Conflict resolver')) {
-                throw new Error('Document is currently being processed. Please wait and try again.');
-            }
-            throw new Error(graphQLError.message || 'Failed to analyze PDF');
         }
         
         throw new Error(error.message || 'Failed to analyze PDF - unknown error');
@@ -373,17 +288,15 @@ export async function analyzePDF(fileID) {
  * @returns {Promise<Object>} Cancellation result
  */
 export async function cancelPDFAnalysis(fileId) {
-    const result = await client.graphql({
-        query: cancelDocumentAnalysisMutation,
-        variables: { fileID: fileId }
-    });
+    const client = getAmplifyClient();
+    const { data, errors } = await client.mutations.cancelDocumentAnalysis({ fileID: fileId });
 
-    if (result.data.cancelDocumentAnalysis.success) {
-        console.log('Document analysis cancelled:', result.data.cancelDocumentAnalysis);
-        return result.data.cancelDocumentAnalysis;
-    } else {
-        throw new Error(result.data.cancelDocumentAnalysis.message || 'Cancellation failed');
+    if (errors || !data?.success) {
+        throw new Error(data?.message || 'Cancellation failed');
     }
+    
+    console.log('Document analysis cancelled:', data);
+    return data;
 }
 
 /**

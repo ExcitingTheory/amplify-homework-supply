@@ -14,7 +14,6 @@
  * clearEmbeddingCache(); // Clear all cached query embeddings
  */
 
-import { generateClient } from 'aws-amplify/api';
 import { getAmplifyClient } from './amplifyClient';
 // Note: Type import commented out for .js file
 // import type { Schema } from '../../amplify/data/resource';
@@ -24,20 +23,6 @@ import {
   extractMultiple,
   extractWithSectionMarkers 
 } from './headlessEditorExtractor';
-
-const client = generateClient();
-
-// GraphQL mutation for generating embeddings (you'll need to add this to your schema)
-const generateEmbeddingMutation = /* GraphQL */ `
-  mutation GenerateEmbedding($text: String!, $model: String, $dimensions: Int) {
-    generateEmbedding(text: $text, model: $model, dimensions: $dimensions) {
-      embedding
-      model
-      dimensions
-      tokenCount
-    }
-  }
-`;
 
 // In-memory cache for query embeddings
 const embeddingCache = new Map();
@@ -222,16 +207,14 @@ export async function generateEmbedding(text, options = {}) {
   
   try {
     console.log('[Embedding] Generating new embedding for:', text.substring(0, 50));
-    const response = await client.graphql({
-      query: generateEmbeddingMutation,
-      variables: {
-        text: text.trim(),
-        model,
-        dimensions
-      }
+    const client = getAmplifyClient();
+    const response = await client.mutations.generateEmbedding({
+      text: text.trim(),
+      model,
+      dimensions
     });
     
-    const embedding = response.data.generateEmbedding.embedding;
+    const embedding = response.data?.embedding;
     
     // Cache the result
     setCachedEmbedding(text, model, dimensions, embedding);

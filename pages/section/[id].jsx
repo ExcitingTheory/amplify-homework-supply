@@ -4,8 +4,6 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import nextI18nextConfig from '../../next-i18next.config';
 import { getAmplifyClient } from '../../src/utils/amplifyClient';
 import { fetchUserAttributes, getCurrentUser } from "aws-amplify/auth";
-import { createSectionGroup } from '../../src/graphql/mutations';
-import { listSectionStudents } from '../../src/graphql/queries';
 import { uploadData } from 'aws-amplify/storage';
 
 import { useRouter } from 'next/router'
@@ -637,19 +635,17 @@ function SectionDetail({ user, signOut }) {
       }
 
       // console.log('fetchSectionStudents.user.username === section.owner', user.username, section.owner)
+      const client = getAmplifyClient();
 
-      const _sectionStudents = await client.graphql({
-        query: listSectionStudents,
-        variables: {
-          sectionCode: section.code,
-        }
-      })
+      const _sectionStudents = await client.queries.listSectionStudents({
+        sectionCode: section.code,
+      });
 
       console.log('_sectionStudents', _sectionStudents)
 
       const sectionStudentsData = {}
-      console.log('_sectionStudents', _sectionStudents.data.listSectionStudents)
-      _sectionStudents.data.listSectionStudents.forEach((sectionStudent) => {
+      console.log('_sectionStudents', _sectionStudents.data)
+      _sectionStudents.data.forEach((sectionStudent) => {
         sectionStudentsData[sectionStudent.id] = sectionStudent
       })
 

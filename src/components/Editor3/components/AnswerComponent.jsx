@@ -6,11 +6,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import { useTranslation } from 'next-i18next';
-import {
-    verifyWord,
-    verifyDefinition,
-} from "../../../graphql/queries";
-import { generateClient } from 'aws-amplify/api';
+import { getAmplifyClient } from '../../../utils/amplifyClient';
 
 import { useEffect, useState, useRef } from 'react';
 
@@ -81,9 +77,6 @@ function SignedAudioPlayer({ audioKey, identityId, waveformData, width, height, 
     />
   );
 }
-
-
-const client = generateClient();
 
 function LinearProgressWithLabel({ value }) {
     return (
@@ -431,19 +424,16 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                             minWidth: 'fit-content',
                         }}
 
-                        onClick={() => {
-                            // verify definition
-                            // verifyDefinition(word: String!, expected: String!, definition: String!, model: String): String @function(name: "openai-${env}")
+onClick={async () => {
+                        // verify definition
+                        // verifyDefinition(word: String!, expected: String!, definition: String!, model: String): String @function(name: "openai-${env}")
+                            const client = getAmplifyClient();
 
-
-                            const response = client.graphql({
-                                query: verifyDefinition,
-                                variables: {
-                                    word: dictionary[wordId]?.phrase,
-                                    expected: dictionary[wordId]?.definition,
-                                    definition: answers[key],
-                                    model: 'gpt-3.5-turbo',
-                                },
+                            const response = await client.queries.verifyDefinition({
+                                word: dictionary[wordId]?.phrase,
+                                expected: dictionary[wordId]?.definition,
+                                definition: answers[key],
+                                model: 'gpt-3.5-turbo',
                             });
 
                             console.log('response', response);
@@ -677,14 +667,12 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                         // verify word 
                         //   verifyWord(word: String!, expected: String!, definition: String!, model: String): String @function(name: "openai-${env}")
                         // "{"id":"chatcmpl-9PctoIeFEcMWLkBVRUWkbc2M0TLQM","object":"chat.completion","created":1715894756,"model":"gpt-3.5-turbo-0125","choices":[{"index":0,"message":{"role":"assistant","content":"{\"answer\": false, \"reason\": \"because the definition is this instead\"}"},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":107,"completion_tokens":16,"total_tokens":123},"system_fingerprint":null}"
-                        const response = await client.graphql({
-                            query: verifyWord,
-                            variables: {
-                                word: answers[key],
-                                expected: dictionary[wordId]?.phrase,
-                                definition: dictionary[wordId]?.definition,
-                                model: 'gpt-3.5-turbo',
-                            },
+                        const client = getAmplifyClient();
+                        const response = await client.queries.verifyWord({
+                            word: answers[key],
+                            expected: dictionary[wordId]?.phrase,
+                            definition: dictionary[wordId]?.definition,
+                            model: 'gpt-3.5-turbo',
                         });
 
                         const mainData = JSON.parse(response?.data?.verifyWord) || {};

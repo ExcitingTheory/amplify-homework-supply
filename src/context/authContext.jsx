@@ -1,4 +1,6 @@
 import React from "react";
+import { fetchUserAttributes, fetchAuthSession } from 'aws-amplify/auth';
+import { Hub } from 'aws-amplify/utils';
 
 const AuthContext = React.createContext();
 
@@ -9,19 +11,45 @@ const AuthProvider = ({ children }) => {
         user: undefined,
         session: undefined,
       });
+      
       const fetchCurrentUserAttributes = React.useCallback(async () => {
         setResult((prevResult) => ({ ...prevResult, isLoading: true }));
         try {
-          const attributes = await fetchUserAttributes();
-          // console.log('fetchCurrentUserAttributes', attributes);
+          // Add timeout to prevent hanging indefinitely
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Authentication timeout')), 10000)
+          );
+          
+          const attributesPromise = fetchUserAttributes();
+          const attributes = await Promise.race([attributesPromise, timeoutPromise]);
+          
+          const sessionPromise = fetchAuthSession();
           const {
             identityId,
             tokens: { idToken },
-          } = await fetchAuthSession();
-          // console.log(JSON.stringify({ user: { attributes }, session: { identityId, idToken }, isLoading: false }));
+          } = await Promise.race([sessionPromise, timeoutPromise]);
+          
           setResult({ user: { attributes }, session: { identityId, idToken }, isLoading: false });
         } catch (error) {
-          setResult({ error, isLoading: false });
+          // Handle unauthenticated state gracefully - this is expected when user is not signed in
+          if (error.name === 'UserUnAuthenticatedException' || 
+              error.message?.includes('not authenticated') ||
+              error.message?.includes('No current user') ||
+              error.message?.includes('NoSignedUser')) {
+            console.log('[AuthContext] User not authenticated');
+            
+            // Store current URL for redirect after login (but not for the home page)
+            if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+              const returnUrl = window.location.pathname + window.location.search;
+              sessionStorage.setItem('returnUrl', returnUrl);
+              console.log('[AuthContext] Stored return URL:', returnUrl);
+            }
+            
+            setResult({ user: undefined, session: undefined, isLoading: false, error: undefined });
+          } else {
+            console.error('[AuthContext] Authentication error:', error);
+            setResult({ error, isLoading: false, user: undefined, session: undefined });
+          }
         }
       }, []);
       const handleAuth = React.useCallback(

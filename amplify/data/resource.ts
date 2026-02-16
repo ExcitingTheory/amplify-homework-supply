@@ -187,9 +187,8 @@ const schema = a.schema({
       allow.group('Instructors').to(['create']),
       // Learners can read all units (for published/assigned content)
       allow.group('Learners').to(['read']),
-      // Dynamic groups for section-based access
-      allow.groupsDefinedIn('readableGroups').to(['read']),
-      allow.groupsDefinedIn('writableGroups').to(['update']),
+      // Note: readableGroups/writableGroups used for client-side filtering
+      // Cannot use allow.groupsDefinedIn() - it generates invalid containsAny subscription filters
     ]),
 
   Assignment: a
@@ -216,10 +215,11 @@ const schema = a.schema({
       allow.owner(),
       // Admins have full access
       allow.group('Admins'),
-      // Dynamic group authorization: instructors and learners can read
-      allow.groupsDefinedIn('readableGroups').to(['read']),
-      // Dynamic group authorization: only instructors can update
-      allow.groupsDefinedIn('writableGroups').to(['update']),
+      // Instructors and Learners have access based on section membership
+      allow.group('Instructors'),
+      allow.group('Learners').to(['read']),
+      // Note: readableGroups/writableGroups used for client-side filtering
+      // Cannot use allow.groupsDefinedIn() - it generates invalid containsAny subscription filters
     ]),
 
   Grade: a
@@ -287,9 +287,11 @@ const schema = a.schema({
     .authorization((allow) => [
       allow.owner(),
       allow.group('Admins'),
-      allow.authenticated(),
-      allow.groupsDefinedIn('readableGroups').to(['read']),
-      allow.groupsDefinedIn('writableGroups').to(['update']),
+      allow.group('Instructors'),
+      allow.group('Learners').to(['read']),
+      allow.authenticated().to(['read']), // Allow authenticated users to find sections by code
+      // Note: readableGroups/writableGroups used for client-side filtering
+      // Cannot use allow.groupsDefinedIn() - it generates invalid containsAny subscription filters
     ]),
 
   // ========================================================================
@@ -601,11 +603,10 @@ const schema = a.schema({
       allow.group('Admins'),
       // Instructors can create and manage documents
       allow.group('Instructors'),
-      // Dynamic group authorization: section instructors and learners can read
-      // This enables collaborative document analysis within sections
-      allow.groupsDefinedIn('readableGroups').to(['read']),
-      // Dynamic group authorization: only instructors can update
-      allow.groupsDefinedIn('writableGroups').to(['update']),
+      // Learners can read documents (section-based access controlled by Lambda/client-side)
+      allow.group('Learners').to(['read']),
+      // Note: readableGroups/writableGroups used for client-side filtering
+      // Cannot use allow.groupsDefinedIn() - it generates invalid containsAny subscription filters
     ]),
 
   ParsedContent: a
