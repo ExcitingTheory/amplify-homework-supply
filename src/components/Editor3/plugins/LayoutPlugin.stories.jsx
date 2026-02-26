@@ -28,6 +28,7 @@ export default {
   component: LayoutPlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

@@ -80,6 +80,7 @@ export default {
   component: AnswerPlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
     docs: {
       description: {
         component: 'Examples of vocabulary exercises that accept audio recordings and drawings as answers.',

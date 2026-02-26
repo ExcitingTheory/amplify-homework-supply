@@ -28,6 +28,7 @@ export default {
   component: FloatingLinkEditorPlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

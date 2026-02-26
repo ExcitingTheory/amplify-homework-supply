@@ -138,18 +138,18 @@ export const LargeDataSet: Story = {
       localStorage: Object.fromEntries(
         Array.from({ length: 20 }, (_, i) => [`key-${i}`, `value-${i}`])
       ),
-      componentTree: Array.from({ length: 50 }, (_, i) => ({
+      componentTree: JSON.stringify(Array.from({ length: 50 }, (_, i) => ({
         id: `component-${i}`,
         name: `Component${i}`,
         props: { id: i, active: i % 2 === 0 },
         state: { count: i },
         renderCount: Math.floor(Math.random() * 10) + 1,
-      })),
-      logs: Array.from({ length: 100 }, (_, i) => ({
+      }))),
+      logs: JSON.stringify(Array.from({ length: 100 }, (_, i) => ({
         timestamp: Date.now() - i * 1000,
         level: (['info', 'warn', 'error'] as const)[i % 3],
         message: `Log message ${i}`,
-      })),
+      }))),
     },
     onRefresh: () => console.log('Refresh clicked'),
     onExport: (snapshot) => console.log('Export:', snapshot),

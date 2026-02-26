@@ -2,7 +2,7 @@ import React from 'react';
 import { within, waitFor, screen, waitForElementToBeRemoved } from 'storybook/test';
 import Editor, { Workbook } from './index';
 import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
-import { clearMockData, initializeMockData, seedMockUnit, seedMockFiles, seedMockWords, seedMockQuestions, seedMockQuestionUnits } from '../../../.storybook/__mocks__/aws-amplify-data';
+import { clearMockData, initializeMockData, seedMockUnit, seedMockFiles, seedMockWords, seedMockQuestions, seedMockQuestionUnits, seedMockSections } from '../../../.storybook/__mocks__/aws-amplify-data';
 const { MOCK_AUDIO_BASE64, mockWaveformData, MOCK_IMAGE_URL_1, MOCK_IMAGE_URL_2 } = await import('../../../.storybook/__mocks__/media');
 const { 
   MOCK_JAPANESE_GRAMMAR_PDF, 
@@ -322,14 +322,42 @@ export const EmptyEditorCustomBlocks = {
         _version: 1,
         owner: 'mock-user-sub',
       });
+      
+      // Seed sections for assignment dropdown
+      seedMockSections([
+        {
+          id: 'section-1',
+          name: 'Section 1',
+          description: 'Test section for assignments',
+          owner: 'student-alice-sub', // Must match mock user's sub
+          code: 'SEC1',
+          status: 'PUBLISHED',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          _version: 1,
+        },
+        {
+          id: 'section-2',
+          name: 'Section 2',
+          description: 'Another test section',
+          owner: 'student-alice-sub', // Must match mock user's sub
+          code: 'SEC2',
+          status: 'PUBLISHED',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          _version: 1,
+        },
+      ]);
     },
   ],
   render: () => <Editor />,
   parameters: {
     unitId: 'empty-editor-custom-blocksid',
     initializeMockData: false,
+    clearMockData: false, // Don't clear mock data since we're seeding it in the loader
   },
-  play: async ({ canvas, userEvent }) => {
+  play: async ({ canvasElement, userEvent }) => {
+    const canvas = within(canvasElement);
     // Wait for editor to load - get all textboxes and find the contenteditable editor
     const textboxes = await canvas.findAllByRole('textbox');
     const editorContent = textboxes.find(el => el.getAttribute('contenteditable') === 'true') || textboxes[0];
@@ -384,14 +412,14 @@ export const EmptyEditorCustomBlocks = {
     const dueDateOption = await screen.getByRole('menuitem', { name: /Due Date/i });
     await userEvent.click(dueDateOption);
     // Interact with due date dialog if needed
-    const dueDateInput = await screen.getByRole('textbox', { name: /Set Unit Due Date/i });
-    await userEvent.type(dueDateInput, '2026/01/01 10:00AM');
+    const dueDateInput = await canvas.getByLabelText(/Due Date/i, { selector: 'input[type="datetime-local"]' });
+    await userEvent.type(dueDateInput, '2026-01-01T10:00');
     // MUI Select renders multiple elements with role="combobox", so we select the first one
-    const selectSections = canvas.getAllByRole('combobox', { name: /Select Section/i });
+    const selectSections = canvas.getAllByRole('combobox', { name: /Section/i });
     const selectSection = selectSections[0];
     await userEvent.click(selectSection);
-    // Select first option
-    const firstSectionOption = await screen.getByRole('option', { name: /Section 1/i });
+    // Wait for sections to load and select first option
+    const firstSectionOption = await waitFor(() => screen.getByRole('option', { name: /Section 1/i }), { timeout: 5000 });
     await userEvent.click(firstSectionOption);
     // Confirm due date
     const confirmDueDateBtn = await screen.getByRole('button', { name: /^Add due date to Unit$/i });

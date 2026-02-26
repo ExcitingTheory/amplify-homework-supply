@@ -478,6 +478,7 @@ export const Default = {
   loaders: [seedMockData],
   parameters: {
     layout: 'fullscreen', // Remove Storybook's default padding
+    initializeMockData: false,
   },
   render: () => (
     <FileManagerWrapper showDebug={true}>
@@ -497,6 +498,7 @@ export const WithExpandedContent = {
   loaders: [seedMockData],
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
   render: () => (
     <FileManagerWrapper>
@@ -534,6 +536,7 @@ export const ExpandedPDFContent = {
   loaders: [seedMockData],
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
   render: () => (
     <FileManagerWrapper>

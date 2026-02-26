@@ -27,6 +27,7 @@ export default {
   component: DragDropPastePlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

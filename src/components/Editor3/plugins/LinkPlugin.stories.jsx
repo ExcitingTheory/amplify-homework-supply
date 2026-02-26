@@ -26,6 +26,7 @@ export default {
   component: LinkPlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

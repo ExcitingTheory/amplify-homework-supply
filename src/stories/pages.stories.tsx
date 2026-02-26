@@ -15,16 +15,17 @@
  * @module stories/pages.stories
  */
 
-// Import page components
-// Note: These are wrapped with MyAuth so we need to provide mock auth context
+// Import page components lazily to avoid breaking Vitest browser mode
 import React from 'react';
-import IndexPage from '../../pages/index.jsx';
-import ProfilePage from '../../pages/profile.jsx';
-import SectionsPage from '../../pages/sections.jsx';
-import UnitsPage from '../../pages/units.jsx';
-import { SectionDetail as SectionDetailPage } from '../../pages/section/[id].jsx';
-import UnitDetailPage from '../../pages/unit/[id].jsx';
-import WorkbookPage from '../../pages/workbook/[id].jsx';
+
+// Lazy load page components
+const IndexPage = React.lazy(() => import('../../pages/index.jsx'));
+const ProfilePage = React.lazy(() => import('../../pages/profile.jsx'));
+const SectionsPage = React.lazy(() => import('../../pages/sections.jsx'));
+const UnitsPage = React.lazy(() => import('../../pages/units.jsx'));
+const SectionDetailPage = React.lazy(() => import('../../pages/section/[id].jsx').then(m => ({ default: m.SectionDetail })));
+const UnitDetailPage = React.lazy(() => import('../../pages/unit/[id].jsx'));
+const WorkbookPage = React.lazy(() => import('../../pages/workbook/[id].jsx'));
 
 // Mock data imports
 import { seedIndexPageData } from '../../.storybook/__mocks__/index-page-examples';
@@ -114,18 +115,22 @@ export const Index = {
       );
     },
   ],
-  render: () => <IndexPage
-    user={{
-      username: 'student-alice-sub',
-      userId: 'student-alice-sub',
-      attributes: {
-        sub: 'student-alice-sub',
-        email: 'alice@example.com',
-      },
-      groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
-    }}
-    signOut={() => console.log('Sign out clicked')}
-  />,
+  render: () => (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <IndexPage
+        user={{
+          username: 'student-alice-sub',
+          userId: 'student-alice-sub',
+          attributes: {
+            sub: 'student-alice-sub',
+            email: 'alice@example.com',
+          },
+          groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
+        }}
+        signOut={() => console.log('Sign out clicked')}
+      />
+    </React.Suspense>
+  ),
   parameters: {
     docs: {
       description: {
@@ -154,7 +159,11 @@ export const Profile = {
       return <Story />;
     },
   ],
-  render: () => <ProfilePage />,
+  render: () => (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <ProfilePage />
+    </React.Suspense>
+  ),
   parameters: {
     docs: {
       description: {
@@ -184,7 +193,11 @@ export const Sections = {
       return <Story />;
     },
   ],
-  render: () => <SectionsPage />,
+  render: () => (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <SectionsPage />
+    </React.Suspense>
+  ),
   parameters: {
     docs: {
       description: {
@@ -215,7 +228,11 @@ export const Units = {
       return <Story />;
     },
   ],
-  render: () => <UnitsPage />,
+  render: () => (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <UnitsPage />
+    </React.Suspense>
+  ),
   parameters: {
     docs: {
       description: {
@@ -260,13 +277,17 @@ export const SectionDetail = {
       return <FilesProvider><Story /></FilesProvider>;
     },
   ],
-  render: () => <SectionDetailPage
-    user={{
-      username: 'teacher-1',
-      attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
-    }}
-    signOut={() => console.log('Sign out clicked')}
-  />,
+  render: () => (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <SectionDetailPage
+        user={{
+          username: 'teacher-1',
+          attributes: { sub: 'teacher-1', email: 'teacher@example.com' },
+        }}
+        signOut={() => console.log('Sign out clicked')}
+      />
+    </React.Suspense>
+  ),
   parameters: {
     nextRouter: {
       pathname: '/section/[id]',
@@ -305,13 +326,17 @@ export const SectionDetailStudent = {
       return <FilesProvider><Story /></FilesProvider>;
     },
   ],
-  render: () => <SectionDetailPage
-    user={{
-      username: 'student-alice-sub',
-      attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' },
-    }}
-    signOut={() => console.log('Sign out clicked')}
-  />,
+  render: () => (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <SectionDetailPage
+        user={{
+          username: 'student-alice-sub',
+          attributes: { sub: 'student-alice-sub', email: 'alice@example.com', name: 'Alice Johnson' },
+        }}
+        signOut={() => console.log('Sign out clicked')}
+      />
+    </React.Suspense>
+  ),
   parameters: {
     nextRouter: {
       pathname: '/section/[id]',
@@ -348,7 +373,11 @@ export const UnitDetail = {
       return <FilesProvider><Story /></FilesProvider>;
     },
   ],
-  render: () => <UnitDetailPage />,
+  render: () => (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <UnitDetailPage />
+    </React.Suspense>
+  ),
   parameters: {
     nextRouter: {
       pathname: '/unit/[id]',
@@ -384,7 +413,11 @@ export const Workbook = {
       return <FilesProvider><Story /></FilesProvider>;
     },
   ],
-  render: () => <WorkbookPage />,
+  render: () => (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <WorkbookPage />
+    </React.Suspense>
+  ),
   parameters: {
     nextRouter: {
       pathname: '/workbook/[id]',
@@ -415,10 +448,14 @@ export const IndexNoSections = {
       return <FilesProvider><Story /></FilesProvider>;
     },
   ],
-  render: () => <IndexPage
-    user={{ username: 'new-student', attributes: { sub: 'new-student', email: 'new.student@example.com' } }}
-    signOut={() => console.log('Sign out')}
-  />,
+  render: () => (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <IndexPage
+        user={{ username: 'new-student', attributes: { sub: 'new-student', email: 'new.student@example.com' } }}
+        signOut={() => console.log('Sign out')}
+      />
+    </React.Suspense>
+  ),
   parameters: {
     docs: {
       description: {
@@ -445,7 +482,11 @@ export const UnitsEmptyState = {
       return <Story />;
     },
   ],
-  render: () => <UnitsPage />,
+  render: () => (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <UnitsPage />
+    </React.Suspense>
+  ),
   parameters: {
     docs: {
       description: {
@@ -472,7 +513,11 @@ export const SectionsEmptyState = {
       return <Story />;
     },
   ],
-  render: () => <SectionsPage />,
+  render: () => (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <SectionsPage />
+    </React.Suspense>
+  ),
   parameters: {
     docs: {
       description: {
@@ -498,7 +543,11 @@ export const ProfilePasswordChange = {
       return <Story />;
     },
   ],
-  render: () => <ProfilePage />,
+  render: () => (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <ProfilePage />
+    </React.Suspense>
+  ),
   parameters: {
     docs: {
       description: {
@@ -525,7 +574,11 @@ export const WorkbookTimedExercise = {
       return <FilesProvider><Story /></FilesProvider>;
     },
   ],
-  render: () => <WorkbookPage />,
+  render: () => (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <WorkbookPage />
+    </React.Suspense>
+  ),
   parameters: {
     nextRouter: {
       pathname: '/workbook/[id]',
@@ -556,14 +609,18 @@ export const IndexAssignments = {
       return <FilesProvider><Story /></FilesProvider>;
     },
   ],
-  render: () => <IndexPage
-    user={{
-      username: 'student-alice-sub',
-      attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
-      groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
-    }}
-    signOut={() => console.log('Sign out')}
-  />,
+  render: () => (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <IndexPage
+        user={{
+          username: 'student-alice-sub',
+          attributes: { sub: 'student-alice-sub', email: 'alice@example.com' },
+          groups: ['section-jpn-101-learners', 'section-jpn-102-learners'],
+        }}
+        signOut={() => console.log('Sign out')}
+      />
+    </React.Suspense>
+  ),
   parameters: {
     docs: {
       description: {

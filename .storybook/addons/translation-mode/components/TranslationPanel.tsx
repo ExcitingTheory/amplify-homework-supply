@@ -5,7 +5,6 @@ import {
   Typography,
   TextField,
   Button,
-  IconButton,
   Divider,
   Chip,
   Alert,
@@ -108,9 +107,18 @@ export const TranslationPanel: React.FC = () => {
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h6">Edit Translation</Typography>
-        <IconButton onClick={handleClose} size="small">
+        <Button 
+          onClick={handleClose} 
+          size="small"
+          sx={{ 
+            minWidth: 'auto', 
+            color: 'inherit',
+            p: 0.5,
+          }}
+          ariaLabel="Close translation panel"
+        >
           <CloseIcon />
-        </IconButton>
+        </Button>
       </Box>
 
       <Box sx={{ mb: 3 }}>

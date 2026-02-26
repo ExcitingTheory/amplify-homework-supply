@@ -9,8 +9,33 @@ export default defineConfig({
     screenshotOnRunFailure: true,
     defaultCommandTimeout: 10000,
     pageLoadTimeout: 30000,
-    setupNodeEvents(_on, _config) {
-      // implement node event listeners here
+    
+    // Support multiple test environments
+    env: {
+      storybookUrl: "http://localhost:6006",
+      devServerUrl: "http://localhost:3000",
     },
+    
+    setupNodeEvents(on, config) {
+      // Custom task for console logging in tests
+      on('task', {
+        log(message: string) {
+          console.log(message);
+          return null;
+        },
+      });
+
+      return config;
+    },
+  },
+  
+  // Configure reports directory
+  screenshotsFolder: 'cypress/screenshots',
+  videosFolder: 'cypress/videos',
+  
+  // Retry configuration for flaky tests
+  retries: {
+    runMode: 2,
+    openMode: 0,
   },
 });

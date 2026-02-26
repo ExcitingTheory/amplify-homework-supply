@@ -14,9 +14,53 @@ Webpack aliases in `.storybook/main.js` redirect all imports to these mock files
 'aws-amplify/utils' → '__mocks__/aws-amplify-utils.js'
 'next/router' → '__mocks__/next-router.js'
 '../src/utils/getCachedUrl' → '__mocks__/getCachedUrl.js'
+'src/context/authContext' → '__mocks__/authContext.js'
 ```
 
 ## Mock Files
+
+### `authContext.js`
+Mocks the authentication context provider:
+- Provides mock user and session data
+- Supports customization per story via parameters
+- Prevents auth-dependent contexts from crashing
+
+**Default mock user:**
+```javascript
+{
+  attributes: {
+    sub: 'student-alice-sub',
+    email: 'alice@example.com',
+    name: 'Alice Student',
+  }
+}
+```
+
+**Usage in stories:**
+```jsx
+export const InstructorView = {
+  parameters: {
+    mockAuth: {
+      user: {
+        attributes: {
+          sub: 'instructor-bob-sub',
+          email: 'bob@example.com',
+          name: 'Bob Instructor',
+        },
+      },
+      isLoading: false,
+    },
+  },
+};
+
+export const LoadingState = {
+  parameters: {
+    mockAuth: {
+      isLoading: true,
+    },
+  },
+};
+```
 
 ### `aws-amplify-api.js`
 Mocks the GraphQL client with support for:

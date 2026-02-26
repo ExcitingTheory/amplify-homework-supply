@@ -13,7 +13,7 @@ This directory contains Lexical editor plugins and their corresponding custom no
   - [ColorPicker.js](#colorpickerjs)
   - [CustomAnswerPlugin.js](#customanswerpluginjs)
   - [CustomListPlugin.js](#customlistpluginjs)
-  - [DataPlugin.js](#datapluginjs)
+  - [DataPlugin.tsx](#dataplugintsx)
   - [DragDropPastePlugin.js](#dragdroppastepluginjs)
   - [DraggableBlockPlugin.js](#draggableblockpluginjs)
   - [FloatingLinkEditorPlugin.js](#floatinglinkeditorpluginjs)
@@ -130,15 +130,17 @@ Each plugin typically consists of:
 - Nested list support
 - List conversion utilities
 
-### DataPlugin.js
-**Node Type:** N/A (Data Management Plugin)
+### DataPlugin.tsx
+**Node Type:** N/A (Data Coordination Plugin)
 
-**Usage:** Manages editor state persistence and synchronization with external data sources (DataStore/GraphQL).
+**Usage:** Lightweight coordinator between Yjs real-time collaboration and Amplify DataStore persistence.
 
 **Features:**
-- Auto-save functionality
-- Version control
-- Conflict resolution
+- Minimal coordination layer for Yjs-based saving
+- Future: Force save on unmount
+- Future: Metadata sync independent of editor content
+
+**Migration Note:** With Yjs integration (Phase 1), initial state loading and version tracking are now handled by CollaborationPlugin and useYjsUnit hook. This plugin provides coordination only.
 
 ### DragDropPastePlugin.js
 **Node Type:** N/A (Event Handling Plugin)

@@ -19,7 +19,6 @@ import {
   createTheme,
   Link,
   Collapse,
-  IconButton,
   List,
 } from '@mui/material';
 import { styled, keyframes } from '@mui/material/styles';
@@ -232,20 +231,31 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
    * Get the appropriate story ID based on current mode
    */
   const getStoryIdForMode = (task: OnboardingTaskWithCriteria): string | null => {
-    if (!task.completionCriteria) return null;
+    if (!task.completionCriteria) {
+      console.warn('⚠️ No completionCriteria for task:', task.id);
+      return null;
+    }
     
     const { tutorialStoryId, quizStoryId, storyId } = task.completionCriteria;
     
     // Use mode-specific story ID if available
     if (mode === 'tutorial' && tutorialStoryId) {
+      console.log('✅ Using tutorialStoryId:', tutorialStoryId);
       return tutorialStoryId;
     }
     if (mode === 'quiz' && quizStoryId) {
+      console.log('✅ Using quizStoryId:', quizStoryId);
       return quizStoryId;
     }
     
     // Fall back to legacy single storyId
-    return storyId || null;
+    if (storyId) {
+      console.log('ℹ️ Using fallback storyId:', storyId, 'for mode:', mode);
+      return storyId;
+    }
+    
+    console.warn('⚠️ No story ID available for task:', task.id, 'in mode:', mode);
+    return null;
   };
 
   const getStoryLink = (task: OnboardingTaskWithCriteria): string | null => {
@@ -352,6 +362,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
    */
   const handleTaskClick = (task: OnboardingTaskWithCriteria) => {
     console.log('🎯 Task clicked:', task.id, task.title);
+    console.log('🔍 Current mode:', mode);
     
     // Don't start spotlight for already completed tasks in quiz mode
     if (mode === 'quiz' && completedTasks.has(task.id)) {
@@ -359,32 +370,25 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
       return;
     }
 
-    // In quiz mode, navigate directly to the story without tutorial
-    if (mode === 'quiz') {
-      console.log('🎯 Quiz mode: Navigating directly to task page');
-      const storyId = getStoryIdForMode(task);
-      if (storyId) {
-        handleNavigateToStory(storyId);
-      } else {
-        console.warn('⚠️ No story ID found for quiz mode task:', task.id);
-      }
-      return;
-    }
-
-    // Tutorial mode: Show spotlight tour
-    console.log('✨ Tutorial mode: Starting spotlight tour...');
+    // Both modes: Show spotlight tour with mode-appropriate steps
+    console.log(`✨ ${mode === 'tutorial' ? 'Tutorial' : 'Quiz'} mode: Starting spotlight tour...`);
     setActiveTask(task);
     const steps = generateSpotlightSteps(task);
-    console.log('📋 Generated steps:', steps.length);
+    console.log('📋 Generated steps:', steps.length, 'steps for', mode, 'mode');
     setSpotlightSteps(steps);
     setSpotlightCurrentStep(0);
     setSpotlightOpen(true);
     
-    // Navigate to the story immediately in tutorial mode
+    // Get the correct story ID based on the current mode
     const storyId = getStoryIdForMode(task);
+    console.log('📍 Story ID for', mode, 'mode:', storyId);
+    
     if (storyId) {
-      console.log('📍 Navigating to tutorial story:', storyId);
+      console.log('🚀 Navigating to', mode, 'story:', storyId);
       handleNavigateToStory(storyId);
+    } else {
+      console.warn('⚠️ No story ID found for', mode, 'mode task:', task.id);
+      console.warn('Task completionCriteria:', task.completionCriteria);
     }
   };
 
@@ -537,6 +541,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
               variant="outlined"
               onClick={() => setSelectedPersona(null)}
               sx={{ textTransform: 'none' }}
+              ariaLabel={false}
             >
               Change
             </Button>
@@ -675,7 +680,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                             </Box>
                             
                             {(hasInstructions || storyLink) && (
-                              <IconButton
+                              <Button
                                 size="small"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -685,10 +690,14 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                                   transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                                   transition: 'transform 0.2s',
                                   pointerEvents: 'auto',
+                                  minWidth: 'auto',
+                                  color: 'inherit',
+                                  p: 0.5,
                                 }}
+                                ariaLabel="Expand task details"
                               >
                                 <ExpandMoreIcon fontSize="small" />
-                              </IconButton>
+                              </Button>
                             )}
                           </Box>
 
@@ -778,6 +787,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
             size="small"
             onClick={handleResetProgress}
             sx={{ textTransform: 'none' }}
+            ariaLabel={false}
           >
             Reset Progress
           </Button>

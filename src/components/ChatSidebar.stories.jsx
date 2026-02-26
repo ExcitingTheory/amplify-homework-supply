@@ -131,6 +131,9 @@ Start a conversation with your AI teaching assistant. The chat is empty and read
 };
 
 export const TranslationHelper = {
+  parameters: {
+    initializeMockData: false,
+  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -204,6 +207,9 @@ Use the AI as your translation assistant for creating bilingual content.
 };
 
 export const ContentCreation = {
+  parameters: {
+    initializeMockData: false,
+  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -283,6 +289,9 @@ Let the AI help you brainstorm and create engaging lesson materials.
 };
 
 export const WithFileAttachments = {
+  parameters: {
+    initializeMockData: false,
+  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -332,6 +341,9 @@ export const WithFileAttachments = {
 };
 
 export const QuizGenerator = {
+  parameters: {
+    initializeMockData: false,
+  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -472,6 +484,9 @@ Demonstrates the **insert_quiz** tool creating interactive quiz blocks directly 
 };
 
 export const AnswerBlockGenerator = {
+  parameters: {
+    initializeMockData: false,
+  },
   decorators: [
     (Story) => {
       // Seed mock words for answer block
@@ -588,6 +603,9 @@ Demonstrates the **insert_answer_block** tool creating interactive answer exerci
 };
 
 export const MeaningAssociationGenerator = {
+  parameters: {
+    initializeMockData: false,
+  },
   decorators: [
     (Story) => {
       // Seed mock words for meaning association
@@ -705,6 +723,9 @@ Demonstrates the **insert_meaning_association** tool creating drag-and-drop voca
 };
 
 export const CustomAnswerGenerator = {
+  parameters: {
+    initializeMockData: false,
+  },
   decorators: [
     (Story) => {
       // Seed mock questions for custom answer block
@@ -841,6 +862,9 @@ Demonstrates the **insert_custom_answer** tool creating exercises with specific 
 };
 
 export const GrammarExplainer = {
+  parameters: {
+    initializeMockData: false,
+  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -924,6 +948,9 @@ Get clear explanations of Japanese grammar concepts with examples.
 };
 
 export const ConversationHistory = {
+  parameters: {
+    initializeMockData: false,
+  },
   render: () => (
     <TabProvider>
       <ChatSidebar />
@@ -983,6 +1010,9 @@ The AI understands "it", "that", and "this" in your questions because it remembe
 };
 
 export const ToolCallSearch = {
+  parameters: {
+    initializeMockData: false,
+  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -1097,6 +1127,9 @@ Demonstrates the **search_content** tool in action. When users ask to search for
 };
 
 export const ToolCallCreateUnit = {
+  parameters: {
+    initializeMockData: false,
+  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -1188,6 +1221,9 @@ Shows the **create_unit** tool creating a new learning unit with a timer.
 };
 
 export const ToolCallGenerateContent = {
+  parameters: {
+    initializeMockData: false,
+  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -1396,6 +1432,9 @@ Demonstrates **insert_content_block** tool creating insertable educational conte
 };
 
 export const ToolCallMultiStep = {
+  parameters: {
+    initializeMockData: false,
+  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([

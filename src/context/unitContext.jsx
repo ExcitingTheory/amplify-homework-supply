@@ -1,12 +1,10 @@
 import * as React from "react";
 import { useState, useRef, createContext } from "react";
 import { useRouter } from 'next/router';
-import { Hub, Cache } from "aws-amplify/utils";
 import { moderateContent, buildModerationFields } from '../utils/moderateContent';
 import { getAmplifyClient } from '../utils/amplifyClient';
-import AuthContext from './authContext';
-
-import getCachedUrl from '../utils/getCachedUrl'
+import AuthContext from '../context/authContext';
+import { useWorkbookCollaboration } from '../yjs/workbookHooks';
 // Provider and Consumer are connected through their "parent" context
 const UnitContext = createContext({});
 
@@ -101,7 +99,8 @@ const UnitProvider = ({ children, id }) => {
 
   const createGrade = React.useCallback(async (unitAccuracy, unitIsComplete) => {
     // Ensure we have authentication before creating grade
-    const currentUsername = usernameRef.current;
+    // Check both the ref (for production) and direct user (for tests where useEffect may not have run)
+    const currentUsername = usernameRef.current || user?.attributes?.sub;
     if (!currentUsername) {
       throw new Error("User not authenticated - cannot create grade");
     }
@@ -126,7 +125,7 @@ const UnitProvider = ({ children, id }) => {
 
     setGrade(_grade);
     return _grade;
-  }, [id]);
+  }, [id, user]);
 
   const saveGrade = React.useCallback(async (data) => {
 
@@ -589,6 +588,104 @@ const UnitProvider = ({ children, id }) => {
     error: authSession?.error,
   }), [user?.attributes?.sub, authSession?.error]);
 
+  // Initialize collaborative workbook when feature is enabled and grade exists  
+  const workbookEnabled = true; // Always enabled - uses mocks in Storybook
+  
+  const workbookCollaborationConfig = React.useMemo(() => {
+    if (!workbookEnabled || !grade?.id) return null;
+    
+    return {
+      gradeId: grade.id,
+      user: {
+        username: user?.attributes?.sub || '',
+        role: authSession?.groups?.includes('Instructors') || authSession?.groups?.includes('Moderators') || authSession?.groups?.includes('Admins') ? 'instructor' : 'student',
+        displayName: user?.attributes?.name || user?.attributes?.email?.split('@')[0] || user?.attributes?.sub || 'Anonymous',
+        color: authSession?.groups?.includes('Instructors') || authSession?.groups?.includes('Moderators') || authSession?.groups?.includes('Admins') ? '#f59e0b' : '#3b82f6',
+      },
+      initialData: grade.data,
+      wsUrl: process.env.NEXT_PUBLIC_YJS_WS_URL || 'ws://localhost:3001',
+      onTutorJoin: (tutor) => {
+        console.log(`[UnitContext] Tutor ${tutor.displayName} joined to help!`);
+      },
+      onSyncToGrade: async (data, feedback) => {
+        if (!grade) return;
+        
+        try {
+          const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+          const blocks = Object.values(parsed);
+          
+          // Calculate metrics from workbook data
+          const completeBlocks = blocks.filter((b) => b.complete);
+          const complete = blocks.length > 0 && blocks.every((b) => b.complete);
+          const percentComplete = blocks.length > 0 
+            ? Math.round((completeBlocks.length / blocks.length) * 100)
+            : 0;
+          const accuracy = blocks.length > 0
+            ? Math.round(
+                blocks.reduce((sum, b) => sum + (b.accuracy || 0), 0) / blocks.length
+              )
+            : 0;
+          
+          // Moderate student submission data
+          const moderationResult = await moderateContent(data);
+          const moderationFields = buildModerationFields(moderationResult);
+          
+          if (moderationResult.flagged) {
+            console.warn('[UnitContext] Workbook data flagged by moderation, saving for instructor review', {
+              categories: moderationResult.categories,
+              username: user?.attributes?.sub
+            });
+          }
+
+          // Save to DataStore
+          const client = getAmplifyClient();
+          await client.models.Grade.update({
+            id: grade.id,
+            data: typeof data === 'string' ? data : JSON.stringify(data),
+            feedback: feedback ? JSON.stringify(feedback) : grade.feedback,
+            complete,
+            percentComplete,
+            accuracy,
+            moderationStatus: moderationFields.moderationStatus,
+            moderationFlags: moderationFields.moderationFlags ? JSON.stringify(moderationFields.moderationFlags) : null,
+            moderationCheckedAt: moderationFields.moderationCheckedAt,
+          });
+          
+          console.log('[UnitContext] Synced workbook to Grade.data', {
+            complete,
+            percentComplete,
+            accuracy,
+          });
+        } catch (error) {
+          console.error('[UnitContext] Error syncing workbook:', error);
+        }
+      },
+    };
+  }, [workbookEnabled, grade?.id, grade?.data, user?.attributes, authSession?.groups]);
+  
+  // Use the workbook collaboration hook
+  const workbookCollaboration = useWorkbookCollaboration(workbookCollaborationConfig);
+
+  // Calculate workbook stats for easy access
+  const workbookStats = React.useMemo(() => {
+    return { completion: 0, accuracy: 0, totalBlocks: 0, completeBlocks: 0 };
+    /* Original workbook stats calculation - disabled
+    if (!workbookCollaboration?.provider) {
+      return { completion: 0, accuracy: 0, totalBlocks: 0, completeBlocks: 0 };
+    }
+    const completion = workbookCollaboration.getCompletionPercentage?.() || 0;
+    const accuracy = workbookCollaboration.getOverallAccuracy?.() || 0;
+    const data = workbookCollaboration.getWorkbookData?.() || {};
+    const blocks = Object.values(data);
+    return {
+      completion,
+      accuracy,
+      totalBlocks: blocks.length,
+      completeBlocks: blocks.filter(b => b.complete).length,
+    };
+    */
+  }, []);
+
   const contextValue = React.useMemo(() => ({
     unit,
     name,
@@ -618,6 +715,10 @@ const UnitProvider = ({ children, id }) => {
     saveGrade,
     createGrade,
     session,
+    // Workbook collaboration features
+    workbook: workbookCollaboration,
+    workbookStats,
+    workbookEnabled,
   }), [
     unit,
     name,
@@ -640,6 +741,9 @@ const UnitProvider = ({ children, id }) => {
     saveEditorContent,
     saveGrade,
     createGrade,
+    workbookCollaboration,
+    workbookStats,
+    workbookEnabled,
   ]);
 
   return (

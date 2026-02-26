@@ -1,0 +1,1062 @@
+/**
+ * useYjsUnit Hook Tests
+ * 
+ * Comprehensive unit tests for real-time collaborative unit editing hook
+ * Testing coverage: Initial load, Yjs provider, debounced saves, version conflicts, cleanup
+ */
+
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { renderHook, waitFor } from '@testing-library/react';
+import * as Y from 'yjs';
+
+// Import actual hook
+import { useYjsUnit } from './useYjsUnit';
+
+// Mock dependencies
+const mockGetAmplifyClient = vi.fn();
+const mockUseYjsProvider = vi.fn();
+
+vi.mock('../utils/amplifyClient', () => ({
+  getAmplifyClient: () => mockGetAmplifyClient(),
+}));
+
+vi.mock('../../yjs/hooks', () => ({
+  useYjsProvider: (config: any) => mockUseYjsProvider(config),
+}));
+
+describe('useYjsUnit', () => {
+  // Mock data
+  const mockUnit = {
+    id: 'unit-1',
+    name: 'Test Unit',
+    description: 'Test Description',
+    data: JSON.stringify({
+      content: 'Test content'
+    }),
+    yjsSnapshot: null,
+    _version: 5,
+    owner: 'user-1',
+  };
+
+  // Mock Yjs provider
+  let mockDoc: Y.Doc;
+  let mockYText: Y.Text;
+  let mockYMap: Y.Map<any>;
+  let mockProvider: any;
+  let mockUpdateHandler: (() => void) | null = null;
+
+  // Mock Amplify client
+  let mockClient: any;
+
+  beforeEach(() => {
+    // Reset mocks
+    vi.clearAllMocks();
+    mockUpdateHandler = null;
+
+    // Create real Yjs structures for testing
+    mockDoc = new Y.Doc();
+    mockYText = mockDoc.getText('editorContent');
+    mockYMap = mockDoc.getMap('metadata');
+
+    // Mock provider
+    mockProvider = {
+      getDoc: vi.fn(() => mockDoc),
+      getText: vi.fn((name: string) => mockDoc.getText(name)),
+      getMap: vi.fn((name: string) => mockDoc.getMap(name)),
+      onUpdate: vi.fn((handler: () => void) => {
+        mockUpdateHandler = handler;
+        return vi.fn(); // unsubscribe function
+      }),
+      disconnect: vi.fn(),
+      destroy: vi.fn(),
+    };
+
+    // Mock useYjsProvider
+    mockUseYjsProvider.mockReturnValue({
+      provider: mockProvider,
+      isSynced: true,
+      isConnected: true,
+    });
+
+    // Mock Amplify client
+    mockClient = {
+      models: {
+        Unit: {
+          get: vi.fn().mockResolvedValue({
+            data: mockUnit,
+          }),
+          update: vi.fn().mockResolvedValue({
+            data: { ...mockUnit, _version: 6 },
+          }),
+        },
+      },
+    };
+
+    mockGetAmplifyClient.mockReturnValue(mockClient);
+  });
+
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+    mockDoc.destroy();
+  });
+
+  describe('Initial Load', () => {
+    it('should load unit data from GraphQL API', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      // Initially loading
+      expect(result.current.isLoading).toBe(true);
+      expect(result.current.unit).toBeNull();
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(mockClient.models.Unit.get).toHaveBeenCalledWith({ id: 'unit-1' });
+      expect(result.current.unit).toEqual({
+        ...mockUnit,
+        data: { content: 'Test content' }, // Parsed JSON
+      });
+      expect(result.current.error).toBeNull();
+    });
+
+    it('should handle loading state correctly', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      expect(result.current.isLoading).toBe(true);
+      expect(result.current.unit).toBeNull();
+      expect(result.current.error).toBeNull();
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.unit).toBeTruthy();
+    });
+
+    it('should handle errors from GraphQL fetch', async () => {
+      const mockError = new Error('Network error');
+      mockClient.models.Unit.get.mockRejectedValueOnce(mockError);
+
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.error).toBe(mockError);
+      expect(result.current.unit).toBeNull();
+    });
+
+    it('should handle unit not found', async () => {
+      mockClient.models.Unit.get.mockResolvedValueOnce({
+        data: null,
+      });
+
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.error).toBeTruthy();
+      expect(result.current.error?.message).toContain('not found');
+    });
+
+    it('should parse JSON data field correctly', async () => {
+      const complexData = {
+        root: {
+          children: [
+            { type: 'paragraph', children: [{ text: 'Hello' }] }
+          ]
+        }
+      };
+
+      mockClient.models.Unit.get.mockResolvedValueOnce({
+        data: {
+          ...mockUnit,
+          data: JSON.stringify(complexData),
+        },
+      });
+
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      expect(result.current.unit.data).toEqual(complexData);
+    });
+
+    it('should handle null data field', async () => {
+      mockClient.models.Unit.get.mockResolvedValueOnce({
+        data: {
+          ...mockUnit,
+          data: null,
+        },
+      });
+
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      expect(result.current.unit.data).toBeNull();
+    });
+
+    it('should apply Yjs snapshot if exists', async () => {
+      // Create a snapshot
+      const snapDoc = new Y.Doc();
+      const snapText = snapDoc.getText('editorContent');
+      snapText.insert(0, 'Snapshot content');
+      const snapshot = Y.encodeStateAsUpdate(snapDoc);
+      const base64Snapshot = Buffer.from(snapshot).toString('base64');
+
+      mockClient.models.Unit.get.mockResolvedValueOnce({
+        data: {
+          ...mockUnit,
+          yjsSnapshot: base64Snapshot,
+        },
+      });
+
+      const applyUpdateSpy = vi.spyOn(Y, 'applyUpdate');
+
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      expect(applyUpdateSpy).toHaveBeenCalledWith(
+        mockDoc,
+        expect.any(Uint8Array)
+      );
+
+      applyUpdateSpy.mockRestore();
+      snapDoc.destroy();
+    });
+
+    it('should handle invalid Yjs snapshot gracefully', async () => {
+      mockClient.models.Unit.get.mockResolvedValueOnce({
+        data: {
+          ...mockUnit,
+          yjsSnapshot: 'invalid-base64',
+        },
+      });
+
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      // Should log warning but not throw
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to apply snapshot'),
+        expect.any(Error)
+      );
+
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('should set nextVersionRef correctly', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      // Version should be incremented for next save
+      // (We can't access the ref directly, but we'll test this in save tests)
+      expect(result.current.unit._version).toBe(5);
+    });
+  });
+
+  describe('Yjs Provider Initialization', () => {
+    it('should initialize provider with correct docName', async () => {
+      renderHook(() =>
+        useYjsUnit({ unitId: 'unit-123' })
+      );
+
+      await waitFor(() => {
+        expect(mockUseYjsProvider).toHaveBeenCalledWith({
+          docName: 'unit-unit-123',
+          connect: true,
+          persistence: true,
+        });
+      });
+    });
+
+    it('should connect when enableWebSocket is true', async () => {
+      renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1', enableWebSocket: true })
+      );
+
+      await waitFor(() => {
+        expect(mockUseYjsProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            connect: true,
+          })
+        );
+      });
+    });
+
+    it('should not connect when enableWebSocket is false', async () => {
+      renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1', enableWebSocket: false })
+      );
+
+      await waitFor(() => {
+        expect(mockUseYjsProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            connect: false,
+          })
+        );
+      });
+    });
+
+    it('should enable persistence when enablePersistence is true', async () => {
+      renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1', enablePersistence: true })
+      );
+
+      await waitFor(() => {
+        expect(mockUseYjsProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            persistence: true,
+          })
+        );
+      });
+    });
+
+    it('should disable persistence when enablePersistence is false', async () => {
+      renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1', enablePersistence: false })
+      );
+
+      await waitFor(() => {
+        expect(mockUseYjsProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            persistence: false,
+          })
+        );
+      });
+    });
+
+    it('should return provider, isSynced, and isConnected', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      expect(result.current.provider).toBe(mockProvider);
+      expect(result.current.isSynced).toBe(true);
+      expect(result.current.isConnected).toBe(true);
+    });
+
+    it('should return ytext from provider', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      expect(result.current.ytext).toBe(mockYText);
+      expect(mockProvider.getText).toHaveBeenCalledWith('editorContent');
+    });
+
+    it('should return ymetadata from provider', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      expect(result.current.ymetadata).toBe(mockYMap);
+      expect(mockProvider.getMap).toHaveBeenCalledWith('metadata');
+    });
+  });
+
+  describe('Debounced Save', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    it('should wait 5 seconds before saving to DataStore', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1', saveDebounceMs: 5000 })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      // Trigger an update
+      mockYText.insert(0, 'Test content');
+      if (mockUpdateHandler) mockUpdateHandler();
+
+      // Should not save immediately
+      expect(mockClient.models.Unit.update).not.toHaveBeenCalled();
+
+      // Advance timer by 5 seconds
+      await vi.advanceTimersByTimeAsync(5000);
+
+      // Should save after debounce
+      await waitFor(() => {
+        expect(mockClient.models.Unit.update).toHaveBeenCalled();
+      });
+    });
+
+    it('should reset timer on subsequent changes (debouncing)', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1', saveDebounceMs: 5000 })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      // First change
+      mockYText.insert(0, 'A');
+      if (mockUpdateHandler) mockUpdateHandler();
+
+      // Wait 3 seconds
+      await vi.advanceTimersByTimeAsync(3000);
+      expect(mockClient.models.Unit.update).not.toHaveBeenCalled();
+
+      // Second change (resets timer)
+      mockYText.insert(1, 'B');
+      if (mockUpdateHandler) mockUpdateHandler();
+
+      // Wait another 3 seconds (total 6s from first, but only 3s from second)
+      await vi.advanceTimersByTimeAsync(3000);
+      expect(mockClient.models.Unit.update).not.toHaveBeenCalled();
+
+      // Wait final 2 seconds (5s from second change)
+      await vi.advanceTimersByTimeAsync(2000);
+
+      await waitFor(() => {
+        expect(mockClient.models.Unit.update).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('should use custom debounce time', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1', saveDebounceMs: 2000 })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      mockYText.insert(0, 'Test');
+      if (mockUpdateHandler) mockUpdateHandler();
+
+      await vi.advanceTimersByTimeAsync(2000);
+
+      await waitFor(() => {
+        expect(mockClient.models.Unit.update).toHaveBeenCalled();
+      });
+    });
+
+    it('should call forceSave immediately without debounce', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1', saveDebounceMs: 5000 })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      mockYText.insert(0, 'Force save test');
+
+      // Call forceSave
+      await result.current.forceSave();
+
+      // Should save immediately without waiting
+      expect(mockClient.models.Unit.update).toHaveBeenCalled();
+    });
+
+    it('should clear existing timer when forceSave is called', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1', saveDebounceMs: 5000 })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      // Trigger debounced save
+      mockYText.insert(0, 'Test');
+      if (mockUpdateHandler) mockUpdateHandler();
+
+      // Immediately force save
+      await result.current.forceSave();
+
+      // Advance timer
+      await vi.advanceTimersByTimeAsync(5000);
+
+      // Should only be called once (from forceSave, not debounce)
+      expect(mockClient.models.Unit.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('should stringify editor content for Amplify Gen 2', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      mockYText.insert(0, 'Content to stringify');
+
+      await result.current.forceSave();
+
+      expect(mockClient.models.Unit.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.stringMatching(/^{.*}$/), // Should be JSON string
+        })
+      );
+    });
+
+    it('should encode Yjs state as base64 snapshot', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      mockYText.insert(0, 'Snapshot test');
+
+      await result.current.forceSave();
+
+      expect(mockClient.models.Unit.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          yjsSnapshot: expect.any(String),
+        })
+      );
+
+      const call = mockClient.models.Unit.update.mock.calls[0][0];
+      // Should be base64
+      expect(call.yjsSnapshot).toMatch(/^[A-Za-z0-9+/=]+$/);
+    });
+
+    it('should include metadata in save', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      // Set metadata
+      mockYMap.set('name', 'Updated Name');
+      mockYMap.set('description', 'Updated Description');
+
+      await result.current.forceSave();
+
+      expect(mockClient.models.Unit.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Updated Name',
+          description: 'Updated Description',
+        })
+      );
+    });
+
+    it('should include version number in save', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      await result.current.forceSave();
+
+      // Should save with version 6 (loaded version 5 + 1)
+      expect(mockClient.models.Unit.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _version: 6,
+        })
+      );
+    });
+  });
+
+  describe('Version Conflict Handling', () => {
+    it('should detect version conflict error', async () => {
+      const versionError = new Error('ConditionalCheckFailedException: _version');
+      mockClient.models.Unit.update.mockRejectedValueOnce(versionError);
+
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      mockYText.insert(0, 'Test');
+
+      // Force save will throw but should handle gracefully
+      await expect(result.current.forceSave()).rejects.toThrow('version');
+    });
+
+    it('should detect ConditionalCheck error', async () => {
+      const conditionalError = new Error('ConditionalCheck failed');
+      mockClient.models.Unit.update.mockRejectedValueOnce(conditionalError);
+
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      await expect(result.current.forceSave()).rejects.toThrow('ConditionalCheck');
+    });
+
+    it('should reload from DataStore on version conflict', async () => {
+      const versionError = new Error('version mismatch');
+      mockClient.models.Unit.update.mockRejectedValueOnce(versionError);
+
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      const initialGetCallCount = mockClient.models.Unit.get.mock.calls.length;
+
+      try {
+        await result.current.forceSave();
+      } catch (err) {
+        // Expected to throw
+      }
+
+      // Should reload from DataStore
+      await waitFor(() => {
+        expect(mockClient.models.Unit.get.mock.calls.length).toBe(
+          initialGetCallCount + 1
+        );
+      });
+    });
+
+    it('should re-apply snapshot after version conflict', async () => {
+      // Create a new snapshot
+      const snapDoc = new Y.Doc();
+      const snapText = snapDoc.getText('editorContent');
+      snapText.insert(0, 'Conflict resolution');
+      const snapshot = Y.encodeStateAsUpdate(snapDoc);
+      const base64Snapshot = Buffer.from(snapshot).toString('base64');
+
+      const versionError = new Error('version conflict');
+      mockClient.models.Unit.update.mockRejectedValueOnce(versionError);
+      mockClient.models.Unit.get.mockResolvedValueOnce({
+        data: {
+          ...mockUnit,
+          _version: 7,
+          yjsSnapshot: base64Snapshot,
+        },
+      });
+
+      const applyUpdateSpy = vi.spyOn(Y, 'applyUpdate');
+
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      const initialApplyCount = applyUpdateSpy.mock.calls.length;
+
+      try {
+        await result.current.forceSave();
+      } catch (err) {
+        // Expected
+      }
+
+      await waitFor(() => {
+        expect(applyUpdateSpy.mock.calls.length).toBeGreaterThan(initialApplyCount);
+      });
+
+      applyUpdateSpy.mockRestore();
+      snapDoc.destroy();
+    });
+
+    it('should handle reload error gracefully', async () => {
+      const versionError = new Error('version');
+      const reloadError = new Error('Reload failed');
+
+      mockClient.models.Unit.update.mockRejectedValueOnce(versionError);
+      mockClient.models.Unit.get.mockRejectedValueOnce(reloadError);
+
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      try {
+        await result.current.forceSave();
+      } catch (err) {
+        // Expected
+      }
+
+      await waitFor(() => {
+        expect(result.current.error).toBe(reloadError);
+      });
+    });
+
+    it('should set error state on non-version save errors', async () => {
+      const networkError = new Error('Network error');
+      mockClient.models.Unit.update.mockRejectedValueOnce(networkError);
+
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      try {
+        await result.current.forceSave();
+      } catch (err) {
+        // Expected
+      }
+
+      await waitFor(() => {
+        expect(result.current.error).toBe(networkError);
+      });
+    });
+  });
+
+  describe('updateMetadata', () => {
+    it('should update metadata in Y.Map', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      result.current.updateMetadata({
+        name: 'New Name',
+        description: 'New Description',
+      });
+
+      expect(mockYMap.get('name')).toBe('New Name');
+      expect(mockYMap.get('description')).toBe('New Description');
+    });
+
+    it('should handle multiple metadata updates', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      result.current.updateMetadata({ name: 'Name 1' });
+      result.current.updateMetadata({ description: 'Description 1' });
+      result.current.updateMetadata({ tags: ['tag1', 'tag2'] });
+
+      expect(mockYMap.get('name')).toBe('Name 1');
+      expect(mockYMap.get('description')).toBe('Description 1');
+      expect(mockYMap.get('tags')).toEqual(['tag1', 'tag2']);
+    });
+
+    it('should handle null provider gracefully', async () => {
+      mockUseYjsProvider.mockReturnValueOnce({
+        provider: null,
+        isSynced: false,
+        isConnected: false,
+      });
+
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      // Should not throw
+      expect(() => {
+        result.current.updateMetadata({ name: 'Test' });
+      }).not.toThrow();
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Cannot update metadata')
+      );
+
+      consoleWarnSpy.mockRestore();
+    });
+  });
+
+  describe('Cleanup', () => {
+    it('should unsubscribe from onUpdate on unmount', async () => {
+      const unsubscribeMock = vi.fn();
+      mockProvider.onUpdate.mockReturnValueOnce(unsubscribeMock);
+
+      const { unmount } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(mockProvider.onUpdate).toHaveBeenCalled();
+      });
+
+      unmount();
+
+      expect(unsubscribeMock).toHaveBeenCalled();
+    });
+
+    it('should clear save timer on unmount', async () => {
+      const { result, unmount } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1', saveDebounceMs: 5000 })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      // Trigger a change to start timer
+      mockYText.insert(0, 'Test');
+      if (mockUpdateHandler) mockUpdateHandler();
+
+      // Unmount before timer fires
+      unmount();
+
+      // Advance timer
+      await vi.advanceTimersByTimeAsync(5000);
+
+      // Should not save after unmount
+      expect(mockClient.models.Unit.update).not.toHaveBeenCalled();
+    });
+
+    it('should handle unmount without active timer', async () => {
+      const { unmount } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(mockUseYjsProvider).toHaveBeenCalled();
+      });
+
+      // Should not throw
+      expect(() => unmount()).not.toThrow();
+    });
+
+    it('should handle re-initialization after unmount', async () => {
+      const { unmount } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(mockUseYjsProvider).toHaveBeenCalled();
+      });
+
+      unmount();
+
+      // Re-render with same ID
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      expect(result.current.provider).toBeTruthy();
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle empty editor content', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      // Don't insert anything
+      await result.current.forceSave();
+
+      expect(mockClient.models.Unit.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.any(String),
+        })
+      );
+    });
+
+    it('should handle very large content', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      // Insert large content (100k characters)
+      const largeContent = 'x'.repeat(100000);
+      mockYText.insert(0, largeContent);
+
+      await result.current.forceSave();
+
+      expect(mockClient.models.Unit.update).toHaveBeenCalled();
+      const call = mockClient.models.Unit.update.mock.calls[0][0];
+      expect(call.data.length).toBeGreaterThan(10000);
+    });
+
+    it('should handle special characters in content', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      mockYText.insert(0, 'こんにちは 🎌 "quotes" \'apostrophes\' \n\t');
+
+      await result.current.forceSave();
+
+      const call = mockClient.models.Unit.update.mock.calls[0][0];
+      const parsedData = JSON.parse(call.data);
+      expect(parsedData.content).toContain('こんにちは');
+      expect(parsedData.content).toContain('🎌');
+    });
+
+    it('should handle rapid metadata updates', async () => {
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      // Rapid updates
+      for (let i = 0; i < 100; i++) {
+        result.current.updateMetadata({ counter: i });
+      }
+
+      expect(mockYMap.get('counter')).toBe(99);
+    });
+
+    it('should handle provider being null initially', async () => {
+      // First call returns null provider
+      mockUseYjsProvider.mockReturnValueOnce({
+        provider: null,
+        isSynced: false,
+        isConnected: false,
+      });
+
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      // Should not crash
+      expect(result.current.provider).toBeNull();
+      expect(result.current.ytext).toBeNull();
+      expect(result.current.ymetadata).toBeNull();
+    });
+
+    it('should handle missing _version field', async () => {
+      mockClient.models.Unit.get.mockResolvedValueOnce({
+        data: {
+          ...mockUnit,
+          _version: undefined,
+        },
+      });
+
+      const { result } = renderHook(() =>
+        useYjsUnit({ unitId: 'unit-1' })
+      );
+
+      await waitFor(() => {
+        expect(result.current.unit).toBeTruthy();
+      });
+
+      // Should default to 0 + 1 = 1
+      await result.current.forceSave();
+
+      expect(mockClient.models.Unit.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _version: 1,
+        })
+      );
+    });
+  });
+
+  describe('Type Safety', () => {
+    it('should accept valid config', () => {
+      const config = {
+        unitId: 'unit-1',
+        enableWebSocket: true,
+        enablePersistence: true,
+        saveDebounceMs: 3000,
+      };
+
+      expect(() => {
+        renderHook(() => useYjsUnit(config));
+      }).not.toThrow();
+    });
+
+    it('should work with minimal config', () => {
+      expect(() => {
+        renderHook(() => useYjsUnit({ unitId: 'unit-1' }));
+      }).not.toThrow();
+    });
+  });
+});

@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import LanguageEditor from '../../src/components/Editor3'
+import Editor from '../../src/components/Editor3'
 import React from "react";
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -37,7 +37,7 @@ function UnitPage() {
       <DictionaryProvider>
       <SectionProvider unitId={id}>
       <UnitProvider id={id}>
-        <LanguageEditor />
+        <Editor />
       </UnitProvider>
       </SectionProvider>
       </DictionaryProvider>

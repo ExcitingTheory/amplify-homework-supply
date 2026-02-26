@@ -418,10 +418,15 @@ export default function AudioWaveformPlayer({
                     
                     // Save file metadata using Gen2 client
                     const { getAmplifyClient } = await import('../../../utils/amplifyClient');
+                    const { getCurrentUser } = await import('aws-amplify/auth');
                     const client = getAmplifyClient();
                     
-                    const { data: newFile } = await client.models.File.create({
+                    // Get current user for owner field
+                    const { username: owner } = await getCurrentUser();
+                    
+                    const { data: newFile, errors: fileErrors } = await client.models.File.create({
                         path: uploadResult.path,
+                        owner,
                         identityId,
                         name: uploadResult.filename,
                         size: blob.size,
@@ -429,6 +434,11 @@ export default function AudioWaveformPlayer({
                         level: 'PRIVATE',
                         waveformData: JSON.stringify(waveform),
                     });
+                    
+                    if (fileErrors || !newFile) {
+                        console.error('[AudioWaveformPlayer] Error creating File record:', fileErrors);
+                        throw new Error(fileErrors?.[0]?.message || 'Failed to create File record');
+                    }
                     
                     console.log('[AudioWaveformPlayer] Saved file metadata:', newFile);
                     

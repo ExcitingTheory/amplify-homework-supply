@@ -199,6 +199,97 @@ export class SyncAdapter {
   }
 
   /**
+   * Sync Workbook (Grade) document for collaborative student-tutor editing
+   * 
+   * This syncs the collaborative workbook data back to the Grade model.
+   * The workbook uses Y.js for real-time collaboration between students and tutors.
+   */
+  async syncWorkbook(gradeId: string, ydoc: Y.Doc): Promise<void> {
+    try {
+      const workbookData = ydoc.getMap('workbookData')
+      const feedbackData = ydoc.getMap('feedback')
+      const metadataData = ydoc.getMap('metadata')
+
+      // Convert Y.Maps to plain objects
+      const workbookObject: Record<string, any> = {}
+      workbookData.forEach((value, key) => {
+        workbookObject[key] = value
+      })
+
+      const feedbackObject: Record<string, any> = {}
+      feedbackData.forEach((value, key) => {
+        feedbackObject[key] = value
+      })
+
+      const metadataObject: Record<string, any> = {}
+      metadataData.forEach((value, key) => {
+        metadataObject[key] = value
+      })
+
+      // Calculate completion and accuracy
+      const blockIds = Object.keys(workbookObject)
+      const completedBlocks = blockIds.filter((id) => workbookObject[id].complete === true)
+      const percentComplete = blockIds.length > 0 
+        ? Math.round((completedBlocks.length / blockIds.length) * 100) 
+        : 0
+
+      const accuracies = blockIds
+        .map((id) => workbookObject[id].accuracy)
+        .filter((acc): acc is number => typeof acc === 'number')
+      
+      const accuracy = accuracies.length > 0
+        ? Math.round(accuracies.reduce((sum, acc) => sum + acc, 0) / accuracies.length)
+        : 0
+
+      // Would call: updateGrade(id, { 
+      //   data: JSON.stringify(workbookObject), 
+      //   feedback: JSON.stringify(feedbackObject),
+      //   percentComplete,
+      //   accuracy,
+      //   complete: percentComplete === 100
+      // })
+      console.log(`[SyncAdapter] Syncing Workbook (Grade) ${gradeId}`)
+      console.log(`  - Total blocks: ${blockIds.length}`)
+      console.log(`  - Completed blocks: ${completedBlocks.length}`)
+      console.log(`  - Completion: ${percentComplete}%`)
+      console.log(`  - Accuracy: ${accuracy}%`)
+      console.log(`  - Feedback entries: ${Object.keys(feedbackObject).length}`)
+      console.log(`  - Metadata entries: ${Object.keys(metadataObject).length}`)
+    } catch (error) {
+      console.error(`[SyncAdapter] Error syncing Workbook:`, error)
+      throw error
+    }
+  }
+
+  /**
+   * Load workbook data from Grade into Y.Doc
+   * 
+   * This initializes a collaborative workbook session from existing Grade data
+   */
+  async loadWorkbook(gradeId: string, gradeDataJson: string, ydoc: Y.Doc): Promise<void> {
+    try {
+      const workbookData = ydoc.getMap('workbookData')
+      
+      if (!gradeDataJson) {
+        console.log(`[SyncAdapter] No existing data for workbook ${gradeId}`)
+        return
+      }
+
+      const gradeData = JSON.parse(gradeDataJson)
+      
+      // Populate Y.Map with grade data
+      Object.entries(gradeData).forEach(([blockId, blockData]) => {
+        workbookData.set(blockId, blockData)
+      })
+
+      console.log(`[SyncAdapter] Loaded ${Object.keys(gradeData).length} blocks into workbook ${gradeId}`)
+    } catch (error) {
+      console.error(`[SyncAdapter] Error loading workbook:`, error)
+      throw error
+    }
+  }
+
+  /**
    * Get snapshot metadata
    */
   getSnapshotInfo(docName: string): Record<string, any> | null {

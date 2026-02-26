@@ -204,6 +204,11 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     category: 'Getting Started',
     order: 1,
     estimatedTime: 120,
+    completionCriteria: {
+      tutorialStoryId: '🧩-components-section-assigner--default', // Tutorial: Component showing join dialog
+      quizStoryId: '📄-pages-application-pages--sections', // Quiz: Navigate to sections page
+      requiredActions: ['onClick', 'onSubmit'], // Join action
+    },
   },
   {
     id: 'learner-view-assignments',
@@ -265,6 +270,11 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     category: 'Progress',
     order: 4,
     estimatedTime: 240,
+    completionCriteria: {
+      tutorialStoryId: '📚-creating-lessons-workbook--workbook-with-content', // Tutorial: Workbook showing feedback
+      quizStoryId: '📄-pages-application-pages--grades', // Quiz: Grades page
+      requiredActions: ['onClick'], // Clicking to view grade details
+    },
   },
   {
     id: 'learner-practice-vocabulary',
@@ -282,6 +292,11 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     category: 'Practice',
     order: 5,
     estimatedTime: 300,
+    completionCriteria: {
+      tutorialStoryId: '📁-managing-content-dictionary--dictionary-list-view', // Tutorial: Dictionary component
+      quizStoryId: '📄-pages-application-pages--dictionary', // Quiz: Dictionary page
+      requiredActions: ['onClick', 'onPlay'], // Clicking words or playing audio
+    },
   },
   {
     id: 'learner-use-chat-help',
@@ -299,6 +314,11 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     category: 'Learning Support',
     order: 6,
     estimatedTime: 300,
+    completionCriteria: {
+      tutorialStoryId: '💬-ai-tools-chat-assistant--default', // Tutorial: Chat component
+      quizStoryId: '📄-pages-application-pages--workbook', // Quiz: Workbook with chat sidebar
+      requiredActions: ['onSubmit', 'onSend'], // Sending chat message
+    },
   },
   {
     id: 'learner-learn-shortcuts',
@@ -317,6 +337,15 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     category: 'Skills',
     order: 7,
     estimatedTime: 180,
+    completionCriteria: {
+      tutorialStoryId: '📚-creating-lessons-workbook--workbook-with-content', // Tutorial: Workbook for practicing shortcuts
+      quizStoryId: '📄-pages-application-pages--workbook', // Quiz: Actual workbook page
+      customCheck: () => {
+        // Check if user has used any keyboard shortcuts
+        const shortcutUsed = localStorage.getItem('learner-shortcut-used');
+        return shortcutUsed === 'true';
+      },
+    },
   },
 
   // ============ DEVELOPER TASKS ============

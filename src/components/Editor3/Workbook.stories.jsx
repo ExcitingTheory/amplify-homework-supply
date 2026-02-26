@@ -1,14 +1,33 @@
 import React from 'react';
-import { Workbook } from './index';
-import { seedMockUnit, seedMockGrade } from '../../../.storybook/__mocks__/aws-amplify-data';
-import { MOCK_IMAGE_URL_1 } from '../../../.storybook/__mocks__/media';
+import { seedMockUnit, seedMockGrade, seedMockWords, clearMockData, seedMockFiles } from '../../../.storybook/__mocks__/aws-amplify-data';
+import { MOCK_IMAGE_URL_1, MOCK_AUDIO_BASE64, mockWaveformData } from '../../../.storybook/__mocks__/media';
 import { within, waitFor, userEvent } from 'storybook/test';
+
+// Lazy load Workbook component to avoid breaking Vitest browser mode
+const WorkbookLazy = React.lazy(() => import('./index.jsx').then(m => ({ default: m.Workbook })));
+
+// Wrapper component for Workbook with Suspense
+const Workbook = (props) => (
+  <React.Suspense fallback={<div>Loading Workbook...</div>}>
+    <WorkbookLazy {...props} />
+  </React.Suspense>
+);
 
 export default {
   title: '📚 Creating Lessons/Workbook',
   component: Workbook,
   parameters: {
     layout: 'fullscreen',
+    mockAuth: {
+      user: {
+        attributes: {
+          sub: 'mock-user-sub',
+          email: 'test@example.com',
+          name: 'Test User',
+        },
+      },
+      // session.username will automatically sync with user.attributes.sub via MockAuthProvider
+    },
   },
 };
 
@@ -161,7 +180,6 @@ const sampleWorkbookState = {
 export const EmptyWorkbook = {
   loaders: [
     async () => {
-      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-data');
       clearMockData();
       
       seedMockUnit({
@@ -206,7 +224,6 @@ export const EmptyWorkbook = {
 export const WorkbookWithContent = {
   loaders: [
     async () => {
-      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-data');
       clearMockData();
       
       seedMockUnit({
@@ -697,10 +714,6 @@ const workbookWithProgressState = {
 export const WorkbookWithProgress = {
   loaders: [
     async () => {
-      const { seedMockWords } = await import('../../../.storybook/__mocks__/aws-amplify-data');
-      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-data');
-      const { MOCK_AUDIO_BASE64, mockWaveformData } = await import('../../../.storybook/__mocks__/media');
-      
       clearMockData();
       
       seedMockUnit({
@@ -717,6 +730,7 @@ export const WorkbookWithProgress = {
       seedMockGrade({
         id: 'grade-progress-1',
         unitID: 'workbook-with-progress-id',
+        unitVersion: 1,
         owner: 'student-alice-sub',
         percentComplete: 0.4,
         accuracy: 0.75,
@@ -2361,9 +2375,6 @@ const kitchenSinkWorkbookState = {
 export const KitchenSink = {
   loaders: [
     async () => {
-      const { seedMockWords, seedMockFiles, seedMockGrade } = await import('../../../.storybook/__mocks__/aws-amplify-data');
-      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-data');
-      
       // Clear any existing mock data to ensure clean state
       clearMockData();
       
@@ -2661,9 +2672,6 @@ export const KitchenSink = {
           _version: 1,
         },
       ]);
-      
-      // Import the proper mock audio base64 data
-      const { MOCK_AUDIO_BASE64, mockWaveformData } = await import('../../../.storybook/__mocks__/media');
       
       // Seed audio files for playlist
       seedMockFiles([
@@ -3085,7 +3093,6 @@ const dataPluginWorkbookState = {
 export const DataPluginDemo = {
   loaders: [
     async () => {
-      const { clearMockData } = await import('../../../.storybook/__mocks__/aws-amplify-data');
       clearMockData();
       
       seedMockUnit({

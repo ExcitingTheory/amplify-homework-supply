@@ -1,0 +1,83 @@
+{
+  "generated": "2026-02-17T05:57:16.968Z",
+  "total": 9,
+  "static": [
+    "/",
+    "/privacy.txt",
+    "/profile",
+    "/sections",
+    "/units",
+    "/workbook/stuff.json"
+  ],
+  "dynamic": [
+    {
+      "route": "/section/[id]",
+      "mockUrl": "/section/mock-id",
+      "params": [
+        "id"
+      ]
+    },
+    {
+      "route": "/unit/[id]",
+      "mockUrl": "/unit/mock-id",
+      "params": [
+        "id"
+      ]
+    },
+    {
+      "route": "/workbook/[id]",
+      "mockUrl": "/workbook/mock-id",
+      "params": [
+        "id"
+      ]
+    }
+  ],
+  "catchAll": [],
+  "allRoutes": [
+    {
+      "route": "/",
+      "file": "index.jsx",
+      "isDynamic": false
+    },
+    {
+      "route": "/privacy.txt",
+      "file": "privacy.txt",
+      "isDynamic": false
+    },
+    {
+      "route": "/profile",
+      "file": "profile.jsx",
+      "isDynamic": false
+    },
+    {
+      "route": "/section/[id]",
+      "file": "section/[id].jsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/sections",
+      "file": "sections.jsx",
+      "isDynamic": false
+    },
+    {
+      "route": "/unit/[id]",
+      "file": "unit/[id].jsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/units",
+      "file": "units.jsx",
+      "isDynamic": false
+    },
+    {
+      "route": "/workbook/[id]",
+      "file": "workbook/[id].jsx",
+      "isDynamic": true
+    },
+    {
+      "route": "/workbook/stuff.json",
+      "file": "workbook/stuff.json",
+      "isDynamic": false
+    }
+  ]
+}

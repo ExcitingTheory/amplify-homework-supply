@@ -38,6 +38,7 @@ import { StateInspector } from './StateInspector';
 import { ComponentTreeView } from './ComponentTreeView';
 import { LogViewer } from './LogViewer';
 import { sendToDiscord, getDiscordWebhookUrl } from '../../utils/debug/discordWebhook';
+import { uploadDebugArtifact } from '../../utils/debug/uploadDebugArtifact';
 
 /**
  * Tab panel wrapper component
@@ -155,7 +156,7 @@ export function DebugPanel({
     if (!stateSnapshot) return;
 
     setDiscordDialog(false);
-    setSnackbar({ open: true, message: 'Sending to Discord...', severity: 'info' });
+    setSnackbar({ open: true, message: 'Uploading diagnostic artifact to S3...', severity: 'info' });
 
     const webhookUrl = getDiscordWebhookUrl();
     if (!webhookUrl) {
@@ -163,21 +164,42 @@ export function DebugPanel({
       return;
     }
 
-    const result = await sendToDiscord(
-      {
-        snapshot: stateSnapshot,
-        description: userDescription || undefined,
-        userContact: userContact || undefined,
-      },
-      { webhookUrl }
-    );
+    try {
+      // Upload artifact to S3 and get signed URL
+      const { url: artifactUrl, key } = await uploadDebugArtifact(stateSnapshot);
+      console.log('[DebugPanel] Artifact uploaded to S3:', key);
+      
+      setSnackbar({ open: true, message: 'Sending to Discord...', severity: 'info' });
 
-    if (result.success) {
-      setSnackbar({ open: true, message: '✅ Diagnostic sent to support team!', severity: 'success' });
-      setUserDescription('');
-      setUserContact('');
-    } else {
-      setSnackbar({ open: true, message: `Failed to send: ${result.error}`, severity: 'error' });
+      // Send to Discord with S3 URL
+      const result = await sendToDiscord(
+        {
+          snapshot: stateSnapshot,
+          description: userDescription || undefined,
+          userContact: userContact || undefined,
+          artifactUrl, // Include 30-day signed URL
+        },
+        { webhookUrl }
+      );
+
+      if (result.success) {
+        setSnackbar({ 
+          open: true, 
+          message: '✅ Diagnostic sent to support team! (S3 link expires in 30 days)', 
+          severity: 'success' 
+        });
+        setUserDescription('');
+        setUserContact('');
+      } else {
+        setSnackbar({ open: true, message: `Failed to send: ${result.error}`, severity: 'error' });
+      }
+    } catch (error) {
+      console.error('[DebugPanel] Error uploading/sending diagnostic:', error);
+      setSnackbar({ 
+        open: true, 
+        message: `Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 
+        severity: 'error' 
+      });
     }
   };
 

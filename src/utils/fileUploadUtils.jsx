@@ -4,6 +4,7 @@
  */
 
 import { uploadData } from 'aws-amplify/storage';
+import { getCurrentUser } from 'aws-amplify/auth';
 import { getAmplifyClient } from './amplifyClient';
 // Type import removed - not needed in runtime JS
 import { calculateWaveformData } from './calculateWaveformData';
@@ -90,6 +91,9 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
     const accessLevel = 'protected';
     let newFilename;
 
+    // Get current user for owner field
+    const { username: owner } = await getCurrentUser();
+    
     // Determine the folder based on file type
     if (isMimeType(file, ACCEPTABLE_IMAGE_TYPES)) {
         newFilename = `images/${file.name}`;
@@ -141,6 +145,7 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
     // Create File model entry
     const fileData = {
         path: newFilename,
+        owner,
         identityId,
         name: file.name,
         size: file.size,
@@ -161,10 +166,17 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
             filename: file.name,
             s3Key: newFilename,
             status: 'uploaded',
+            owner,
             identityId,
         };
         
-        const { data: newDocument } = await amplifyClient.models.Document.create(documentData);
+        const { data: newDocument, errors: documentErrors } = await amplifyClient.models.Document.create(documentData);
+        
+        if (documentErrors || !newDocument) {
+            console.error('Error creating Document record:', documentErrors);
+            throw new Error(documentErrors?.[0]?.message || 'Failed to create Document record');
+        }
+        
         documentModel = newDocument;
         console.log('Created Document record:', documentModel);
     }
@@ -174,7 +186,13 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
     if (documentModel) {
         fileData.documentID = documentModel.id;
     }
-    const { data: newFile } = await amplifyClient.models.File.create(fileData);
+    const { data: newFile, errors: fileErrors } = await amplifyClient.models.File.create(fileData);
+    
+    if (fileErrors || !newFile) {
+        console.error('Error creating File record:', fileErrors);
+        throw new Error(fileErrors?.[0]?.message || 'Failed to create File record');
+    }
+    
     const fileModel = newFile;
     console.log('Created File record:', fileModel);
 
@@ -190,16 +208,22 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
     if (documentModel && unitId) {
         try {
             const amplifyClient = getAmplifyClient();
-            const { data: unit } = await amplifyClient.models.Unit.get({ id: unitId });
-            if (unit && unit.id) {
+            const { data: unit, errors: unitErrors } = await amplifyClient.models.Unit.get({ id: unitId });
+            
+            if (unitErrors || !unit) {
+                console.warn(`Failed to fetch unit ${unitId}:`, unitErrors);
+            } else if (unit.id) {
                 // Create the join table entry to link Document and Unit
-                await amplifyClient.models.UnitDocument.create({
+                const { data: unitDoc, errors: unitDocErrors } = await amplifyClient.models.UnitDocument.create({
                     documentID: documentModel.id,
                     unitID: unit.id
                 });
-                console.log('Linked Document to Unit:', unit.id);
-            } else {
-                console.warn(`Unit ${unitId} not found, Document created without unit association`);
+                
+                if (unitDocErrors || !unitDoc) {
+                    console.warn('Error creating UnitDocument relationship:', unitDocErrors);
+                } else {
+                    console.log('Linked Document to Unit:', unit.id);
+                }
             }
         } catch (error) {
             console.warn('Error linking Document to Unit:', error);

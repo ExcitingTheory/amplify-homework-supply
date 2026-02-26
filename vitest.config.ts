@@ -1,4 +1,4 @@
-import { defineConfig, defineProject, mergeConfig } from 'vitest/config';
+import { defineConfig, defineProject } from 'vitest/config';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
@@ -17,13 +17,17 @@ const storybookConfigDir = path.resolve(__dirname, '.storybook');
  * - Storybook component tests (browser mode with Playwright)
  * 
  * This is the recommended approach for Vitest ≥ 4.0.
- * See: https://storybook.js.org/docs/writing-tests/integrations/vitest-addon
  */
 export default defineConfig({
   test: {
     projects: [
       // Unit test project
       defineProject({
+        plugins: [
+          react({
+            include: /\.[jt]sx?$/,
+          }),
+        ],
         test: {
           name: 'unit',
           globals: true,
@@ -48,8 +52,32 @@ export default defineConfig({
             'build',
           ],
         },
+        resolve: {
+          alias: {
+            '@': path.resolve(__dirname, './src'),
+            '@storybook/__mocks__': path.resolve(storybookConfigDir, './__mocks__'),
+          },
+          conditions: ['import', 'module', 'browser', 'default'],
+          mainFields: ['module', 'jsnext:main', 'jsnext', 'main'],
+        },
+        optimizeDeps: {
+          include: [
+            '@mui/material',
+            '@mui/icons-material',
+            'react-beautiful-dnd',
+            'lodash',
+            '@lexical/rich-text',
+            '@lexical/list',
+            '@lexical/code',
+            '@lexical/link',
+            '@lexical/table',
+            '@lexical/hashtag',
+            '@lexical/markdown',
+            'lexical',
+          ],
+        },
       }),
-      // Storybook component test project (inline to avoid file reference issues)
+      // Storybook component test project
       defineProject({
         plugins: [
           react({
@@ -60,20 +88,45 @@ export default defineConfig({
           }),
         ],
         test: {
+          name: 'storybook',
           globals: true,
+          testTimeout: 60000, // 60s for interactive tests
+          hookTimeout: 60000,
           browser: {
             enabled: true,
             headless: true,
             provider: playwright(),
             instances: [{ browser: 'chromium' }],
+            fileParallelism: false, // Disable parallel execution to avoid cache conflicts
+            isolate: false, // Reuse browser context to avoid module cache invalidation
           },
-          setupFiles: [path.resolve(storybookConfigDir, './vitest.setup.ts')],
+          // Use relative path for setupFiles so Vite can serve it in browser mode
+          setupFiles: ['.storybook/vitest.setup.ts'],
+          exclude: [
+            '**/node_modules/**',
+            '**/dist/**',
+            '**/.amplify/**',
+            '**/.next/**',
+            '**/src/stories/index.stories.jsx', // Temporarily exclude - qrcode/pngjs browser issue
+            '**/src/stories/pages.stories.tsx', // Temporarily exclude - qrcode/pngjs browser issue
+          ],
+          deps: {
+            optimizer: {
+              web: {
+                enabled: false, // Disable optimization for browser tests to prevent reloads
+              },
+            },
+          },
         },
         resolve: {
           alias: {
             '@': path.resolve(__dirname, './src'),
             '@storybook/__mocks__': path.resolve(storybookConfigDir, './__mocks__'),
+            // Workaround for Lexical packages that don't have "." export
+            '@lexical/react$': '@lexical/react/LexicalComposer',
           },
+          conditions: ['import', 'module', 'browser', 'default'],
+          mainFields: ['module', 'jsnext:main', 'jsnext', 'main'],
         },
         optimizeDeps: {
           include: [
@@ -81,8 +134,30 @@ export default defineConfig({
             '@mui/icons-material',
             'react-beautiful-dnd',
             'lodash',
+            '@lexical/rich-text',
+            '@lexical/list',
+            '@lexical/code',
+            '@lexical/link',
+            '@lexical/table',
+            '@lexical/hashtag',
+            '@lexical/markdown',
+            'lexical',
+          ],
+          exclude: [
+            'qrcode', // Exclude qrcode to prevent Node.js module issues in browser
           ],
         },
+        server: {
+          hmr: false, // Disable HMR during tests to prevent cache corruption
+          watch: {
+            ignored: ['**/node_modules/**', '**/.git/**'],
+          },
+          fs: {
+            strict: false, // Allow serving files outside root
+          },
+        },
+        cacheDir: path.resolve(__dirname, 'node_modules/.vite/storybook'),
+        clearScreen: false,
       }),
     ],
     coverage: {

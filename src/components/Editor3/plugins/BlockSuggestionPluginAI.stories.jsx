@@ -28,6 +28,7 @@ export default {
   component: BlockSuggestionPlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

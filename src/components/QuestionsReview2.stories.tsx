@@ -54,6 +54,7 @@ const meta: Meta<typeof QuestionsReview2> = {
     component: QuestionsReview2,
     parameters: {
         layout: 'padded',
+        initializeMockData: false,
         docs: {
             description: {
                 component: `

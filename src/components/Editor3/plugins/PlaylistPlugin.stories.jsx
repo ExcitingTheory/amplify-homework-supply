@@ -26,6 +26,7 @@ export default {
   component: PlaylistPlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

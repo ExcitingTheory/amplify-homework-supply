@@ -27,6 +27,7 @@ export default {
   component: DraggableBlockPlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

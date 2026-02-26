@@ -149,6 +149,7 @@ export const WithRecordedAnswer = {
     },
   ],
   parameters: {
+    initializeMockData: false,
     docs: {
       description: {
         story: 'Shows RecordingStudio2 with a previously recorded answer displayed in an interactive AudioWaveformPlayer. Click play to hear the recording and see the waveform animate. Feedback shows the AI verification result.',

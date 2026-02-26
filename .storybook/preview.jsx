@@ -4,7 +4,7 @@
  * Global Mocking Strategy:
  * - AWS Amplify modules (api, auth, storage, datastore, utils) are mocked via webpack aliases in main.js
  * - Mock implementations are in .storybook/__mocks__/ directory
- * - getCachedUrl utility is also mocked for safe file URL generation
+ * - getCachedUrl utility is  also mocked for safe file URL generation
  * - All mocks are global and work across all stories without needing jest.mock()
  * 
  * Mock Features:
@@ -13,6 +13,43 @@
  * - Authentication with mock credentials
  * - DataStore operations with in-memory storage
  */
+
+// Polyfill for Node.js modules needed by qrcode/pngjs in browser environment
+if (typeof window !== 'undefined') {
+  // Adding global polyfill
+  window.global = window;
+  
+  // Mock util module for pngjs which expects Node.js util
+  if (!window.util) {
+    window.util = {
+      inherits: function(ctor, superCtor) {
+        if (!ctor || !superCtor) return;
+        try {
+          ctor.super_ = superCtor;
+          // Only create prototype if it doesn't exist or is not already set up
+          if (!ctor.prototype || Object.getPrototypeOf(ctor.prototype) !== superCtor.prototype) {
+            ctor.prototype = Object.create(superCtor.prototype, {
+              constructor: {
+                value: ctor,
+                enumerable: false,
+                writable: true,
+                configurable: true
+              }
+            });
+          }
+        } catch (e) {
+          // Silently fail if prototype setup fails
+          console.warn('[preview] Failed to set up prototype inheritance:', e);
+        }
+      }
+    };
+  }
+  
+  // Mock stream module basics that pngjs might need
+  if (!window.stream && !window.require) {
+    window.stream = { Writable: class {}, Readable: class {} };
+  }
+}
 
 import React from 'react';
 import { ThemeProvider } from '@mui/material/styles';
@@ -29,6 +66,7 @@ import { getStoryId } from './code/route-map';
 import { initializeTaskCompletion } from './code/task-completion';
 
 // Import real context providers
+import { AuthProvider } from './__mocks__/authContext';
 import { FilesProvider } from '../src/context/fileContext';
 import { DictionaryProvider } from '../src/context/dictionaryContext';
 import { SectionProvider } from '../src/context/sectionContext';
@@ -341,6 +379,15 @@ const preview = {
       routerParams = routerParams || {};
       const mockRouter = createMockRouter(routerParams);
       
+      // Get auth configuration from story parameters
+      const mockAuth = context?.parameters?.mockAuth || {};
+      const authProps = {
+        mockUser: mockAuth.user,
+        mockSession: mockAuth.session,
+        isLoading: mockAuth.isLoading || false,
+        error: mockAuth.error,
+      };
+      
       return (
         <RouterContext.Provider value={mockRouter}>
           <ThemeProvider theme={theme}>
@@ -360,31 +407,11 @@ const preview = {
                 })
               }}
             >
-              <AudioPlayerProvider>
-                <FilesProvider>
-                  {disableDictionaryContext ? (
-                    disableUnitContext ? (
-                      disableSectionContext ? (
-                        <Story />
-                      ) : (
-                        <SectionProvider unitId={unitId}>
-                          <Story />
-                        </SectionProvider>
-                      )
-                    ) : (
-                      <UnitProvider id={unitId}>
-                        {disableSectionContext ? (
-                          <Story />
-                        ) : (
-                          <SectionProvider unitId={unitId}>
-                            <Story />
-                          </SectionProvider>
-                        )}
-                      </UnitProvider>
-                    )
-                  ) : (
-                    <DictionaryProvider>
-                      {disableUnitContext ? (
+              <AuthProvider {...authProps}>
+                <AudioPlayerProvider>
+                  <FilesProvider>
+                    {disableDictionaryContext ? (
+                      disableUnitContext ? (
                         disableSectionContext ? (
                           <Story />
                         ) : (
@@ -402,11 +429,33 @@ const preview = {
                             </SectionProvider>
                           )}
                         </UnitProvider>
-                      )}
-                    </DictionaryProvider>
-                  )}
-                </FilesProvider>
-              </AudioPlayerProvider>
+                      )
+                    ) : (
+                      <DictionaryProvider>
+                        {disableUnitContext ? (
+                          disableSectionContext ? (
+                            <Story />
+                          ) : (
+                            <SectionProvider unitId={unitId}>
+                              <Story />
+                            </SectionProvider>
+                          )
+                        ) : (
+                          <UnitProvider id={unitId}>
+                            {disableSectionContext ? (
+                              <Story />
+                            ) : (
+                              <SectionProvider unitId={unitId}>
+                                <Story />
+                              </SectionProvider>
+                            )}
+                          </UnitProvider>
+                        )}
+                      </DictionaryProvider>
+                    )}
+                  </FilesProvider>
+                </AudioPlayerProvider>
+              </AuthProvider>
             </div>
           </ThemeProvider>
         </RouterContext.Provider>

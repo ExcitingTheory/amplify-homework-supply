@@ -53,14 +53,12 @@ import { IS_APPLE } from '../utils/dom';
 import {CellContext} from '../plugins/TablePlugin';
 import {
   $isTableNode,
-  Cell,
   cellHTMLCache,
   cellTextContentCache,
   createRow,
   createUID,
   exportTableCellsToHTML,
   extractRowsFromHTML,
-  Rows,
   TableNode,
 } from './TableNode';
 

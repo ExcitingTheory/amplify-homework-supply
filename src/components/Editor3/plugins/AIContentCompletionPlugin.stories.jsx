@@ -26,6 +26,7 @@ export default {
   component: AIContentCompletionPlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

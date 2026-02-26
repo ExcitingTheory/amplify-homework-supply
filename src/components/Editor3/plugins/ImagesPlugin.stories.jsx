@@ -28,6 +28,7 @@ export default {
   component: ImagesPlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

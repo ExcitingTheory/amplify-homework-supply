@@ -19,6 +19,7 @@ export default {
   component: CustomAnswerPlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
     disableUnitContext: true,
     disableDictionaryContext: true,
     disableSectionContext: true,

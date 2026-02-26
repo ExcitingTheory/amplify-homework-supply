@@ -20,7 +20,7 @@ import getCachedUrl from '../utils/getCachedUrl';
 import UnitContext from '../context/unitContext';
 import { uploadStudentSubmission } from '../utils/userSubmissionStorage';
 
-import { fetchAuthSession } from 'aws-amplify/auth';
+import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth';
 import { getAmplifyClient } from '../utils/amplifyClient';
 
 // Component to handle async audio URL loading
@@ -188,8 +188,12 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
         // Save file metadata using Gen2 client
         const client = getAmplifyClient();
         
-        const { data: newFile } = await client.models.File.create({
+        // Get current user for owner field
+        const { username: owner } = await getCurrentUser();
+        
+        const { data: newFile, errors: fileErrors } = await client.models.File.create({
           path: uploadResult.path,
+          owner,
           identityId,
           name: uploadResult.filename,
           size: audioBlob.size,
@@ -197,6 +201,11 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
           level: 'PRIVATE',
           waveformData: JSON.stringify(waveformData),
         });
+        
+        if (fileErrors || !newFile) {
+          console.error('[RecordingStudio2] Error creating File record:', fileErrors);
+          throw new Error(fileErrors?.[0]?.message || 'Failed to create File record');
+        }
         
         console.log('[RecordingStudio2] Saved file metadata:', newFile);
         

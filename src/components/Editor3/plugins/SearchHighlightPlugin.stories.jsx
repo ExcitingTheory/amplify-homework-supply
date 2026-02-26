@@ -12,6 +12,9 @@ import SearchHighlightPlugin from './SearchHighlightPlugin';
 export default {
   title: '🔌 Editor Plugins/Interactions/Search Highlight',
   component: SearchHighlightPlugin,
+  parameters: {
+    initializeMockData: false,
+  },
 };
 
 const sampleText = 'The quick brown fox jumps over the lazy dog. Photosynthesis is the process by which plants convert sunlight into energy. Learning Japanese requires dedication and practice.';

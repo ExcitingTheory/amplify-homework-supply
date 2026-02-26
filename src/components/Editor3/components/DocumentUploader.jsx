@@ -38,9 +38,6 @@ const SUPPORTED_DOCUMENT_TYPES = {
 /**
  * Component for uploading and processing documents to extract vocabulary or questions
  */
-
-const DocumentUploader = ({
- */
 export default function DocumentUploader({ extractionType = 'vocabulary', onUploadComplete }) {
     const { t } = useTranslation('editor.files');
     const [uploading, setUploading] = useState(false);

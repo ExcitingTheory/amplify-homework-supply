@@ -26,6 +26,7 @@ export default {
   component: YouTubePlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

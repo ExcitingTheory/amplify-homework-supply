@@ -2,7 +2,12 @@ import React from "react";
 import { fetchUserAttributes, fetchAuthSession } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
 
-const AuthContext = React.createContext();
+const AuthContext = React.createContext({
+  error: undefined,
+  isLoading: true,
+  user: undefined,
+  session: undefined,
+});
 
 const AuthProvider = ({ children }) => {
     const [result, setResult] = React.useState({
@@ -17,7 +22,7 @@ const AuthProvider = ({ children }) => {
         try {
           // Add timeout to prevent hanging indefinitely
           const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Authentication timeout')), 10000)
+            setTimeout(() => reject(new Error('Authentication timeout')), 15000)
           );
           
           const attributesPromise = fetchUserAttributes();
@@ -31,6 +36,13 @@ const AuthProvider = ({ children }) => {
           
           setResult({ user: { attributes }, session: { identityId, idToken }, isLoading: false });
         } catch (error) {
+          // Handle timeout errors - treat as if user is not authenticated
+          if (error.message === 'Authentication timeout') {
+            console.warn('[AuthContext] Authentication request timed out - treating as not authenticated');
+            setResult({ user: undefined, session: undefined, isLoading: false, error: undefined });
+            return;
+          }
+          
           // Handle unauthenticated state gracefully - this is expected when user is not signed in
           if (error.name === 'UserUnAuthenticatedException' || 
               error.message?.includes('not authenticated') ||

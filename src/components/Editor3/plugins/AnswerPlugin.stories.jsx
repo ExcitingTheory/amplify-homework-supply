@@ -25,6 +25,7 @@ export default {
   component: AnswerPlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

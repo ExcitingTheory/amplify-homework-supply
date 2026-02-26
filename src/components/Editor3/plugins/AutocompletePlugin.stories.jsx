@@ -26,6 +26,7 @@ export default {
   component: AutocompletePlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

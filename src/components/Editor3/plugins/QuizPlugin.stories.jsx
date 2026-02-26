@@ -26,6 +26,7 @@ export default {
   component: QuizPlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

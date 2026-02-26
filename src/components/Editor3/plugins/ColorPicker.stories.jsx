@@ -27,6 +27,7 @@ export default {
   component: ColorPicker,
   parameters: {
     layout: 'centered',
+    initializeMockData: false,
   },
 };
 

@@ -17,8 +17,10 @@ const SectionProvider = ({ children, unitId }) => {
     const [assignments, setAssignments] = React.useState([]);
 
     React.useEffect(() => {
+        console.log('[SectionContext] useEffect triggered', { authLoading, hasUser: !!user, userSub: user?.attributes?.sub });
         // Wait for auth to be ready
         if (authLoading || !user) {
+            console.log('[SectionContext] Waiting for auth...', { authLoading, hasUser: !!user });
             return;
         }
 
@@ -26,6 +28,7 @@ const SectionProvider = ({ children, unitId }) => {
 
         async function fetchSections() {
             const username = user.attributes.sub;
+            console.log('[SectionContext] Fetching sections for user:', username);
 
             const client = getAmplifyClient();
 
@@ -35,6 +38,7 @@ const SectionProvider = ({ children, unitId }) => {
                 }
             }).subscribe({
                 next: ({ items }) => {
+                    console.log('[SectionContext] Received sections:', items.length, items.map(s => ({ id: s.id, name: s.name, owner: s.owner })));
                     let _sectionMap = {}
 
                     items.forEach(item => {
@@ -48,6 +52,7 @@ const SectionProvider = ({ children, unitId }) => {
                         if (prevStr === newStr) {
                             return prevSections; // Return same reference to prevent rerender
                         }
+                        console.log('[SectionContext] Updating sections state');
                         return items;
                     });
 
@@ -58,6 +63,7 @@ const SectionProvider = ({ children, unitId }) => {
                         if (prevStr === newStr) {
                             return prevMap; // Return same reference to prevent rerender
                         }
+                        console.log('[SectionContext] Updating sectionMap state');
                         return _sectionMap;
                     });
                 },
@@ -70,6 +76,7 @@ const SectionProvider = ({ children, unitId }) => {
         fetchSections()
 
         return () => {
+            console.log('[SectionContext] Cleaning up subscription');
             subscription?.unsubscribe();
         };
     }, [user, authLoading]);

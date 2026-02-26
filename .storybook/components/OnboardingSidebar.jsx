@@ -5,7 +5,6 @@ import {
   Card,
   Chip,
   Collapse,
-  IconButton,
   LinearProgress,
   Stack,
   Tooltip,
@@ -139,6 +138,7 @@ const OnboardingSidebar = ({ api }) => {
                 },
               }}
               startIcon={<Box sx={{ color: p.color, display: 'flex' }}>{p.icon}</Box>}
+              ariaLabel={false}
             >
               {p.label}
             </Button>
@@ -193,9 +193,17 @@ const OnboardingSidebar = ({ api }) => {
               {completionPercentage}% Complete
             </Typography>
           </Box>
-          <IconButton size="small" sx={{ p: 0 }}>
+          <Button 
+            size="small" 
+            sx={{ 
+              p: 0, 
+              minWidth: 'auto',
+              color: 'inherit',
+            }}
+            ariaLabel="Toggle onboarding tasks"
+          >
             {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
-          </IconButton>
+          </Button>
         </Box>
 
         {/* Progress Bar */}
@@ -261,6 +269,7 @@ const OnboardingSidebar = ({ api }) => {
                   filter: 'brightness(0.9)',
                 },
               }}
+              ariaLabel={false}
             >
               View All Tasks
             </Button>
@@ -277,6 +286,7 @@ const OnboardingSidebar = ({ api }) => {
                 fontSize: '0.75rem',
                 py: 0.5,
               }}
+              ariaLabel={false}
             >
               Change Role
             </Button>

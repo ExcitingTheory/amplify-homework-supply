@@ -40,7 +40,8 @@ export const ACCEPTABLE_PLAYLIST_TYPES = [
 // Provider will be exported wrapped in ConfigProvider component.
 const FilesProvider = ({ children }) => {
   // Get auth state from centralized context
-  const { user, session, isLoading: authLoading } = React.useContext(AuthContext);
+  const authContext = React.useContext(AuthContext);
+  const { user, session, isLoading: authLoading } = authContext || { user: undefined, session: undefined, isLoading: true };
 
   const [audioFiles, setAudioFiles] = React.useState({})
   // const [files, setFiles] = React.useState({})

@@ -171,6 +171,7 @@ export default {
   title: '📚 Creating Lessons/Editor Components',
   parameters: {
     layout: 'padded',
+    initializeMockData: false,
     disableUnitContext: true, // Stories provide their own UnitProvider
     disableDictionaryContext: true, // Not needed for these component demos
     docs: {

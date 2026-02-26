@@ -7,6 +7,12 @@ module.exports = {
   // Internationalization
   i18n,
   
+  // Environment variables exposed to the browser
+  env: {
+    NEXT_PUBLIC_YJS_WS_URL: process.env.NEXT_PUBLIC_YJS_WS_URL || 'ws://localhost:3001',
+    NEXT_PUBLIC_ENABLE_WORKBOOK_COLLABORATION: process.env.NEXT_PUBLIC_ENABLE_WORKBOOK_COLLABORATION || 'true',
+  },
+  
   // Reduce build output size for Amplify deployment
   productionBrowserSourceMaps: false, // Disable source maps in production
   

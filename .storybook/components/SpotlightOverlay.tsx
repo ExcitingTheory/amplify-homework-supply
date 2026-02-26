@@ -4,11 +4,9 @@ import {
   Button,
   Card,
   CardContent,
-  IconButton,
   Stack,
   Typography,
   Portal,
-  ClickAwayListener,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -100,6 +98,9 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
       const targetDoc = iframe?.contentDocument || document;
       const targetElement = targetDoc.querySelector(currentStep.targetSelector);
 
+      console.log('[SpotlightOverlay] Looking for selector:', currentStep.targetSelector);
+      console.log('[SpotlightOverlay] Element found:', !!targetElement);
+
       if (targetElement) {
         const rect = targetElement.getBoundingClientRect();
         
@@ -112,19 +113,34 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
             rect.width,
             rect.height
           ));
+          console.log('[SpotlightOverlay] Target rect (iframe-adjusted):', {
+            left: rect.left + iframeRect.left,
+            top: rect.top + iframeRect.top,
+            width: rect.width,
+            height: rect.height
+          });
         } else {
           setTargetRect(rect);
+          console.log('[SpotlightOverlay] Target rect:', {
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height: rect.height
+          });
         }
       } else {
         // Element not found - use center of screen
+        console.warn('[SpotlightOverlay] Target element not found, using center position');
         setTargetRect(null);
       }
     } else if (currentStep.targetPosition) {
       // Use manual position
       const { top, left, width, height } = currentStep.targetPosition;
       setTargetRect(new DOMRect(left, top, width, height));
+      console.log('[SpotlightOverlay] Using manual position:', currentStep.targetPosition);
     } else {
       // No target - center of screen
+      console.log('[SpotlightOverlay] No target selector or position, centering');
       setTargetRect(null);
     }
   };
@@ -196,28 +212,88 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   useEffect(() => {
     if (!isOpen) return;
 
+    // Initial update
     updateTargetPosition();
     calculateTooltipPosition();
 
-    // Update on resize and scroll
     const handleUpdate = () => {
       updateTargetPosition();
       calculateTooltipPosition();
     };
 
+    // Listen to iframe load event - fires when new story is loaded
+    const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
+    
+    const handleIframeLoad = () => {
+      console.log('[SpotlightOverlay] 🎬 Iframe loaded - story rendered, updating target position');
+      // Small delay to ensure DOM is fully ready
+      setTimeout(() => {
+        updateTargetPosition();
+        calculateTooltipPosition();
+      }, 50);
+    };
+
+    if (iframe) {
+      iframe.addEventListener('load', handleIframeLoad);
+    }
+
+    // Listen to Storybook's storyRendered event via postMessage
+    const handleMessage = (event: MessageEvent) => {
+      // Check if message is from Storybook iframe
+      if (event.source === iframe?.contentWindow) {
+        const data = event.data;
+        
+        // Storybook emits various events - look for story rendering completion
+        if (data?.type === 'storyRendered' || 
+            data?.event === 'storyRendered' ||
+            data?.eventName === 'storyRendered' ||
+            data?.name === 'storyRendered') {
+          console.log('[SpotlightOverlay] ✨ Story rendered event received:', data);
+          setTimeout(() => {
+            updateTargetPosition();
+            calculateTooltipPosition();
+          }, 100);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    // Retry finding target element after navigation as fallback
+    // This handles edge cases where events might be missed
+    const retryIntervals = [100, 300, 500, 1000, 2000];
+    const retryTimeouts: NodeJS.Timeout[] = [];
+    
+    retryIntervals.forEach(delay => {
+      const timeout = setTimeout(() => {
+        console.log('[SpotlightOverlay] ⏱️ Retry attempt after', delay, 'ms');
+        updateTargetPosition();
+        calculateTooltipPosition();
+      }, delay);
+      retryTimeouts.push(timeout);
+    });
+
+    // Update on resize and scroll
     window.addEventListener('resize', handleUpdate);
     window.addEventListener('scroll', handleUpdate, true);
 
-    // Also listen to iframe scroll
-    const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
     if (iframe?.contentWindow) {
       iframe.contentWindow.addEventListener('scroll', handleUpdate, true);
       iframe.contentWindow.addEventListener('resize', handleUpdate);
     }
 
     return () => {
+      // Clear retry timeouts
+      retryTimeouts.forEach(timeout => clearTimeout(timeout));
+      
+      // Remove event listeners
+      if (iframe) {
+        iframe.removeEventListener('load', handleIframeLoad);
+      }
+      window.removeEventListener('message', handleMessage);
       window.removeEventListener('resize', handleUpdate);
       window.removeEventListener('scroll', handleUpdate, true);
+      
       if (iframe?.contentWindow) {
         iframe.contentWindow.removeEventListener('scroll', handleUpdate, true);
         iframe.contentWindow.removeEventListener('resize', handleUpdate);
@@ -329,22 +405,21 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
         )}
 
         {/* Tooltip/Coachmark */}
-        <ClickAwayListener onClickAway={() => onClose?.()}>
-          <Card
-            sx={{
-              position: 'absolute',
-              top: tooltipPosition.top,
-              left: tooltipPosition.left,
-              width: 320,
-              maxWidth: 'calc(100vw - 20px)',
-              maxHeight: 'calc(100vh - 20px)',
-              overflow: 'auto',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-              borderLeft: '4px solid',
-              borderColor: mode === 'tutorial' ? '#4CAF50' : '#2196F3',
-              zIndex: 10000,
-            }}
-          >
+        <Card
+          sx={{
+            position: 'absolute',
+            top: tooltipPosition.top,
+            left: tooltipPosition.left,
+            width: 320,
+            maxWidth: 'calc(100vw - 20px)',
+            maxHeight: 'calc(100vh - 20px)',
+            overflow: 'auto',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+            borderLeft: '4px solid',
+            borderColor: mode === 'tutorial' ? '#4CAF50' : '#2196F3',
+            zIndex: 10000,
+          }}
+        >
             <CardContent>
               {/* Header */}
               <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
@@ -356,15 +431,37 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
                     {currentStep.title}
                   </Typography>
                 </Box>
-                <IconButton size="small" onClick={onClose} sx={{ ml: 1 }}>
+                <Button 
+                  size="small" 
+                  onClick={onClose} 
+                  sx={{ 
+                    ml: 1, 
+                    minWidth: 'auto',
+                    color: 'inherit',
+                    p: 0.5,
+                  }}
+                  ariaLabel="Close spotlight guide"
+                >
                   <CloseIcon fontSize="small" />
-                </IconButton>
+                </Button>
               </Box>
 
               {/* Description */}
               <Typography variant="body2" sx={{ mb: 2, color: 'text.primary' }}>
                 {currentStep.description}
               </Typography>
+
+              {/* Warning if target element not found */}
+              {currentStep.targetSelector && !targetRect && (
+                <Box sx={{ mb: 2, p: 1.5, backgroundColor: 'rgba(255, 152, 0, 0.1)', borderRadius: 1, borderLeft: '3px solid #FF9800' }}>
+                  <Typography variant="caption" sx={{ color: '#F57C00', fontWeight: 600, display: 'block', mb: 0.5 }}>
+                    ⚠️ Target Element Not Found
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem', display: 'block' }}>
+                    The component we're looking for hasn't loaded yet. The spotlight will keep trying to find it. Follow the instructions below to complete this step.
+                  </Typography>
+                </Box>
+              )}
 
               {/* Action items - Tutorial mode only */}
               {mode === 'tutorial' && currentStep.actions && currentStep.actions.length > 0 && (
@@ -404,6 +501,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
                   onClick={onSkip}
                   startIcon={<SkipNextIcon />}
                   sx={{ textTransform: 'none' }}
+                  ariaLabel={false}
                 >
                   Skip
                 </Button>
@@ -420,13 +518,13 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
                       backgroundColor: mode === 'tutorial' ? '#45a049' : '#1976D2',
                     },
                   }}
+                  ariaLabel={false}
                 >
                   {isLastStep ? 'Complete' : 'Next'}
                 </Button>
               </Stack>
             </CardContent>
           </Card>
-        </ClickAwayListener>
       </Box>
     </Portal>
   );

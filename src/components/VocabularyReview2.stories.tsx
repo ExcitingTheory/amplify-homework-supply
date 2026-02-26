@@ -54,6 +54,7 @@ const meta: Meta<typeof VocabularyReview2> = {
     component: VocabularyReview2,
     parameters: {
         layout: 'padded',
+        initializeMockData: false,
         docs: {
             description: {
                 component: `

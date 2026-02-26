@@ -26,6 +26,7 @@ export default {
   component: AutoEmbedPlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

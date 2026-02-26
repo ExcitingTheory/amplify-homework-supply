@@ -12,6 +12,21 @@ This directory contains the core Yjs infrastructure for real-time collaborative 
   - Provides methods for creating Y.Maps, Y.Arrays, Y.Text
   - Handles awareness (presence tracking)
 
+### Workbook Collaboration (NEW! 🎉)
+- **`WorkbookCollaborationProvider.ts`** - Specialized provider for student-tutor collaboration
+  - Per-student workbook rooms using Grade ID
+  - Real-time collaboration between students and tutors
+  - Tutor presence indicators and live feedback
+  - Auto-sync to Grade.data with debouncing
+  - See [WORKBOOK_COLLABORATION.md](./WORKBOOK_COLLABORATION.md) for full documentation
+
+- **`workbookHooks.ts`** - React hooks for workbook collaboration
+  - `useWorkbookCollaboration()` - Main hook for managing workbook state
+  - `useWorkbookBlock()` - Hook for individual block editing
+  - `useTutorPresence()` - Track tutor cursors and presence
+  - `useWorkbookFeedback()` - Real-time feedback notifications
+  - `useWorkbookStats()` - Live completion and accuracy statistics
+
 ### React Hooks
 - **`hooks.ts`** - React integration hooks
   - `useYjsProvider()` - Hook for managing provider lifecycle
@@ -32,10 +47,69 @@ This directory contains the core Yjs infrastructure for real-time collaborative 
 - **`SyncAdapter.ts`** - Converts Yjs to GraphQL mutations
   - Saves Y.Doc snapshots to backend
   - Loads snapshots from backend
-  - Document-specific sync methods (Unit, Grade, Chat, Question, etc.)
+  - Document-specific sync methods (Unit, Grade, Chat, Question, Workbook, etc.)
 
 ### Tests
 - **`__tests__/YjsProvider.test.ts`** - Unit tests for YjsProvider
+
+## Quick Start: Workbook Collaboration
+
+Enable real-time collaboration between students and tutors on workbook assignments:
+
+```typescript
+import { useWorkbookCollaboration } from '@/yjs'
+
+function StudentWorkbook({ gradeId, currentUser, grade }) {
+  const {
+    workbookData,
+    updateBlock,
+    activeTutors,
+    isSynced,
+  } = useWorkbookCollaboration({
+    gradeId,
+    user: {
+      username: currentUser.username,
+      role: 'student',
+      displayName: currentUser.name,
+      color: '#3b82f6'
+    },
+    initialData: grade.data,
+    onTutorJoin: (tutor) => {
+      toast.info(`${tutor.displayName} joined to help!`)
+    },
+    onSyncToGrade: async (data, feedback) => {
+      await DataStore.save(
+        Grade.copyOf(grade, updated => {
+          updated.data = data
+          updated.feedback = JSON.stringify(feedback)
+        })
+      )
+    }
+  })
+
+  return (
+    <div>
+      {activeTutors.length > 0 && (
+        <Alert>Tutor is helping you!</Alert>
+      )}
+      <WorkbookEditor 
+        data={workbookData}
+        onBlockUpdate={updateBlock}
+      />
+    </div>
+  )
+}
+```
+
+**Key Features:**
+- 🔄 Real-time sync between student and tutors
+- 👀 Tutor presence indicators
+- 💬 Live feedback from tutors
+- 📊 Auto-calculated completion and accuracy
+- 💾 Offline-first with IndexedDB
+- 🔐 Role-based permissions
+
+See [WORKBOOK_COLLABORATION.md](./WORKBOOK_COLLABORATION.md) for complete documentation.
 
 ## Installation
 

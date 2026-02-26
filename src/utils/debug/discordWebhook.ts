@@ -28,6 +28,8 @@ export interface DiagnosticReport {
   description?: string;
   /** User email/identifier (optional) */
   userContact?: string;
+  /** S3 signed URL for full artifact (30-day expiration) */
+  artifactUrl?: string;
 }
 
 /**
@@ -96,6 +98,11 @@ function createEmbed(report: DiagnosticReport, sanitized: StateSnapshot) {
         value: sanitized.errors!.slice(0, 3).map((err, i) => 
           `${i + 1}. ${err.message?.substring(0, 100)}...`
         ).join('\n') || 'See attached file',
+        inline: false,
+      }] : []),
+      ...(report.artifactUrl ? [{
+        name: '📎 Full Diagnostic Artifact (S3)',
+        value: `[Download JSON (30-day link)](${report.artifactUrl})`,
         inline: false,
       }] : []),
     ],

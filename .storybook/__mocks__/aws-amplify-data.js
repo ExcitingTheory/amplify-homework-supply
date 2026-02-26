@@ -219,12 +219,36 @@ const addRelationshipAccessors = (item, modelName) => {
 /**
  * Create a mock observable query that immediately returns data
  */
-const createObservableQuery = (modelName) => {
+const createObservableQuery = (modelName, filter) => {
   return {
     subscribe: ({ next, error }) => {
       try {
-        const items = Array.from(dataStores[modelName].values());
-        console.log(`[Mock Data] ${modelName}.observeQuery() returning ${items.length} items`);
+        let items = Array.from(dataStores[modelName].values());
+        
+        // Apply filter if provided
+        if (filter?.filter) {
+          console.log(`[Mock Data] ${modelName}.observeQuery() applying filter:`, filter.filter);
+          console.log(`[Mock Data] ${modelName}.observeQuery() items before filter:`, items.length);
+          items = items.filter(item => {
+            // Simple filter implementation - supports { field: { eq: value } }
+            const matches = Object.entries(filter.filter).every(([field, condition]) => {
+              if (condition.eq !== undefined) {
+                const itemValue = item[field];
+                const conditionValue = condition.eq;
+                const match = itemValue === conditionValue;
+                if (modelName === 'Section') {
+                  console.log(`[Mock Data] Section filter check: ${field} => item[${field}]=${itemValue} === ${conditionValue} => ${match}`);
+                }
+                return match;
+              }
+              return true;
+            });
+            return matches;
+          });
+          console.log(`[Mock Data] ${modelName}.observeQuery() items after filter:`, items.length);
+        }
+        
+        console.log(`[Mock Data] ${modelName}.observeQuery() returning ${items.length} items (filter applied)`, filter);
         
         // Add relationship accessors to all items
         const enhancedItems = items.map(item => addRelationshipAccessors(item, modelName));
@@ -271,7 +295,7 @@ const createObservableQuery = (modelName) => {
 const createMockModel = (modelName) => ({
   observeQuery: (filter) => {
     console.log(`[Mock Data] ${modelName}.observeQuery() called with filter:`, filter);
-    return createObservableQuery(modelName);
+    return createObservableQuery(modelName, filter);
   },
   
   list: async (options) => {
@@ -607,10 +631,12 @@ export const seedMockSections = (sectionsArray) => {
   console.log(`[Mock Data] seedMockSections: Adding ${sectionsArray.length} sections`);
   sectionsArray.forEach(section => {
     if (section.id) {
+      console.log(`[Mock Data] Seeding section: ${section.id} with owner: ${section.owner}`);
       dataStores.Section.set(section.id, section);
     }
   });
   console.log('[Mock Data] Total sections in store:', dataStores.Section.size);
+  console.log('[Mock Data] Sections in store:', Array.from(dataStores.Section.values()).map(s => ({ id: s.id, owner: s.owner, name: s.name })));
   
   // Notify all Section subscribers about the new data
   if (activeSubscriptions.Section.length > 0) {
@@ -625,6 +651,8 @@ export const seedMockSections = (sectionsArray) => {
         });
       }, 0);
     });
+  } else {
+    console.log('[Mock Data] No active Section subscriptions to notify yet');
   }
 };
 

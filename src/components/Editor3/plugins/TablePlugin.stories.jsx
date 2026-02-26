@@ -28,6 +28,7 @@ export default {
   component: TablePlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

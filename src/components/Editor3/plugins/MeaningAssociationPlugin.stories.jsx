@@ -29,6 +29,7 @@ export default {
   component: MeaningAssociationPlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 

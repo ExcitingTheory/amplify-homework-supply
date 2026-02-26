@@ -27,6 +27,7 @@ export default {
   component: WordBlockPlugin,
   parameters: {
     layout: 'fullscreen',
+    initializeMockData: false,
   },
 };
 
