@@ -47,11 +47,12 @@ interface WorkbookProps {
  * Shows the student's workbook with real-time collaboration features
  */
 export function CollaborativeWorkbook({ gradeId, unitId }: WorkbookProps) {
-  const { session, currentGrade } = useContext(UnitContext)
+  const { session, grade } = useContext(UnitContext)
   const [showTutorNotification, setShowTutorNotification] = useState(false)
 
   // Initialize collaborative workbook
   const {
+    provider,
     workbookData,
     updateBlock,
     activeTutors,
@@ -68,7 +69,7 @@ export function CollaborativeWorkbook({ gradeId, unitId }: WorkbookProps) {
       displayName: session.user?.name || session.username || '',
       color: '#3b82f6', // Blue for students
     },
-    initialData: currentGrade?.data,
+    initialData: grade?.data,
     onTutorJoin: (tutor) => {
       setShowTutorNotification(true)
       console.log(`Tutor ${tutor.displayName} joined to help!`)
@@ -78,7 +79,7 @@ export function CollaborativeWorkbook({ gradeId, unitId }: WorkbookProps) {
     },
     onSyncToGrade: async (data, feedback) => {
       // Sync to DataStore
-      if (!currentGrade) return
+      if (!grade) return
 
       try {
         const parsed = JSON.parse(data)
@@ -94,7 +95,7 @@ export function CollaborativeWorkbook({ gradeId, unitId }: WorkbookProps) {
         )
 
         await DataStore.save(
-          Grade.copyOf(currentGrade, (updated) => {
+          Grade.copyOf(grade, (updated) => {
             updated.data = data
             updated.feedback = JSON.stringify(feedback)
             updated.complete = complete
@@ -110,7 +111,7 @@ export function CollaborativeWorkbook({ gradeId, unitId }: WorkbookProps) {
     },
   })
 
-  const stats = useWorkbookStats(workbookData ? { getWorkbookData: () => workbookData } : null)
+  const stats = useWorkbookStats(provider)
 
   return (
     <Box sx={{ p: 2 }}>

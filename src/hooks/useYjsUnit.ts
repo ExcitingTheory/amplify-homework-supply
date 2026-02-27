@@ -14,7 +14,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { useYjsProvider } from '../../yjs/hooks';
+import { useYjsProvider } from '../yjs/hooks';
 import { getAmplifyClient } from '../utils/amplifyClient';
 import * as Y from 'yjs';
 

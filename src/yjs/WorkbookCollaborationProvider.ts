@@ -83,7 +83,7 @@ export interface WorkbookBlockData {
 export class WorkbookCollaborationProvider extends YjsDocProvider {
   private gradeId: string
   private user: WorkbookUser
-  private config: WorkbookCollaborationConfig
+  private workbookConfig: WorkbookCollaborationConfig
   private syncTimer: NodeJS.Timeout | null = null
   private activeTutors: Map<number, WorkbookUser> = new Map()
   
@@ -103,7 +103,7 @@ export class WorkbookCollaborationProvider extends YjsDocProvider {
 
     this.gradeId = config.gradeId
     this.user = config.user
-    this.config = {
+    this.workbookConfig = {
       autoSyncToGrade: true,
       syncInterval: 3000, // 3 second debounce
       ...config,
@@ -121,7 +121,7 @@ export class WorkbookCollaborationProvider extends YjsDocProvider {
     this.setupAwarenessHandlers()
 
     // Set up auto-sync to Grade.data if enabled
-    if (this.config.autoSyncToGrade) {
+    if (this.workbookConfig.autoSyncToGrade) {
       this.setupAutoSync()
     }
   }
@@ -156,7 +156,7 @@ export class WorkbookCollaborationProvider extends YjsDocProvider {
           // Track if it's a tutor/instructor
           if (user.role === 'tutor' || user.role === 'instructor' || user.role === 'admin') {
             this.activeTutors.set(clientId, user)
-            this.config.onTutorJoin?.(user)
+            this.workbookConfig.onTutorJoin?.(user)
           }
         }
       })
@@ -166,13 +166,13 @@ export class WorkbookCollaborationProvider extends YjsDocProvider {
         const tutor = this.activeTutors.get(clientId)
         if (tutor) {
           this.activeTutors.delete(clientId)
-          this.config.onTutorLeave?.(tutor)
+          this.workbookConfig.onTutorLeave?.(tutor)
         }
 
         // Check if student disconnected
         const state = this.getClientState(clientId)
         if (state?.user?.role === 'student') {
-          this.config.onStudentDisconnect?.()
+          this.workbookConfig.onStudentDisconnect?.()
         }
       })
     })
@@ -192,7 +192,7 @@ export class WorkbookCollaborationProvider extends YjsDocProvider {
 
       this.syncTimer = setTimeout(() => {
         this.triggerGradeSync()
-      }, this.config.syncInterval)
+      }, this.workbookConfig.syncInterval)
     })
   }
 

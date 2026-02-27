@@ -38,16 +38,41 @@ export interface DiagnosticReport {
 function sanitizeSnapshot(snapshot: StateSnapshot): StateSnapshot {
   const sanitized = { ...snapshot };
   
-  // Redact sensitive fields
-  if (sanitized.state?.auth) {
-    sanitized.state.auth = {
-      ...sanitized.state.auth,
-      // Keep user ID but redact tokens
-      session: sanitized.state.auth.session ? {
-        identityId: '[REDACTED]',
-        idToken: '[REDACTED]',
-      } : undefined,
-    };
+  // Redact sensitive fields from contexts (may contain auth info)
+  if (sanitized.contexts) {
+    sanitized.contexts = Object.fromEntries(
+      Object.entries(sanitized.contexts).map(([key, value]) => {
+        // Redact authentication tokens if present
+        if (key.toLowerCase().includes('auth') && typeof value === 'object' && value !== null) {
+          return [key, {
+            ...value as Record<string, unknown>,
+            session: '[REDACTED]',
+            tokens: '[REDACTED]',
+            credentials: '[REDACTED]',
+          }];
+        }
+        return [key, value];
+      })
+    );
+  }
+  
+  // Redact sensitive localStorage/sessionStorage
+  const redactKeys = ['token', 'auth', 'credential', 'password', 'secret'];
+  if (sanitized.localStorage) {
+    sanitized.localStorage = Object.fromEntries(
+      Object.entries(sanitized.localStorage).map(([key, value]) => [
+        key,
+        redactKeys.some(k => key.toLowerCase().includes(k)) ? '[REDACTED]' : value
+      ])
+    );
+  }
+  if (sanitized.sessionStorage) {
+    sanitized.sessionStorage = Object.fromEntries(
+      Object.entries(sanitized.sessionStorage).map(([key, value]) => [
+        key,
+        redactKeys.some(k => key.toLowerCase().includes(k)) ? '[REDACTED]' : value
+      ])
+    );
   }
   
   return sanitized;
@@ -59,14 +84,26 @@ function sanitizeSnapshot(snapshot: StateSnapshot): StateSnapshot {
 function formatForDiscord(snapshot: StateSnapshot): string {
   const info = [
     `**Timestamp:** ${new Date(snapshot.timestamp).toLocaleString()}`,
-    `**Route:** ${snapshot.route}`,
-    `**Browser:** ${snapshot.browser}`,
-    `**Components:** ${snapshot.componentCount}`,
-    `**Log Entries:** ${snapshot.logEntries.length}`,
+    `**Version:** ${snapshot.version}`,
+    `**URL:** ${snapshot.environment.url}`,
+    `**Browser:** ${snapshot.environment.userAgent.substring(0, 100)}`,
+    `**Platform:** ${snapshot.environment.platform}`,
+    `**Screen:** ${snapshot.environment.screenSize.width}x${snapshot.environment.screenSize.height}`,
   ];
   
   if (snapshot.errors?.length > 0) {
     info.push(`**Errors:** ${snapshot.errors.length} error(s) detected`);
+  }
+  
+  // Add data store summary if available
+  if (snapshot.dataStore) {
+    const modelCounts = Object.entries(snapshot.dataStore)
+      .filter(([key]) => Array.isArray(snapshot.dataStore[key as keyof typeof snapshot.dataStore]))
+      .map(([key, value]) => `${key}:${(value as unknown[]).length}`)
+      .join(', ');
+    if (modelCounts) {
+      info.push(`**Data:** ${modelCounts}`);
+    }
   }
   
   return info.join('\n');
@@ -155,7 +192,7 @@ export async function sendToDiscord(
     
     // Optionally send full snapshot as file attachment
     // (Discord webhooks support file uploads via multipart/form-data)
-    if (sanitized.logEntries.length > 10 || (sanitized.errors && sanitized.errors.length > 0)) {
+    if ((sanitized.logs && sanitized.logs.length > 1000) || (sanitized.errors && sanitized.errors.length > 0)) {
       await sendFullSnapshot(sanitized, config.webhookUrl);
     }
     

@@ -22,6 +22,24 @@ export interface UseWorkbookCollaborationOptions {
   wsUrl?: string
 }
 
+export interface UseWorkbookCollaborationReturn {
+  provider: WorkbookCollaborationProvider | null
+  workbookData: WorkbookBlockData
+  activeTutors: WorkbookUser[]
+  connectedUsers: WorkbookUser[]
+  isSynced: boolean
+  isConnected: boolean
+  hasTutorPresent: boolean
+  updateBlock: <T extends Partial<WorkbookBlockData[string]>>(blockId: string, data: T) => void
+  getBlock: (blockId: string) => WorkbookBlockData[string] | undefined
+  deleteBlock: (blockId: string) => void
+  setFeedback: (blockId: string, feedback: any) => void
+  updateCursor: (blockId: string, position?: number) => void
+  exportToGradeData: () => string
+  getCompletionPercentage: () => number
+  getOverallAccuracy: () => number
+}
+
 /**
  * Main hook for workbook collaboration
  * 
@@ -74,7 +92,7 @@ export interface UseWorkbookCollaborationOptions {
  * }
  * ```
  */
-export function useWorkbookCollaboration(options: UseWorkbookCollaborationOptions) {
+export function useWorkbookCollaboration(options: UseWorkbookCollaborationOptions): UseWorkbookCollaborationReturn {
   const {
     gradeId,
     user,
