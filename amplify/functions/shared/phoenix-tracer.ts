@@ -31,8 +31,9 @@ export function initializePhoenixTracing() {
 
   const phoenixEndpoint = process.env.PHOENIX_COLLECTOR_ENDPOINT;
   
-  if (!phoenixEndpoint) {
-    console.warn('[Phoenix] PHOENIX_COLLECTOR_ENDPOINT not set - tracing disabled');
+  // Skip if endpoint is not set or is a placeholder value
+  if (!phoenixEndpoint || phoenixEndpoint.includes('<value will be resolved')) {
+    console.warn('[Phoenix] PHOENIX_COLLECTOR_ENDPOINT not set or is placeholder - tracing disabled');
     return;
   }
 

@@ -63,7 +63,7 @@ export class PlaylistNode extends DecoratorNode {
   }
 
   static clone(node) {
-    return new PlaylistNode(node.__ids, node.__format);
+    return new PlaylistNode(node.__ids, node.__format, node.__key);
   }
 
   static importJSON(serializedNode) {
@@ -82,7 +82,7 @@ export class PlaylistNode extends DecoratorNode {
   }
 
   constructor(ids = [], format, key) {
-    super(format, key);
+    super(key);
     this.__ids = ids;
   }
 

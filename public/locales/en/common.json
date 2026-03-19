@@ -28,6 +28,10 @@
     "name": "Homework Supply",
     "tagline": "elearning platform"
   },
+  "chat": {
+    "aiAssistant": "AI Assistant",
+    "openAssistant": "Open AI Assistant"
+  },
   "common": {
     "about": "About",
     "filter": "Filter",
@@ -43,9 +47,9 @@
   "mainToolbar": {
     "addToSection": {
       "add": "Add",
-      "codeLabel": "Code Label",
-      "description": "Description",
-      "title": "Title"
+      "codeLabel": "Join Code",
+      "description": "Add self to class section with Join Code",
+      "title": "Add to Section"
     },
     "help": "Help",
     "settings": {

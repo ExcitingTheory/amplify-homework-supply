@@ -1,0 +1,42 @@
+
+DevTools listening on ws://127.0.0.1:56593/devtools/browser/fe965094-4be6-4a96-adc6-25cb3a48f760
+2026-03-14 15:47:30.151 Cypress[78544:4257218] WARNING: Secure coding is not enabled for restorable state! Enable secure coding by implementing NSApplicationDelegate.applicationSupportsSecureRestorableState: and returning YES.
+
+================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:        13.17.0                                                                        │
+  │ Browser:        Chrome 146 (headless)                                                          │
+  │ Node Version:   v20.19.6 (/Users/colinbarrett-fox/.nvm/versions/node/v20.19.6/bin/node)        │
+  │ Specs:          1 found (instructor-workflow.cy.ts)                                            │
+  │ Searched:       cypress/e2e/instructor-workflow.cy.ts                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  instructor-workflow.cy.ts                                                       (1 of 1)
+
+
+  Instructor Complete Workflow
+    ✓ instructor creates unit via chatbot (19796ms)
+    (Attempt 1 of 3) instructor creates section manually
+    (Attempt 2 of 3) instructor creates section manually
+The Test Runner unexpectedly exited via a exit event with signal SIGKILL
+
+Please search Cypress documentation for possible solutions:
+
+https://on.cypress.io
+
+Check if there is a GitHub issue describing this crash:
+
+https://github.com/cypress-io/cypress/issues
+
+Consider opening a new issue.
+
+----------
+
+Platform: darwin-x64 (23.6.0)
+Cypress Version: 13.17.0

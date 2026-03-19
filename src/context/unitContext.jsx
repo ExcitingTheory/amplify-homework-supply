@@ -27,8 +27,9 @@ const UnitProvider = ({ children, id }) => {
   const [showUnitComplete, setShowUnitComplete] = useState(false)
   const [playlistUrls, setPlaylistUrls] = React.useState({})
   const [username, setUsername] = React.useState(null);
+  const [permissionError, setPermissionError] = React.useState(null);
 
-  const versionRef = useRef(0);
+  const versionRef = useRef(null); // Store updatedAt to detect changes
   const editorStateRef = useRef();
   const editorSelectionRef = useRef();
   const editorRef = useRef(null);
@@ -49,8 +50,106 @@ const UnitProvider = ({ children, id }) => {
 
   // Memoize derived values to prevent recalculation on every render
   const rubricLength = React.useMemo(() => rubric.length || 0, [rubric.length]);
-  const unitVersion = React.useMemo(() => unit?._version || 0, [unit?._version]);
+  const unitVersion = React.useMemo(() => unit?.updatedAt || '', [unit?.updatedAt]);
   const unitOwner = React.useMemo(() => unit?.owner || '', [unit?.owner]);
+
+  /**
+   * Check if the current user has permission to EDIT the unit (strict check)
+   * Returns true if:
+   * - User is the owner of the unit
+   * - User is in Instructors, Moderators, or Admins group
+   * - Unit status is PUBLISHED (public access for viewing)
+   */
+  const checkUnitEditPermission = React.useCallback((unit, currentUser, userGroups) => {
+    if (!unit || !unit.id) {
+      return { hasAccess: false, reason: null }; // Unit not loaded yet
+    }
+
+    // If unit is published, anyone can view it (learners can read published units)
+    if (unit.status === 'PUBLISHED') {
+      return { hasAccess: true, reason: null };
+    }
+
+    // Check if user is authenticated
+    if (!currentUser) {
+      return { 
+        hasAccess: false, 
+        reason: 'You must be signed in to access this content.' 
+      };
+    }
+
+    const userId = currentUser?.attributes?.sub;
+    const groups = userGroups || [];
+
+    // Check if user is owner
+    if (unit.owner === userId) {
+      return { hasAccess: true, reason: null };
+    }
+
+    // Check if user is in privileged groups
+    const hasInstructorAccess = groups.some(group => 
+      ['Instructors', 'Moderators', 'Admins'].includes(group)
+    );
+
+    if (hasInstructorAccess) {
+      return { hasAccess: true, reason: null };
+    }
+
+    // No access to edit
+    return { 
+      hasAccess: false, 
+      reason: 'You do not have permission to edit this unit. Only the owner or instructors can edit unpublished units.' 
+    };
+  }, []);
+
+  /**
+   * Check if the current user has permission to VIEW the unit in workbook (permissive check)
+   * Workbook is for completing assignments, so it's more accessible than the editor.
+   * Returns true if:
+   * - User is authenticated (learners can work on any published or assigned units)
+   * - Unit is published (anyone can access)
+   * - User is owner or instructor (can access any unit)
+   */
+  const checkUnitViewPermission = React.useCallback((unit, currentUser, userGroups) => {
+    if (!unit || !unit.id) {
+      return { hasAccess: false, reason: null }; // Unit not loaded yet
+    }
+
+    // If unit is published, anyone can view it
+    if (unit.status === 'PUBLISHED') {
+      return { hasAccess: true, reason: null };
+    }
+
+    // Check if user is authenticated
+    if (!currentUser) {
+      return { 
+        hasAccess: false, 
+        reason: 'You must be signed in to access this content.' 
+      };
+    }
+
+    const userId = currentUser?.attributes?.sub;
+    const groups = userGroups || [];
+
+    // Check if user is owner
+    if (unit.owner === userId) {
+      return { hasAccess: true, reason: null };
+    }
+
+    // Check if user is in privileged groups (instructors can view all units)
+    const hasInstructorAccess = groups.some(group => 
+      ['Instructors', 'Moderators', 'Admins'].includes(group)
+    );
+
+    if (hasInstructorAccess) {
+      return { hasAccess: true, reason: null };
+    }
+
+    // For workbook/viewing: Allow authenticated learners to access
+    // The backend (Grade creation, Assignment checks) will enforce actual access control
+    // This allows students to view units they have assignments for
+    return { hasAccess: true, reason: null };
+  }, []);
 
   // NOTE: Authentication is now handled by centralized AuthContext
   // Update usernameRef when user changes
@@ -113,7 +212,7 @@ const UnitProvider = ({ children, id }) => {
       // use the unit owner as the instructor
       instructor: currentUnit?.owner || '',
       // Owner will be auto-populated by Amplify based on auth
-      unitVersion: currentUnit?._version || 0,
+      unitVersion: currentUnit?.updatedAt || '',
       complete: unitIsComplete,
       accuracy: unitAccuracy
     });
@@ -316,8 +415,19 @@ const UnitProvider = ({ children, id }) => {
   }, [id, unitVersion, user, authLoading]);
 
   React.useEffect(() => {
-    if (!id) return
+    console.log('[UnitContext] useEffect triggered', { id, authLoading, hasUser: !!user, userSub: user?.attributes?.sub });
+    // Wait for auth to be ready before fetching unit data
+    if (authLoading || !user) {
+      console.log('[UnitContext] Waiting for auth...', { authLoading, hasUser: !!user });
+      return;
+    }
 
+    if (!id) {
+      console.log('[UnitContext] No unit id provided');
+      return;
+    }
+
+    console.log('[UnitContext] Fetching unit data for id:', id);
     const client = getAmplifyClient();
 
     const subscription = client.models.Unit.observeQuery({
@@ -330,10 +440,16 @@ const UnitProvider = ({ children, id }) => {
         
         if (!_newUnit) {
           setUnit({});
+          setPermissionError(null);
           return;
         }
 
-        // Only update if version has actually changed
+        // Permission checking is handled by individual pages (editor vs workbook)
+        // UnitContext loads data for both, pages decide whether to show error
+        // Clear any previous permission errors
+        setPermissionError(null);
+
+        // Skip if same unit with no changes (compare _version)
         if (versionRef.current === _newUnit?._version) {
           return;
         }
@@ -426,7 +542,7 @@ const UnitProvider = ({ children, id }) => {
           })
         }
 
-        // Update all state - version check ensures data has changed
+        // Update all state - _version check ensures data has changed
         unitRef.current = _newUnit;
         setUnit(_newUnit);
         setDictionary(_dictionary);
@@ -436,7 +552,7 @@ const UnitProvider = ({ children, id }) => {
         setRubric(_rubric);
 
         editorStateRef.current = unitData;
-        versionRef.current = _newUnit?._version
+        versionRef.current = _newUnit?._version;
       },
       error: (error) => {
         console.error('[UnitContext] Unit subscription error:', error);
@@ -454,7 +570,7 @@ const UnitProvider = ({ children, id }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [id]);
+  }, [id, user, authLoading]);
 
   const saveEditorContent = React.useCallback(async (editorContent) => {
     const currentUnit = unitRef.current;
@@ -704,6 +820,7 @@ const UnitProvider = ({ children, id }) => {
     unitRef,
     finishedQuestions,
     showUnitComplete,
+    permissionError,
     handleBeforeUnload,
     setShowUnitComplete,
     setFinishedQuestions,
@@ -713,6 +830,8 @@ const UnitProvider = ({ children, id }) => {
     handleStatusChange,
     saveEditorContent,
     saveGrade,
+    checkUnitEditPermission,
+    checkUnitViewPermission,
     createGrade,
     session,
     // Workbook collaboration features
@@ -731,7 +850,10 @@ const UnitProvider = ({ children, id }) => {
     playlistUrls,
     description,
     finishedQuestions,
+    checkUnitEditPermission,
+    checkUnitViewPermission,
     showUnitComplete,
+    permissionError,
     session,
     handleBeforeUnload,
     saveName,

@@ -186,7 +186,6 @@ class QuestionDecoratorNode extends DecoratorNode {
   __hint;
   __answer;
   __audio;
-  __version;
   __isExpanded;
   __isSelected;
   __searchTerm;
@@ -214,7 +213,6 @@ class QuestionDecoratorNode extends DecoratorNode {
       node.__hint,
       node.__answer,
       node.__audio,
-      node.__version,
       node.__isExpanded,
       node.__isSelected,
       node.__searchTerm,
@@ -240,7 +238,6 @@ class QuestionDecoratorNode extends DecoratorNode {
     hint,
     answer,
     audio,
-    version,
     isExpanded = true,
     isSelected = false,
     searchTerm = '',
@@ -264,7 +261,6 @@ class QuestionDecoratorNode extends DecoratorNode {
     this.__hint = hint;
     this.__answer = answer;
     this.__audio = audio || [];
-    this.__version = version;
     this.__isExpanded = isExpanded;
     this.__isSelected = isSelected;
     this.__searchTerm = searchTerm;
@@ -323,7 +319,6 @@ class QuestionDecoratorNode extends DecoratorNode {
       hint: this.__hint,
       answer: this.__answer,
       audio: this.__audio,
-      version: this.__version,
       isExpanded: this.__isExpanded,
       isSelected: this.__isSelected,
       index: this.__index,
@@ -336,7 +331,6 @@ class QuestionDecoratorNode extends DecoratorNode {
     if (updates.hint !== undefined) writable.__hint = updates.hint;
     if (updates.answer !== undefined) writable.__answer = updates.answer;
     if (updates.audio !== undefined) writable.__audio = updates.audio;
-    if (updates._version !== undefined) writable.__version = updates._version;
   }
 
   setExpanded(isExpanded) {
@@ -389,7 +383,6 @@ class QuestionDecoratorNode extends DecoratorNode {
     element.setAttribute('data-lexical-question-prompt', this.__prompt || '');
     element.setAttribute('data-lexical-question-hint', this.__hint || '');
     element.setAttribute('data-lexical-question-answer', this.__answer || '');
-    element.setAttribute('data-lexical-question-version', this.__version || '1');
 
     // Audio URLs (S3 keys)
     if (this.__audio && this.__audio.length > 0) {
@@ -497,7 +490,6 @@ class QuestionDecoratorNode extends DecoratorNode {
         hint={this.__hint}
         answer={this.__answer}
         audio={this.__audio}
-        version={this.__version}
         isExpanded={this.__isExpanded}
         isSelected={this.__isSelected}
         searchTerm={this.__searchTerm}
@@ -533,7 +525,6 @@ function $createQuestionDecoratorNode(
   hint,
   answer,
   audio,
-  version,
   isExpanded,
   isSelected,
   searchTerm,
@@ -556,7 +547,6 @@ function $createQuestionDecoratorNode(
     hint,
     answer,
     audio,
-    version,
     isExpanded,
     isSelected,
     searchTerm,
@@ -589,7 +579,6 @@ function QuestionRowComponent({
   hint,
   answer,
   audio,
-  version,
   isExpanded,
   isSelected,
   searchTerm,
@@ -643,7 +632,7 @@ function QuestionRowComponent({
 
           // Update the question with new audio
           if (onUpdate) {
-            await onUpdate(questionId, { audio: newAudio }, version);
+            await onUpdate(questionId, { audio: newAudio });
           }
 
           _fileOps[i] = { ..._fileOps[i], progress: 'Complete' };
@@ -748,7 +737,7 @@ function QuestionRowComponent({
 
   const handleUpdateWrapper = async (itemIndex, field, newValue) => {
     if (onUpdate) {
-      await onUpdate(questionId, { [field]: newValue }, version);
+      await onUpdate(questionId, { [field]: newValue });
     }
   };
 
@@ -820,7 +809,6 @@ function QuestionsPlugin({
           question.hint,
           question.answer,
           question.audio,
-          question._version,
           expandedItems.has(id),
           selectedItems.has(id),
           searchTerm,
@@ -842,13 +830,12 @@ function QuestionsPlugin({
     });
   }, [questionBank, searchTerm, expandedItems, selectedItems, audioFiles, editor]);
 
-  const handleUpdateQuestion = async (questionId, updates, currentVersion) => {
+  const handleUpdateQuestion = async (questionId, updates) => {
     try {
       const client = getAmplifyClient();
       const { data, errors } = await client.models.Question.update({
         id: questionId,
-        ...updates,
-        _version: currentVersion,
+        ...updates
       });
       
       if (errors) {
@@ -999,11 +986,7 @@ export function QuestionEditor2() {
         const client = getAmplifyClient();
         for (const id of selectedItems) {
           try {
-            const question = questionBank[id];
-            const { errors } = await client.models.Question.delete({
-              id,
-              _version: question._version,
-            });
+            const { errors } = await client.models.Question.delete({ id });
             
             if (errors) {
               console.error('Error deleting question:', id, errors);

@@ -44,7 +44,9 @@ import UnitContext from "../context/unitContext";
 import SectionContext from "../context/sectionContext";
 import VectorStoreContext from "../context/vectorStoreContext";
 import AuthContext from "../context/authContext";
+import ChatContext from "../context/chatContext";
 import { useTabContext } from "../context/tabContext";
+import { useTourSafe } from "../context/tourContext";
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
 import { fetchAuthSession } from 'aws-amplify/auth';
@@ -67,7 +69,10 @@ import { INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND } from '../components/Editor3/
 import { INSERT_CUSTOM_ANSWER_BLOCK_COMMAND } from '../components/Editor3/plugins/CustomAnswerPlugin';
 
 const ChatSidebar = () => {
-    const { t } = useTranslation('components');
+    const { t, ready } = useTranslation('components');
+
+    // Don't render until translations are ready to prevent hydration errors
+    if (!ready) return null;
 
     // Utility function to deep clone messages to prevent frozen object errors
     // The AI SDK mutates message objects during streaming, so they must be mutable
@@ -215,18 +220,23 @@ const ChatSidebar = () => {
         insertQuestion,
     } = unitContext;
 
-    // Get tab management and chat state from context
-    const tabContext = useTabContext();
+    // Get chat state from ChatContext
     const {
         assistantChat,
         chatHistories,
         setCurrentChat,
         isLoadingChat,
         chatCreationError,
-    } = tabContext;
+    } = React.useContext(ChatContext);
+
+    // Get tab context (optional - only available in Editor)
+    const tabContext = useTabContext() || {};
 
     // Get auth state
     const { user, isLoading: authLoading } = React.useContext(AuthContext);
+
+    // Get tour context (optional - may not be available in all pages)
+    const tourContext = useTourSafe();
 
 
 
@@ -236,7 +246,10 @@ const ChatSidebar = () => {
     // Simple handlers
     const handleInsertWord = (word) => insertWord?.(word);
     const handleInsertQuestion = (question) => insertQuestion?.(question);
-    const handleFocusItem = (type, id) => tabContext.setFocusItem?.({ type, id, timestamp: Date.now() });
+    const handleFocusItem = (type, id) => {
+        // Note: setFocusItem is not available in ChatContext, only in Editor's TabContext
+        console.log('[ChatSidebar] handleFocusItem called:', type, id);
+    };
 
     // Handle inserting editor blocks from chat
     const handleInsertBlock = useCallback((blockType, blockData) => {
@@ -274,13 +287,6 @@ const ChatSidebar = () => {
     // Load chat data when chat changes
     useEffect(() => {
         if (!assistantChat || isLoadingChat) return;
-        
-        // Log warning if version is missing but don't block loading
-        // In Gen 2, _version may be undefined during initial observeQuery sync
-        if (assistantChat._version == null) {
-            console.warn('[ChatSidebar] Chat missing _version field (may populate after sync):', assistantChat.id);
-        }
-
         const chatChanged = lastChatId !== assistantChat.id;
 
         if (chatChanged) {
@@ -312,7 +318,7 @@ const ChatSidebar = () => {
                 .then(result => dispatch({ type: ACTIONS.SET_UPLOADED_FILES, payload: result?.data || [] }))
                 .catch(err => console.error('[ChatSidebar] Error loading files:', err));
         }
-    }, [assistantChat?.id, assistantChat?._version, isLoadingChat]);
+    }, [assistantChat?.id, assistantChat?.updatedAt, isLoadingChat]);
 
     const vectorStoreCtx = React.useContext(VectorStoreContext);
 
@@ -612,6 +618,54 @@ const ChatSidebar = () => {
     // Derive loading state from useChat status
     const isLoading = status === 'in_progress' || status === 'streaming' || status === 'submitted';
 
+    // Monitor messages for tool actions and execute them
+    useEffect(() => {
+        if (!messages || messages.length === 0) return;
+
+        // Get the last message
+        const lastMessage = messages[messages.length - 1];
+        if (!lastMessage || lastMessage.role !== 'assistant') return;
+
+        // Extract tool parts with outputs
+        const toolParts = lastMessage.parts?.filter(part => 
+            part.type?.startsWith('tool-') && 
+            part.state === 'output-available' &&
+            part.output
+        ) || [];
+
+        if (toolParts.length === 0) return;
+
+        // Process each tool output for actions
+        toolParts.forEach(part => {
+            let output;
+            try {
+                output = typeof part.output === 'string' ? JSON.parse(part.output) : part.output;
+            } catch (e) {
+                console.error('[ChatSidebar] Failed to parse tool output:', e);
+                return;
+            }
+
+            if (!output || !output.action) return;
+
+            const { action } = output;
+
+            // Handle tour actions
+            if (action === 'start_tour' && tourContext) {
+                const { tourId, mode = 'tutorial' } = output;
+                console.log('[ChatSidebar] Starting tour:', tourId, 'mode:', mode);
+                tourContext.startTour(tourId, mode);
+            } else if (action === 'stop_tour' && tourContext) {
+                console.log('[ChatSidebar] Stopping tour');
+                tourContext.stopTour();
+            } else if (action === 'navigate_to_tab' && tabContext?.setLeftTab) {
+                const { tab } = output;
+                console.log('[ChatSidebar] Navigating to tab:', tab);
+                tabContext.setLeftTab(tab);
+            }
+            // Note: 'insert_editor_block' actions are handled by BlockInsertPreview component
+        });
+    }, [messages, tourContext, tabContext]);
+
     // Simple input change handler with debounced draft saving
     const handleInputChange = (e) => {
         const newValue = e.target.value;
@@ -667,6 +721,13 @@ const ChatSidebar = () => {
 
     // Subscribe to Document status changes
     useEffect(() => {
+        // Wait for authentication
+        if (authLoading || !user) {
+            console.log('[ChatSidebar] Document subscription: waiting for authentication', { authLoading, hasUser: !!user });
+            return;
+        }
+        
+        console.log('[ChatSidebar] Setting up Document subscription for user:', user.username);
         const client = getAmplifyClient();
         const subscription = client.models.Document.observeQuery().subscribe({
             next: ({ items }) => {
@@ -679,10 +740,10 @@ const ChatSidebar = () => {
                     };
                 });
 
-                // Only update if _version has actually changed
+                // Only update if _version has changed
                 const hasChanges = items.some(doc => {
                     const prevDoc = documentStatuses[doc.id];
-                    return !prevDoc || (doc._version || 0) > (prevDoc._version || 0);
+                    return !prevDoc || doc._version !== prevDoc._version;
                 });
 
                 if (hasChanges) {
@@ -708,7 +769,7 @@ const ChatSidebar = () => {
         });
 
         return () => subscription.unsubscribe();
-    }, []);
+    }, [authLoading, user?.username]);
 
     // Update document processing status when document status changes
     const documentStatusesRef = useRef({});
@@ -1128,9 +1189,9 @@ const ChatSidebar = () => {
                                                 throw new Error('Failed to create chat - no data returned. Check that backend is deployed and accessible.');
                                             }
                                             
-                                            console.log('[ChatSidebar] Created new chat:', result.data.id, '_version:', result.data._version);
+                                            console.log('[ChatSidebar] Created new chat:', result.data.id, 'at:', result.data.createdAt);
                                             
-                                            // TabContext subscription will pick up the new chat automatically
+                                            // ChatContext subscription will pick up the new chat automatically
                                         } catch (error) {
                                             console.error('[ChatSidebar] Error creating new chat:', error);
                                             alert('Failed to create new chat. Please check that the backend is running and try again.');
@@ -1145,7 +1206,7 @@ const ChatSidebar = () => {
                                     size="small"
                                     onClick={async () => {
                                         // Archive current chat by marking it archived
-                                        // TabContext will detect this and create a new chat automatically
+                                        // ChatContext will detect this and create a new chat automatically
                                         if (assistantChat?.id && !isLoadingChat) {
                                             try {
                                                 // Mark current chat as archived
@@ -1154,7 +1215,7 @@ const ChatSidebar = () => {
                                                     id: assistantChat.id,
                                                     archived: true
                                                 });
-                                                console.log('[ChatSidebar] Chat archived - TabContext will create new chat');
+                                                console.log('[ChatSidebar] Chat archived - ChatContext will create new chat');
 
                                                 // Clear local state
                                                 setMessages([]);
@@ -1269,7 +1330,7 @@ const ChatSidebar = () => {
                                                                             console.error('[ChatSidebar] Error saving draft:', error);
                                                                         }
                                                                     }
-                                                                    if (tabContext.switchToChat) {
+                                                                    if (tabContext?.switchToChat) {
                                                                         tabContext.switchToChat(history.id);
                                                                     } else {
                                                                         setCurrentChat(history);
@@ -1362,7 +1423,7 @@ const ChatSidebar = () => {
                                                         <React.Fragment key={history.id}>
                                                             <ListItemButton
                                                                 onClick={async () => {
-                                                                    if (tabContext.switchToChat) {
+                                                                    if (tabContext?.switchToChat) {
                                                                         tabContext.switchToChat(history.id);
                                                                     } else {
                                                                         setCurrentChat(history);
@@ -1449,6 +1510,7 @@ const ChatSidebar = () => {
                             key={assistantChat ? assistantChat.id : 'no-history'}
                             messages={messages}
                             useLexicalRenderer={true}
+                            data-testid="chat-messages"
                             renderMessage={(message, index) => {
                                 // Extract text content from message.parts (AI SDK v6 format)
                                 let textContent = '';
@@ -1470,6 +1532,7 @@ const ChatSidebar = () => {
                                         {textContent && (
                                             <Box
                                                 className={message.role === 'user' ? 'user' : 'assistant'}
+                                                data-role={message.role}
                                                 sx={{
                                                     m: 0.75,
                                                     p: '0.75rem 1rem',
@@ -1600,7 +1663,7 @@ const ChatSidebar = () => {
                                                         )}
 
                                                         {part.state === 'output-error' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                 ✗ {part.errorText}
                                                             </Typography>
                                                         )}
@@ -1614,6 +1677,7 @@ const ChatSidebar = () => {
                                                     <Box
                                                         key={callId || toolIdx}
                                                         sx={{
+                                                            width: '100%',
                                                             mb: 1,
                                                             p: 1,
                                                             bgcolor: 'transparent',
@@ -1621,6 +1685,9 @@ const ChatSidebar = () => {
                                                             borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
                                                             fontSize: '0.8rem',
                                                             color: 'text.secondary',
+                                                            overflow: 'hidden',
+                                                            overflowWrap: 'break-word',
+                                                            wordBreak: 'break-word',
                                                         }}
                                                     >
                                                         <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
@@ -1634,19 +1701,19 @@ const ChatSidebar = () => {
                                                         )}
 
                                                         {part.state === 'input-available' && (
-                                                            <Typography variant="caption" sx={{ display: 'block' }}>
+                                                            <Typography variant="caption" sx={{ display: 'block', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                 "{part.input?.name}"
                                                             </Typography>
                                                         )}
 
                                                         {part.state === 'output-available' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'success.dark', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                 ✓ {part.output?.message || t('chatSidebar.created')}
                                                             </Typography>
                                                         )}
 
                                                         {part.state === 'output-error' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                 ✗ {part.errorText}
                                                             </Typography>
                                                         )}
@@ -1674,6 +1741,9 @@ const ChatSidebar = () => {
                                                         sx={{
                                                             width: '100%',
                                                             mb: 2,
+                                                            overflow: 'hidden',
+                                                            overflowWrap: 'break-word',
+                                                            wordBreak: 'break-word',
                                                         }}
                                                     >
                                                         {part.state === 'input-streaming' && (
@@ -1702,10 +1772,12 @@ const ChatSidebar = () => {
                                                                     p: 2,
                                                                     bgcolor: 'error.light',
                                                                     borderRadius: 1,
-                                                                    color: 'error.dark'
+                                                                    color: 'error.dark',
+                                                                    wordBreak: 'break-word',
+                                                                    overflowWrap: 'break-word',
                                                                 }}
                                                             >
-                                                                <Typography variant="body2">
+                                                                <Typography variant="body2" sx={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                     Error creating block: {part.errorText}
                                                                 </Typography>
                                                             </Box>
@@ -1720,6 +1792,7 @@ const ChatSidebar = () => {
                                                     <Box
                                                         key={callId || toolIdx}
                                                         sx={{
+                                                            width: '100%',
                                                             mb: 1,
                                                             p: 1,
                                                             bgcolor: 'transparent',
@@ -1727,6 +1800,9 @@ const ChatSidebar = () => {
                                                             borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
                                                             fontSize: '0.8rem',
                                                             color: 'text.secondary',
+                                                            overflow: 'hidden',
+                                                            overflowWrap: 'break-word',
+                                                            wordBreak: 'break-word',
                                                         }}
                                                     >
                                                         <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
@@ -1740,19 +1816,19 @@ const ChatSidebar = () => {
                                                         )}
 
                                                         {part.state === 'input-available' && (
-                                                            <Typography variant="caption" sx={{ display: 'block' }}>
+                                                            <Typography variant="caption" sx={{ display: 'block', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                 {t('chatSidebar.contentTypeAndTopic', { contentType: part.input?.contentType, topic: part.input?.topic })}
                                                             </Typography>
                                                         )}
 
                                                         {part.state === 'output-available' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'success.dark', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                 ✓ {part.output?.message || t('chatSidebar.ready')}
                                                             </Typography>
                                                         )}
 
                                                         {part.state === 'output-error' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                 ✗ {part.errorText}
                                                             </Typography>
                                                         )}
@@ -1766,6 +1842,7 @@ const ChatSidebar = () => {
                                                     <Box
                                                         key={callId || toolIdx}
                                                         sx={{
+                                                            width: '100%',
                                                             mb: 1,
                                                             p: 1,
                                                             bgcolor: 'transparent',
@@ -1773,6 +1850,9 @@ const ChatSidebar = () => {
                                                             borderColor: part.state === 'output-error' ? 'error.main' : 'primary.main',
                                                             fontSize: '0.8rem',
                                                             color: 'text.secondary',
+                                                            overflow: 'hidden',
+                                                            overflowWrap: 'break-word',
+                                                            wordBreak: 'break-word',
                                                         }}
                                                     >
                                                         <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5, color: 'text.primary' }}>
@@ -1786,19 +1866,19 @@ const ChatSidebar = () => {
                                                         )}
 
                                                         {part.state === 'input-available' && (
-                                                            <Typography variant="caption" sx={{ display: 'block' }}>
+                                                            <Typography variant="caption" sx={{ display: 'block', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                 Topic: {part.input?.topic} ({part.input?.count} {part.input?.questionType} questions, {part.input?.difficulty} difficulty)
                                                             </Typography>
                                                         )}
 
                                                         {part.state === 'output-available' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', color: 'success.dark' }}>
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'success.dark', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                 ✓ {part.output?.message || `Generated ${part.output?.questionsGenerated || part.input?.count} questions`}
                                                             </Typography>
                                                         )}
 
                                                         {part.state === 'output-error' && (
-                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main' }}>
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'error.main', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
                                                                 ✗ {part.errorText}
                                                             </Typography>
                                                         )}
@@ -1811,6 +1891,7 @@ const ChatSidebar = () => {
                                                 <Box
                                                     key={callId || toolIdx}
                                                     sx={{
+                                                        width: '100%',
                                                         mb: 1,
                                                         p: 1,
                                                         bgcolor: 'transparent',
@@ -1818,6 +1899,9 @@ const ChatSidebar = () => {
                                                         borderColor: part.state === 'output-error' ? 'error.main' : 'grey.400',
                                                         fontSize: '0.8rem',
                                                         color: 'text.secondary',
+                                                        overflow: 'hidden',
+                                                        overflowWrap: 'break-word',
+                                                        wordBreak: 'break-word',
                                                     }}
                                                 >
                                                     <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', color: 'text.primary' }}>
@@ -1843,7 +1927,7 @@ const ChatSidebar = () => {
                                                     )}
 
                                                     {part.state === 'output-error' && (
-                                                        <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'error.main' }}>
+                                                        <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'error.main', wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
                                                             ✗ {part.errorText}
                                                         </Typography>
                                                     )}
@@ -2168,6 +2252,7 @@ const ChatSidebar = () => {
                             fullWidth
                             size="small"
                             data-tour="chat-input"
+                            data-testid="chat-input"
                             value={input}
                             onChange={handleInputChange}
                             onKeyPress={(e) => {
@@ -2197,6 +2282,7 @@ const ChatSidebar = () => {
                             type="submit"
                             variant="contained"
                             disabled={isLoading || !assistantChat?.id || !user}
+                            data-testid="chat-send"
                             sx={{
                                 minWidth: 'auto',
                                 px: 2,

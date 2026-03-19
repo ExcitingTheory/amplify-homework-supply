@@ -27,6 +27,8 @@ import AverageIcon from '@mui/icons-material/Timeline';
 import HighIcon from '@mui/icons-material/ArrowUpward';
 import StarIcon from '@mui/icons-material/Star';
 import { FilesProvider } from "../src/context/fileContext";
+import { useChatPageContext } from "../src/hooks/useChatPageContext";
+
 
 
 function getColor(grade = 0) {
@@ -80,6 +82,13 @@ function CardMediaComponent({ s3Key, identityId, level = 'protected', filter = n
   )
 }
 
+function getUserId(user) {
+    return (
+        user?.signInUserSession?.idToken?.payload?.sub ||
+        user?.userId ||
+        user?.username
+    );
+}
 
 
 function Index({ signOut, user }) {
@@ -105,14 +114,22 @@ function Index({ signOut, user }) {
   const [myGrades, setMyGrades] = React.useState([])
   const [myAssignmentNeedsGrading, setMyAssignmentNeedsGrading] = React.useState([])
 
+  // Register page context with global chat
+  useChatPageContext({
+    sections: mySections,
+  });
+
   useEffect(() => {
-    if (!user?.username) return;
+    const myUserId = getUserId(user);
+    if (!myUserId) return;
     const client = getAmplifyClient();
-    const myUserId = user.username;
     
     const subscription = client.models.Grade.observeQuery().subscribe({
       next: ({ items }) => {
         console.log('[Index] Grade subscription update:', items.length, 'grades');
+        
+        // Filter out null items before processing
+        items = items.filter(item => item != null && item.id != null);
         
         // Process my grades (complete only)
         const myCompletedGrades = items.filter(g => g.complete === true && g.owner === myUserId);
@@ -169,13 +186,16 @@ function Index({ signOut, user }) {
 
   // Consolidated Assignment observer - handles both my and others' assignments
   useEffect(() => {
-    if (!user?.username) return;
+    const myUserId = getUserId(user);
+    if (!myUserId) return;
     const client = getAmplifyClient();
-    const myUserId = user.username;
     
     const subscription = client.models.Assignment.observeQuery().subscribe({
       next: ({ items }) => {
         console.log('[Index] Assignment subscription update:', items.length, 'assignments');
+        
+        // Filter out null items before processing
+        items = items.filter(item => item != null && item.id != null);
         
         const myAssignments = items.filter(a => a.owner === myUserId);
         const othersAssignments = items.filter(a => a.owner !== myUserId);
@@ -207,22 +227,24 @@ function Index({ signOut, user }) {
 
   // Consolidated Section observer - handles both my and others' sections
   useEffect(() => {
-    console.log('[Index] Section useEffect triggered, user?.username:', user?.username);
-    if (!user?.username) return;
+    const myUserId = getUserId(user);
+    console.log('[Index] Section useEffect triggered, myUserId:', myUserId);
+    if (!myUserId) return;
     const client = getAmplifyClient();
-    const myUserId = user.username;
     const myGroups = user.groups || []; // Cognito groups the user belongs to
     
     const subscription = client.models.Section.observeQuery().subscribe({
       next: ({ items }) => {
-        console.log('[Index] Section subscription update:', items.length, 'sections');
+        // Filter out null items that can appear during subscription updates
+        const validItems = items.filter(item => item != null && item.id != null);
+        console.log('[Index] Section subscription update:', validItems.length, 'sections');
         console.log('[Index] Fetching sections for user:', myUserId, 'groups:', myGroups);
-        console.log('[Index] Received sections:', items.length, items);
+        console.log('[Index] Received sections:', validItems.length, validItems);
         
         // Sections I own (I'm the instructor)
-        const mySections = items.filter(s => s.owner === myUserId);
+        const mySections = validItems.filter(s => s.owner === myUserId);
         // Sections where I'm a student (I'm in the learner group)
-        const othersSections = items.filter(s => 
+        const othersSections = validItems.filter(s => 
           s.owner !== myUserId && s.learner && myGroups.includes(s.learner)
         );
         
@@ -241,6 +263,13 @@ function Index({ signOut, user }) {
   }, [user?.username])
 
   useEffect(() => {
+    const myUserId = getUserId(user);
+    if (!myUserId) {
+      console.log('[Index] Unit useEffect: waiting for user authentication');
+      return;
+    }
+    
+    console.log('[Index] Setting up Unit subscription for user:', myUserId);
     const client = getAmplifyClient();
     
     const subscription = client.models.Unit.observeQuery().subscribe({
@@ -260,7 +289,7 @@ function Index({ signOut, user }) {
     return function cleanup() {
       subscription.unsubscribe();
     };
-  }, [])
+  }, [user?.username])
 
   console.log('Grades.grades', grades)
 

@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { within, userEvent, waitFor } from '@storybook/test';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -203,12 +204,43 @@ const sampleWordBlockState = {
 
 export const EditableEmpty = {
   render: () => <EditableTemplate editorState={null} showInsertButton={true} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for insert button
+    await waitFor(() => {
+      const insertButton = canvas.getByRole('button', { name: /insert.*word/i });
+      expect(insertButton).toBeInTheDocument();
+    }, { timeout: 3000 });
+  },
 };
 
 export const EditableWithWordBlock = {
   render: () => <EditableTemplate editorState={sampleWordBlockState} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for word block to render
+    await waitFor(() => {
+      expect(canvas.getByText(/Vocabulary Word Example/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify word block displays
+    expect(canvas.getByText(/Below is a word block/i)).toBeInTheDocument();
+  },
 };
 
 export const ReadOnlyWithWordBlock = {
   render: () => <ReadOnlyTemplate editorState={sampleWordBlockState} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for word block in read-only mode
+    await waitFor(() => {
+      expect(canvas.getByText(/Vocabulary Word Example/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+  },
 };

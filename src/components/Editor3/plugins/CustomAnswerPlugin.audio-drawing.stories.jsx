@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { within, userEvent, waitFor } from '@storybook/test';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -272,6 +273,19 @@ const languageQuestionState = {
 
 export const AudioOnlyQuestion = {
   render: () => <ReadOnlyTemplate editorState={audioQuestionState} questionIDs={['audio-q1', 'audio-q2']} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for audio question to render
+    await waitFor(() => {
+      expect(canvas.getByText(/Pronounce the following/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify audio recording interface elements are visible
+    const recordButtons = canvas.queryAllByRole('button', { name: /record|start recording/i });
+    expect(recordButtons.length).toBeGreaterThan(0);
+  },
   parameters: {
     docs: {
       description: {
@@ -283,6 +297,19 @@ export const AudioOnlyQuestion = {
 
 export const DrawingOnlyQuestion = {
   render: () => <ReadOnlyTemplate editorState={drawingQuestionState} questionIDs={['drawing-q1', 'drawing-q2']} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for drawing question to render
+    await waitFor(() => {
+      expect(canvas.getByText(/Draw a diagram/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify drawing canvas or interface is present
+    const drawArea = canvas.getByRole('region', { name: /drawing|canvas/i });
+    expect(drawArea).toBeInTheDocument();
+  },
   parameters: {
     docs: {
       description: {
@@ -294,6 +321,20 @@ export const DrawingOnlyQuestion = {
 
 export const MultiModalQuestion = {
   render: () => <ReadOnlyTemplate editorState={multiModalQuestionState} questionIDs={['multi-q1']} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for multi-modal question to render
+    await waitFor(() => {
+      expect(canvas.getByText(/Explain.*photosynthesis/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify multiple input options are available
+    const textInput = canvas.queryByRole('textbox');
+    const recordButton = canvas.queryByRole('button', { name: /record/i });
+    expect(textInput || recordButton).toBeTruthy();
+  },
   parameters: {
     docs: {
       description: {
@@ -606,6 +647,19 @@ export const AnsweredAudioQuestion = {
     gradeData={mockGradeWithAnswers}
     questionIDs={['audio-q1']}
   />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for answered audio question to render
+    await waitFor(() => {
+      expect(canvas.getByText(/submitted|completed/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify audio playback controls are visible
+    const playButton = canvas.queryByRole('button', { name: /play|listen/i });
+    expect(playButton).toBeInTheDocument();
+  },
   parameters: {
     docs: {
       description: {
@@ -621,6 +675,19 @@ export const AnsweredDrawingQuestion = {
     gradeData={mockGradeWithAnswers}
     questionIDs={['drawing-q1']}
   />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for answered drawing question to render
+    await waitFor(() => {
+      expect(canvas.getByText(/submitted|completed/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify drawing image is displayed
+    const drawingImage = canvas.queryByRole('img', { name: /drawing|sketch/i });
+    expect(drawingImage).toBeInTheDocument();
+  },
   parameters: {
     docs: {
       description: {

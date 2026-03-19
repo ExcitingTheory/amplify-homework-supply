@@ -2,7 +2,7 @@
  * @fileoverview CollaborationPlugin - Real-time collaborative editing with Yjs
  * @module CollaborationPlugin
  * 
- * Wrapper around Lexical's official CollaborationPlugin that adapts our YjsDocProvider
+ * Uses Lexical's official CollaborationPlugin with proper context provider
  * 
  * @example
  * ```tsx
@@ -20,9 +20,8 @@
 
 import React from 'react';
 import { CollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
+import { LexicalCollaboration } from '@lexical/react/LexicalCollaborationContext';
 import type { Provider } from '@lexical/yjs';
-
-// Import YjsDocProvider - use @/ alias from tsconfig paths
 import type { YjsDocProvider } from '@/yjs/YjsProvider';
 
 export interface YjsCollaborationPluginProps {
@@ -34,39 +33,9 @@ export interface YjsCollaborationPluginProps {
 }
 
 /**
- * Creates a provider factory compatible with Lexical's CollaborationPlugin
- */
-function createProviderFactory(yjsProvider: YjsDocProvider) {
-  return (id: string, yjsDocMap: Map<string, any>): Provider => {
-    const awareness = yjsProvider.getAwareness();
-    const doc = yjsProvider.getDoc();
-    
-    // Add the Yjs document to the map
-    yjsDocMap.set(id, doc);
-    
-    // Return a Lexical-compatible Provider
-    return {
-      awareness: {
-        getLocalState: () => awareness.getLocalState() as any,
-        getStates: () => awareness.getStates() as any,
-        off: (type: string, cb: any) => awareness.off(type as any, cb),
-        on: (type: string, cb: any) => awareness.on(type as any, cb),
-        setLocalState: (state: any) => awareness.setLocalState(state),
-        setLocalStateField: (field: string, value: any) => 
-          awareness.setLocalStateField(field, value),
-      },
-      connect: () => yjsProvider.reconnect(),
-      disconnect: () => yjsProvider.disconnect(),
-      off: () => {}, // WebSocket events handled internally by YjsDocProvider
-      on: () => {},  // WebSocket events handled internally by YjsDocProvider
-    } as Provider;
-  };
-}
-
-/**
  * Collaboration plugin for real-time editing with Yjs
  * 
- * Uses Lexical's official CollaborationPlugin with our YjsDocProvider adapter
+ * Uses official Lexical CollaborationPlugin with LexicalCollaboration context provider
  */
 export default function YjsCollaborationPlugin({
   provider,
@@ -83,15 +52,46 @@ export default function YjsCollaborationPlugin({
 
   console.log('[YjsCollaborationPlugin] Initializing collaboration for', username);
 
+  // Create a provider factory for CollaborationPlugin
+  const providerFactory = React.useCallback(
+    (id: string, yjsDocMap: Map<string, any>): Provider => {
+      const doc = provider.getDoc();
+      const awareness = provider.getAwareness();
+      
+      // Add the Yjs document to the map
+      yjsDocMap.set(id, doc);
+      
+      // Return a Lexical-compatible Provider
+      return {
+        awareness: {
+          getLocalState: () => awareness.getLocalState() as any,
+          getStates: () => awareness.getStates() as any,
+          off: (type: string, cb: any) => awareness.off(type as any, cb),
+          on: (type: string, cb: any) => awareness.on(type as any, cb),
+          setLocalState: (state: any) => awareness.setLocalState(state),
+          setLocalStateField: (field: string, value: any) => 
+            awareness.setLocalStateField(field, value),
+        },
+        connect: () => provider.reconnect(),
+        disconnect: () => provider.disconnect(),
+        off: () => {},
+        on: () => {},
+      } as Provider;
+    },
+    [provider]
+  );
+
   return (
-    <CollaborationPlugin
-      id="yjs-collaboration"
-      providerFactory={createProviderFactory(provider)}
-      shouldBootstrap={shouldBootstrap}
-      username={username}
-      cursorColor={color}
-      cursorsContainerRef={cursorsContainerRef}
-      awarenessData={{ user: { name: username, color } }}
-    />
+    <LexicalCollaboration>
+      <CollaborationPlugin
+        id="yjs-collaboration"
+        providerFactory={providerFactory}
+        shouldBootstrap={shouldBootstrap}
+        username={username}
+        cursorColor={color}
+        cursorsContainerRef={cursorsContainerRef}
+        awarenessData={{ user: { name: username, color } }}
+      />
+    </LexicalCollaboration>
   );
 }

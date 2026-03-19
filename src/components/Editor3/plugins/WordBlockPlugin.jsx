@@ -269,7 +269,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
     }
   
     static clone(node) {
-    return new WordBlockNode(node.__id, node.__format);
+    return new WordBlockNode(node.__id, node.__format, node.__key);
   }
 
   static importJSON(serializedNode) {
@@ -288,15 +288,15 @@ import getCachedUrl from '../../../utils/getCachedUrl';
     }
   
     constructor(id, format, key) {
-      super(format, key);
-      this.__id = id;
-    }
-  
-    exportDOM() {
-      const element = document.createElement('div');
-      element.setAttribute('data-lexical-word-block', this.__id);
-      return {element};
-    }
+    super(key);
+    this.__id = id;
+  }
+
+  exportDOM() {
+    const element = document.createElement('div');
+    element.setAttribute('data-lexical-word-block', this.__id);
+    return {element};
+  }
   
     static importDOM() {
       return {

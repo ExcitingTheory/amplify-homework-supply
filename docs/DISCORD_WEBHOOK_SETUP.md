@@ -71,9 +71,16 @@ Discord receives:
   - Error count (if any)
   - User-provided description
   - User contact info (if provided)
+  - **📎 S3 Artifact Link** (30-day signed URL)
 
-- **File Attachment** (if errors or many logs):
-  - Full diagnostic JSON file
+- **S3 Artifact Storage**:
+  - Full diagnostic JSON uploaded to `public/debug/` path
+  - 30-day signed URL for support team access
+  - Accessible via clickable link in Discord embed
+  - No need to download attachments from Discord
+
+- **Legacy File Attachment** (if errors or many logs):
+  - Optional fallback file attachment via Discord multipart upload
   - Sanitized to remove sensitive data
 
 ### Data Sanitization
@@ -103,6 +110,9 @@ user@example.com
 1. Cannot read property 'data' of undefined...
 2. Network request failed: 400 Bad Request...
 3. [Context] User not authenticated, skip...
+
+📎 Full Diagnostic Artifact (S3)
+Download JSON (30-day link)
 ```
 
 ## Advanced Configuration
@@ -382,19 +392,23 @@ Save not working, grade lost
 
 ## Support Team Guide
 
-### When You Receive a Diagnostic
+### WClick S3 artifact link** in Discord embed (30-day expiration)
+3. **Download JSON file** from S3
+4. **Review error messages** (in embed)
+5. **Check state snapshot** (in downloaded JSON file)
+6. **Contact user** (use provided contact info)
+7. **Reproduce issue** (use route + browser info)
+8. **Create GitHub issue** (if bug found)
+9. **Follow up** (via Discord thread)
 
-1. **Acknowledge receipt** (reply in Discord thread)
-2. **Download JSON file** (if attached)
-3. **Review error messages** (in embed)
-4. **Check state snapshot** (in JSON file)
-5. **Contact user** (use provided contact info)
+**Note**: S3 links expire after 30 days. Download artifacts promptly for long-term storage.tact info)
 6. **Reproduce issue** (use route + browser info)
 7. **Create GitHub issue** (if bug found)
 8. **Follow up** (via Discord thread)
 
-### Analyzing JSON File
-
+###Download from S3 link or load locally
+const response = await fetch('https://your-s3-bucket.../diagnostic-123.json');
+const diagnostic = await response.json(
 ```javascript
 // Load in browser
 const diagnostic = await fetch('/path/to/diagnostic.json').then(r => r.json());
@@ -416,14 +430,17 @@ console.log(diagnostic.componentTree);   // Component hierarchy
 | File upload fails | S3 config | `diagnostic.state.files` |
 | Grade not saving | Network/auth | `diagnostic.errors` + `diagnostic.logEntries` |
 | UI not loading | Component crash | `diagnostic.componentTree` |
-| Slow performance | Too many re-renders | `diagnostic.componentCount` |
-
-## Future Enhancements
-
+| Sx] S3 artifact storage with signed URLs
+- [x] 30-day link expiration for security
 - [ ] Automatic error detection and alerts
 - [ ] Integration with GitHub Issues
 - [ ] Slack webhook support
 - [ ] Real-time streaming logs
+- [ ] Video/screenshot capture
+- [ ] Session replay integration
+- [ ] Sentiment analysis on user descriptions
+- [ ] Auto-categorization of issues
+- [ ] S3 lifecycle policies for old artifact
 - [ ] Video/screenshot capture
 - [ ] Session replay integration
 - [ ] Sentiment analysis on user descriptions

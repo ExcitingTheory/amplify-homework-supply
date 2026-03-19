@@ -272,12 +272,7 @@ export class CustomListItemNode extends ListItemNode {
     }
   
     static clone(node) {
-      return new CustomListItemNode(node, this.__id);
-    }
-  
-    constructor(key, id) {
-      super(key);
-      this.__id = id;
+    return new CustomListItemNode(node.__key, node.__id);
     }
 
     append(...nodes) {

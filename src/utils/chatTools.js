@@ -27,6 +27,80 @@ export const toolDefinitions = [
   {
     type: 'function',
     function: {
+      name: 'list_tours',
+      description: 'List available guided tours to help users learn the platform. Tours cover instructor workflows, learner workflows, and developer documentation. Each tour has tutorial mode (step-by-step guidance) and quiz mode (test knowledge).',
+      parameters: {
+        type: 'object',
+        properties: {
+          persona: {
+            type: 'string',
+            enum: ['instructor', 'learner', 'developer'],
+            description: 'Filter tours by user role'
+          },
+          category: {
+            type: 'string',
+            description: 'Filter tours by category (e.g., "Getting Started", "Content Creation")'
+          }
+        },
+        required: []
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'start_tour',
+      description: 'Start a guided interactive tour that highlights UI elements and walks users through tasks. The tour will open automatically and guide users step-by-step.',
+      parameters: {
+        type: 'object',
+        properties: {
+          tourId: {
+            type: 'string',
+            description: 'ID of the tour to start (from list_tours)'
+          },
+          mode: {
+            type: 'string',
+            enum: ['tutorial', 'quiz'],
+            description: 'Tutorial mode provides detailed guidance, quiz mode tests knowledge with minimal hints',
+            default: 'tutorial'
+          }
+        },
+        required: ['tourId']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_tour_info',
+      description: 'Get detailed information about a specific tour including steps, estimated time, and instructions.',
+      parameters: {
+        type: 'object',
+        properties: {
+          tourId: {
+            type: 'string',
+            description: 'ID of the tour'
+          }
+        },
+        required: ['tourId']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'stop_tour',
+      description: 'Stop and close the currently active guided tour.',
+      parameters: {
+        type: 'object',
+        properties: {},
+        required: []
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
       name: 'search_content',
       description: 'Search through files, vocabulary words, and questions using semantic similarity. Returns the most relevant results based on the query.',
       parameters: {
@@ -427,6 +501,58 @@ export const toolDefinitions = [
           }
         },
         required: ['prompt', 'acceptedAnswers']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'publish_unit',
+      description: 'Publish a unit to make it available to students. This generates embeddings and changes the unit status to PUBLISHED.',
+      parameters: {
+        type: 'object',
+        properties: {
+          unitId: {
+            type: 'string',
+            description: 'ID of the unit to publish'
+          },
+          generateEmbeddings: {
+            type: 'boolean',
+            description: 'Whether to generate embeddings for semantic search (recommended)',
+            default: true
+          }
+        },
+        required: ['unitId']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'navigate_to_editor_tab',
+      description: 'Open a specific tab in the editor left sidebar (dictionary, questions, files, etc.). Helps users discover and access editor features.',
+      parameters: {
+        type: 'object',
+        properties: {
+          tab: {
+            type: 'string',
+            enum: ['assignments', 'toc', 'dictionary', 'questions', 'files', 'configuration'],
+            description: 'Which tab to open: assignments (assignment settings), toc (table of contents), dictionary (vocabulary), questions (question bank), files (media files), configuration (unit settings)'
+          }
+        },
+        required: ['tab']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_editor_buttons',
+      description: 'List all available editor controls, buttons, and features to help users discover what they can do.',
+      parameters: {
+        type: 'object',
+        properties: {},
+        required: []
       }
     }
   }
@@ -1103,6 +1229,304 @@ export async function executeInsertCustomAnswer({ prompt, acceptedAnswers, caseS
   }
 }
 
+export async function executePublishUnit({ unitId, generateEmbeddings = true }) {
+  try {
+    const client = getAmplifyClient();
+    const { data: unit } = await client.models.Unit.get({ id: unitId });
+    if (!unit) {
+      return { success: false, error: 'Unit not found' };
+    }
+
+    // Update unit status to PUBLISHED
+    await client.models.Unit.update({
+      id: unitId,
+      status: 'PUBLISHED',
+      publishedAt: new Date().toISOString()
+    });
+
+    // Generate embeddings if requested
+    let embeddingResult = null;
+    if (generateEmbeddings) {
+      try {
+        // Use the generateEmbeddings mutation from the backend
+        const { data, errors } = await client.mutations.generateUnitEmbeddings({
+          unitId
+        });
+        
+        if (!errors && data) {
+          embeddingResult = {
+            success: true,
+            message: 'Embeddings generated successfully'
+          };
+        }
+      } catch (embeddingError) {
+        console.warn('Embedding generation failed:', embeddingError);
+        embeddingResult = {
+          success: false,
+          message: 'Unit published but embedding generation failed'
+        };
+      }
+    }
+
+    return {
+      success: true,
+      unitId,
+      status: 'PUBLISHED',
+      embeddings: embeddingResult,
+      message: `Unit "${unit.name}" published successfully${generateEmbeddings ? ' with embeddings' : ''}`
+    };
+  } catch (error) {
+    console.error('Publish unit error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function executeNavigateToEditorTab({ tab }) {
+  try {
+    const tabDescriptions = {
+      'assignments': 'Assignment settings - manage where this unit is assigned',
+      'toc': 'Table of Contents - see unit structure and navigate between sections',
+      'dictionary': 'Dictionary Editor - manage vocabulary words for this unit',
+      'questions': 'Question Bank - manage practice questions',
+      'files': 'File Manager - upload and manage images, audio, video, and PDFs',
+      'configuration': 'Unit Configuration - settings like time limits, publishing status, etc.'
+    };
+
+    if (!tabDescriptions[tab]) {
+      return {
+        success: false,
+        error: `Unknown tab: ${tab}. Valid tabs are: ${Object.keys(tabDescriptions).join(', ')}`
+      };
+    }
+
+    return {
+      success: true,
+      action: 'navigate_to_tab',
+      tab,
+      description: tabDescriptions[tab],
+      message: `Opening ${tab} tab...`
+    };
+  } catch (error) {
+    console.error('Navigate to editor tab error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function executeGetEditorButtons() {
+  try {
+    const editorFeatures = {
+      toolbar: [
+        { name: 'Bold', description: 'Make text bold', shortcut: 'Cmd+B / Ctrl+B' },
+        { name: 'Italic', description: 'Make text italic', shortcut: 'Cmd+I / Ctrl+I' },
+        { name: 'Underline', description: 'Underline text', shortcut: 'Cmd+U / Ctrl+U' },
+        { name: 'Code', description: 'Format as code', shortcut: 'Cmd+E / Ctrl+E' },
+        { name: 'Link', description: 'Insert hyperlink', shortcut: 'Cmd+K / Ctrl+K' },
+        { name: 'Headings', description: 'Format as H1, H2, H3 headings', shortcut: 'Type # ## or ###' },
+        { name: 'Lists', description: 'Create bullet or numbered lists', shortcut: 'Type - or 1.' },
+        { name: 'Quote', description: 'Insert block quote', shortcut: 'Type >' },
+        { name: 'Code Block', description: 'Insert code block', shortcut: 'Type ```' },
+      ],
+      blocks: [
+        { name: 'Quiz', description: 'Interactive quiz with multiple choice, true/false, or short answer', command: '/' },
+        { name: 'Answer Block', description: 'Graded vocabulary translation/definition block', command: '/' },
+        { name: 'Meaning Association', description: 'Drag-and-drop matching exercise', command: '/' },
+        { name: 'Custom Answer', description: 'Custom graded question with flexible answers', command: '/' },
+        { name: 'Image', description: 'Insert image from files or URL', command: '/' },
+        { name: 'Video', description: 'Embed video from files or URL', command: '/' },
+        { name: 'Audio', description: 'Insert audio player', command: '/' },
+        { name: 'PDF', description: 'Embed PDF viewer', command: '/' },
+        { name: 'Divider', description: 'Horizontal line separator', command: '/' },
+      ],
+      leftSidebar: [
+        { name: 'Assignments', description: 'View and manage assignments for this unit' },
+        { name: 'Table of Contents', description: 'Navigate unit structure' },
+        { name: 'Dictionary', description: 'Add and edit vocabulary words' },
+        { name: 'Questions', description: 'Manage question bank' },
+        { name: 'Files', description: 'Upload and manage media files' },
+        { name: 'Configuration', description: 'Unit settings and publishing' },
+      ],
+      topBar: [
+        { name: 'Publish', description: 'Publish unit to make it available to students' },
+        { name: 'Save', description: 'Save current changes' },
+        { name: 'Preview', description: 'Preview how students will see the unit' },
+        { name: 'Settings', description: 'Unit configuration' },
+      ],
+      chatAssistant: [
+        { name: 'Search Content', description: 'Search files, vocabulary, and questions' },
+        { name: 'Insert Blocks', description: 'Ask AI to create quiz, answer, or other blocks' },
+        { name: 'Generate Content', description: 'AI-powered content generation' },
+        { name: 'Get Help', description: 'Ask questions about how to use features' },
+      ]
+    };
+
+    return {
+      success: true,
+      features: editorFeatures,
+      summary: {
+        totalFeatures: Object.values(editorFeatures).reduce((sum, arr) => sum + arr.length, 0),
+        categories: Object.keys(editorFeatures)
+      },
+      message: 'Editor features and controls listed'
+    };
+  } catch (error) {
+    console.error('Get editor buttons error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Tour Control Functions
+ * Note: These return instructions to the UI layer to trigger tours.
+ * The ChatSidebar or TourContext will handle the actual tour activation.
+ */
+
+// This will be populated by TourContext on app load
+let tourTasksData = null;
+
+/**
+ * Set tour tasks data from the onboarding system
+ * Called by TourContext when it initializes
+ */
+export function setTourTasksData(tasks) {
+  tourTasksData = tasks;
+  console.log('[chatTools] Tour tasks data registered:', tasks?.length || 0, 'tasks');
+}
+
+export async function executeListTours({ persona, category }) {
+  try {
+    if (!tourTasksData) {
+      return {
+        success: false,
+        error: 'Tour system not initialized. Tours are only available in Storybook or when TourContext is loaded.'
+      };
+    }
+
+    let filteredTours = tourTasksData;
+
+    // Filter by persona
+    if (persona) {
+      filteredTours = filteredTours.filter(t => t.persona === persona || t.persona === 'all');
+    }
+
+    // Filter by category
+    if (category) {
+      filteredTours = filteredTours.filter(t => 
+        t.category.toLowerCase().includes(category.toLowerCase())
+      );
+    }
+
+    // Sort by order
+    filteredTours = filteredTours.sort((a, b) => a.order - b.order);
+
+    return {
+      success: true,
+      count: filteredTours.length,
+      total: tourTasksData.length,
+      tours: filteredTours.map(t => ({
+        id: t.id,
+        title: t.title,
+        description: t.description,
+        persona: t.persona,
+        category: t.category,
+        estimatedTime: t.estimatedTime,
+        hasTutorial: !!t.completionCriteria?.tutorialStoryId || !!t.completionCriteria?.storyId,
+        hasQuiz: !!t.completionCriteria?.quizStoryId || !!t.completionCriteria?.storyId,
+      }))
+    };
+  } catch (error) {
+    console.error('List tours error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function executeStartTour({ tourId, mode = 'tutorial' }) {
+  try {
+    if (!tourTasksData) {
+      return {
+        success: false,
+        error: 'Tour system not initialized.'
+      };
+    }
+
+    const tour = tourTasksData.find(t => t.id === tourId);
+    if (!tour) {
+      return {
+        success: false,
+        error: `Tour not found: ${tourId}. Use list_tours to see available tours.`
+      };
+    }
+
+    // Return action for ChatSidebar to handle
+    return {
+      success: true,
+      action: 'start_tour',
+      tourId: tour.id,
+      mode,
+      tour: {
+        title: tour.title,
+        description: tour.description,
+        estimatedTime: tour.estimatedTime,
+        instructions: tour.instructions
+      },
+      message: `Starting "${tour.title}" in ${mode} mode...`
+    };
+  } catch (error) {
+    console.error('Start tour error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function executeGetTourInfo({ tourId }) {
+  try {
+    if (!tourTasksData) {
+      return {
+        success: false,
+        error: 'Tour system not initialized.'
+      };
+    }
+
+    const tour = tourTasksData.find(t => t.id === tourId);
+    if (!tour) {
+      return {
+        success: false,
+        error: `Tour not found: ${tourId}`
+      };
+    }
+
+    return {
+      success: true,
+      tour: {
+        id: tour.id,
+        title: tour.title,
+        description: tour.description,
+        instructions: tour.instructions || [],
+        persona: tour.persona,
+        category: tour.category,
+        estimatedTime: tour.estimatedTime,
+        order: tour.order,
+        hasTutorial: !!tour.completionCriteria?.tutorialStoryId || !!tour.completionCriteria?.storyId,
+        hasQuiz: !!tour.completionCriteria?.quizStoryId || !!tour.completionCriteria?.storyId,
+      }
+    };
+  } catch (error) {
+    console.error('Get tour info error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function executeStopTour() {
+  try {
+    return {
+      success: true,
+      action: 'stop_tour',
+      message: 'Stopping current tour...'
+    };
+  } catch (error) {
+    console.error('Stop tour error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 /**
  * Execute a tool call
  * @param {string} toolName - Name of the tool to execute
@@ -1111,6 +1535,10 @@ export async function executeInsertCustomAnswer({ prompt, acceptedAnswers, caseS
  */
 export async function executeTool(toolName, args) {
   const toolMap = {
+    list_tours: executeListTours,
+    start_tour: executeStartTour,
+    get_tour_info: executeGetTourInfo,
+    stop_tour: executeStopTour,
     search_content: executeSearchContent,
     create_section: executeCreateSection,
     create_unit: executeCreateUnit,
@@ -1126,7 +1554,10 @@ export async function executeTool(toolName, args) {
     insert_quiz: executeInsertQuiz,
     insert_answer_block: executeInsertAnswerBlock,
     insert_meaning_association: executeInsertMeaningAssociation,
-    insert_custom_answer: executeInsertCustomAnswer
+    insert_custom_answer: executeInsertCustomAnswer,
+    publish_unit: executePublishUnit,
+    navigate_to_editor_tab: executeNavigateToEditorTab,
+    get_editor_buttons: executeGetEditorButtons
   };
 
   const executor = toolMap[toolName];

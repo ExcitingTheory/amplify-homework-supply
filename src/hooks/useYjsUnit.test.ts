@@ -38,7 +38,7 @@ describe('useYjsUnit Hook', () => {
     description: 'Test Description',
     data: JSON.stringify({ content: 'Test content' }),
     yjsSnapshot: null,
-    _version: 5,
+    updatedAt: '2024-01-15T10:30:00Z',
     owner: 'user-1',
   };
 
@@ -78,7 +78,7 @@ describe('useYjsUnit Hook', () => {
             data: mockUnitData,
           }),
           update: vi.fn().mockResolvedValue({
-            data: { ...mockUnitData, _version: 6 },
+            data: { ...mockUnitData, updatedAt: '2024-01-15T10:31:00Z' },
           }),
         },
       },
@@ -365,14 +365,14 @@ describe('useYjsUnit Hook', () => {
       });
 
       const callArgs = mockClient.models.Unit.update.mock.calls[0][0];
-      expect(callArgs._version).toBe(6); // Initial version 5 + 1
+      expect(callArgs.updatedAt).toBeDefined(); // Timestamp should be set
     });
   });
 
   describe('Version Conflict Handling', () => {
     it('should handle version conflict error', async () => {
       mockClient.models.Unit.update.mockRejectedValueOnce(
-        new Error('ConditionalCheckFailedException: _version')
+        new Error('ConditionalCheckFailedException: updatedAt')
       );
 
       const { result } = renderHook(() => useYjsUnit({ unitId: 'unit-1' }));

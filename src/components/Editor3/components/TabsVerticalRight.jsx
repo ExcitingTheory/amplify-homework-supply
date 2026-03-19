@@ -353,7 +353,9 @@ export default function TabsVerticalRight({
         <Tab
           value={5}
           onClick={() => handleTabClick(5)}
-          label={<ChatIcon />} {...a11yProps(t('tabsVerticalRight.aiAssistantTab'))} />
+          label={<ChatIcon />}
+          data-testid="editor-chat-tab"
+          {...a11yProps(t('tabsVerticalRight.aiAssistantTab'))} />
         <Tab
           value={7}
           onClick={() => handleTabClick(7)}

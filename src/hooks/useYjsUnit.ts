@@ -19,7 +19,7 @@ import { getAmplifyClient } from '../utils/amplifyClient';
 import * as Y from 'yjs';
 
 export interface UseYjsUnitConfig {
-  unitId: string;
+  unitId?: string | null;
   enableWebSocket?: boolean;
   enablePersistence?: boolean;
   saveDebounceMs?: number;
@@ -63,19 +63,25 @@ export function useYjsUnit(config: UseYjsUnitConfig): UseYjsUnitReturn {
   const nextVersionRef = useRef(1);
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize Yjs provider
+  // Initialize Yjs provider only if we have a unitId
   const { provider, isSynced, isConnected } = useYjsProvider({
-    docName: `unit-${unitId}`,
-    connect: enableWebSocket,
-    persistence: enablePersistence
+    docName: unitId ? `unit-${unitId}` : 'unit-null',
+    connect: enableWebSocket && !!unitId,
+    persistence: enablePersistence && !!unitId
   });
 
   // Load initial state from Amplify
   useEffect(() => {
+    if (!unitId) {
+      setIsLoading(false);
+      return;
+    }
+
     async function loadUnit() {
       try {
         setIsLoading(true);
-        const { data } = await client.models.Unit.get({ id: unitId });
+        // TypeScript type guard - unitId is guaranteed to be string here
+        const { data } = await client.models.Unit.get({ id: unitId as string });
         
         if (!data) {
           throw new Error(`Unit ${unitId} not found`);
@@ -117,8 +123,8 @@ export function useYjsUnit(config: UseYjsUnitConfig): UseYjsUnitReturn {
 
   // Debounced save to DataStore
   const saveToDataStore = useCallback(async () => {
-    if (!provider) {
-      console.warn('[useYjsUnit] No provider available for save');
+    if (!unitId || !provider) {
+      console.warn('[useYjsUnit] No unitId or provider available for save');
       return;
     }
 
@@ -158,7 +164,7 @@ export function useYjsUnit(config: UseYjsUnitConfig): UseYjsUnitReturn {
         
         try {
           // Reload from DataStore
-          const { data } = await client.models.Unit.get({ id: unitId });
+          const { data } = await client.models.Unit.get({ id: unitId as string });
           if (data) {
             nextVersionRef.current = ((data as any)._version || 0) + 1;
             
@@ -213,8 +219,8 @@ export function useYjsUnit(config: UseYjsUnitConfig): UseYjsUnitReturn {
 
   // Update metadata helper
   const updateMetadata = useCallback((updates: Record<string, any>) => {
-    if (!provider) {
-      console.warn('[useYjsUnit] Cannot update metadata: no provider');
+    if (!unitId || !provider) {
+      console.warn('[useYjsUnit] Cannot update metadata: no unitId or provider');
       return;
     }
 

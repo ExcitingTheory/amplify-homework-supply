@@ -29,8 +29,7 @@ module.exports = {
     ? ['page.tsx', 'page.ts', 'page.jsx', 'page.js', 'tsx', 'ts', 'jsx', 'js'].filter(ext => !ext.includes('stories') && !ext.includes('mdx'))
     : ['tsx', 'ts', 'jsx', 'js', 'mdx'],
   
-  // Turbopack config - optimizations are mostly built-in
+  // Turbopack config - PDF.js worker is copied via postinstall script
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack
-  // turbopack: {
-  // },
+  turbopack: {},
 };

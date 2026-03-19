@@ -108,6 +108,9 @@ const config: StorybookConfig = {
       '@/context/authContext': path.resolve(__dirname, './__mocks__/authContext.js'),
       '../context/authContext': path.resolve(__dirname, './__mocks__/authContext.js'),
       '../../context/authContext': path.resolve(__dirname, './__mocks__/authContext.js'),
+      // Alias the absolute path to the production authContext file
+      [path.resolve(__dirname, '../src/context/authContext.jsx')]: path.resolve(__dirname, './__mocks__/authContext.js'),
+      [path.resolve(__dirname, '../src/context/authContext')]: path.resolve(__dirname, './__mocks__/authContext.js'),
       // Mock YJS workbook hooks - now in src/yjs/
       [path.resolve(__dirname, '../src/yjs/workbookHooks')]: path.resolve(__dirname, './__mocks__/workbookHooks.js'),
       [path.resolve(__dirname, '../src/yjs/workbookHooks.ts')]: path.resolve(__dirname, './__mocks__/workbookHooks.js'),
@@ -162,6 +165,22 @@ const config: StorybookConfig = {
       '../../yjs': path.resolve(__dirname, './__mocks__/yjs-index.js'),
       '../../yjs/index': path.resolve(__dirname, './__mocks__/yjs-index.js'),
       '../../yjs/index.ts': path.resolve(__dirname, './__mocks__/yjs-index.js'),
+      // Mock vector store modules for Storybook
+      '../components/Editor3/components/FileManager2': path.resolve(__dirname, './__mocks__/FileManager2.js'),
+      '../components/Editor3/components/FileManager2.jsx': path.resolve(__dirname, './__mocks__/FileManager2.js'),
+      '@/components/Editor3/components/FileManager2': path.resolve(__dirname, './__mocks__/FileManager2.js'),
+      '@/components/Editor3/components/FileManager2.jsx': path.resolve(__dirname, './__mocks__/FileManager2.js'),
+      '../utils/vectorStoreDB': path.resolve(__dirname, './__mocks__/vectorStoreDB.js'),
+      '../utils/vectorStoreDB.jsx': path.resolve(__dirname, './__mocks__/vectorStoreDB.js'),
+      '@/utils/vectorStoreDB': path.resolve(__dirname, './__mocks__/vectorStoreDB.js'),
+      '@/utils/vectorStoreDB.jsx': path.resolve(__dirname, './__mocks__/vectorStoreDB.js'),
+      '../../utils/vectorStoreDB': path.resolve(__dirname, './__mocks__/vectorStoreDB.js'),
+      '../../utils/vectorStoreDB.jsx': path.resolve(__dirname, './__mocks__/vectorStoreDB.js'),
+      // Absolute path mocks for vector store
+      [path.resolve(__dirname, '../src/components/Editor3/components/FileManager2')]: path.resolve(__dirname, './__mocks__/FileManager2.js'),
+      [path.resolve(__dirname, '../src/components/Editor3/components/FileManager2.jsx')]: path.resolve(__dirname, './__mocks__/FileManager2.js'),
+      [path.resolve(__dirname, '../src/utils/vectorStoreDB')]: path.resolve(__dirname, './__mocks__/vectorStoreDB.js'),
+      [path.resolve(__dirname, '../src/utils/vectorStoreDB.jsx')]: path.resolve(__dirname, './__mocks__/vectorStoreDB.js'),
     };
     
     // Exclude YJS folder from being processed to prevent loading real files

@@ -17,6 +17,11 @@ import { Amplify } from 'aws-amplify';
 import { parseAmplifyConfig } from 'aws-amplify/utils';
 import { DebugPanelProvider } from '../src/components/DebugPanel';
 import { AuthProvider } from '../src/context/authContext';
+import { TourProvider } from '../src/context/tourContext';
+import { ChatContextProvider } from '../src/context/chatContext';
+import GlobalChatButton from '../src/components/GlobalChatButton';
+import GlobalChatDrawer from '../src/components/GlobalChatDrawer';
+import { useGlobalChatShortcut } from '../src/hooks/useGlobalChatShortcut';
 
 // Configure Amplify Gen 2 with existing REST API resources
 const amplifyConfig = parseAmplifyConfig(outputs);
@@ -84,6 +89,12 @@ function MyApp(props) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
   const router = useRouter();
 
+  // Enable global chat keyboard shortcut (Cmd/Ctrl + Shift + C)
+  useGlobalChatShortcut();
+
+  // Hide chat button on Workbook and Unit pages
+  const hideChatButton = router.pathname.startsWith('/workbook/') || router.pathname.startsWith('/unit/');
+
   // Check for saved locale preference on mount and apply it
   React.useEffect(() => {
     const savedLocale = localStorage.getItem('preferredLocale');
@@ -107,7 +118,14 @@ function MyApp(props) {
         <CssBaseline />
         <DebugPanelProvider>
           <AuthProvider>
-            <Component {...pageProps} />
+            <ChatContextProvider>
+              <TourProvider>
+                <Component {...pageProps} />
+                {/* Global Chat UI - available on all pages except Workbook and Unit */}
+                <GlobalChatButton show={!hideChatButton} />
+                <GlobalChatDrawer />
+              </TourProvider>
+            </ChatContextProvider>
           </AuthProvider>
         </DebugPanelProvider>
       </ThemeProvider>

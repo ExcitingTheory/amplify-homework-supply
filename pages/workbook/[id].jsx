@@ -13,6 +13,7 @@ import { DictionaryProvider } from '../../src/context/dictionaryContext'
 
 import { UnitProvider } from '../../src/context/unitContext'
 import UnitContext from '../../src/context/unitContext';
+import { useChatPageContext } from '../../src/hooks/useChatPageContext';
 import Box from '@mui/material/Box';
 
 import Card from '@mui/material/Card';
@@ -32,7 +33,18 @@ import AppBar from '@mui/material/AppBar';
  */
 function TimerWrappedEditor() {
   const { t } = useTranslation('pages');
-  const { unit, grade, createGrade, recentGrades } = useContext(UnitContext)
+  const { unit, grade, createGrade, recentGrades, files, dictionary, questionBank } = useContext(UnitContext)
+
+  // Convert files object to array for chat context
+  const filesArray = React.useMemo(() => Object.values(files || {}), [files]);
+
+  // Register page context with global chat
+  useChatPageContext({
+    unit,
+    files: filesArray,
+    dictionary,
+    questions: questionBank,
+  });
 
   const unitTimeLimitSeconds = unit?.timeLimitSeconds || 0
   const needsTimer = unitTimeLimitSeconds > 0 ? true : false
@@ -256,7 +268,9 @@ function TimerWrappedEditor() {
                         }
     </>}
     {(!needsTimer || needsTimer && timerStarted) &&
-      <Workbook />
+      <Box data-tour="workbook-content">
+        <Workbook />
+      </Box>
     }
 
   </>)

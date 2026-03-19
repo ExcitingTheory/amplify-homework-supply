@@ -44,6 +44,7 @@ import {
     updateVocabularyItem,
 } from '../utils/vocabularyImportUtils';
 import DictionaryContext from '../context/dictionaryContext';
+import AuthContext from '../context/authContext';
 
 // Lexical imports
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
@@ -473,6 +474,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
     searchTerm = '',
 }) => {
     const { t } = useTranslation('components');
+    const { user, isLoading: authLoading } = useContext(AuthContext) || { user: undefined, isLoading: true };
     const [parsedContent, setParsedContent] = useState<any>(null);
     const [document, setDocument] = useState<any>(null);
     const [vocabularyItems, setVocabularyItems] = useState<VocabularyItem[]>([]);
@@ -519,8 +521,15 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
 
     // Fetch ParsedContent and Document
     useEffect(() => {
+        // Wait for authentication
+        if (authLoading || !user) {
+            console.log('[VocabularyReview2] Waiting for authentication', { authLoading, hasUser: !!user });
+            return;
+        }
+        
         loadParsedContent();
         
+        console.log('[VocabularyReview2] Setting up ParsedContent subscription for user:', user.username);
         const client = getAmplifyClient();
         const subscription = client.models.ParsedContent.observeQuery().subscribe({
             next: () => {
@@ -530,7 +539,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
         });
         
         return () => subscription.unsubscribe();
-    }, [documentId]);
+    }, [documentId, authLoading, user?.username]);
 
     const loadParsedContent = async () => {
         try {

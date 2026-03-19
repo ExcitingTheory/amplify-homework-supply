@@ -42,6 +42,10 @@ import LanguageEditorTheme from './components/LanguageEditorTheme';
 import Placeholder from './components/Placeholder';
 
 import UnitContext from '../../context/unitContext';
+import FilesContext from '../../context/fileContext';
+import DictionaryContext from '../../context/dictionaryContext';
+import SectionContext from '../../context/sectionContext';
+import VectorStoreContext from '../../context/vectorStoreContext';
 
 
 import ToolBarPlugin from './plugins/ToolBarPlugin';
@@ -67,6 +71,7 @@ import BlockSuggestionPlugin from './plugins/BlockSuggestionPlugin';
 import AIContentCompletionPlugin from './plugins/AIContentCompletionPlugin';
 import DraggableBlockPlugin from './plugins/DraggableBlockPlugin';
 import YjsCollaborationPlugin from './plugins/CollaborationPlugin';
+import { useChatPageContext } from '../../hooks/useChatPageContext';
 
 import { useYjsUnit } from '../../hooks/useYjsUnit';
 import { EditorNodes, ALL_TRANSFORMERS, onError, DRAWER_WIDTH, DEBOUNCE_SAVE_DELAY_MS } from './editorConfig';
@@ -129,8 +134,21 @@ function EditorRefPlugin(): null {
  * Main Editor component with collaborative editing support
  */
 export default function Editor(): JSX.Element {
-  const { unit, session } = useContext(UnitContext);
+  const { unit, session, editorRef, files, dictionary, questionBank } = useContext(UnitContext);
+  const { sections } = useContext(SectionContext);
+  const vectorStoreContext = useContext(VectorStoreContext);
   const theme = useTheme();
+
+  // Register page context with global chat
+  useChatPageContext({
+    unit,
+    files: (files ? Object.values(files) : []) as any[],
+    dictionary: (dictionary ? Object.values(dictionary) : []) as any[],
+    questions: (questionBank ? Object.values(questionBank) : []) as any[],
+    sections,
+    editorRef,
+    vectorStoreSearch: vectorStoreContext?.search,
+  });
 
   // Yjs collaboration setup
   const { provider } = useYjsUnit({
@@ -428,12 +446,14 @@ export default function Editor(): JSX.Element {
                 <AutoLinkPlugin />
                 <YouTubePlugin />
                 <EditorRefPlugin />
-                <YjsCollaborationPlugin
-                  provider={provider}
-                  username={session?.username || 'Anonymous'}
-                  color={getUserColor(session?.username)}
-                  cursorsContainerRef={cursorsContainerRef}
-                />
+                {unit?.id && provider && (
+                  <YjsCollaborationPlugin
+                    provider={provider}
+                    username={session?.username || 'Anonymous'}
+                    color={getUserColor(session?.username)}
+                    cursorsContainerRef={cursorsContainerRef}
+                  />
+                )}
                 {!floatingAnchorElem ? null : (
                   <>
                     <FloatingLinkEditorPlugin
@@ -532,6 +552,7 @@ export default function Editor(): JSX.Element {
                             <ContentEditable
                               className="editor"
                               data-tour="editor"
+                              data-lexical-editor="true"
                               aria-label="Main editor content"
                               style={{
                                 maxWidth: '100%',

@@ -6,13 +6,13 @@ Comprehensive Grade mock data for Storybook stories, covering all common scenari
 
 ```javascript
 // In your story file
-import { seedGradeExamples } from '../../.storybook/__mocks__/grade-examples';
+import { seedGradeExamples } from "../../.storybook/__mocks__/grade-examples";
 
 export const YourStory = {
   loaders: [
     async () => {
       // Seed a specific scenario
-      seedGradeExamples('in-progress');
+      seedGradeExamples("in-progress");
     },
   ],
   render: () => <YourComponent />,
@@ -22,7 +22,9 @@ export const YourStory = {
 ## Available Scenarios
 
 ### `'empty'` - Brand New Grade
+
 Student just started, no progress made yet.
+
 - 0% complete
 - 0% accuracy
 - No responses recorded
@@ -31,11 +33,13 @@ Student just started, no progress made yet.
 **Use for**: Initial workbook load, new assignment stories
 
 ```javascript
-seedGradeExamples('empty');
+seedGradeExamples("empty");
 ```
 
 ### `'in-progress'` - Partially Complete
+
 Student has completed about half the exercises with mixed results.
+
 - 45% complete
 - 78% accuracy
 - Some blocks done, some not started
@@ -45,11 +49,13 @@ Student has completed about half the exercises with mixed results.
 **Use for**: Workbook resume scenarios, progress tracking UI
 
 ```javascript
-seedGradeExamples('in-progress');
+seedGradeExamples("in-progress");
 ```
 
 ### `'complete-high'` - Excellent Performance
+
 Student completed everything with high scores.
+
 - 100% complete
 - 95% accuracy
 - All exercises answered correctly or nearly so
@@ -59,11 +65,13 @@ Student completed everything with high scores.
 **Use for**: Results display, achievement screens, grade reports
 
 ```javascript
-seedGradeExamples('complete-high');
+seedGradeExamples("complete-high");
 ```
 
 ### `'complete-low'` - Needs Improvement
+
 Student finished but struggled with many questions.
+
 - 100% complete
 - 58% accuracy
 - Many incorrect answers
@@ -72,11 +80,13 @@ Student finished but struggled with many questions.
 **Use for**: Review mode, remediation UI, re-attempt prompts
 
 ```javascript
-seedGradeExamples('complete-low');
+seedGradeExamples("complete-low");
 ```
 
 ### `'audio'` - Audio Submissions
+
 Grade with audio recording responses.
+
 - Audio file IDs in responses
 - Pronunciation feedback
 - Custom answer blocks with audio
@@ -84,11 +94,13 @@ Grade with audio recording responses.
 **Use for**: Audio recording UI, pronunciation exercises
 
 ```javascript
-seedGradeExamples('audio');
+seedGradeExamples("audio");
 ```
 
 ### `'drawing'` - Drawing Submissions
+
 Grade with drawing/canvas submissions.
+
 - Drawing file IDs in responses
 - Visual feedback
 - Custom answer blocks with drawings
@@ -96,11 +108,13 @@ Grade with drawing/canvas submissions.
 **Use for**: Drawing pad UI, kanji practice, visual exercises
 
 ```javascript
-seedGradeExamples('drawing');
+seedGradeExamples("drawing");
 ```
 
 ### `'flagged'` - Moderation Review
+
 Grade flagged by content moderation system.
+
 - Moderation status: 'flagged'
 - Moderation flags with reasons
 - Requires instructor review
@@ -108,11 +122,13 @@ Grade flagged by content moderation system.
 **Use for**: Moderation queue UI, instructor review workflows
 
 ```javascript
-seedGradeExamples('flagged');
+seedGradeExamples("flagged");
 ```
 
 ### `'timed'` - Timed Exercise
+
 Active timed exercise in progress.
+
 - Timer started
 - Timer metadata in data field
 - Partial completion
@@ -121,11 +137,13 @@ Active timed exercise in progress.
 **Use for**: Timed quiz UI, countdown timers, exam mode
 
 ```javascript
-seedGradeExamples('timed');
+seedGradeExamples("timed");
 ```
 
 ### `'multiple-attempts'` - Progress Over Time
+
 Array of 3 grades showing improvement.
+
 - Attempt 1: 65% accuracy
 - Attempt 2: 78% accuracy
 - Attempt 3: 92% accuracy
@@ -133,11 +151,13 @@ Array of 3 grades showing improvement.
 **Use for**: Progress charts, attempt history, learning curves
 
 ```javascript
-seedGradeExamples('multiple-attempts');
+seedGradeExamples("multiple-attempts");
 ```
 
 ### `'multiple-learners'` - Multiple Students
+
 Array of 5 grades for different students in same unit.
+
 - Alice: 94% accuracy (completed, high performer)
 - Bob: 76% accuracy (completed, average)
 - Charlie: 82% accuracy (60% complete, in progress)
@@ -147,7 +167,7 @@ Array of 5 grades for different students in same unit.
 **Use for**: Instructor dashboard, gradebook, class roster, analytics
 
 ```javascript
-seedGradeExamples('multiple-learners');
+seedGradeExamples("multiple-learners");
 ```
 
 ## Using Individual Grade Objects
@@ -155,8 +175,8 @@ seedGradeExamples('multiple-learners');
 Import specific grades directly without seeding:
 
 ```javascript
-import gradeExamples from '../../.storybook/__mocks__/grade-examples';
-import { seedMockGrade } from '../../.storybook/__mocks__/aws-amplify-datastore';
+import gradeExamples from "../../.storybook/__mocks__/grade-examples";
+import { seedMockGrade } from "../../.storybook/__mocks__/aws-amplify-datastore";
 
 export const CustomStory = {
   loaders: [
@@ -164,7 +184,7 @@ export const CustomStory = {
       // Customize a grade before seeding
       const customGrade = {
         ...gradeExamples.inProgressGrade,
-        id: 'my-custom-grade-id',
+        id: "my-custom-grade-id",
         accuracy: 65,
       };
       seedMockGrade(customGrade);
@@ -178,34 +198,34 @@ export const CustomStory = {
 Rubrics are arrays of block keys extracted from the Unit's Lexical editor state. They contain keys of all graded block types (quiz, meaning-association, answer, custom-answer).
 
 ```javascript
-import gradeExamples from '../../.storybook/__mocks__/grade-examples';
+import gradeExamples from "../../.storybook/__mocks__/grade-examples";
 
 // Simple rubric with 3 blocks
-gradeExamples.simpleRubric
+gradeExamples.simpleRubric;
 // ['quiz-block-1', 'meaning-assoc-1', 'custom-q-1']
 
 // Standard rubric with mix of types
-gradeExamples.standardRubric
+gradeExamples.standardRubric;
 // ['quiz-block-1', 'quiz-block-2', 'meaning-assoc-1', 'answer-block-1', 'custom-q-1', 'custom-q-2']
 
 // Complex rubric for large units
-gradeExamples.complexRubric
+gradeExamples.complexRubric;
 // 12 blocks including multiple quizzes, meaning associations, answers, and custom questions
 
 // Vocabulary-focused rubric
-gradeExamples.vocabularyRubric
+gradeExamples.vocabularyRubric;
 // 7 blocks, mostly meaning-association and answer blocks
 
 // Quiz-heavy rubric
-gradeExamples.quizRubric
+gradeExamples.quizRubric;
 // 6 quiz blocks
 
 // Mixed media rubric
-gradeExamples.mixedMediaRubric
+gradeExamples.mixedMediaRubric;
 // Includes audio and drawing custom answer blocks
 
 // Empty rubric (informational unit with no graded content)
-gradeExamples.emptyRubric
+gradeExamples.emptyRubric;
 // []
 ```
 
@@ -215,28 +235,30 @@ gradeExamples.emptyRubric
 export const YourStory = {
   loaders: [
     async () => {
-      const { seedMockUnit } = await import('../../.storybook/__mocks__/aws-amplify-datastore');
-      const gradeExamples = await import('../../.storybook/__mocks__/grade-examples');
-      
+      const { seedMockUnit } =
+        await import("../../.storybook/__mocks__/aws-amplify-datastore");
+      const gradeExamples =
+        await import("../../.storybook/__mocks__/grade-examples");
+
       // Create unit state with graded blocks matching the rubric
       const unitData = {
         root: {
           children: [
-            { type: 'heading', key: 'heading-1', /* ... */ },
-            { type: 'quiz', key: 'quiz-block-1', /* ... */ },
-            { type: 'meaning-association', key: 'meaning-assoc-1', /* ... */ },
-            { type: 'custom-answer', key: 'custom-q-1', /* ... */ },
-          ]
-        }
+            { type: "heading", key: "heading-1" /* ... */ },
+            { type: "quiz", key: "quiz-block-1" /* ... */ },
+            { type: "meaning-association", key: "meaning-assoc-1" /* ... */ },
+            { type: "custom-answer", key: "custom-q-1" /* ... */ },
+          ],
+        },
       };
-      
+
       seedMockUnit({
-        id: 'unit-1',
-        name: 'Test Unit',
+        id: "unit-1",
+        name: "Test Unit",
         data: unitData,
         _version: 1,
       });
-      
+
       // The rubric will be automatically extracted from the unit data
       // It will contain: ['quiz-block-1', 'meaning-assoc-1', 'custom-q-1']
     },
@@ -268,7 +290,7 @@ Each grade contains:
   moderationCheckedAt: string | null; // ISO datetime
   createdAt: string;                // ISO datetime
   updatedAt: string;                // ISO datetime
-  _version: number;                 // DataStore OCC version
+  updatedAt: string;                // Last update timestamp
   _lastChangedAt: number;           // Unix timestamp
   _deleted: boolean;
 }
@@ -289,7 +311,7 @@ The `data` field is a JSON string that when parsed becomes:
       'quiz-q2': { selected: 'Answer', correct: false }
     }
   },
-  
+
   // Meaning association block
   'meaning-assoc-1': {
     complete: true,
@@ -299,7 +321,7 @@ The `data` field is a JSON string that when parsed becomes:
       'word-id-2': 'Definition text'
     }
   },
-  
+
   // Custom answer block
   'custom-q-1': {
     complete: true,
@@ -309,7 +331,7 @@ The `data` field is a JSON string that when parsed becomes:
     drawingFileId: 'file-id',      // Optional
     feedback: 'Instructor feedback'
   },
-  
+
   // Answer block (vocabulary)
   'answer-block-1': {
     complete: true,
@@ -323,7 +345,7 @@ The `data` field is a JSON string that when parsed becomes:
       }
     }
   },
-  
+
   // Timer metadata (for timed exercises)
   timerStartedAt: '2024-01-20T10:00:00Z',
   timeLimit: 1800000  // milliseconds
@@ -350,8 +372,8 @@ The `feedback` field is a JSON string:
 ### Testing Grade Updates
 
 ```javascript
-import { seedMockGrade } from '../../.storybook/__mocks__/aws-amplify-datastore';
-import gradeExamples from '../../.storybook/__mocks__/grade-examples';
+import { seedMockGrade } from "../../.storybook/__mocks__/aws-amplify-datastore";
+import gradeExamples from "../../.storybook/__mocks__/grade-examples";
 
 // Start with empty grade
 seedMockGrade(gradeExamples.emptyGrade);
@@ -363,13 +385,15 @@ const updatedGrade = {
   percentComplete: 25,
   accuracy: 80,
   data: JSON.stringify({
-    'quiz-block-1': {
+    "quiz-block-1": {
       complete: true,
       accuracy: 80,
-      responses: { /* ... */ }
-    }
+      responses: {
+        /* ... */
+      },
+    },
   }),
-  _version: 2  // Increment version for OCC
+  updatedAt: "2024-01-15T10:31:00Z", // Update timestamp
 };
 seedMockGrade(updatedGrade);
 ```
@@ -378,25 +402,37 @@ seedMockGrade(updatedGrade);
 
 ```javascript
 // Use the pre-built multiple learners array
-seedGradeExamples('multiple-learners');
+seedGradeExamples("multiple-learners");
 
 // Or create custom student roster
 const studentGrades = [
-  { ...gradeExamples.completeHighScoreGrade, id: 'grade-student-1', owner: 'student1' },
-  { ...gradeExamples.inProgressGrade, id: 'grade-student-2', owner: 'student2' },
-  { ...gradeExamples.completeLowScoreGrade, id: 'grade-student-3', owner: 'student3' },
+  {
+    ...gradeExamples.completeHighScoreGrade,
+    id: "grade-student-1",
+    owner: "student1",
+  },
+  {
+    ...gradeExamples.inProgressGrade,
+    id: "grade-student-2",
+    owner: "student2",
+  },
+  {
+    ...gradeExamples.completeLowScoreGrade,
+    id: "grade-student-3",
+    owner: "student3",
+  },
 ];
 
-studentGrades.forEach(grade => seedMockGrade(grade));
+studentGrades.forEach((grade) => seedMockGrade(grade));
 
 // Or use the multipleLearnersGrades directly
-import gradeExamples from '../../.storybook/__mocks__/grade-examples';
-gradeExamples.multipleLearnersGrades.forEach(grade => seedMockGrade(grade));
+import gradeExamples from "../../.storybook/__mocks__/grade-examples";
+gradeExamples.multipleLearnersGrades.forEach((grade) => seedMockGrade(grade));
 ```
 
 ### Testing Grade History
 
-```javascript
+````javascript
 // Use multipleAttempts for showing improvement over time
 seedGradeExamples('multiple-attempts');
 
@@ -410,13 +446,14 @@ const rubric = ['quiz-block-1', 'meaning-assoc-1', 'custom-q-1', 'answer-block-1
 
 // Used for progress tracking
 const totalQuestions = rubric.length; // 4
-const completedQuestions = Object.keys(gradeData).filter(key => 
+const completedQuestions = Object.keys(gradeData).filter(key =>
   gradeData[key].complete
 ).length;
 const percentComplete = (completedQuestions / totalQuestions) * 100;
-```
+````
 
 Graded block types (from `unitContext.js`):
+
 - `quiz` - Multiple choice/true-false questions
 - `meaning-association` - Match words to definitions
 - `answer` - Vocabulary translation exercises
@@ -424,20 +461,12 @@ Graded block types (from `unitContext.js`):
 
 ## Tips
 
-1. **Always increment `_version`** when updating a grade to match Amplify's Optimistic Concurrency Control
+1. **Always use current timestamp in `updatedAt`** when updating a grade
 2. **Update `updatedAt`** timestamp when modifying grades
 3. **Match block IDs** in grade data with actual block IDs in your unit's Lexical state and rubric
 4. **Use realistic file IDs** that match files you've seeded with `seedMockFiles`
 5. **JSON.stringify() the data and feedback** fields - they're stored as strings in DynamoDB
 6. **Rubric keys must match** the keys in the grade's data field for accurate progress calculation
-
-## Tips
-
-1. **Always increment `_version`** when updating a grade to match Amplify's Optimistic Concurrency Control
-2. **Update `updatedAt`** timestamp when modifying grades
-3. **Match block IDs** in grade data with actual block IDs in your unit's Lexical state
-4. **Use realistic file IDs** that match files you've seeded with `seedMockFiles`
-5. **JSON.stringify() the data and feedback** fields - they're stored as strings in DynamoDB
 
 ## See Also
 

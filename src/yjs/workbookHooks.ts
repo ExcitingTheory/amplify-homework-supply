@@ -92,7 +92,7 @@ export interface UseWorkbookCollaborationReturn {
  * }
  * ```
  */
-export function useWorkbookCollaboration(options: UseWorkbookCollaborationOptions): UseWorkbookCollaborationReturn {
+export function useWorkbookCollaboration(options: UseWorkbookCollaborationOptions | null): UseWorkbookCollaborationReturn {
   const {
     gradeId,
     user,
@@ -103,7 +103,7 @@ export function useWorkbookCollaboration(options: UseWorkbookCollaborationOption
     autoSyncToGrade = true,
     syncInterval = 3000,
     wsUrl,
-  } = options
+  } = options || {} as UseWorkbookCollaborationOptions
 
   const providerRef = useRef<WorkbookCollaborationProvider | null>(null)
   const [workbookData, setWorkbookData] = useState<WorkbookBlockData>({})
@@ -114,7 +114,7 @@ export function useWorkbookCollaboration(options: UseWorkbookCollaborationOption
 
   // Initialize provider
   useEffect(() => {
-    if (!gradeId || !user) return
+    if (!options || !gradeId || !user) return
 
     console.log(`[useWorkbookCollaboration] Initializing for grade ${gradeId}`)
 
@@ -187,7 +187,7 @@ export function useWorkbookCollaboration(options: UseWorkbookCollaborationOption
       }
       // Don't destroy provider on unmount - keeps connection alive
     }
-  }, [gradeId, user.username]) // Only reinitialize if gradeId or user changes
+  }, [gradeId, user?.username]) // Only reinitialize if gradeId or user changes
 
   const updateBlock = useCallback(
     <T extends Partial<WorkbookBlockData[string]>>(blockId: string, data: T) => {

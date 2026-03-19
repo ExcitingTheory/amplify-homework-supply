@@ -13,8 +13,14 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Import commands.js using ES2015 syntax:
-import './commands'
+// Import and register custom commands
+import { registerCommands } from './commands'
+
+// Register all custom Cypress commands
+registerCommands();
+
+// Removed console interception to avoid performance issues and promise conflicts
+// Console output will appear naturally in the browser console during test execution
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

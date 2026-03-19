@@ -43,6 +43,9 @@
     "**/*.stories.jsx",
     "**/*.test.ts",
     "**/*.test.tsx",
-    "**/__tests__/**"
+    "**/__tests__/**",
+    "vitest.workspace.ts",
+    "vitest.config.ts",
+    "vitest.shims.d.ts"
   ]
 }

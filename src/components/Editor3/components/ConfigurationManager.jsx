@@ -102,25 +102,27 @@ export default function ConfigurationManager() {
         console.log('uploading file', fileInput);
         console.log('fileOperations', fileOperations);
 
-        const result = await uploadData({
-          key: newFilename,
+        // Gen 2 API requires full path with protection level prefix
+        const s3Path = `protected/${identityId}/${newFilename}`;
+
+        const uploadOperation = uploadData({
+          path: s3Path,
           data: file,
           options: {
             contentType: file.type,
-            contentLength: file.size,
-            accessLevel: 'protected',
-            identityId,
-            progressCallback(progress) {
-              console.log(`Uploaded: ${progress.loaded}/${progress.total}`);
+            onProgress(progress) {
+              console.log(`Uploaded: ${progress.transferredBytes}/${progress.totalBytes}`);
 
               setFileOperations((prev) => {
                 const newFileOperations = [...prev];
-                newFileOperations[fileInput.index].progress = Math.round(progress.loaded / progress.total * 100) + '%';
+                newFileOperations[fileInput.index].progress = Math.round(progress.transferredBytes / progress.totalBytes * 100) + '%';
                 return newFileOperations;
               })
             }
           }
         });
+
+        await uploadOperation.result;
 
       }));
 

@@ -56,6 +56,7 @@ import CameraIcon from '@mui/icons-material/Camera';
 import DeleteIcon from '@mui/icons-material/Delete';
 import getCachedUrl from "../../src/utils/getCachedUrl";
 import FilesContext from "../../src/context/fileContext";
+import { useChatPageContext } from '../../src/hooks/useChatPageContext';
 
 // import { fetchAuthSession } from '@aws-amplify/auth';
 
@@ -143,6 +144,7 @@ function SectionDetail({ user, signOut }) {
   const router = useRouter()
 
   const [currentUser, setCurrentUser] = useState(null);
+  const [userAttributes, setUserAttributes] = useState(null);
   const [section, setSection] = useState(null)
   const [sectionStudents, setSectionStudents] = useState([])
   const [units, setUnits] = useState({})
@@ -177,12 +179,19 @@ function SectionDetail({ user, signOut }) {
 
   const { session }  = React.useContext(FilesContext);
 
+  // Register page context with global chat
+  useChatPageContext({
+    sections: section ? [section] : [],
+  });
+
   // Fetch current user on mount
   useEffect(() => {
     async function fetchUser() {
       try {
         const user = await getCurrentUser();
         setCurrentUser(user);
+        const attributes = await fetchUserAttributes();
+        setUserAttributes(attributes);
       } catch (error) {
         console.error('Error fetching user:', error);
       }
@@ -533,7 +542,8 @@ function SectionDetail({ user, signOut }) {
       }
     }).subscribe({
       next: ({ items: grades }) => {
-
+        // Filter out null items before processing
+        grades = grades.filter(grade => grade != null && grade.id != null);
 
       // grades by user and assignment
       // look for the last grade for each assignment
@@ -620,16 +630,15 @@ function SectionDetail({ user, signOut }) {
     fetchSectionStudents()
     async function fetchSectionStudents() {
       // use ampllify api to get all students in this section
-      // const user = await getCurrentUser()
-      const userAttributes = await fetchUserAttributes();
+      const currentUserAttributes = userAttributes || await fetchUserAttributes();
 
-      if (userAttributes?.sub !== section.owner) {
+      if (currentUserAttributes?.sub !== section.owner) {
 
-        console.log('fetchSectionStudents.user.username !== section.owner', currentUser?.username, section.owner)
+        console.log('fetchSectionStudents - not owner', currentUserAttributes?.sub, section.owner)
         setSectionStudents([{
-          id: currentUser?.username,
-          email: userAttributes?.email, // TODO: Determine if email is something we want to expose?
-          name: userAttributes?.name || currentUser?.username
+          id: currentUserAttributes?.sub,
+          email: currentUserAttributes?.email, // TODO: Determine if email is something we want to expose?
+          name: currentUserAttributes?.name || currentUserAttributes?.sub
         }])
         return
       }
@@ -645,9 +654,13 @@ function SectionDetail({ user, signOut }) {
 
       const sectionStudentsData = {}
       console.log('_sectionStudents', _sectionStudents.data)
-      _sectionStudents.data.forEach((sectionStudent) => {
-        sectionStudentsData[sectionStudent.id] = sectionStudent
-      })
+      
+      // Check if data exists before processing
+      if (_sectionStudents.data) {
+        _sectionStudents.data.forEach((sectionStudent) => {
+          sectionStudentsData[sectionStudent.id] = sectionStudent
+        })
+      }
 
       console.log('fetchSectionStudents', sectionStudentsData)
 
@@ -1050,7 +1063,7 @@ function SectionDetail({ user, signOut }) {
               </Typography>
 
               <Typography gutterBottom variant="h5" component="div">
-                {t('sectionDetail.joinCode')} {section?.code}
+                {t('sectionDetail.joinCode')} <Box component="code" data-tour="join-code" sx={{ fontFamily: 'monospace', fontWeight: 600, backgroundColor: 'grey.100', px: 1, py: 0.5, borderRadius: 1 }}>{section?.code}</Box>
               </Typography>
 
               <Typography variant="body2" color="text.secondary">
@@ -1527,6 +1540,7 @@ function SectionDetail({ user, signOut }) {
       }
       {sectionAssignments &&
         <Box
+        data-tour="assignments-section"
         style={{
           padding: '1rem',
           marginBottom: '3rem',
@@ -1565,6 +1579,7 @@ function SectionDetail({ user, signOut }) {
                 <>
 
                   <Card
+                    data-tour="assignment-card"
                     elevation={2}
                     sx={{
                       display: 'flex',
@@ -1597,6 +1612,7 @@ function SectionDetail({ user, signOut }) {
                         <Button
                           variant="text"
                           color="inherit"
+                          data-tour="view-workbook-button"
                           href={workbookUrl}
                           disabled={work}
                           style={{

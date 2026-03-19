@@ -26,4 +26,11 @@ export const auth = defineAuth({
     totp: true,
   },
   groups: ['Learners', 'Instructors', 'Moderators', 'Admins'],
+  userAttributes: {
+    locale: {
+      mutable: true,
+      required: false,
+    },
+  },
+  accountRecovery: 'EMAIL_ONLY',
 });

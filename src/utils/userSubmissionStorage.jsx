@@ -1,14 +1,19 @@
 /**
- * User Submission Storage Utility
+ * User Submission Storage Utility (Amplify Gen 2)
  * 
  * Handles storage of student-submitted content (audio recordings, drawings, etc.)
  * with strict privacy controls and cost tracking separation.
  * 
  * Key Features:
  * - Uses PRIVATE access level (only owner can access directly)
- * - Dedicated S3 prefix: user-submissions/{gradeId}/{nodeKey}/{filename}
+ * - Gen 2 pattern: private/{userId}/user-submissions/{gradeId}/{nodeKey}/{filename}
  * - Separate from other File storage for cost tracking
  * - Teachers access via special backend endpoint that validates permissions
+ * 
+ * Gen 2 Notes:
+ * - Uses `path` parameter with full S3 path including protection level prefix
+ * - No `accessLevel` or `identityId` options needed (encoded in path)
+ * - Returns result.path (not result.key) for uploaded files
  */
 
 import { uploadData, remove } from 'aws-amplify/storage';
@@ -29,35 +34,29 @@ export async function uploadStudentSubmission({ file, gradeId, nodeKey, fileType
   try {
     const timestamp = Date.now();
     const filename = `${gradeId}_${nodeKey}_${timestamp}.${fileType}`;
-    const key = `user-submissions/${gradeId}/${nodeKey}/${filename}`;
     
-    // Get current user for identityId
+    // Get current user for metadata and path
     const { userId, username } = await getCurrentUser();
     
-    console.log(`[UserSubmission] Uploading to: ${key}`);
+    // Gen 2 API: private files use private/{identityId}/* pattern
+    // Note: identityId is automatically added by Amplify when accessing private storage
+    const s3Path = `private/${userId}/user-submissions/${gradeId}/${nodeKey}/${filename}`;
     
-    // Upload with PRIVATE access level
+    console.log(`[UserSubmission] Uploading to: ${s3Path}`);
+    
+    // Upload with Gen 2 API (no accessLevel option needed - it's in the path)
     const result = await uploadData({
-      key,
+      path: s3Path,
       data: file,
       options: {
-        accessLevel: 'private',
         contentType: file.type,
-        metadata: {
-          gradeId,
-          nodeKey,
-          uploadedBy: username,
-          uploadedAt: new Date().toISOString(),
-          ...metadata,
-        },
       },
     }).result;
     
     console.log(`[UserSubmission] Upload successful: ${result.path}`);
     
     return {
-      path: result.path || key,
-      key: result.path || key, // For backwards compatibility
+      path: result.path,
       filename,
       gradeId,
       nodeKey,
@@ -65,6 +64,8 @@ export async function uploadStudentSubmission({ file, gradeId, nodeKey, fileType
       metadata: {
         userId,
         username,
+        uploadedBy: username,
+        uploadedAt: new Date().toISOString(),
         ...metadata,
       },
     };
@@ -77,21 +78,19 @@ export async function uploadStudentSubmission({ file, gradeId, nodeKey, fileType
 /**
  * Delete a student submission file
  * 
- * @param {string} key The S3 key of the file to delete
+ * @param {string} path The S3 path of the file to delete (full path including private/ prefix)
  * @returns {Promise<void>}
  */
-export async function deleteStudentSubmission(key) {
+export async function deleteStudentSubmission(path) {
   try {
-    console.log(`[UserSubmission] Deleting: ${key}`);
+    console.log(`[UserSubmission] Deleting: ${path}`);
     
+    // Gen 2 API: use path directly, no accessLevel option
     await remove({
-      key,
-      options: {
-        accessLevel: 'private',
-      },
+      path,
     });
     
-    console.log(`[UserSubmission] Delete successful: ${key}`);
+    console.log(`[UserSubmission] Delete successful: ${path}`);
   } catch (error) {
     console.error('[UserSubmission] Delete failed:', error);
     throw new Error(`Failed to delete student submission: ${error.message}`);

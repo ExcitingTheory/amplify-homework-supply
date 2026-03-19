@@ -16,7 +16,7 @@ export const documentAnalysisHandler = defineFunction({
   // entry: './handler.ts',
   timeoutSeconds: 900,
   memoryMB: 512,
-  resourceGroupName: 'data',  // Assign to data stack - used as GraphQL resolver
+  resourceGroupName: 'data',  // Must be in data stack - used as GraphQL resolver
   environment: {
     OPENAI_API_KEY: secret('OPENAI_API_KEY'),
     PHOENIX_COLLECTOR_ENDPOINT: secret('PHOENIX_COLLECTOR_ENDPOINT'),

@@ -10,6 +10,7 @@ The Debug Panel can be enabled in production to help diagnose issues and collect
 - **Performance Metrics**: Monitor render times and performance
 - **Export Diagnostics**: Download logs and state for support tickets
 - **🆕 Discord Integration**: Automatically send diagnostics to support team via Discord webhook
+- **🆕 S3 Artifact Storage**: Upload diagnostics to S3 with 30-day signed URLs
 
 ## Discord Webhook Integration
 
@@ -18,13 +19,16 @@ The debug panel can automatically send diagnostic reports to your support team v
 **Quick Setup:**
 1. Create Discord webhook in your support channel
 2. Add `NEXT_PUBLIC_DISCORD_WEBHOOK_URL` to `.env.local`
-3. Restart development server
-4. Users can now click the 📤 Send icon in the debug panel
+3. Ensure AWS Amplify Storage is configured (for S3 uploads)
+4. Restart development server
+5. Users can now click the 📤 Send icon in the debug panel
 
 **Benefits:**
 - Instant notification when users report issues
 - Automatic data sanitization (removes auth tokens)
-- Full diagnostic snapshot attached
+- **S3 artifact storage** with 30-day signed URLs
+- Diagnostics uploaded to `public/debug/` path in S3
+- Support team gets clickable download link in Discord
 - User can provide description and contact info
 - Organized in Discord channels for team collaboration
 
@@ -143,6 +147,9 @@ When asking users to enable debug mode:
 
 ### Files Modified
 
+- `src/utils/debug/discordWebhook.ts` - Discord webhook integration with S3 URL support
+- `src/utils/debug/uploadDebugArtifact.ts` - S3 artifact upload with 30-day signed URLs
+- `src/components/DebugPanel/DebugPanel.tsx` - Added S3 upload before Discord send
 - `src/components/DebugPanel/useDebugPanel.ts` - Added localStorage persistence
 - `src/components/DebugPanel/DebugPanelProvider.tsx` - Check localStorage flag
 - `src/components/MainToolbar.jsx` - Secret click counter on menu icon

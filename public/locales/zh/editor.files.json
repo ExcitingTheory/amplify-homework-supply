@@ -64,6 +64,10 @@
       "searchPlaceholder": "搜索文件...",
       "selectAllTooltip": "全选",
       "uploadTooltip": "上传文件"
+    },
+    "dragDrop": {
+      "dropFilesHere": "拖放文件到此处以上传",
+      "supportedFormats": "音频、图片、PDF、文档等"
     }
   },
   "fileMetadataComponent": {

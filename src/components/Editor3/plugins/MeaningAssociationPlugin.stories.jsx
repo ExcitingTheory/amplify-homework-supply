@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { within, userEvent, waitFor } from '@storybook/test';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -283,12 +284,43 @@ const sampleMeaningAssociationState = {
 
 export const EditableEmpty = {
   render: () => <EditableTemplate editorState={null} showInsertButton={true} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for insert button
+    await waitFor(() => {
+      const insertButton = canvas.getByRole('button', { name: /insert.*meaning|match/i });
+      expect(insertButton).toBeInTheDocument();
+    }, { timeout: 3000 });
+  },
 };
 
 export const EditableWithExercise = {
   render: () => <EditableTemplate editorState={sampleMeaningAssociationState} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for meaning association exercise to render
+    await waitFor(() => {
+      expect(canvas.getByText(/Vocabulary Matching Exercise/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify exercise instruction text
+    expect(canvas.getByText(/Match the words with their definitions/i)).toBeInTheDocument();
+  },
 };
 
 export const ReadOnlyWithExercise = {
   render: () => <ReadOnlyTemplate editorState={sampleMeaningAssociationState} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for read-only meaning association
+    await waitFor(() => {
+      expect(canvas.getByText(/Vocabulary Matching Exercise/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+  },
 };

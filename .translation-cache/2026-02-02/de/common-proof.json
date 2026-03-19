@@ -777,9 +777,9 @@
         }
       },
       "mainToolbar.addToSection.description": {
-        "value": "Description",
+        "value": "Add self to class section with Join Code",
         "_meta": {
-          "context": "This text appears as a form field label in the MainToolbar component when instructors are adding content to a learning section. Users see this label when they are in the content creation workflow, specifically when prompted to provide descriptive information about the section or content they are adding.",
+          "context": "This text appears as a form field label in the MainToolbar component when users are entering the section join information for a class or section.",
           "component": {
             "location": "src/components/MainToolbar.jsx",
             "description": "The MainToolbar component provides primary navigation and content creation tools for instructors. It displays when users are actively creating or editing learning materials and includes various action buttons and form fields for content management."

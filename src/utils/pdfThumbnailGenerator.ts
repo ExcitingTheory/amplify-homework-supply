@@ -135,17 +135,17 @@ export async function generateAndUploadThumbnails(
 
                 // Upload to S3
                 const extension = options.format === 'png' ? 'png' : 'jpg';
-                const s3Key = `thumbnails/${identityId}/${fileId}/page-${i}.${extension}`;
+                const s3Path = `protected/${identityId}/thumbnails/${fileId}/page-${i}.${extension}`;
                 
                 const result = await uploadData({
-                    key: s3Key,
+                    path: s3Path,
                     data: blob,
                     options: {
                         contentType: blob.type,
                     },
                 }).result;
 
-                thumbnailKeys.push(result.key);
+                thumbnailKeys.push(result.path);
             } catch (error) {
                 console.error(`Error generating thumbnail for page ${i}:`, error);
                 errors.push({
@@ -188,17 +188,17 @@ export async function generateSingleThumbnail(
     const blob = dataUrlToBlob(dataUrl);
 
     const extension = options.format === 'png' ? 'png' : 'jpg';
-    const s3Key = `thumbnails/${identityId}/${fileId}/page-${pageNumber}.${extension}`;
+    const s3Path = `protected/${identityId}/thumbnails/${fileId}/page-${pageNumber}.${extension}`;
 
     const result = await uploadData({
-        key: s3Key,
+        path: s3Path,
         data: blob,
         options: {
             contentType: blob.type,
         },
     }).result;
 
-    return result.key;
+    return result.path;
 }
 
 /**

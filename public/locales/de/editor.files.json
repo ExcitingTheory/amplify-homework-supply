@@ -64,6 +64,10 @@
       "searchPlaceholder": "Dateien suchen...",
       "selectAllTooltip": "Alle auswählen",
       "uploadTooltip": "Dateien hochladen"
+    },
+    "dragDrop": {
+      "dropFilesHere": "Dateien hier ablegen zum Hochladen",
+      "supportedFormats": "Audio, Bilder, PDFs, Dokumente und mehr"
     }
   },
   "fileMetadataComponent": {

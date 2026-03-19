@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { within, userEvent, waitFor } from '@storybook/test';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -254,12 +255,47 @@ const sampleLayoutState = {
 
 export const EditableEmpty = {
   render: () => <EditableTemplate editorState={null} showInsertButton={true} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for insert button
+    await waitFor(() => {
+      const insertButton = canvas.getByRole('button', { name: /insert.*layout|columns/i });
+      expect(insertButton).toBeInTheDocument();
+    }, { timeout: 3000 });
+  },
 };
 
 export const EditableWithLayout = {
   render: () => <EditableTemplate editorState={sampleLayoutState} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for layout columns to render
+    await waitFor(() => {
+      expect(canvas.getByText(/Left column content/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify both columns are visible
+    expect(canvas.getByText(/Right column content/i)).toBeInTheDocument();
+    expect(canvas.getByText(/organize content side-by-side/i)).toBeInTheDocument();
+  },
 };
 
 export const ReadOnlyWithLayout = {
   render: () => <ReadOnlyTemplate editorState={sampleLayoutState} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for layout in read-only mode
+    await waitFor(() => {
+      expect(canvas.getByText(/Left column content/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify columns display
+    expect(canvas.getByText(/Right column content/i)).toBeInTheDocument();
+  },
 };

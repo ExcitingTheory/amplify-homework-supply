@@ -1,13 +1,25 @@
 import React, { createContext } from "react";
 import { getAmplifyClient } from '../utils/amplifyClient';
+import AuthContext from './authContext';
 
 const SettingsContext = createContext();
 
 const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  
+  // Get auth state from centralized context
+  const authContext = React.useContext(AuthContext);
+  const { user, isLoading: authLoading } = authContext || { user: undefined, isLoading: true };
 
   React.useEffect(() => {
+    // Wait for auth to be ready
+    if (authLoading || !user) {
+      console.log('[SettingsContext] Waiting for auth...', { authLoading, hasUser: !!user });
+      return;
+    }
+    
+    console.log('[SettingsContext] Setting up Settings subscription for user:', user.attributes.sub);
     const client = getAmplifyClient();
 
     const subscription = client.models.Settings.observeQuery().subscribe({
@@ -52,7 +64,7 @@ const SettingsProvider = ({ children }) => {
     });
     
     return () => subscription.unsubscribe();
-  }, []);
+  }, [authLoading, user]);
 
   const updateSettings = React.useCallback(async (updates) => {
     if (!settings) return;

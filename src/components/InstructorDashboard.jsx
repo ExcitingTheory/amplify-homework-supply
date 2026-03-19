@@ -220,9 +220,9 @@ export default function InstructorDashboard({ sections = [] }) {
   }
 
   return (
-    <Box sx={{ mb: 4 }}>
+    <Box sx={{ mb: 4, margin: '1rem auto', width: '90vw', maxWidth: '80rem' }}>
       {/* Aggregate Statistics */}
-      <Card elevation={3} sx={{ mb: 3, borderRadius: 2 }}>
+      <Card elevation={3} sx={{ mb: 3, borderRadius: 2, width: '100%' }}>
         <CardContent>
           <Typography variant="h5" gutterBottom sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <TrendingUpIcon sx={{ mr: 1 }} />
@@ -292,7 +292,7 @@ export default function InstructorDashboard({ sections = [] }) {
       </Card>
 
       {/* Section Leaderboards */}
-      <Card elevation={3} sx={{ borderRadius: 2 }}>
+      <Card elevation={3} sx={{ borderRadius: 2, width: '100%' }}>
         <CardContent>
           <Typography variant="h5" gutterBottom sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <EmojiEventsIcon sx={{ mr: 1 }} />

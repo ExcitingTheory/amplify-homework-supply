@@ -6,6 +6,8 @@ import AuthContext from './authContext';
 import { Hub, Cache } from "aws-amplify/utils";
 
 // Import vector store for early initialization
+// In Storybook: Vite aliases automatically resolve these to mocks in .storybook/__mocks__/
+// In Next.js: Tree-shaking and conditional usage prevent SSR issues
 import { CourseVectorStore } from "../components/Editor3/components/FileManager2";
 import { loadEmbeddingsByDocument, loadEmbeddingsFromS3 } from "../utils/vectorStoreDB";
 
@@ -21,7 +23,7 @@ const FilesContext = createContext({
   documents: [],
   session: { identityId: undefined, idToken: undefined, error: undefined },
   filesVersion: 0,
-  vectorStore: { loaded: false, items: [], add: () => {}, loadFromIndexedDB: async () => 0 },
+  vectorStore: null, // Will be null during SSR, initialized in browser
   vectorStoreReady: false,
 });
 
@@ -55,14 +57,24 @@ const FilesProvider = ({ children }) => {
   const subscriptionRef = React.useRef(null);
   const documentSubscriptionRef = React.useRef(null);
   
-  // Create vector store instance - shared across entire app
-  const vectorStore = React.useRef(new CourseVectorStore()).current;
+  // Create vector store instance - shared across entire app (browser-only)
+  const vectorStore = React.useRef(
+    typeof window !== 'undefined' && CourseVectorStore 
+      ? new CourseVectorStore() 
+      : null
+  ).current;
   const [vectorStoreReady, setVectorStoreReady] = React.useState(false);
   const loadedVersions = React.useRef(new Map()); // Track loaded document versions
 
   
   // Early vector store initialization - load from IndexedDB on mount
   React.useEffect(() => {
+    if (!vectorStore) {
+      // SSR or vector store not available
+      setVectorStoreReady(false);
+      return;
+    }
+    
     console.log('[FilesContext] Initializing vector store from IndexedDB');
     
     if (!vectorStore.loaded) {
@@ -83,6 +95,7 @@ const FilesProvider = ({ children }) => {
   
   // Populate vector store from files and documents
   React.useEffect(() => {
+    if (!vectorStore) return; // Guard for SSR
     if (myFiles.length === 0) return;
     
     const isInitialLoad = loadedVersions.current.size === 0;
@@ -99,7 +112,7 @@ const FilesProvider = ({ children }) => {
       const docStatus = documents[file.documentID];
       const pageEmbeddings = docStatus?.pageEmbeddings;
       const embeddingsS3Key = docStatus?.embeddingsS3Key;
-      const currentVersion = docStatus?._version || file._version;
+      const currentVersion = docStatus?.updatedAt || file.updatedAt;
       const loadedVersion = loadedVersions.current.get(file.id);
       
       // Skip if already loaded and version unchanged
@@ -263,12 +276,7 @@ const FilesProvider = ({ children }) => {
 
         // Query all files regardless of owner - we'll track by identityId for lookup
         // Include parsedContent relationship for PDFs
-        // Note: Amplify Gen 2 doesn't support '*' wildcard - it fetches all scalar fields by default
-        subscriptionRef.current = client.models.File.observeQuery({
-          selectionSet: ['id', 'owner', 'identityId', 'name', 'description', 'mimeType', 'level', 'path', 
-                        'size', 'duration', 'generated', 'thumbnail', 'waveformData', 'createdAt', 'updatedAt',
-                        'document.id', 'document.filename', 'parsedContent.id', 'parsedContent.vocabularyJSON']
-        }).subscribe({
+        subscriptionRef.current = client.models.File.observeQuery().subscribe({
           next: ({ items, isSynced }) => {
             console.log('[FilesContext] File observeQuery subscription triggered:');
             console.log('  - items.length:', items?.length);
@@ -293,7 +301,7 @@ const FilesProvider = ({ children }) => {
                 return _playlistFiltered;
               }
               const hasChanges = Object.keys(_playlistFiltered).some(
-                key => !prev[key] || prev[key].updatedAt !== _playlistFiltered[key].updatedAt
+                key => !prev[key] || prev[key]._version !== _playlistFiltered[key]._version
               );
               return hasChanges ? _playlistFiltered : prev;
             });
@@ -303,7 +311,7 @@ const FilesProvider = ({ children }) => {
                 return _pdfsFiltered;
               }
               const hasChanges = Object.keys(_pdfsFiltered).some(
-                key => !prev[key] || prev[key].updatedAt !== _pdfsFiltered[key].updatedAt
+                key => !prev[key] || prev[key]._version !== _pdfsFiltered[key]._version
               );
               return hasChanges ? _pdfsFiltered : prev;
             });
@@ -315,7 +323,7 @@ const FilesProvider = ({ children }) => {
                 return items;
               }
               const hasChanges = items.some((item, i) => 
-                !prev[i] || prev[i].id !== item.id || prev[i].updatedAt !== item.updatedAt
+                !prev[i] || prev[i].id !== item.id || prev[i]._version !== item._version
               );
               if (hasChanges) {
                 console.log('[FilesContext] Files have changes, updating state');
@@ -365,9 +373,9 @@ const FilesProvider = ({ children }) => {
             pageCount: doc.pageCount,
             extractedText: doc.extractedText,
             pageEmbeddings: pageEmbeddings,
-            embeddingsS3Key: doc.embeddingsS3Key, // ← ADDED: S3 key for embeddings backup
+            embeddingsS3Key: doc.embeddingsS3Key,
             metadata: doc.metadata,
-            _version: doc._version, // Track version for cache invalidation
+            updatedAt: doc.updatedAt, // Track updatedAt for cache invalidation
           };
         });
       

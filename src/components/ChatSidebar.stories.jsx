@@ -15,6 +15,7 @@
  */
 
 import React from 'react';
+import { within, userEvent, waitFor, expect } from '@storybook/test';
 import ChatSidebar from './ChatSidebar';
 import { UnitProvider } from '../context/unitContext';
 import FilesContext from '../context/fileContext';
@@ -83,6 +84,25 @@ export const GettingStarted = {
       <ChatSidebar />
     </TabProvider>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Verify chat input is visible
+    const chatInput = await canvas.findByPlaceholderText(/ask a question/i, { timeout: 5000 });
+    expect(chatInput).toBeInTheDocument();
+    
+    // Type a message
+    await userEvent.type(chatInput, 'Help me create a Japanese greeting lesson');
+    
+    // Find and click send button
+    const sendButton = canvas.getByRole('button', { name: /send/i });
+    await userEvent.click(sendButton);
+    
+    // Verify message appears in chat (input should be cleared)
+    await waitFor(() => {
+      expect(chatInput.value).toBe('');
+    }, { timeout: 3000 });
+  },
   parameters: {
     docs: {
       description: {
@@ -131,6 +151,19 @@ Start a conversation with your AI teaching assistant. The chat is empty and read
 };
 
 export const TranslationHelper = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for messages to render
+    await waitFor(() => {
+      const messages = canvas.getAllByRole('article');
+      expect(messages.length).toBeGreaterThanOrEqual(2);
+    }, { timeout: 5000 });
+    
+    // Verify the translation response is visible
+    expect(canvas.getByText(/ohayou gozaimasu/i)).toBeInTheDocument();
+    expect(canvas.getByText(/polite form/i)).toBeInTheDocument();
+  },
   parameters: {
     initializeMockData: false,
   },
@@ -207,6 +240,18 @@ Use the AI as your translation assistant for creating bilingual content.
 };
 
 export const ContentCreation = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for lesson plan to render
+    await waitFor(() => {
+      expect(canvas.getByText(/Basic Japanese Greetings/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify lesson structure is visible
+    expect(canvas.getByText(/Learning Objectives/i)).toBeInTheDocument();
+    expect(canvas.getByText(/Vocabulary/i)).toBeInTheDocument();
+  },
   parameters: {
     initializeMockData: false,
   },
@@ -289,6 +334,17 @@ Let the AI help you brainstorm and create engaging lesson materials.
 };
 
 export const WithFileAttachments = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for PDF acknowledgment message
+    await waitFor(() => {
+      expect(canvas.getByText(/PDF document about Japanese culture/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify AI's analysis options are shown
+    expect(canvas.getByText(/Extract vocabulary/i)).toBeInTheDocument();
+  },
   parameters: {
     initializeMockData: false,
   },
@@ -341,6 +397,21 @@ export const WithFileAttachments = {
 };
 
 export const QuizGenerator = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for tool call preview to render
+    await waitFor(() => {
+      expect(canvas.getByText(/Hiragana Characters Quiz/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify quiz preview shows question count
+    expect(canvas.getByText(/3/)).toBeInTheDocument(); // 3 questions
+    
+    // Look for the preview content
+    const quizPreview = canvas.getByText(/Which hiragana character represents/i);
+    expect(quizPreview).toBeInTheDocument();
+  },
   parameters: {
     initializeMockData: false,
   },
@@ -484,6 +555,17 @@ Demonstrates the **insert_quiz** tool creating interactive quiz blocks directly 
 };
 
 export const AnswerBlockGenerator = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for tool call preview
+    await waitFor(() => {
+      expect(canvas.getByText(/3 Japanese greetings/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify answer block preview is shown
+    expect(canvas.getByText(/insert_answer_block/i)).toBeInTheDocument();
+  },
   parameters: {
     initializeMockData: false,
   },
@@ -603,6 +685,17 @@ Demonstrates the **insert_answer_block** tool creating interactive answer exerci
 };
 
 export const MeaningAssociationGenerator = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for tool call preview
+    await waitFor(() => {
+      expect(canvas.getByText(/4 color words/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify modes are mentioned
+    expect(canvas.getByText(/Learn mode/i)).toBeInTheDocument();
+  },
   parameters: {
     initializeMockData: false,
   },
@@ -723,6 +816,17 @@ Demonstrates the **insert_meaning_association** tool creating drag-and-drop voca
 };
 
 export const CustomAnswerGenerator = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for tool call preview
+    await waitFor(() => {
+      expect(canvas.getByText(/2 questions/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify audio prompt method
+    expect(canvas.getByText(/Listen and type/i)).toBeInTheDocument();
+  },
   parameters: {
     initializeMockData: false,
   },
@@ -862,6 +966,18 @@ Demonstrates the **insert_custom_answer** tool creating exercises with specific 
 };
 
 export const GrammarExplainer = {
+  play: async ({
+ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for grammar explanation
+    await waitFor(() => {
+      expect(canvas.getByText(/は \(wa\) - Topic Marker/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify examples are shown
+    expect(canvas.getByText(/が \(ga\) - Subject Marker/i)).toBeInTheDocument();
+  },
   parameters: {
     initializeMockData: false,
   },

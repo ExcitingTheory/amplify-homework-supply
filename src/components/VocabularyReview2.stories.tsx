@@ -12,6 +12,7 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
+import { within, userEvent, waitFor, expect } from '@storybook/test';
 import VocabularyReview2 from './VocabularyReview2';
 import { Box, Paper } from '@mui/material';
 import { DemoBanner } from '../../.storybook/components/DemoBanner';
@@ -221,6 +222,24 @@ export const Default: Story = {
             <VocabularyReview2 {...args} />
         </Box>
     ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        
+        // Wait for vocabulary items to load
+        await waitFor(() => {
+            expect(canvas.getByText('光合成')).toBeInTheDocument();
+        }, { timeout: 5000 });
+        
+        // Verify multiple vocabulary items are visible
+        expect(canvas.getByText('葉緑体')).toBeInTheDocument();
+        expect(canvas.getByText('酸素')).toBeInTheDocument();
+        
+        // Select first vocabulary item checkbox
+        const checkboxes = canvas.getAllByRole('checkbox');
+        if (checkboxes.length > 1) { // First is "select all"
+            await userEvent.click(checkboxes[1]);
+        }
+    },
     parameters: {
         docs: {
             description: {
@@ -251,6 +270,21 @@ export const WithSearchHighlight: Story = {
             <VocabularyReview2 {...args} />
         </Box>
     ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        
+        // Wait for vocabulary with search filtering
+        await waitFor(() => {
+            expect(canvas.getByText('光合成')).toBeInTheDocument();
+        }, { timeout: 5000 });
+        
+        // Verify search highlights are visible (mark elements)
+        const highlighted = canvas.getAllByText('光合成');
+        expect(highlighted.length).toBeGreaterThan(0);
+        
+        // Verify filtered results (should show items containing search term)
+        expect(canvas.getByText('葉緑体')).toBeInTheDocument();
+    },
     parameters: {
         docs: {
             description: {
@@ -288,6 +322,21 @@ export const LargeList: Story = {
             <VocabularyReview2 {...args} />
         </Box>
     ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        
+        // Wait for first items to load
+        await waitFor(() => {
+            expect(canvas.getByText('用語1')).toBeInTheDocument();
+        }, { timeout: 5000 });
+        
+        // Verify virtual scrolling renders items
+        expect(canvas.getByText(/用語2/)).toBeInTheDocument();
+        
+        // Verify select all checkbox is present
+        const checkboxes = canvas.getAllByRole('checkbox');
+        expect(checkboxes.length).toBeGreaterThan(0);
+    },
     parameters: {
         docs: {
             description: {
@@ -372,6 +421,30 @@ export const MinimalData: Story = {
             <VocabularyReview2 {...args} />
         </Box>
     ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        
+        // Wait for minimal vocabulary items
+        await waitFor(() => {
+            expect(canvas.getByText('植物')).toBeInTheDocument();
+        }, { timeout: 5000 });
+        
+        // Verify all items render without optional fields
+        expect(canvas.getByText('Plant')).toBeInTheDocument();
+        expect(canvas.getByText('エネルギー')).toBeInTheDocument();
+        expect(canvas.getByText('光')).toBeInTheDocument();
+        
+        // Click first row to expand inline editor
+        const firstRow = canvas.getByText('植物').closest('[role="button"]');
+        if (firstRow) {
+            await userEvent.click(firstRow);
+            
+            // Wait for expanded content (definition field)
+            await waitFor(() => {
+                expect(canvas.getByText('Plant')).toBeVisible();
+            }, { timeout: 3000 });
+        }
+    },
     parameters: {
         docs: {
             description: {

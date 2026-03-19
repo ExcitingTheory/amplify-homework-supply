@@ -56,7 +56,7 @@ export class MeaningAssociationNode extends DecoratorNode {
   }
 
   static clone(node) {
-    return new MeaningAssociationNode(node.__ids, node.__enabledModes, node.__format);
+    return new MeaningAssociationNode(node.__ids, node.__enabledModes, node.__format, node.__key);
   }
 
   static importJSON(serializedNode) {
@@ -79,7 +79,7 @@ export class MeaningAssociationNode extends DecoratorNode {
   }
 
   constructor(ids = [], enabledModes = ['learn', 'easy', 'hard'], format, key) {
-    super(format, key);
+    super(key);
     this.__ids = ids;
     this.__enabledModes = enabledModes;
   }

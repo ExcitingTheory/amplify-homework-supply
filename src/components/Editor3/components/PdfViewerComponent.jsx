@@ -10,6 +10,8 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Box, IconButton, Typography, Paper, ButtonGroup, CircularProgress } from '@mui/material';
 import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/TextLayer.css';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
 import { useTranslation } from 'next-i18next';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
@@ -38,8 +40,10 @@ import {
 } from '@mui/icons-material';
 import getCachedUrl from '../../../utils/getCachedUrl';
 
-// Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Configure PDF.js worker from local public directory
+if (typeof window !== 'undefined') {
+  pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+}
 
 /**
  * PdfViewerComponent - Displays PDF documents with controls.

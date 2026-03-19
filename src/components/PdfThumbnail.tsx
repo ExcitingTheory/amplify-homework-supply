@@ -9,12 +9,16 @@
 
 import React, { useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/TextLayer.css';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
 import { Box, CircularProgress, Typography, Paper } from '@mui/material';
 import { PictureAsPdf as PdfIcon, Error as ErrorIcon } from '@mui/icons-material';
 import { useTranslation } from 'next-i18next';
 
-// Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Configure PDF.js worker from local public directory
+if (typeof window !== 'undefined') {
+  pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+}
 
 interface PdfThumbnailProps {
     /** URL of the PDF file */

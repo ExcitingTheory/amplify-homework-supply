@@ -1,4 +1,5 @@
 import React from 'react';
+import { within, userEvent, waitFor, expect } from '@storybook/test';
 import { Easy } from './Easy';
 import { Hard } from './Hard';
 import { Learn } from './Learn';
@@ -108,6 +109,19 @@ export const EasyExercise = {
       />
     );
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for exercise to load
+    await waitFor(() => {
+      expect(canvas.getByText('Hello')).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify all words are visible
+    expect(canvas.getByText('Goodbye')).toBeInTheDocument();
+    expect(canvas.getByText('Thank you')).toBeInTheDocument();
+    expect(canvas.getByText('Please')).toBeInTheDocument();
+  },
 };
 
 export const EasyExerciseCompleted = {
@@ -137,6 +151,19 @@ export const HardExercise = {
       />
     );
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for hard mode exercise to load
+    await waitFor(() => {
+      // Hard mode typically shows definitions without phrases initially
+      expect(canvas.getByText(/A greeting|A farewell|Expression of gratitude|Polite request/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify hard mode UI elements
+    const definitions = canvas.getAllByText(/A greeting|A farewell|Expression of gratitude|Polite request/i);
+    expect(definitions.length).toBeGreaterThan(0);
+  },
 };
 
 export const HardExerciseCompleted = {
@@ -165,6 +192,22 @@ export const LearnExercise = {
         wordIDs={['1', '2', '3', '4']}
       />
     );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for learn mode to load
+    await waitFor(() => {
+      expect(canvas.getByText('Hello')).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify vocabulary words are visible in learn mode
+    expect(canvas.getByText('Goodbye')).toBeInTheDocument();
+    expect(canvas.getByText('Thank you')).toBeInTheDocument();
+    expect(canvas.getByText('Please')).toBeInTheDocument();
+    
+    // Learn mode shows both phrases and definitions
+    expect(canvas.getByText('A greeting')).toBeInTheDocument();
   },
 };
 
@@ -205,6 +248,24 @@ export const CompletionScreenLearn = {
       </div>
     );
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for completion screen to render
+    await waitFor(() => {
+      expect(canvas.getByText(/Learn Mode/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify accuracy percentage is displayed
+    expect(canvas.getByText(/95%/)).toBeInTheDocument();
+    
+    // Verify attempts count
+    expect(canvas.getByText(/10/)).toBeInTheDocument();
+    
+    // Verify continue button is present
+    const continueButton = canvas.getByRole('button', { name: /continue|next/i });
+    expect(continueButton).toBeInTheDocument();
+  },
 };
 
 export const CompletionScreenEasy = {
@@ -229,6 +290,23 @@ export const CompletionScreenEasy = {
       </div>
     );
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for completion screen
+    await waitFor(() => {
+      expect(canvas.getByText(/Easy Mode/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify accuracy (88%)
+    expect(canvas.getByText(/88%/)).toBeInTheDocument();
+    
+    // Verify attempts
+    expect(canvas.getByText(/15/)).toBeInTheDocument();
+    
+    // Verify next level name is shown
+    expect(canvas.getByText(/Hard Mode/i)).toBeInTheDocument();
+  },
 };
 
 export const CompletionScreenHard = {
@@ -252,5 +330,23 @@ export const CompletionScreenHard = {
         />
       </div>
     );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for final completion screen
+    await waitFor(() => {
+      expect(canvas.getByText(/Hard Mode/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify accuracy (75%)
+    expect(canvas.getByText(/75%/)).toBeInTheDocument();
+    
+    // Verify attempts
+    expect(canvas.getByText(/20/)).toBeInTheDocument();
+    
+    // Verify final completion state (isLastLevel)
+    const continueButton = canvas.getByRole('button', { name: /finish|done|complete/i });
+    expect(continueButton).toBeInTheDocument();
   },
 };

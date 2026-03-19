@@ -229,6 +229,7 @@ export function Workbook(): JSX.Element {
                       }}
                     >
                       <ContentEditable
+                        data-lexical-editor="true"
                         aria-label="Workbook content"
                         style={{
                           width: '100%',

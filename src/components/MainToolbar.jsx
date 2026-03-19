@@ -228,14 +228,19 @@ export function UserMenu() {
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem onClick={() => {
-          router.push('/profile')
-        }}><UserIcon/>&nbsp;{t('common:navigation.profile')}</MenuItem>
-        {/* <MenuItem onClick={handleClose}>My account</MenuItem> */}
-        <MenuItem onClick={() => {
-          signOut();
-        }}>
-          <LogoutIcon/>&nbsp;{t('auth:sign_out')}</MenuItem>
+        {/* Lazy render menu items only when open - prevents translation calls during initial render */}
+        {open && (
+          <>
+            <MenuItem onClick={() => {
+              router.push('/profile')
+            }}><UserIcon/>&nbsp;{t('common:navigation.profile')}</MenuItem>
+            {/* <MenuItem onClick={handleClose}>My account</MenuItem> */}
+            <MenuItem onClick={() => {
+              signOut();
+            }}>
+              <LogoutIcon/>&nbsp;{t('auth:sign_out')}</MenuItem>
+          </>
+        )}
       </Menu>
     </div>
   );
@@ -385,6 +390,7 @@ export default function MainToolbar({ children }) {
         <IconButton
           color="inherit"
           aria-label="Add User to Section"
+          data-tour="join-section-button"
           onClick={() => setOpenAddStudentToSection(true)}
         >
           <PersonAddIcon />
@@ -514,9 +520,11 @@ export default function MainToolbar({ children }) {
          * Add a modal for adding a user to a section by section code
          */}
 
-<Dialog open={openAddStudentToSection}
+<Dialog
+  open={openAddStudentToSection}
   onClose={() => setOpenAddStudentToSection(false)}
- aria-labelledby="form-dialog-title"
+  data-tour="join-section-dialog"
+  aria-labelledby="form-dialog-title"
                 
                 slotProps={{
                     backdrop: {
@@ -541,6 +549,7 @@ export default function MainToolbar({ children }) {
                                 required
                                 id="code"
                                 name="code"
+                                data-tour="join-code-input"
                                 label={t('mainToolbar.addToSection.codeLabel', 'Code')}
                                 variant="outlined"
                             /><br /><br />

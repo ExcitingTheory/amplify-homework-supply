@@ -108,3 +108,12 @@ export const signInWithRedirect = async () => {
 export const autoSignIn = async () => {
   console.log('[Mock Auth] autoSignIn');
 };
+
+export const listWebAuthnCredentials = async () => {
+  console.log('[Mock Auth] listWebAuthnCredentials');
+  return [];
+};
+
+export const associateWebAuthnCredential = async () => {
+  console.log('[Mock Auth] associateWebAuthnCredential');
+};

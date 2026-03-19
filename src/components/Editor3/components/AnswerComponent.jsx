@@ -385,7 +385,8 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
 
                     <TextareaAutosize
                         minRows={3}
-
+                        data-testid="answer-input"
+                        data-word-id={wordId}
                         style={{
                             flexBasis: '80%',
                             maxWidth: '50rem',
@@ -418,7 +419,8 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                     <Button
                         variant="contained"
                         color="primary"
-
+                        data-testid="answer-submit-button"
+                        data-word-id={wordId}
                         style={{
                             marginLeft: '1rem',
                             minWidth: 'fit-content',

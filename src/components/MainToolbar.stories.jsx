@@ -1,4 +1,5 @@
 import React from 'react';
+import { within, userEvent, waitFor, expect } from '@storybook/test';
 import { Box, Typography } from '@mui/material';
 import MainToolbar, { SettingsMenu, HelpMenu, UserMenu } from './MainToolbar';
 
@@ -45,6 +46,16 @@ export const FullToolbar = {
       </Box>
     </MainToolbar>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Verify toolbar is rendered
+    const toolbar = canvas.getByRole('banner');
+    expect(toolbar).toBeInTheDocument();
+    
+    // Verify page content is visible
+    expect(canvas.getByText('Page Content')).toBeInTheDocument();
+  },
   parameters: {
     docs: {
       description: {
@@ -60,6 +71,21 @@ export const SettingsMenuOnly = {
       <SettingsMenu />
     </Box>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for settings button and click it
+    const settingsButton = await canvas.findByRole('button', { name: /settings/i });
+    expect(settingsButton).toBeInTheDocument();
+    
+    await userEvent.click(settingsButton);
+    
+    // Verify menu opens (using screen since menu renders in portal)
+    await waitFor(() => {
+      const menu = document.querySelector('[role="menu"]');
+      expect(menu).toBeInTheDocument();
+    }, { timeout: 3000 });
+  },
   parameters: {
     docs: {
       description: {
@@ -75,6 +101,21 @@ export const HelpMenuOnly = {
       <HelpMenu />
     </Box>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for help button and click it
+    const helpButton = await canvas.findByRole('button', { name: /help/i });
+    expect(helpButton).toBeInTheDocument();
+    
+    await userEvent.click(helpButton);
+    
+    // Verify menu opens
+    await waitFor(() => {
+      const menu = document.querySelector('[role="menu"]');
+      expect(menu).toBeInTheDocument();
+    }, { timeout: 3000 });
+  },
   parameters: {
     docs: {
       description: {
@@ -90,6 +131,21 @@ export const UserMenuOnly = {
       <UserMenu />
     </Box>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for user menu button and click it
+    const userButton = await canvas.findByRole('button', { name: /account/i });
+    expect(userButton).toBeInTheDocument();
+    
+    await userEvent.click(userButton);
+    
+    // Verify menu opens
+    await waitFor(() => {
+      const menu = document.querySelector('[role="menu"]');
+      expect(menu).toBeInTheDocument();
+    }, { timeout: 3000 });
+  },
   parameters: {
     docs: {
       description: {

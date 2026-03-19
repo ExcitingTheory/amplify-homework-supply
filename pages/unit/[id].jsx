@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router'
 import Editor from '../../src/components/Editor3'
+import PermissionErrorOverlay from '../../src/components/PermissionErrorOverlay'
 import React from "react";
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -10,7 +11,32 @@ import MyAuth from "../../src/components/authenticator";
 import { FilesProvider } from '../../src/context/fileContext'
 import { DictionaryProvider } from '../../src/context/dictionaryContext' 
 import { UnitProvider } from '../../src/context/unitContext'
+import UnitContext from '../../src/context/unitContext';
+import AuthContext from '../../src/context/authContext';
 import { SectionProvider } from '../../src/context/sectionContext';
+
+function UnitPageContent() {
+  const { unit, checkUnitEditPermission } = React.useContext(UnitContext);
+  const { user, session } = React.useContext(AuthContext);
+  
+  // Check edit permissions for the unit editor
+  const permissionCheck = React.useMemo(() => {
+    if (!unit?.id) return { hasAccess: true, reason: null }; // Loading state
+    const userGroups = session?.groups || [];
+    return checkUnitEditPermission(unit, user, userGroups);
+  }, [unit, user, session?.groups, checkUnitEditPermission]);
+
+  return (
+    <>
+      <PermissionErrorOverlay
+        open={!permissionCheck.hasAccess}
+        resourceType="unit"
+        message={permissionCheck.reason}
+      />
+      {permissionCheck.hasAccess && <Editor />}
+    </>
+  );
+}
 
 function UnitPage() {
   /**
@@ -37,7 +63,7 @@ function UnitPage() {
       <DictionaryProvider>
       <SectionProvider unitId={id}>
       <UnitProvider id={id}>
-        <Editor />
+        <UnitPageContent />
       </UnitProvider>
       </SectionProvider>
       </DictionaryProvider>

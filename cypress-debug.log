@@ -1,0 +1,27 @@
+
+DevTools listening on ws://127.0.0.1:56191/devtools/browser/6c0f3a7c-b824-4793-8328-9fcf04d2466f
+2026-03-16 12:43:43.394 Cypress[34407:3334650] WARNING: Secure coding is not enabled for restorable state! Enable secure coding by implementing NSApplicationDelegate.applicationSupportsSecureRestorableState: and returning YES.
+Missing baseUrl in compilerOptions. tsconfig-paths will be skipped
+
+================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:        13.17.0                                                                        │
+  │ Browser:        Chrome 146 (headless)                                                          │
+  │ Node Version:   v20.19.6 (/Users/colinbarrett-fox/.nvm/versions/node/v20.19.6/bin/node)        │
+  │ Specs:          1 found (complete-workflow.cy.ts)                                              │
+  │ Searched:       cypress/e2e/complete-workflow.cy.ts                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  complete-workflow.cy.ts                                                         (1 of 1)
+
+
+  Complete Teaching Workflow
+    (Attempt 1 of 3) instructor creates unit with graded blocks via UI
+    (Attempt 2 of 3) instructor creates unit with graded blocks via UI
+    1) instructor creates unit with graded blocks via UI

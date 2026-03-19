@@ -992,8 +992,11 @@ function WordRowComponent({
                 const { file, name } = audioFilesToUpload[i];
 
                 try {
+                    // Gen 2 API requires full path with protection level prefix
+                    const s3Path = `protected/${identityId}/audio/${name}`;
+                    
                     const result = await uploadData({
-                        key: `audio/${identityId}/${name}`,
+                        path: s3Path,
                         data: file,
                         options: {
                             contentType: 'audio/ogg',
@@ -1010,7 +1013,7 @@ function WordRowComponent({
                         },
                     }).result;
 
-                    _audio.push(result.key);
+                    _audio.push(result.path);
                 } catch (error) {
                     console.error('Error uploading file:', error);
                 }
@@ -1183,15 +1186,18 @@ function WordRowComponent({
                                 const name = `${unit.id}_${wordId}_${Date.now()}_${i}.ogg`;
                                 
                                 try {
+                                    // Gen 2 API requires full path with protection level prefix
+                                    const s3Path = `protected/${identityId}/audio/${name}`;
+                                    
                                     const result = await uploadData({
-                                        key: `audio/${identityId}/${name}`,
+                                        path: s3Path,
                                         data: file,
                                         options: {
                                             contentType: 'audio/ogg',
                                         },
                                     }).result;
 
-                                    _audio.push(result.key);
+                                    _audio.push(result.path);
                                 } catch (error) {
                                     console.error('Error uploading file:', error);
                                 }

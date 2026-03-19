@@ -27,33 +27,32 @@ const SectionProvider = ({ children, unitId }) => {
         let subscription;
 
         async function fetchSections() {
-            const username = user.attributes.sub;
-            console.log('[SectionContext] Fetching sections for user:', username);
+            const userId = user.attributes.sub;
+            console.log('[SectionContext] Fetching sections for userId:', userId);
 
             const client = getAmplifyClient();
 
-            subscription = client.models.Section.observeQuery({
-                filter: {
-                    owner: { eq: username }
-                }
-            }).subscribe({
+            // Temporarily fetch all sections to debug
+            subscription = client.models.Section.observeQuery().subscribe({
                 next: ({ items }) => {
-                    console.log('[SectionContext] Received sections:', items.length, items.map(s => ({ id: s.id, name: s.name, owner: s.owner })));
+                    // Filter out null items that can appear during subscription updates
+                    const validItems = items.filter(item => item != null && item.id != null);
+                    console.log('[SectionContext] Received sections:', validItems.length, validItems.map(s => ({ id: s.id, name: s.name, owner: s.owner })));
                     let _sectionMap = {}
 
-                    items.forEach(item => {
+                    validItems.forEach(item => {
                         _sectionMap[item.id] = item
                     })
 
                     // Only update if sections have actually changed
                     setSections(prevSections => {
                         const prevStr = JSON.stringify(prevSections);
-                        const newStr = JSON.stringify(items);
+                        const newStr = JSON.stringify(validItems);
                         if (prevStr === newStr) {
                             return prevSections; // Return same reference to prevent rerender
                         }
                         console.log('[SectionContext] Updating sections state');
-                        return items;
+                        return validItems;
                     });
 
                     // Only update if sectionMap has actually changed

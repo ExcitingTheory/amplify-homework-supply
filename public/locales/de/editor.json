@@ -780,6 +780,10 @@
       "uploadTooltip": "Dateien hochladen",
       "actionsTooltip": "Aktionen"
     },
+    "dragDrop": {
+      "dropFilesHere": "Dateien hier ablegen zum Hochladen",
+      "supportedFormats": "Audio, Bilder, PDFs, Dokumente und mehr"
+    },
     "contextMenu": {
       "deselectAll": "Alle abwählen",
       "deleteConfirmMessage": "{{count}} ausgewählte Datei(en) löschen?",

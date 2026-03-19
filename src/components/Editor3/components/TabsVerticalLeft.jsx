@@ -191,24 +191,30 @@ export default function TabsVerticalLeft({
 
         <Tab
           onClick={() => handleTabClick(0)}
+          data-tour="assignments-tab"
           label={<AssignmentIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.assignments'))} />
         <Tab
           onClick={() => handleTabClick(1)}
+          data-tour="table-of-contents-tab"
           label={<TocIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.tableOfContents'))} />
         <Tab 
           onClick={() => handleTabClick(2)}
+          data-tour="dictionary-tab"
           label={<DictionaryIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.dictionary'))} />
         <Tab
           onClick={() => handleTabClick(3)}
+          data-tour="questions-tab"
           label={<QuestionMarkOutlined />} {...a11yProps(t('tabsVerticalLeft.tabs.questions'))} overflow="hidden" />
         <Tab
           onClick={() => handleTabClick(4)}
+          data-tour="files-tab"
           label={<FolderIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.files'))} />
         {/* <Tab
           onClick={() => handleTabClick(5)}
           label={<ChatIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.aiAssistant'))} /> */}
         <Tab
           onClick={() => handleTabClick(6)}
+          data-tour="configuration-tab"
           label={<ConfigIcon />} {...a11yProps(t('tabsVerticalLeft.tabs.configuration'))} />
         {/* <Tab label="Item Five" {...a11yProps(4)} />
         <Tab label="Item Six" {...a11yProps(5)} />

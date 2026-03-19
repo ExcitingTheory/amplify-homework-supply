@@ -53,7 +53,7 @@ export class CustomAnswerNode extends DecoratorNode {
   }
 
   static clone(node) {
-    return new CustomAnswerNode(node.__ids, node.__allowedInput, node.__promptMethod, node.__format);
+    return new CustomAnswerNode(node.__ids, node.__allowedInput, node.__promptMethod, node.__format, node.__key);
   }
 
   static importJSON(serializedNode) {

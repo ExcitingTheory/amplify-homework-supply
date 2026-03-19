@@ -5,6 +5,7 @@ Detailed documentation for each validation phase.
 ## Phase 1: Story Inventory Generation
 
 ### Purpose
+
 Catalog all Storybook stories and collect metadata about components, args, and decorators.
 
 ### Process
@@ -25,6 +26,7 @@ Catalog all Storybook stories and collect metadata about components, args, and d
    - Map stories to components
 
 ### Output Format
+
 ```json
 {
   "stories": [
@@ -53,11 +55,13 @@ Catalog all Storybook stories and collect metadata about components, args, and d
 ## Phase 2: Mock Data Validation
 
 ### Purpose
+
 Verify that mock data structures match component TypeScript interfaces.
 
 ### Validation Steps
 
 1. **Extract component prop types**
+
    ```typescript
    interface ChatSidebarProps {
      messages: Message[];
@@ -66,8 +70,9 @@ Verify that mock data structures match component TypeScript interfaces.
    ```
 
 2. **Load mock data**
+
    ```typescript
-   import { mockMessages } from '../../../.storybook/__mocks__/ui-data/chatMessages';
+   import { mockMessages } from "../../../.storybook/__mocks__/ui-data/chatMessages";
    ```
 
 3. **Compare structures**
@@ -94,16 +99,19 @@ Verify that mock data structures match component TypeScript interfaces.
 ### Special Cases
 
 **Message.parts format**:
+
 - Verify `parts` array exists
 - Check part types (`text`, `tool-*`)
 - Validate required fields per type
 
 **DataStore models**:
-- Check `_version` field for OCC
+
+- Check `updatedAt` field for change tracking
 - Verify model relationships
 - Validate timestamps
 
 **File objects**:
+
 - Verify S3 key format
 - Check protection level
 - Validate MIME types
@@ -113,24 +121,30 @@ Verify that mock data structures match component TypeScript interfaces.
 ## Phase 3: Component Rendering Tests
 
 ### Purpose
+
 Ensure all stories render without errors in actual Storybook runtime.
 
 ### Test Process
 
 1. **Build Storybook**
+
    ```bash
    npm run build-storybook
    ```
 
 2. **Start test server**
+
    ```bash
    npx http-server storybook-static -p 6006
    ```
 
 3. **Run Playwright tests**
+
    ```typescript
-   test('ChatSidebar stories render', async ({ page }) => {
-     await page.goto('http://localhost:6006/?path=/story/components-chatsidebar--default');
+   test("ChatSidebar stories render", async ({ page }) => {
+     await page.goto(
+       "http://localhost:6006/?path=/story/components-chatsidebar--default",
+     );
      await expect(page.locator('[data-testid="chat-sidebar"]')).toBeVisible();
    });
    ```
@@ -154,15 +168,17 @@ Ensure all stories render without errors in actual Storybook runtime.
 ## Phase 4: Accessibility Audits
 
 ### Purpose
+
 Ensure stories meet WCAG 2.1 AA standards.
 
 ### Audit Process
 
 1. **Load story**
 2. **Run axe-core**
+
    ```typescript
-   import { injectAxe, checkA11y } from 'axe-playwright';
-   
+   import { injectAxe, checkA11y } from "axe-playwright";
+
    await injectAxe(page);
    await checkA11y(page);
    ```
@@ -177,6 +193,7 @@ Ensure stories meet WCAG 2.1 AA standards.
 ### Common Issues
 
 **Missing ARIA labels**:
+
 ```tsx
 // ❌ Bad
 <button onClick={handleClick}>X</button>
@@ -186,6 +203,7 @@ Ensure stories meet WCAG 2.1 AA standards.
 ```
 
 **Poor color contrast**:
+
 ```tsx
 // ❌ Bad (contrast ratio 2.5:1)
 <p style={{ color: '#999', background: '#fff' }}>Text</p>
@@ -195,6 +213,7 @@ Ensure stories meet WCAG 2.1 AA standards.
 ```
 
 **Missing landmark roles**:
+
 ```tsx
 // ❌ Bad
 <div>
@@ -214,11 +233,13 @@ Ensure stories meet WCAG 2.1 AA standards.
 ## Phase 5: Integration Validation
 
 ### Purpose
+
 Verify stories work with real-world context providers and state.
 
 ### Integration Tests
 
 1. **Context provider compatibility**
+
    ```typescript
    // Verify story works with UnitContext
    <UnitContext.Provider value={mockUnitContextValue}>
@@ -227,11 +248,12 @@ Verify stories work with real-world context providers and state.
    ```
 
 2. **DataStore integration**
+
    ```typescript
    // Test with mocked DataStore
-   jest.mock('aws-amplify/datastore');
+   jest.mock("aws-amplify/datastore");
    DataStore.observeQuery.mockReturnValue({
-     subscribe: jest.fn()
+     subscribe: jest.fn(),
    });
    ```
 
@@ -240,7 +262,7 @@ Verify stories work with real-world context providers and state.
    // Verify AI SDK streaming
    mockUseChat.mockReturnValue({
      messages: mockMessages,
-     append: jest.fn()
+     append: jest.fn(),
    });
    ```
 
@@ -249,6 +271,7 @@ Verify stories work with real-world context providers and state.
 ## Phase 6: Performance Checks
 
 ### Purpose
+
 Ensure stories meet performance budgets.
 
 ### Metrics Tracked
@@ -271,13 +294,13 @@ test('ChatSidebar renders quickly', async () => {
   const start = performance.now();
   render(<ChatSidebar {...mockProps} />);
   const end = performance.now();
-  
+
   expect(end - start).toBeLessThan(100);
 });
 
 test('ChatSidebar cleans up subscriptions', async () => {
   const { unmount } = render(<ChatSidebar {...mockProps} />);
-  
+
   expect(mockSubscribe).toHaveBeenCalled();
   unmount();
   expect(mockUnsubscribe).toHaveBeenCalled();
@@ -289,16 +312,19 @@ test('ChatSidebar cleans up subscriptions', async () => {
 ## Phase 7: Visual Regression Testing
 
 ### Purpose
+
 Detect unintended visual changes.
 
 ### Process
 
 1. **Capture baseline screenshots**
+
    ```bash
    npm run test-storybook -- --update-snapshots
    ```
 
 2. **Compare on changes**
+
    ```bash
    npm run test-storybook
    ```
@@ -309,6 +335,7 @@ Detect unintended visual changes.
    - Manual approval for intentional changes
 
 ### Tool: Chromatic
+
 ```bash
 npx chromatic --project-token=$CHROMATIC_TOKEN
 ```
@@ -322,40 +349,40 @@ interface ValidationReport {
   timestamp: string;
   phases: {
     inventory: {
-      status: 'pass' | 'fail';
+      status: "pass" | "fail";
       storiesFound: number;
       componentsFound: number;
     };
     mockData: {
-      status: 'pass' | 'fail';
+      status: "pass" | "fail";
       errors: ValidationError[];
       warnings: ValidationWarning[];
     };
     rendering: {
-      status: 'pass' | 'fail';
+      status: "pass" | "fail";
       passedStories: string[];
       failedStories: string[];
       errors: RenderError[];
     };
     accessibility: {
-      status: 'pass' | 'fail';
+      status: "pass" | "fail";
       violations: A11yViolation[];
       criticalIssues: number;
     };
     integration: {
-      status: 'pass' | 'fail';
+      status: "pass" | "fail";
       contextTests: TestResult[];
       datastoreTests: TestResult[];
     };
     performance: {
-      status: 'pass' | 'fail';
+      status: "pass" | "fail";
       slowStories: {
         story: string;
         renderTime: number;
       }[];
     };
     visualRegression: {
-      status: 'pass' | 'fail';
+      status: "pass" | "fail";
       changedStories: {
         story: string;
         diffPercentage: number;
@@ -366,7 +393,7 @@ interface ValidationReport {
   summary: {
     totalPass: number;
     totalFail: number;
-    overallStatus: 'pass' | 'fail';
+    overallStatus: "pass" | "fail";
   };
 }
 ```
@@ -382,27 +409,27 @@ name: Storybook Validation
 on:
   pull_request:
     paths:
-      - 'src/**/*.tsx'
-      - '.storybook/**'
+      - "src/**/*.tsx"
+      - ".storybook/**"
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Phase 1 - Inventory
         run: npx tsx .github/skills/storybook-validation/scripts/generate-story-inventory.ts
-      
+
       - name: Phase 2 - Mock Data
         run: npm test -- storybook-validation.test.ts
-      
+
       - name: Phase 3 - Rendering
         run: npm run test-storybook
-      
+
       - name: Phase 4 - Accessibility
         run: npm run test-storybook -- --a11y
-      
+
       - name: Phase 7 - Visual Regression
         run: npx chromatic --exit-zero-on-changes
 ```

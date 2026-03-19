@@ -247,6 +247,10 @@
       "searchPlaceholder": "Rechercher des fichiers...",
       "selectAllTooltip": "Tout sélectionner",
       "uploadTooltip": "Télécharger des fichiers"
+    },
+    "dragDrop": {
+      "dropFilesHere": "Déposez les fichiers ici pour les téléverser",
+      "supportedFormats": "Audio, Images, PDFs, Documents et plus"
     }
   },
   "fileMetadataComponent": {

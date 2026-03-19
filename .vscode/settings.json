@@ -7,5 +7,148 @@
     "amplify/#current-cloud-backend": true,
     "amplify/backend/amplify-meta.json": true,
     "amplify/backend/awscloudformation": false
-  }
+  },
+  // File watchdog settings (prevent accidental deletions)
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.hg/store/**": true,
+    "**/.amplify/**": true
+  },
+  // Protected file patterns (prompt before changes)
+  "files.associations": {
+    "*.graphql": "graphql",
+    "amplify/backend/api/**/schema.graphql": "graphql"
+  },
+  // Workspace trust settings
+  "security.workspace.trust.untrustedFiles": "prompt",
+  "security.workspace.trust.banner": "always",
+  "security.workspace.trust.startupPrompt": "always",
+  // Terminal settings (restrict dangerous commands)
+  "terminal.integrated.confirmOnKill": "always",
+  "terminal.integrated.confirmOnExit": "always",
+  // Git settings (prevent accidental pushes)
+  "git.confirmSync": true,
+  "git.confirmForcePush": true,
+  "git.confirmEmptyCommits": true,
+  // Search settings
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/build": true,
+    "**/.amplify": true,
+    "**/amplify/#current-cloud-backend": true,
+    "**/coverage": true
+  },
+  // Copilot chat settings
+  "github.copilot.chat.codeGeneration.instructions": [
+    {
+      "text": "Always check agent permissions before file operations using the system defined in .github/agent-permissions.json"
+    },
+    {
+      "text": "For production code changes (src/components, src/context, src/utils, pages), ask for confirmation first"
+    },
+    {
+      "text": "Never modify package.json, amplify.yml, or GraphQL schema files without explicit permission"
+    },
+    {
+      "text": "Prefer creating test files, stories, and documentation which don't require confirmation"
+    },
+    {
+      "text": "Check the terminal command against allowed list before suggesting shell commands"
+    }
+  ],
+  // Terminal auto-approve settings
+  "chat.tools.terminal.enableAutoApprove": true,
+  "chat.tools.terminal.autoApprove": {
+    "npm test": true,
+    "npm run test": true,
+    "npx cypress": true,
+    "npm run dev": true,
+    "npm run build": true,
+    "npm run storybook": true,
+    "npm run lint": true,
+    // compiler 
+    "npx tsc": true,
+    "npx eslint": true,
+    "npx prettier": true,
+    
+    // Git commands
+    "git status": true,
+    "git diff": true,
+    "git log": true,
+    "git show": true,
+    "git branch": true,
+    "git blame": true,
+    "git grep": true,
+    // Common safe shell commands
+    "cat": true,
+    "ls": true,
+    "find": true,
+    "grep": true,
+    "head": true,
+    "tail": true,
+    "wc": true,
+    "pwd": true,
+    "echo": true,
+    "amplify status": true,
+    "amplify console": true,
+    "eslint": true,
+    "tsc": true,
+    "prettier --check": true,
+    "tee": true,
+    "curl": true,
+    "wget": true,
+    "docker ps": true,
+    "docker images": true,
+    "docker logs": true,
+    "docker stats": true,
+    "docker inspect": true,
+    "docker-compose ps": true,
+    "docker-compose logs": true,
+    "docker-compose config": true,
+    "docker-compose build": true,
+    "docker-compose up": true,
+    "docker-compose down": true,
+    // /tmp/ file operations (safe temporary directory)
+    "cat /tmp/*": true,
+    "ls /tmp/*": true,
+    "rm /tmp/*": true,
+    "rm -rf /tmp/*": true,
+    "mv /tmp/*": true,
+    "cp /tmp/*": true,
+    "mkdir /tmp/*": true,
+    "touch /tmp/*": true,
+    "echo * > /tmp/*": true,
+    "tee /tmp/*": true,
+    // lsof commands
+    "lsof": true,
+    // System monitoring commands
+    "top": true,
+    "htop": true,
+    "df -h": true,
+    "du -h": true,
+    "free -h": true,
+    "vmstat": true,
+    "iostat": true,
+    "netstat": true,
+    "ss -tuln": true,
+    "uptime": true,
+    "who": true,
+    "w": true,
+    "last": true,
+    "ps aux": true,
+    "ps -aux": true,
+    "ps -ef": true,
+    "ps -eo": true,
+  },
+  // Editor settings for safety
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  // Extensions
+  "extensions.ignoreRecommendations": false
 }

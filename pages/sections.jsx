@@ -3,6 +3,7 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import nextI18nextConfig from '../next-i18next.config';
 import { getAmplifyClient } from "../src/utils/amplifyClient";
+import SectionContext, { SectionProvider } from '../src/context/sectionContext';
 
 import PeopleIcon from '@mui/icons-material/People';
 
@@ -22,6 +23,9 @@ import {
     DialogTitle,
     CardContent,
     CardMedia,
+    Chip,
+    Snackbar,
+    Alert,
 } from '@mui/material';
 
 import AddIcon from '@mui/icons-material/Add';
@@ -30,6 +34,7 @@ import MainToolbar from '../src/components/MainToolbar'
 import MyAuth from "../src/components/authenticator";
 import getCachedUrl from "../src/utils/getCachedUrl";
 import InstructorDashboard from '../src/components/InstructorDashboard';
+import { useChatPageContext } from "../src/hooks/useChatPageContext";
 
 function CardMediaComponent({ s3Key, identityId, level = 'protected' }) {
     const [url, setUrl] = React.useState(null);
@@ -70,7 +75,24 @@ function CardMediaComponent({ s3Key, identityId, level = 'protected' }) {
 
 
 
-function Sections() {
+function getUserGroups(user) {
+    return (
+        user?.signInUserSession?.accessToken?.payload?.['cognito:groups'] ||
+        user?.signInUserSession?.idToken?.payload?.['cognito:groups'] ||
+        user?.groups ||
+        []
+    );
+}
+
+function getUserId(user) {
+    return (
+        user?.signInUserSession?.idToken?.payload?.sub ||
+        user?.userId ||
+        user?.username
+    );
+}
+
+function Sections({ user }) {
     /**
      * Sections is a page that displays a list of sections.
      * For Instructor users, it displays a list of sections they are teaching.
@@ -97,10 +119,33 @@ function Sections() {
      * 
      */
     const { t } = useTranslation('pages');
-    const [sections, setSections] = useState([])
+    const { sections } = React.useContext(SectionContext);
     const [work, setIsWorking] = useState(false)
     const [open, setOpen] = React.useState(false);
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'error' });
 
+    // Register page context with global chat
+    useChatPageContext({
+        sections,
+    });
+
+    const userGroups = React.useMemo(() => getUserGroups(user), [user]);
+    const isInstructor = React.useMemo(
+        () => userGroups.includes('Instructors') || userGroups.includes('Admins'),
+        [userGroups]
+    );
+    const userId = React.useMemo(() => getUserId(user), [user]);
+    const ownedSections = React.useMemo(() => {
+        if (!userId) return [];
+        const owned = sections.filter((section) =>
+            section?.owner === userId || section?.instructor === userId
+        );
+        console.log('[sections.jsx] userId:', userId, 'ownedSections:', owned.length, owned.map(s => ({ name: s.name, owner: s.owner, instructor: s.instructor })));
+        return owned;
+    }, [sections, userId]);
+    const canViewInstructorDashboard = isInstructor || ownedSections.length > 0;
+
+    console.log('[sections.jsx] canViewInstructorDashboard:', canViewInstructorDashboard, 'isInstructor:', isInstructor, 'ownedSections.length:', ownedSections.length)
     console.log('sections', sections)
 
     const handleClickOpen = () => {
@@ -131,64 +176,50 @@ function Sections() {
             console.log('createSectionGroup.response', response)
 
             if (response.errors || !response.data) {
-                throw new Error(response.errors?.[0]?.message || 'Failed to create section');
+                const errorMsg = response.errors?.[0]?.message || 'Failed to create section';
+                console.error('createSectionGroup errors:', response.errors);
+                throw new Error(errorMsg);
             }
 
             // Parse the JSON response from Lambda
-            const result = JSON.parse(response.data);
-            console.log('Section created:', result);
-            const newSection = {
-                id: result.sectionId,
-                name: result.name,
-                code: result.code,
-                description: form.get('description').toString(),
-                createdAt: result.createdAt,
-            };
+            let result;
+            try {
+                result = JSON.parse(response.data);
+                console.log('Section created:', result);
+            } catch (parseError) {
+                console.error('Failed to parse response.data:', response.data);
+                console.error('Parse error:', parseError);
+                throw new Error(`Invalid response from server: ${response.data}`);
+            }
             
-            setSections(prevSections => [newSection, ...prevSections]);
+            // Don't add optimistic update - let the subscription deliver the new section
+            // This prevents conflicts with Amplify's internal subscription processing
             
             setIsWorking(false);
             setOpen(false);
 
         } catch (error) {
-            console.error('Error creating section:', error);
+            // Log detailed error information for debugging
+            console.error('[Section Creation] Error:', error);
+            console.error('[Section Creation] Error details:', {
+                message: error?.message,
+                stack: error?.stack,
+                response: error?.response
+            });
+            
+            // Show generic user-friendly message (hide implementation details)
+            setSnackbar({
+                open: true,
+                message: 'Unable to create section. Please try again.',
+                severity: 'error'
+            });
             setIsWorking(false);
         }
     }
 
 
 
-    useEffect(() => {
-        const amplifyClient = getAmplifyClient();
-        
-        const subscription = amplifyClient.models.Section.observeQuery().subscribe({
-            next: ({ items }) => {
-                console.log('[Sections] Section subscription update:', items.length, 'sections');
-                console.log('sectionData', items);
-                
-                // Update sections, preserving order and deduplicating
-                setSections(prevSections => {
-                    // Create a map of existing sections by ID
-                    const existingIds = new Set(prevSections.map(s => s.id));
-                    const newSectionIds = new Set(items.map(s => s.id));
-                    
-                    // If no new sections from subscription, keep optimistic updates
-                    if (items.length === 0) return prevSections;
-                    
-                    // Merge: keep optimistic updates that haven't arrived yet, add subscription items
-                    const optimisticOnly = prevSections.filter(s => !newSectionIds.has(s.id));
-                    return [...optimisticOnly, ...items];
-                });
-            },
-            error: (error) => {
-                console.error('[Sections] Section subscription error:', error);
-            }
-        });
-
-        return function cleanup() {
-            subscription.unsubscribe();
-        };
-    }, [])
+    // Sections now come from SectionContext - no duplicate subscription needed
 
     // console.log('sections', sections)
 
@@ -313,7 +344,9 @@ function Sections() {
                     </div>
                     
                     {/* Instructor Dashboard with aggregate stats and leaderboards */}
-                    {sections.length > 0 && <InstructorDashboard sections={sections} />}
+                    {canViewInstructorDashboard && (
+                        <InstructorDashboard sections={ownedSections} />
+                    )}
                     
                     {!sections &&
                         <div>{t('sections.loading')}</div>
@@ -408,6 +441,26 @@ function Sections() {
                                             <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                                                 {section?.description || ''}
                                             </Typography>
+                                            {section?.code && (
+                                                <Box sx={{ mt: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                                                        {t('sections.joinCode')}:
+                                                    </Typography>
+                                                    <Chip
+                                                        data-tour="join-code"
+                                                        label={section.code}
+                                                        size="small"
+                                                        sx={{
+                                                            fontFamily: 'monospace',
+                                                            fontSize: '0.875rem',
+                                                            fontWeight: 600,
+                                                            backgroundColor: 'grey.100',
+                                                            border: '1px solid',
+                                                            borderColor: 'grey.300',
+                                                        }}
+                                                    />
+                                                </Box>
+                                            )}
                                         </CardContent>
                                         <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5 }}>
                                             <Button
@@ -448,6 +501,23 @@ function Sections() {
                     }
                 </Box>
             </Box>
+
+            {/* Error/Success Snackbar */}
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={() => setSnackbar({ ...snackbar, open: false })}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert
+                    onClose={() => setSnackbar({ ...snackbar, open: false })}
+                    severity={snackbar.severity}
+                    sx={{ width: '100%' }}
+                    variant="filled"
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </>
     )
 }
@@ -456,7 +526,9 @@ function Sections() {
 function WrappedPage() {
     return (
         <MyAuth>
-            <Sections />
+            <SectionProvider>
+                <Sections />
+            </SectionProvider>
         </MyAuth>
     )
 }

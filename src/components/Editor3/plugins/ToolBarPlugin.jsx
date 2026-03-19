@@ -1108,6 +1108,7 @@ const InsertNodeDropDown = ({
                             INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND,
                             undefined,
                         );
+                        handleClose();
                     }}
                     title="Meaning Association"
                     aria-label="Meaning Association">
@@ -1141,6 +1142,7 @@ const InsertNodeDropDown = ({
                             INSERT_ANSWER_BLOCK_COMMAND,
                             [],
                         );
+                        handleClose();
                     }
                     }
                     title="Short Answer"
@@ -1156,6 +1158,7 @@ const InsertNodeDropDown = ({
                             INSERT_CUSTOM_ANSWER_BLOCK_COMMAND,
                             [],
                         );
+                        handleClose();
                     }
                     }
                     title="Short Answer"
@@ -1190,6 +1193,7 @@ const InsertNodeDropDown = ({
                             INSERT_PLAYLIST_COMMAND,
                             undefined,
                         );
+                        handleClose();
                     }}
                     title="Audio"
                     aria-label="Audio">
@@ -1204,6 +1208,7 @@ const InsertNodeDropDown = ({
                             INSERT_QUIZ_COMMAND,
                             undefined,
                         );
+                        handleClose();
                     }}
                     title="Quiz"
                     aria-label="Quiz">
@@ -1218,6 +1223,7 @@ const InsertNodeDropDown = ({
                             INSERT_HORIZONTAL_RULE_COMMAND,
                             undefined,
                         );
+                        handleClose();
                     }}
                     className="item">
                     <HorizontalRuleIcon />&nbsp;

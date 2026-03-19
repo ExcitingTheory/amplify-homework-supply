@@ -52,8 +52,7 @@ export class QuizNode extends DecoratorNode {
   }
 
   static clone(node) {
-    // Don't pass __key - let Lexical generate a new one for the clone
-    return new QuizNode(node.__data, node.__format);
+    return new QuizNode(node.__data, node.__format, node.__key);
   }
 
   static importJSON(serializedNode) {
@@ -72,7 +71,7 @@ export class QuizNode extends DecoratorNode {
   }
 
   constructor(ids = [], format, key) {
-    super(format, key);
+    super(key);
     this.__data = ids;
   }
 

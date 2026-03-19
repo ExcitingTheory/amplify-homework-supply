@@ -1,0 +1,268 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://homework.supply/schemas/agent-permissions.json",
+  "title": "Agent Permissions Configuration",
+  "description": "Schema for defining non-destructive agent CLI permissions",
+  "type": "object",
+  "required": ["version", "permissions"],
+  
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference"
+    },
+    
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version of the permissions config"
+    },
+    
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of this config"
+    },
+    
+    "lastUpdated": {
+      "type": "string",
+      "format": "date",
+      "description": "ISO date when config was last updated"
+    },
+    
+    "permissions": {
+      "type": "object",
+      "description": "Permission definitions",
+      "properties": {
+        "fileOperations": {
+          "type": "object",
+          "properties": {
+            "read": { "$ref": "#/definitions/filePermission" },
+            "write": { "$ref": "#/definitions/filePermission" },
+            "writeRestricted": { "$ref": "#/definitions/filePermission" },
+            "delete": { "$ref": "#/definitions/filePermission" },
+            "rename": { "$ref": "#/definitions/filePermission" }
+          }
+        },
+        
+        "terminalCommands": {
+          "type": "object",
+          "properties": {
+            "allowed": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/definitions/commandPermission" }
+            },
+            "blocked": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        },
+        
+        "dataStoreOperations": {
+          "type": "object",
+          "properties": {
+            "query": { "$ref": "#/definitions/simplePermission" },
+            "save": { "$ref": "#/definitions/simplePermission" },
+            "delete": { "$ref": "#/definitions/simplePermission" },
+            "clear": { "$ref": "#/definitions/simplePermission" }
+          }
+        },
+        
+        "schemaChanges": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/filePermission" }
+        },
+        
+        "configurationFiles": {
+          "type": "object",
+          "properties": {
+            "readOnly": {
+              "type": "object",
+              "properties": {
+                "paths": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "description": { "type": "string" }
+              }
+            },
+            "modifiable": { "$ref": "#/definitions/filePermission" }
+          }
+        },
+        
+        "agentSkills": {
+          "type": "object",
+          "properties": {
+            "allowed": { "type": "boolean" },
+            "skillPermissions": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/definitions/skillPermission" }
+            }
+          }
+        }
+      }
+    },
+    
+    "safeModes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "enabled": { "type": "boolean" },
+          "description": { "type": "string" }
+        },
+        "required": ["enabled"]
+      }
+    },
+    
+    "logging": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "logPath": { "type": "string" },
+        "logLevel": {
+          "type": "string",
+          "enum": ["debug", "info", "warn", "error"]
+        },
+        "logOperations": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "description": { "type": "string" }
+      },
+      "required": ["enabled"]
+    },
+    
+    "validation": {
+      "type": "object",
+      "properties": {
+        "preCommitChecks": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "checks": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "description": { "type": "string" }
+          }
+        },
+        "fileSize": {
+          "type": "object",
+          "properties": {
+            "maxSingleFile": { "type": "number" },
+            "maxTotalBatch": { "type": "number" },
+            "description": { "type": "string" }
+          }
+        },
+        "batchOperations": {
+          "type": "object",
+          "properties": {
+            "maxFilesPerBatch": { "type": "number" },
+            "requiresConfirmation": { "type": "boolean" },
+            "description": { "type": "string" }
+          }
+        }
+      }
+    },
+    
+    "exemptions": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "skills": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "paths": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "description": { "type": "string" }
+      }
+    },
+    
+    "notifications": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "enabled": { "type": "boolean" },
+          "method": {
+            "type": "string",
+            "enum": ["console", "prompt", "log", "webhook"]
+          },
+          "description": { "type": "string" }
+        }
+      }
+    }
+  },
+  
+  "definitions": {
+    "filePermission": {
+      "type": "object",
+      "properties": {
+        "allowed": { "type": "boolean" },
+        "requiresConfirmation": { "type": "boolean" },
+        "allowedPaths": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "excludePaths": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "paths": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "maxFileSize": { "type": "number" },
+        "description": { "type": "string" }
+      },
+      "required": ["allowed"]
+    },
+    
+    "commandPermission": {
+      "type": "object",
+      "properties": {
+        "commands": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "blocked": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "description": { "type": "string" }
+      }
+    },
+    
+    "simplePermission": {
+      "type": "object",
+      "properties": {
+        "allowed": { "type": "boolean" },
+        "requiresConfirmation": { "type": "boolean" },
+        "description": { "type": "string" }
+      },
+      "required": ["allowed"]
+    },
+    
+    "skillPermission": {
+      "type": "object",
+      "properties": {
+        "canCreate": { "type": "boolean" },
+        "canModify": { "type": "boolean" },
+        "canDelete": { "type": "boolean" },
+        "requiresConfirmation": { "type": "boolean" },
+        "description": { "type": "string" }
+      },
+      "required": ["canCreate", "canModify", "canDelete"]
+    }
+  }
+}

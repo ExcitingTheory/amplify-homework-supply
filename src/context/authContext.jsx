@@ -1,5 +1,5 @@
 import React from "react";
-import { fetchUserAttributes, fetchAuthSession } from 'aws-amplify/auth';
+import { fetchUserAttributes, fetchAuthSession, signOut } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
 
 const AuthContext = React.createContext({
@@ -31,15 +31,48 @@ const AuthProvider = ({ children }) => {
           const sessionPromise = fetchAuthSession();
           const {
             identityId,
-            tokens: { idToken },
+            tokens: { idToken, accessToken },
           } = await Promise.race([sessionPromise, timeoutPromise]);
           
-          setResult({ user: { attributes }, session: { identityId, idToken }, isLoading: false });
+          // Extract user groups from token payload
+          const groups = accessToken?.payload['cognito:groups'] || [];
+          
+          setResult({ 
+            user: { attributes }, 
+            session: { identityId, idToken, groups }, 
+            isLoading: false 
+          });
         } catch (error) {
           // Handle timeout errors - treat as if user is not authenticated
           if (error.message === 'Authentication timeout') {
             console.warn('[AuthContext] Authentication request timed out - treating as not authenticated');
             setResult({ user: undefined, session: undefined, isLoading: false, error: undefined });
+            return;
+          }
+          
+          // Handle expired/invalid token - sign out and redirect to login
+          if (error.name === 'NotAuthorizedException' || 
+              error.message?.includes('Invalid login token') ||
+              error.message?.includes('expired')) {
+            console.log('[AuthContext] Token expired or invalid - signing out and redirecting to login');
+            try {
+              await signOut();
+            } catch (signOutError) {
+              console.warn('[AuthContext] Error during signOut:', signOutError);
+            }
+            setResult({ user: undefined, session: undefined, isLoading: false, error: undefined });
+            
+            // Store current URL for redirect after login
+            if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+              const returnUrl = window.location.pathname + window.location.search;
+              sessionStorage.setItem('returnUrl', returnUrl);
+              console.log('[AuthContext] Token expired - stored return URL:', returnUrl);
+            }
+            
+            // Redirect to home page (which has Authenticator component)
+            if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+              window.location.href = '/';
+            }
             return;
           }
           

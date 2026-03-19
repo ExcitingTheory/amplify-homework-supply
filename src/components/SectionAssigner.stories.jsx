@@ -1,4 +1,5 @@
 import React from 'react';
+import { within, userEvent, waitFor, expect } from '@storybook/test';
 import { SectionAssigner } from './SectionAssigner';
 
 export default {
@@ -20,6 +21,14 @@ export const Default = {
     openAssignmentDialog: true,
     setOpenAssignmentDialog: (open) => console.log('Dialog state:', open),
     ContentModel: mockContentModel,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Verify dialog is open and displays unit title
+    await waitFor(() => {
+      expect(canvas.queryByText(/French Vocabulary Unit 1/i)).toBeInTheDocument();
+    }, { timeout: 3000 });
   },
 };
 

@@ -92,7 +92,7 @@ import * as React from 'react';
     }
   
     static clone(node) {
-    return new YouTubeNode(node.__id, node.__format);
+    return new YouTubeNode(node.__id, node.__format, node.__key);
   }
 
   static importJSON(serializedNode) {
@@ -111,7 +111,7 @@ import * as React from 'react';
     }
   
     constructor(id, format, key) {
-      super(format, key);
+      super(key);
       this.__id = id;
     }
   

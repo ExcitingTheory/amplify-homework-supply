@@ -83,7 +83,7 @@ export function sanitizeModel(model: Record<string, unknown> | null): Record<str
   // Keep only essential fields
   const essential: Record<string, unknown> = {
     id: sanitized.id,
-    _version: sanitized._version,
+    updatedAt: sanitized.updatedAt,
     _lastChangedAt: sanitized._lastChangedAt,
     _deleted: sanitized._deleted,
   };

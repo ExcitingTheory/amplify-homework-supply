@@ -9,8 +9,46 @@
  */
 
 import type { Handler } from 'aws-lambda';
+import { type Schema } from '../../data/resource';
+import { Amplify } from 'aws-amplify';
+import { generateClient } from 'aws-amplify/data';
+import { fromEnv } from '@aws-sdk/credential-providers';
+
+// Configure Amplify at module level (before creating client)
+// Lambda resolvers get API_ENDPOINT and AWS_REGION automatically
+Amplify.configure(
+  {
+    API: {
+      GraphQL: {
+        endpoint: process.env.API_ENDPOINT || '',
+        region: process.env.AWS_REGION || 'us-east-1',
+        defaultAuthMode: 'iam', // Lambda uses IAM auth
+      },
+    },
+  },
+  {
+    Auth: {
+      credentialsProvider: {
+        getCredentialsAndIdentityId: async () => ({
+          credentials: await fromEnv()(),
+        }),
+        clearCredentialsAndIdentityId: () => {},
+      },
+    },
+  }
+);
 
 let openaiInstance: any = null;
+let dataClient: ReturnType<typeof generateClient<Schema>> | null = null;
+
+function getDataClient() {
+  if (!dataClient) {
+    dataClient = generateClient<Schema>({
+      authMode: 'iam',
+    });
+  }
+  return dataClient;
+}
 
 async function getOpenAI(): Promise<any> {
   if (!openaiInstance) {
@@ -110,18 +148,32 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
 
   try {
     console.log('[Generate Embeddings] Starting for fileID:', fileID);
-    const graphqlEndpoint = process.env.API_ENDPOINT;
-    if (!graphqlEndpoint) {
-      throw new Error('API_ENDPOINT environment variable not set');
+    const client = getDataClient();
+
+    // Get File record
+    const getFileQuery = /* GraphQL */ `
+      query GetFile($id: ID!) {
+        getFile(id: $id) {
+          id
+          documentID
+        }
+      }
+    `;
+    
+    const { data: fileData, errors: fileErrors } = await client.graphql({
+      query: getFileQuery,
+      variables: { id: fileID },
+    }) as any;
+    
+    if (fileErrors || !fileData?.getFile) {
+      console.error('[Generate Embeddings] File not found:', fileErrors);
+      throw new Error(`File not found for ID: ${fileID}`);
     }
 
-    const { GraphQLClient } = await import('graphql-request');
-    const client = new GraphQLClient(graphqlEndpoint);
-
     // Query for ParsedContent records by fileID
-    const query = `
-      query ParsedContentsByFileID($fileID: ID!) {
-        parsedContentsByFileID(fileID: $fileID) {
+    const query = /* GraphQL */ `
+      query ListParsedContents($filter: ModelParsedContentFilterInput) {
+        listParsedContents(filter: $filter) {
           items {
             id
             documentID
@@ -135,8 +187,20 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
       }
     `;
 
-    const result: any = await client.request(query, { fileID });
-    const parsedContents = result.parsedContentsByFileID?.items || [];
+    const { data: parsedData, errors: parsedErrors } = await client.graphql({
+      query,
+      variables: {
+        filter: {
+          fileID: { eq: fileID }
+        }
+      },
+    }) as any;
+    
+    if (parsedErrors) {
+      console.error('[Generate Embeddings] Error querying ParsedContent:', parsedErrors);
+    }
+    
+    const parsedContents = parsedData?.listParsedContents?.items || [];
 
     if (parsedContents.length === 0) {
       console.log('[Generate Embeddings] No parsed content found for fileID:', fileID);
@@ -231,47 +295,46 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
     // 4. Batch save PageEmbedding records via GraphQL
     console.log(`[Generate Embeddings] Saving ${embeddedPages.length} embeddings to database...`);
 
-    // Note: In a real scenario, you'd create bulk mutation or use batch API
-    // For now, we'll create individual records
-    const createPageEmbeddingMutation = `
-      mutation CreatePageEmbedding($input: CreatePageEmbeddingInput!) {
-        createPageEmbedding(input: $input) {
-          id
-          documentID
-          page
-          embedding
-          model
-        }
-      }
-    `;
+    // Note: PageEmbedding model doesn't exist in schema - storing as parsedContent metadata instead
+    // The embeddings are now part of the ParsedContent record itself
+    console.log('[Generate Embeddings] Embeddings generated, storing in ParsedContent metadata...');
 
-    for (const embeddedPage of embeddedPages) {
-      try {
-        await client.request(createPageEmbeddingMutation, {
-          input: {
-            documentID: parsedContent.documentID,
-            page: embeddedPage.page,
-            text: embeddedPage.text,
-            sourceId: embeddedPage.sourceId,
-            embedding: embeddedPage.embedding,
-            model: embeddedPage.model,
-            dimensions: embeddedPage.dimensions,
-            tokenCount: embeddedPage.tokenCount,
-            type: embeddedPage.type,
+    // Update ParsedContent with embedding metadata
+    if (parsedContent && parsedContents.length > 0) {
+      const updateParsedContentMutation = /* GraphQL */ `
+        mutation UpdateParsedContent($input: UpdateParsedContentInput!) {
+          updateParsedContent(input: $input) {
+            id
+            metadata
           }
-        });
+        }
+      `;
+
+      try {
+        await client.graphql({
+          query: updateParsedContentMutation,
+          variables: {
+            input: {
+              id: parsedContent.id,
+              metadata: JSON.stringify({
+                embeddings: embeddedPages,
+                embeddingCount,
+                generatedAt: new Date().toISOString(),
+              }),
+            },
+          },
+        } as any);
       } catch (error) {
-        console.error(`[Generate Embeddings] Error saving embedding for page ${embeddedPage.page}:`, error);
-        // Continue with next record
+        console.error('[Generate Embeddings] Error updating ParsedContent metadata:', error);
       }
     }
 
-    // 5. Update File status
-    console.log('[Generate Embeddings] Updating file status to "embedded"...');
+    // 5. Update Document status
+    console.log('[Generate Embeddings] Updating document status to "embedded"...');
 
-    const updateFileMutation = `
-      mutation UpdateFile($input: UpdateFileInput!) {
-        updateFile(input: $input) {
+    const updateDocumentMutation = /* GraphQL */ `
+      mutation UpdateDocument($input: UpdateDocumentInput!) {
+        updateDocument(input: $input) {
           id
           status
         }
@@ -279,14 +342,17 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
     `;
 
     try {
-      await client.request(updateFileMutation, {
-        input: {
-          id: fileID,
-          status: 'embedded',
-        }
-      });
+      await client.graphql({
+        query: updateDocumentMutation,
+        variables: {
+          input: {
+            id: parsedContent.documentID,
+            status: 'embedded',
+          },
+        },
+      } as any);
     } catch (error) {
-      console.error('[Generate Embeddings] Error updating file status:', error);
+      console.error('[Generate Embeddings] Error updating document status:', error);
       // Don't fail the whole operation if status update fails
     }
 

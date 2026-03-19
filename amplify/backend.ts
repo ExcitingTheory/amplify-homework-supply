@@ -194,8 +194,8 @@ backend.embeddingsHandler.resources.lambda.role?.attachInlinePolicy(embeddingsSe
  * All endpoints require Cognito User Pool authentication via Bearer token
  */
 
-// Create streaming API on its own stack to avoid cross-stack cycles with data/auth/storage
-const apiStack = backend.createStack('StreamApiStack');
+// Use data stack to avoid creating separate StreamApiStack (which causes circular deps)
+const apiStack = dataStack;
 
 // Create Cognito User Pool authorizer for HTTP API
 const httpAuthorizer = new HttpUserPoolAuthorizer(
@@ -285,6 +285,7 @@ backend.addOutput({
  * WebSocket API for real-time collaboration
  * 
  * Uses custom CDK construct for WebSocket infrastructure
+ * Created on data stack since websocketHandler is also on data stack
  */
 const websocketApi = new WebSocketApiConstruct(dataStack, 'WebSocketApi', {
   unitTable: backend.data.resources.tables['Unit'],

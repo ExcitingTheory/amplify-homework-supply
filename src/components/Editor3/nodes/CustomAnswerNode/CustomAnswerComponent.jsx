@@ -339,7 +339,8 @@ export default function CustomAnswerComponent({
 
                             <TextareaAutosize
                                 minRows={3}
-
+                                data-testid="custom-answer-input"
+                                data-question-id={questionID}
                                 style={{
                                     border: borderStyle,
                                     color: feedback[questionID]?.answer === true? 'green' : feedback[questionID]?.answer === false? 'red' : 'black',
@@ -367,7 +368,8 @@ export default function CustomAnswerComponent({
                             <Button
                                 variant="contained"
                                 color="primary"
-
+                                data-testid="custom-answer-submit-button"
+                                data-question-id={questionID}
                                 style={{
                                     marginLeft: '1rem',
                                     minWidth: 'fit-content',

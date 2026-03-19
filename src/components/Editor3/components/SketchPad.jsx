@@ -1,5 +1,4 @@
 import { Excalidraw } from "@excalidraw/excalidraw";
-import "@excalidraw/excalidraw/index.css";
 import { useState, useEffect, useRef, useContext } from "react";
 import { exportToCanvas } from "@excalidraw/excalidraw";
 import { getAmplifyClient } from "../../../utils/amplifyClient";

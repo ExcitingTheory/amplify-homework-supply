@@ -763,6 +763,10 @@
       "uploadTooltip": "Subir archivos",
       "actionsTooltip": "Acciones"
     },
+    "dragDrop": {
+      "dropFilesHere": "Suelta los archivos aquí para subirlos",
+      "supportedFormats": "Audio, Imágenes, PDFs, Documentos y más"
+    },
     "contextMenu": {
       "deselectAll": "Deseleccionar todo",
       "deleteConfirmMessage": "¿Eliminar {{count}} archivo(s) seleccionado(s)?",

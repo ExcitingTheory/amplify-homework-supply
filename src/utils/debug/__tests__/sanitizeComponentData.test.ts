@@ -81,7 +81,7 @@ describe('sanitizeComponentData', () => {
         name: 'Test',
         createdAt: '2024-01-01',
         owner: 'user1',
-        _version: 1,
+        updatedAt: '2024-01-01T12:00:00Z',
         _deleted: false,
         _lastChangedAt: 1234567890
       };
@@ -90,15 +90,15 @@ describe('sanitizeComponentData', () => {
       
       expect(result?.id).toBe('123');
       expect(result?.name).toBe('Test');
-      expect(result?._version).toBe(1); // Essential metadata fields are kept
+      expect(result?.updatedAt).toBe('2024-01-01T12:00:00Z'); // Essential metadata fields are kept
       expect(result?._deleted).toBe(false);
     });
 
-    it('should include DataStore metadata fields', () => {
+    it('should include Gen 2 metadata fields', () => {
       const model = {
         id: 'abc',
         name: 'Test',
-        _version: 1,
+        updatedAt: '2024-01-01T12:00:00Z',
         _deleted: false,
         _lastChangedAt: 123
       };
@@ -106,7 +106,7 @@ describe('sanitizeComponentData', () => {
       const result = sanitizeModel(model);
       
       // These are kept as essential fields
-      expect(result?._version).toBe(1);
+      expect(result?.updatedAt).toBe('2024-01-01T12:00:00Z');
       expect(result?._deleted).toBe(false);
       expect(result?._lastChangedAt).toBe(123);
     });

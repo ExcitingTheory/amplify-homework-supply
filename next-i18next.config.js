@@ -51,7 +51,7 @@ module.exports = {
   
   // Development settings
   debug: process.env.NODE_ENV === 'development',
-  saveMissing: false,
+  saveMissing: process.env.NODE_ENV === 'development', // Track missing keys in dev
   
   // Fallback language
   fallbackLng: 'en',

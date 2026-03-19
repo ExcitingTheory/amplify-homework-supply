@@ -247,6 +247,10 @@
       "searchPlaceholder": "Search files...",
       "selectAllTooltip": "Select All",
       "uploadTooltip": "Upload Files"
+    },
+    "dragDrop": {
+      "dropFilesHere": "Drop files here to upload",
+      "supportedFormats": "Audio, Images, PDFs, Documents and more"
     }
   },
   "fileMetadataComponent": {

@@ -101,45 +101,44 @@ export default function DragDropPaste() {
                 setFileOperations(_fileOperations);
 
                 const _inProgress = files.map(async (file, index) => {
-                    let newFilename;
-                    let thumbnailFilename;
+                    let subfolder;
                     if (isMimeType(file, ACCEPTABLE_IMAGE_TYPES)) {
-                        newFilename = `images/${file.name}`
-                        thumbnailFilename = `thumbnails/${file.name}`
-
+                        subfolder = 'images';
                         // What if a duplicate file is uploaded. How to handle?
                     } else if (isMimeType(file, ACCEPTABLE_AUDIO_TYPES)) {
-                        newFilename = `audio/${file.name}`
+                        subfolder = 'audio';
                         // Way to determine length of audio file?
                     } else if (isMimeType(file, ACCEPTABLE_FILE_TYPES)) {
-                        newFilename = `files/${file.name}`
-
+                        subfolder = 'files';
                         // How to generate thumbnail for file?
                     }
 
-                    await uploadData({
-                        key: newFilename,
+                    // Gen 2 API requires full path with protection level prefix
+                    const s3Path = `protected/${identityId}/${subfolder}/${file.name}`;
+
+                    const uploadOperation = uploadData({
+                        path: s3Path,
                         data: file,
                         options: {
                             contentType: file.type,
-                            contentLength: file.size,
-                            accessLevel: 'protected',
-                            identityId,
-                            progressCallback(progress) {
-                                console.log(`Uploaded: ${progress.loaded}/${progress.total}`);
+                            onProgress(progress) {
+                                console.log(`Uploaded: ${progress.transferredBytes}/${progress.totalBytes}`);
 
                                 setFileOperations((prev) => {
                                     const newFileOperations = [...prev];
-                                    newFileOperations[index].progress = Math.round(progress.loaded / progress.total * 100) + '%';
+                                    newFileOperations[index].progress = Math.round(progress.transferredBytes / progress.totalBytes * 100) + '%';
                                     return newFileOperations;
                                 })
                             }
                         }
                     });
 
+                    // Wait for upload to complete
+                    const uploadResult = await uploadOperation.result;
+
                     const client = getAmplifyClient();
                     const { data: newFile } = await client.models.File.create({
-                        path: newFilename,
+                        path: uploadResult.path,  // Use the full S3 path from upload
                         name: file.name,
                         size: file.size,
                         mimeType: file.type,
@@ -155,7 +154,7 @@ export default function DragDropPaste() {
                                 
                             editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
                                 altText: newFile.name,
-                                path: newFilename,
+                                path: newFile.path,  // Use the path from File record
                                 identityId,
                             });
 

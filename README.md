@@ -15,7 +15,8 @@ Welcome to the Homework Supply documentation! This directory contains comprehens
 ### 🔧 Technical Reference
 - **[API Documentation](./docs/API.md)** - Backend services, data models, and GraphQL API
 - **[Architecture Overview](./docs/ARCHITECTURE.md)** - System design and component relationships *(Coming Soon)*
-- **[Testing Guide](./docs/TESTING.md)** - Testing strategies and best practices *(Coming Soon)*
+- **[Test Coverage Plan](./docs/TEST_COVERAGE_PLAN.md)** - Comprehensive testing strategy and implementation guide
+- **[E2E Testing Guide](./docs/E2E_TESTING_GUIDE.md)** - Running E2E tests with Amplify sandbox (no mocks)
 
 ### 📋 Process Documentation
 - **[Contributing Guidelines](./CONTRIBUTING.md)** - Code standards and pull request process

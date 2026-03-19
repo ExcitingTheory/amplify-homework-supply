@@ -1,0 +1,25 @@
+# Sample PDF document for E2E testing
+
+This is a sample document about **Photosynthesis** for use in Cypress E2E tests.
+
+## What is Photosynthesis?
+
+Photosynthesis is the process by which plants make food using sunlight.
+
+### Key Vocabulary:
+
+- **Photosynthesis**: The process plants use to convert light energy into chemical energy
+- **Chlorophyll**: The green pigment in plants that captures light energy
+- **Glucose**: A simple sugar produced during photosynthesis
+- **Carbon dioxide (CO2)**: A gas absorbed by plants from the atmosphere
+- **Oxygen (O2)**: A gas released by plants as a byproduct
+
+### Sample Questions:
+
+1. What is the primary function of chlorophyll in plants?
+2. What are the main inputs and outputs of photosynthesis?
+3. Why is photosynthesis important for life on Earth?
+
+---
+
+This document is intentionally simple to ensure predictable test results.

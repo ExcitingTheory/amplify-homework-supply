@@ -22,6 +22,7 @@ import MainToolbar from '../src/components/MainToolbar'
 
 import MyAuth from '../src/components/authenticator';
 import Snackbar from '@mui/material/Snackbar';
+import { useChatPageContext } from '../src/hooks/useChatPageContext';
 
 import Button from '@mui/material/Button';
 import { CircularProgress, Modal, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, MenuItem, Select, InputLabel } from '@mui/material';
@@ -58,6 +59,9 @@ function Profile() {
 
   const [successMessage, setSuccessMessage] = React.useState('')
   const [clearDataStoreDialogOpen, setClearDataStoreDialogOpen] = React.useState(false)
+
+  // Register page context with global chat (no specific context for profile page)
+  useChatPageContext({});
 
   // Available locales from next-i18next config
   const availableLocales = [

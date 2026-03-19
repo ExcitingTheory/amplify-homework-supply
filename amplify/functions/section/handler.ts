@@ -88,6 +88,7 @@ const CREATE_SECTION = /* GraphQL */ `
       name
       code
       createdAt
+      _version
     }
   }
 `;
@@ -98,6 +99,7 @@ const UPDATE_SECTION = /* GraphQL */ `
       id
       readableGroups
       writableGroups
+      _version
     }
   }
 `;
@@ -143,7 +145,9 @@ function getClient() {
       throw new Error('API_ENDPOINT environment variable not set. Lambda must be configured as AppSync resolver.');
     }
     // Create client - authMode is already set in Amplify.configure()
-    client = generateClient<Schema>();
+    // Use untyped client to avoid auto-generation of versioning fields
+    console.log('[Section] Initializing untyped GraphQL client');
+    client = generateClient();
   }
   return client;
 }
@@ -186,7 +190,15 @@ export const handler: Handler = async (event: any, context: any) => {
         }
     } catch (error) {
         console.error(`[Section Handler Error] ${operationName}:`, error);
-        throw error;
+        // Ensure we throw a proper Error instance, not an object
+        if (error instanceof Error) {
+            throw error;
+        }
+        // Convert non-Error objects to Error instances
+        const errorMessage = typeof error === 'object' && error !== null 
+            ? JSON.stringify(error, null, 2) 
+            : String(error);
+        throw new Error(`Section handler error: ${errorMessage}`);
     }
 };
 
@@ -206,7 +218,7 @@ async function handleCreateSectionGroup(
         const code = Math.random().toString(36).substring(2, 8).toUpperCase();
         const client = getClient();
         
-        // Use raw GraphQL mutation (models API doesn't work in Lambda)
+        // Create section using GraphQL mutation - only pass required fields (no _version)
         const { data, errors } = await client.graphql({
             query: CREATE_SECTION,
             variables: {
@@ -221,8 +233,8 @@ async function handleCreateSectionGroup(
         });
 
         if (errors || !data?.createSection) {
-            console.error('[Section] Failed to create section:', errors);
-            throw new Error('Failed to create section record');
+            console.error('[Create Section Error]:', { data, errors });
+            throw new Error(`Failed to create section: ${JSON.stringify(errors)}`);
         }
 
         const section = data.createSection;
@@ -242,19 +254,34 @@ async function handleCreateSectionGroup(
             const readableGroups = [`instructor-${sectionId}`, `learner-${sectionId}`];
             const writableGroups = [`instructor-${sectionId}`];
             
-            await client.graphql({
+            console.log(`[Section] Updating section ${sectionId} with groups, _version: ${section._version}`);
+            const updateResult = await client.graphql({
                 query: UPDATE_SECTION,
                 variables: {
                     input: {
                         id: sectionId,
+                        _version: section._version, // Required for optimistic concurrency
                         readableGroups,
                         writableGroups,
                     },
                 },
             });
+            
+            if (updateResult.errors) {
+                console.error(`[Section] Update section errors:`, JSON.stringify(updateResult.errors, null, 2));
+                throw new Error(`Failed to update section groups: ${JSON.stringify(updateResult.errors)}`);
+            }
+            
             console.log(`[Section] Updated section with group authorization`);
         } catch (groupError) {
             console.error(`[Section] Warning: Failed to create/manage groups:`, groupError);
+            // Log full error details
+            if (groupError instanceof Error) {
+                console.error(`[Section] Error message: ${groupError.message}`);
+                console.error(`[Section] Error stack: ${groupError.stack}`);
+            } else {
+                console.error(`[Section] Error object:`, JSON.stringify(groupError, null, 2));
+            }
             // Don't fail section creation if groups fail - groups are for authorization only
         }
 
@@ -267,6 +294,16 @@ async function handleCreateSectionGroup(
         });
     } catch (error) {
         console.error('[Create Section Error]:', error);
+        // Log detailed error information
+        if (error instanceof Error) {
+            console.error('[Create Section Error Details]:', {
+                message: error.message,
+                stack: error.stack,
+                name: error.name,
+            });
+        } else {
+            console.error('[Create Section Error Object]:', JSON.stringify(error, null, 2));
+        }
         throw error;
     }
 }

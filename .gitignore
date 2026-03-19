@@ -67,6 +67,9 @@ amplifytools.xcconfig
 # production
 /build
 
+# generated files
+/public/pdf.worker.min.mjs
+
 # misc
 .DS_Store
 *.pem
@@ -85,6 +88,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# i18n missing translations (generated in development)
+*.missing.json
 
 # amplify
 .amplify

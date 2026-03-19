@@ -594,6 +594,7 @@ function TableCell({
   sortingOptions,
 }) {
   const { t } = useTranslation('editor.shared');
+  const [editor] = useLexicalComposerContext();
   const [showMenu, setShowMenu] = useState(false);
   const menuRootRef = useRef(null);
   const isHeader = cell.type !== 'normal';
@@ -607,6 +608,9 @@ function TableCell({
     coords !== undefined &&
     coords[0] === sortingOptions.x &&
     coords[1] === 0;
+    
+  // Check if editor is readonly/not editable
+  const isEditorEditable = editor.isEditable();
 
   useEffect(() => {
     if (isEditing || !isPrimarySelected) {
@@ -623,8 +627,8 @@ function TableCell({
       tabIndex={-1}
       style={{width: cellWidth !== null ? cellWidth : undefined}}
       onContextMenu={(e) => {
-        // Right-click opens the menu if this cell is selected
-        if (isPrimarySelected && !isEditing) {
+        // Right-click opens the menu if this cell is selected and editor is editable
+        if (isPrimarySelected && !isEditing && isEditorEditable) {
           e.preventDefault();
           e.stopPropagation();
           setShowMenu(true);
@@ -652,7 +656,7 @@ function TableCell({
           <div className={theme.tableCellResizer} data-table-resize="true" />
         </>
       )}
-      {isPrimarySelected && !isEditing && (
+      {isPrimarySelected && !isEditing && isEditorEditable && (
         <div className={theme.tableCellActionButtonContainer} ref={menuRootRef}>
           <button
             className={theme.tableCellActionButton}
@@ -668,6 +672,7 @@ function TableCell({
       )}
       {showMenu &&
         menuElem !== null &&
+        isEditorEditable &&
         createPortal(
           <TableActionMenu
             cell={cell}

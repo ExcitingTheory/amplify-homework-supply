@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { within, userEvent, waitFor, expect } from '@storybook/test';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -178,6 +179,15 @@ export const CompareAIvsRules = {
       instructions="Toggle between modes to see the difference. AI mode provides reasoning for each suggestion!"
     />
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Verify toggle buttons are visible
+    await waitFor(() => {
+      expect(canvas.getByRole('button', { name: /Rule-Based/i })).toBeInTheDocument();
+      expect(canvas.getByRole('button', { name: /AI-Powered/i })).toBeInTheDocument();
+    }, { timeout: 3000 });
+  },
 };
 
 // Story 2: After Explanation - AI suggests next steps

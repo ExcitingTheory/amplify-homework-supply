@@ -106,6 +106,7 @@ ToolResults.propTypes = {
  * @param {Function} [props.renderMessage] - Custom message renderer (message, index) => JSX
  * @param {Function} [props.renderToolPart] - Custom tool part renderer (part, message, index) => JSX
  * @param {boolean} [props.useLexicalRenderer=true] - Use Lexical for markdown rendering
+ * @param {string} [props['data-testid']] - Test ID for E2E testing
  */
 export const VirtualizedMessageList = ({ 
   messages,
@@ -117,6 +118,7 @@ export const VirtualizedMessageList = ({
   renderMessage,
   renderToolPart,
   useLexicalRenderer = true,
+  'data-testid': dataTestId,
 }) => {
   const { t } = useTranslation('components');
   const parentRef = useRef(null);
@@ -163,6 +165,7 @@ export const VirtualizedMessageList = ({
         role="log"
         aria-live="polite"
         aria-label={t('chatSidebar.messageList.chatMessagesLabel')}
+        data-testid={dataTestId}
       >
         <div
           style={{

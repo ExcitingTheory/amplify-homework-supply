@@ -104,28 +104,30 @@ export default function DocumentUploader({ extractionType = 'vocabulary', onUplo
         setUploadProgress(0);
 
         try {
-            const filename = `documents/${Date.now()}_${file.name}`;
+            // Gen 2 API requires full path with protection level prefix
+            const s3Path = `protected/${identityId}/documents/${Date.now()}_${file.name}`;
 
-            // Upload to S3
-            const result = await uploadData({
-                key: filename,
+            // Upload to S3 using Gen 2 API
+            const uploadOperation = uploadData({
+                path: s3Path,
                 data: file,
                 options: {
                     contentType: file.type,
-                    accessLevel: 'protected',
-                    identityId,
-                    progressCallback(progress) {
-                        const percent = Math.round((progress.loaded / progress.total) * 100);
+                    onProgress(progress) {
+                        const percent = Math.round((progress.transferredBytes / progress.totalBytes) * 100);
                         setUploadProgress(percent);
                     }
                 }
             });
 
-            // Create Document record
+            // Wait for upload to complete
+            const uploadResult = await uploadOperation.result;
+
+            // Create Document record with full S3 path
             const amplifyClient = getAmplifyClient();
             const { data: documentModel } = await amplifyClient.models.Document.create({
                 filename: file.name,
-                s3Key: filename,
+                s3Key: uploadResult.path,  // Use the full S3 path from upload
                 status: 'uploaded',
                 identityId,
                 unitID: unit?.id,

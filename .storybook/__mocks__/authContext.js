@@ -1,20 +1,20 @@
 /**
  * Mock AuthContext for Storybook
  * 
- * Provides a mock authentication context that works with the aws-amplify/auth mock.
- * This prevents AuthContext from crashing in Storybook when components consume it.
+ * Re-exports the production AuthContext to ensure there's only ONE React Context instance
+ * shared between the mock provider and all consumers. This prevents the "two contexts" bug
+ * where MockAuthProvider provides to one context while UnitContext consumes from another.
  */
 
 import React from 'react';
-
-const AuthContext = React.createContext();
+import ProductionAuthContext from '../../src/context/authContext';
 
 /**
  * Mock user for Storybook - can be customized per story
  */
 const defaultMockUser = {
   attributes: {
-    sub: 'student-alice-sub',
+    sub: 'mock-user-sub',
     email: 'alice@example.com',
     name: 'Alice Student',
   },
@@ -22,11 +22,18 @@ const defaultMockUser = {
 
 const defaultMockSession = {
   identityId: 'us-east-1:mock-identity-123',
-  username: 'student-alice-sub', // Must match user.attributes.sub for UnitContext
+  username: 'mock-user-sub', // Must match user.attributes.sub for UnitContext
   idToken: {
     toString: () => 'mock-id-token',
   },
 };
+
+// Re-export the production AuthContext - this ensures UnitContext and MockAuthProvider
+// use the SAME React Context instance
+const AuthContext = ProductionAuthContext;
+
+// Debug: verify this mock module is being loaded
+console.log('[MOCK authContext.js] Module loaded - Re-exporting production AuthContext');
 
 /**
  * Mock AuthProvider for Storybook
@@ -65,12 +72,12 @@ const MockAuthProvider = ({ children, mockUser, mockSession, isLoading = false, 
     username: user.attributes.sub, // Always sync with user.attributes.sub
   };
 
-  const value = {
+  const value = React.useMemo(() => ({
     user,
     session,
     isLoading,
     error,
-  };
+  }), [user, session, isLoading, error]);
 
   console.log('[Mock AuthContext] Providing auth:', value);
 

@@ -8,6 +8,12 @@
  * - Files and documents for analysis testing
  * - Grade submissions for instructor testing
  * 
+ * Email Verification Strategy:
+ * - Production keeps email verification enabled for security
+ * - Seed script programmatically verifies test user emails via AWS SDK
+ * - Uses AdminUpdateUserAttributes to mark email_verified=true
+ * - Requires proper IAM permissions for sandbox environment
+ * 
  * Usage:
  *   npx ampx sandbox seed
  * 
@@ -18,7 +24,8 @@
 import { createAndSignUpUser, addToUserGroup, signInUser } from "@aws-amplify/seed";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
-import { fetchAuthSession } from "aws-amplify/auth";
+import { fetchAuthSession, signOut } from "aws-amplify/auth";
+import { CognitoIdentityProviderClient, AdminUpdateUserAttributesCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { readFile } from 'node:fs/promises';
 import type { Schema } from "../data/resource";
 
@@ -27,17 +34,25 @@ const url = new URL("../../amplify_outputs.json", import.meta.url);
 const outputs = JSON.parse(await readFile(url, { encoding: 'utf8' }));
 Amplify.configure(outputs);
 
-// Get the password from secrets
-const password = process.env.TEST_USER_PASSWORD;
+// Extract Cognito configuration from outputs
+const userPoolId = outputs.auth.user_pool_id;
+const region = outputs.auth.aws_region;
+
+// Initialize Cognito client for admin operations
+// Uses default AWS credentials from your AWS profile
+const cognitoClient = new CognitoIdentityProviderClient({ region });
+
+// Get the password from environment variable
+const password = process.env.TEST_USER_PASSWORD || 'TempPassword123!';
 
 // Initialize the data client
 const client = generateClient<Schema>();
 
 console.log('🌱 Starting seed data generation...');
-console.log(`Password: ${password ? 'SET' : 'NOT SET'}`);
+console.log(`Password: ${password ? 'SET' : 'NOT SET (using default)'}`);
 
 if (!password) {
-  throw new Error('Password secret not set');
+  throw new Error('Password not available');
 }
 
 const TEST_USERS: Record<string, { username: string; group: string }> = {
@@ -63,6 +78,32 @@ const TEST_USERS: Record<string, { username: string; group: string }> = {
   },
 }
 
+/**
+ * Manually verify a user's email address in Cognito
+ * This is needed for sandbox seeding since we want to keep email verification
+ * enabled for production but bypass it for test users
+ */
+async function verifyUserEmail(username: string): Promise<void> {
+  try {
+    await cognitoClient.send(
+      new AdminUpdateUserAttributesCommand({
+        UserPoolId: userPoolId,
+        Username: username,
+        UserAttributes: [
+          {
+            Name: 'email_verified',
+            Value: 'true',
+          },
+        ],
+      })
+    );
+    console.log(`  ✓ Email verified for ${username}`);
+  } catch (error: any) {
+    console.error(`  ⚠ Failed to verify email for ${username}:`, error.message);
+    throw error;
+  }
+}
+
 console.log('Starting user creation...');
 
 // Create users using @aws-amplify/seed helpers
@@ -73,43 +114,76 @@ for (const [key, userData] of Object.entries(TEST_USERS)) {
     const user = await createAndSignUpUser({
       username: userData.username,
       password: password,
-      signInAfterCreation: userData.username === TEST_USERS.instructor1.username, // Sign in as instructor1 for data creation later
+      signInAfterCreation: false,
       signInFlow: "Password",
       userAttributes: {
         locale: "en",
+        // Don't set email here - Cognito auto-sets it from username when email login is enabled
       },
     });
     
-    console.log(`  ✓ User created, adding to group: ${userData.group}`);
+    console.log(`  ✓ User created: ${user.username}`);
+    
+    // Manually verify email for sandbox testing
+    await verifyUserEmail(userData.username);
+    
+    console.log(`  ✓ Adding to group: ${userData.group}`);
     await addToUserGroup(user, userData.group);
-    console.log(`  ✓ Added ${userData.username} to ${userData.group}`);
+    console.log(`  ✓ Added to ${userData.group}`);
   } catch (error: any) {
-    if (error.name === 'UsernameExistsException' || error.message?.includes('already exists')) {
-      console.log(`  ⚠ User ${userData.username} already exists, skipping...`);
+    if (error.name === 'UsernameExistsException' || 
+        error.name === 'UsernameExistsError' ||
+        error.message?.includes('already exists') ||
+        error.message?.includes('User already exists')) {
+      console.log(`  ⚠ User ${userData.username} already exists`);
+      
+      // Ensure email is verified even for existing users
+      await verifyUserEmail(userData.username);
+      
+      // Try to add to group in case that failed previously
+      try {
+        await addToUserGroup({ username: userData.username }, userData.group);
+        console.log(`  ✓ Added to ${userData.group}`);
+      } catch (groupError: any) {
+        console.log(`  ⚠ Could not add to group (may already be member)`);
+      }
     } else {
-      console.error(`  ✗ Error creating ${userData.username}:`, error.message);
+      console.error(`  ✗ Error creating ${userData.username}:`, error);
       throw error;
     }
   }
 }
 
-console.log('✅ Test users created successfully');
+console.log('✅ Test users created/verified successfully');
 
+// Explicitly sign in as instructor1 for data creation
+console.log('\n🔐 Signing in as instructor1 for data creation...');
 
-await signInUser({
-  username: TEST_USERS.instructor1.username,
-  password: password,
-  signInFlow: "Password",
-});
+let instructor1OwnerSub: string;
+let instructor1IdentityId: string;
 
-// Get the authenticated user's ID for use as owner
-const session = await fetchAuthSession();
-const instructor1OwnerSub = session.tokens?.accessToken.payload.sub as string; // For owner fields
-const instructor1IdentityId = session.identityId as string; // For File.identityId field
-if (!instructor1OwnerSub || !instructor1IdentityId) {
-  throw new Error('Could not get authenticated user IDs');
+try {
+  await signInUser({
+    username: TEST_USERS.instructor1.username,
+    password: password,
+    signInFlow: "Password",
+  });
+  
+  const session = await fetchAuthSession();
+  instructor1OwnerSub = session.userSub!;
+  instructor1IdentityId = session.identityId!;
+  
+  console.log(`✅ Authenticated as instructor1`);
+  console.log(`   Sub: ${instructor1OwnerSub}`);
+  console.log(`   Identity ID: ${instructor1IdentityId}`);
+} catch (error: any) {
+  console.error('\n❌ Failed to sign in as instructor1:', error.message);
+  console.error('\nPossible issues:');
+  console.error('1. Email verification failed (check Cognito permissions)');
+  console.error('2. Password does not match');
+  console.error('3. User pool configuration issue');
+  throw error;
 }
-console.log(`Authenticated as instructor1 (sub: ${instructor1OwnerSub}, identityId: ${instructor1IdentityId})`);
 
 
 // ========================================================================
@@ -673,7 +747,6 @@ console.log('   2. Start development: npm run dev');
 console.log('   3. Sign in with any test user to begin testing\n');
 
 // Sign out
-console.log('🔓 Signing out...');
-const { signOut } = await import("aws-amplify/auth");
+console.log('\n🔓 Signing out...');
 await signOut();
 console.log('✅ Signed out');

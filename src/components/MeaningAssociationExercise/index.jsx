@@ -72,7 +72,10 @@ export const AnswerDropLearn = ({ correctAnswer, pronunciation, definition, id, 
   return (
     <ListItem 
       ref={drop} 
-      key={id} 
+      key={id}
+      data-testid="drop-target-learn"
+      data-word-id={id}
+      data-is-matched={isMatched}
       sx={{ 
         margin: '0.25rem 0', 
         padding: '0.75rem', 
@@ -137,6 +140,8 @@ export const AnswerDrop = ({ correctAnswer }) => {
         ref={drop}
         borderRadius={3}
         border={1}
+        data-testid="drop-target"
+        data-word-id={correctAnswer?.id}
         style={{
           borderStyle: 'dashed',
           width: '100%',

@@ -17,6 +17,11 @@
     "passwordPlaceholder": "Enter your Password:",
     "confirmPasswordPlaceholder": "Please confirm your Password"
   },
+  "chat": {
+    "aiAssistant": "AI Assistant",
+    "close": "Close",
+    "openAssistant": "Open AI Assistant"
+  },
   "chatSidebar": {
     "activeChats": "Active Chats",
     "aiAssistant": "AI Assistant",
@@ -379,5 +384,19 @@
     "average": "Average",
     "completed": "Completed",
     "completion": "Completion"
+  },
+  "permissionError": {
+    "title": "Access Denied",
+    "defaultMessage": "You don't have permission to access this {{resourceType}}.",
+    "explanation": "This content is restricted. You need to be the owner or have instructor permissions to access it.",
+    "contactInfo": "If you believe this is an error, please contact your instructor or administrator.",
+    "goBack": "Go Back",
+    "goHome": "Go to Home",
+    "resourceTypes": {
+      "unit": "unit",
+      "section": "section",
+      "assignment": "assignment",
+      "grade": "grade"
+    }
   }
 }

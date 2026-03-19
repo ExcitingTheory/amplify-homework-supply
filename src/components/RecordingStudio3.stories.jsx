@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { within, userEvent, waitFor, expect } from '@storybook/test';
 import RecordingStudio3 from './RecordingStudio3';
 import FilesContext from '../context/fileContext';
 import { DemoBanner } from '../../.storybook/components/DemoBanner';
@@ -386,6 +387,22 @@ export const CoffeeShopDialogue = {
     identityId: 'us-east-1:mock-identity-123',
     readOnly: false,
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for script to load
+    await waitFor(() => {
+      expect(canvas.getByText(/Coffee Shop Conversation/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify dialogue lines are visible
+    expect(canvas.getByText(/Hello, how are you doing today/i)).toBeInTheDocument();
+    expect(canvas.getByText(/doing well, thanks for asking/i)).toBeInTheDocument();
+    
+    // Verify speakers are shown
+    expect(canvas.getByText(/Alice/i)).toBeInTheDocument();
+    expect(canvas.getByText(/Bob/i)).toBeInTheDocument();
+  },
   parameters: {
     docs: {
       description: {
@@ -423,6 +440,22 @@ export const JapaneseVocabularyWord = {
     nodeKey: 'word-konnichiwa',
     identityId: 'us-east-1:mock-identity-123',
     readOnly: false,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for locked tracks to render with lock icons
+    await waitFor(() => {
+      expect(canvas.getByText(/Japanese Greetings/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify locked track indicators are visible
+    const lockIcons = canvas.getAllByTitle(/locked/i);
+    expect(lockIcons.length).toBeGreaterThan(0);
+    
+    // Verify dialogue lines are present
+    expect(canvas.getByText(/こんにちは/)).toBeInTheDocument();
+    expect(canvas.getByText(/Hello. Good afternoon/i)).toBeInTheDocument();
   },
   parameters: {
     docs: {
@@ -469,6 +502,21 @@ export const QuizQuestionAudio = {
     identityId: 'us-east-1:mock-identity-123',
     readOnly: false,
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for question tracks to load
+    await waitFor(() => {
+      expect(canvas.getByText(/What is the capital of France/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify both question and answer tracks are visible
+    expect(canvas.getByText(/Paris/)).toBeInTheDocument();
+    
+    // Verify locked state prevents deletion
+    const lockIcons = canvas.getAllByTitle(/locked/i);
+    expect(lockIcons.length).toBeGreaterThanOrEqual(2);
+  },
   parameters: {
     docs: {
       description: {
@@ -509,6 +557,25 @@ export const ComparingMultipleTakes = {
     nodeKey: 'conversation-takes',
     identityId: 'us-east-1:mock-identity-123',
     readOnly: false,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for script with takes to load
+    await waitFor(() => {
+      expect(canvas.getByText(/It was a dark and stormy night/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify multiple takes are visible (TTS and human)
+    const ttsLabels = canvas.getAllByText(/TTS/i);
+    const humanLabels = canvas.getAllByText(/Human/i);
+    
+    expect(ttsLabels.length).toBeGreaterThan(0);
+    expect(humanLabels.length).toBeGreaterThan(0);
+    
+    // Verify active take indicator (star icon) is present
+    const activeIndicators = canvas.getAllByRole('button', { name: /active take/i });
+    expect(activeIndicators.length).toBeGreaterThan(0);
   },
   parameters: {
     docs: {
@@ -557,6 +624,20 @@ export const PreviewMode = {
     nodeKey: null,
     identityId: 'us-east-1:mock-identity-123',
     readOnly: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for read-only mode to render
+    await waitFor(() => {
+      expect(canvas.getByText(/Recording Practice Session/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify edit controls are disabled
+    const recordButtons = canvas.queryAllByRole('button', { name: /record/i });
+    recordButtons.forEach(button => {
+      expect(button).toBeDisabled();
+    });
   },
   parameters: {
     docs: {

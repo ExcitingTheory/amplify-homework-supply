@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { within, userEvent, waitFor } from '@storybook/test';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -222,12 +223,49 @@ const sampleQuizState = {
 
 export const EditableEmpty = {
   render: () => <EditableTemplate editorState={null} showInsertButton={true} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for insert button to be visible
+    await waitFor(() => {
+      const insertButton = canvas.getByRole('button', { name: /insert.*quiz/i });
+      expect(insertButton).toBeInTheDocument();
+    }, { timeout: 3000 });
+  },
 };
 
 export const EditableWithQuiz = {
   render: () => <EditableTemplate editorState={sampleQuizState} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for quiz block to render
+    await waitFor(() => {
+      expect(canvas.getByText(/What is the capital of France/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify all 4 answer options are visible
+    expect(canvas.getByText('Paris')).toBeInTheDocument();
+    expect(canvas.getByText('London')).toBeInTheDocument();
+    expect(canvas.getByText('Berlin')).toBeInTheDocument();
+    expect(canvas.getByText('Madrid')).toBeInTheDocument();
+  },
 };
 
 export const ReadOnlyWithQuiz = {
   render: () => <ReadOnlyTemplate editorState={sampleQuizState} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { expect } = await import('@storybook/test');
+    
+    // Wait for quiz in read-only mode
+    await waitFor(() => {
+      expect(canvas.getByText(/What is the capital of France/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify quiz is rendered
+    expect(canvas.getByText('Paris')).toBeInTheDocument();
+  },
 };

@@ -346,13 +346,24 @@ const createMockModel = (modelName) => ({
     };
     dataStores[modelName].set(id, item);
     
-    // Trigger observeQuery updates
-    setTimeout(() => {
-      // This would notify subscribers in a real implementation
-      console.log(`[Mock Data] ${modelName} created:`, id);
-    }, 10);
-    
     const enhancedItem = addRelationshipAccessors(item, modelName);
+    
+    // Notify all subscribers about the new item
+    if (activeSubscriptions[modelName] && activeSubscriptions[modelName].length > 0) {
+      const items = Array.from(dataStores[modelName].values());
+      const enhancedItems = items.map(item => addRelationshipAccessors(item, modelName));
+      activeSubscriptions[modelName].forEach(subscription => {
+        setTimeout(() => {
+          subscription.next({
+            items: enhancedItems,
+            isSynced: true,
+          });
+        }, 0);
+      });
+      console.log(`[Mock Data] ${modelName} created: ${id} - notified ${activeSubscriptions[modelName].length} subscribers`);
+    } else {
+      console.log(`[Mock Data] ${modelName} created: ${id} - no active subscribers`);
+    }
     
     return {
       data: enhancedItem,
@@ -378,12 +389,24 @@ const createMockModel = (modelName) => ({
     };
     dataStores[modelName].set(input.id, updated);
     
-    // Trigger observeQuery updates
-    setTimeout(() => {
-      console.log(`[Mock Data] ${modelName} updated:`, input.id);
-    }, 10);
-    
     const enhancedUpdated = addRelationshipAccessors(updated, modelName);
+    
+    // Notify all subscribers about the update
+    if (activeSubscriptions[modelName] && activeSubscriptions[modelName].length > 0) {
+      const items = Array.from(dataStores[modelName].values());
+      const enhancedItems = items.map(item => addRelationshipAccessors(item, modelName));
+      activeSubscriptions[modelName].forEach(subscription => {
+        setTimeout(() => {
+          subscription.next({
+            items: enhancedItems,
+            isSynced: true,
+          });
+        }, 0);
+      });
+      console.log(`[Mock Data] ${modelName} updated: ${input.id} - notified ${activeSubscriptions[modelName].length} subscribers`);
+    } else {
+      console.log(`[Mock Data] ${modelName} updated: ${input.id} - no active subscribers`);
+    }
     
     return {
       data: enhancedUpdated,
@@ -403,10 +426,22 @@ const createMockModel = (modelName) => ({
     
     dataStores[modelName].delete(id);
     
-    // Trigger observeQuery updates
-    setTimeout(() => {
-      console.log(`[Mock Data] ${modelName} deleted:`, id);
-    }, 10);
+    // Notify all subscribers about the deletion
+    if (activeSubscriptions[modelName] && activeSubscriptions[modelName].length > 0) {
+      const items = Array.from(dataStores[modelName].values());
+      const enhancedItems = items.map(item => addRelationshipAccessors(item, modelName));
+      activeSubscriptions[modelName].forEach(subscription => {
+        setTimeout(() => {
+          subscription.next({
+            items: enhancedItems,
+            isSynced: true,
+          });
+        }, 0);
+      });
+      console.log(`[Mock Data] ${modelName} deleted: ${id} - notified ${activeSubscriptions[modelName].length} subscribers`);
+    } else {
+      console.log(`[Mock Data] ${modelName} deleted: ${id} - no active subscribers`);
+    }
     
     return {
       data: existing,

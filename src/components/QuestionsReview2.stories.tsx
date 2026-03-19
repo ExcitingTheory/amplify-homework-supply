@@ -12,6 +12,7 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
+import { within, userEvent, waitFor, expect } from '@storybook/test';
 import QuestionsReview2 from './QuestionsReview2';
 import { Box, Paper, Typography } from '@mui/material';
 import { DemoBanner } from '../../.storybook/components/DemoBanner';
@@ -167,6 +168,23 @@ export const Default: Story = {
             <QuestionsReview2 {...args} />
         </Box>
     ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        
+        // Wait for questions to load
+        await waitFor(() => {
+            expect(canvas.getByText(/What is photosynthesis/i)).toBeInTheDocument();
+        }, { timeout: 5000 });
+        
+        // Verify different question types are visible
+        expect(canvas.getByText(/Describe the role of chloroplasts/i)).toBeInTheDocument();
+        
+        // Select first question checkbox
+        const checkboxes = canvas.getAllByRole('checkbox');
+        if (checkboxes.length > 1) {
+            await userEvent.click(checkboxes[1]);
+        }
+    },
     parameters: {
         docs: {
             description: {
@@ -197,6 +215,21 @@ export const WithSearchHighlight: Story = {
             <QuestionsReview2 {...args} />
         </Box>
     ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        
+        // Wait for filtered questions with search term
+        await waitFor(() => {
+            expect(canvas.getByText(/What is photosynthesis/i)).toBeInTheDocument();
+        }, { timeout: 5000 });
+        
+        // Verify search highlights multiple matches
+        const highlighted = canvas.getAllByText(/photosynthesis/i);
+        expect(highlighted.length).toBeGreaterThan(3); // Should appear in multiple questions
+        
+        // Verify other matching questions are visible
+        expect(canvas.getByText(/Describe the role of chloroplasts/i)).toBeInTheDocument();
+    },
     parameters: {
         docs: {
             description: {
@@ -235,6 +268,21 @@ export const LargeList: Story = {
             <QuestionsReview2 {...args} />
         </Box>
     ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        
+        // Wait for questions to load
+        await waitFor(() => {
+            expect(canvas.getByText(/Question 1:/i)).toBeInTheDocument();
+        }, { timeout: 5000 });
+        
+        // Verify virtual scrolling renders multiple items
+        expect(canvas.getByText(/Question 2:/i)).toBeInTheDocument();
+        
+        // Verify type and difficulty badges are present
+        const badges = canvas.getAllByRole('status'); // MUI Chip uses role="status"
+        expect(badges.length).toBeGreaterThan(0);
+    },
     parameters: {
         docs: {
             description: {
@@ -265,6 +313,23 @@ export const EssayQuestions: Story = {
             <QuestionsReview2 {...args} />
         </Box>
     ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        
+        // Wait for essay questions to load
+        await waitFor(() => {
+            expect(canvas.getByText(/Explain the process of photosynthesis/i)).toBeInTheDocument();
+        }, { timeout: 5000 });
+        
+        // Verify all essay type badges are visible
+        const essayBadges = canvas.getAllByText(/essay/i);
+        expect(essayBadges.length).toBe(3);
+        
+        // Verify different difficulty levels
+        expect(canvas.getByText(/easy/i)).toBeInTheDocument();
+        expect(canvas.getByText(/medium/i)).toBeInTheDocument();
+        expect(canvas.getByText(/hard/i)).toBeInTheDocument();
+    },
     parameters: {
         docs: {
             description: {
@@ -355,6 +420,23 @@ export const WithMediaAttachments: Story = {
             <QuestionsReview2 {...args} />
         </Box>
     ),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        
+        // Wait for questions with media to load
+        await waitFor(() => {
+            expect(canvas.getByText(/Listen to the explanation/i)).toBeInTheDocument();
+        }, { timeout: 5000 });
+        
+        // Verify media indicators are visible
+        // Audio icon (microphone)
+        const audioIcons = canvas.getAllByTestId(/audio-icon|mic-icon/i);
+        expect(audioIcons.length).toBeGreaterThan(0);
+        
+        // Image icon
+        const imageIcons = canvas.getAllByTestId(/image-icon|photo-icon/i);
+        expect(imageIcons.length).toBeGreaterThan(0);
+    },
     parameters: {
         docs: {
             description: {

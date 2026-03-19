@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { within, userEvent, waitFor, expect } from '@storybook/test';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -202,12 +203,42 @@ const sampleAnswerState = {
 
 export const EditableEmpty = {
   render: () => <EditableTemplate editorState={null} showInsertButton={true} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Verify insert button is visible
+    await waitFor(() => {
+      expect(canvas.getByRole('button', { name: /Insert Answer Block/i })).toBeInTheDocument();
+    }, { timeout: 3000 });
+  },
 };
 
 export const EditableWithAnswer = {
   render: () => <EditableTemplate editorState={sampleAnswerState} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for answer block to render
+    await waitFor(() => {
+      expect(canvas.getByText(/Vocabulary Answer Exercise/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify prompt is visible
+    expect(canvas.getByText(/Provide translations or definitions/i)).toBeInTheDocument();
+  },
 };
 
 export const ReadOnlyWithAnswer = {
   render: () => <ReadOnlyTemplate editorState={sampleAnswerState} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for read-only view to render
+    await waitFor(() => {
+      expect(canvas.getByText(/Answer Plugin - Read-Only Mode/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+    
+    // Verify content is present
+    expect(canvas.getByText(/Vocabulary Answer Exercise/i)).toBeInTheDocument();
+  },
 };

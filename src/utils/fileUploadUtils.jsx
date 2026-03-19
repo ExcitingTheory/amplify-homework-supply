@@ -20,6 +20,29 @@ import {
 // No need to define GraphQL strings - schema handles this
 
 /**
+ * Check if a MIME type is an analyzable document type
+ * Matches the types that can be processed by the document analysis Lambda
+ * @param {string} mimeType - MIME type to check
+ * @returns {boolean} True if the type can be analyzed
+ */
+export function isAnalyzableDocument(mimeType) {
+    if (!mimeType) return false;
+    const analyzableTypes = [
+        'application/pdf',
+        'text/plain',
+        'text/markdown',
+        'text/csv',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    ];
+    return analyzableTypes.includes(mimeType);
+}
+
+/**
  * Trigger embedding generation for a file
  * @param {string} fileID - File ID to generate embeddings for
  * @returns {Promise<Object>} Result object
@@ -88,48 +111,46 @@ async function triggerEmbeddingsGeneration(fileID) {
  * @returns {Promise<{fileModel: FileModel, documentModel?: Document}>}
  */
 export async function uploadFile(file, identityId, unitId = null, onProgress = null) {
-    const accessLevel = 'protected';
-    let newFilename;
+    let subfolder;
 
     // Get current user for owner field
     const { username: owner } = await getCurrentUser();
     
     // Determine the folder based on file type
     if (isMimeType(file, ACCEPTABLE_IMAGE_TYPES)) {
-        newFilename = `images/${file.name}`;
+        subfolder = 'images';
     } else if (isMimeType(file, ACCEPTABLE_AUDIO_TYPES)) {
-        newFilename = `audio/${file.name}`;
+        subfolder = 'audio';
     } else if (isMimeType(file, ACCEPTABLE_FILE_TYPES)) {
-        newFilename = `files/${file.name}`;
+        subfolder = 'files';
     } else {
         throw new Error(`Unsupported file type: ${file.type}`);
     }
 
-    console.log('Uploading file:', newFilename);
+    // Gen 2 API requires full path with protection level prefix
+    const s3Path = `protected/${identityId}/${subfolder}/${file.name}`;
+    console.log('Uploading file to:', s3Path);
 
-    // Upload to S3
+    // Upload to S3 using Gen 2 API
     const uploadOperation = uploadData({
-        key: newFilename,
+        path: s3Path,
         data: file,
         options: {
             contentType: file.type,
-            contentLength: file.size,
-            accessLevel,
-            identityId,
-            progressCallback(progress) {
-                console.log(`Uploaded: ${progress.loaded}/${progress.total}`);
+            onProgress(progress) {
+                console.log(`Uploaded: ${progress.transferredBytes}/${progress.totalBytes}`);
                 if (onProgress) {
-                    onProgress(progress.loaded, progress.total);
+                    onProgress(progress.transferredBytes, progress.totalBytes);
                 }
             }
         }
     });
 
-    console.log('Upload result:', uploadOperation);
+    console.log('Upload operation created');
     
-    // Wait for upload to complete before continuing
-    await uploadOperation.result;
-    console.log('Upload completed successfully');
+    // Wait for upload to complete and get the result
+    const uploadResult = await uploadOperation.result;
+    console.log('Upload completed successfully, S3 path:', uploadResult.path);
 
     // Calculate waveform data for audio files
     let waveformData = null;
@@ -142,9 +163,9 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
         }
     }
 
-    // Create File model entry
+    // Create File model entry with the full S3 path from upload result
     const fileData = {
-        path: newFilename,
+        path: uploadResult.path,  // Use the actual S3 path from upload
         owner,
         identityId,
         name: file.name,
@@ -157,17 +178,20 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
         fileData.waveformData = JSON.stringify(waveformData);
     }
 
-    // If PDF, create Document record first (so we have an ID for the File)
+    // If analyzable document type, create Document record first (so we have an ID for the File)
     let documentModel = null;
-    if (file.type === 'application/pdf') {
+    if (isAnalyzableDocument(file.type)) {
         const amplifyClient = getAmplifyClient();
         // Create document without unit relationship first
         const documentData = {
             filename: file.name,
-            s3Key: newFilename,
+            s3Key: uploadResult.path,  // Use the full S3 path from upload
             status: 'uploaded',
+            mimeType: file.type,
+            fileSize: file.size,
             owner,
             identityId,
+            uploadedAt: new Date().toISOString(),
         };
         
         const { data: newDocument, errors: documentErrors } = await amplifyClient.models.Document.create(documentData);
@@ -178,7 +202,7 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
         }
         
         documentModel = newDocument;
-        console.log('Created Document record:', documentModel);
+        console.log('Created Document record for', file.type, ':', documentModel);
     }
 
     // Create File record, linking to Document if PDF
@@ -260,8 +284,9 @@ async function waitForDocumentSync(documentId) {
 }
 
 /**
- * Trigger PDF analysis via GraphQL mutation
- * @param {string} fileId - File ID to analyze
+ * Trigger document analysis via GraphQL mutation
+ * Works for all analyzable document types: PDFs, text files, Word docs, Excel, PowerPoint, CSV, etc.
+ * @param {string} fileID - File ID to analyze
  * @returns {Promise<Object>} Analysis result
  */
 export async function analyzePDF(fileID) {
@@ -324,17 +349,18 @@ export async function cancelPDFAnalysis(fileId) {
 }
 
 /**
- * Upload a PDF and optionally trigger analysis
- * @param {File} file - PDF file to upload
+ * Upload an analyzable document and optionally trigger analysis
+ * Supports PDFs, text files, Word docs, Excel, PowerPoint, CSV, etc.
+ * @param {File} file - Document file to upload
  * @param {string} identityId - AWS Cognito identity ID
  * @param {string} unitId - Unit ID to associate with
- * @param {boolean} autoAnalyze - Whether to automatically analyze the PDF
+ * @param {boolean} autoAnalyze - Whether to automatically analyze the document
  * @param {Function} onProgress - Optional progress callback
  * @returns {Promise<{fileModel: FileModel, documentModel: Document, analysisResult?: Object}>}
  */
 export async function uploadAndAnalyzePDF(file, identityId, unitId, autoAnalyze = true, onProgress = null) {
-    if (file.type !== 'application/pdf') {
-        throw new Error('File must be a PDF');
+    if (!isAnalyzableDocument(file.type)) {
+        throw new Error(`File type ${file.type} is not analyzable. Supported types: PDF, Word, Excel, PowerPoint, text, markdown, CSV`);
     }
 
     // Upload the file

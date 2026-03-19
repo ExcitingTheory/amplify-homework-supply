@@ -40,6 +40,9 @@ export const DragBox = ({ answer, wordID }) => {
       variant="outlined"
       boxShadow='0 2px 4px rgba(0,0,0,0.1)'
       onTouchStart={onTouchMove}
+      data-testid="drag-box"
+      data-word-id={wordID}
+      data-answer={answer}
       style={{
         fontSize: '1.2rem',
         margin: '.3rem',

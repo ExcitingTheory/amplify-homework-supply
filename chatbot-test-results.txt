@@ -1,0 +1,44 @@
+
+DevTools listening on ws://127.0.0.1:56572/devtools/browser/9b670af8-0240-4d1d-99df-f6f5c4d5c4b8
+2026-03-14 15:47:26.563 Cypress[72691:4250702] WARNING: Secure coding is not enabled for restorable state! Enable secure coding by implementing NSApplicationDelegate.applicationSupportsSecureRestorableState: and returning YES.
+
+================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:        13.17.0                                                                        │
+  │ Browser:        Electron 118 (headless)                                                        │
+  │ Node Version:   v20.19.6 (/Users/colinbarrett-fox/.nvm/versions/node/v20.19.6/bin/node)        │
+  │ Specs:          1 found (chatbot-workflows.cy.ts)                                              │
+  │ Searched:       cypress/e2e/chatbot-workflows.cy.ts                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  chatbot-workflows.cy.ts                                                         (1 of 1)
+
+
+  Chatbot Workflows
+    ✓ should create a unit for chatbot testing (16880ms)
+    (Attempt 1 of 3) should use chatbot to create a section
+    (Attempt 2 of 3) should use chatbot to create a section
+    1) should use chatbot to create a section
+    (Attempt 1 of 3) should use chatbot to assign unit to section
+The Test Runner unexpectedly exited via a exit event with signal SIGKILL
+
+Please search Cypress documentation for possible solutions:
+
+https://on.cypress.io
+
+Check if there is a GitHub issue describing this crash:
+
+https://github.com/cypress-io/cypress/issues
+
+Consider opening a new issue.
+
+----------
+
+Platform: darwin-x64 (23.6.0)
+Cypress Version: 13.17.0

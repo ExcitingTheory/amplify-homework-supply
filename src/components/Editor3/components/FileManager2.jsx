@@ -37,6 +37,7 @@ import {
     Chip,
     Portal,
     Divider,
+    LinearProgress,
 } from "@mui/material";
 import { useVirtualizer } from '@tanstack/react-virtual';
 import React from "react";
@@ -64,10 +65,11 @@ import FilesContext from "../../../context/fileContext";
 import SettingsContext from "../../../context/settingsContext";
 
 import { getAmplifyClient } from '../../../utils/amplifyClient';
+import { useYjsFile } from '../../../hooks/useYjsFile';
 import { uploadData, remove } from 'aws-amplify/storage';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { calculateWaveformData } from '../../../utils/calculateWaveformData';
-import { uploadFile, uploadAndAnalyzePDF, analyzePDF, cancelPDFAnalysis, generateEmbeddings } from '../../../utils/fileUploadUtils';
+import { uploadFile, uploadAndAnalyzePDF, analyzePDF, cancelPDFAnalysis, generateEmbeddings, isAnalyzableDocument } from '../../../utils/fileUploadUtils';
 import {
     saveEmbeddings,
     loadAllEmbeddings,
@@ -1955,26 +1957,55 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentSt
                     message: `Delete ${file.name}?`,
                     severity: 'warning',
                     onConfirm: async () => {
-                        await deleteFileCompletely(file);
-                        setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                        try {
+                            console.log('[FileManager2] Deleting single file:', file.name, file.id);
+                            await deleteFileCompletely(file);
+                            console.log('[FileManager2] Successfully deleted:', file.name);
+                            setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                        } catch (error) {
+                            console.error('[FileManager2] Failed to delete file:', file.name, error);
+                            setConfirmDialog({
+                                open: true,
+                                message: `Failed to delete ${file.name}: ${error.message}`,
+                                severity: 'error',
+                                onConfirm: () => setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' })
+                            });
+                        }
                     }
                 });
                 break;
             case 're-analyze':
-                if (file.documentID) {
-                    if (file.mimeType === 'application/pdf') {
-                        try {
-                            console.log('[FileManager2] Re-analyzing PDF:', file.name);
-                            await analyzePDF(file.id, true);
-                            console.log('[FileManager2] Re-generating embeddings for:', file.name);
-                            await generateEmbeddings(file.id);
-                        } catch (error) {
-                            console.error('Error re-analyzing document:', error);
-                        }
-                    } else {
+                try {
+                    if (isAnalyzableDocument(file.mimeType)) {
+                        console.log('[FileManager2] Re-analyzing document:', file.name, 'type:', file.mimeType, 'documentID:', file.documentID);
+                        
+                        // Analyze document - analyzeDocument will create Document if needed
+                        await analyzePDF(file.id);
+                        console.log('[FileManager2] Document analysis started for:', file.name);
+                        
+                        // Generate embeddings after analysis
+                        console.log('[FileManager2] Generating embeddings for:', file.name);
+                        await generateEmbeddings(file.id);
+                        console.log('[FileManager2] Embedding generation started for:', file.name);
+                    } else if (file.documentID) {
+                        // For non-analyzable files with existing embeddings, just regenerate
                         console.log('[FileManager2] Re-generating embeddings for:', file.name);
                         await generateEmbeddings(file.id);
+                        console.log('[FileManager2] Embedding generation started for:', file.name);
+                    } else {
+                        console.warn('[FileManager2] Cannot re-analyze - not an analyzable document and no documentID:', file.name, file.mimeType);
                     }
+                } catch (error) {
+                    console.error('[FileManager2] Error re-analyzing document:', error);
+                    // Show error to user
+                    setConfirmDialog({
+                        open: true,
+                        message: `Error re-analyzing ${file.name}: ${error.message}`,
+                        severity: 'error',
+                        onConfirm: () => {
+                            setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                        }
+                    });
                 }
                 break;
         }
@@ -2099,7 +2130,7 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentSt
                             <DownloadIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
-                    {documentStatus && (
+                    {(isAnalyzableDocument(file.mimeType) || file.documentID) && (
                         <Tooltip title={t('fileManager2.fileDetails.reAnalyzeTooltip')}>
                             <IconButton size="small" onClick={() => handleMenuAction('re-analyze')}>
                                 <RefreshIcon fontSize="small" />
@@ -2121,12 +2152,19 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentSt
 // FileRowComponent - Renders individual file rows based on file type
 // =============================================================================
 
-const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, index, isSelected, onSelect, allFiles, selectedItems, setSelectedItems }) {
+const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, index, isSelected, allFiles, selectedItems, setSelectedItems }) {
     const [isEditing, setIsEditing] = React.useState(false);
     const [editedName, setEditedName] = React.useState(file.name);
     const [isSaving, setIsSaving] = React.useState(false);
     const { handleFileNameUpdate } = useFileManager();
     const isEvenRow = index % 2 === 0;
+    
+    // Lazy Yjs: Only connect when editing
+    const { metadata, updateMetadata, forceSave, isSynced } = useYjsFile({
+        fileId: isEditing ? file.id : null,
+        enableWebSocket: isEditing,
+        enablePersistence: false // No need for IndexedDB on quick edits
+    });
 
     const handleSaveFileName = async () => {
         if (!editedName.trim() || editedName === file.name) {
@@ -2137,7 +2175,30 @@ const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, 
 
         try {
             setIsSaving(true);
-            await handleFileNameUpdate(file.id, editedName);
+            
+            // Extract extension from original filename
+            const originalName = file.name;
+            const lastDotIndex = originalName.lastIndexOf('.');
+            const extension = lastDotIndex > 0 ? originalName.substring(lastDotIndex) : '';
+
+            // Check if new name has an extension
+            const newNameTrimmed = editedName.trim();
+            const newHasExtension = newNameTrimmed.lastIndexOf('.') > 0;
+
+            // If new name doesn't have extension, append the original extension
+            const finalName = newHasExtension ? newNameTrimmed : newNameTrimmed + extension;
+            
+            // Use Yjs metadata for real-time sync if available
+            if (metadata && updateMetadata) {
+                updateMetadata({ name: finalName });
+                await forceSave(); // Force immediate save to GraphQL
+                console.log('[FileRowComponent] Saved via Yjs:', finalName);
+            } else {
+                // Fallback to direct GraphQL if Yjs not ready
+                await handleFileNameUpdate(file.id, finalName);
+                console.log('[FileRowComponent] Saved via GraphQL:', finalName);
+            }
+            
             setIsEditing(false);
         } catch (error) {
             console.error('Error updating filename:', error);
@@ -2159,6 +2220,42 @@ const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, 
             handleCancelEdit();
         }
     };
+
+    const handleCheckboxChange = React.useCallback((e) => {
+        e.stopPropagation();
+        
+        if (e.shiftKey) {
+            // Shift-click: range select
+            const selectedArray = Array.from(selectedItems);
+            if (selectedArray.length === 0) {
+                // No previous selection, just toggle this file
+                setSelectedItems(new Set([file.id]));
+            } else {
+                // Find range between last selected and current file
+                const lastSelectedId = selectedArray[selectedArray.length - 1];
+                const lastSelectedIndex = allFiles.findIndex(f => f.id === lastSelectedId);
+                const currentIndex = allFiles.findIndex(f => f.id === file.id);
+                
+                const start = Math.min(lastSelectedIndex, currentIndex);
+                const end = Math.max(lastSelectedIndex, currentIndex);
+                
+                const rangeSet = new Set(selectedArray);
+                for (let i = start; i <= end; i++) {
+                    rangeSet.add(allFiles[i].id);
+                }
+                setSelectedItems(rangeSet);
+            }
+        } else {
+            // Toggle selection
+            const newSet = new Set(selectedItems);
+            if (newSet.has(file.id)) {
+                newSet.delete(file.id);
+            } else {
+                newSet.add(file.id);
+            }
+            setSelectedItems(newSet);
+        }
+    }, [selectedItems, setSelectedItems, allFiles, file.id]);
 
     const handleRowClick = React.useCallback((e) => {
         if (isEditing) return;
@@ -2212,19 +2309,32 @@ const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, 
         <Box
             onClick={handleRowClick}
             sx={{
-                backgroundColor: isSelected ? 'primary.100' : isEvenRow ? 'grey.100' : 'background.paper',
+                backgroundColor: isSelected ? 'action.selected' : isEvenRow ? 'grey.100' : 'background.paper',
                 borderBottom: '1px solid',
                 borderColor: 'divider',
+                borderLeft: isSelected ? '3px solid' : '3px solid transparent',
+                borderLeftColor: isSelected ? 'primary.main' : 'transparent',
                 transition: 'all 0.2s ease',
                 cursor: isEditing ? 'text' : 'pointer',
                 p: 1,
+                pl: isSelected ? 0.625 : 1, // Adjust padding to account for border
                 display: 'flex',
                 alignItems: 'center',
                 gap: 0.75,
                 '&:hover': {
-                    backgroundColor: isSelected ? 'primary.100' : 'action.hover'
+                    backgroundColor: isSelected ? 'action.selected' : 'action.hover'
                 }
             }}>
+            {/* Selection Checkbox */}
+            <Box sx={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+                <Checkbox
+                    size="small"
+                    checked={isSelected}
+                    onChange={handleCheckboxChange}
+                    sx={{ p: 0, mr: 0.5 }}
+                    onClick={(e) => e.stopPropagation()}
+                />
+            </Box>
             {/* File Icon */}
             <Box sx={{ flexShrink: 0, width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {fileType === 'images' && <ImageIcon sx={{ fontSize: '20px', color: isSelected ? 'primary.main' : 'inherit', transition: 'color 0.2s' }} />}
@@ -2324,42 +2434,158 @@ async function deleteFileCompletely(file) {
     if (!file) return;
 
     try {
-        // Delete associated Document if it exists
+        const client = getAmplifyClient();
+
+        // Delete associated Document and all its relationships if it exists
         if (file.documentID) {
-            const client = getAmplifyClient();
             const { data: document } = await client.models.Document.get({ id: file.documentID });
             if (document) {
+                console.log('Deleting Document and all related records:', file.documentID);
+                
+                // Delete embeddings from IndexedDB
+                try {
+                    await deleteEmbeddings(file.documentID);
+                    console.log('Deleted embeddings for document:', file.documentID);
+                } catch (embError) {
+                    console.warn('Failed to delete embeddings:', embError);
+                }
+
+                // Delete all ParsedContent records associated with this document
+                const { data: parsedContents } = await client.models.ParsedContent.list({
+                    filter: { documentID: { eq: file.documentID } }
+                });
+                for (const parsedContent of parsedContents || []) {
+                    await client.models.ParsedContent.delete({ id: parsedContent.id });
+                }
+                console.log(`Deleted ${parsedContents?.length || 0} ParsedContent records`);
+
+                // Delete all UnitDocument join table entries
+                const { data: unitDocuments } = await client.models.UnitDocument.list({
+                    filter: { documentID: { eq: file.documentID } }
+                });
+                for (const unitDoc of unitDocuments || []) {
+                    await client.models.UnitDocument.delete({ id: unitDoc.id });
+                }
+                console.log(`Deleted ${unitDocuments?.length || 0} UnitDocument links`);
+
+                // Delete all DocumentWord join table entries
+                const { data: documentWords } = await client.models.DocumentWord.list({
+                    filter: { documentID: { eq: file.documentID } }
+                });
+                for (const docWord of documentWords || []) {
+                    await client.models.DocumentWord.delete({ id: docWord.id });
+                }
+                console.log(`Deleted ${documentWords?.length || 0} DocumentWord links`);
+
+                // Delete all DocumentQuestion join table entries
+                const { data: documentQuestions } = await client.models.DocumentQuestion.list({
+                    filter: { documentID: { eq: file.documentID } }
+                });
+                for (const docQuestion of documentQuestions || []) {
+                    await client.models.DocumentQuestion.delete({ id: docQuestion.id });
+                }
+                console.log(`Deleted ${documentQuestions?.length || 0} DocumentQuestion links`);
+
+                // Delete all AgentJob records
+                const { data: agentJobs } = await client.models.AgentJob.list({
+                    filter: { documentID: { eq: file.documentID } }
+                });
+                for (const job of agentJobs || []) {
+                    await client.models.AgentJob.delete({ id: job.id });
+                }
+                console.log(`Deleted ${agentJobs?.length || 0} AgentJob records`);
+                
+                // Finally delete the Document model itself
                 await client.models.Document.delete({ id: file.documentID });
-                console.log('Deleted associated Document:', file.documentID);
+                console.log('Deleted Document model:', file.documentID);
             }
         }
 
-        // Delete the File model from Gen2 client
-        const client = getAmplifyClient();
-        await client.models.File.delete({ id: file.id });
-        console.log('Deleted File model:', file.id);
+        // Delete all File relationship join table entries
+        
+        // Delete UnitFile join table entries
+        const { data: unitFiles } = await client.models.UnitFile.list({
+            filter: { fileID: { eq: file.id } }
+        });
+        for (const unitFile of unitFiles || []) {
+            await client.models.UnitFile.delete({ id: unitFile.id });
+        }
+        console.log(`Deleted ${unitFiles?.length || 0} UnitFile links`);
 
-        // Delete from S3
-        await remove({ key: file.path });
-        console.log('Deleted S3 file:', file.path);
+        // Delete WordFile join table entries
+        const { data: wordFiles } = await client.models.WordFile.list({
+            filter: { fileID: { eq: file.id } }
+        });
+        for (const wordFile of wordFiles || []) {
+            await client.models.WordFile.delete({ id: wordFile.id });
+        }
+        console.log(`Deleted ${wordFiles?.length || 0} WordFile links`);
+
+        // Delete QuestionFile join table entries
+        const { data: questionFiles } = await client.models.QuestionFile.list({
+            filter: { fileID: { eq: file.id } }
+        });
+        for (const questionFile of questionFiles || []) {
+            await client.models.QuestionFile.delete({ id: questionFile.id });
+        }
+        console.log(`Deleted ${questionFiles?.length || 0} QuestionFile links`);
+
+        // Delete AssistantChatFile join table entries
+        const { data: chatFiles } = await client.models.AssistantChatFile.list({
+            filter: { fileID: { eq: file.id } }
+        });
+        for (const chatFile of chatFiles || []) {
+            await client.models.AssistantChatFile.delete({ id: chatFile.id });
+        }
+        console.log(`Deleted ${chatFiles?.length || 0} AssistantChatFile links`);
+
+        // Delete ParsedContent associated directly with the file
+        const { data: fileParsedContents } = await client.models.ParsedContent.list({
+            filter: { fileID: { eq: file.id } }
+        });
+        for (const parsedContent of fileParsedContents || []) {
+            await client.models.ParsedContent.delete({ id: parsedContent.id });
+        }
+        console.log(`Deleted ${fileParsedContents?.length || 0} ParsedContent records for file`);
+
+        // Delete the File model itself
+        await client.models.File.delete({ id: file.id });
+        console.log('Successfully deleted File model:', file.id);
+
+        // Delete from S3 - must provide accessLevel and identityId for protected files
+        try {
+            await remove({ 
+                key: file.path,
+                options: {
+                    accessLevel: 'protected',
+                    identityId: file.identityId
+                }
+            });
+            console.log('Deleted S3 file:', file.path);
+        } catch (s3Error) {
+            console.error('S3 deletion error (file may not exist):', s3Error);
+            // Don't throw - file model is already deleted
+        }
     } catch (error) {
         console.error('Error deleting file:', error);
+        console.error('Error details:', {
+            message: error.message,
+            name: error.name,
+            stack: error.stack
+        });
         throw error;
     }
 }
 
 /**
- * Component to handle selected file view with lazy-loaded parsedContent
- * Extracted to separate component so React.use() can properly work with Suspense
+ * Component to handle selected file view with parsedContent
+ * Note: parsedContent is eagerly loaded via selectionSet in fileContext.jsx,
+ * so it's a direct array property, not a lazy-loaded function
  */
 function SelectedFileView({ selectedFile, documentStatus, search, editor }) {
-    // Await lazy-loaded parsedContent relationship using React.use()
-    // This MUST be at component level (not in IIFE) for Suspense to work
-    // Per Amplify Gen 2 API: hasMany returns a function -> Promise<{data: Array}>
-    const parsedContentResult = selectedFile.parsedContent 
-        ? React.use(selectedFile.parsedContent()) 
-        : null;
-    const parsedContent = parsedContentResult?.data?.[0];
+    // Access eagerly-loaded parsedContent (loaded via selectionSet in fileContext)
+    // It's already an array, not a function that returns Promise<{data: Array}>
+    const parsedContent = selectedFile.parsedContent?.[0] || null;
 
     return (
         <>
@@ -2652,6 +2878,16 @@ export default function FileManager2() {
     const [filesToUpload, setFilesToUpload] = React.useState([]);
     const uploadInProgressRef = React.useRef(false);
     const [newFileFormOpen, setNewFileFormOpen] = React.useState(false);
+    
+    // Calculate overall upload progress
+    const uploadProgress = React.useMemo(() => {
+        if (fileOperations.length === 0) return 0;
+        const totalProgress = fileOperations.reduce((sum, op) => {
+            const percent = parseInt(op.progress) || 0;
+            return sum + percent;
+        }, 0);
+        return Math.round(totalProgress / fileOperations.length);
+    }, [fileOperations]);
     const [newImageFileFormOpen, setNewImageFileFormOpen] = React.useState(false);
     const [newAudioFileFormOpen, setNewAudioFileFormOpen] = React.useState(false);
     const [newVideoFileFormOpen, setNewVideoFileFormOpen] = React.useState(false);
@@ -3174,9 +3410,9 @@ export default function FileManager2() {
                         documentId: result?.documentModel?.id
                     });
 
-                    // If PDF and auto-analyze is enabled, trigger both analysis and embeddings in parallel
-                    if (file.type === 'application/pdf' && settings?.autoAnalyzeDocuments && result.documentModel) {
-                        console.log('Auto-analyzing and generating embeddings for file:', result.fileModel.id);
+                    // If analyzable document and auto-analyze is enabled, trigger both analysis and embeddings in parallel
+                    if (isAnalyzableDocument(file.type) && settings?.autoAnalyzeDocuments && result.documentModel) {
+                        console.log('Auto-analyzing and generating embeddings for document:', result.fileModel.id, 'type:', file.type);
 
                         // Run both in parallel - don't await
                         Promise.all([
@@ -3351,11 +3587,70 @@ export default function FileManager2() {
                             display: 'flex',
                             flexDirection: 'column',
                             borderRadius: 1,
+                            position: 'relative',
                         }}
                         onDragOver={handleDragOver}
                         onDragLeave={() => setIsDragging(false)}
                         onDrop={handleDrop}
                     >
+                    {/* Upload Progress Bar */}
+                    {fileOperations.length > 0 && (
+                        <LinearProgress 
+                            variant="determinate" 
+                            value={uploadProgress} 
+                            sx={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                zIndex: 1100,
+                                height: 3,
+                                borderRadius: '1px 1px 0 0',
+                            }}
+                        />
+                    )}
+                    {/* Drag and Drop Overlay */}
+                    {isDragging && (
+                        <Box
+                            sx={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                bgcolor: 'rgba(25, 118, 210, 0.08)',
+                                border: '3px dashed',
+                                borderColor: 'primary.main',
+                                borderRadius: 1,
+                                zIndex: 1000,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                pointerEvents: 'none',
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: 2,
+                                    p: 4,
+                                    bgcolor: 'background.paper',
+                                    borderRadius: 2,
+                                    boxShadow: 3,
+                                }}
+                            >
+                                <CloudUploadIcon sx={{ fontSize: 64, color: 'primary.main' }} />
+                                <Typography variant="h6" color="primary">
+                                    {t('fileManager2.dragDrop.dropFilesHere')}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    {t('fileManager2.dragDrop.supportedFormats')}
+                                </Typography>
+                            </Box>
+                        </Box>
+                    )}
                     <Box
                         sx={{
                             bgcolor: 'background.paper',
@@ -3470,14 +3765,37 @@ export default function FileManager2() {
                                         message: t('fileManager2.contextMenu.deleteConfirmMessage', { count: selectedItems.size }),
                                         severity: 'error',
                                         onConfirm: async () => {
+                                            console.log('[FileManager2] Starting delete operation for', selectedItems.size, 'files');
+                                            const deleteErrors = [];
+                                            
                                             for (const fileId of selectedItems) {
                                                 const file = files.find(f => f.id === fileId);
                                                 if (file) {
-                                                    await deleteFileCompletely(file);
+                                                    try {
+                                                        console.log('[FileManager2] Deleting file:', file.name, file.id);
+                                                        await deleteFileCompletely(file);
+                                                        console.log('[FileManager2] Successfully deleted:', file.name);
+                                                    } catch (error) {
+                                                        console.error('[FileManager2] Failed to delete file:', file.name, error);
+                                                        deleteErrors.push({ file: file.name, error: error.message });
+                                                    }
                                                 }
                                             }
+                                            
                                             setSelectedItems(new Set());
-                                            setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                                            
+                                            if (deleteErrors.length > 0) {
+                                                console.error('[FileManager2] Delete operation completed with errors:', deleteErrors);
+                                                setConfirmDialog({
+                                                    open: true,
+                                                    message: `Failed to delete ${deleteErrors.length} file(s): ${deleteErrors.map(e => e.file).join(', ')}`,
+                                                    severity: 'error',
+                                                    onConfirm: () => setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' })
+                                                });
+                                            } else {
+                                                console.log('[FileManager2] All files deleted successfully');
+                                                setConfirmDialog({ open: false, message: '', onConfirm: null, severity: 'warning' });
+                                            }
                                         }
                                     });
                                 }}
@@ -3494,23 +3812,23 @@ export default function FileManager2() {
                                     setContextMenu(null);
                                     selectedItems.forEach(async (fileId) => {
                                         const file = files.find(f => f.id === fileId);
-                                        if (file && file.documentID) {
-                                            //. check if document is a pdf
-                                            if (file.mimeType == 'application/pdf') {
-                                                try {
-                                                    console.log('[FileManager2] Re-analyzing PDF:', file.name);
-                                                    await analyzePDF(file.id, true); // force re-analysis
+                                        if (file) {
+                                            try {
+                                                if (isAnalyzableDocument(file.mimeType)) {
+                                                    console.log('[FileManager2] Re-analyzing document:', file.name, 'type:', file.mimeType);
+                                                    await analyzePDF(file.id);
+                                                    console.log('[FileManager2] Generating embeddings for:', file.name);
+                                                    await generateEmbeddings(file.id);
+                                                } else if (file.documentID) {
                                                     console.log('[FileManager2] Re-generating embeddings for:', file.name);
                                                     await generateEmbeddings(file.id);
-                                                } catch (error) {
-                                                    console.error('Error re-analyzing document:', error);
+                                                } else {
+                                                    console.warn('[FileManager2] Cannot re-analyze - not an analyzable document and no documentID:', file.name, file.mimeType);
                                                 }
-                                            } else {
-                                                console.log('[FileManager2] Re-generating embeddings for:', file.name);
-                                                await generateEmbeddings(file.id);
+                                            } catch (error) {
+                                                console.error('[FileManager2] Error re-analyzing document:', file.name, error);
                                             }
                                         }
-
                                     });
                                 }}
                             >

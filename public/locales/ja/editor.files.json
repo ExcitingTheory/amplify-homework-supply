@@ -64,6 +64,10 @@
       "searchPlaceholder": "ファイルを検索...",
       "selectAllTooltip": "すべて選択します",
       "uploadTooltip": "ファイルをアップロードします"
+    },
+    "dragDrop": {
+      "dropFilesHere": "ここにファイルをドロップしてアップロード",
+      "supportedFormats": "音声、画像、PDF、ドキュメントなど"
     }
   },
   "fileMetadataComponent": {

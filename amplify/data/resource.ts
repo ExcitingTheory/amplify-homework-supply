@@ -177,6 +177,8 @@ const schema = a.schema({
       moderation: ModerationInfo,
       publishedAt: a.timestamp(),
       isDraft: a.boolean(),
+      // Yjs CRDT snapshot for conflict-free collaborative editing
+      yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
     })
     .authorization((allow) => [
       // Owners (creators - typically Instructors) have full control
@@ -276,7 +278,7 @@ const schema = a.schema({
       thumbnail: a.string(),
       backgroundColor: a.string(),
       embedding: EmbeddingInfo,
-      learner: a.string(), // For student access
+      learner: a.string(),// For student access
       owner: a.string(),
       identityId: a.string(),
       // Gradebook curve settings
@@ -332,6 +334,8 @@ const schema = a.schema({
       questionWords: a.hasMany('QuestionWord', ['questionID']),
       questionFiles: a.hasMany('QuestionFile', ['questionID']),
       documentQuestions: a.hasMany('DocumentQuestion', ['questionID']),
+      // Yjs CRDT snapshot for conflict-free collaborative editing
+      yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
     })
     .authorization((allow) => [
       allow.owner(),
@@ -396,6 +400,8 @@ const schema = a.schema({
       parsedContent: a.hasMany('ParsedContent', ['fileID']),
       // Metadata for semantic search
       embedding: EmbeddingInfo,
+      // Yjs CRDT snapshot for conflict-free file metadata management
+      yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
     })
     .authorization((allow) => [
       // Owner has full control
@@ -434,6 +440,8 @@ const schema = a.schema({
       wordFiles: a.hasMany('WordFile', ['wordID']),
       questionWords: a.hasMany('QuestionWord', ['wordID']),
       documentWords: a.hasMany('DocumentWord', ['wordID']),
+      // Yjs CRDT snapshot for conflict-free collaborative editing
+      yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
     })
     .authorization((allow) => [
       allow.owner(),
@@ -595,6 +603,8 @@ const schema = a.schema({
       documentQuestions: a.hasMany('DocumentQuestion', ['documentID']), // Generated comprehension questions
       // Metadata
       metadata: a.json(),
+      // Yjs CRDT snapshot for conflict-free document status management
+      yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
     })
     .authorization((allow) => [
       // Document owner (student) can manage their documents
@@ -631,8 +641,7 @@ const schema = a.schema({
       modelUsed: a.string(),
       tokensUsed: a.integer(),
       processingTime: a.integer(),
-      // Timestamps
-      createdAt: a.datetime(),
+      // Timestamps (createdAt/updatedAt auto-generated)
       importedAt: a.datetime(),
       metadata: a.json(),
     })
@@ -727,7 +736,6 @@ const schema = a.schema({
       language: a.string(),
       timezone: a.string(),
       metadata: a.json(),
-      updatedAt: a.datetime(),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -756,9 +764,6 @@ const schema = a.schema({
       messageId: a.string(),
       sessionId: a.string(),
       metadata: a.json(),
-      // Timestamps
-      createdAt: a.datetime(),
-      updatedAt: a.datetime(),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -1131,4 +1136,9 @@ export const data = defineData({
       expiresInDays: 30,
     },
   },
+  // Enable optimistic concurrency control for data consistency
+  // All models will have _version, _lastChangedAt, _deleted fields
+  conflictResolution: {
+    resolutionStrategy: 'OPTIMISTIC_CONCURRENCY'
+  }
 });

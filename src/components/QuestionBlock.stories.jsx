@@ -1,4 +1,5 @@
 import React from 'react';
+import { within, userEvent, waitFor, expect } from '@storybook/test';
 import QuestionBlock from './QuestionBlock';
 
 export default {
@@ -47,6 +48,17 @@ export const MultipleChoice = {
     contentState: createMockContentState(multipleChoiceQuestion),
     blockProps: mockBlockProps,
     nodeKey: 'mock-node-key',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Verify all answer options are rendered
+    await waitFor(() => {
+      expect(canvas.getByText('Paris')).toBeInTheDocument();
+      expect(canvas.getByText('London')).toBeInTheDocument();
+      expect(canvas.getByText('Berlin')).toBeInTheDocument();
+      expect(canvas.getByText('Madrid')).toBeInTheDocument();
+    }, { timeout: 3000 });
   },
 };
 

@@ -8,6 +8,7 @@ Detailed examples of using the component-versioning skill.
 **Target**: `ChatSidebar2.tsx`
 
 ### Initial State
+
 ```typescript
 // src/components/ChatSidebar.tsx
 export function ChatSidebar({ messages }: ChatSidebarProps) {
@@ -16,6 +17,7 @@ export function ChatSidebar({ messages }: ChatSidebarProps) {
 ```
 
 ### After Versioning
+
 ```typescript
 // src/components/ChatSidebar2.tsx (auto-generated)
 export function ChatSidebar2({ messages }: ChatSidebar2Props) {
@@ -24,6 +26,7 @@ export function ChatSidebar2({ messages }: ChatSidebar2Props) {
 ```
 
 **Generated Checklist**:
+
 - [ ] Verify message rendering
 - [ ] Test with message.parts format
 - [ ] Validate scroll behavior
@@ -34,6 +37,7 @@ export function ChatSidebar2({ messages }: ChatSidebar2Props) {
 ## Example 2: Versioning with Storybook
 
 **Input**:
+
 ```typescript
 {
   componentPath: "src/components/Editor3/Editor3.tsx",
@@ -43,6 +47,7 @@ export function ChatSidebar2({ messages }: ChatSidebar2Props) {
 ```
 
 **Generates**:
+
 - `src/components/Editor4/Editor4.tsx`
 - `src/components/Editor4/Editor4.stories.tsx`
 - Feature parity checklist with:
@@ -66,6 +71,7 @@ export function UnitEditor() {
 ```
 
 **Generated Checklist Includes**:
+
 - [ ] Verify UnitContext integration
 - [ ] Test saveEditorContent calls
 - [ ] Validate observeQuery subscriptions
@@ -76,15 +82,17 @@ export function UnitEditor() {
 ## Example 4: Component with Multiple Exports
 
 **Source**:
+
 ```typescript
 // DictionaryEditor.tsx
-export function DictionaryEditor() { }
-export function DictionaryEditorToolbar() { }
-export const useDictionaryEditor = () => { }
+export function DictionaryEditor() {}
+export function DictionaryEditorToolbar() {}
+export const useDictionaryEditor = () => {};
 ```
 
 **Result**:
 All exports renamed:
+
 - `DictionaryEditor2`
 - `DictionaryEditorToolbar2`
 - `useDictionaryEditor2`
@@ -94,6 +102,7 @@ All exports renamed:
 ## Example 5: File Organization
 
 **Before**:
+
 ```
 src/components/
 ├── ChatSidebar.tsx
@@ -102,6 +111,7 @@ src/components/
 ```
 
 **After**:
+
 ```
 src/components/
 ├── ChatSidebar2/
@@ -119,19 +129,25 @@ src/components/
 ## Common Patterns
 
 ### Pattern 1: DataStore Integration
+
 When versioning components with DataStore:
+
 - Check for `DataStore.observeQuery()` calls
-- Verify `_version` tracking for OCC
+- Verify `updatedAt` timestamp tracking
 - Validate subscription cleanup
 
 ### Pattern 2: Lexical Editor Nodes
+
 When versioning Editor components:
+
 - List all custom nodes
 - Check plugin integrations
 - Verify state management
 
 ### Pattern 3: Material UI Components
+
 When versioning MUI components:
+
 - Check theme usage
 - Verify responsive breakpoints
 - Validate accessibility props

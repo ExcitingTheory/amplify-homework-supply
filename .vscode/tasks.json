@@ -1,0 +1,153 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Check Agent Permission",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "agent:check",
+        "--",
+        "--operation",
+        "${input:operation}",
+        "--path",
+        "${input:filePath}"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      }
+    },
+    {
+      "label": "Check Terminal Command Permission",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "agent:check",
+        "--",
+        "--operation",
+        "terminal",
+        "--command",
+        "${input:terminalCommand}"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "View Agent Operation Logs",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "agent:logs",
+        "--",
+        "--recent",
+        "50"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Enable Dry-Run Safe Mode",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "agent:safe-mode",
+        "--",
+        "--mode",
+        "dryRun",
+        "--enable",
+        "true"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Disable Dry-Run Safe Mode",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "agent:safe-mode",
+        "--",
+        "--mode",
+        "dryRun",
+        "--enable",
+        "false"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Enable Read-Only Safe Mode",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "agent:safe-mode",
+        "--",
+        "--mode",
+        "readOnly",
+        "--enable",
+        "true"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Disable Read-Only Safe Mode",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "agent:safe-mode",
+        "--",
+        "--mode",
+        "readOnly",
+        "--enable",
+        "false"
+      ],
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "operation",
+      "type": "pickString",
+      "description": "Select operation type",
+      "options": [
+        "read",
+        "write",
+        "delete",
+        "rename",
+        "terminal"
+      ],
+      "default": "write"
+    },
+    {
+      "id": "filePath",
+      "type": "promptString",
+      "description": "Enter file path to check"
+    },
+    {
+      "id": "terminalCommand",
+      "type": "promptString",
+      "description": "Enter terminal command to check"
+    }
+  ]
+}

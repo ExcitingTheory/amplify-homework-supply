@@ -39,7 +39,11 @@ export default function WorkbookStatePlugin() {
         
         // Convert JSON to EditorState and update editor
         const parsedState = editor.parseEditorState(editorState);
-        editor.setEditorState(parsedState);
+        
+        // Defer state update to avoid flushSync during React lifecycle
+        queueMicrotask(() => {
+          editor.setEditorState(parsedState);
+        });
         
         hasLoaded.current = true;
       }

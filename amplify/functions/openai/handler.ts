@@ -17,13 +17,68 @@ import { type Schema } from '../../data/resource';
 import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/data';
 import { initializePhoenixTracing, addTraceAttributes } from '../shared/phoenix-tracer';
+import { fromEnv } from '@aws-sdk/credential-providers';
 
 // Initialize Phoenix tracing at module load
 initializePhoenixTracing();
 
+// Configure Amplify at module level (before creating client)
+// Lambda resolvers get API_ENDPOINT and AWS_REGION automatically
+Amplify.configure(
+  {
+    API: {
+      GraphQL: {
+        endpoint: process.env.API_ENDPOINT || '',
+        region: process.env.AWS_REGION || 'us-east-1',
+        defaultAuthMode: 'iam', // Lambda uses IAM auth
+      },
+    },
+  },
+  {
+    Auth: {
+      credentialsProvider: {
+        getCredentialsAndIdentityId: async () => ({
+          credentials: await fromEnv()(),
+        }),
+        clearCredentialsAndIdentityId: () => {},
+      },
+    },
+  }
+);
+
 const lambdaClient = new LambdaClient();
 let openaiInstance: any = null;
 let dataClient: ReturnType<typeof generateClient<Schema>> | null = null;
+
+// Raw GraphQL operations - .models API doesn't work in Lambda resolvers
+const GET_FILE = /* GraphQL */ `
+  query GetFile($id: ID!) {
+    getFile(id: $id) {
+      id
+    }
+  }
+`;
+
+const CREATE_FILE = /* GraphQL */ `
+  mutation CreateFile($input: CreateFileInput!) {
+    createFile(input: $input) {
+      id
+      name
+      path
+      mimeType
+    }
+  }
+`;
+
+const UPDATE_FILE = /* GraphQL */ `
+  mutation UpdateFile($input: UpdateFileInput!) {
+    updateFile(input: $input) {
+      id
+      path
+      description
+    }
+  }
+`;
 
 async function getOpenAI(): Promise<any> {
   if (!openaiInstance) {
@@ -35,19 +90,11 @@ async function getOpenAI(): Promise<any> {
   return openaiInstance;
 }
 
-async function getDataClient() {
+function getDataClient() {
   if (!dataClient) {
-    // Lambda resolvers get API_ENDPOINT and AWS_REGION automatically
-    Amplify.configure({
-      API: {
-        GraphQL: {
-          endpoint: process.env.API_ENDPOINT || '',
-          region: process.env.AWS_REGION || 'us-east-1',
-          defaultAuthMode: 'iam', // Lambda uses IAM auth
-        },
-      },
+    dataClient = generateClient<Schema>({
+      authMode: 'iam',
     });
-    dataClient = generateClient<Schema>();
   }
   return dataClient;
 }
@@ -193,20 +240,26 @@ async function handleGenerateAudioFile(args: any, userId: string, identityId: st
   const { phrase, voice = 'alloy', model = 'tts-1' } = args;
   
   try {
-    const client = await getDataClient();
+    const client = getDataClient();
     
     const timestamp = Date.now();
     const fileName = `generated-audio-${timestamp}.mp3`;
     const s3Path = `public/audio/${timestamp}/${fileName}`;
     
     // Create File record with pending status
-    const { data: file, errors } = await client.models.File.create({
-      name: fileName,
-      mimeType: 'audio/mpeg',
-      path: s3Path,
-      owner: userId,
-      identityId: identityId,
-    });
+    const { data, errors } = await client.graphql({
+      query: CREATE_FILE,
+      variables: {
+        input: {
+          name: fileName,
+          mimeType: 'audio/mpeg',
+          path: s3Path,
+          owner: userId,
+          identityId: identityId,
+        },
+      },
+    }) as any;
+    const file = data?.createFile;
     
     if (errors || !file) {
       throw new Error(`Failed to create File record: ${JSON.stringify(errors)}`);
@@ -244,7 +297,7 @@ async function handleGenerateAudioFile(args: any, userId: string, identityId: st
 async function handleGenerateAudioFileAsync(args: any): Promise<void> {
   const { fileId, phrase, voice = 'alloy', model = 'tts-1' } = args;
   const openai = await getOpenAI();
-  const client = await getDataClient();
+  const client = getDataClient();
   
   try {
     // Generate audio
@@ -258,9 +311,14 @@ async function handleGenerateAudioFileAsync(args: any): Promise<void> {
     const base64Audio = Buffer.from(buffer).toString('base64');
     
     // Update File with completed data
-    await client.models.File.update({
-      id: fileId,
-      description: 'Generated audio - completed',
+    await client.graphql({
+      query: UPDATE_FILE,
+      variables: {
+        input: {
+          id: fileId,
+          description: 'Generated audio - completed',
+        },
+      },
     });
     
     console.log(`[Audio Generation Complete] ${fileId}`);
@@ -268,10 +326,15 @@ async function handleGenerateAudioFileAsync(args: any): Promise<void> {
     console.error('[Generate Audio File Async Error]:', error);
     // Update File with error description
     try {
-      const client = await getDataClient();
-      await client.models.File.update({
-        id: fileId,
-        description: `Error: ${String(error).substring(0, 200)}`,
+      const client = getDataClient();
+      await client.graphql({
+        query: UPDATE_FILE,
+        variables: {
+          input: {
+            id: fileId,
+            description: `Error: ${String(error).substring(0, 200)}`,
+          },
+        },
       });
     } catch (updateError) {
       console.error('[Update File Status Error]:', updateError);
@@ -303,20 +366,26 @@ async function handleGenerateImageFile(args: any, userId: string, identityId: st
   const { phrase, model = 'dall-e-3' } = args;
   
   try {
-    const client = await getDataClient();
+    const client = getDataClient();
     
     const timestamp = Date.now();
     const fileName = `generated-image-${timestamp}.png`;
     const s3Path = `public/images/${timestamp}/${fileName}`;
     
     // Create File record with pending status
-    const { data: file, errors } = await client.models.File.create({
-      name: fileName,
-      mimeType: 'image/png',
-      path: s3Path,
-      owner: userId,
-      identityId: identityId,
-    });
+    const { data, errors } = await client.graphql({
+      query: CREATE_FILE,
+      variables: {
+        input: {
+          name: fileName,
+          mimeType: 'image/png',
+          path: s3Path,
+          owner: userId,
+          identityId: identityId,
+        },
+      },
+    }) as any;
+    const file = data?.createFile;
     
     if (errors || !file) {
       throw new Error(`Failed to create File record: ${JSON.stringify(errors)}`);
@@ -352,7 +421,7 @@ async function handleGenerateImageFile(args: any, userId: string, identityId: st
 async function handleGenerateImageFileAsync(args: any): Promise<void> {
   const { fileId, phrase, model = 'dall-e-3' } = args;
   const openai = await getOpenAI();
-  const client = await getDataClient();
+  const client = getDataClient();
   
   try {
     // Generate image
@@ -367,9 +436,14 @@ async function handleGenerateImageFileAsync(args: any): Promise<void> {
     const base64 = response.data[0]?.b64_json || '';
     
     // Update File with completed data
-    await client.models.File.update({
-      id: fileId,
-      description: 'Generated image - completed',
+    await client.graphql({
+      query: UPDATE_FILE,
+      variables: {
+        input: {
+          id: fileId,
+          description: 'Generated image - completed',
+        },
+      },
     });
     
     console.log(`[Image Generation Complete] ${fileId}`);
@@ -377,10 +451,15 @@ async function handleGenerateImageFileAsync(args: any): Promise<void> {
     console.error('[Generate Image File Async Error]:', error);
     // Update File with error description
     try {
-      const client = await getDataClient();
-      await client.models.File.update({
-        id: fileId,
-        description: `Error: ${String(error).substring(0, 200)}`,
+      const client = getDataClient();
+      await client.graphql({
+        query: UPDATE_FILE,
+        variables: {
+          input: {
+            id: fileId,
+            description: `Error: ${String(error).substring(0, 200)}`,
+          },
+        },
       });
     } catch (updateError) {
       console.error('[Update File Status Error]:', updateError);

@@ -454,6 +454,94 @@ This document outlines the comprehensive end-to-end (E2E) testing strategy for v
 
 ---
 
+### I. Global Chat Tests
+
+**Test File**: `cypress/e2e/global-chat.cy.ts`  
+**Documentation**: `cypress/e2e/GLOBAL_CHAT_E2E_README.md`  
+**Status**: ✅ Complete (All tests implemented)
+
+#### I1. Global Chat Button Visibility
+- [ ] Chat button visible on home page (instructor)
+- [ ] Chat button visible on sections page
+- [ ] Chat button visible on units page
+- [ ] Chat button visible on profile page
+- [ ] Chat button visible on home page (learner)
+- [ ] Chat button hides when chat is open
+
+#### I2. Chat Opening and Closing
+- [ ] Opens chat drawer when button clicked
+- [ ] Closes chat drawer when close button clicked
+- [ ] Hides chat button when drawer is open
+- [ ] Shows chat button when drawer is closed
+- [ ] Keyboard shortcut Cmd+Shift+C opens chat (Mac)
+- [ ] Keyboard shortcut Cmd+Shift+C closes chat (Mac)
+- [ ] Keyboard shortcut Ctrl+Shift+C works (Windows/Linux)
+
+#### I3. Chat Persistence Across Navigation
+- [ ] Open state maintained when navigating to sections
+- [ ] Open state maintained when navigating to units
+- [ ] Open state maintained when navigating to profile
+- [ ] Closed state maintained across pages
+- [ ] Chat closes and remains closed on next page
+
+#### I4. Context-Aware Chat Functionality
+- [ ] Chat has sections context on home page
+- [ ] Chat has sections context on sections page
+- [ ] Chat has units context on units page
+- [ ] Chat context changes when navigating between pages
+- [ ] Tools access correct page context
+- [ ] Navigation prompt shown when context unavailable
+
+#### I5. Chat History Persistence
+- [ ] Messages persist when closing/reopening chat
+- [ ] Messages persist across page navigation
+- [ ] Messages saved to AssistantChat model in DynamoDB
+- [ ] Chat history loads from database on page refresh
+- [ ] Draft messages preserved in input field
+
+#### I6. Real Chat Interaction with AI
+- [ ] Sends user messages successfully
+- [ ] Receives AI responses via streaming
+- [ ] Multiple message exchanges work
+- [ ] Tool calls execute correctly
+- [ ] Search results render in chat
+- [ ] Block suggestions work
+- [ ] Section creation via chat works
+- [ ] Unit operations via chat work
+
+#### I7. Responsive Behavior
+- [ ] Persistent drawer on desktop (1920x1080)
+- [ ] Temporary drawer on mobile (375x667)
+- [ ] Graceful viewport resize handling
+- [ ] Touch interactions work on mobile
+- [ ] Drawer width adjusts for screen size
+
+#### I8. Accessibility
+- [ ] Chat button has proper aria-label
+- [ ] Close button has proper aria-label
+- [ ] Chat messages container has role="log"
+- [ ] Keyboard navigable (Tab, Enter, Esc)
+- [ ] Visible focus indicators
+- [ ] Screen reader announces new messages
+- [ ] High contrast mode support
+
+#### I9. Error Handling
+- [ ] Empty messages handled gracefully
+- [ ] Very long messages handled gracefully
+- [ ] Authentication errors shown clearly
+- [ ] Network failures show retry option
+- [ ] AI API errors don't crash chat
+- [ ] Invalid tool calls handled safely
+
+**Run Command**:
+```bash
+npx cypress run --spec "cypress/e2e/global-chat.cy.ts"
+```
+
+**Duration**: ~10-15 minutes (AI operations are slower)
+
+---
+
 ## Test Data Requirements
 
 ### Seed Data for Sandbox/Staging

@@ -1,11 +1,17 @@
 /**
  * IndexedDB wrapper for vector embeddings storage
  * Provides persistent caching of document embeddings for semantic search
+ * 
+ * Note: This module is browser-only (uses IndexedDB)
  */
 
-import { openDB } from 'idb';
-import { downloadData } from 'aws-amplify/storage';
-import pako from 'pako';
+// Only import in browser environment
+let openDB, downloadData, pako;
+if (typeof window !== 'undefined') {
+  ({ openDB } = require('idb'));
+  ({ downloadData } = require('aws-amplify/storage'));
+  pako = require('pako');
+}
 
 const DB_NAME = 'VectorStoreDB';
 const DB_VERSION = 1;
@@ -16,6 +22,9 @@ const STORE_NAME = 'embeddings';
  * @returns {Promise<IDBDatabase>}
  */
 async function getDB() {
+  if (typeof window === 'undefined') {
+    throw new Error('IndexedDB is only available in browser');
+  }
   return openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
       // Create object store for embeddings if it doesn't exist

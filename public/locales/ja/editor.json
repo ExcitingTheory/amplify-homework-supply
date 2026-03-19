@@ -763,6 +763,10 @@
       "uploadTooltip": "ファイルをアップロードします",
       "actionsTooltip": "アクション"
     },
+    "dragDrop": {
+      "dropFilesHere": "ここにファイルをドロップしてアップロード",
+      "supportedFormats": "音声、画像、PDF、ドキュメントなど"
+    },
     "contextMenu": {
       "deselectAll": "すべて選択解除",
       "deleteConfirmMessage": "選択した{{count}}個のファイルを削除しますか？",

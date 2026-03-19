@@ -21,6 +21,8 @@ import IconEdit from "@mui/icons-material/Edit";
 import EditNoteIcon from '@mui/icons-material/EditNote';
 
 import getCachedUrl from '../src/utils/getCachedUrl'
+import { useChatPageContext } from '../src/hooks/useChatPageContext'
+import AuthContext from '../src/context/authContext'
 
 import { fetchAuthSession } from 'aws-amplify/auth'
 
@@ -58,6 +60,8 @@ function CardMediaComponent({ s3Key, identityId, level = 'protected' }) {
 
 function Units() {
     const { t } = useTranslation('pages');
+    const { user, isLoading: authLoading } = React.useContext(AuthContext) || { user: undefined, isLoading: true };
+    
     /**
      * Units is a page that displays a list of units.
      * For Instructor users, it displays a list of units they are teaching.
@@ -88,9 +92,27 @@ function Units() {
     const [work, setIsWorking] = useState(false)
     const router = useRouter()
 
+    // Register page context with global chat
+    // Combine all units for chat context
+    const allUnits = React.useMemo(() => [
+        ...draftUnits,
+        ...publishedUnits,
+        ...archivedUnits
+    ], [draftUnits, publishedUnits, archivedUnits]);
+    
+    useChatPageContext({
+        // No specific unit, but chat can list/search all units
+    });
 
     // Consolidated Unit observer - handles published, archived, and draft units with client-side filtering
     useEffect(() => {
+        // Wait for authentication
+        if (authLoading || !user) {
+            console.log('[Units] Waiting for authentication...', { authLoading, hasUser: !!user });
+            return;
+        }
+        
+        console.log('[Units] Setting up Unit subscription for user:', user.username);
         const client = getAmplifyClient();
         
         const subscription = client.models.Unit.observeQuery().subscribe({
@@ -242,6 +264,7 @@ function Units() {
                                         {t('units.noPublishedUnits')}
                                     </Typography>
                                     <Button
+                                        data-tour="create-unit-button"
                                         variant="outlined"
                                         color="primary"
                                         onClick={createUnit}
