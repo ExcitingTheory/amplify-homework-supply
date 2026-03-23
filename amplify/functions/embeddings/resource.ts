@@ -13,7 +13,6 @@ import { defineFunction, secret } from '@aws-amplify/backend';
  */
 
 export const embeddingsHandler = defineFunction({
-  // entry: './handler.ts',
   timeoutSeconds: 300,
   memoryMB: 512,
   resourceGroupName: 'data',

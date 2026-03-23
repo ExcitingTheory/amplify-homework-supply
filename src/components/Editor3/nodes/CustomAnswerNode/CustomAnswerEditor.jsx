@@ -399,8 +399,8 @@ export default React.memo(function CustomAnswerEditor({
 
         console.log('fileGenerator', fileGenerator)
 
-        
-        const { path } = fileGenerator.data.generateAudioFile;
+        // The mutation returns { data: { path, identityId, ... }, errors }
+        const { path } = fileGenerator.data || {};
 
         if (path) {
             console.log('s3Key', path, identityId)
@@ -429,7 +429,7 @@ export default React.memo(function CustomAnswerEditor({
         // " What is Tokyo?"        
 
         // Extract waveform data from the backend response
-        const promptWaveformData = fileGenerator?.data?.generateAudioFile?.waveformData;
+        const promptWaveformData = fileGenerator?.data?.waveformData;
 
         // Create and save the Question model
         try {

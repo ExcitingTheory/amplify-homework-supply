@@ -352,7 +352,7 @@ export default function AssignmentConfiguration() {
             >
 
               {sections?.length > 0 &&
-                sections.map((_section, index) => {
+                sections.filter(s => s != null && s.id != null).map((_section, index) => {
                   return (
                     <MenuItem key={index} value={_section.id}
                     >

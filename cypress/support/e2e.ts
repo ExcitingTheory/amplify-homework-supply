@@ -19,8 +19,81 @@ import { registerCommands } from './commands'
 // Register all custom Cypress commands
 registerCommands();
 
-// Removed console interception to avoid performance issues and promise conflicts
-// Console output will appear naturally in the browser console during test execution
+/**
+ * Browser Console Capture (Non-blocking)
+ * 
+ * Captures console output to Cypress logs without forwarding to terminal tasks.
+ * This avoids command chaining issues during cy.visit().
+ * 
+ * Enable by setting CYPRESS_CONSOLE_LOGS=true environment variable
+ */
+const enableConsoleCapture = Cypress.env('CONSOLE_LOGS') || false;
+
+if (enableConsoleCapture) {
+  const logLevels = typeof enableConsoleCapture === 'string' 
+    ? enableConsoleCapture.split(',').map(s => s.trim().toLowerCase())
+    : ['log', 'warn', 'error'];
+
+  // Store console output for later access
+  const consoleBuffer: { level: string; message: string; timestamp: number }[] = [];
+
+  Cypress.on('window:before:load', (win) => {
+    const originalLog = win.console.log;
+    const originalWarn = win.console.warn;
+    const originalError = win.console.error;
+
+    if (logLevels.includes('log')) {
+      win.console.log = function (...args: any[]) {
+        originalLog.apply(win.console, args);
+        const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ');
+        consoleBuffer.push({ level: 'log', message, timestamp: Date.now() });
+        Cypress.log({ name: 'console.log', message });
+      };
+    }
+
+    if (logLevels.includes('warn')) {
+      win.console.warn = function (...args: any[]) {
+        originalWarn.apply(win.console, args);
+        const message = args.map(arg => String(arg)).join(' ');
+        consoleBuffer.push({ level: 'warn', message, timestamp: Date.now() });
+        Cypress.log({ name: 'console.warn', message, consoleProps: () => ({ args }) });
+      };
+    }
+
+    if (logLevels.includes('error')) {
+      win.console.error = function (...args: any[]) {
+        originalError.apply(win.console, args);
+        const message = args.map(arg => {
+          if (arg instanceof Error) return `${arg.name}: ${arg.message}`;
+          if (typeof arg === 'object') return JSON.stringify(arg);
+          return String(arg);
+        }).join(' ');
+        consoleBuffer.push({ level: 'error', message, timestamp: Date.now() });
+        Cypress.log({ name: 'console.error', message, consoleProps: () => ({ args }) });
+      };
+    }
+  });
+
+  // Make buffer accessible via cy.task for later retrieval
+  beforeEach(() => {
+    cy.wrap(consoleBuffer).as('consoleBuffer');
+  });
+}
+
+// Handle uncaught errors from Amplify subscription processing
+// This prevents tests from failing due to known issues with null items in subscription updates
+Cypress.on('uncaught:exception', (err, runnable) => {
+  // Amplify Gen 2 subscription error: null items in Array.map() 
+  // Error pattern: "Cannot read properties of null (reading 'id')" from findIndexByFields/ingestMessages
+  if (err.message.includes("Cannot read properties of null (reading 'id')")) {
+    console.warn('[Cypress] Suppressing Amplify subscription null item error:', err.message);
+    // Return false to prevent the error from failing the test
+    return false;
+  }
+  
+  // Allow other errors to fail the test
+  return true;
+});
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

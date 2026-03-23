@@ -112,7 +112,7 @@ const FilesProvider = ({ children }) => {
       const docStatus = documents[file.documentID];
       const pageEmbeddings = docStatus?.pageEmbeddings;
       const embeddingsS3Key = docStatus?.embeddingsS3Key;
-      const currentVersion = docStatus?.updatedAt || file.updatedAt;
+      const currentVersion = docStatus?._version || file._version;
       const loadedVersion = loadedVersions.current.get(file.id);
       
       // Skip if already loaded and version unchanged
@@ -282,10 +282,14 @@ const FilesProvider = ({ children }) => {
             console.log('  - items.length:', items?.length);
             console.log('  - isSynced:', isSynced);
             console.log('  - items:', items);
+            
+            // Filter out null items that can appear during subscription updates
+            const validItems = items.filter(item => item != null && item.id != null);
+            
             const _playlistFiltered = {}
             const _pdfsFiltered = {}
 
-            items.forEach((item) => {
+            validItems.forEach((item) => {
               // Include all audio files in playlist, not just specific MIME types
               if (item.mimeType && item.mimeType.startsWith('audio/')) {
                 _playlistFiltered[item.id] = item
@@ -317,18 +321,18 @@ const FilesProvider = ({ children }) => {
             });
             
             setMyFiles(prev => {
-              if (prev.length !== items.length) {
-                console.log('[FilesContext] Files count changed:', prev.length, '→', items.length);
+              if (prev.length !== validItems.length) {
+                console.log('[FilesContext] Files count changed:', prev.length, '→', validItems.length);
                 setFilesVersion(v => v + 1);
-                return items;
+                return validItems;
               }
-              const hasChanges = items.some((item, i) => 
+              const hasChanges = validItems.some((item, i) => 
                 !prev[i] || prev[i].id !== item.id || prev[i]._version !== item._version
               );
               if (hasChanges) {
                 console.log('[FilesContext] Files have changes, updating state');
                 setFilesVersion(v => v + 1);
-                return items;
+                return validItems;
               }
               return prev;
             });
@@ -359,8 +363,11 @@ const FilesProvider = ({ children }) => {
     const client = getAmplifyClient();
     documentSubscriptionRef.current = client.models.Document.observeQuery().subscribe({
       next: ({ items }) => {
+        // Filter out null items that can appear during subscription updates
+        const validItems = items.filter(item => item != null && item.id != null);
+        
         const statusMap = {};
-        items.forEach(doc => {
+        validItems.forEach(doc => {
           // Parse pageEmbeddings if it's a string
           const pageEmbeddings = typeof doc.pageEmbeddings === 'string' 
             ? JSON.parse(doc.pageEmbeddings)

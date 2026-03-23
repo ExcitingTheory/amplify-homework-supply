@@ -24,8 +24,11 @@ const SettingsProvider = ({ children }) => {
 
     const subscription = client.models.Settings.observeQuery().subscribe({
       next: async ({ items }) => {
-        if (items.length > 0) {
-          setSettings(items[0]);
+        // Filter out null items that can appear during subscription updates
+        const validItems = items.filter(item => item != null && item.id != null);
+        
+        if (validItems.length > 0) {
+          setSettings(validItems[0]);
           setIsLoading(false);
         } else {
           // Create default settings if none exist

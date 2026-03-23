@@ -13,7 +13,6 @@ import { defineFunction, secret } from '@aws-amplify/backend';
  */
 
 export const documentAnalysisHandler = defineFunction({
-  // entry: './handler.ts',
   timeoutSeconds: 900,
   memoryMB: 512,
   resourceGroupName: 'data',  // Must be in data stack - used as GraphQL resolver

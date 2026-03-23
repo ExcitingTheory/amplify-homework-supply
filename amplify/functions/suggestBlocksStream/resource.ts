@@ -14,7 +14,6 @@ import { defineFunction, secret } from '@aws-amplify/backend';
  */
 
 export const suggestBlocksStreamHandler = defineFunction({
-  // entry: './handler.ts',
   timeoutSeconds: 60,
   memoryMB: 256,
   resourceGroupName: 'data',  // Must be in data stack - integrated with HTTP API on data stack

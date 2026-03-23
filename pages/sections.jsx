@@ -119,7 +119,7 @@ function Sections({ user }) {
      * 
      */
     const { t } = useTranslation('pages');
-    const { sections } = React.useContext(SectionContext);
+    const { sections, refetchSections } = React.useContext(SectionContext);
     const [work, setIsWorking] = useState(false)
     const [open, setOpen] = React.useState(false);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'error' });
@@ -137,10 +137,13 @@ function Sections({ user }) {
     const userId = React.useMemo(() => getUserId(user), [user]);
     const ownedSections = React.useMemo(() => {
         if (!userId) return [];
+        // Filter out null items explicitly before checking ownership
         const owned = sections.filter((section) =>
-            section?.owner === userId || section?.instructor === userId
+            section != null && section.id != null && (section.owner === userId || section.instructor === userId)
         );
-        console.log('[sections.jsx] userId:', userId, 'ownedSections:', owned.length, owned.map(s => ({ name: s.name, owner: s.owner, instructor: s.instructor })));
+        // Filter for console.log to prevent "Cannot read properties of null" errors
+        const validOwned = owned.filter(s => s != null && s.id != null);
+        console.log('[sections.jsx] userId:', userId, 'ownedSections:', validOwned.length, validOwned.map(s => ({ name: s.name, owner: s.owner, instructor: s.instructor })));
         return owned;
     }, [sections, userId]);
     const canViewInstructorDashboard = isInstructor || ownedSections.length > 0;
@@ -192,8 +195,9 @@ function Sections({ user }) {
                 throw new Error(`Invalid response from server: ${response.data}`);
             }
             
-            // Don't add optimistic update - let the subscription deliver the new section
-            // This prevents conflicts with Amplify's internal subscription processing
+            // Refetch sections to get the newly created section
+            // (subscriptions may not always deliver immediately)
+            await refetchSections();
             
             setIsWorking(false);
             setOpen(false);
@@ -404,7 +408,9 @@ function Sections({ user }) {
 
           }
                     {sections &&
-                        sections.map(function (section) {
+                        sections
+                            .filter(section => section != null && section.id != null) // Filter out null/undefined sections and sections without ID
+                            .map(function (section) {
                             console.log('!!!section', section)
                             return (
 

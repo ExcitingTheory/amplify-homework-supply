@@ -254,14 +254,17 @@ export async function generateUnitEmbedding(unitId, options = {}) {
       filter: { unitID: { eq: unitId } }
     });
     
-    if (sections.length === 0) {
-      console.warn(`Unit ${unitId} has no sections`);
+    // Filter out null sections
+    const validSections = sections.filter(s => s != null && s.id != null);
+    
+    if (validSections.length === 0) {
+      console.warn(`Unit ${unitId} has no valid sections`);
       return { success: false, reason: 'no_sections' };
     }
     
     // Extract text from all sections
     const extracted = extractWithSectionMarkers(
-      sections.map(s => ({
+      validSections.map(s => ({
         id: s.id,
         title: s.title,
         content: s.content
@@ -458,12 +461,15 @@ export async function generateAllSectionEmbeddings(unitId) {
       filter: { unitID: { eq: unitId } }
     });
     
+    // Filter out null items that can occur in subscription updates
+    const validSections = sections.filter(s => s != null && s.id != null);
+    
     const results = await Promise.allSettled(
-      sections.map(section => generateSectionEmbedding(section.id))
+      validSections.map(section => generateSectionEmbedding(section.id))
     );
     
     const summary = {
-      total: sections.length,
+      total: validSections.length,
       success: results.filter(r => r.status === 'fulfilled' && r.value.success).length,
       cached: results.filter(r => r.status === 'fulfilled' && r.value.cached).length,
       failed: results.filter(r => r.status === 'rejected').length

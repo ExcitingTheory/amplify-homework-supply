@@ -16,7 +16,6 @@ export interface WebSocketApiProps {
 
 
 export const websocketHandler = defineFunction({
-  // entry: './handler.ts',
   timeoutSeconds: 30,
   memoryMB: 256,
   resourceGroupName: 'data',  // Keep in data stack with WebSocket construct

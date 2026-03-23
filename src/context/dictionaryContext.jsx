@@ -166,10 +166,13 @@ const DictionaryProvider = ({ children }) => {
         const setupSubscription = async () => {
             subscription = client.models.Word.observeQuery().subscribe({
             next: ({ items }) => {
+                // Filter out null items that can appear during subscription updates
+                const validItems = items.filter(item => item != null && item.id != null);
+                
                 const wordMap = {}
                 const _wordMapId = {}
 
-                items.forEach((item) => {
+                validItems.forEach((item) => {
                     wordMap[item.phrase] = item
                     _wordMapId[item.id] = item
                 })
@@ -227,9 +230,12 @@ const DictionaryProvider = ({ children }) => {
         const setupSubscription = async () => {
             subscription = client.models.Question.observeQuery().subscribe({
             next: ({ items }) => {
+                // Filter out null items that can appear during subscription updates
+                const validItems = items.filter(item => item != null && item.id != null);
+                
                 const questionMap = {}
 
-                items.forEach((item) => {
+                validItems.forEach((item) => {
                     questionMap[item.id] = item
                 })
 

@@ -20,7 +20,7 @@ yarn-error.log*
 
 amplify/mock-api-resources
 
-
+cypress/screenshots
 
 debug-storybook.log
 

@@ -318,7 +318,7 @@ const ChatSidebar = () => {
                 .then(result => dispatch({ type: ACTIONS.SET_UPLOADED_FILES, payload: result?.data || [] }))
                 .catch(err => console.error('[ChatSidebar] Error loading files:', err));
         }
-    }, [assistantChat?.id, assistantChat?.updatedAt, isLoadingChat]);
+    }, [assistantChat?.id, assistantChat?._version, isLoadingChat]);
 
     const vectorStoreCtx = React.useContext(VectorStoreContext);
 
@@ -731,8 +731,11 @@ const ChatSidebar = () => {
         const client = getAmplifyClient();
         const subscription = client.models.Document.observeQuery().subscribe({
             next: ({ items }) => {
+                // Filter out null items that can appear during subscription updates
+                const validItems = items.filter(item => item != null && item.id != null);
+                
                 const statusMap = {};
-                items.forEach(doc => {
+                validItems.forEach(doc => {
                     statusMap[doc.id] = {
                         status: doc.status,
                         pageCount: doc.pageCount,

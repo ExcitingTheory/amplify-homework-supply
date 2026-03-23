@@ -455,7 +455,9 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
         
         const client = getAmplifyClient();
         const subscription = client.models.ParsedContent.observeQuery().subscribe({
-            next: () => {
+            next: ({ items }) => {
+                // Filter out null items that can appear during subscription updates
+                const validItems = items.filter((item: any) => item != null && item.id != null);
                 loadParsedContent();
             },
             error: (error: any) => console.error('[QuestionsReview2] ParsedContent subscription error:', error)

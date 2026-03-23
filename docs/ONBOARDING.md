@@ -20,13 +20,14 @@ Welcome to the Homework Supply project! This guide will take you from zero knowl
 Homework Supply is a web application for interactive Japanese language learning assignments. Built with:
 
 - **Frontend**: Next.js, React, Material UI
-- **Backend**: AWS Amplify Gen 1 (GraphQL API, Authentication, Storage)
+- **Backend**: AWS Amplify Gen 2 (GraphQL API, Authentication, Storage)
 - **Language**: Mixed JavaScript/TypeScript (transitioning to TypeScript)
-- **Database**: AWS DynamoDB (via Amplify DataStore)
+- **Database**: AWS DynamoDB (via Amplify Data Client)
 - **Storage**: AWS S3 (for audio, images, videos)
 - **AI Integration**: OpenAI API for content generation and grading
 
 ### Key Features
+
 - Interactive assignments with audio/image processing
 - Real-time LLM feedback and grading
 - User progress tracking
@@ -37,18 +38,21 @@ Homework Supply is a web application for interactive Japanese language learning 
 ## ✅ Prerequisites
 
 ### Required Knowledge (We'll help you learn these)
+
 - Basic JavaScript/React fundamentals
 - HTML/CSS basics
 - Git version control
 - Command line basics
 
 ### Software Requirements
+
 - **Node.js** (v16 or later) - [Download here](https://nodejs.org/)
 - **Git** - [Download here](https://git-scm.com/)
 - **VS Code** (recommended) - [Download here](https://code.visualstudio.com/)
 - **AWS CLI** - [Installation guide](https://aws.amazon.com/cli/)
 
 ### Accounts Needed
+
 - GitHub account (for code access)
 - AWS account access (will be provided)
 - OpenAI API access (for AI features)
@@ -56,17 +60,20 @@ Homework Supply is a web application for interactive Japanese language learning 
 ## 🔧 Development Environment Setup
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/ExcitingTheory/amplify-homework-supply.git
 cd amplify-homework-supply
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 3. Install Amplify CLI
+
 ```bash
 npm install -g @aws-amplify/cli
 ```
@@ -74,6 +81,7 @@ npm install -g @aws-amplify/cli
 ## ☁️ AWS Setup
 
 ### 1. AWS SSO Login
+
 You'll need to log into AWS SSO using a specific URL that will be provided to you:
 
 ```bash
@@ -83,11 +91,13 @@ You'll need to log into AWS SSO using a specific URL that will be provided to yo
 ```
 
 **Note**: Your supervisor will provide you with:
+
 - The specific AWS SSO URL for our organization
 - Your temporary credentials or login instructions
 - The appropriate AWS profile configuration
 
 ### 2. Configure AWS CLI
+
 After SSO login, configure your local AWS CLI:
 
 ```bash
@@ -96,6 +106,7 @@ aws configure sso
 ```
 
 ### 3. Initialize Amplify
+
 ```bash
 amplify configure
 amplify init
@@ -104,6 +115,7 @@ amplify init
 ```
 
 ### 4. Pull Backend Configuration
+
 ```bash
 amplify pull
 ```
@@ -111,12 +123,15 @@ amplify pull
 ## 💻 Local Development
 
 ### 1. Start Development Server
+
 ```bash
 npm run dev
 ```
+
 Navigate to `http://localhost:3000`
 
 ### 2. Key Development Commands
+
 ```bash
 # Start development server
 npm run dev
@@ -135,7 +150,9 @@ npm run lint
 ```
 
 ### 3. Environment Variables
+
 Create a `.env.local` file (will be gitignored):
+
 ```bash
 # OpenAI API configuration
 OPENAI_API_KEY=your_api_key_here
@@ -146,6 +163,7 @@ OPENAI_API_KEY=your_api_key_here
 ## 🧪 Testing
 
 ### Cypress E2E Testing
+
 ```bash
 # Open Cypress test runner
 npm run cypress:open
@@ -159,6 +177,7 @@ Current test coverage is limited - expanding test coverage is a priority item.
 ## 🔄 Development Workflow
 
 ### 1. Branch Strategy
+
 ```bash
 # Create feature branch
 git checkout -b feature/your-feature-name
@@ -172,12 +191,14 @@ git push origin feature/your-feature-name
 ```
 
 ### 2. Code Standards
+
 - Use meaningful variable and function names
 - Add comments for complex logic
 - Follow existing code patterns
 - Test your changes locally before pushing
 
 ### 3. Pull Request Process
+
 1. Create descriptive PR title and description
 2. Link any related issues
 3. Request review from team members
@@ -187,6 +208,7 @@ git push origin feature/your-feature-name
 ## 🏗️ Architecture Overview
 
 ### Frontend Structure
+
 ```
 pages/           # Next.js pages (routing)
 ├── index.js     # Home page
@@ -203,6 +225,7 @@ src/
 ```
 
 ### Backend (AWS Amplify)
+
 ```
 amplify/
 ├── api/         # GraphQL API schema
@@ -212,6 +235,7 @@ amplify/
 ```
 
 ### Key Data Models
+
 - **Unit**: Learning modules containing questions/content
 - **Assignment**: Units assigned to students with due dates
 - **Grade**: Student submissions and performance data
@@ -221,10 +245,12 @@ amplify/
 ## 🔑 Key Concepts
 
 ### 1. AWS Amplify DataStore
+
 We use Amplify DataStore for real-time data sync:
+
 ```javascript
-import { DataStore } from 'aws-amplify';
-import { Unit } from '../models';
+import { DataStore } from "aws-amplify";
+import { Unit } from "../models";
 
 // Query data
 const units = await DataStore.query(Unit);
@@ -234,31 +260,37 @@ await DataStore.save(new Unit({ name: "New Unit" }));
 ```
 
 ### 2. File Management
+
 Audio, image, and video files are stored in S3:
+
 ```javascript
-import { Storage } from 'aws-amplify';
+import { Storage } from "aws-amplify";
 
 // Upload file
-const result = await Storage.put('filename.jpg', file);
+const result = await Storage.put("filename.jpg", file);
 
 // Get file URL
-const url = await Storage.get('filename.jpg');
+const url = await Storage.get("filename.jpg");
 ```
 
 ### 3. Authentication
+
 User auth with Cognito:
+
 ```javascript
-import { Auth } from 'aws-amplify';
+import { Auth } from "aws-amplify";
 
 // Get current user
 const user = await Auth.currentAuthenticatedUser();
 
 // Check user groups
-const groups = user.signInUserSession.accessToken.payload['cognito:groups'];
+const groups = user.signInUserSession.accessToken.payload["cognito:groups"];
 ```
 
 ### 4. AI Integration
+
 OpenAI integration for content generation and grading:
+
 - Content generation from text prompts
 - Audio transcription and comparison
 - Image analysis and feedback
@@ -267,12 +299,14 @@ OpenAI integration for content generation and grading:
 ## 📚 Learning Resources
 
 ### Essential Reading
+
 1. [Next.js Documentation](https://nextjs.org/docs) - Our frontend framework
 2. [React Documentation](https://reactjs.org/docs) - UI library
 3. [AWS Amplify Docs](https://docs.amplify.aws/) - Our backend platform
 4. [Material UI](https://mui.com/) - Our component library
 
 ### Recommended Learning Path
+
 1. **Week 1**: Familiarize with codebase, run local environment
 2. **Week 2**: Understand data models and basic CRUD operations
 3. **Week 3**: Work on small bug fixes and feature additions
@@ -281,18 +315,21 @@ OpenAI integration for content generation and grading:
 ## 🆘 Getting Help
 
 ### When You're Stuck
+
 1. **Check existing code** - Look for similar implementations
 2. **Read documentation** - Check AWS Amplify and Next.js docs
 3. **Search issues** - Look for similar problems in GitHub issues
 4. **Ask questions** - Don't hesitate to reach out!
 
 ### Communication Channels
+
 - **Slack/Teams**: Daily questions and quick help
 - **GitHub Issues**: Bug reports and feature requests
 - **Code Reviews**: Learning opportunities in PRs
 - **Weekly Sync**: Regular check-ins with team
 
 ### Common Issues and Solutions
+
 See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for common problems and their solutions.
 
 ## 🎯 Next Steps

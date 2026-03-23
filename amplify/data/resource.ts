@@ -179,6 +179,10 @@ const schema = a.schema({
       isDraft: a.boolean(),
       // Yjs CRDT snapshot for conflict-free collaborative editing
       yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       // Owners (creators - typically Instructors) have full control
@@ -211,6 +215,10 @@ const schema = a.schema({
       // Tracking
       learner: a.string(),
       owner: a.string(),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       // Student owns their assignment
@@ -247,6 +255,10 @@ const schema = a.schema({
       // Metadata
       identityId: a.string(),
       moderation: ModerationInfo,
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       // Student owns their grade
@@ -285,6 +297,10 @@ const schema = a.schema({
       curveEnabled: a.boolean(),
       curveMethod: a.string(), // 'scale-to-top' or 'linear-adjustment'
       curveAssignments: a.string().array(), // Array of unitIDs to apply curve to
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -336,6 +352,10 @@ const schema = a.schema({
       documentQuestions: a.hasMany('DocumentQuestion', ['questionID']),
       // Yjs CRDT snapshot for conflict-free collaborative editing
       yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -402,6 +422,10 @@ const schema = a.schema({
       embedding: EmbeddingInfo,
       // Yjs CRDT snapshot for conflict-free file metadata management
       yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       // Owner has full control
@@ -442,6 +466,10 @@ const schema = a.schema({
       documentWords: a.hasMany('DocumentWord', ['wordID']),
       // Yjs CRDT snapshot for conflict-free collaborative editing
       yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -459,6 +487,10 @@ const schema = a.schema({
       unit: a.belongsTo('Unit', ['unitID']),
       fileID: a.id().required(),
       file: a.belongsTo('File', ['fileID']),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -468,6 +500,10 @@ const schema = a.schema({
       unit: a.belongsTo('Unit', ['unitID']),
       wordID: a.id().required(),
       word: a.belongsTo('Word', ['wordID']),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -477,6 +513,10 @@ const schema = a.schema({
       question: a.belongsTo('Question', ['questionID']),
       unitID: a.id().required(),
       unit: a.belongsTo('Unit', ['unitID']),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -486,6 +526,10 @@ const schema = a.schema({
       unit: a.belongsTo('Unit', ['unitID']),
       documentID: a.id().required(),
       document: a.belongsTo('Document', ['documentID']),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -495,6 +539,10 @@ const schema = a.schema({
       question: a.belongsTo('Question', ['questionID']),
       fileID: a.id().required(),
       file: a.belongsTo('File', ['fileID']),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -504,6 +552,10 @@ const schema = a.schema({
       word: a.belongsTo('Word', ['wordID']),
       fileID: a.id().required(),
       file: a.belongsTo('File', ['fileID']),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -513,6 +565,10 @@ const schema = a.schema({
       question: a.belongsTo('Question', ['questionID']),
       wordID: a.id().required(),
       word: a.belongsTo('Word', ['wordID']),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -522,6 +578,10 @@ const schema = a.schema({
       document: a.belongsTo('Document', ['documentID']),
       wordID: a.id().required(),
       word: a.belongsTo('Word', ['wordID']),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -531,6 +591,10 @@ const schema = a.schema({
       document: a.belongsTo('Document', ['documentID']),
       questionID: a.id().required(),
       question: a.belongsTo('Question', ['questionID']),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -540,6 +604,10 @@ const schema = a.schema({
       chat: a.belongsTo('AssistantChat', ['chatID']),
       fileID: a.id().required(),
       file: a.belongsTo('File', ['fileID']),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -605,6 +673,10 @@ const schema = a.schema({
       metadata: a.json(),
       // Yjs CRDT snapshot for conflict-free document status management
       yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       // Document owner (student) can manage their documents
@@ -644,6 +716,10 @@ const schema = a.schema({
       // Timestamps (createdAt/updatedAt auto-generated)
       importedAt: a.datetime(),
       metadata: a.json(),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -674,6 +750,10 @@ const schema = a.schema({
       retryCount: a.integer(),
       metadata: a.json(),
       identityId: a.string(),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -705,6 +785,10 @@ const schema = a.schema({
       outputTokens: a.string(),
       // Relationships
       chatFiles: a.hasMany('AssistantChatFile', ['chatID']),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -736,6 +820,10 @@ const schema = a.schema({
       language: a.string(),
       timezone: a.string(),
       metadata: a.json(),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -764,6 +852,10 @@ const schema = a.schema({
       messageId: a.string(),
       sessionId: a.string(),
       metadata: a.json(),
+      // Versioning fields for conflict resolution
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -1136,9 +1228,7 @@ export const data = defineData({
       expiresInDays: 30,
     },
   },
-  // Enable optimistic concurrency control for data consistency
-  // All models will have _version, _lastChangedAt, _deleted fields
-  conflictResolution: {
-    resolutionStrategy: 'OPTIMISTIC_CONCURRENCY'
-  }
+  // Note: Versioning fields (_version, _lastChangedAt, _deleted) are explicitly defined
+  // in the schema for all models. The CDK Aspect in backend.ts enables the DynamoDB-level
+  // conflict resolution (syncConfig: VERSION) which works with these fields.
 });

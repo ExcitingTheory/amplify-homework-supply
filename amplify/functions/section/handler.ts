@@ -81,6 +81,8 @@ Amplify.configure(
 );
 
 // Raw GraphQL operations - .models API doesn't work in Lambda resolvers
+// Versioning fields (_version, _lastChangedAt, _deleted) are now explicitly in the schema
+// and can be queried/mutated via GraphQL
 const CREATE_SECTION = /* GraphQL */ `
   mutation CreateSection($input: CreateSectionInput!) {
     createSection(input: $input) {
@@ -88,6 +90,19 @@ const CREATE_SECTION = /* GraphQL */ `
       name
       code
       createdAt
+      _version
+    }
+  }
+`;
+
+const GET_SECTION = /* GraphQL */ `
+  query GetSection($id: ID!) {
+    getSection(id: $id) {
+      id
+      name
+      code
+      readableGroups
+      writableGroups
       _version
     }
   }
@@ -111,6 +126,7 @@ const LIST_SECTIONS_BY_CODE = /* GraphQL */ `
         id
         name
         code
+        _version
       }
     }
   }
@@ -123,6 +139,7 @@ const LIST_ASSIGNMENTS = /* GraphQL */ `
         id
         unitID
         sectionID
+        _version
       }
     }
   }
@@ -132,6 +149,7 @@ const CREATE_ASSIGNMENT = /* GraphQL */ `
   mutation CreateAssignment($input: CreateAssignmentInput!) {
     createAssignment(input: $input) {
       id
+      _version
     }
   }
 `;
@@ -218,16 +236,28 @@ async function handleCreateSectionGroup(
         const code = Math.random().toString(36).substring(2, 8).toUpperCase();
         const client = getClient();
         
-        // Create section using GraphQL mutation - only pass required fields (no _version)
+        // Pre-generate section ID for group names (we'll let DynamoDB auto-generate if needed)
+        // Actually, we need to use a UUID since we need to know the ID before creation for groups
+        const sectionId = crypto.randomUUID();
+        
+        // Pre-calculate group names to include in CREATE (avoids need for UPDATE with _version)
+        const readableGroups = [`section-${sectionId}-instructors`, `section-${sectionId}-learners`];
+        const writableGroups = [`section-${sectionId}-instructors`];
+        
+        // Create section using GraphQL mutation with groups included
+        // This avoids needing a separate UPDATE which would require _version
         const { data, errors } = await client.graphql({
             query: CREATE_SECTION,
             variables: {
                 input: {
+                    id: sectionId, // Specify ID so it matches pre-calculated group names
                     name,
                     description: description || '',
                     code,
                     instructor: userId,
                     status: 'PUBLISHED',
+                    readableGroups,
+                    writableGroups,
                 },
             },
         });
@@ -238,7 +268,6 @@ async function handleCreateSectionGroup(
         }
 
         const section = data.createSection;
-        const sectionId = section.id;
 
         // Create Cognito groups for this section
         console.log(`[Section] Creating Cognito groups for section ${sectionId}`);
@@ -249,30 +278,6 @@ async function handleCreateSectionGroup(
             // Add the creator as an instructor
             await groupManager.addInstructor(username, sectionId);
             console.log(`[Section] Groups created successfully, ${username} added as instructor`);
-            
-            // Update Section with dynamic groups for authorization
-            const readableGroups = [`instructor-${sectionId}`, `learner-${sectionId}`];
-            const writableGroups = [`instructor-${sectionId}`];
-            
-            console.log(`[Section] Updating section ${sectionId} with groups, _version: ${section._version}`);
-            const updateResult = await client.graphql({
-                query: UPDATE_SECTION,
-                variables: {
-                    input: {
-                        id: sectionId,
-                        _version: section._version, // Required for optimistic concurrency
-                        readableGroups,
-                        writableGroups,
-                    },
-                },
-            });
-            
-            if (updateResult.errors) {
-                console.error(`[Section] Update section errors:`, JSON.stringify(updateResult.errors, null, 2));
-                throw new Error(`Failed to update section groups: ${JSON.stringify(updateResult.errors)}`);
-            }
-            
-            console.log(`[Section] Updated section with group authorization`);
         } catch (groupError) {
             console.error(`[Section] Warning: Failed to create/manage groups:`, groupError);
             // Log full error details
@@ -352,10 +357,14 @@ async function handleAddSelfToSection(
         const sectionAssignments = assignmentsData?.listAssignments?.items || [];
 
         // Create assignments for this student
-        const readableGroups = [`learner-${sectionId}`];
-        const writableGroups = [`learner-${sectionId}`];
+        // Must match GroupManager's naming pattern: section-{id}-{role}
+        const readableGroups = [`section-${sectionId}-learners`];
+        const writableGroups = [`section-${sectionId}-learners`];
 
-        for (const assignment of sectionAssignments) {
+        // Filter out null items that can appear in subscription arrays
+        const validAssignments = sectionAssignments.filter((a: any) => a != null && a.id != null);
+
+        for (const assignment of validAssignments) {
             await client.graphql({
                 query: CREATE_ASSIGNMENT,
                 variables: {

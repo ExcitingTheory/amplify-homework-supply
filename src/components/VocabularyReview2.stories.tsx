@@ -12,7 +12,9 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, waitFor, expect } from '@storybook/test';
+import { expect } from 'vitest';
+import { within, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import VocabularyReview2 from './VocabularyReview2';
 import { Box, Paper } from '@mui/material';
 import { DemoBanner } from '../../.storybook/components/DemoBanner';

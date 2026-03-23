@@ -965,6 +965,7 @@ function WordRowComponent({
     page,
     nodeKey,
 }) {
+    const { t } = useTranslation('components');
     const [isDragging, setIsDragging] = React.useState(false);
     const [fileOperations, setFileOperations] = React.useState([]);
     const [audioFilesToUpload, setAudioFilesToUpload] = React.useState([]);
@@ -1725,7 +1726,12 @@ export function DictionaryEditor2() {
                 />
 
                 <Tooltip title="New Word">
-                    <IconButton onClick={toggleNewWordFormOpen} color="primary" size="small">
+                    <IconButton 
+                        onClick={toggleNewWordFormOpen} 
+                        color="primary" 
+                        size="small"
+                        data-tour="add-word-button"
+                    >
                         <Description />
                     </IconButton>
                 </Tooltip>
@@ -1789,7 +1795,7 @@ export function DictionaryEditor2() {
             <Dialog open={newWordFormOpen} onClose={toggleNewWordFormOpen} maxWidth="sm" fullWidth>
                 <DialogTitle>{t('dictionaryEditor.createNewWordTitle')}</DialogTitle>
                 <DialogContent>
-                    <form onSubmit={(e) => { e.preventDefault(); handleCreateNewWord(); }}>
+                    <form onSubmit={(e) => { e.preventDefault(); handleCreateNewWord(); }} data-tour="word-form">
                         <TextField
                             value={newPhrase}
                             required
@@ -1798,6 +1804,7 @@ export function DictionaryEditor2() {
                             margin="normal"
                             label="Phrase"
                             variant="outlined"
+                            name="phrase"
                         />
                         <TextField
                             value={newPronunciation}
@@ -1807,6 +1814,7 @@ export function DictionaryEditor2() {
                             margin="normal"
                             label="Pronunciation"
                             variant="outlined"
+                            name="pronunciation"
                         />
                         <TextField
                             value={newDefinition}
@@ -1818,6 +1826,7 @@ export function DictionaryEditor2() {
                             variant="outlined"
                             multiline
                             rows={3}
+                            name="definition"
                         />
                         <Button variant="contained" type="submit" sx={{ mt: 2 }}>
                             {t('dictionaryEditor.createWordButton')}

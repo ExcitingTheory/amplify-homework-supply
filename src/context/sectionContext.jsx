@@ -24,7 +24,8 @@ const SectionProvider = ({ children, unitId }) => {
             return;
         }
 
-        let subscription;
+        // Track subscriptions for cleanup
+        const subscriptions = [];
 
         async function fetchSections() {
             const userId = user.attributes.sub;
@@ -32,97 +33,234 @@ const SectionProvider = ({ children, unitId }) => {
 
             const client = getAmplifyClient();
 
-            // Temporarily fetch all sections to debug
-            subscription = client.models.Section.observeQuery().subscribe({
-                next: ({ items }) => {
-                    // Filter out null items that can appear during subscription updates
-                    const validItems = items.filter(item => item != null && item.id != null);
-                    console.log('[SectionContext] Received sections:', validItems.length, validItems.map(s => ({ id: s.id, name: s.name, owner: s.owner })));
-                    let _sectionMap = {}
-
-                    validItems.forEach(item => {
-                        _sectionMap[item.id] = item
-                    })
-
-                    // Only update if sections have actually changed
-                    setSections(prevSections => {
-                        const prevStr = JSON.stringify(prevSections);
-                        const newStr = JSON.stringify(validItems);
-                        if (prevStr === newStr) {
-                            return prevSections; // Return same reference to prevent rerender
-                        }
-                        console.log('[SectionContext] Updating sections state');
-                        return validItems;
-                    });
-
-                    // Only update if sectionMap has actually changed
-                    setSectionMap(prevMap => {
-                        const prevStr = JSON.stringify(prevMap);
-                        const newStr = JSON.stringify(_sectionMap);
-                        if (prevStr === newStr) {
-                            return prevMap; // Return same reference to prevent rerender
-                        }
-                        console.log('[SectionContext] Updating sectionMap state');
-                        return _sectionMap;
-                    });
-                },
-                error: (error) => {
-                    console.error('[SectionContext] Section subscription error:', error);
+            // Use list() + individual subscriptions instead of observeQuery()
+            // This bypasses the internal findIndexByFields() that crashes on null items
+            try {
+                // Initial fetch
+                const { data: initialSections, errors } = await client.models.Section.list();
+                if (errors) {
+                    console.error('[SectionContext] Initial fetch errors:', errors);
                 }
+                
+                const validItems = (initialSections || []).filter(item => item != null && item.id != null);
+                console.log('[SectionContext] Initial sections:', validItems.length, validItems.map(s => ({ id: s.id, name: s.name, owner: s.owner })));
+                
+                // Update state with initial data
+                updateSectionsState(validItems);
+                
+                // Subscribe to new sections
+                const createSub = client.models.Section.onCreate().subscribe({
+                    next: (response) => {
+                        console.log('[SectionContext] onCreate raw response:', JSON.stringify(response, null, 2));
+                        const newSection = response?.data;
+                        if (!newSection || !newSection.id) {
+                            console.log('[SectionContext] onCreate - no valid section data, returning');
+                            return;
+                        }
+                        console.log('[SectionContext] Section created:', newSection.id);
+                        setSections(prev => {
+                            // Avoid duplicates
+                            if (prev.some(s => s.id === newSection.id)) return prev;
+                            console.log('[SectionContext] Adding new section to state');
+                            return [...prev, newSection];
+                        });
+                        setSectionMap(prev => ({ ...prev, [newSection.id]: newSection }));
+                    },
+                    error: (error) => console.error('[SectionContext] onCreate error:', error)
+                });
+                subscriptions.push(createSub);
+                
+                // Subscribe to section updates
+                const updateSub = client.models.Section.onUpdate().subscribe({
+                    next: (response) => {
+                        const updatedSection = response?.data;
+                        if (!updatedSection || !updatedSection.id) return;
+                        console.log('[SectionContext] Section updated:', updatedSection.id);
+                        setSections(prev => prev.map(s => s.id === updatedSection.id ? updatedSection : s));
+                        setSectionMap(prev => ({ ...prev, [updatedSection.id]: updatedSection }));
+                    },
+                    error: (error) => console.error('[SectionContext] onUpdate error:', error)
+                });
+                subscriptions.push(updateSub);
+                
+                // Subscribe to section deletions
+                const deleteSub = client.models.Section.onDelete().subscribe({
+                    next: (response) => {
+                        const deletedSection = response?.data;
+                        if (!deletedSection || !deletedSection.id) return;
+                        console.log('[SectionContext] Section deleted:', deletedSection.id);
+                        setSections(prev => prev.filter(s => s.id !== deletedSection.id));
+                        setSectionMap(prev => {
+                            const newMap = { ...prev };
+                            delete newMap[deletedSection.id];
+                            return newMap;
+                        });
+                    },
+                    error: (error) => console.error('[SectionContext] onDelete error:', error)
+                });
+                subscriptions.push(deleteSub);
+                
+            } catch (error) {
+                console.error('[SectionContext] fetchSections error:', error);
+            }
+        }
+        
+        function updateSectionsState(validItems) {
+            let _sectionMap = {};
+            validItems.forEach(item => {
+                _sectionMap[item.id] = item;
+            });
+            
+            setSections(prevSections => {
+                const prevStr = JSON.stringify(prevSections);
+                const newStr = JSON.stringify(validItems);
+                if (prevStr === newStr) {
+                    return prevSections;
+                }
+                console.log('[SectionContext] Updating sections state');
+                return validItems;
+            });
+            
+            setSectionMap(prevMap => {
+                const prevStr = JSON.stringify(prevMap);
+                const newStr = JSON.stringify(_sectionMap);
+                if (prevStr === newStr) {
+                    return prevMap;
+                }
+                console.log('[SectionContext] Updating sectionMap state');
+                return _sectionMap;
             });
         }
 
-        fetchSections()
+        fetchSections();
 
         return () => {
-            console.log('[SectionContext] Cleaning up subscription');
-            subscription?.unsubscribe();
+            console.log('[SectionContext] Cleaning up subscriptions');
+            subscriptions.forEach(sub => sub?.unsubscribe());
         };
     }, [user, authLoading]);
 
     React.useEffect(() => {
         if(!unitId) return
 
-        let subscription;
+        const subscriptions = [];
 
         async function fetchAssignments() {
             const client = getAmplifyClient();
 
-            subscription = client.models.Assignment.observeQuery({
-                filter: {
-                    unitID: { eq: unitId }
+            try {
+                // Initial fetch with filter
+                const { data: initialAssignments, errors } = await client.models.Assignment.list({
+                    filter: { unitID: { eq: unitId } }
+                });
+                if (errors) {
+                    console.error('[SectionContext] Assignment fetch errors:', errors);
                 }
-            }).subscribe({
-                next: ({ items }) => {
-                    // Only update if assignments have actually changed
-                    setAssignments(prevAssignments => {
-                        const prevStr = JSON.stringify(prevAssignments);
-                        const newStr = JSON.stringify(items);
-                        if (prevStr === newStr) {
-                            return prevAssignments; // Return same reference to prevent rerender
-                        }
-                        return items;
-                    });
-                },
-                error: (error) => {
-                    console.error('[SectionContext] Assignment subscription error:', error);
+                
+                const validItems = (initialAssignments || []).filter(item => item != null && item.id != null);
+                updateAssignmentsState(validItems);
+                
+                // Subscribe to new assignments with filter
+                const createSub = client.models.Assignment.onCreate({
+                    filter: { unitID: { eq: unitId } }
+                }).subscribe({
+                    next: (response) => {
+                        const newAssignment = response?.data;
+                        if (!newAssignment || !newAssignment.id) return;
+                        if (newAssignment.unitID !== unitId) return; // Double-check filter
+                        console.log('[SectionContext] Assignment created:', newAssignment.id);
+                        setAssignments(prev => {
+                            if (prev.some(a => a.id === newAssignment.id)) return prev;
+                            return [...prev, newAssignment];
+                        });
+                    },
+                    error: (error) => console.error('[SectionContext] Assignment onCreate error:', error)
+                });
+                subscriptions.push(createSub);
+                
+                // Subscribe to assignment updates
+                const updateSub = client.models.Assignment.onUpdate({
+                    filter: { unitID: { eq: unitId } }
+                }).subscribe({
+                    next: (response) => {
+                        const updatedAssignment = response?.data;
+                        if (!updatedAssignment || !updatedAssignment.id) return;
+                        if (updatedAssignment.unitID !== unitId) return;
+                        console.log('[SectionContext] Assignment updated:', updatedAssignment.id);
+                        setAssignments(prev => prev.map(a => a.id === updatedAssignment.id ? updatedAssignment : a));
+                    },
+                    error: (error) => console.error('[SectionContext] Assignment onUpdate error:', error)
+                });
+                subscriptions.push(updateSub);
+                
+                // Subscribe to assignment deletions
+                const deleteSub = client.models.Assignment.onDelete({
+                    filter: { unitID: { eq: unitId } }
+                }).subscribe({
+                    next: (response) => {
+                        const deletedAssignment = response?.data;
+                        if (!deletedAssignment || !deletedAssignment.id) return;
+                        console.log('[SectionContext] Assignment deleted:', deletedAssignment.id);
+                        setAssignments(prev => prev.filter(a => a.id !== deletedAssignment.id));
+                    },
+                    error: (error) => console.error('[SectionContext] Assignment onDelete error:', error)
+                });
+                subscriptions.push(deleteSub);
+                
+            } catch (error) {
+                console.error('[SectionContext] fetchAssignments error:', error);
+            }
+        }
+        
+        function updateAssignmentsState(validItems) {
+            setAssignments(prevAssignments => {
+                const prevStr = JSON.stringify(prevAssignments);
+                const newStr = JSON.stringify(validItems);
+                if (prevStr === newStr) {
+                    return prevAssignments;
                 }
+                return validItems;
             });
         }
 
-        fetchAssignments()
+        fetchAssignments();
 
         return () => {
-            subscription?.unsubscribe();
+            subscriptions.forEach(sub => sub?.unsubscribe());
         };
     }, [unitId]);
+
+    // Refetch sections - can be called after create/update operations
+    const refetchSections = React.useCallback(async () => {
+        console.log('[SectionContext] Manual refetch triggered');
+        const client = getAmplifyClient();
+        try {
+            const { data: fetchedSections, errors } = await client.models.Section.list();
+            if (errors) {
+                console.error('[SectionContext] Refetch errors:', errors);
+            }
+            const validItems = (fetchedSections || []).filter(item => item != null && item.id != null);
+            console.log('[SectionContext] Refetch complete, sections:', validItems.length);
+            
+            let _sectionMap = {};
+            validItems.forEach(item => {
+                _sectionMap[item.id] = item;
+            });
+            
+            setSections(validItems);
+            setSectionMap(_sectionMap);
+        } catch (error) {
+            console.error('[SectionContext] Refetch error:', error);
+        }
+    }, []);
 
     // Memoize context value to prevent unnecessary rerenders
     const contextValue = React.useMemo(() => ({
         sections,
         sectionMap,
         assignments,
-    }), [sections, sectionMap, assignments]);
+        refetchSections,
+    }), [sections, sectionMap, assignments, refetchSections]);
 
 
     return (

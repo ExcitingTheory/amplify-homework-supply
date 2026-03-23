@@ -63,8 +63,11 @@ export default function InstructorDashboard({ sections = [] }) {
       }
     }).subscribe({
       next: ({ items }) => {
+        // Filter out null items that can appear during subscription updates
+        const validItems = items.filter(item => item != null && item.id != null);
+        
         // Filter out grades without accuracy scores (client-side filtering)
-        const validGrades = items.filter(grade => grade.accuracy != null);
+        const validGrades = validItems.filter(grade => grade.accuracy != null);
         setAllGrades(validGrades);
       },
       error: (err) => {
@@ -87,7 +90,11 @@ export default function InstructorDashboard({ sections = [] }) {
   useEffect(() => {
     if (sections.length === 0) return;
     
-    const sectionIDs = sections.map(s => s.id);
+    // Filter out null sections before mapping to IDs
+    const validSections = sections.filter(s => s != null && s.id != null);
+    if (validSections.length === 0) return;
+    
+    const sectionIDs = validSections.map(s => s.id);
     
     const subscription = client.models.Assignment.observeQuery({
       filter: {
@@ -95,7 +102,9 @@ export default function InstructorDashboard({ sections = [] }) {
       }
     }).subscribe({
       next: ({ items }) => {
-        setAllAssignments(items);
+        // Filter out null items that can appear during subscription updates
+        const validItems = items.filter(item => item != null && item.id != null);
+        setAllAssignments(validItems);
       },
       error: (err) => {
         console.error('Assignments subscription error:', err);
@@ -123,7 +132,10 @@ export default function InstructorDashboard({ sections = [] }) {
     const calculateSectionStats = async () => {
       const stats = {};
       
-      for (const section of sections) {
+      // Filter out null sections before iterating
+      const validSections = sections.filter(s => s != null && s.id != null);
+      
+      for (const section of validSections) {
         const sectionAssignments = allAssignments.filter(a => a.sectionID === section.id);
         
         // Get unique students who have submitted work in this section
@@ -303,7 +315,7 @@ export default function InstructorDashboard({ sections = [] }) {
             <LinearProgress />
           ) : (
             <Box>
-              {sections.map((section, index) => {
+              {sections.filter(s => s != null && s.id != null).map((section, index) => {
                 const stats = sectionStats[section.id] || { 
                   studentCount: 0, 
                   averageGrade: 0, 

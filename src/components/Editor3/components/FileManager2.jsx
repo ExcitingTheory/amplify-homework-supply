@@ -2783,7 +2783,8 @@ export default function FileManager2() {
 
     // Select/Deselect handlers
     const handleSelectAll = () => {
-        const allFileIds = new Set(files.map(f => f.id));
+        // Filter out null items before mapping to IDs
+        const allFileIds = new Set(files.filter(f => f != null && f.id != null).map(f => f.id));
         setSelectedItems(allFileIds);
     };
 
@@ -3089,7 +3090,9 @@ export default function FileManager2() {
 
         // Hybrid: Combine keyword and semantic
         if (searchMode === 'hybrid') {
-            const keywordMatches = new Set(files.filter(matchesKeyword).map(f => f.id));
+            // Filter out null items before processing
+            const validFiles = files.filter(f => f != null && f.id != null);
+            const keywordMatches = new Set(validFiles.filter(matchesKeyword).map(f => f.id));
 
             if (!semanticResults) {
                 // No semantic results yet, use keyword only

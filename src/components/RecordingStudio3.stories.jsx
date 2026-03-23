@@ -4,7 +4,9 @@
  */
 
 import React from 'react';
-import { within, userEvent, waitFor, expect } from '@storybook/test';
+import { expect } from 'vitest';
+import { within, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import RecordingStudio3 from './RecordingStudio3';
 import FilesContext from '../context/fileContext';
 import { DemoBanner } from '../../.storybook/components/DemoBanner';

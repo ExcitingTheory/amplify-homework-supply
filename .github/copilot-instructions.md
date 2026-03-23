@@ -1,18 +1,18 @@
 # Copilot Instructions - Homework Supply
 
-elearning platform built with Next.js, AWS Amplify Gen 1, and OpenAI.
+elearning platform built with Next.js, AWS Amplify Gen 2, and OpenAI.
 
 ## Architecture Overview
 
-**Stack**: Next.js 20 + AWS Amplify Gen 1 (GraphQL/DataStore) + Material UI + Lexical Editor + OpenAI  
-**Database**: DynamoDB via Amplify DataStore with real-time sync  
+**Stack**: Next.js 20 + AWS Amplify Gen 2 (GraphQL/Data Client) + Material UI + Lexical Editor + OpenAI  
+**Database**: DynamoDB via Amplify Data Client with real-time sync and versioning  
 **Auth**: AWS Cognito with user groups (Admins,Moderators, Instructors, Learners)m owner-based auth, and dynamic group auth by creating Cognito groups and including them in the model fields (we use both read and write groups) and @auth directives
 **Storage**: S3 for files (audio/video/PDFs), organized by protection level, however we can use base64 and http(s) URLs for testing without S3 uploads
 **AI Features**: OpenAI API (GPT-4, Whisper, TTS) via Lambda + Vercel AI SDK for streaming chat
 
 ### Key Architectural Patterns
 
-**React Contexts for Shared State**: The app heavily uses React Context to prevent DataStore subscription duplication. Core contexts:
+**React Contexts for Shared State**: The app heavily uses React Context to prevent subscription duplication. Core contexts:
 
 - `UnitContext` ([src/context/unitContext.js](src/context/unitContext.js)) - Unit data, dictionary, files, question bank, grading
 - `SectionContext` ([src/context/sectionContext.js](src/context/sectionContext.js)) - Class sections and assignments
@@ -20,29 +20,32 @@ elearning platform built with Next.js, AWS Amplify Gen 1, and OpenAI.
 - `DictionaryContext` ([src/context/dictionaryContext.js](src/context/dictionaryContext.js)) - Vocabulary words and questions
 - `SettingsContext` ([src/context/settingsContext.js](src/context/settingsContext.js)) - User settings
 
-**Always use existing contexts** instead of creating new DataStore subscriptions. Import and consume via `React.useContext()`.
+**Always use existing contexts** instead of creating new subscriptions. Import and consume via `React.useContext()`.
 
-**DataStore Subscription Management**: Critical performance pattern - see [DATASTORE_OPTIMIZATION_CHANGES.md](DATASTORE_OPTIMIZATION_CHANGES.md):
+**Data Client Subscription Management**: Critical performance pattern:
 
-- Use `DataStore.observeQuery()` for real-time updates (preferred over `.observe()`)
+- Use `client.models.Model.observeQuery()` for real-time updates
 - **One subscription per model** - use client-side filtering instead of multiple queries
 - Always unsubscribe in cleanup: `return () => subscription.unsubscribe()`
-- Lazy load relationships: `await unit.words.toArray()` for ManyToMany joins
+- Lazy load relationships as needed
 
 Example consolidated pattern:
 
 ```javascript
-const subscription = DataStore.observeQuery(Grade).subscribe(({ items }) => {
-  const incomplete = items.filter((g) => !g.complete);
-  const complete = items.filter((g) => g.complete);
-  setCurrentGrade(incomplete[0]);
-  setRecentGrades(complete.slice(0, 5));
+const subscription = client.models.Grade.observeQuery().subscribe({
+  next: ({ items }) => {
+    const validItems = items.filter((item) => item != null);
+    const incomplete = validItems.filter((g) => !g.complete);
+    const complete = validItems.filter((g) => g.complete);
+    setCurrentGrade(incomplete[0]);
+    setRecentGrades(complete.slice(0, 5));
+  },
 });
 ```
 
 ## Data Models & GraphQL
 
-**Core Models** (see [docs/API.md](docs/API.md) and [amplify/backend/api/japanese5/schema.graphql](amplify/backend/api/japanese5/schema.graphql)):
+**Core Models** (see [docs/API.md](docs/API.md) and [amplify/data/resource.ts](amplify/data/resource.ts)):
 
 - `Unit` - Learning modules with Lexical JSON content in `data` field
 - `Assignment` - Units assigned to a Section with due dates
@@ -73,10 +76,12 @@ npm run build:amplify:dev  # Push backend changes to dev environment
 
 **Amplify Schema Changes**:
 
-1. Edit `amplify/backend/api/japanese5/schema.graphql`
-2. Run `amplify push` (or `npm run build:amplify:dev`)
-3. **Increment SCHEMA_VERSION in [pages/\_app.js](pages/_app.js)** to trigger DataStore clear
-4. Models auto-generated in `src/models/`
+1. Edit `amplify/data/resource.ts`
+2. Run `npx ampx sandbox` (or `npm run sandbox:with-logs`)
+3. After schema changes, restart Next.js dev server
+4. Types auto-generated in `amplify_outputs.json`
+
+**Versioning Fields**: All models include `_version`, `_lastChangedAt`, `_deleted` for conflict resolution. Use `_version` (integer) for change detection in React, not `updatedAt` (timestamp).
 
 **Testing**: Cypress E2E tests in `cypress/e2e/`. Run with `npm run cypress:open`.
 
@@ -89,7 +94,7 @@ npm run build:amplify:dev  # Push backend changes to dev environment
 - `src/context/` - React Context providers
 - `src/utils/` - Pure functions and helpers
 - `src/graphql/` - GraphQL queries/mutations/subscriptions (TypeScript)
-- `amplify/backend/function/` - Lambda functions (Node.js)
+- `amplify/functions/` - Lambda functions (TypeScript)
 
 **TypeScript Migration in Progress** (see [docs/TYPESCRIPT_MIGRATION.md](docs/TYPESCRIPT_MIGRATION.md)):
 
@@ -105,27 +110,27 @@ npm run build:amplify:dev  # Push backend changes to dev environment
 - Utilities: camelCase (e.g., `getCachedUrl.js`)
 - `2` suffix indicates second major version (e.g., `DictionaryEditor2.js`)
 
-**DataStore Save Patterns**:
+**Data Client CRUD Patterns**:
 
 ```javascript
 // Create new
-await DataStore.save(new Unit({ name, description }));
+await client.models.Unit.create({ name, description });
 
-// Update existing - always use Unit.copyOf()
-await DataStore.save(
-  Unit.copyOf(currentUnit, (updated) => {
-    updated.name = newName;
-    updated.data = JSON.stringify(editorContent);
-  }),
-);
+// Update existing - pass _version for optimistic locking
+await client.models.Unit.update({
+  id: currentUnit.id,
+  name: newName,
+  data: JSON.stringify(editorContent),
+  _version: currentUnit._version,
+});
 
 // Delete
-await DataStore.delete(unit);
+await client.models.Unit.delete({ id: unit.id, _version: unit._version });
 ```
 
 ## AI Integration
 
-**OpenAI via Lambda** (see [amplify/backend/function/openai/](amplify/backend/function/openai/)):
+**OpenAI via Lambda** (see [amplify/functions/openai/](amplify/functions/openai/)):
 
 - Audio transcription: `verifyAudioUrl` query
 - Text generation: `chat` mutation
@@ -176,7 +181,7 @@ await DataStore.delete(unit);
 - Stored in model fields like `embedding`, `embeddingModel`, `embeddingDimensions`
 - Generated for Units, Words, Questions for semantic search
 
-**Document Analysis** ([amplify/backend/function/analyzeDocument/](amplify/backend/function/analyzeDocument/)):
+**Document Analysis** ([amplify/functions/analyzeDocument/](amplify/functions/analyzeDocument/)):
 
 - `analyzeDocument(fileID)` mutation extracts PDF text
 - Creates `ParsedContent` records with vocabulary
@@ -249,18 +254,16 @@ const result = await uploadData({
 - Always use Amplify's `post()` from `aws-amplify/api` for REST calls to Lambda functions, which handles auth tokens automatically.
 - completions is an example of a custom API name that can be used for other REST APIs we create.
 
-**Authentication Context**: Always check `session.username` exists before DataStore operations that require auth:
+**Authentication Context**: Always check `session.username` exists before data operations that require auth:
 
 ```javascript
 const { session } = React.useContext(UnitContext);
 if (!session.username) return; // Wait for auth
 ```
 
-**Schema Version Changes**: After `amplify push` with schema changes, increment `SCHEMA_VERSION` in `_app.js` to clear stale DataStore cache.
+**Subscription Best Practices**: Don't create duplicate subscriptions - check if a Context already provides the data.
 
-**Observe Query Subscriptions**: Don't create duplicate subscriptions - check if a Context already provides the data. See `DATASTORE_OPTIMIZATION_CHANGES.md` for patterns.
-
-**Editor Content Saving**: Don't directly mutate `unit.data` - always use `saveEditorContent()` from UnitContext which handles JSON serialization and DataStore.copyOf.
+**Editor Content Saving**: Don't directly mutate `unit.data` - always use `saveEditorContent()` from UnitContext which handles JSON serialization and proper updates.
 **Editor Content**: Use the Lexical state management to make changes, not direct DOM manipulation.
 
 **Grade Data Structure**: `Grade.data` is a JSON string that when parsed becomes an object keyed by block IDs:
@@ -274,18 +277,17 @@ const gradeData = JSON.parse(grade.data);
 // }
 
 // When saving:
-await DataStore.save(
-  Grade.copyOf(currentGrade, (updated) => {
-    updated.data = JSON.stringify(gradeDataObject);
-  }),
-);
+await client.models.Grade.update({
+  id: currentGrade.id,
+  data: JSON.stringify(gradeDataObject),
+  _version: currentGrade._version,
+});
 ```
 
 ## Key Files to Reference
 
 - [docs/ONBOARDING.md](docs/ONBOARDING.md) - Developer setup guide
 - [docs/API.md](docs/API.md) - Data models and GraphQL API
-- [DATASTORE_OPTIMIZATION_CHANGES.md](DATASTORE_OPTIMIZATION_CHANGES.md) - Subscription patterns
 - [package.json](package.json) - Scripts and dependencies
 - [src/context/unitContext.js](src/context/unitContext.js) - Core state management example
 - [src/components/ChatSidebar.js](src/components/ChatSidebar.js) - AI SDK streaming example
@@ -296,7 +298,7 @@ await DataStore.save(
 Component development uses Storybook with mocked AWS services:
 
 - Stories in `*.stories.tsx` or `*.stories.jsx`
-- Mocks in `.storybook/__mocks__/` (DataStore, Auth, AI SDK)
+- Mocks in `.storybook/__mocks__/` (Data Client, Auth, AI SDK)
 - Mock data in `.storybook/__mocks__/ui-data/` is **extracted from working components** - treat as source of truth for data structures
 - Run `npm run storybook` to develop components in isolation
 - See [ChatSidebar.stories.jsx](src/components/ChatSidebar.stories.jsx) for advanced mocking patterns
@@ -309,5 +311,44 @@ Component development uses Storybook with mocked AWS services:
 
 ## Next.js /api Routes - DO NOT USE
 
-- Amplify Gen 1 and 2 uses Lambda functions for backend logic, and if we need rest we will use Express style routes in Lambda functions under `amplify/backend/function/` with `aws-serverless-express` and API Gateway. Do not create new Next.js `/api` routes.
-- Instead use the Amplify.api REST client or GraphQL client from the frontend to call Lambda functions or GraphQL API.
+- Amplify Gen 2 uses Lambda functions for backend logic under `amplify/functions/`. Do not create new Next.js `/api` routes.
+- Use Amplify Data Client or GraphQL client from the frontend to call Lambda functions or GraphQL API.
+
+## Gen 2 Versioning Pattern
+
+**All models have versioning fields** (`_version`, `_lastChangedAt`, `_deleted`) for optimistic locking:
+
+```typescript
+// Schema definition (amplify/data/resource.ts)
+const MyModel = a.model({
+  // ... other fields
+  _version: a.integer(),
+  _lastChangedAt: a.timestamp(),
+  _deleted: a.boolean(),
+}).authorization(...)
+```
+
+**React change detection** - use `_version` (integer), NOT `updatedAt` (timestamp):
+
+```javascript
+const versionRef = useRef(0);
+
+// In subscription callback:
+if (versionRef.current === newItem?._version) return; // Skip - no change
+versionRef.current = newItem?._version;
+setItem(newItem);
+```
+
+**Lambda functions** - query and pass `_version` in updates:
+
+```typescript
+// Query includes _version
+const { data } = await client.graphql({ query: GET_MODEL, variables: { id } });
+const currentVersion = data.getModel._version;
+
+// Update includes _version
+await client.graphql({
+  query: UPDATE_MODEL,
+  variables: { input: { id, _version: currentVersion, ...updates } },
+});
+```

@@ -112,31 +112,106 @@ function Units() {
             return;
         }
         
-        console.log('[Units] Setting up Unit subscription for user:', user.username);
+        console.log('[Units] Setting up Unit fetch for user:', user.username);
         const client = getAmplifyClient();
+        const subscriptions = [];
         
-        const subscription = client.models.Unit.observeQuery().subscribe({
-            next: ({ items }) => {
-                console.log('[Units] Unit subscription update:', items.length, 'units');
+        // Use list() + individual subscriptions instead of observeQuery()
+        // This bypasses the internal findIndexByFields() that crashes on null items
+        async function fetchUnits() {
+            try {
+                const { data: items, errors } = await client.models.Unit.list();
+                if (errors) {
+                    console.error('[Units] Unit fetch errors:', errors);
+                }
+                
+                const validItems = (items || []).filter(u => u != null && u.id != null);
+                console.log('[Units] Initial units:', validItems.length);
                 
                 // Filter client-side by status
-                const published = items.filter(u => u.status === 'PUBLISHED');
-                const archived = items.filter(u => u.status === 'ARCHIVED');
-                const draft = items.filter(u => u.status !== 'ARCHIVED' && u.status !== 'PUBLISHED');
+                updateUnitsState(validItems);
                 
-                setPublishedUnits(published);
-                setArchivedUnits(archived);
-                setDraftUnits(draft);
-            },
-            error: (error) => {
-                console.error('[Units] Unit subscription error:', error);
+                // Subscribe to new units
+                const createSub = client.models.Unit.onCreate().subscribe({
+                    next: (response) => {
+                        const newUnit = response?.data;
+                        if (!newUnit || !newUnit.id) return;
+                        console.log('[Units] Unit created:', newUnit.id, newUnit.name);
+                        updateUnitInState(newUnit, 'create');
+                    },
+                    error: (error) => console.error('[Units] onCreate error:', error)
+                });
+                subscriptions.push(createSub);
+                
+                // Subscribe to unit updates
+                const updateSub = client.models.Unit.onUpdate().subscribe({
+                    next: (response) => {
+                        const updatedUnit = response?.data;
+                        if (!updatedUnit || !updatedUnit.id) return;
+                        console.log('[Units] Unit updated:', updatedUnit.id, updatedUnit.name);
+                        updateUnitInState(updatedUnit, 'update');
+                    },
+                    error: (error) => console.error('[Units] onUpdate error:', error)
+                });
+                subscriptions.push(updateSub);
+                
+                // Subscribe to unit deletions
+                const deleteSub = client.models.Unit.onDelete().subscribe({
+                    next: (response) => {
+                        const deletedUnit = response?.data;
+                        if (!deletedUnit || !deletedUnit.id) return;
+                        console.log('[Units] Unit deleted:', deletedUnit.id);
+                        updateUnitInState(deletedUnit, 'delete');
+                    },
+                    error: (error) => console.error('[Units] onDelete error:', error)
+                });
+                subscriptions.push(deleteSub);
+                
+            } catch (error) {
+                console.error('[Units] fetchUnits error:', error);
             }
-        });
+        }
+        
+        function updateUnitsState(items) {
+            const published = items.filter(u => u.status === 'PUBLISHED');
+            const archived = items.filter(u => u.status === 'ARCHIVED');
+            const draft = items.filter(u => u.status !== 'ARCHIVED' && u.status !== 'PUBLISHED');
+            
+            setPublishedUnits(published);
+            setArchivedUnits(archived);
+            setDraftUnits(draft);
+        }
+        
+        function updateUnitInState(unit, action) {
+            if (action === 'delete') {
+                setPublishedUnits(prev => prev.filter(u => u.id !== unit.id));
+                setArchivedUnits(prev => prev.filter(u => u.id !== unit.id));
+                setDraftUnits(prev => prev.filter(u => u.id !== unit.id));
+                return;
+            }
+            
+            // For create/update, first remove from all lists then add to correct list
+            setPublishedUnits(prev => prev.filter(u => u.id !== unit.id));
+            setArchivedUnits(prev => prev.filter(u => u.id !== unit.id));
+            setDraftUnits(prev => prev.filter(u => u.id !== unit.id));
+            
+            if (action === 'create' || action === 'update') {
+                if (unit.status === 'PUBLISHED') {
+                    setPublishedUnits(prev => [...prev, unit]);
+                } else if (unit.status === 'ARCHIVED') {
+                    setArchivedUnits(prev => [...prev, unit]);
+                } else {
+                    setDraftUnits(prev => [...prev, unit]);
+                }
+            }
+        }
+        
+        fetchUnits();
 
         return function cleanup() {
-            subscription.unsubscribe();
+            subscriptions.forEach(sub => sub?.unsubscribe());
         };
-    }, [])
+    }, [user, authLoading])
 
 
 

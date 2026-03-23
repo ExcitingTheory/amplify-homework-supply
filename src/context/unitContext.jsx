@@ -29,7 +29,7 @@ const UnitProvider = ({ children, id }) => {
   const [username, setUsername] = React.useState(null);
   const [permissionError, setPermissionError] = React.useState(null);
 
-  const versionRef = useRef(null); // Store updatedAt to detect changes
+  const versionRef = useRef(0); // Store _version to detect changes and prevent rerenders
   const editorStateRef = useRef();
   const editorSelectionRef = useRef();
   const editorRef = useRef(null);
@@ -50,7 +50,7 @@ const UnitProvider = ({ children, id }) => {
 
   // Memoize derived values to prevent recalculation on every render
   const rubricLength = React.useMemo(() => rubric.length || 0, [rubric.length]);
-  const unitVersion = React.useMemo(() => unit?.updatedAt || '', [unit?.updatedAt]);
+  const unitVersion = React.useMemo(() => unit?._version || 0, [unit?._version]);
   const unitOwner = React.useMemo(() => unit?.owner || '', [unit?.owner]);
 
   /**
@@ -212,7 +212,7 @@ const UnitProvider = ({ children, id }) => {
       // use the unit owner as the instructor
       instructor: currentUnit?.owner || '',
       // Owner will be auto-populated by Amplify based on auth
-      unitVersion: currentUnit?.updatedAt || '',
+      unitVersion: currentUnit?._version || 1,
       complete: unitIsComplete,
       accuracy: unitAccuracy
     });
@@ -339,27 +339,37 @@ const UnitProvider = ({ children, id }) => {
       return;
     }
 
-    if (!id || !unitVersion) {
-      return
+    // Validate required fields before subscribing
+    if (!id) {
+      return;
     }
 
     const username = user.attributes.sub;
+    
+    // Validate username
+    if (!username) {
+      console.warn('[UnitContext] No username available, skipping Grade subscription');
+      return;
+    }
+
     const client = getAmplifyClient();
 
     // Subscribe to grades for this unit and user
+    // Note: owner filter removed - Amplify Gen 2 automatically filters by owner for models with allow.owner()
+    // Adding owner manually caused "subscription filter uses same fieldName multiple time" error
+    // unitID filter is sufficient to identify grades for this unit (user filter is automatic)
     const subscription = client.models.Grade.observeQuery({
       filter: {
-        owner: { eq: username },
-        unitID: { eq: id },
-        unitVersion: { eq: unitVersion }
-      },
-      sortDirection: 'DESC',
-      sortField: 'createdAt'
+        unitID: { eq: id }
+      }
     }).subscribe({
       next: ({ items }) => {
+        // Filter out null items that can appear during subscription updates
+        const validItems = items.filter(item => item != null && item.id != null);
+        
         // Filter client-side
-        const incompleteGrades = items.filter(grade => !grade.complete);
-        const completedGrades = items.filter(grade => grade.complete);
+        const incompleteGrades = validItems.filter(grade => !grade.complete);
+        const completedGrades = validItems.filter(grade => grade.complete);
         
         // Handle current grade (most recent incomplete)
         const currentGrade = incompleteGrades[0];
@@ -397,11 +407,27 @@ const UnitProvider = ({ children, id }) => {
       },
       error: (error) => {
         console.error('[UnitContext] Grade subscription error:', error);
+        
+        // Extract error message from nested structure
+        // Error structure: { error: { errors: [{ message: '...' }] }, type: 'onUpdate' }
+        const errorMessage = error?.error?.errors?.[0]?.message || error?.message || '';
+        
+        // Handle subscription filter errors (AWS AppSync limit: max 5 values in `in` operator)
+        // Occurs when user belongs to >5 groups and Amplify tries to filter by all groups
+        if (errorMessage.includes('exceeds maximum value limit') || 
+            errorMessage.includes('operator `in`')) {
+          console.warn('[UnitContext] Subscription filter limit exceeded, using client-side filtering only');
+          console.warn('[UnitContext] This is an AWS AppSync limitation, not a code bug');
+          // Subscription will retry automatically - the error is logged but not fatal
+          // Client-side filtering in next() handler will still work
+          return;
+        }
+        
         // Stop retrying on auth errors to prevent rate limiting
-        if (error?.message?.includes('No current user') || 
-            error?.message?.includes('NoSignedUser') ||
-            error?.message?.includes('401') ||
-            error?.message?.includes('403')) {
+        if (errorMessage.includes('No current user') || 
+            errorMessage.includes('NoSignedUser') ||
+            errorMessage.includes('401') ||
+            errorMessage.includes('403')) {
           console.warn('[UnitContext] Auth error, stopping Grade subscription retries');
           subscription.unsubscribe();
         }
@@ -412,7 +438,7 @@ const UnitProvider = ({ children, id }) => {
       subscription.unsubscribe();
     };
 
-  }, [id, unitVersion, user, authLoading]);
+  }, [id, user, authLoading]);
 
   React.useEffect(() => {
     console.log('[UnitContext] useEffect triggered', { id, authLoading, hasUser: !!user, userSub: user?.attributes?.sub });
@@ -436,7 +462,9 @@ const UnitProvider = ({ children, id }) => {
       }
     }).subscribe({
       next: async ({ items }) => {
-        const _newUnit = items[0]
+        // Filter out null items that can appear during subscription updates
+        const validItems = items.filter(item => item != null && item.id != null);
+        const _newUnit = validItems[0]
         
         if (!_newUnit) {
           setUnit({});
@@ -818,6 +846,7 @@ const UnitProvider = ({ children, id }) => {
     editorRef,
     versionRef,
     unitRef,
+    unitVersion,
     finishedQuestions,
     showUnitComplete,
     permissionError,

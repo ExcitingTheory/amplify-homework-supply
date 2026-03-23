@@ -72,7 +72,10 @@ export const QUIZ_TRANSFORMER = {
       return null;
     }
     const data = node.getData();
-    const ids = Array.isArray(data) ? data.map(item => item.id).join(',') : '';
+    // Filter out null items before mapping to IDs
+    const ids = Array.isArray(data) 
+      ? data.filter(item => item != null && item.id != null).map(item => item.id).join(',') 
+      : '';
     return `:::quiz[${ids}]`;
   },
   regExp: QUIZ_REGEX,

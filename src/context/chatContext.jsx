@@ -80,7 +80,7 @@ export function ChatContextProvider({ children }) {
     const [isLoadingChat, setIsLoadingChat] = useState(false);
     const [chatCreationError, setChatCreationError] = useState(null);
     const [subscriptionReady, setSubscriptionReady] = useState(false);
-    const chatUpdatedAtRef = useRef(null); // Track _version to detect changes
+    const chatVersionRef = useRef(null); // Track _version to detect changes and prevent rerenders
     const subscriptionInitializedRef = useRef(false);
     
     // Global chat UI state
@@ -121,13 +121,16 @@ export function ChatContextProvider({ children }) {
                 sortField: 'createdAt'
             }).subscribe({
                 next: ({ items, isSynced }) => {
-                    console.log('[ChatContext] AssistantChat query update:', items.length, 'items', isSynced ? '(synced)' : '(not synced)');
+                    // Filter out null items that can appear during subscription updates
+                    const validItems = items.filter(item => item != null && item.id != null);
+                    
+                    console.log('[ChatContext] AssistantChat query update:', validItems.length, 'items', isSynced ? '(synced)' : '(not synced)');
                     
                     // Log updatedAt for debugging
-                    if (items.length > 0) {
+                    if (validItems.length > 0) {
                         console.log('[ChatContext] First item details:', {
-                            id: items[0].id,
-                            updatedAt: items[0].updatedAt
+                            id: validItems[0].id,
+                            updatedAt: validItems[0].updatedAt
                         });
                     }
                     
@@ -145,20 +148,20 @@ export function ChatContextProvider({ children }) {
                     
                     if (isSubscribed) {
                         // Update chat histories list
-                        setChatHistories(items);
-                        console.log('[ChatContext] AssistantChat list updated:', items.length, 'chats');
+                        setChatHistories(validItems);
+                        console.log('[ChatContext] AssistantChat list updated:', validItems.length, 'chats');
                         
                         // Update current chat
                         setAssistantChat(prevCurrent => {
-                            if (items.length > 0) {
+                            if (validItems.length > 0) {
                                 // Find the most recent non-archived chat
-                                const nonArchivedChats = items.filter(item => !item.archived);
+                                const nonArchivedChats = validItems.filter(item => !item.archived);
                                 const mostRecentChat = nonArchivedChats[0]; // Already sorted by createdAt DESC
                                 
                                 if (!prevCurrent) {
                                     // No current chat, set to most recent non-archived
                                     if (mostRecentChat) {
-                                        chatUpdatedAtRef.current = mostRecentChat._version;
+                                        chatVersionRef.current = mostRecentChat._version;
                                         console.log('[ChatContext] Setting initial chat:', mostRecentChat.id);
                                         return mostRecentChat;
                                     }
@@ -170,13 +173,13 @@ export function ChatContextProvider({ children }) {
                                 // If current chat is archived, switch to most recent non-archived or null
                                 if (prevCurrent.archived) {
                                     if (mostRecentChat) {
-                                        chatUpdatedAtRef.current = mostRecentChat._version;
+                                        chatVersionRef.current = mostRecentChat._version;
                                         console.log('[ChatContext] Current chat archived, switching to:', mostRecentChat.id);
                                         return mostRecentChat;
                                     } else {
                                         // All chats are archived - set to null, creation effect will make a new one
                                         console.log('[ChatContext] All chats archived, clearing current chat - new one will be created');
-                                        chatUpdatedAtRef.current = null;
+                                        chatVersionRef.current = null;
                                         return null;
                                     }
                                 }
@@ -184,15 +187,15 @@ export function ChatContextProvider({ children }) {
                                 // Find updated version of current chat
                                 const updatedCurrent = items.find(item => item.id === prevCurrent.id);
                                 // Only update if _version has changed
-                                if (updatedCurrent && chatUpdatedAtRef.current !== updatedCurrent._version) {
-                                    chatUpdatedAtRef.current = updatedCurrent._version;
+                                if (updatedCurrent && chatVersionRef.current !== updatedCurrent._version) {
+                                    chatVersionRef.current = updatedCurrent._version;
                                     console.log('[ChatContext] Chat updated, new _version:', updatedCurrent._version);
                                     return updatedCurrent;
                                 }
                             } else {
                                 // No chats at all - clear current chat so creation effect triggers
                                 console.log('[ChatContext] No chats found, clearing current chat - new one will be created');
-                                chatUpdatedAtRef.current = null;
+                                chatVersionRef.current = null;
                                 return null;
                             }
                             return prevCurrent;
@@ -316,7 +319,7 @@ export function ChatContextProvider({ children }) {
         setMessages,
     }), [
         assistantChat?.id,
-        assistantChat?.updatedAt,
+        assistantChat?._version,
         assistantChat?.archived,
         chatHistories?.length,
         isLoadingChat,

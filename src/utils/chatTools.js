@@ -805,12 +805,30 @@ export async function executeCreateSection({ name, description }) {
       description: description || ''
     });
 
-    if (errors || !data) {
-      throw new Error(errors?.[0]?.message || 'Failed to create section');
+    // Detailed error logging for debugging
+    if (errors) {
+      console.error('[executeCreateSection] GraphQL errors:', JSON.stringify(errors, null, 2));
+      throw new Error(errors[0]?.message || 'GraphQL mutation failed');
+    }
+
+    if (!data) {
+      console.error('[executeCreateSection] Mutation returned null data');
+      throw new Error('Section creation failed - no data returned');
     }
 
     // Parse the JSON response from the Lambda
-    const result = JSON.parse(data);
+    let result;
+    try {
+      result = JSON.parse(data);
+    } catch (parseError) {
+      console.error('[executeCreateSection] Failed to parse response:', data);
+      throw new Error('Invalid response format from section creation');
+    }
+
+    if (!result.sectionId) {
+      console.error('[executeCreateSection] Response missing sectionId:', result);
+      throw new Error('Section creation response missing required fields');
+    }
 
     return {
       success: true,
@@ -822,7 +840,7 @@ export async function executeCreateSection({ name, description }) {
       }
     };
   } catch (error) {
-    console.error('Create section error:', error);
+    console.error('[executeCreateSection] Error:', error);
     return { success: false, error: error.message };
   }
 }
@@ -977,10 +995,13 @@ export async function executeListSections() {
     const client = getAmplifyClient();
     const { data: sections } = await client.models.Section.list();
     
+    // Filter out null items that can occur in subscription updates
+    const validSections = sections.filter(s => s != null && s.id != null);
+    
     return {
       success: true,
-      count: sections.length,
-      sections: sections.map(s => ({
+      count: validSections.length,
+      sections: validSections.map(s => ({
         id: s.id,
         name: s.name,
         description: s.description,

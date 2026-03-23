@@ -296,14 +296,13 @@ const websocketApi = new WebSocketApiConstruct(dataStack, 'WebSocketApi', {
 backend.websocketHandler.addEnvironment('CONNECTIONS_TABLE_NAME', websocketApi.connectionsTable.tableName);
 backend.websocketHandler.addEnvironment('UNIT_TABLE_NAME', backend.data.resources.tables['Unit'].tableName);
 
-// Export WebSocket endpoint
+// Export WebSocket endpoint using CFN intrinsic functions to construct URL at deploy time
 backend.addOutput({
   custom: {
     WEBSOCKET_API: {
-      endpoint: websocketApi.stage.url,
-      region: Stack.of(websocketApi).region,
       apiId: websocketApi.api.apiId,
       stageName: websocketApi.stage.stageName,
+      region: Stack.of(websocketApi).region,
     },
   },
 });

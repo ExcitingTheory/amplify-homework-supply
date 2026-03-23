@@ -1,5 +1,7 @@
 import React from 'react';
-import { within, userEvent, waitFor, expect } from '@storybook/test';
+import { expect } from 'vitest';
+import { within, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Box, Typography } from '@mui/material';
 import MainToolbar, { SettingsMenu, HelpMenu, UserMenu } from './MainToolbar';
 

@@ -14,8 +14,6 @@ import { defineFunction, secret } from '@aws-amplify/backend';
  */
 
 export const assistantHandler = defineFunction({
-
-  // entry: './handler.ts',
   timeoutSeconds: 120,
   memoryMB: 256,
   resourceGroupName: 'data',  // Assign to data stack - used as GraphQL resolver

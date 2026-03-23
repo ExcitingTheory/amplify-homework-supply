@@ -15,7 +15,9 @@
  */
 
 import React from 'react';
-import { within, userEvent, waitFor, expect } from '@storybook/test';
+import { expect } from 'vitest';
+import { within, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import ChatSidebar from './ChatSidebar';
 import { UnitProvider } from '../context/unitContext';
 import FilesContext from '../context/fileContext';

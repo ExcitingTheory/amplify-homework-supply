@@ -39,7 +39,9 @@ export function TutorialStep({
 }: TutorialStepProps) {
   const [completed, setCompleted] = useState(false);
   const emitter = getOnboardingEmitter();
-  const currentPersona = persona || emitter.getPersona();
+  
+  // Use provided persona, current persona, or default to 'instructor' for isolated stories
+  const currentPersona = persona || emitter.getPersona() || 'instructor';
 
   React.useEffect(() => {
     if (currentPersona) {
@@ -49,15 +51,15 @@ export function TutorialStep({
   }, [stepId, currentPersona, emitter]);
 
   const handleComplete = () => {
-    if (!currentPersona) {
-      alert('Please select a persona in the Onboarding panel first');
-      return;
+    // Set default persona if none exists (for isolated Storybook usage)
+    if (!emitter.getPersona()) {
+      emitter.setPersona(currentPersona as UserPersona);
     }
 
     emitter.emit({
       type: 'task-completed',
       taskId: stepId,
-      persona: currentPersona,
+      persona: currentPersona as UserPersona,
       timestamp: Date.now(),
       metadata: {
         mode: 'tutorial',
@@ -99,7 +101,6 @@ export function TutorialStep({
           <button
             className="tutorial-button primary"
             onClick={handleComplete}
-            disabled={!currentPersona}
           >
             Mark as Complete
           </button>

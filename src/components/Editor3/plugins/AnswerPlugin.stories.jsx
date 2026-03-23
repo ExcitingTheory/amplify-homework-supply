@@ -4,7 +4,9 @@
  */
 
 import React from 'react';
-import { within, userEvent, waitFor, expect } from '@storybook/test';
+import { expect } from 'vitest';
+import { within, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';

@@ -1,5 +1,7 @@
 import React from 'react';
-import { within, userEvent, waitFor, expect } from '@storybook/test';
+import { expect } from 'vitest';
+import { within, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { SectionAssigner } from './SectionAssigner';
 
 export default {

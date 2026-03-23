@@ -190,12 +190,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentMode, setCurrentMode] = useState<'tutorial' | 'quiz' | null>(null);
   const [isActive, setIsActive] = useState(false);
 
-  // Register tour tasks with chatTools on mount
-  useEffect(() => {
-    console.log('[TourContext] Initializing tour system with', ONBOARDING_TASKS.length, 'tasks');
-    setTourTasksData(ONBOARDING_TASKS);
-  }, []);
-
+  // Define callbacks first before they're used in effects
   const startTour = useCallback((tourId: string, mode: 'tutorial' | 'quiz' = 'tutorial') => {
     console.log('[TourContext] Starting tour:', tourId, 'mode:', mode);
     
@@ -229,6 +224,29 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getAvailableTours = useCallback(() => {
     return ONBOARDING_TASKS;
   }, []);
+
+  // Register tour tasks with chatTools on mount
+  useEffect(() => {
+    console.log('[TourContext] Initializing tour system with', ONBOARDING_TASKS.length, 'tasks');
+    setTourTasksData(ONBOARDING_TASKS);
+  }, []);
+
+  // Expose tour methods to window for Cypress testing (dev mode only)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+      console.log('[TourContext] Exposing tour methods to window for testing');
+      (window as any).startTour = startTour;
+      (window as any).stopTour = stopTour;
+      (window as any).getAvailableTours = getAvailableTours;
+
+      return () => {
+        // Cleanup on unmount
+        delete (window as any).startTour;
+        delete (window as any).stopTour;
+        delete (window as any).getAvailableTours;
+      };
+    }
+  }, [startTour, stopTour, getAvailableTours]);
 
   const value: TourContextValue = {
     startTour,
