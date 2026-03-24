@@ -322,6 +322,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
       {/* Overlay with spotlight cutout */}
       <Box
         ref={overlayRef}
+        data-testid="spotlight-overlay"
         sx={{
           position: 'fixed',
           top: 0,

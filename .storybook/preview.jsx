@@ -244,11 +244,20 @@ const preview = {
     // Configure layout settings
     layout: 'padded',
 
-    // Better docs display
+    // Better docs display with toolbar support
     docs: {
       toc: true,
       source: {
         state: 'open',
+      },
+      // Render stories in canvas mode within docs to show toolbar & addons
+      canvas: {
+        withToolbar: true,
+      },
+      // Keep stories inline but with full canvas features
+      story: {
+        inline: true,
+        height: 'auto',
       },
     },
 
@@ -256,6 +265,28 @@ const preview = {
     options: {
       showPanel: true,
       showToolbar: true,
+      storySort: {
+        order: [
+          'Getting Started',
+          ['Welcome', 'Onboarding', '*'],
+          'Introduction',
+          '📚 Creating Lessons',
+          ['Editor', 'Workbook', 'Suggested Content'],
+          '🎙️ Recording Audio',
+          ['Recording Studio'],
+          '📁 Managing Content', 
+          ['File Manager', 'Dictionary', 'Questions'],
+          '💬 AI Tools',
+          ['Chat Assistant'],
+          '📄 Pages',
+          ['Application Pages', 'Index', 'Units', 'Sections', 'Profile', 'Workbook', 'Grades'],
+          '🧩 Components',
+          ['Header', 'Button', 'Nodes', 'Meaning Association'],
+          '🔌 Editor Plugins',
+          'WIP',
+          '*',
+        ],
+      },
     },
 
     // Background options for testing
@@ -275,31 +306,6 @@ const preview = {
       test: 'todo'
     }
   },
-      options: {
-      storySort: {
-        order: [
-          'Introduction',
-          'Welcome',
-          'Getting Started',
-          '📚 Creating Lessons',
-          ['Editor', 'Workbook', 'Suggested Content'],
-          '🎙️ Recording Audio',
-          ['Recording Studio'],
-          '📁 Managing Content', 
-          ['File Manager', 'Dictionary', 'Questions'],
-          '💬 AI Tools',
-          ['Chat Assistant'],
-          '📄 Pages',
-          ['Index', 'Units', 'Sections', 'Profile', 'Workbook', 'Grades'],
-          '🧩 Components',
-          ['Header', 'Button', 'Nodes', 'Meaning Association'],
-          '🔌 Editor Plugins',
-          //    ['Editor3'],
-          'WIP',
-          '*',
-        ],
-      },
-    },
   tags: ['autodocs'],
   decorators: [
     withTranslationMode,

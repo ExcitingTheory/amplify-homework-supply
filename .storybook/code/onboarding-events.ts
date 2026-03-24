@@ -3,7 +3,7 @@
  * Emits events when users complete onboarding tasks
  */
 
-export type UserPersona = 'instructor' | 'learner' | 'developer';
+export type UserPersona = 'instructor' | 'learner' | 'developer' | 'translator';
 
 export interface OnboardingEvent {
   type: 'task-started' | 'task-completed' | 'task-skipped' | 'persona-selected' | 'action-performed';

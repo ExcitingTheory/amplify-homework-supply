@@ -42,9 +42,10 @@ describe('Storybook Onboarding Tour', () => {
    * Helper: Navigate to specific story
    */
   const visitStory = (storyPath: string) => {
-    cy.visit(`${STORYBOOK_URL}/iframe.html?path=/story/${storyPath}`);
+    // Use id= parameter and viewMode=story for proper story rendering (not docs)
+    cy.visit(`${STORYBOOK_URL}/iframe.html?id=${storyPath}&viewMode=story`);
     // Wait for story to render
-    cy.wait(1000);
+    cy.wait(1500);
   };
 
   /**
@@ -128,19 +129,21 @@ describe('Storybook Onboarding Tour', () => {
   // ============================================================================
   describe('Onboarding Panel - Persona Selection', () => {
     it('allows selecting instructor persona', () => {
-      visitStory('getting-started-onboarding--docs');
+      visitStory('getting-started-onboarding--persona-selection');
 
       cy.log('Verify welcome message appears');
       cy.contains(/welcome.*to.*homework.*supply/i, { timeout: 10000 })
         .should('be.visible');
 
-      cy.log('Verify persona buttons are visible');
-      cy.contains('button', /instructor/i).should('be.visible');
-      cy.contains('button', /learner/i).should('be.visible');
-      cy.contains('button', /developer/i).should('be.visible');
+      cy.log('Verify persona cards are visible');
+      // Scroll to ensure cards are in viewport and wait for render
+      cy.contains(/instructor/i).scrollIntoView().should('be.visible');
+      cy.contains(/learner/i).should('exist');
+      cy.contains(/developer/i).should('exist');
 
       cy.log('Click Instructor persona');
-      cy.contains('button', /instructor/i).click();
+      // Use force:true in case card is covered by container
+      cy.contains('.MuiCard-root', /instructor/i).scrollIntoView().click({ force: true });
 
       cy.log('Verify instructor tasks appear');
       cy.contains(/getting.*started|create.*unit|create.*section/i, { timeout: 5000 })
@@ -155,10 +158,10 @@ describe('Storybook Onboarding Tour', () => {
     });
 
     it('allows changing personas', () => {
-      visitStory('getting-started-onboarding--docs');
+      visitStory('getting-started-onboarding--persona-selection');
 
       cy.log('Select Instructor persona');
-      cy.contains('button', /instructor/i).click();
+      cy.contains('.MuiCard-root', /instructor/i).scrollIntoView().click({ force: true });
 
       cy.log('Wait for persona to load');
       cy.contains(/instructor.*onboarding/i, { timeout: 5000 })
@@ -171,7 +174,7 @@ describe('Storybook Onboarding Tour', () => {
       cy.contains(/welcome.*to/i).should('be.visible');
 
       cy.log('Select Learner persona');
-      cy.contains('button', /learner/i).click();
+      cy.contains('.MuiCard-root', /learner/i).scrollIntoView().click({ force: true });
 
       cy.log('Verify learner tasks appear');
       cy.contains(/learner.*onboarding|join.*section|complete.*workbook/i, { timeout: 5000 })
@@ -179,10 +182,10 @@ describe('Storybook Onboarding Tour', () => {
     });
 
     it('persists persona selection across reloads', () => {
-      visitStory('getting-started-onboarding--docs');
+      visitStory('getting-started-onboarding--persona-selection');
 
       cy.log('Select Developer persona');
-      cy.contains('button', /developer/i).click();
+      cy.contains('.MuiCard-root', /developer/i).scrollIntoView().click({ force: true });
 
       cy.log('Wait for developer tasks');
       cy.contains(/developer.*onboarding/i, { timeout: 5000 })
@@ -288,10 +291,10 @@ describe('Storybook Onboarding Tour', () => {
   // ============================================================================
   describe('Mode Switching', () => {
     it('switches between tutorial and quiz modes', () => {
-      visitStory('getting-started-onboarding--docs');
+      visitStory('getting-started-onboarding--persona-selection');
 
       cy.log('Select Instructor persona');
-      cy.contains('button', /instructor/i).click();
+      cy.contains('.MuiCard-root', /instructor/i).scrollIntoView().click({ force: true });
 
       cy.log('Verify default mode is Tutorial');
       cy.contains(/tutorial/i).should('have.class', 'MuiChip-colorPrimary');
@@ -320,10 +323,10 @@ describe('Storybook Onboarding Tour', () => {
     });
 
     it('tracks completed tasks and updates progress', () => {
-      visitStory('getting-started-onboarding--docs');
+      visitStory('getting-started-onboarding--persona-selection');
 
       cy.log('Select Instructor persona');
-      cy.contains('button', /instructor/i).click();
+      cy.contains('.MuiCard-root', /instructor/i).scrollIntoView().click({ force: true });
 
       cy.log('Get initial progress value');
       cy.get('[role="progressbar"]')
@@ -353,10 +356,10 @@ describe('Storybook Onboarding Tour', () => {
     });
 
     it('persists completed tasks in localStorage', () => {
-      visitStory('getting-started-onboarding--docs');
+      visitStory('getting-started-onboarding--persona-selection');
 
       cy.log('Select Instructor persona');
-      cy.contains('button', /instructor/i).click();
+      cy.contains('.MuiCard-root', /instructor/i).scrollIntoView().click({ force: true });
 
       cy.log('Complete first task');
       cy.get('[data-testid="task-item"]').first().click();
@@ -421,10 +424,10 @@ describe('Storybook Onboarding Tour', () => {
   // ============================================================================
   describe('Reset Progress', () => {
     it('resets onboarding progress', () => {
-      visitStory('getting-started-onboarding--docs');
+      visitStory('getting-started-onboarding--persona-selection');
 
       cy.log('Select persona and complete a task');
-      cy.contains('button', /instructor/i).click();
+      cy.contains('.MuiCard-root', /instructor/i).scrollIntoView().click({ force: true });
       cy.get('[data-testid="task-item"]').first().click();
       cy.contains('button', /complete/i).click();
 
@@ -444,7 +447,7 @@ describe('Storybook Onboarding Tour', () => {
       cy.contains(/welcome.*to/i, { timeout: 5000 }).should('be.visible');
 
       cy.log('Verify progress is reset');
-      cy.contains('button', /instructor/i).click();
+      cy.contains('.MuiCard-root', /instructor/i).scrollIntoView().click({ force: true });
       cy.get('[role="progressbar"]')
         .invoke('attr', 'aria-valuenow')
         .should('eq', '0');

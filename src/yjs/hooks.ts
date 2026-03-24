@@ -62,6 +62,18 @@ export function useYjsProvider(config: YjsProviderConfig) {
 }
 
 /**
+ * Helper to check if Y type is ready to read from
+ */
+function isYTypeReady(ytype: Y.Map<any> | Y.Array<any> | Y.Text): boolean {
+  try {
+    // Try to access the doc - will throw if not attached
+    return ytype.doc !== null
+  } catch {
+    return false
+  }
+}
+
+/**
  * Hook to sync a Y.Map with React state
  */
 export function useYMap<T extends Record<string, any>>(
@@ -71,20 +83,34 @@ export function useYMap<T extends Record<string, any>>(
   const [state, setState] = useState<T>(initialState || ({} as T))
 
   useEffect(() => {
+    // Guard against uninitialized Y types
+    if (!isYTypeReady(ymap)) {
+      console.warn('[useYMap] Y.Map not ready - skipping initial read')
+      return
+    }
+
     // Initialize state from Y.Map
-    const initialData = {} as T
-    ymap.forEach((value, key) => {
-      initialData[key as keyof T] = value
-    })
-    setState(initialData)
+    try {
+      const initialData = {} as T
+      ymap.forEach((value, key) => {
+        initialData[key as keyof T] = value
+      })
+      setState(initialData)
+    } catch (err) {
+      console.warn('[useYMap] Failed to initialize from Y.Map:', err)
+    }
 
     // Subscribe to changes
     const updateHandler = () => {
-      const newData = {} as T
-      ymap.forEach((value, key) => {
-        newData[key as keyof T] = value
-      })
-      setState(newData)
+      try {
+        const newData = {} as T
+        ymap.forEach((value, key) => {
+          newData[key as keyof T] = value
+        })
+        setState(newData)
+      } catch (err) {
+        console.warn('[useYMap] Failed to update from Y.Map:', err)
+      }
     }
 
     ymap.observe(updateHandler)
@@ -115,12 +141,26 @@ export function useYArray<T>(yarray: Y.Array<T>) {
   const [items, setItems] = useState<T[]>([])
 
   useEffect(() => {
+    // Guard against uninitialized Y types
+    if (!isYTypeReady(yarray)) {
+      console.warn('[useYArray] Y.Array not ready - skipping initial read')
+      return
+    }
+
     // Initialize items from Y.Array
-    setItems(Array.from(yarray))
+    try {
+      setItems(Array.from(yarray))
+    } catch (err) {
+      console.warn('[useYArray] Failed to initialize from Y.Array:', err)
+    }
 
     // Subscribe to changes
     const updateHandler = () => {
-      setItems(Array.from(yarray))
+      try {
+        setItems(Array.from(yarray))
+      } catch (err) {
+        console.warn('[useYArray] Failed to update from Y.Array:', err)
+      }
     }
 
     yarray.observe(updateHandler)
@@ -169,15 +209,29 @@ export function useYArray<T>(yarray: Y.Array<T>) {
  * Hook to sync Y.Text (for rich text editors like Lexical)
  */
 export function useYText(ytext: Y.Text) {
-  const [content, setContent] = useState(ytext.toString())
+  const [content, setContent] = useState('')
 
   useEffect(() => {
+    // Guard against uninitialized Y types
+    if (!isYTypeReady(ytext)) {
+      console.warn('[useYText] Y.Text not ready - skipping initial read')
+      return
+    }
+
     // Initialize content
-    setContent(ytext.toString())
+    try {
+      setContent(ytext.toString())
+    } catch (err) {
+      console.warn('[useYText] Failed to initialize from Y.Text:', err)
+    }
 
     // Subscribe to changes
     const updateHandler = () => {
-      setContent(ytext.toString())
+      try {
+        setContent(ytext.toString())
+      } catch (err) {
+        console.warn('[useYText] Failed to update from Y.Text:', err)
+      }
     }
 
     ytext.observe(updateHandler)

@@ -122,6 +122,7 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
       instructor: { label: 'Instructor', icon: '👨‍🏫', color: '#2196F3' },
       learner: { label: 'Learner', icon: '🎓', color: '#4CAF50' },
       developer: { label: 'Developer', icon: '💻', color: '#9C27B0' },
+      translator: { label: 'Translator', icon: '🌐', color: '#FF9800' },
     };
     return configs[p];
   };
@@ -150,6 +151,15 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="16 18 22 12 16 6"></polyline>
           <polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+      );
+    }
+    if (type === 'translator') {
+      return (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
         </svg>
       );
     }
@@ -188,6 +198,7 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
                 { id: 'instructor' as UserPersona, label: 'Instructor', color: '#2196F3' },
                 { id: 'learner' as UserPersona, label: 'Learner', color: '#4CAF50' },
                 { id: 'developer' as UserPersona, label: 'Developer', color: '#9C27B0' },
+                { id: 'translator' as UserPersona, label: 'Translator', color: '#FF9800' },
               ].map((p) => (
                 <div
                   key={p.id}
@@ -381,32 +392,13 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
             fontWeight: 600
           }}
           onClick={() => {
-            // First, check current panel visibility state using Storybook API
-            const isPanelOpen = api.getQueryParam('panel') !== null || 
-                               (api.getElements && api.getElements('panel'));
+            console.log('[Onboarding] View All Tasks clicked');
             
-            // Always switch to the onboarding panel
+            // First open the panel (true = force open), then select our tab
+            // This is the working pattern from OnboardingSummary.tsx
+            api.togglePanel(true);
             api.setSelectedPanel(PANEL_ID);
-            
-            // Only try to open the panel if we detect it's currently closed
-            // Never call toggle if panel appears to already be open
-            if (!isPanelOpen) {
-              setTimeout(() => {
-                const bottomPanel = document.querySelector('[data-side="bottom"]');
-                
-                if (bottomPanel) {
-                  const style = window.getComputedStyle(bottomPanel);
-                  const actuallyHidden = style.display === 'none' || 
-                                       style.visibility === 'hidden' ||
-                                       parseInt(style.height) < 50;
-                  
-                  // Only toggle if we're absolutely sure it's hidden
-                  if (actuallyHidden && api.togglePanel) {
-                    api.togglePanel();
-                  }
-                }
-              }, 50);
-            }
+            console.log('[Onboarding] Panel opened and tab selected:', PANEL_ID);
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = '#3d3d3d';
@@ -532,6 +524,52 @@ addons.register(ADDON_ID, (api) => {
       active ? <OnboardingPanel api={api} /> : null
     ),
   });
+  
+  // Auto-open onboarding panel when Welcome story is displayed
+  const WELCOME_STORY_ID = 'getting-started-welcome--welcome';
+  let panelOpenedForStory: string | null = null;
+  
+  // Helper to open the panel - uses same proven pattern as "View All Tasks" button
+  const openOnboardingPanel = () => {
+    console.log('[Onboarding] Opening onboarding panel...');
+    
+    // Check current panel visibility state
+    const isPanelOpen = api.getQueryParam('panel') !== null || 
+                       (api.getElements && api.getElements('panel'));
+    
+    // Always switch to the onboarding panel
+    api.setSelectedPanel(PANEL_ID);
+    
+    // Only try to open the panel if we detect it's currently closed
+    if (!isPanelOpen) {
+      setTimeout(() => {
+        const bottomPanel = document.querySelector('[data-side="bottom"]');
+        
+        if (bottomPanel) {
+          const style = window.getComputedStyle(bottomPanel);
+          const actuallyHidden = style.display === 'none' || 
+                               style.visibility === 'hidden' ||
+                               parseInt(style.height) < 50;
+          
+          if (actuallyHidden && api.togglePanel) {
+            api.togglePanel();
+          }
+        }
+      }, 50);
+    }
+  };
+  
+  // Handle story changes
+  const handleStoryChange = (storyId: string) => {
+    if (storyId === WELCOME_STORY_ID && panelOpenedForStory !== storyId) {
+      console.log('[Onboarding] Welcome story detected, opening panel');
+      panelOpenedForStory = storyId;
+      openOnboardingPanel();
+    }
+  };
+  
+  // Listen for story changes
+  api.on('storyChanged', handleStoryChange);
   
   // Inject compact summary into sidebar below the logo
   // Use longer delay and MutationObserver to ensure DOM is ready

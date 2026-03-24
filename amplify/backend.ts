@@ -171,6 +171,22 @@ const openaiSelfInvokePolicy = new Policy(backend.openaiHandler.resources.lambda
 
 backend.openaiHandler.resources.lambda.role?.attachInlinePolicy(openaiSelfInvokePolicy);
 
+// Grant OpenAI handler permission to call AppSync GraphQL API for File management
+const openaiAppSyncPolicy = new Policy(
+  backend.openaiHandler.resources.lambda.stack,
+  'OpenAIAppSyncPolicy',
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ['appsync:GraphQL'],
+        resources: [`${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`],
+      }),
+    ],
+  }
+);
+
+backend.openaiHandler.resources.lambda.role?.attachInlinePolicy(openaiAppSyncPolicy);
+
 // Grant Embeddings handler permission to invoke itself for async operations if needed
 const embeddingsSelfInvokePolicy = new Policy(backend.embeddingsHandler.resources.lambda.stack, 'EmbeddingsSelfInvokePolicy', {
   statements: [

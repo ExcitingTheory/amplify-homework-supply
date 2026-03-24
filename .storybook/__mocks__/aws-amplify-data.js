@@ -290,12 +290,95 @@ const createObservableQuery = (modelName, filter) => {
 };
 
 /**
+ * Store mutation subscriptions for onCreate, onUpdate, onDelete
+ * These are separate from observeQuery subscriptions
+ */
+const mutationSubscriptions = {
+  File: { onCreate: [], onUpdate: [], onDelete: [] },
+  Document: { onCreate: [], onUpdate: [], onDelete: [] },
+  Unit: { onCreate: [], onUpdate: [], onDelete: [] },
+  Word: { onCreate: [], onUpdate: [], onDelete: [] },
+  Question: { onCreate: [], onUpdate: [], onDelete: [] },
+  Grade: { onCreate: [], onUpdate: [], onDelete: [] },
+  Section: { onCreate: [], onUpdate: [], onDelete: [] },
+  Assignment: { onCreate: [], onUpdate: [], onDelete: [] },
+  UnitWord: { onCreate: [], onUpdate: [], onDelete: [] },
+  UnitFile: { onCreate: [], onUpdate: [], onDelete: [] },
+  UnitDocument: { onCreate: [], onUpdate: [], onDelete: [] },
+  QuestionUnit: { onCreate: [], onUpdate: [], onDelete: [] },
+  ParsedContent: { onCreate: [], onUpdate: [], onDelete: [] },
+  AIFeedback: { onCreate: [], onUpdate: [], onDelete: [] },
+  AssistantChat: { onCreate: [], onUpdate: [], onDelete: [] },
+  AssistantChatFile: { onCreate: [], onUpdate: [], onDelete: [] },
+  Settings: { onCreate: [], onUpdate: [], onDelete: [] },
+};
+
+/**
+ * Create a mutation subscription observable (onCreate, onUpdate, onDelete)
+ */
+const createMutationSubscription = (modelName, mutationType) => ({
+  subscribe: ({ next, error }) => {
+    const subscription = { next, error };
+    
+    // Initialize if needed
+    if (!mutationSubscriptions[modelName]) {
+      mutationSubscriptions[modelName] = { onCreate: [], onUpdate: [], onDelete: [] };
+    }
+    
+    mutationSubscriptions[modelName][mutationType].push(subscription);
+    console.log(`[Mock Data] ${modelName}.${mutationType}() subscription added. Total: ${mutationSubscriptions[modelName][mutationType].length}`);
+    
+    return {
+      unsubscribe: () => {
+        const index = mutationSubscriptions[modelName][mutationType].indexOf(subscription);
+        if (index > -1) {
+          mutationSubscriptions[modelName][mutationType].splice(index, 1);
+          console.log(`[Mock Data] ${modelName}.${mutationType}() subscription removed. Remaining: ${mutationSubscriptions[modelName][mutationType].length}`);
+        }
+      },
+    };
+  },
+});
+
+/**
+ * Notify mutation subscribers when data changes
+ */
+const notifyMutationSubscribers = (modelName, mutationType, item) => {
+  const subs = mutationSubscriptions[modelName]?.[mutationType] || [];
+  if (subs.length > 0) {
+    const enhancedItem = addRelationshipAccessors(item, modelName);
+    subs.forEach(subscription => {
+      setTimeout(() => {
+        subscription.next(enhancedItem);
+      }, 0);
+    });
+    console.log(`[Mock Data] ${modelName}.${mutationType}() notified ${subs.length} subscribers`);
+  }
+};
+
+/**
  * Create a mock model with common operations
  */
 const createMockModel = (modelName) => ({
   observeQuery: (filter) => {
     console.log(`[Mock Data] ${modelName}.observeQuery() called with filter:`, filter);
     return createObservableQuery(modelName, filter);
+  },
+  
+  // Real-time subscription methods (Amplify Gen 2 API)
+  onCreate: (filter) => {
+    console.log(`[Mock Data] ${modelName}.onCreate() called with filter:`, filter);
+    return createMutationSubscription(modelName, 'onCreate');
+  },
+  
+  onUpdate: (filter) => {
+    console.log(`[Mock Data] ${modelName}.onUpdate() called with filter:`, filter);
+    return createMutationSubscription(modelName, 'onUpdate');
+  },
+  
+  onDelete: (filter) => {
+    console.log(`[Mock Data] ${modelName}.onDelete() called with filter:`, filter);
+    return createMutationSubscription(modelName, 'onDelete');
   },
   
   list: async (options) => {
@@ -348,7 +431,10 @@ const createMockModel = (modelName) => ({
     
     const enhancedItem = addRelationshipAccessors(item, modelName);
     
-    // Notify all subscribers about the new item
+    // Notify onCreate mutation subscribers
+    notifyMutationSubscribers(modelName, 'onCreate', item);
+    
+    // Notify all observeQuery subscribers about the new item
     if (activeSubscriptions[modelName] && activeSubscriptions[modelName].length > 0) {
       const items = Array.from(dataStores[modelName].values());
       const enhancedItems = items.map(item => addRelationshipAccessors(item, modelName));
@@ -391,7 +477,10 @@ const createMockModel = (modelName) => ({
     
     const enhancedUpdated = addRelationshipAccessors(updated, modelName);
     
-    // Notify all subscribers about the update
+    // Notify onUpdate mutation subscribers
+    notifyMutationSubscribers(modelName, 'onUpdate', updated);
+    
+    // Notify all observeQuery subscribers about the update
     if (activeSubscriptions[modelName] && activeSubscriptions[modelName].length > 0) {
       const items = Array.from(dataStores[modelName].values());
       const enhancedItems = items.map(item => addRelationshipAccessors(item, modelName));
@@ -426,7 +515,10 @@ const createMockModel = (modelName) => ({
     
     dataStores[modelName].delete(id);
     
-    // Notify all subscribers about the deletion
+    // Notify onDelete mutation subscribers
+    notifyMutationSubscribers(modelName, 'onDelete', existing);
+    
+    // Notify all observeQuery subscribers about the deletion
     if (activeSubscriptions[modelName] && activeSubscriptions[modelName].length > 0) {
       const items = Array.from(dataStores[modelName].values());
       const enhancedItems = items.map(item => addRelationshipAccessors(item, modelName));
@@ -774,6 +866,14 @@ export const seedMockAssistantChats = (chatsArray) => {
 export const clearMockData = () => {
   console.log('[Mock Data] Clearing all data stores');
   Object.values(dataStores).forEach(store => store.clear());
+  
+  // Clear mutation subscriptions
+  Object.values(mutationSubscriptions).forEach(modelSubs => {
+    modelSubs.onCreate = [];
+    modelSubs.onUpdate = [];
+    modelSubs.onDelete = [];
+  });
+  
   console.log('[Mock Data] All data stores cleared');
 };
 

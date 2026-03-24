@@ -197,11 +197,13 @@ describe('Main UI Tour System', () => {
       cy.waitForNavigation('/units');
 
       cy.log('Verify tour system is still available');
-      cy.window().then((win) => {
+      // Wait for TourProvider to mount and expose functions to window
+      // The useEffect that exposes functions runs after component mounts
+      cy.window({ timeout: 10000 }).should((win) => {
         expect((win as any).startTour).to.exist;
         expect((win as any).stopTour).to.exist;
-        cy.log('Tour system persisted across page reload');
       });
+      cy.log('Tour system persisted across page reload');
     });
   });
 

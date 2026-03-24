@@ -328,7 +328,8 @@ export async function getServerSideProps({ locale }) {
         'pages',
         'components',
         'workbook',
-        'editor.blocks'
+        'editor.blocks',
+        'editor.shared'
       ], nextI18nextConfig)),
     },
   }

@@ -599,6 +599,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                 return (
                   <Card
                     key={task.id}
+                    data-testid="task-item"
                     sx={{
                       mb: 1.5,
                       backgroundColor: isCompleted ? 'rgba(76, 175, 80, 0.05)' : 'transparent',
@@ -798,7 +799,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <CardOutline>
+      <CardOutline data-testid="onboarding-panel">
         <CardContentWrapper>
           {renderContent()}
         </CardContentWrapper>

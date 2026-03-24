@@ -40,6 +40,7 @@
     "amplify:upgrade": "npx npm-check-updates -i '/@?aws-amplify/' && npm update",
     "manage-admins": "node scripts/manage-admins.js",
     "storybook": "NODE_OPTIONS='--experimental-import-meta-resolve' storybook dev -p 6006",
+    "storybook:with-logs": "NODE_OPTIONS='--experimental-import-meta-resolve' storybook dev -p 6006 | tee storybook-logs.txt",
     "build-storybook": "NODE_OPTIONS='--experimental-import-meta-resolve' storybook build",
     "test": "vitest",
     "test:unit": "vitest run --exclude 'test/integration/**' --exclude 'test/performance/**'",

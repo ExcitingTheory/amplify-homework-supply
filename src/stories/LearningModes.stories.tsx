@@ -57,7 +57,7 @@ export const TutorialModeExample: StoryObj = {
         </Button>
         {submitted && (
           <Box sx={{ mt: 2, p: 2, bgcolor: 'success.light', borderRadius: 1 }}>
-            ✅ Unit "{value}" created!
+            ✅ Unit "{value}" created! Great job!
           </Box>
         )}
       </Box>
@@ -65,6 +65,12 @@ export const TutorialModeExample: StoryObj = {
 
     return (
       <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
+        <Box sx={{ mb: 3, p: 2, bgcolor: '#e3f2fd', borderRadius: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+          <span style={{ fontSize: '24px' }}>📖</span>
+          <span style={{ fontWeight: 'bold' }}>Tutorial Mode</span>
+          <span style={{ color: '#666' }}>— Learn step-by-step with interactive guidance</span>
+        </Box>
+
         <h2>Creating Your First Unit</h2>
         <p>
           Units are the building blocks of your lessons. Follow the tutorial below to learn
@@ -98,11 +104,53 @@ export const TutorialModeExample: StoryObj = {
  */
 export const QuizModeExample: StoryObj = {
   render: () => {
+    const [completed, setCompleted] = React.useState(false);
+    
     return (
-      <QuizMode
-        taskId="instructor-create-unit"
-        requiredActions={['onClick:create-unit']}
-      />
+      <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
+        <Box sx={{ mb: 3, p: 2, bgcolor: '#fff3e0', borderRadius: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+          <span style={{ fontSize: '24px' }}>🎯</span>
+          <span style={{ fontWeight: 'bold' }}>Quiz Mode</span>
+          <span style={{ color: '#666' }}>— Practice hands-on with minimal guidance</span>
+        </Box>
+
+        <h2>Test Your Knowledge</h2>
+        <p>
+          Practice creating a unit without step-by-step guidance. 
+          See if you can complete the task on your own!
+        </p>
+
+        {!completed ? (
+          <Box sx={{ mt: 3, p: 3, border: '2px dashed #ccc', borderRadius: 2, textAlign: 'center' }}>
+            <h3>Create a Unit</h3>
+            <p style={{ color: '#666' }}>Navigate to the Units page and create your first unit.</p>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2, mr: 2 }}
+              onClick={() => {
+                // Simulate navigation
+                window.parent.location.href = '?path=/story/📄-pages-application-pages--units';
+              }}
+            >
+              Start Task
+            </Button>
+            <Button
+              variant="outlined"
+              sx={{ mt: 2 }}
+              onClick={() => setCompleted(true)}
+            >
+              Mark as Complete
+            </Button>
+          </Box>
+        ) : (
+          <Box sx={{ mt: 3, p: 3, bgcolor: '#e8f5e9', borderRadius: 2, textAlign: 'center' }}>
+            <span style={{ fontSize: '48px' }}>✅</span>
+            <h3>Task Completed!</h3>
+            <p>Great job! You've successfully completed the quiz task.</p>
+          </Box>
+        )}
+      </div>
     );
   },
   parameters: {

@@ -578,6 +578,143 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     order: 103,
     estimatedTime: 1800,
   },
+
+  // ============ TRANSLATOR TASKS ============
+  {
+    id: 'translator-language-switcher',
+    title: 'Try the Language Switcher',
+    description: 'Learn how to preview content in different languages',
+    instructions: [
+      'Look for the 🌐 Globe icon in the top toolbar',
+      'Click it to open the language selector',
+      'Switch between languages (English, Japanese, Spanish, etc.)',
+      'Notice how UI text changes in real-time',
+      'Try viewing a component in each available language',
+    ],
+    persona: 'translator',
+    category: 'Getting Started',
+    order: 1,
+    estimatedTime: 120,
+    completionCriteria: {
+      tutorialStoryId: 'translation-mode-demo--default', // Tutorial: Translation demo with toolbar
+      requiredActions: ['onLanguageChange'],
+    },
+  },
+  {
+    id: 'translator-translation-panel',
+    title: 'Open the Translations Panel',
+    description: 'Discover the translation editing tools',
+    instructions: [
+      'Look at the addon panel at the bottom of Storybook',
+      'Click on the "Translations" tab',
+      'Browse the translation keys for the current component',
+      'See which strings are translated vs missing',
+      'View the context and usage information',
+    ],
+    persona: 'translator',
+    category: 'Getting Started',
+    order: 2,
+    estimatedTime: 180,
+    completionCriteria: {
+      tutorialStoryId: 'translation-mode-demo--default', // Tutorial: Translation demo with panel
+      requiredActions: ['onPanelOpen'],
+    },
+  },
+  {
+    id: 'translator-view-missing',
+    title: 'Find Missing Translations',
+    description: 'Identify strings that need translation',
+    instructions: [
+      'Open the Translations panel',
+      'Look for strings marked as "Missing" or with warning icons',
+      'Switch languages to see which locales are incomplete',
+      'Note the namespace and key for missing strings',
+      'Check the component context for translation hints',
+    ],
+    persona: 'translator',
+    category: 'Translation Workflow',
+    order: 3,
+    estimatedTime: 300,
+    completionCriteria: {
+      tutorialStoryId: 'translation-mode-demo--default', // Tutorial: Translation panel showing missing strings
+    },
+  },
+  {
+    id: 'translator-locale-files',
+    title: 'Understand Locale File Structure',
+    description: 'Learn where translation files are stored',
+    instructions: [
+      'Translation files live in public/locales/{lang}/',
+      'Each namespace has its own JSON file (common.json, etc.)',
+      'Keys are organized hierarchically',
+      'English (en) is the source language',
+      'Other locales mirror the English structure',
+    ],
+    persona: 'translator',
+    category: 'Translation Workflow',
+    order: 4,
+    estimatedTime: 300,
+    completionCriteria: {
+      tutorialStoryId: 'translation-mode-demo--editor-namespace', // Tutorial: Editor namespace showing file structure
+    },
+  },
+  {
+    id: 'translator-component-context',
+    title: 'Review Component Context',
+    description: 'Understand where translations are used',
+    instructions: [
+      'Select a component story in the sidebar',
+      'Open the Translations panel',
+      'Review which translation keys the component uses',
+      'Check the "Used In" field to see file locations',
+      'Understand the UI context before translating',
+    ],
+    persona: 'translator',
+    category: 'Translation Workflow',
+    order: 5,
+    estimatedTime: 240,
+    completionCriteria: {
+      tutorialStoryId: 'translation-mode-demo--auth-namespace', // Tutorial: Auth namespace with component context
+    },
+  },
+  {
+    id: 'translator-test-rtl',
+    title: 'Test RTL Language Support',
+    description: 'Verify right-to-left language layouts',
+    instructions: [
+      'Switch to a RTL language if available (Arabic, Hebrew)',
+      'Observe how the UI layout mirrors',
+      'Check that text alignment is correct',
+      'Verify icons and buttons are in the right position',
+      'Report any layout issues found',
+    ],
+    persona: 'translator',
+    category: '🎁 Extra Credit',
+    order: 101,
+    estimatedTime: 300,
+    completionCriteria: {
+      tutorialStoryId: 'translation-mode-demo--default', // Tutorial: Test RTL in translation demo
+    },
+  },
+  {
+    id: 'translator-pluralization',
+    title: 'Review Pluralization Rules',
+    description: 'Check translations with count variables',
+    instructions: [
+      'Find translations that use {{count}} variables',
+      'Verify plural forms are correct for each language',
+      'Test with different count values (0, 1, 2, 5, etc.)',
+      'Some languages need multiple plural forms',
+      'Check the i18next pluralization documentation',
+    ],
+    persona: 'translator',
+    category: '🎁 Extra Credit',
+    order: 102,
+    estimatedTime: 600,
+    completionCriteria: {
+      tutorialStoryId: 'translation-mode-demo--default', // Tutorial: Review plurals in translation panel
+    },
+  },
 ];
 
 /**

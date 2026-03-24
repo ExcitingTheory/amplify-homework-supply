@@ -1,0 +1,295 @@
+
+> amplify-homework-supply@1.0.0 cypress:run
+> cypress run
+
+
+===============
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:        13.17.0                                                                        │
+  │ Browser:        Electron 118 (headless)                                                        │
+  │ Node Version:   v20.19.6 (/Users/colinbarrett-fox/.nvm/versions/node/v20.19.6/bin/node)        │
+  │ Specs:          4 found (complete-workflow.cy.ts, onboarding-main-ui.cy.ts, onboarding-storybo │
+  │                 ok.cy.ts, workbook-spec.cy.ts)                                                 │
+  │ Searched:       cypress/e2e/**/*.cy.{js,jsx,ts,tsx}                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  complete-workflow.cy.ts                                                         (1 of 4)
+
+
+  Complete Teaching Workflow
+    1) instructor creates unit with graded blocks via UI
+    ✓ instructor creates section and extracts join code (12738ms)
+    ✓ instructor assigns unit to section from editor (11805ms)
+    ✓ learner joins section using join code (8380ms)
+    ✓ learner can access section detail page (11089ms)
+    ✓ instructor views section detail page with gradebook (12378ms)
+
+
+  5 passing (1m)
+  1 failing
+
+  1) Complete Teaching Workflow
+       instructor creates unit with graded blocks via UI:
+     AssertionError: Timed out retrying after 10000ms: Expected to find element: `:visible`, but never found it. Queried from:
+
+              > cy.get(input[type="text"])
+      at Context.eval (webpack://amplify-homework-supply/./cypress/e2e/complete-workflow.cy.ts:172:0)
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        6                                                                                │
+  │ Passing:      5                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     1 minute, 23 seconds                                                             │
+  │ Spec Ran:     complete-workflow.cy.ts                                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/cypress/    (2560x1440)
+     screenshots/complete-workflow.cy.ts/Complete Teaching Workflow -- instructor cre               
+     ates unit with graded blocks via UI (failed).png                                               
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  onboarding-main-ui.cy.ts                                                        (2 of 4)
+
+
+  Main UI Tour System
+    Unit Creation Tour State
+      ✓ starts unit creation guided tour via programmatic trigger (8627ms)
+      ✓ allows skipping tour (5262ms)
+    Section Creation Tour State
+      ✓ starts section creation guided tour (5122ms)
+    Tour System Persistence
+      ✓ persists tour completion across sessions (6007ms)
+    Tour Target Elements
+      ✓ verifies data-tour attributes on units page (4911ms)
+      ✓ verifies data-tour attributes on sections page (5011ms)
+      ✓ verifies data-tour attributes on editor (7563ms)
+
+
+  7 passing (43s)
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        7                                                                                │
+  │ Passing:      7                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     43 seconds                                                                       │
+  │ Spec Ran:     onboarding-main-ui.cy.ts                                                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  onboarding-storybook.cy.ts                                                      (3 of 4)
+
+
+  Storybook Onboarding Tour
+    Spotlight Overlay Component
+      ✓ renders tutorial mode correctly (3611ms)
+      ✓ renders quiz mode correctly (1909ms)
+    Onboarding Panel - Persona Selection
+      1) allows selecting instructor persona
+      2) allows changing personas
+      3) persists persona selection across reloads
+    Tutorial Mode
+      4) shows interactive tutorial demos
+      ✓ allows manual task completion (1922ms)
+    Quiz Mode
+      5) navigates to application page for quiz tasks
+      6) does not allow re-starting completed tasks in quiz mode
+    Mode Switching
+      7) switches between tutorial and quiz modes
+    Task Completion Tracking
+      8) tracks completed tasks and updates progress
+      9) persists completed tasks in localStorage
+    Spotlight Tour Navigation
+      ✓ navigates through spotlight tour steps (3484ms)
+    Reset Progress
+      10) resets onboarding progress
+
+
+  4 passing (2m)
+  10 failing
+
+  1) Storybook Onboarding Tour
+       Onboarding Panel - Persona Selection
+         allows selecting instructor persona:
+     AssertionError: Timed out retrying after 10000ms: Expected to find content: '/instructor/i' within the selector: 'button' but never did.
+      at Context.eval (webpack://amplify-homework-supply/./cypress/e2e/onboarding-storybook.cy.ts:114:0)
+
+  2) Storybook Onboarding Tour
+       Onboarding Panel - Persona Selection
+         allows changing personas:
+     AssertionError: Timed out retrying after 10000ms: Expected to find content: '/instructor/i' within the selector: 'button' but never did.
+      at Context.eval (webpack://amplify-homework-supply/./cypress/e2e/onboarding-storybook.cy.ts:131:0)
+
+  3) Storybook Onboarding Tour
+       Onboarding Panel - Persona Selection
+         persists persona selection across reloads:
+     AssertionError: Timed out retrying after 10000ms: Expected to find content: '/developer/i' within the selector: 'button' but never did.
+      at Context.eval (webpack://amplify-homework-supply/./cypress/e2e/onboarding-storybook.cy.ts:148:0)
+
+  4) Storybook Onboarding Tour
+       Tutorial Mode
+         shows interactive tutorial demos:
+     AssertionError: Timed out retrying after 5000ms: Expected to find content: '/✅|completed|great.*job/i' but never did.
+      at Context.eval (webpack://amplify-homework-supply/./cypress/e2e/onboarding-storybook.cy.ts:180:0)
+
+  5) Storybook Onboarding Tour
+       Quiz Mode
+         navigates to application page for quiz tasks:
+     AssertionError: Timed out retrying after 10000ms: expected 'http://localhost:6006/iframe.html?id=%F0%9F%93%84-pages-application-pages--units&viewMode=story' to include 'onboarding'
+      at Context.eval (webpack://amplify-homework-supply/./cypress/e2e/onboarding-storybook.cy.ts:210:0)
+
+  6) Storybook Onboarding Tour
+       Quiz Mode
+         does not allow re-starting completed tasks in quiz mode:
+     AssertionError: Timed out retrying after 10000ms: Expected to find content: '/complete/i' within the selector: 'button' but never did.
+      at Context.eval (webpack://amplify-homework-supply/./cypress/e2e/onboarding-storybook.cy.ts:217:0)
+
+  7) Storybook Onboarding Tour
+       Mode Switching
+         switches between tutorial and quiz modes:
+     AssertionError: Timed out retrying after 10000ms: Expected to find content: '/instructor/i' within the selector: 'button' but never did.
+      at Context.eval (webpack://amplify-homework-supply/./cypress/e2e/onboarding-storybook.cy.ts:231:0)
+
+  8) Storybook Onboarding Tour
+       Task Completion Tracking
+         tracks completed tasks and updates progress:
+     AssertionError: Timed out retrying after 10000ms: Expected to find content: '/instructor/i' within the selector: 'button' but never did.
+      at Context.eval (webpack://amplify-homework-supply/./cypress/e2e/onboarding-storybook.cy.ts:255:0)
+
+  9) Storybook Onboarding Tour
+       Task Completion Tracking
+         persists completed tasks in localStorage:
+     AssertionError: Timed out retrying after 10000ms: Expected to find content: '/instructor/i' within the selector: 'button' but never did.
+      at Context.eval (webpack://amplify-homework-supply/./cypress/e2e/onboarding-storybook.cy.ts:281:0)
+
+  10) Storybook Onboarding Tour
+       Reset Progress
+         resets onboarding progress:
+     AssertionError: Timed out retrying after 10000ms: Expected to find content: '/instructor/i' within the selector: 'button' but never did.
+      at Context.eval (webpack://amplify-homework-supply/./cypress/e2e/onboarding-storybook.cy.ts:337:0)
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        14                                                                               │
+  │ Passing:      4                                                                                │
+  │ Failing:      10                                                                               │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  10                                                                               │
+  │ Video:        false                                                                            │
+  │ Duration:     2 minutes, 12 seconds                                                            │
+  │ Spec Ran:     onboarding-storybook.cy.ts                                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/cypress/    (2560x1440)
+     screenshots/onboarding-storybook.cy.ts/Storybook Onboarding Tour -- Onboarding P               
+     anel - Persona Selection -- allows selecting instructor persona (failed).png                   
+  -  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/cypress/    (2560x1440)
+     screenshots/onboarding-storybook.cy.ts/Storybook Onboarding Tour -- Onboarding P               
+     anel - Persona Selection -- allows changing personas (failed).png                              
+  -  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/cypress/    (2560x1440)
+     screenshots/onboarding-storybook.cy.ts/Storybook Onboarding Tour -- Onboarding P               
+     anel - Persona Selection -- persists persona selection across reloads (failed).p               
+     ng                                                                                             
+  -  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/cypress/    (2560x1440)
+     screenshots/onboarding-storybook.cy.ts/Storybook Onboarding Tour -- Tutorial Mod               
+     e -- shows interactive tutorial demos (failed).png                                             
+  -  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/cypress/    (2560x1440)
+     screenshots/onboarding-storybook.cy.ts/Storybook Onboarding Tour -- Quiz Mode --               
+      navigates to application page for quiz tasks (failed).png                                     
+  -  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/cypress/    (2560x1440)
+     screenshots/onboarding-storybook.cy.ts/Storybook Onboarding Tour -- Quiz Mode --               
+      does not allow re-starting completed tasks in quiz mode (failed).png                          
+  -  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/cypress/    (2560x1440)
+     screenshots/onboarding-storybook.cy.ts/Storybook Onboarding Tour -- Mode Switchi               
+     ng -- switches between tutorial and quiz modes (failed).png                                    
+  -  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/cypress/    (2560x1440)
+     screenshots/onboarding-storybook.cy.ts/Storybook Onboarding Tour -- Task Complet               
+     ion Tracking -- tracks completed tasks and updates progress (failed).png                       
+  -  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/cypress/    (2560x1440)
+     screenshots/onboarding-storybook.cy.ts/Storybook Onboarding Tour -- Task Complet               
+     ion Tracking -- persists completed tasks in localStorage (failed).png                          
+  -  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/cypress/    (2560x1440)
+     screenshots/onboarding-storybook.cy.ts/Storybook Onboarding Tour -- Reset Progre               
+     ss -- resets onboarding progress (failed).png                                                  
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  workbook-spec.cy.ts                                                             (4 of 4)
+
+
+  Workbook E2E
+    ✓ creates unit via UI and completes workbook (20816ms)
+
+
+  1 passing (21s)
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     20 seconds                                                                       │
+  │ Spec Ran:     workbook-spec.cy.ts                                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+===============
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  complete-workflow.cy.ts                  01:23        6        5        1        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  onboarding-main-ui.cy.ts                 00:43        7        7        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  onboarding-storybook.cy.ts               02:12       14        4       10        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  workbook-spec.cy.ts                      00:20        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  2 of 4 failed (50%)                      04:40       28       17       11        -        -  
+

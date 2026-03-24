@@ -66,7 +66,7 @@ type Story = StoryObj<typeof SpotlightOverlay>;
 /**
  * Demo UI Component for examples
  */
-const DemoUI: React.FC<{ onStart: () => void }> = ({ onStart }) => (
+const DemoUI: React.FC<{ onStart: () => void; buttonText?: string }> = ({ onStart, buttonText = 'Start Tutorial' }) => (
   <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
     <Stack spacing={3}>
       <Card>
@@ -83,7 +83,7 @@ const DemoUI: React.FC<{ onStart: () => void }> = ({ onStart }) => (
             color="primary" 
             onClick={onStart}
           >
-            Start Tutorial
+            {buttonText}
           </Button>
         </CardContent>
       </Card>
@@ -252,7 +252,7 @@ export const QuizMode: Story = {
 
     return (
       <>
-        <DemoUI onStart={() => setIsOpen(true)} />
+        <DemoUI onStart={() => setIsOpen(true)} buttonText="Start Quiz" />
         <SpotlightOverlay
           steps={steps}
           currentStepIndex={currentStep}

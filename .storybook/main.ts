@@ -9,7 +9,8 @@ const config: StorybookConfig = {
   "stories": [
     // "../src/**/*.mdx", // Temporarily disabled - vitest plugin excludes ../**/*.mdx causing no tests to run
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)",
-    "./TranslationMode.stories.tsx"
+    "./TranslationMode.stories.tsx",
+    "./components/**/*.stories.@(js|jsx|mjs|ts|tsx)"
   ],
   "addons": [
     "@chromatic-com/storybook",

@@ -7,6 +7,8 @@ import './code/myOnboarding/manager';
 import './addons/translation-mode/manager';
 
 addons.setConfig({
+  // Set the default story for first-time users - shows welcome overview page
+  initialStoryId: 'getting-started-welcome--welcome',
   navSize: 300,
   bottomPanelHeight: 300,
   rightPanelWidth: 300,
