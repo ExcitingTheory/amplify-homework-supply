@@ -85,6 +85,9 @@ import { RouterContext, createMockRouter } from './__mocks__/next-router';
 import { withTranslationMode } from './addons/translation-mode';
 import { globalTypes } from './addons/translation-mode/globalTypes';
 
+// Import custom docs page template
+import DocsPageWithPanel from './components/DocsPageWithPanel';
+
 // Import i18n for Storybook
 import i18n from './i18next';
 
@@ -250,6 +253,8 @@ const preview = {
       source: {
         state: 'open',
       },
+      // Use custom docs page template with embedded controls panel
+      page: DocsPageWithPanel,
       // Render stories in canvas mode within docs to show toolbar & addons
       canvas: {
         withToolbar: true,

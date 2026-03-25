@@ -13,6 +13,9 @@ node_modules
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+next-dev.log*
+sandbox-logs.txt*
+storybook-logs.txt*
 
 # Next.js
 .next

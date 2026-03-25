@@ -1,6 +1,15 @@
+⚠ Port 3000 is in use by process 50288, using available port 3001 instead.
 ▲ Next.js 16.2.1 (Turbopack)
-- Local:         http://localhost:3000
-- Network:       http://192.168.1.154:3000
+- Local:         http://localhost:3001
+- Network:       http://192.168.1.154:3001
 - Environments: .env.local
-✓ Ready in 881ms
+✓ Ready in 991ms
+⨯ Another next dev server is already running.
 
+- Local:        http://localhost:3000
+- PID:          50288
+- Dir:          /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply
+- Log:          .next/dev/logs/next-development.log
+
+Run kill 50288 to stop it.
+[?25h

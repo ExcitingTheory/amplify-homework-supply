@@ -150,5 +150,14 @@
     "source.fixAll.eslint": "explicit"
   },
   // Extensions
-  "extensions.ignoreRecommendations": false
+  "extensions.ignoreRecommendations": false,
+  "chat.mcp.discovery.enabled": {
+    "claude-desktop": true,
+    "windsurf": true,
+    "cursor-global": true,
+    "cursor-workspace": true
+  },
+  "chat.mcp.assisted.nuget.enabled": true,
+  "github.copilot.chat.githubMcpServer.enabled": true,
+  "github.copilot.chat.githubMcpServer.readonly": false
 }

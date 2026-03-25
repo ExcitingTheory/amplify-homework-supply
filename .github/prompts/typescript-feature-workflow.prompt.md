@@ -10,6 +10,7 @@ Your goal is to guide the user through a structured TypeScript feature developme
 ## When to Use This Workflow
 
 Activate this workflow when the user:
+
 - Starts developing a new TypeScript feature
 - Mentions "create a feature", "build a component", or "implement a new [feature]"
 - Asks for help with TypeScript development workflow
@@ -18,34 +19,39 @@ Activate this workflow when the user:
 
 ## Workflow Overview
 
-This workflow consists of 7 iterative steps that ensure high-quality TypeScript feature development:
+This workflow consists of 8 iterative steps that ensure high-quality TypeScript feature development:
 
 1. Create a feature specification document
 2. Create a testing and validation guide
 3. Break down the feature into development phases
 4. Generate a TODO list for the selected phase
-  4.1. Flatten the TODO list into individual tasks following Phase{Number}_Task{Number}_Subtask{Number} format, e.g., where subtasks are optional:
-  4.2. Phase1_Task1_Subtask1, Phase1_Task1_Subtask2, Phase2_Task1, etc.
+   - Flatten the TODO list into individual tasks following `Phase{N}_Task{N}_Subtask{N}` format
+   - Example: `Phase1_Task1_Subtask1`, `Phase1_Task1_Subtask2`, `Phase2_Task1`, etc.
 5. Implement code with TypeScript compilation validation
 6. Add comprehensive unit tests
-7. Repeat until feature parity is achieved
+7. **Run regression testing suite** (TypeScript, Storybook, Cypress, Unit tests)
+8. Repeat until feature parity is achieved
 
 ---
 
-## ⚠️ MANDATORY ENFORCEMENT RULE ⚠️
+## ⚠️ MANDATORY ENFORCEMENT RULES ⚠️
+
+### Rule 1: TypeScript Compilation (After Every Code Change)
 
 **TypeScript Compilation Validation is REQUIRED after EVERY code change.**
 
 You **MUST** run `tsc --noEmit --project tsconfig.json` using the `run_in_terminal` tool after implementing each TODO item. Do NOT proceed to the next task, step, or phase until TypeScript compilation completes with **zero errors** (exit code 0).
 
 **Workflow Blocker**: If `tsc` returns errors:
+
 1. STOP immediately
 2. Display all errors to the user
 3. Fix errors or ask user how to proceed
 4. Re-run `tsc --noEmit --project tsconfig.json` after fixes in `run_in_terminal`
-5. Only proceed there are no errors
+5. Only proceed when there are no errors
 
 This rule applies to:
+
 - After writing implementation code
 - After writing test code
 - After refactoring
@@ -53,6 +59,36 @@ This rule applies to:
 - Before completing a phase
 
 **No exceptions.** Type safety is the foundation of this workflow.
+
+### Rule 2: Full Regression Testing (After Every Feature Is Implemented)
+
+**Full regression testing is REQUIRED after completing each feature.**
+
+You **MUST** run the complete regression suite before proceeding to the next feature or phase. This includes TypeScript compilation, unit tests, Storybook build, and Cypress E2E tests. Do NOT proceed to the next feature or phase until ALL tests pass without errors.:
+
+```bash
+# 1. TypeScript compilation (MUST pass with 0 errors)
+tsc --noEmit --project tsconfig.json
+
+# 2. Unit tests (MUST pass)
+npm run test -- --run
+
+# 3. Storybook build (MUST complete without errors)
+npm run build-storybook
+
+# 4. Cypress tests (MUST pass - run headless)
+npm run cypress:run
+```
+
+**Workflow Blocker**: If ANY test suite fails:
+
+1. STOP immediately
+2. Display all failures to the user
+3. Fix failures before proceeding
+4. Re-run the failing suite
+5. Only proceed when ALL suites pass
+
+This ensures no regressions are introduced during development.
 
 ---
 
@@ -63,11 +99,13 @@ This rule applies to:
 **IMPORTANT**: When rewriting an existing component or making major changes, create a new versioned component instead of modifying the original.
 
 **Naming Convention**:
+
 - First rewrite: `ComponentName2` (e.g., `FileManager2`, `QuestionsReview2`)
 - Second rewrite: `ComponentName3` (e.g., `Editor3`, `RecordingStudio3`)
 - Increment number for each major rewrite
 
 **Benefits**:
+
 1. **Feature Parity Validation** - Side-by-side comparison with original
 2. **Safe Rollback** - Keep original working during development
 3. **Gradual Migration** - Switch components incrementally
@@ -75,6 +113,7 @@ This rule applies to:
 5. **Documentation** - Clear version history
 
 **Process**:
+
 ```bash
 # 1. Create new versioned component in workspace
 cp ${workspaceFolder}/src/components/Component.jsx ${workspaceFolder}/src/components/Component2.tsx
@@ -90,6 +129,7 @@ cp ${workspaceFolder}/src/components/Component.stories.jsx ${workspaceFolder}/sr
 ```
 
 **Feature Spec Requirements for Rewrites**:
+
 - [ ] Document all features from original component
 - [ ] Identify features to keep vs. deprecate
 - [ ] Define new features/improvements
@@ -97,27 +137,33 @@ cp ${workspaceFolder}/src/components/Component.stories.jsx ${workspaceFolder}/sr
 - [ ] Plan migration strategy (when to switch components)
 
 **Feature Parity Checklist** (add to FEATURE_SPEC.md):
+
 ```markdown
 ## Feature Parity with [OriginalComponent]
 
 ### Features to Maintain
+
 - [ ] Feature A - Description
 - [ ] Feature B - Description
 - [ ] Feature C - Description
 
 ### Features to Improve
+
 - [ ] Feature D - What's being improved
 - [ ] Feature E - What's being improved
 
 ### New Features
+
 - [ ] Feature F - New capability
 - [ ] Feature G - New capability
 
 ### Deprecated Features (not porting)
+
 - [ ] Feature H - Why deprecated
 - [ ] Feature I - Why deprecated
 
 ### Migration Plan
+
 1. Complete new component implementation
 2. Add both components to Storybook for comparison
 3. Run full test suite on both versions
@@ -127,19 +173,23 @@ cp ${workspaceFolder}/src/components/Component.stories.jsx ${workspaceFolder}/sr
 ```
 
 **Testing Both Versions**:
+
 ```markdown
 # Keep both story files active during development
- - Component.stories.jsx (original)
- - Component2.stories.tsx (new version)
+
+- Component.stories.jsx (original)
+- Component2.stories.tsx (new version)
 
 # In Storybook, compare side-by-side:
- - Visual appearance
- - Functionality
- - Performance
- - Edge cases
+
+- Visual appearance
+- Functionality
+- Performance
+- Edge cases
 ```
 
 **When to Use Versioning**:
+
 - ✅ Complete TypeScript rewrite of JS component
 - ✅ Major architectural changes (e.g., class → hooks)
 - ✅ Significant API/props changes
@@ -150,6 +200,7 @@ cp ${workspaceFolder}/src/components/Component.stories.jsx ${workspaceFolder}/sr
 ### Feature Specification Document
 
 When the user describes a feature, ask clarifying questions about:
+
 - Feature purpose and goals
 - Expected inputs and outputs
 - Dependencies and integrations
@@ -163,6 +214,7 @@ Then create a detailed specification document ([FEATURE_SPEC.md](../../docs/FEAT
 # Feature: [Feature Name]
 
 ## Overview
+
 Brief description of the feature
 
 **Component Version**: [If rewrite: Component2, Component3, etc.]  
@@ -170,43 +222,53 @@ Brief description of the feature
 **Rewrite Reason**: [If rewrite: Why creating new version vs. updating original]
 
 ## Goals
+
 - Primary objectives
 - Success criteria
 - **[If rewrite]** Feature parity requirements with original
 
 ## Technical Requirements
+
 - TypeScript version
 - Required dependencies
 - Type safety requirements
 
 ## API Design
+
 - Function signatures
 - Interface definitions
 - Type definitions
 - **[If rewrite]** Props comparison (original vs. new)
 
 ## Feature Parity
+
 **[For rewrites only - see Component Versioning Strategy section above]**
 
 ### Features to Maintain
+
 - List all features from original that must work identically
 
-### Features to Improve  
+### Features to Improve
+
 - List features being enhanced with explanations
 
 ### New Features
+
 - List net-new capabilities
 
 ### Deprecated Features
+
 - List features intentionally not porting with rationale
 
 ## Implementation Notes
+
 - Key algorithms or approaches
 - Performance considerations
 - Security considerations
 - **[If rewrite]** Migration strategy for consuming components
 
 ## Edge Cases
+
 - Boundary conditions
 - Error scenarios
 - Invalid input handling
@@ -220,6 +282,7 @@ Create a comprehensive testing guide ([TESTING_GUIDE.md](../../docs/TESTING_GUID
 # Testing Guide: [Feature Name]
 
 ## Test Strategy
+
 - Unit test coverage goals (aim for >80%)
 - Integration test requirements
 - Test framework (Jest/Vitest/etc.)
@@ -227,20 +290,24 @@ Create a comprehensive testing guide ([TESTING_GUIDE.md](../../docs/TESTING_GUID
 ## Test Scenarios
 
 ### Happy Path Tests
+
 - Normal operation scenarios
 - Expected inputs
 
 ### Edge Case Tests
+
 - Boundary conditions
 - Null/undefined handling
 - Empty inputs
 
 ### Error Handling Tests
+
 - Invalid inputs
 - Exception scenarios
 - Type errors
 
 ## Validation Checklist
+
 - [ ] All functions have tests
 - [ ] Type safety validated
 - [ ] Error cases covered
@@ -252,26 +319,31 @@ Create a comprehensive testing guide ([TESTING_GUIDE.md](../../docs/TESTING_GUID
 ## Step 3: Phase Breakdown
 
 Ask the user how they want to divide the work. Common approaches:
+
 - By component or module
 - By functionality (CRUD operations)
 - By priority (MVP → enhancements)
 - By complexity (simple → complex)
 
 Create a phase breakdown document showing:
+
 ```markdown
 # Development Phases
 
 ## Phase 1: [Name]
+
 - Core types and interfaces
 - Basic functionality
 - Estimated effort: [time]
 
 ## Phase 2: [Name]
+
 - Additional features
 - Integration points
 - Estimated effort: [time]
 
 ## Phase 3: [Name]
+
 - Edge cases and error handling
 - Performance optimizations
 - Estimated effort: [time]
@@ -284,8 +356,7 @@ Ask: "Which phase would you like to start with?"
 For the selected phase, create a detailed TODO list:
 
 ```markdown
-
-# TODO naming pattern: 
+# TODO naming pattern:
 
 pattern: `Phase[N]-Task[1...x]-Subtask[1...x]`
 
@@ -297,41 +368,49 @@ pattern: `Phase[N]-Task[1...x]-Subtask[1...x]`
 - Phase1:Define-types-and-interfaces-TypeB
 
 ## Implementation: Implement function A
-  - [ ] Write code
-  - [ ] **[MANDATORY]** Run `tsc --noEmit` and verify 0 errors before proceeding
+
+- [ ] Write code
+- [ ] **[MANDATORY]** Run `tsc --noEmit` and verify 0 errors before proceeding
 
 ## Implementation: Implement function B
-  - [ ] Write code
-  - [ ] **[MANDATORY]** Run `tsc --noEmit` and verify 0 errors before proceeding
+
+- [ ] Write code
+- [ ] **[MANDATORY]** Run `tsc --noEmit` and verify 0 errors before proceeding
 
 ## Implementation: Add error handling
-  - [ ] Write code
-  - [ ] **[MANDATORY]** Run `tsc --noEmit` and verify 0 errors before proceeding
+
+- [ ] Write code
+- [ ] **[MANDATORY]** Run `tsc --noEmit` and verify 0 errors before proceeding
 
 ## Implementation: Add input validation
-  - [ ] Write code
-  - [ ] **[MANDATORY]** Run `tsc --noEmit` and verify 0 errors before proceeding
+
+- [ ] Write code
+- [ ] **[MANDATORY]** Run `tsc --noEmit` and verify 0 errors before proceeding
 
 ## Testing: Write unit tests for function A
-  - [ ] Write tests
-  - [ ] **[MANDATORY]** Run `tsc --noEmit` on test files
-  - [ ] Run tests and verify passing
+
+- [ ] Write tests
+- [ ] **[MANDATORY]** Run `tsc --noEmit` on test files
+- [ ] Run tests and verify passing
 
 ## Testing: Write unit tests for function B
-  - [ ] Write tests
-  - [ ] **[MANDATORY]** Run `tsc --noEmit` on test files
-  - [ ] Run tests and verify passing
+
+- [ ] Write tests
+- [ ] **[MANDATORY]** Run `tsc --noEmit` on test files
+- [ ] Run tests and verify passing
 
 ## Testing: Test error scenarios
-  - [ ] Write tests
-  - [ ] **[MANDATORY]** Run `tsc --noEmit` on test files
-  - [ ] Run tests and verify passing
+
+- [ ] Write tests
+- [ ] **[MANDATORY]** Run `tsc --noEmit` on test files
+- [ ] Run tests and verify passing
 
 ## Final Validation
-  - [ ] Run full `tsc --noEmit --project ${workspaceFolder}/tsconfig.json` for entire project
-  - [ ] Check for project errors by finding all tsconfig.json files (excluding node_modules)
-  - [ ] Run all tests
-  - [ ] Check coverage
+
+- [ ] Run full `tsc --noEmit --project ${workspaceFolder}/tsconfig.json` for entire project
+- [ ] Check for project errors by finding all tsconfig.json files (excluding node_modules)
+- [ ] Run all tests
+- [ ] Check coverage
 ```
 
 ## Step 5: Implementation with Validation
@@ -341,6 +420,7 @@ pattern: `Phase[N]-Task[1...x]-Subtask[1...x]`
 For each TODO item, follow this exact sequence:
 
 ### 5.1: Write Implementation Code
+
 - Implement the code for the current TODO item
 - Save all files
 
@@ -349,11 +429,13 @@ For each TODO item, follow this exact sequence:
 **YOU MUST run TypeScript compilation after EVERY implementation before proceeding.**
 
 Run with `run_in_terminal`:
+
 ```bash
 tsc --noEmit --project ${workspaceFolder}/tsconfig.json --strict
 ```
 
 For subfolder projects:
+
 ```bash
 tsc --noEmit --project ${workspaceFolder}/subpath/tsconfig.json --strict
 ```
@@ -361,6 +443,7 @@ tsc --noEmit --project ${workspaceFolder}/subpath/tsconfig.json --strict
 ### 5.3: Handle Compilation Results
 
 **If errors found** (exit code ≠ 0):
+
 1. Use `get_errors` to retrieve detailed Problems panel issues
 2. **STOP** - Do not proceed to next TODO
 3. Show all TypeScript errors to user
@@ -369,6 +452,7 @@ tsc --noEmit --project ${workspaceFolder}/subpath/tsconfig.json --strict
 6. After fixing, **re-run compilation** (return to 5.2)
 
 **If no errors** (exit code = 0):
+
 - Display: "✅ TypeScript compilation successful (0 errors)"
 - Proceed to next TODO item or ask about next steps
 
@@ -377,27 +461,28 @@ tsc --noEmit --project ${workspaceFolder}/subpath/tsconfig.json --strict
 After each implementation, create corresponding unit tests:
 
 ```typescript
-import { describe, it, expect } from 'vitest'; // or jest
-import { functionName } from './module';
+import { describe, it, expect } from "vitest"; // or jest
+import { functionName } from "./module";
 
-describe('functionName', () => {
-  it('should handle normal input correctly', () => {
+describe("functionName", () => {
+  it("should handle normal input correctly", () => {
     const result = functionName(validInput);
     expect(result).toBe(expectedOutput);
   });
 
-  it('should handle edge cases', () => {
+  it("should handle edge cases", () => {
     const result = functionName(edgeCase);
     expect(result).toBe(expectedEdgeCaseOutput);
   });
 
-  it('should throw error for invalid input', () => {
+  it("should throw error for invalid input", () => {
     expect(() => functionName(invalidInput)).toThrow();
   });
 });
 ```
 
 **Run tests** with `run_in_terminal`:
+
 ```bash
 npm test path/to/testfile.spec.ts
 # or
@@ -420,6 +505,7 @@ npx vitest run path/to/testfile.spec.ts
 4. **Check for errors** with `get_errors`
 
 **Manual Checks**:
+
 - Navigate to story and check:
   - Renders without errors
   - Mock data displays correctly
@@ -436,16 +522,19 @@ Follow the **[Storybook Testing Workflow](./storybook-testing-workflow.prompt.md
 5. **Fix Issues** - Update mocks or stories as needed
 
 **Build validation**:
+
 ```bash
 npm run build-storybook
 ```
 
 **Run story tests**:
+
 ```bash
 npm run test -- story-rendering
 ```
 
 **Critical Checks**:
+
 - [ ] Story imports mock data correctly
 - [ ] Mock data structure matches component props
 - [ ] All required context providers wrapped around component
@@ -458,24 +547,28 @@ npm run test -- story-rendering
 For UI component layout verification, use browser DevTools box model overlay from tool call webbrowser:
 
 **How to Enable** (Chrome/Edge):
+
 1. Right-click element → Inspect → Hover over element in DOM tree
 2. Or: Select element → Styles panel shows box model
 3. Or: Console → `document.querySelector('selector')` → Hover
 
 **Color Legend**:
+
 - 🔵 Blue = Content (element dimensions)
 - 🟢 Green = Padding
-- 🟡 Yellow = Border  
+- 🟡 Yellow = Border
 - 🟤 Brown = Margin
 - 🟣 Purple = Gap (flexbox/grid)
 
 **Use Cases**:
+
 - **Component Rewrites**: Compare layout between original and new version
 - **Spacing Issues**: Identify unexpected margins/padding
 - **Alignment Problems**: Verify flex/grid layouts
 - **Responsive Design**: Check breakpoint behavior
 
 **Best Practice**: When reporting layout issues, provide:
+
 1. Screenshots with box model overlay enabled (shows exact spacing values)
 2. Relevant DOM tree structure (shows actual element hierarchy)
 
@@ -484,11 +577,13 @@ For UI component layout verification, use browser DevTools box model overlay fro
 To give full context for layout issues, include the rendered DOM:
 
 **How to Get DOM Tree**:
+
 1. Right-click element → Inspect → Elements panel shows tree
 2. Right-click element in DevTools → Copy → Copy outerHTML
 3. Or manually copy visible hierarchy with indentation
 
 **Example DOM Tree** (include in code block):
+
 ```html
 <div class="component-wrapper">
   <div class="component-header">
@@ -501,34 +596,127 @@ To give full context for layout issues, include the rendered DOM:
 ```
 
 **When to Provide**:
+
 - Comparing layout between Component and Component2
 - Debugging spacing/alignment issues
 - Showing how nesting affects layout
 - Documenting actual vs. expected structure
 
 **Documentation Updates**:
+
 - [ ] Update [STORYBOOK_INVENTORY.md](../../docs/STORYBOOK_INVENTORY.md) with new stories
-- [ ] Add mock data to [.storybook/__mocks__/ui-data/](../../.storybook/__mocks__/ui-data/) if needed
+- [ ] Add mock data to [.storybook/**mocks**/ui-data/](../../.storybook/__mocks__/ui-data/) if needed
 - [ ] Update story with proper context providers
 
 **For comprehensive Storybook testing**, refer to [storybook-testing-workflow.prompt.md](./storybook-testing-workflow.prompt.md) for the full 7-phase validation process.
 
-## Step 7: Iteration Until Parity
+## Step 7: Regression Testing Suite (MANDATORY)
+
+**When to run**: After completing each phase and before proceeding to the next phase.
+
+**Purpose**: Ensure no regressions are introduced during development.
+
+### 7.1: TypeScript Compilation
+
+```bash
+# MUST complete with 0 errors
+tsc --noEmit --project ${workspaceFolder}/tsconfig.json
+```
+
+**Expected**: Exit code 0, no errors.
+
+### 7.2: Unit Tests (Vitest)
+
+```bash
+# Run all unit tests in non-watch mode
+npm run test -- --run
+```
+
+**Expected**: All tests pass. If tests fail:
+
+1. Review failure output
+2. Fix failing tests or implementation bugs
+3. Re-run until all pass
+
+### 7.3: Storybook Build (CLI)
+
+```bash
+# Build Storybook for production (validates all stories compile)
+npm run build-storybook
+```
+
+**Expected**: Build completes without errors. This validates:
+
+- All story files compile correctly
+- No missing imports or dependencies
+- Mock data structures are valid
+- All decorators and context providers work
+
+### 7.4: Cypress Tests (CLI - Headless)
+
+```bash
+# Run all Cypress E2E tests headlessly
+npm run cypress:run
+```
+
+**Expected**: All tests pass. If tests fail:
+
+1. Review failure screenshots in `cypress/screenshots/`
+2. Check test videos in `cypress/videos/`
+3. Fix failing tests or implementation bugs
+4. Re-run until all pass
+
+### Regression Testing Workflow
+
+```
+1. Complete phase implementation
+   ↓
+2. Run tsc --noEmit
+   → FAIL: Fix TypeScript errors, retry
+   → PASS: Continue
+   ↓
+3. Run npm run test -- --run
+   → FAIL: Fix unit test failures, retry
+   → PASS: Continue
+   ↓
+4. Run npm run build-storybook
+   → FAIL: Fix Storybook build errors, retry
+   → PASS: Continue
+   ↓
+5. Run npm run cypress:run
+   → FAIL: Fix E2E test failures, retry
+   → PASS: Continue
+   ↓
+6. ✅ Phase complete - proceed to next phase
+```
+
+### Quick Regression Check (For Single TODOs)
+
+For quick validation between TODO items (not full phase completion):
+
+```bash
+# Minimal check - TypeScript only
+tsc --noEmit --project tsconfig.json
+
+# Standard check - TypeScript + Unit tests
+tsc --noEmit --project tsconfig.json && npm run test -- --run
+```
+
+## Step 8: Iteration Until Parity
 
 After completing a phase:
 
-1. **Check against [FEATURE_SPEC.md](../../docs/FEATURE_SPEC.md)**: Review if requirements are met
-2. **Check against [TESTING_GUIDE.md](../../docs/TESTING_GUIDE.md)**: Verify all test scenarios covered
-3. **Run full validation** using tools:
-   - TypeScript compilation: Use `run_in_terminal` with `tsc --noEmit --project ${workspaceFolder}/tsconfig.json`
-   - Tests: Use `run_in_terminal` with `npm test`
-   - Coverage: Use `run_in_terminal` with `npm test -- --coverage`
-   - Review the feature spec and testing guide to identify any remaining TODOs, compare against current to-do list and add any missing items.
+1. **Run full regression testing suite** (Step 7) - TypeScript, Unit tests, Storybook build, Cypress
+2. **Check against [FEATURE_SPEC.md](../../docs/FEATURE_SPEC.md)**: Review if requirements are met
+3. **Check against [TESTING_GUIDE.md](../../docs/TESTING_GUIDE.md)**: Verify all test scenarios covered
+4. **Run coverage check**: `npm run test -- --run --coverage`
+5. **Review remaining work**: Compare feature spec against current TODO list
 
-4. **Ask**: "This phase is complete. Would you like to:
-   - Continue to the next phase?
-   - Refactor/improve current code?
-   - Add more tests?
+**Ask**: "This phase is complete with all regression tests passing. Would you like to:
+
+- Continue to the next phase?
+- Refactor/improve current code?
+- Add more tests?"
 
 ## Between-Step Validation Checklist
 
@@ -537,47 +725,63 @@ After completing a phase:
 ### Mandatory After Each TODO Item:
 
 **1. TypeScript Compilation** (REQUIRED):
+
 ```bash
-tsc --noEmit --project ${workspaceFolder}/tsconfig.json --strict
+tsc --noEmit --project ${workspaceFolder}/tsconfig.json
 ```
+
 - **If exit code ≠ 0**: STOP and fix errors before proceeding
-- **If exit code = 0**: Proceed with optional checks below
+- **If exit code = 0**: Proceed to next TODO or phase validation
+
+### Mandatory After Each Phase:
+
+**Full Regression Suite** (REQUIRED before moving to next phase):
+
+```bash
+# 1. TypeScript (already done per-TODO, but verify)
+tsc --noEmit --project tsconfig.json
+
+# 2. Unit tests
+npm run test -- --run
+
+# 3. Storybook build
+npm run build-storybook
+
+# 4. Cypress E2E tests
+npm run cypress:run
+```
 
 ### Optional Additional Checks:
 
-**2. Get Problems Panel**: Use `get_errors` to see all VS Code errors/warnings
-
-**3. Run Tests**: `npm test path/to/file.test.ts`
-
-**4. Code Review**: 
-- Search TODOs: `grep_search` with pattern `TODO|FIXME`
-- Check usage: `list_code_usages` for specific symbols
-
-**5. Linting**: `npm run lint`
+- **Get Problems Panel**: Use `get_errors` to see all VS Code errors/warnings
+- **Code Review**: Search for `TODO|FIXME` patterns
+- **Linting**: `npm run lint`
+- **Coverage**: `npm run test -- --run --coverage`
 
 ### Validation Workflow
 
 ```
-1. Write code
-   ↓
-2. Save files
-   ↓
-3. ✅ MANDATORY: Run tsc --noEmit
-   ↓
-4. Exit code = 0? 
-   → NO: Fix errors, goto step 2
-   → YES: Continue
-   ↓
-5. Optional: Run additional checks
-   ↓
-6. Move to next TODO item
-```
+Per-TODO:
+  1. Write code → 2. Save → 3. tsc --noEmit → 4. Fix if errors → 5. Next TODO
 
-**Remember**: TypeScript compilation is the **minimum required validation**. All other checks are recommended but optional.
+Per-Phase:
+  1. All TODOs complete
+     ↓
+  2. tsc --noEmit (verify)
+     ↓
+  3. npm run test -- --run
+     ↓
+  4. npm run build-storybook
+     ↓
+  5. npm run cypress:run
+     ↓
+  6. All pass? → Next phase
+```
 
 ## Coding Standards
 
 Follow these TypeScript best practices:
+
 - Use strict mode (`"strict": true` in [tsconfig.json](../../tsconfig.json))
 - Prefer interfaces for object shapes
 - Use type inference where possible
@@ -592,43 +796,70 @@ Follow these TypeScript best practices:
 **All commands executed via `run_in_terminal`**:
 
 ```bash
-# Type checking
+# Type checking (MANDATORY after every code change)
 tsc --noEmit --project ${workspaceFolder}/tsconfig.json
 
-# Run tests
-npm test
+# Unit tests (Vitest)
+npm run test -- --run           # Run once (CI mode)
+npm run test                     # Watch mode (development)
+npm run test -- --run --coverage # With coverage report
 
-# Run tests with coverage
-npm test -- --coverage
+# Storybook
+npm run storybook                # Dev server (port 6006)
+npm run build-storybook          # CLI build (validates all stories)
 
-# Lint code
+# Cypress E2E tests
+npm run cypress:run              # Headless (CLI)
+npm run cypress:open             # Interactive (development)
+
+# Linting
 npm run lint
 ```
 
 ## Final Validation
 
-When all phases are complete, perform final validation using tools to examine the current state:
+When all phases are complete, perform final validation using the complete regression suite:
 
-**Execute these checks systematically**:
+### Mandatory Final Checks (MUST ALL PASS)
+
+```bash
+# 1. TypeScript compilation - MUST complete with 0 errors
+tsc --noEmit --project tsconfig.json
+
+# 2. Unit tests - MUST all pass
+npm run test -- --run
+
+# 3. Storybook build - MUST complete without errors
+npm run build-storybook
+
+# 4. Cypress E2E tests - MUST all pass
+npm run cypress:run
+
+# 5. Coverage check (informational)
+npm run test -- --run --coverage
+```
+
+### Additional Checks
 
 1. **Find all TypeScript files**: `file_search` with `src/**/*.{ts,tsx}`
-2. **Search for TODOs**: `grep_search` with pattern `TODO|FIXME`
+2. **Search for remaining TODOs**: `grep_search` with pattern `TODO|FIXME`
 3. **Get changed files**: `get_changed_files`
-4. **Run full type check**: `tsc --noEmit --project ${workspaceFolder}/tsconfig.json`
-5. **Run all tests**: `npm test`
-6. **Check for errors**: `get_errors`
-7. **Check coverage**: `npm test -- --coverage`
+4. **Check for VS Code errors**: `get_errors`
 
-**Validation checklist**:
+### Validation Checklist
+
+- [ ] **Regression Suite (MANDATORY)**:
+  - [ ] TypeScript compilation: 0 errors
+  - [ ] Unit tests (Vitest): All passing
+  - [ ] Storybook build: Completes without errors
+  - [ ] Cypress E2E: All passing
 - [ ] All feature spec requirements met
 - [ ] All TODOs completed
-- [ ] All tests passing
-- [ ] TypeScript compilation successful (no errors)
 - [ ] Code coverage meets target
 - [ ] [FEATURE_SPEC.md](../../docs/FEATURE_SPEC.md) requirements met
 - [ ] [TESTING_GUIDE.md](../../docs/TESTING_GUIDE.md) scenarios covered
 - [ ] Documentation updated
-- [ ] Create change log entry, verify the change log is in sync with the new feature spec
+- [ ] Change log entry created
 - [ ] **[For component rewrites]** Feature parity validation:
   - [ ] All original features working in new version
   - [ ] Side-by-side comparison in Storybook complete
@@ -643,56 +874,40 @@ When all phases are complete, perform final validation using tools to examine th
   - [ ] Run full [Storybook Testing Workflow](./storybook-testing-workflow.prompt.md) if needed
   - [ ] **[For rewrites]** Both original and new version stories present for comparison
 
-**Storybook Final Check**:
+**Storybook Final Check** (already covered in mandatory regression suite):
 
-**Build validation**:
-```bash
-npm run build-storybook
-```
+The `npm run build-storybook` command in the regression suite validates all stories compile correctly. For additional manual verification:
 
-**Run story render tests**:
-```bash
-npm run test -- story-rendering
-```
-
-**Manual verification**:
 1. Start Storybook (background): `npm run storybook`
-2. Open browser: `open_simple_browser` → `http://localhost:6006`
-
-3. Check all new/updated stories render correctly
-
-**For component rewrites**:
-- Compare original vs new version stories side-by-side
-- Verify feature parity visually
-- Test all interactions in both versions
+2. Open browser: `http://localhost:6006`
+3. Verify all new/updated stories render correctly
+4. Check console for errors
 
 **Feature Parity Validation (For Rewrites)**:
 
-1. Start Storybook (if not running): `npm run storybook` (background)
-2. Open browser: `http://localhost:6006`
+When rewriting a component, use Storybook for side-by-side comparison:
 
-3. Navigate to both component stories:
-   - Original: Component.stories
-   - New: Component2.stories
+1. Navigate to both component stories:
+   - Original: `Component.stories`
+   - New: `Component2.stories`
 
-4. For each story variant, verify:
+2. For each story variant, verify:
+   - Visual appearance matches (unless intentionally changed)
+   - All interactions work identically
+   - Props/API behaves the same
+   - Performance is equal or better
 
-# 3. For each story variant, verify:
-# - Visual appearance matches (unless intentionally changed)
-# - All interactions work identically
-# - Props/API behaves the same
-# - Performance is equal or better
-# 
-# Layout Comparison Tips:
-# - Enable box model overlay (right-click → Inspect → hover element)
-# - Compare spacing: Blue (content), Green (padding), Brown (margin), Purple (gaps)
-# - Take screenshots with overlay to document any layout differences
-# - Copy DOM tree structure: Right-click → Inspect → Copy outerHTML
-# - Compare DOM hierarchy between original and new version
-# - Verify responsive behavior at multiple breakpoints
+3. Layout Comparison Tips:
+   - Enable box model overlay (right-click → Inspect → hover element)
+   - Compare spacing: Blue (content), Green (padding), Brown (margin), Purple (gaps)
+   - Take screenshots with overlay to document any layout differences
+   - Copy DOM tree structure: Right-click → Inspect → Copy outerHTML
+   - Compare DOM hierarchy between original and new version
+   - Verify responsive behavior at multiple breakpoints
 
 # 4. Document any intentional differences in [FEATURE_SPEC.md](../../docs/FEATURE_SPEC.md)
-```
+
+````
 
 Ask: "Would you like me to generate a final summary report of the completed feature?"
 
@@ -725,8 +940,8 @@ Every feature must have ONE canonical `*_STATUS.md` with this structure:
 ```markdown
 # [Feature Name] Status
 
-**Last Updated**: YYYY-MM-DD  
-**Overall Status**: 🟢 Complete | 🟡 In Progress | 🔴 Not Started  
+**Last Updated**: YYYY-MM-DD
+**Overall Status**: 🟢 Complete | 🟡 In Progress | 🔴 Not Started
 **Verified**: [Link to verification command output or test results]
 
 ## Implementation Status
@@ -769,23 +984,26 @@ tsc --noEmit --project tsconfig.json
 - [Planning Doc](FEATURE_PLAN.md)
 - [User Guide](FEATURE_GUIDE.md)
 - [API Reference](API.md#feature-section)
-```
+````
 
 #### 3. Verification Requirements (MANDATORY)
 
 Before marking ANY item as ✅ Implemented:
 
 1. **File Existence**: Link to actual file path
+
    ```bash
    ls -la path/to/claimed/file.ts
    ```
 
 2. **Usage Verification**: Show it's actually used
+
    ```bash
    grep -r "import.*FeatureName" src/ --include="*.{ts,tsx}"
    ```
 
 3. **Test Verification**: Show tests pass
+
    ```bash
    npm test -- path/to/feature.test.ts
    ```
@@ -802,6 +1020,7 @@ Before marking ANY item as ✅ Implemented:
 **After completing each phase**:
 
 1. **Update Status Doc**:
+
    ```bash
    # Edit docs/FEATURE_STATUS.md
    # Move completed items from "In Progress" to "Implemented"
@@ -810,6 +1029,7 @@ Before marking ANY item as ✅ Implemented:
    ```
 
 2. **Verify All Claims**:
+
    ```bash
    # For each ✅ Implemented item, run verification command
    # Update doc with actual command output
@@ -833,6 +1053,7 @@ Before marking ANY item as ✅ Implemented:
 #### 5. Common Anti-Patterns (AVOID)
 
 ❌ **Don't**:
+
 - Create multiple status docs for same feature
 - Use "COMPLETE" in filename before 100% done
 - Claim completion without verification links
@@ -840,6 +1061,7 @@ Before marking ANY item as ✅ Implemented:
 - Create "Phase X Complete" docs (update status doc instead)
 
 ✅ **Do**:
+
 - ONE status doc per feature (single source of truth)
 - Link to actual code files as proof
 - Show test results, not just claims
@@ -850,15 +1072,23 @@ Before marking ANY item as ✅ Implemented:
 
 Before proceeding to next phase or marking feature complete:
 
+**Regression Suite (MANDATORY)**:
+
+- [ ] `tsc --noEmit --project tsconfig.json` - 0 errors
+- [ ] `npm run test -- --run` - All unit tests pass
+- [ ] `npm run build-storybook` - Builds without errors
+- [ ] `npm run cypress:run` - All E2E tests pass
+
+**Documentation**:
+
 - [ ] Status doc updated with current state
 - [ ] All ✅ items have verification links
 - [ ] All claimed files exist and contain expected code
-- [ ] All claimed tests pass
-- [ ] TypeScript compiles with no errors
 - [ ] Obsolete docs deleted after merging content
 - [ ] Main tracking doc updated
 
 **Automated Check** (add to pre-commit hook):
+
 ```bash
 # Verify all linked files in STATUS docs exist
 grep -h '\[.*\](.*\.ts)' docs/*_STATUS.md | \

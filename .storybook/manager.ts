@@ -23,8 +23,13 @@ addons.setConfig({
     showSidebar(state: State, defaultValue: boolean) {
       return state.storyId === 'landing' ? false : defaultValue;
     },
-    showToolbar(state: State, defaultValue: boolean) {
-      return state.viewMode === 'docs' ? false : defaultValue;
+    // Always show toolbar, including in docs mode
+    showToolbar(_state: State, _defaultValue: boolean) {
+      return true;
+    },
+    // Always show addon panel, including in docs mode
+    showPanel(_state: State, _defaultValue: boolean) {
+      return true;
     },
   },
   sidebar: {

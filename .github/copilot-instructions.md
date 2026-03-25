@@ -2,6 +2,12 @@
 
 elearning platform built with Next.js, AWS Amplify Gen 2, and OpenAI.
 
+## Core Principles
+
+- **Never choose lazy solutions.** Always choose the most technically correct approach. No shortcuts, workarounds, or "good enough" implementations when a proper solution exists.
+- **Always verify library versions before writing code or answering questions.** Check `package.json` for the installed version, then gather the correct API documentation for that version (use Context7 or official docs). Do not assume API shapes from memory — confirm them first.
+- **Never trust internal repo documentation blindly.** Docs, READMEs, and inline comments in this repo can be outdated or mid-upgrade. Always cross-check claims against the actual source code, `package.json`, and current file contents before relying on them.
+
 ## Architecture Overview
 
 **Stack**: Next.js 20 + AWS Amplify Gen 2 (GraphQL/Data Client) + Material UI + Lexical Editor + OpenAI  
@@ -71,7 +77,6 @@ const subscription = client.models.Grade.observeQuery().subscribe({
 ```bash
 npm run dev          # Next.js dev server (port 3000)
 npm run storybook    # Component development (port 6006)
-npm run build:amplify:dev  # Push backend changes to dev environment
 ```
 
 **Amplify Schema Changes**:
@@ -80,8 +85,6 @@ npm run build:amplify:dev  # Push backend changes to dev environment
 2. Run `npx ampx sandbox` (or `npm run sandbox:with-logs`)
 3. After schema changes, restart Next.js dev server
 4. Types auto-generated in `amplify_outputs.json`
-
-**Versioning Fields**: All models include `_version`, `_lastChangedAt`, `_deleted` for conflict resolution. Use `_version` (integer) for change detection in React, not `updatedAt` (timestamp).
 
 **Testing**: Cypress E2E tests in `cypress/e2e/`. Run with `npm run cypress:open`.
 
@@ -138,12 +141,11 @@ await client.models.Unit.delete({ id: unit.id, _version: unit._version });
 - Audio generation: `generateAudioFile` mutation
 - All API keys stored in AWS SSM, never in frontend
 
-**Streaming Chat** ([pages/api/chat.js](pages/api/chat.js)):
+**Streaming Chat**:
 
-- Uses Vercel AI SDK with Edge Runtime
+- Uses Vercel AI SDK
 - `useChat` hook from `@ai-sdk/react` in components like [ChatSidebar.js](src/components/ChatSidebar.js)
 - System messages built with current context (unit, files, dictionary)
-- Streams GPT-4 responses via `OpenAIStream` + `StreamingTextResponse`
   **CRITICAL - Chat Message Format**:
   Messages from `useChat` hook use `message.parts` array - **DO NOT modify message parsing without checking current code**:
 
@@ -252,7 +254,6 @@ const result = await uploadData({
 **REST API Calls**:
 
 - Always use Amplify's `post()` from `aws-amplify/api` for REST calls to Lambda functions, which handles auth tokens automatically.
-- completions is an example of a custom API name that can be used for other REST APIs we create.
 
 **Authentication Context**: Always check `session.username` exists before data operations that require auth:
 
@@ -291,7 +292,6 @@ await client.models.Grade.update({
 - [package.json](package.json) - Scripts and dependencies
 - [src/context/unitContext.js](src/context/unitContext.js) - Core state management example
 - [src/components/ChatSidebar.js](src/components/ChatSidebar.js) - AI SDK streaming example
-- [pages/api/chat.js](pages/api/chat.js) - Edge function with OpenAI streaming
 
 ## Storybook
 
@@ -352,3 +352,21 @@ await client.graphql({
   variables: { input: { id, _version: currentVersion, ...updates } },
 });
 ```
+
+## Preferred MCP Usage
+
+Use MCP servers intentionally based on task type. See [.github/prompts/mcp-tool-routing.prompt.md](.github/prompts/mcp-tool-routing.prompt.md) for a full routing checklist.
+
+- **GitHub operations**: Prefer `io.github.github/github-mcp-server` for issues, PRs, reviews, labels, branch/commit metadata, and repository information.
+- **Browser/UI verification**: Prefer `microsoft/playwright-mcp` for end-to-end interaction checks and reproducible UI validation.
+- **Frontend runtime debugging**: Prefer `io.github.ChromeDevTools/chrome-devtools-mcp` for console/network/perf inspection in rendered pages.
+- **Next.js diagnostics**: Prefer `io.github.vercel/next-devtools-mcp` for Next.js-specific runtime, route, and app diagnostics.
+- **Framework/library docs**: Prefer `io.github.upstash/context7` for authoritative docs lookup (Next.js, Amplify Gen 2, Storybook, Lexical, MUI, Cypress, Vitest).
+
+Selection rules:
+
+- If task is GitHub state/change management, choose GitHub MCP first.
+- If task requires real browser behavior, choose Playwright MCP first; use Chrome DevTools MCP for deep console/network/performance analysis.
+- If task is specifically Next.js runtime or routes, choose Next DevTools MCP first.
+- If task is implementation guidance from external docs, use Context7 before guessing.
+- Avoid duplicating effort across MCPs unless one tool lacks required capability.
