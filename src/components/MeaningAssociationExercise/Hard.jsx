@@ -12,8 +12,6 @@ import { LinearProgressWithLabel, AnswerDrop } from '.';
 
 import { Word } from '../../models';
 
-import { format } from 'util';
-
 export const Hard = ({
   nodeKey, tabIndex, setTabIndex, wordIDs,
 }) => {

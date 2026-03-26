@@ -27,14 +27,14 @@ const TASK_NAVIGATION: Record<string, TaskNavigation> = {
     primary: '?path=/story/📄-pages-application-pages--sections',
     label: 'Open Sections Page',
     alternatives: [
-      { url: '?path=/story/components-sectionassigner--default', label: 'Section Assigner Component' }
+      { url: '?path=/story/🧩-components-section-assigner--default', label: 'Section Assigner Component' }
     ]
   },
   'instructor-create-unit': {
     primary: '?path=/story/📄-pages-application-pages--units',
     label: 'Open Units Page',
     alternatives: [
-      { url: '?path=/story/📚-creating-lessons-editor--default', label: 'Editor' },
+      { url: '?path=/story/�-creating-lessons-editor--editor-with-content', label: 'Editor' },
       { url: '?path=/story/📄-pages-application-pages--unit-detail', label: 'Unit Detail' }
     ]
   },
@@ -42,21 +42,21 @@ const TASK_NAVIGATION: Record<string, TaskNavigation> = {
     primary: '?path=/story/📚-creating-lessons-editor-plugins-quizplugin--default',
     label: 'Open Quiz Plugin',
     alternatives: [
-      { url: '?path=/story/📚-creating-lessons-editor--default', label: 'Full Editor' }
+      { url: '?path=/story/📚-creating-lessons-editor--editor-with-content', label: 'Full Editor' }
     ]
   },
   'instructor-create-vocabulary': {
     primary: '?path=/story/📚-creating-lessons-editor-plugins-wordblockplugin--default',
     label: 'Open Word Block Plugin',
     alternatives: [
-      { url: '?path=/story/components-vocabularyreview2--default', label: 'Vocabulary Review' }
+      { url: '?path=/story/📁-managing-content-vocabulary-review--default', label: 'Vocabulary Review' }
     ]
   },
   'instructor-create-assignment': {
     primary: '?path=/story/📄-pages-application-pages--section-detail',
     label: 'Open Section Detail',
     alternatives: [
-      { url: '?path=/story/components-sectionassigner--default', label: 'Section Assigner' }
+      { url: '?path=/story/🧩-components-section-assigner--default', label: 'Section Assigner' }
     ]
   },
   'instructor-view-grades': {
@@ -67,7 +67,7 @@ const TASK_NAVIGATION: Record<string, TaskNavigation> = {
     ]
   },
   'instructor-use-ai-assistant': {
-    primary: '?path=/story/components-chatsidebar--default',
+    primary: '?path=/story/💬-ai-assistant-chat-sidebar--getting-started',
     label: 'Open AI Chat Sidebar',
     alternatives: [
       { url: '?path=/story/📚-creating-lessons-editor-plugins-aicontentcompletionplugin--default', label: 'AI Content Completion' },
@@ -75,11 +75,11 @@ const TASK_NAVIGATION: Record<string, TaskNavigation> = {
     ]
   },
   'instructor-learn-shortcuts': {
-    primary: '?path=/story/help-keyboard-shortcuts--keyboard-shortcut-trainer',
+    primary: '?path=/story/help-keyboard-shortcut-trainer--default',
     label: 'Open Keyboard Shortcuts Trainer',
     alternatives: [
-      { url: '?path=/story/help-keyboard-shortcuts--automated-demo', label: 'Watch Demo' },
-      { url: '?path=/story/📚-creating-lessons-editor--default', label: 'Practice in Editor' }
+      { url: '?path=/story/�-creating-lessons-editor--keyboard-shortcuts-demo', label: 'Watch Demo' },
+      { url: '?path=/story/📚-creating-lessons-editor--empty-editor-text-formatting', label: 'Practice in Editor' }
     ]
   },
   // Learner tasks
@@ -103,11 +103,11 @@ const TASK_NAVIGATION: Record<string, TaskNavigation> = {
     ]
   },
   'learner-practice-vocabulary': {
-    primary: '?path=/story/components-vocabularyreview2--default',
+    primary: '?path=/story/📁-managing-content-vocabulary-review--default',
     label: 'Open Vocabulary Review',
   },
   'learner-use-chat-help': {
-    primary: '?path=/story/components-chatsidebar--default',
+    primary: '?path=/story/💬-ai-assistant-chat-sidebar--getting-started',
     label: 'Open AI Chat',
   },
   // Developer tasks
@@ -119,27 +119,27 @@ const TASK_NAVIGATION: Record<string, TaskNavigation> = {
     primary: '?path=/docs/📚-creating-lessons-editor--docs',
     label: 'Open Editor Docs',
     alternatives: [
-      { url: '?path=/story/📚-creating-lessons-editor--default', label: 'Live Editor' }
+      { url: '?path=/story/📚-creating-lessons-editor--editor-with-content', label: 'Live Editor' }
     ]
   },
   'developer-keyboard-shortcuts-demo': {
     primary: '?path=/story/help-keyboard-shortcuts--keyboard-shortcut-trainer',
     label: 'Open Keyboard Shortcuts',
     alternatives: [
-      { url: '?path=/story/help-keyboard-shortcuts--automated-demo', label: 'Watch Automated Demo' }
+      { url: '?path=/story/�-creating-lessons-editor--keyboard-shortcuts-demo', label: 'Watch Automated Demo' }
     ]
   },
   // Secret tasks
   'secret-keyboard-master': {
-    primary: '?path=/story/help-keyboard-shortcuts--keyboard-shortcut-trainer',
+    primary: '?path=/story/help-keyboard-shortcut-trainer--default',
     label: 'Start Keyboard Master Challenge',
   },
   'secret-speed-demon': {
-    primary: '?path=/story/help-keyboard-shortcuts--keyboard-shortcut-trainer',
+    primary: '?path=/story/help-keyboard-shortcut-trainer--default',
     label: 'Start Speed Challenge',
   },
   'secret-achievement-hunter': {
-    primary: '?path=/story/help-keyboard-shortcuts--keyboard-shortcut-trainer',
+    primary: '?path=/story/help-keyboard-shortcut-trainer--default',
     label: 'Unlock Achievements',
   },
 };

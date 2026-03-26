@@ -92,6 +92,14 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
     const unsubscribe = emitter.on((event) => {
       if (event.type === 'persona-selected') {
         setPersona(event.persona);
+        if (!event.persona) {
+          // Reset was triggered - clear all state
+          setPercentage(0);
+          setTotalCount(0);
+          setCompletedCount(0);
+          setNextTasks([]);
+          return;
+        }
         const pct = emitter.getCompletionPercentage(event.persona, ONBOARDING_TASKS);
         setPercentage(pct);
         const tasks = getTasksForPersona(event.persona);
@@ -335,7 +343,20 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
                     marginBottom: index < nextTasks.length - 1 ? '6px' : '0',
                     padding: '4px',
                     borderRadius: '3px',
-                    opacity: isCompleted ? 0.5 : 1
+                    opacity: isCompleted ? 0.5 : 1,
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onClick={() => {
+                    console.log('[Onboarding] Task clicked in sidebar:', task.id);
+                    api.togglePanel(true);
+                    api.setSelectedPanel(PANEL_ID);
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#2a2a2a';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
                   }}
                 >
                   <div style={{

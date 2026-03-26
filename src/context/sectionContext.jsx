@@ -38,7 +38,7 @@ const SectionProvider = ({ children, unitId }) => {
             try {
                 // Initial fetch
                 const { data: initialSections, errors } = await client.models.Section.list();
-                if (errors) {
+                if (errors?.length) {
                     console.error('[SectionContext] Initial fetch errors:', errors);
                 }
                 
@@ -153,7 +153,7 @@ const SectionProvider = ({ children, unitId }) => {
                 const { data: initialAssignments, errors } = await client.models.Assignment.list({
                     filter: { unitID: { eq: unitId } }
                 });
-                if (errors) {
+                if (errors?.length) {
                     console.error('[SectionContext] Assignment fetch errors:', errors);
                 }
                 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { expect } from 'vitest';
+import { expect } from 'storybook/test';
 import { within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Easy } from './Easy';

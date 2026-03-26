@@ -33,9 +33,11 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 const meta: Meta = {
   title: 'Getting Started/Welcome',
+  tags: ['!autodocs'],
   parameters: {
     layout: 'fullscreen',
     docs: {
+      disable: true,
       description: {
         component: `
 # Welcome to Homework Supply

@@ -84,13 +84,21 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const overlayRef = useRef<HTMLDivElement>(null);
+  const targetClickCleanupRef = useRef<(() => void) | null>(null);
   const currentStep = steps[currentStepIndex];
 
   /**
-   * Update target element position and size
+   * Update target element position and size.
+   * Also attaches a click listener to the target so clicking it advances the tour.
    */
   const updateTargetPosition = () => {
     if (!currentStep) return;
+
+    // Clean up previous target click listener
+    if (targetClickCleanupRef.current) {
+      targetClickCleanupRef.current();
+      targetClickCleanupRef.current = null;
+    }
 
     if (currentStep.targetSelector) {
       // Find element in the iframe (Storybook preview) or main window
@@ -128,6 +136,20 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
             height: rect.height
           });
         }
+
+        // Attach click listener to advance tour when target element is clicked
+        const handleTargetClick = () => {
+          console.log('[SpotlightOverlay] 🎯 Target element clicked, advancing tour');
+          if (currentStep.isLast || currentStepIndex === steps.length - 1) {
+            onComplete?.();
+          } else {
+            onNext?.();
+          }
+        };
+        targetElement.addEventListener('click', handleTargetClick);
+        targetClickCleanupRef.current = () => {
+          targetElement.removeEventListener('click', handleTargetClick);
+        };
       } else {
         // Element not found - use center of screen
         console.warn('[SpotlightOverlay] Target element not found, using center position');
@@ -286,6 +308,12 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
       // Clear retry timeouts
       retryTimeouts.forEach(timeout => clearTimeout(timeout));
       
+      // Clean up target click listener
+      if (targetClickCleanupRef.current) {
+        targetClickCleanupRef.current();
+        targetClickCleanupRef.current = null;
+      }
+
       // Remove event listeners
       if (iframe) {
         iframe.removeEventListener('load', handleIframeLoad);
@@ -330,7 +358,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
           right: 0,
           bottom: 0,
           zIndex: 9999,
-          pointerEvents: 'auto',
+          pointerEvents: 'none',
         }}
       >
         {/* SVG mask for spotlight effect */}
@@ -419,6 +447,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
             borderLeft: '4px solid',
             borderColor: mode === 'tutorial' ? '#4CAF50' : '#2196F3',
             zIndex: 10000,
+            pointerEvents: 'auto',
           }}
         >
             <CardContent>

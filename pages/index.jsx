@@ -379,8 +379,6 @@ function Index({ signOut, user }) {
 
 
                   return (
-                    <>
-
                       <Card
                         key={index}
                         elevation={2}
@@ -455,9 +453,6 @@ function Index({ signOut, user }) {
 
 
                       </Card>
-
-
-                    </>
 
 
                   )
@@ -922,8 +917,6 @@ function Index({ signOut, user }) {
                 mySections?.map(function (section, index) {
 
                   return (
-                    <>
-
                       <Card
                         key={index}
                         elevation={2}
@@ -1001,9 +994,6 @@ function Index({ signOut, user }) {
                       </Card>
 
 
-                    </>
-
-
                   )
                 })
               }
@@ -1032,8 +1022,6 @@ function Index({ signOut, user }) {
                 sections?.map(function (section, index) {
 
                   return (
-                    <>
-
                       <Card
                         key={index}
                         elevation={2}
@@ -1109,9 +1097,6 @@ function Index({ signOut, user }) {
 
 
                       </Card>
-
-
-                    </>
 
 
                   )

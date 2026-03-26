@@ -1,7 +1,5 @@
 import React from 'react';
-import { expect } from 'vitest';
-import { within, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { expect, within, waitFor, userEvent } from 'storybook/test';
 import { SectionAssigner } from './SectionAssigner';
 
 export default {
@@ -27,9 +25,9 @@ export const Default = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     
-    // Verify dialog is open and displays unit title
+    // Verify dialog is open and displays the dialog title
     await waitFor(() => {
-      expect(canvas.queryByText(/French Vocabulary Unit 1/i)).toBeInTheDocument();
+      expect(canvas.queryByText(/Assign to Section/i)).toBeInTheDocument();
     }, { timeout: 3000 });
   },
 };

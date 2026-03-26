@@ -5,12 +5,16 @@
  * Note: This module is browser-only (uses IndexedDB)
  */
 
-// Only import in browser environment
+// Lazy-load browser-only dependencies via dynamic import (compatible with Vite/Storybook ESM)
 let openDB, downloadData, pako;
-if (typeof window !== 'undefined') {
-  ({ openDB } = require('idb'));
-  ({ downloadData } = require('aws-amplify/storage'));
-  pako = require('pako');
+let _depsLoaded = false;
+
+async function loadDeps() {
+  if (_depsLoaded || typeof window === 'undefined') return;
+  ({ openDB } = await import('idb'));
+  ({ downloadData } = await import('aws-amplify/storage'));
+  pako = (await import('pako')).default || (await import('pako'));
+  _depsLoaded = true;
 }
 
 const DB_NAME = 'VectorStoreDB';
@@ -25,6 +29,7 @@ async function getDB() {
   if (typeof window === 'undefined') {
     throw new Error('IndexedDB is only available in browser');
   }
+  await loadDeps();
   return openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
       // Create object store for embeddings if it doesn't exist
@@ -207,6 +212,7 @@ export async function getEmbeddingsTimestamp(documentId) {
  * @returns {Promise<number>} Number of embeddings loaded
  */
 export async function loadEmbeddingsFromS3(s3Key, documentId, metadata = {}) {
+  await loadDeps();
   try {
     console.log(`[VectorStoreDB] Loading embeddings from S3: ${s3Key}`);
     

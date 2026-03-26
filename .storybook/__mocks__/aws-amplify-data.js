@@ -565,6 +565,28 @@ const mockClient = {
     AssistantChatFile: createMockModel('AssistantChatFile'),
     Settings: createMockModel('Settings'),
   },
+
+  // Mock mutations for custom server-side operations
+  mutations: {
+    addSelfToSection: async (input) => {
+      console.log('[Mock Data] addSelfToSection() called with:', input);
+      // Simulate a successful join for any code
+      const sectionId = `mock-section-${Date.now()}`;
+      const mockSection = {
+        id: sectionId,
+        name: `Mock Section (${input?.code || 'DEMO'})`,
+        code: input?.code || 'DEMO',
+        owner: 'student-alice-sub',
+        _version: 1,
+        _lastChangedAt: Date.now(),
+        _deleted: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      dataStores.Section.set(sectionId, mockSection);
+      return { data: `Successfully joined section with code ${input?.code}`, errors: null };
+    },
+  },
   
   // GraphQL method for custom queries
   graphql: async ({ query, variables }) => {

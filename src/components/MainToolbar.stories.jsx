@@ -1,7 +1,5 @@
 import React from 'react';
-import { expect } from 'vitest';
-import { within, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { expect, within, waitFor, userEvent } from 'storybook/test';
 import { Box, Typography } from '@mui/material';
 import MainToolbar, { SettingsMenu, HelpMenu, UserMenu } from './MainToolbar';
 
@@ -51,9 +49,9 @@ export const FullToolbar = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     
-    // Verify toolbar is rendered
-    const toolbar = canvas.getByRole('banner');
-    expect(toolbar).toBeInTheDocument();
+    // Verify toolbar is rendered (MUI Toolbar renders a plain div, query by menu button instead)
+    const menuButton = canvas.getByRole('button', { name: /menu/i });
+    expect(menuButton).toBeInTheDocument();
     
     // Verify page content is visible
     expect(canvas.getByText('Page Content')).toBeInTheDocument();
@@ -152,6 +150,47 @@ export const UserMenuOnly = {
     docs: {
       description: {
         story: 'User menu component displayed in isolation.',
+      },
+    },
+  },
+};
+
+export const JoinSectionDemo = {
+  render: () => (
+    <MainToolbar>
+      <Box sx={{ p: 4 }}>
+        <Typography variant="h3" gutterBottom>
+          Join a Section
+        </Typography>
+        <Typography variant="body1" paragraph>
+          Click the person-add icon in the toolbar to open the Join Section dialog.
+          Use the demo code <strong>DEMO-2026</strong> to simulate joining a class.
+        </Typography>
+      </Box>
+    </MainToolbar>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Click the "Add User to Section" button to open the dialog
+    const joinButton = await canvas.findByRole('button', { name: /add user to section/i });
+    await userEvent.click(joinButton);
+
+    // Wait for the dialog to appear
+    await waitFor(() => {
+      const dialog = document.querySelector('[data-tour="join-section-dialog"]');
+      expect(dialog).toBeInTheDocument();
+    }, { timeout: 3000 });
+
+    // Type the demo join code
+    const codeInput = document.querySelector('[data-tour="join-code-input"] input') || document.querySelector('#code');
+    expect(codeInput).toBeInTheDocument();
+    await userEvent.type(codeInput, 'DEMO-2026');
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Demonstrates the Join Section dialog flow. Opens the dialog and fills in a demo code (`DEMO-2026`) that will succeed in Storybook.',
       },
     },
   },

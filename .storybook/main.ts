@@ -7,6 +7,8 @@ const __dirname = path.dirname(__filename);
 
 const config: StorybookConfig = {
   "stories": [
+    // Welcome page first so Storybook defaults to it on fresh visits
+    "./components/Welcome.stories.tsx",
     // "../src/**/*.mdx", // Temporarily disabled - vitest plugin excludes ../**/*.mdx causing no tests to run
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)",
     "./TranslationMode.stories.tsx",

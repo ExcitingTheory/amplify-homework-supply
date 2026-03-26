@@ -2,7 +2,7 @@
 	"servers": {
 		"io.github.ChromeDevTools/chrome-devtools-mcp": {
 			"type": "stdio",
-			"command": "npx",
+			"command": "${workspaceFolder}/.vscode/nvm-npx.sh",
 			"args": [
 				"--registry",
 				"https://registry.npmjs.org",

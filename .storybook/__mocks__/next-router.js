@@ -148,8 +148,7 @@ export const createMockRouter = (overrides = {}) => ({
     return true;
   },
   reload: () => {
-    console.log('[Mock Router] reload');
-    window.parent.location.reload();
+    console.log('[Mock Router] reload (no-op in Storybook)');
   },
   back: () => {
     console.log('[Mock Router] back');

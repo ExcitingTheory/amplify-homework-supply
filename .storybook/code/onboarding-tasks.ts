@@ -45,7 +45,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     order: 1,
     estimatedTime: 300,
     completionCriteria: {
-      tutorialStoryId: '🧩-components-section-assigner--default', // Tutorial: Component story showing the dialog
+      tutorialStoryId: '📄-pages-application-pages--sections', // Tutorial: Sections page with create section UI
       quizStoryId: '📄-pages-application-pages--sections', // Quiz: Navigate to actual sections page
       requiredActions: ['onClick', 'onCreate'], // Any create/save action
     },
@@ -112,6 +112,11 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     category: 'Content Management',
     order: 4,
     estimatedTime: 360,
+    completionCriteria: {
+      tutorialStoryId: '📁-managing-content-vocabulary-review--default', // Tutorial: Vocabulary review component
+      quizStoryId: '📄-pages-application-pages--unit-detail', // Quiz: Unit detail with dictionary
+      requiredActions: ['onClick', 'onCreate'], // Adding words
+    },
   },
   {
     id: 'instructor-create-assignment',
@@ -130,6 +135,11 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     category: 'Assignments',
     order: 5,
     estimatedTime: 240,
+    completionCriteria: {
+      tutorialStoryId: '🧩-components-section-assigner--default', // Tutorial: Section assigner dialog component
+      quizStoryId: '📄-pages-application-pages--section-detail', // Quiz: Section detail page
+      requiredActions: ['onClick', 'onCreate'], // Creating assignment
+    },
   },
   {
     id: 'instructor-view-grades',
@@ -147,6 +157,11 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     category: 'Assessment',
     order: 6,
     estimatedTime: 240,
+    completionCriteria: {
+      tutorialStoryId: '📄-pages-application-pages--section-detail', // Tutorial: Section detail with grades tab
+      quizStoryId: '📄-pages-application-pages--section-detail', // Quiz: Section detail page
+      requiredActions: ['onClick'], // Viewing grades
+    },
   },
   {
     id: 'instructor-use-ai-assistant',
@@ -165,6 +180,11 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     category: 'AI Tools',
     order: 7,
     estimatedTime: 480,
+    completionCriteria: {
+      tutorialStoryId: '💬-ai-assistant-chat-sidebar--getting-started', // Tutorial: Chat sidebar component
+      quizStoryId: '📄-pages-application-pages--workbook', // Quiz: Workbook with chat sidebar
+      requiredActions: ['onSubmit', 'onSend'], // Sending chat message
+    },
   },
   {
     id: 'instructor-learn-shortcuts',
@@ -185,6 +205,10 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     category: 'Skills',
     order: 8,
     estimatedTime: 300,
+    completionCriteria: {
+      tutorialStoryId: 'help-keyboard-shortcut-trainer--default', // Tutorial: Keyboard shortcut trainer
+      quizStoryId: '📄-pages-application-pages--unit-detail', // Quiz: Editor page for practicing
+    },
   },
 
   // ============ LEARNER TASKS ============
@@ -205,7 +229,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     order: 1,
     estimatedTime: 120,
     completionCriteria: {
-      tutorialStoryId: '🧩-components-section-assigner--default', // Tutorial: Component showing join dialog
+      tutorialStoryId: '📚-creating-lessons-main-toolbar--full-toolbar', // Tutorial: MainToolbar has the join section dialog
       quizStoryId: '📄-pages-application-pages--sections', // Quiz: Navigate to sections page
       requiredActions: ['onClick', 'onSubmit'], // Join action
     },
@@ -272,7 +296,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     estimatedTime: 240,
     completionCriteria: {
       tutorialStoryId: '📚-creating-lessons-workbook--workbook-with-content', // Tutorial: Workbook showing feedback
-      quizStoryId: '📄-pages-application-pages--grades', // Quiz: Grades page
+      quizStoryId: '📄-pages-application-pages--section-detail', // Quiz: Section detail page (has grades tab)
       requiredActions: ['onClick'], // Clicking to view grade details
     },
   },
@@ -293,8 +317,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     order: 5,
     estimatedTime: 300,
     completionCriteria: {
-      tutorialStoryId: '📁-managing-content-dictionary--dictionary-list-view', // Tutorial: Dictionary component
-      quizStoryId: '📄-pages-application-pages--dictionary', // Quiz: Dictionary page
+      tutorialStoryId: '📁-managing-content-vocabulary-review--default', // Tutorial: Vocabulary review component
+      quizStoryId: '📄-pages-application-pages--unit-detail', // Quiz: Unit detail page (has vocabulary)
       requiredActions: ['onClick', 'onPlay'], // Clicking words or playing audio
     },
   },
@@ -315,7 +339,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     order: 6,
     estimatedTime: 300,
     completionCriteria: {
-      tutorialStoryId: '💬-ai-tools-chat-assistant--default', // Tutorial: Chat component
+      tutorialStoryId: '💬-ai-assistant-chat-sidebar--getting-started', // Tutorial: Chat sidebar component
       quizStoryId: '📄-pages-application-pages--workbook', // Quiz: Workbook with chat sidebar
       requiredActions: ['onSubmit', 'onSend'], // Sending chat message
     },

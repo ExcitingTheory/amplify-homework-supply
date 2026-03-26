@@ -2145,8 +2145,9 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                 // preventDefault called early above
                 if (isShortcut(event, 'Digit1', { ctrl: true, shift: true })) {
                     activeEditor.update(() => {
-                        if ($isRangeSelection(selection)) {
-                            $setBlocksType(selection, () => $createHeadingNode('h1'));
+                        const sel = $getSelection();
+                        if ($isRangeSelection(sel)) {
+                            $setBlocksType(sel, () => $createHeadingNode('h1'));
                         }
                     });
                     return true;
@@ -2156,8 +2157,9 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                 // preventDefault called early above
                 if (isShortcut(event, 'Digit2', { ctrl: true, shift: true })) {
                     activeEditor.update(() => {
-                        if ($isRangeSelection(selection)) {
-                            $setBlocksType(selection, () => $createHeadingNode('h2'));
+                        const sel = $getSelection();
+                        if ($isRangeSelection(sel)) {
+                            $setBlocksType(sel, () => $createHeadingNode('h2'));
                         }
                     });
                     return true;
@@ -2167,8 +2169,9 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                 // preventDefault called early above
                 if (isShortcut(event, 'Digit3', { ctrl: true, shift: true })) {
                     activeEditor.update(() => {
-                        if ($isRangeSelection(selection)) {
-                            $setBlocksType(selection, () => $createHeadingNode('h3'));
+                        const sel = $getSelection();
+                        if ($isRangeSelection(sel)) {
+                            $setBlocksType(sel, () => $createHeadingNode('h3'));
                         }
                     });
                     return true;
@@ -2178,8 +2181,9 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                 if (isShortcut(event, 'Quote', { ctrl: true })) {
                     event.preventDefault();
                     activeEditor.update(() => {
-                        if ($isRangeSelection(selection)) {
-                            $setBlocksType(selection, () => $createQuoteNode());
+                        const sel = $getSelection();
+                        if ($isRangeSelection(sel)) {
+                            $setBlocksType(sel, () => $createQuoteNode());
                         }
                     });
                     return true;
@@ -2189,8 +2193,9 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                 // preventDefault called early above
                 if (isShortcut(event, 'KeyC', { ctrl: true, shift: true })) {
                     activeEditor.update(() => {
-                        if ($isRangeSelection(selection)) {
-                            $setBlocksType(selection, () => $createCodeNode());
+                        const sel = $getSelection();
+                        if ($isRangeSelection(sel)) {
+                            $setBlocksType(sel, () => $createCodeNode());
                         }
                     });
                     return true;

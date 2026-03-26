@@ -402,19 +402,9 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
 
   /**
    * Handle completing the spotlight tour
+   * Does NOT auto-complete the task — the user must actually perform the task
    */
   const handleSpotlightComplete = () => {
-    if (activeTask && selectedPersona) {
-      // Mark task as complete
-      emitter.emit({
-        type: 'task-completed',
-        taskId: activeTask.id,
-        persona: selectedPersona,
-        timestamp: Date.now(),
-        metadata: { completedViaSpotlight: true, mode },
-      });
-    }
-    
     setSpotlightOpen(false);
     setSpotlightCurrentStep(0);
     setActiveTask(null);

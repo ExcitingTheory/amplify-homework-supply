@@ -12,7 +12,7 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect } from 'vitest';
+import { expect } from 'storybook/test';
 import { within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import QuestionsReview2 from './QuestionsReview2';

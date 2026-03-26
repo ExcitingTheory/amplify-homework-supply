@@ -68,6 +68,7 @@ export const mockUnits = {
     }),
     featuredImage: MOCK_MEDIA.FEATURED_CROPPED.JAPANESE_CULTURE,
     published: true,
+    timeLimitSeconds: 120,
     createdAt: new Date('2024-01-05T10:00:00Z').toISOString(),
     updatedAt: new Date('2024-01-12T15:00:00Z').toISOString(),
     _version: 2,

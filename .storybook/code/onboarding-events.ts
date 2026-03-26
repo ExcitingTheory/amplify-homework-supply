@@ -102,12 +102,19 @@ class OnboardingEventEmitter {
   }
 
   /**
-   * Clear all tracking data
+   * Clear all tracking data and notify listeners
    */
   reset(): void {
     this.completedTasks.clear();
     this.currentPersona = null;
     this.clearLocalStorage();
+    // Notify listeners so sidebar widget resets
+    this.listeners.forEach((callback) => callback({
+      type: 'persona-selected',
+      taskId: 'reset',
+      persona: null,
+      timestamp: Date.now(),
+    }));
   }
 
   /**

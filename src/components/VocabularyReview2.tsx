@@ -170,6 +170,9 @@ function NestedVocabField({
                                     resize: multiline ? 'vertical' : 'none',
                                     backgroundColor: '#fff',
                                     cursor: 'text',
+                                    overflow: 'hidden',
+                                    overflowWrap: 'break-word',
+                                    wordBreak: 'break-word',
                                 }}
                             />
                         }
@@ -244,6 +247,7 @@ export function VocabularyCard({
                 margin: 0,
                 borderBottom: '1px solid',
                 borderColor: 'divider',
+                overflow: 'hidden',
                 transition: 'all 0.2s ease',
                 '&:hover': {
                     backgroundColor: 'action.hover',
@@ -269,7 +273,7 @@ export function VocabularyCard({
                     cursor: isExpanded ? 'default' : 'pointer',
                 }}
             >
-                <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', flex: 1 }}>
+                <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', flex: 1, minWidth: 0, overflow: 'hidden' }}>
                     {!alreadyImported && (
                         <Checkbox
                             size="small"
@@ -292,13 +296,14 @@ export function VocabularyCard({
                     
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                         {!isExpanded ? (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', minWidth: 0 }}>
                                 <Box 
                                     onClick={(e) => e.stopPropagation()} 
                                     sx={{ 
                                         fontWeight: 600,
                                         fontSize: '0.875rem',
-                                        minWidth: '120px',
+                                        minWidth: 0,
+                                        maxWidth: '200px',
                                         flex: '0 1 auto',
                                     }}
                                 >
@@ -315,7 +320,8 @@ export function VocabularyCard({
                                     sx={{ 
                                         fontSize: '0.875rem',
                                         flex: 1,
-                                        minWidth: '200px',
+                                        minWidth: 0,
+                                        overflow: 'hidden',
                                         display: { xs: 'none', sm: 'block' },
                                     }}
                                 >
@@ -561,9 +567,9 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
                 const content = parsedContents[0];
                 setParsedContent(content);
                 
-                // Parse vocabulary
+                // Parse vocabulary - a.json() fields may be returned as objects or strings
                 const vocab = content.vocabularyJSON 
-                    ? JSON.parse(String(content.vocabularyJSON))
+                    ? (typeof content.vocabularyJSON === 'string' ? JSON.parse(content.vocabularyJSON) : content.vocabularyJSON)
                     : [];
                 
                 // Enrich vocabulary with source metadata
@@ -576,15 +582,15 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
                 
                 setVocabularyItems(enrichedVocab);
                 
-                // Parse summaries
+                // Parse summaries - a.json() fields may be returned as objects or strings
                 const sums = content.summariesJSON 
-                    ? JSON.parse(String(content.summariesJSON)) 
+                    ? (typeof content.summariesJSON === 'string' ? JSON.parse(content.summariesJSON) : content.summariesJSON)
                     : [];
                 setSummaries(sums);
                 
-                // Parse objectives
+                // Parse objectives - a.json() fields may be returned as objects or strings
                 const objs = content.objectivesJSON 
-                    ? JSON.parse(String(content.objectivesJSON)) 
+                    ? (typeof content.objectivesJSON === 'string' ? JSON.parse(content.objectivesJSON) : content.objectivesJSON)
                     : [];
                 setObjectives(objs);
                 
