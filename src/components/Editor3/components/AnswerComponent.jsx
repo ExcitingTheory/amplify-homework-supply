@@ -276,13 +276,13 @@ export default function AnswerComponent({
                 ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t)
             }
             {requestDefinition &&
-                ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t)
+                ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t, saveGrade)
             }
         </div>
     );
 }
 
-function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t) {
+function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t, saveGrade) {
 
     console.log('ByWordList', wordIDs, feedback, answers);
     console.log('ByWordList.currentPromptMethod', currentPromptMethod);
@@ -440,11 +440,9 @@ onClick={async () => {
 
                             console.log('response', response);
 
-                            const mainData = JSON.parse(response?.data?.verifyDefinition) || {};
+                            const data = JSON.parse(response?.data) || {};
 
-                            const data = JSON.parse(mainData?.choices[0]?.message?.content) || {};
-
-                            console.log('response', response);
+                            console.log('verifyDefinition parsed data', data);
 
 
 
@@ -512,9 +510,19 @@ onClick={async () => {
                 gradeId={grade?.id}
                 nodeKey={`${nodeKey}-${wordId}`}
                 title={dictionary[wordId]?.phrase}
-                onRecordingComplete={(audioFile, waveformData) => {
-                    // Handle recording completion
-                    console.log('Recording complete:', audioFile, waveformData);
+                onRecordingComplete={(audioFile, uploadResult) => {
+                    const currentGradeData = grade?.data || {};
+                    const audioNodeKey = `${nodeKey}-${wordId}`;
+                    const updatedGradeData = {
+                        ...currentGradeData,
+                        [audioNodeKey]: {
+                            ...currentGradeData[audioNodeKey],
+                            audioFilePath: audioFile?.path || null,
+                            audioFileId: audioFile?.id || null,
+                            inputMethod: 'audio',
+                        }
+                    };
+                    saveGrade(updatedGradeData);
                 }}
             />
             </li>)
@@ -677,11 +685,9 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                             model: 'gpt-3.5-turbo',
                         });
 
-                        const mainData = JSON.parse(response?.data?.verifyWord) || {};
+                        const data = JSON.parse(response?.data) || {};
 
-                        const data = JSON.parse(mainData?.choices[0]?.message?.content) || {};
-
-                        console.log('response', response);
+                        console.log('verifyWord parsed data', data);
 
                         setFeedback({
                             ...feedback,

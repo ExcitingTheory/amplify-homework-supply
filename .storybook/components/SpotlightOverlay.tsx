@@ -35,6 +35,8 @@ export interface SpotlightStep {
   tooltipPosition?: 'top' | 'bottom' | 'left' | 'right' | 'center';
   /** Whether this is the last step */
   isLast?: boolean;
+  /** If true, the user can interact with the target element without auto-advancing the tour */
+  interactable?: boolean;
 }
 
 export interface SpotlightOverlayProps {
@@ -138,18 +140,21 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
         }
 
         // Attach click listener to advance tour when target element is clicked
-        const handleTargetClick = () => {
-          console.log('[SpotlightOverlay] 🎯 Target element clicked, advancing tour');
-          if (currentStep.isLast || currentStepIndex === steps.length - 1) {
-            onComplete?.();
-          } else {
-            onNext?.();
-          }
-        };
-        targetElement.addEventListener('click', handleTargetClick);
-        targetClickCleanupRef.current = () => {
-          targetElement.removeEventListener('click', handleTargetClick);
-        };
+        // Skip for interactable steps so the user can interact without auto-advancing
+        if (!currentStep.interactable) {
+          const handleTargetClick = () => {
+            console.log('[SpotlightOverlay] 🎯 Target element clicked, advancing tour');
+            if (currentStep.isLast || currentStepIndex === steps.length - 1) {
+              onComplete?.();
+            } else {
+              onNext?.();
+            }
+          };
+          targetElement.addEventListener('click', handleTargetClick);
+          targetClickCleanupRef.current = () => {
+            targetElement.removeEventListener('click', handleTargetClick);
+          };
+        }
       } else {
         // Element not found - use center of screen
         console.warn('[SpotlightOverlay] Target element not found, using center position');

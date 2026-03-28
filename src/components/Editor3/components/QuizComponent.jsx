@@ -11,6 +11,8 @@ import Checkbox from '@mui/material/Checkbox';
 import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import WarningIcon from '@mui/icons-material/Warning';
 import { useTranslation } from 'next-i18next';
 
 import UnitContext from '../../../context/unitContext'
@@ -20,7 +22,14 @@ export default function QuestionBlockRo(props) {
   const { nodeKey, data } = props
   const { grade, saveGrade } = React.useContext(UnitContext)
   console.log('QuestionBlockRo.grade', grade)
-  const inProgress = grade?.data?.[nodeKey] || {}
+  const gradeData = React.useMemo(() => {
+    if (!grade?.data) return {};
+    if (typeof grade.data === 'string') {
+      try { return JSON.parse(grade.data); } catch { return {}; }
+    }
+    return grade.data;
+  }, [grade?.data]);
+  const inProgress = gradeData[nodeKey] || {}
 
   const content = data || []
   // let questionContent = shuffle([...content]);
@@ -41,8 +50,8 @@ export default function QuestionBlockRo(props) {
 
   console.log('QuestionBlock.nodeKey', nodeKey, 'type:', typeof nodeKey)
   console.log('QuestionBlock.questionContent', questionContent)
-  console.log('QuestionBlock.grade.data keys:', grade?.data ? Object.keys(grade.data) : 'no data')
-  console.log('QuestionBlock.grade.data[nodeKey]:', grade?.data?.[nodeKey])
+  console.log('QuestionBlock.grade.data keys:', gradeData ? Object.keys(gradeData) : 'no data')
+  console.log('QuestionBlock.grade.data[nodeKey]:', gradeData[nodeKey])
   console.log('QuestionBlockRo.inProgress', inProgress)
 
   const accuracy = inProgress?.accuracy || 0
@@ -73,7 +82,7 @@ export default function QuestionBlockRo(props) {
 
     console.log('meow: ?thisAnswer', thisAnswer)
 
-    const savedGrade = grade?.data
+    const savedGrade = gradeData
     // let { saveGrade } = this.props;
     let thisExerciseDone = false
 
@@ -124,7 +133,11 @@ export default function QuestionBlockRo(props) {
     if (questionContent) {
       checkboxes = questionContent.map((data, key) => {
         // Check if this specific answer has been attempted
-        const checked = attemptedAnswers[key] !== undefined;
+        const wasAttempted = attemptedAnswers[key] !== undefined;
+        const isCorrectAnswer = data.correct === true;
+        const checked = isLocked ? (wasAttempted && isCorrectAnswer) : wasAttempted;
+        const showCorrectFeedback = isLocked && wasAttempted && isCorrectAnswer;
+        const showWrongFeedback = isLocked && wasAttempted && !isCorrectAnswer;
         
         return (<FormControlLabel 
           key={key}
@@ -133,10 +146,24 @@ export default function QuestionBlockRo(props) {
             <Checkbox 
               checked={checked} 
               disabled={isLocked} 
-              onChange={async (e) => { gradeAnswer(e, key, data) }} 
+              onChange={async (e) => { gradeAnswer(e, key, data) }}
+              sx={isLocked && wasAttempted ? {
+                '&.Mui-disabled': {
+                  color: showCorrectFeedback ? 'success.main' : 'warning.main',
+                },
+              } : undefined}
             />
           } 
-          label={data.answer} 
+          label={
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              {data.answer}
+              {showCorrectFeedback && <CheckCircleIcon sx={{ fontSize: 18, color: 'success.main' }} />}
+              {showWrongFeedback && <WarningIcon sx={{ fontSize: 18, color: 'warning.main' }} />}
+            </Box>
+          }
+          sx={isLocked && wasAttempted ? {
+            color: showCorrectFeedback ? 'success.main' : 'warning.main',
+          } : undefined}
         />)
       });
     }

@@ -587,7 +587,63 @@ const mockClient = {
       return { data: `Successfully joined section with code ${input?.code}`, errors: null };
     },
   },
-  
+
+  // Mock queries for custom query handlers (Lambda-backed)
+  queries: {
+    verifyDefinition: async (input) => {
+      console.log('[Mock Data] queries.verifyDefinition() called with:', input);
+      const mockResponse = JSON.stringify({
+        choices: [{ message: { content: JSON.stringify({ answer: true, reason: 'Mock verification: definition accepted' }) } }],
+      });
+      return { data: mockResponse, errors: null };
+    },
+    verifyWord: async (input) => {
+      console.log('[Mock Data] queries.verifyWord() called with:', input);
+      const mockResponse = JSON.stringify({
+        choices: [{ message: { content: JSON.stringify({ answer: true, reason: 'Mock verification: word accepted' }) } }],
+      });
+      return { data: mockResponse, errors: null };
+    },
+    verifyShortAnswer: async (input) => {
+      console.log('[Mock Data] queries.verifyShortAnswer() called with:', input);
+      const mockResponse = JSON.stringify({
+        choices: [{ message: { content: JSON.stringify({ answer: true, reason: 'Mock verification: answer accepted' }) } }],
+      });
+      return { data: mockResponse, errors: null };
+    },
+    verifyAudioUrl: async (input) => {
+      console.log('[Mock Data] queries.verifyAudioUrl() called with:', input);
+      const mockResponse = JSON.stringify({
+        choices: [{ message: { content: JSON.stringify({ answer: true, reason: 'Mock verification: audio accepted' }) } }],
+      });
+      return { data: mockResponse, errors: null };
+    },
+    verifyImage: async (input) => {
+      console.log('[Mock Data] queries.verifyImage() called with:', input);
+      return { data: JSON.stringify({ answer: true, reason: 'Mock verification: image accepted' }), errors: null };
+    },
+    verifyImageUrl: async (input) => {
+      console.log('[Mock Data] queries.verifyImageUrl() called with:', input);
+      return { data: JSON.stringify({ answer: true, reason: 'Mock verification: image URL accepted' }), errors: null };
+    },
+    processImageUrl: async (input) => {
+      console.log('[Mock Data] queries.processImageUrl() called with:', input);
+      return { data: JSON.stringify({ description: 'Mock image description' }), errors: null };
+    },
+    transcribeUrl: async (input) => {
+      console.log('[Mock Data] queries.transcribeUrl() called with:', input);
+      return { data: JSON.stringify({ text: 'Mock transcription result' }), errors: null };
+    },
+    getStudentSubmissionUrl: async (input) => {
+      console.log('[Mock Data] queries.getStudentSubmissionUrl() called with:', input);
+      return { data: 'https://mock-submission-url.example.com/submission.mp3', errors: null };
+    },
+    listSectionStudents: async (input) => {
+      console.log('[Mock Data] queries.listSectionStudents() called with:', input);
+      return { data: JSON.stringify([]), errors: null };
+    },
+  },
+
   // GraphQL method for custom queries
   graphql: async ({ query, variables }) => {
     console.log('[Mock Data] graphql() called:', { query, variables });

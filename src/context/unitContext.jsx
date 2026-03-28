@@ -374,15 +374,23 @@ const UnitProvider = ({ children, id }) => {
         // Handle current grade (most recent incomplete)
         const currentGrade = incompleteGrades[0];
         
+        // Parse grade.data from JSON string to object so all consumers get an object
+        if (currentGrade?.data && typeof currentGrade.data === 'string') {
+          try {
+            currentGrade.data = JSON.parse(currentGrade.data);
+          } catch (e) {
+            console.error('[UnitContext] Failed to parse grade.data:', e);
+            currentGrade.data = {};
+          }
+        }
+        
         setGrade(currentGrade);
         setUsername(username);
         
         // Calculate finished questions from the current grade data
         if (currentGrade?.data) {
           let _finishedQuestions = 0;
-          const gradeData = typeof currentGrade.data === 'string' 
-            ? JSON.parse(currentGrade.data) 
-            : currentGrade.data;
+          const gradeData = currentGrade.data;
           Object.entries(gradeData).forEach(([key, value]) => {
             if (value?.complete === true) {
               _finishedQuestions++;

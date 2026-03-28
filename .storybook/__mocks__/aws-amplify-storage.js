@@ -85,11 +85,11 @@ export const getUrl = async ({ key, options = {} }) => {
   return { url: { href: key || 'mock-url' } };
 };
 
-export const uploadData = ({ key, data, options = {} }) => {
-  console.log('[Mock Storage] uploadData called with:', { key, options });
+export const uploadData = ({ key, path, data, options = {} }) => {
+  console.log('[Mock Storage] uploadData called with:', { key, path, options });
   
-  // Simulate the upload process
-  const mockPath = key || `mock-path-${Date.now()}`;
+  // Simulate the upload process (Gen 2 uses path, Gen 1 uses key)
+  const mockPath = path || key || `mock-path-${Date.now()}`;
   
   return {
     result: Promise.resolve({ 

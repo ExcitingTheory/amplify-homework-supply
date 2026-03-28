@@ -428,8 +428,19 @@ export default function CustomAnswerComponent({
                                     gradeId={grade?.id}
                                     nodeKey={`custom-answer-${questionID}`}
                                     title={prompt || question?.prompt}
-                                    onRecordingComplete={(audioFile, waveformData) => {
-                                        console.log('Recording complete:', audioFile, waveformData);
+                                    onRecordingComplete={(audioFile, uploadResult) => {
+                                        const currentGradeData = grade?.data || {};
+                                        const audioNodeKey = `custom-answer-${questionID}`;
+                                        const updatedGradeData = {
+                                            ...currentGradeData,
+                                            [audioNodeKey]: {
+                                                ...currentGradeData[audioNodeKey],
+                                                audioFilePath: audioFile?.path || null,
+                                                audioFileId: audioFile?.id || null,
+                                                inputMethod: 'audio',
+                                            }
+                                        };
+                                        saveGrade(updatedGradeData);
                                     }}
                                 />
                             </Box>
