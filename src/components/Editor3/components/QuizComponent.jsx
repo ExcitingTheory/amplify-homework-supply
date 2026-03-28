@@ -132,10 +132,11 @@ export default function QuestionBlockRo(props) {
     let checkboxes
     if (questionContent) {
       checkboxes = questionContent.map((data, key) => {
-        // Check if this specific answer has been attempted
-        const wasAttempted = attemptedAnswers[key] !== undefined;
+        // Use != null to handle sparse arrays that become [null,null,...] after JSON round-trip
+        const wasAttempted = attemptedAnswers[key] != null;
         const isCorrectAnswer = data.correct === true;
-        const checked = isLocked ? (wasAttempted && isCorrectAnswer) : wasAttempted;
+        const checked = wasAttempted;
+        // Only highlight the answer the user actually selected
         const showCorrectFeedback = isLocked && wasAttempted && isCorrectAnswer;
         const showWrongFeedback = isLocked && wasAttempted && !isCorrectAnswer;
         

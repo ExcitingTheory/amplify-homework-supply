@@ -239,11 +239,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
 
         console.log('verify response data:', data);
 
-        const mainData = JSON.parse(data) || {}
-
-        console.log('mainData', mainData);
-
-        const feedbackData = JSON.parse(mainData?.completion?.choices[0]?.message?.content) || {}
+        const feedbackData = JSON.parse(data) || {}
 
         console.log('feedbackData', feedbackData);
 
@@ -309,7 +305,8 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
         let x = 0;
 
         // Find the maximum value in the dataArray
-        const max = Math.max(...dataArray);
+        // Prevent division by zero when analyser returns silence (all zeros)
+        const max = Math.max(...dataArray) || 1;
 
         // Reflect the canvas horizontally
         canvasCtx.scale(-1, 1);
@@ -408,7 +405,8 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
             let x = 0;
 
             // Find the maximum value in the dataArray
-            const max = Math.max(...dataArray);
+            // Prevent division by zero when analyser returns silence (all zeros)
+            const max = Math.max(...dataArray) || 1;
 
             // Reflect the canvas horizontally
             canvasCtx.scale(-1, 1);

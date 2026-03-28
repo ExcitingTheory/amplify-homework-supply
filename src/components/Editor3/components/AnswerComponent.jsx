@@ -448,7 +448,7 @@ onClick={async () => {
 
                             setFeedback({
                                 ...feedback,
-                                [key]: JSON.stringify(data) || {},
+                                [key]: data,
                             });
                             // const progress = (correctCount / questions.length) * 100;
                             // setProgress(progress);
@@ -510,7 +510,7 @@ onClick={async () => {
                 gradeId={grade?.id}
                 nodeKey={`${nodeKey}-${wordId}`}
                 title={dictionary[wordId]?.phrase}
-                onRecordingComplete={(audioFile, uploadResult) => {
+                onRecordingComplete={async (audioFile, uploadResult) => {
                     const currentGradeData = grade?.data || {};
                     const audioNodeKey = `${nodeKey}-${wordId}`;
                     const updatedGradeData = {
@@ -523,6 +523,26 @@ onClick={async () => {
                         }
                     };
                     saveGrade(updatedGradeData);
+
+                    // Verify the recorded audio against expected word
+                    try {
+                        const client = getAmplifyClient();
+                        const audioUrl = audioFile?.path || uploadResult?.path;
+                        if (audioUrl) {
+                            const { data, errors } = await client.queries.verifyAudioUrl({
+                                expected: dictionary[wordId]?.phrase,
+                                audioUrl,
+                                model: 'whisper-1',
+                                chatModel: 'gpt-3.5-turbo',
+                            });
+                            if (!errors && data) {
+                                const feedbackData = JSON.parse(data);
+                                setFeedback(prev => ({ ...prev, [key]: feedbackData }));
+                            }
+                        }
+                    } catch (err) {
+                        console.error('[AnswerComponent] Audio verification error:', err);
+                    }
                 }}
             />
             </li>)

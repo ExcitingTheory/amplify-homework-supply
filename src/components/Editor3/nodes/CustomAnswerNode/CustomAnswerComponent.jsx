@@ -70,7 +70,8 @@ export default function CustomAnswerComponent({
     } = React.useContext(DictionaryContext);
 
     const gradeId = grade?.id;
-    const inProgress = grade?.data?.[nodeKey] || {};
+    const inProgress = grade?.data?.[nodeKey];
+    const completionSavedRef = useRef(false);
     
     // Load saved answers from progress data
     React.useEffect(() => {
@@ -131,13 +132,20 @@ export default function CustomAnswerComponent({
 
     }, []);
 
+    // Reset completion guard when exercise changes
+    React.useEffect(() => {
+        completionSavedRef.current = false;
+    }, [nodeKey]);
+
     // Track completion of this exercise
     React.useEffect(() => {
+        if (completionSavedRef.current) return;
         if (questionIDs && questionIDs.length > 0 && feedback) {
             // Check if all questions have been answered
             const allQuestionsAnswered = questionIDs.every(qid => feedback[qid] !== undefined);
             
             if (allQuestionsAnswered && !inProgress?.complete) {
+                completionSavedRef.current = true;
                 console.log('CustomAnswerComponent: All questions answered, marking complete');
                 // Get the first answer as user response (for single question exercises)
                 const firstQuestionId = questionIDs?.[0];
@@ -391,9 +399,7 @@ export default function CustomAnswerComponent({
 
                                         console.log('response', response)
 
-                                        const mainData = JSON.parse(response?.data?.verifyShortAnswer) || {}
-
-                                        const data = JSON.parse(mainData?.choices[0]?.message?.content) || {}
+                                        const data = JSON.parse(response?.data) || {}
                                        
                                         setFeedback({
                                             ...feedback,
@@ -428,7 +434,7 @@ export default function CustomAnswerComponent({
                                     gradeId={grade?.id}
                                     nodeKey={`custom-answer-${questionID}`}
                                     title={prompt || question?.prompt}
-                                    onRecordingComplete={(audioFile, uploadResult) => {
+                                    onRecordingComplete={async (audioFile, uploadResult) => {
                                         const currentGradeData = grade?.data || {};
                                         const audioNodeKey = `custom-answer-${questionID}`;
                                         const updatedGradeData = {
@@ -441,6 +447,26 @@ export default function CustomAnswerComponent({
                                             }
                                         };
                                         saveGrade(updatedGradeData);
+
+                                        // Verify the recorded audio
+                                        try {
+                                            const client = getAmplifyClient();
+                                            const audioUrl = audioFile?.path || uploadResult?.path;
+                                            if (audioUrl) {
+                                                const { data, errors } = await client.queries.verifyShortAnswer({
+                                                    answer: audioUrl,
+                                                    prompt: prompt,
+                                                    expected: answer,
+                                                    model: 'gpt-3.5-turbo',
+                                                });
+                                                if (!errors && data) {
+                                                    const feedbackData = JSON.parse(data);
+                                                    setFeedback(prev => ({ ...prev, [questionID]: feedbackData }));
+                                                }
+                                            }
+                                        } catch (err) {
+                                            console.error('[CustomAnswerComponent] Audio verification error:', err);
+                                        }
                                     }}
                                 />
                             </Box>

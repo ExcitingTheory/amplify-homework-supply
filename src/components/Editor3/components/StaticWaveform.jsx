@@ -91,14 +91,21 @@ export default function StaticWaveform({
                     range,
                     width,
                     height,
-                    note: range < 0.2 ? '⚠️ LOW VARIANCE (AGC/compression) - stretching for visibility' : '✅ Good variance'
+                    note: 'Always re-normalizing for full visual range'
                 });
                 
-                // Re-normalize if variance is too low (typical of browser microphone recordings with AGC)
-                // This stretches the visible waveform without changing the actual audio
+                // Re-normalize only when there is meaningful dynamic range.
+                // Browser microphone recordings with AGC often have narrow amplitude
+                // variance (e.g. range < 0.15). Re-normalising such data stretches
+                // near-uniform values to full height, making every bar look maxed out.
+                // For low-range data, scale relative to absolute max so the visual
+                // reflects actual amplitude rather than stretching noise to full height.
                 let displayData = normalizedData;
-                if (range < 0.2 && range > 0) {
+                if (range > 0.15) {
                     displayData = normalizedData.map(val => (val - minVal) / range);
+                } else if (maxVal > 0) {
+                    // Low dynamic range: use absolute scale so bars reflect true amplitude
+                    displayData = normalizedData.map(val => val / 1.0);
                 }
                 
                 for (let i = 0; i < displayData.length; i++) {

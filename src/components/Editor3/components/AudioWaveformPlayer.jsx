@@ -361,6 +361,7 @@ export default function AudioWaveformPlayer({
         }
         
         setPendingRecordingStart(false);
+        const setupRecording = async () => {
         const stream = mediaStreamRef.current;
         
         const recorder = new MediaRecorder(stream);
@@ -370,6 +371,11 @@ export default function AudioWaveformPlayer({
 
         // Setup real-time waveform visualization
         const audioContext = new AudioContext();
+        // Resume AudioContext - it may be suspended when created outside a user gesture
+        // Must await so the analyser produces real data before the draw loop starts
+        if (audioContext.state === 'suspended') {
+            await audioContext.resume();
+        }
         const source = audioContext.createMediaStreamSource(stream);
         const analyser = audioContext.createAnalyser();
         source.connect(analyser);
@@ -392,25 +398,35 @@ export default function AudioWaveformPlayer({
         recorder.addEventListener("stop", async () => {
             isRecording = false;
             audioContext.close();
-            const blob = new Blob(audioChunks, { type: 'audio/mp3' });
+            // Use the recorder's actual mimeType so decodeAudioData gets a valid container
+            const actualMimeType = recorder.mimeType || 'audio/webm';
+            const blob = new Blob(audioChunks, { type: actualMimeType });
             setAudioBlob(blob);
             
-            // Calculate waveform data for the recorded audio
+            // Calculate waveform data (non-blocking — failures don't prevent upload/grading)
+            let waveform = null;
             try {
-                const waveform = await calculateWaveformData(blob, width);
+                waveform = await calculateWaveformData(blob, width);
                 setRecordedWaveformData(waveform);
                 console.log('[AudioWaveformPlayer] Calculated waveform for recording');
-                
-                // Upload if gradeId and nodeKey are provided
-                if (gradeId && nodeKey) {
+            } catch (waveformError) {
+                console.warn('[AudioWaveformPlayer] Waveform calculation failed (continuing):', waveformError);
+            }
+            
+            let savedFile = null;
+            let uploadResult = null;
+            
+            // Upload if gradeId and nodeKey are provided
+            if (gradeId && nodeKey) {
+                try {
                     console.log('[AudioWaveformPlayer] Uploading recording...');
-                    const uploadResult = await uploadStudentSubmission({
+                    uploadResult = await uploadStudentSubmission({
                         file: blob,
                         gradeId: gradeId,
                         nodeKey: nodeKey,
                         fileType: 'mp3',
                         metadata: {
-                            waveformData: JSON.stringify(waveform),
+                            ...(waveform ? { waveformData: JSON.stringify(waveform) } : {}),
                             ...metadata
                         }
                     });
@@ -430,24 +446,29 @@ export default function AudioWaveformPlayer({
                         identityId,
                         name: uploadResult.filename,
                         size: blob.size,
-                        mimeType: 'audio/mp3',
+                        mimeType: actualMimeType,
                         level: 'PRIVATE',
-                        waveformData: JSON.stringify(waveform),
+                        ...(waveform ? { waveformData: JSON.stringify(waveform) } : {}),
                     });
                     
-                    if (fileErrors || !newFile) {
+                    if (fileErrors?.length > 0 || !newFile) {
                         console.error('[AudioWaveformPlayer] Error creating File record:', fileErrors);
-                        throw new Error(fileErrors?.[0]?.message || 'Failed to create File record');
+                    } else {
+                        savedFile = newFile;
+                        console.log('[AudioWaveformPlayer] Saved file metadata:', newFile);
                     }
-                    
-                    console.log('[AudioWaveformPlayer] Saved file metadata:', newFile);
-                    
-                    if (onRecordingComplete) {
-                        onRecordingComplete(newFile, uploadResult);
-                    }
+                } catch (uploadError) {
+                    console.error('[AudioWaveformPlayer] Upload/save error (continuing):', uploadError);
                 }
-            } catch (error) {
-                console.error('[AudioWaveformPlayer] Error processing recording:', error);
+            }
+            
+            // Always call onRecordingComplete
+            if (onRecordingComplete) {
+                const waveformJson = waveform ? JSON.stringify(waveform) : null;
+                onRecordingComplete(
+                    savedFile || { path: URL.createObjectURL(blob), ...(waveformJson ? { waveformData: waveformJson } : {}) },
+                    uploadResult
+                );
             }
         });
 
@@ -464,7 +485,8 @@ export default function AudioWaveformPlayer({
             let barHeight;
             let x = 0;
 
-            const max = Math.max(...dataArray);
+            // Prevent division by zero when analyser returns silence (all zeros)
+            const max = Math.max(...dataArray) || 1;
 
             canvasCtx.scale(-1, 1);
             canvasCtx.translate(-canvas.width, 0);
@@ -486,6 +508,8 @@ export default function AudioWaveformPlayer({
 
         console.log('[AudioWaveformPlayer] Starting real-time waveform visualization');
         draw();
+        };
+        setupRecording();
     }, [pendingRecordingStart, recording, width, _g, _b, gradeId, nodeKey, metadata, identityId, onRecordingComplete]);
 
     const stopRecording = useCallback(() => {

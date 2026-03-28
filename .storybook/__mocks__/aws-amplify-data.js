@@ -592,31 +592,19 @@ const mockClient = {
   queries: {
     verifyDefinition: async (input) => {
       console.log('[Mock Data] queries.verifyDefinition() called with:', input);
-      const mockResponse = JSON.stringify({
-        choices: [{ message: { content: JSON.stringify({ answer: true, reason: 'Mock verification: definition accepted' }) } }],
-      });
-      return { data: mockResponse, errors: null };
+      return { data: JSON.stringify({ answer: true, reason: 'Mock verification: definition accepted' }), errors: null };
     },
     verifyWord: async (input) => {
       console.log('[Mock Data] queries.verifyWord() called with:', input);
-      const mockResponse = JSON.stringify({
-        choices: [{ message: { content: JSON.stringify({ answer: true, reason: 'Mock verification: word accepted' }) } }],
-      });
-      return { data: mockResponse, errors: null };
+      return { data: JSON.stringify({ answer: true, reason: 'Mock verification: word accepted' }), errors: null };
     },
     verifyShortAnswer: async (input) => {
       console.log('[Mock Data] queries.verifyShortAnswer() called with:', input);
-      const mockResponse = JSON.stringify({
-        choices: [{ message: { content: JSON.stringify({ answer: true, reason: 'Mock verification: answer accepted' }) } }],
-      });
-      return { data: mockResponse, errors: null };
+      return { data: JSON.stringify({ answer: true, reason: 'Mock verification: answer accepted' }), errors: null };
     },
     verifyAudioUrl: async (input) => {
       console.log('[Mock Data] queries.verifyAudioUrl() called with:', input);
-      const mockResponse = JSON.stringify({
-        choices: [{ message: { content: JSON.stringify({ answer: true, reason: 'Mock verification: audio accepted' }) } }],
-      });
-      return { data: mockResponse, errors: null };
+      return { data: JSON.stringify({ answer: true, reason: 'Mock verification: audio accepted' }), errors: null };
     },
     verifyImage: async (input) => {
       console.log('[Mock Data] queries.verifyImage() called with:', input);

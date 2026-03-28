@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -85,9 +85,71 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
 }) => {
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0, offsetX: 0, offsetY: 0 });
+  const dragCurrentRef = useRef({ x: 0, y: 0 });
   const overlayRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
   const targetClickCleanupRef = useRef<(() => void) | null>(null);
   const currentStep = steps[currentStepIndex];
+
+  // Reset drag offset when step changes
+  useEffect(() => {
+    setDragOffset({ x: 0, y: 0 });
+    dragCurrentRef.current = { x: 0, y: 0 };
+    if (tooltipRef.current) {
+      tooltipRef.current.style.transform = '';
+    }
+  }, [currentStepIndex]);
+
+  // Drag handlers — direct DOM manipulation for performance
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isDraggingRef.current = true;
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      offsetX: dragCurrentRef.current.x,
+      offsetY: dragCurrentRef.current.y,
+    };
+    // Block iframe from stealing mousemove events during drag
+    const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
+    if (iframe) iframe.style.pointerEvents = 'none';
+  }, []);
+
+  useEffect(() => {
+    const handleDragMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current || !tooltipRef.current) return;
+      const dx = e.clientX - dragStartRef.current.x;
+      const dy = e.clientY - dragStartRef.current.y;
+      const newX = dragStartRef.current.offsetX + dx;
+      const newY = dragStartRef.current.offsetY + dy;
+      dragCurrentRef.current = { x: newX, y: newY };
+      // Direct DOM write — no React re-render
+      tooltipRef.current.style.transform = `translate(${newX}px, ${newY}px)`;
+    };
+
+    const handleDragEnd = () => {
+      if (!isDraggingRef.current) return;
+      isDraggingRef.current = false;
+      // Restore iframe pointer events
+      const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
+      if (iframe) iframe.style.pointerEvents = '';
+      // Commit final position to React state so it survives re-renders
+      setDragOffset({ ...dragCurrentRef.current });
+    };
+
+    window.addEventListener('mousemove', handleDragMove);
+    window.addEventListener('mouseup', handleDragEnd);
+    return () => {
+      window.removeEventListener('mousemove', handleDragMove);
+      window.removeEventListener('mouseup', handleDragEnd);
+      // Ensure iframe pointer events are restored on cleanup
+      const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
+      if (iframe) iframe.style.pointerEvents = '';
+    };
+  }, []);
 
   /**
    * Update target element position and size.
@@ -173,7 +235,8 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   };
 
   /**
-   * Calculate tooltip position based on target and preferred position
+   * Calculate tooltip position based on target and preferred position.
+   * Measures the actual tooltip element and tries multiple sides to avoid going off-screen.
    */
   const calculateTooltipPosition = () => {
     if (!targetRect) {
@@ -185,53 +248,62 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
       return;
     }
 
-    const tooltipPref = currentStep.tooltipPosition || 'right';
     const padding = 24; // Space between spotlight and tooltip
-    const tooltipWidth = 320;
-    const tooltipHeight = 200; // Approximate
+    const tooltipEl = tooltipRef.current;
+    const tooltipWidth = tooltipEl?.offsetWidth || 320;
+    const tooltipHeight = tooltipEl?.offsetHeight || 200;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
 
-    let top = 0;
-    let left = 0;
+    // Calculate position for each side
+    const positions: Record<string, { top: number; left: number }> = {
+      right: {
+        top: targetRect.top,
+        left: targetRect.right + padding,
+      },
+      left: {
+        top: targetRect.top,
+        left: targetRect.left - tooltipWidth - padding,
+      },
+      bottom: {
+        top: targetRect.bottom + padding,
+        left: targetRect.left,
+      },
+      top: {
+        top: targetRect.top - tooltipHeight - padding,
+        left: targetRect.left,
+      },
+    };
 
-    switch (tooltipPref) {
-      case 'right':
-        top = targetRect.top;
-        left = targetRect.right + padding;
-        // Adjust if goes off screen
-        if (left + tooltipWidth > window.innerWidth) {
-          left = targetRect.left - tooltipWidth - padding;
-        }
+    // Check if a position fits within the viewport
+    const fits = (pos: { top: number; left: number }) =>
+      pos.top >= 10 &&
+      pos.left >= 10 &&
+      pos.top + tooltipHeight <= vh - 10 &&
+      pos.left + tooltipWidth <= vw - 10;
+
+    // Preferred side order based on the step's tooltipPosition
+    const preferred = currentStep.tooltipPosition || 'right';
+    const sideOrder: string[] = {
+      right: ['right', 'left', 'bottom', 'top'],
+      left: ['left', 'right', 'bottom', 'top'],
+      bottom: ['bottom', 'top', 'right', 'left'],
+      top: ['top', 'bottom', 'right', 'left'],
+      center: ['right', 'bottom', 'left', 'top'],
+    }[preferred];
+
+    // Pick the first side that fits, or fall back to the preferred side
+    let chosen = positions[preferred];
+    for (const side of sideOrder) {
+      if (fits(positions[side])) {
+        chosen = positions[side];
         break;
-      case 'left':
-        top = targetRect.top;
-        left = targetRect.left - tooltipWidth - padding;
-        if (left < 0) {
-          left = targetRect.right + padding;
-        }
-        break;
-      case 'bottom':
-        top = targetRect.bottom + padding;
-        left = targetRect.left;
-        if (top + tooltipHeight > window.innerHeight) {
-          top = targetRect.top - tooltipHeight - padding;
-        }
-        break;
-      case 'top':
-        top = targetRect.top - tooltipHeight - padding;
-        left = targetRect.left;
-        if (top < 0) {
-          top = targetRect.bottom + padding;
-        }
-        break;
-      case 'center':
-        top = window.innerHeight / 2 - tooltipHeight / 2;
-        left = window.innerWidth / 2 - tooltipWidth / 2;
-        break;
+      }
     }
 
-    // Ensure tooltip stays in viewport
-    top = Math.max(10, Math.min(top, window.innerHeight - tooltipHeight - 10));
-    left = Math.max(10, Math.min(left, window.innerWidth - tooltipWidth - 10));
+    // Final clamp to ensure it stays in viewport even if no side fully fits
+    const top = Math.max(10, Math.min(chosen.top, vh - tooltipHeight - 10));
+    const left = Math.max(10, Math.min(chosen.left, vw - tooltipWidth - 10));
 
     setTooltipPosition({ top, left });
   };
@@ -440,10 +512,13 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
 
         {/* Tooltip/Coachmark */}
         <Card
+          ref={tooltipRef}
           sx={{
             position: 'absolute',
             top: tooltipPosition.top,
             left: tooltipPosition.left,
+            transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)`,
+            willChange: isDraggingRef.current ? 'transform' : 'auto',
             width: 320,
             maxWidth: 'calc(100vw - 20px)',
             maxHeight: 'calc(100vh - 20px)',
@@ -456,8 +531,19 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
           }}
         >
             <CardContent>
-              {/* Header */}
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+              {/* Header – drag handle */}
+              <Box
+                onMouseDown={handleDragStart}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  mb: 2,
+                  cursor: 'grab',
+                  '&:active': { cursor: 'grabbing' },
+                  userSelect: 'none',
+                }}
+              >
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="overline" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>
                     {mode === 'tutorial' ? '📖 Tutorial' : '🎯 Quiz'} • Step {currentStepIndex + 1} of {steps.length}
