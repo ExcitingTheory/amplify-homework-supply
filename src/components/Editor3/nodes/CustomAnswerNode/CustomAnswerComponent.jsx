@@ -72,6 +72,21 @@ export default function CustomAnswerComponent({
     const gradeId = grade?.id;
     const inProgress = grade?.data?.[nodeKey];
     const completionSavedRef = useRef(false);
+
+    // Reset local state when grade changes (e.g., new grade after unit completion)
+    const gradeIdRef = useRef(gradeId);
+    React.useEffect(() => {
+        if (gradeId && gradeId !== gradeIdRef.current) {
+            gradeIdRef.current = gradeId;
+            // Only reset if the new grade has no data for this exercise
+            if (!grade?.data?.[nodeKey]) {
+                setAnswers({});
+                setFeedback({});
+                setProgress(0);
+                completionSavedRef.current = false;
+            }
+        }
+    }, [gradeId, grade?.data, nodeKey]);
     
     // Load saved answers from progress data
     React.useEffect(() => {

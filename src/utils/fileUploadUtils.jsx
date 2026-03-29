@@ -196,7 +196,7 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
         
         const { data: newDocument, errors: documentErrors } = await amplifyClient.models.Document.create(documentData);
         
-        if (documentErrors || !newDocument) {
+        if ((documentErrors && documentErrors.length > 0) || !newDocument) {
             console.error('Error creating Document record:', documentErrors);
             throw new Error(documentErrors?.[0]?.message || 'Failed to create Document record');
         }
@@ -212,7 +212,7 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
     }
     const { data: newFile, errors: fileErrors } = await amplifyClient.models.File.create(fileData);
     
-    if (fileErrors || !newFile) {
+    if ((fileErrors && fileErrors.length > 0) || !newFile) {
         console.error('Error creating File record:', fileErrors);
         throw new Error(fileErrors?.[0]?.message || 'Failed to create File record');
     }
@@ -234,7 +234,7 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
             const amplifyClient = getAmplifyClient();
             const { data: unit, errors: unitErrors } = await amplifyClient.models.Unit.get({ id: unitId });
             
-            if (unitErrors || !unit) {
+            if ((unitErrors && unitErrors.length > 0) || !unit) {
                 console.warn(`Failed to fetch unit ${unitId}:`, unitErrors);
             } else if (unit.id) {
                 // Create the join table entry to link Document and Unit
@@ -243,7 +243,7 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
                     unitID: unit.id
                 });
                 
-                if (unitDocErrors || !unitDoc) {
+                if ((unitDocErrors && unitDocErrors.length > 0) || !unitDoc) {
                     console.warn('Error creating UnitDocument relationship:', unitDocErrors);
                 } else {
                     console.log('Linked Document to Unit:', unit.id);

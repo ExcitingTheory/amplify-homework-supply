@@ -181,6 +181,20 @@ export default function AnswerComponent({
         saveGrade
     } = React.useContext(UnitContext);
 
+    // Reset local state when grade changes (e.g., new grade after unit completion)
+    const gradeIdRef = useRef(grade?.id);
+    React.useEffect(() => {
+        if (grade?.id && grade.id !== gradeIdRef.current) {
+            gradeIdRef.current = grade.id;
+            // Only reset if the new grade has no data for this exercise
+            if (!grade?.data?.[nodeKey]) {
+                setAnswers({});
+                setFeedback({});
+                setProgress(0);
+            }
+        }
+    }, [grade?.id, grade?.data, nodeKey]);
+
     console.log('AnswerComponent   ', wordIDs, dictionary)
 
     let thisPrompt = customPrompt ? customPrompt : 'Provide words that best match the following definition(s):'

@@ -207,7 +207,7 @@ export const EditableEmpty = {
   render: () => <EditableTemplate editorState={null} showInsertButton={true} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('@storybook/test');
+    const { expect } = await import('storybook/test');
     
     // Wait for insert button
     await waitFor(() => {
@@ -221,7 +221,7 @@ export const EditableWithWordBlock = {
   render: () => <EditableTemplate editorState={sampleWordBlockState} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('@storybook/test');
+    const { expect } = await import('storybook/test');
     
     // Wait for word block to render
     await waitFor(() => {
@@ -237,7 +237,7 @@ export const ReadOnlyWithWordBlock = {
   render: () => <ReadOnlyTemplate editorState={sampleWordBlockState} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('@storybook/test');
+    const { expect } = await import('storybook/test');
     
     // Wait for word block in read-only mode
     await waitFor(() => {

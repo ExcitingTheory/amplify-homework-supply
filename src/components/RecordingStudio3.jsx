@@ -455,7 +455,7 @@ export default function RecordingStudio3({
         model: 'tts-1-hd',
       });
       
-      if (errors || !fileData?.path) {
+      if ((errors && errors.length > 0) || !fileData?.path) {
         throw new Error('Failed to generate audio file');
       }
       

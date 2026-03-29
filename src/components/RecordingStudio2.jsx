@@ -93,9 +93,12 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
   const [mediaRecorder, setMediaRecorder] = React.useState(null);
   const [audioBlob, setAudioBlob] = React.useState(null);
   const [waveformData, setWaveformData] = React.useState(null);
+  const [error, setError] = React.useState(null);
   // const [objectUrl, setObjectUrl] = React.useState(null);
   const audioRef = React.useRef(null);
   const [isPlaying, setIsPlaying] = React.useState(false);
+  // Track stream for cleanup
+  const streamRef = React.useRef(null);
 
 
   const { audioFiles } = React.useContext(FilesContext);
@@ -146,51 +149,31 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
   console.log('audioFile', audioFile);
 
   React.useEffect(() => {
+    let cancelled = false;
     async function uploadSignAndVerifyAudio() {
-      if (audioBlob) {
-        console.log('audioBlob', audioBlob);
-
-        console.log('grade', grade);
-
-        let gradeID = null;
-
-        if(!grade) {
-          const _updatedGrade = await createGrade()
-          console.log('updatedGrade', _updatedGrade);
+      if (!audioBlob) return;
+      setError(null);
+      try {
+        let gradeID = grade ? grade.id : null;
+        if (!grade) {
+          const _updatedGrade = await createGrade();
           gradeID = _updatedGrade.id;
-        } else {
-          gradeID = grade.id;
         }
-
-        // Use the new user submission storage with private access
         const nodeKey = qk || 'unknown';
-        
-        console.log('[RecordingStudio2] Uploading student submission...');
-        
-        // Calculate waveform data before upload
         const waveformData = await calculateWaveformData(audioBlob, 600);
-        
-        // Upload to private user-submissions storage
         const uploadResult = await uploadStudentSubmission({
           file: audioBlob,
           gradeId: gradeID,
-          nodeKey: nodeKey,
+          nodeKey,
           fileType: 'mp3',
           metadata: {
             waveformData: JSON.stringify(waveformData),
             phrase: phrase || '',
             definition: definition || '',
-          }
+          },
         });
-        
-        console.log('[RecordingStudio2] Upload successful:', uploadResult);
-        
-        // Save file metadata using Gen2 client
         const client = getAmplifyClient();
-        
-        // Get current user for owner field
         const { username: owner } = await getCurrentUser();
-        
         const { data: newFile, errors: fileErrors } = await client.models.File.create({
           path: uploadResult.path,
           owner,
@@ -201,15 +184,10 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
           level: 'PRIVATE',
           waveformData: JSON.stringify(waveformData),
         });
-        
-        if (fileErrors || !newFile) {
-          console.error('[RecordingStudio2] Error creating File record:', fileErrors);
-          throw new Error(fileErrors?.[0]?.message || 'Failed to create File record');
+        if ((fileErrors && fileErrors.length > 0) || !newFile) {
+          setError(fileErrors?.[0]?.message || 'Failed to create File record');
+          return;
         }
-        
-        console.log('[RecordingStudio2] Saved file metadata:', newFile);
-        
-        // Update grade with file reference and identityId
         if (grade && grade.id) {
           const existingFiles = grade.files || [];
           await client.models.Grade.update({
@@ -217,40 +195,28 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
             files: [...existingFiles, uploadResult.path],
             identityId: grade.identityId || identityId,
           });
-          console.log('[RecordingStudio2] Added file to grade.files[]:', uploadResult.path);
         }
-        
-        // For verification, students can access their own private files directly
-        // Teachers will use the getStudentSubmissionUrl GraphQL query
         const url = await getCachedUrl(uploadResult.path, 'private', identityId);
-
-        // verify the audio file
         const { data, errors } = await client.queries.verifyAudioUrl({
-          expected: requestDefinition? definition : phrase,
+          expected: requestDefinition ? definition : phrase,
           audioUrl: url,
           model: 'whisper-1',
           chatModel: 'gpt-3.5-turbo',
         });
-
-        if (errors) {
-          console.error('Error verifying audio:', errors);
+        if (errors && errors.length > 0) {
+          setError(errors[0]?.message || 'Audio verification failed');
           return;
         }
-
-        console.log('verify response data:', data);
-
-        const feedbackData = JSON.parse(data) || {}
-
-        console.log('feedbackData', feedbackData);
-
+        if (!cancelled) {
+          const feedbackData = JSON.parse(data) || {};
           setFeedback(feedbackData);
-
+        }
+      } catch (err) {
+        setError(err?.message || 'Audio upload/verification failed');
       }
-
-      return null;
     }
-
     uploadSignAndVerifyAudio();
+    return () => { cancelled = true; };
   }, [audioBlob]);
 
   // let mediaRecorder = null;
@@ -348,100 +314,87 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
   };
 
   const startRecording = async () => {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then((stream) => {
-        const mediaRecorder = new MediaRecorder(stream);
-        setMediaRecorder(mediaRecorder);
-        mediaRecorder.start();
-        setRecording(true);
-        const audioChunks = [];
-
-
-        const audioContext = new AudioContext()
-        const source = audioContext.createMediaStreamSource(stream)
-        const analyser = audioContext.createAnalyser()
-        source.connect(analyser)
-        
-        analyser.fftSize = 2048;
-        analyser.smoothingTimeConstant = 0.8;
-    
-        const canvas = canvasRef.current;
-        // const timeline = timelineRef.current;
-        const canvasCtx = canvas.getContext('2d');
-
-
-        const bufferLength = analyser.frequencyBinCount
-        const dataArray = new Uint8Array(bufferLength)
-
-
-        mediaRecorder.addEventListener("dataavailable", (event) => {
-          audioChunks.push(event.data);
-        });
-        
-        mediaRecorder.addEventListener("stop", async () => {
+    if (recording || mediaRecorder) return;
+    setError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mediaRecorderInstance = new MediaRecorder(stream);
+      setMediaRecorder(mediaRecorderInstance);
+      setRecording(true);
+      const audioChunks = [];
+      const audioContext = new AudioContext();
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      source.connect(analyser);
+      analyser.fftSize = 2048;
+      analyser.smoothingTimeConstant = 0.8;
+      const canvas = canvasRef.current;
+      const canvasCtx = canvas.getContext('2d');
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      let stopped = false;
+      mediaRecorderInstance.addEventListener('dataavailable', (event) => {
+        audioChunks.push(event.data);
+      });
+      mediaRecorderInstance.addEventListener('stop', async () => {
+        if (stopped) return;
+        stopped = true;
+        try {
           const _audioBlob = new Blob(audioChunks);
           setAudioBlob(_audioBlob);
-          
-          // Calculate waveform data for the recorded audio
-          try {
-            const waveform = await calculateWaveformData(_audioBlob, 600);
-            setWaveformData(waveform);
-            console.log('Calculated waveform for recording:', waveform);
-          } catch (error) {
-            console.error('Error calculating waveform:', error);
-          }
-        });
-
-        const draw = () => {
-            requestAnimationFrame(draw);
-
-            analyser.getByteFrequencyData(dataArray);
-            // TODO make this white or black depending on if its light or dark mode
-            canvasCtx.fillStyle = 'rgb(255, 255, 255)';
-            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-
-            const barWidth = (canvas.width / bufferLength) * 2.5;
-            let barHeight;
-            let x = 0;
-
-            // Find the maximum value in the dataArray
-            // Prevent division by zero when analyser returns silence (all zeros)
-            const max = Math.max(...dataArray) || 1;
-
-            // Reflect the canvas horizontally
-            canvasCtx.scale(-1, 1);
-            canvasCtx.translate(-canvas.width, 0);
-
-            for (let i = 0; i < bufferLength; i++) {
-                barHeight = (dataArray[i] / max) * canvas.height / 2;
-
-                canvasCtx.fillStyle = `rgb(${barHeight + 100},${_g},${_b})`;
-                canvasCtx.fillRect(canvas.width - (x + barWidth / 2), canvas.height / 2 - (barHeight / 2), barWidth, barHeight);
-
-                x += barWidth + 1;
-            }
-
-            // Reset the canvas transformation
-            canvasCtx.setTransform(1, 0, 0, 1, 0, 0);
-        };
-
-        draw();
-
+          const waveform = await calculateWaveformData(_audioBlob, 600);
+          setWaveformData(waveform);
+        } catch (error) {
+          setError('Error calculating waveform: ' + (error?.message || error));
+        }
+        // Clean up audio context
+        audioContext.close();
       });
+      const draw = () => {
+        if (!recording) return;
+        requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(dataArray);
+        canvasCtx.fillStyle = 'rgb(255, 255, 255)';
+        canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+        const barWidth = (canvas.width / bufferLength) * 2.5;
+        let barHeight;
+        let x = 0;
+        const max = Math.max(...dataArray) || 1;
+        canvasCtx.save();
+        canvasCtx.scale(-1, 1);
+        canvasCtx.translate(-canvas.width, 0);
+        for (let i = 0; i < bufferLength; i++) {
+          barHeight = (dataArray[i] / max) * canvas.height / 2;
+          canvasCtx.fillStyle = `rgb(${barHeight + 100},${_g},${_b})`;
+          canvasCtx.fillRect(canvas.width - (x + barWidth / 2), canvas.height / 2 - (barHeight / 2), barWidth, barHeight);
+          x += barWidth + 1;
+        }
+        canvasCtx.restore();
+      };
+      draw();
+      mediaRecorderInstance.start();
+    } catch (err) {
+      setError('Microphone access or recording failed: ' + (err?.message || err));
+      setRecording(false);
+      setMediaRecorder(null);
+    }
   };
 
   const stopRecording = () => {
-    // mediaRecorder.stop();
-    // setRecording(false);
-    mediaRecorder.stop();
-    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+    if (!mediaRecorder) return;
+    try {
+      mediaRecorder.stop();
+    } catch (err) {
+      setError('Failed to stop recording: ' + (err?.message || err));
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
     setIsPlaying(false);
     setRecording(false);
-    // setAudioBlob(null);
-    // setChunks([]);
     setMediaRecorder(null);
-
-
   };
 
   const doNothing = (e) => {
@@ -449,132 +402,122 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
     e.stopPropagation();
   };
 
+  React.useEffect(() => {
+    // Cleanup on unmount
+    return () => {
+      if (mediaRecorder) {
+        try { mediaRecorder.stop(); } catch {}
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+    };
+    // eslint-disable-next-line
+  }, []);
+
   return (
     <>
-    <Box>
-      {audioFile &&
-        <>
-          <audio
-            controls={false}
-            ref={audioRef}
-            onEnded={handleEnded}
-          >
-            <source src={audioFile} />
-          </audio>
-          {!isPlaying && <PlayIcon
-            color="primary"
-
-            sx={{
-              position: 'relative',
-              top: '0.2rem',
-              cursor: 'pointer',
-            }}
-            onClick={handlePlay} />}
-          {isPlaying && <PauseIcon
-            color="primary"
-            sx={{
-              position: 'relative',
-              top: '0.2rem',
-              cursor: 'pointer',
-            }}
-            onClick={handlePause} />}
-
-        </>}
-      {!recording &&
-        <RecordIcon
-          color="primary"
-          onClick={startRecording} sx={{
-            position: 'relative',
-            top: '0.2rem',
-            cursor: 'pointer',
-          }} />}
-      {recording &&
-        <StopIcon onClick={stopRecording}
-          color="error"
-          sx={{
-            position: 'relative',
-            top: '0.2rem',
-            cursor: 'pointer',
-          }} />}
-      {/**
-       * Add a waveform for the audio as it is being recorded
-       * 
-      */}
-        
-      {audioBlob &&
-        <>
-          <audio
-            controls={false}
-            ref={audioRef}
-            onEnded={handleEnded}
-          >
-            <source src={URL.createObjectURL(audioBlob)} />
-
-          </audio>
-          {!isPlaying && <PlayIcon
-            color="primary"
-            sx={{
-              position: 'relative',
-              top: '0.2rem',
-              cursor: 'pointer',
-            }}
-            onClick={handlePlay} />}
-          {isPlaying && <PauseIcon
-            color="primary"
-            sx={{
-              position: 'relative',
-              top: '0.2rem',
-              cursor: 'pointer',
-            }}
-            onClick={handlePause} />}
-        </>}
-    </Box>
-    <canvas
-    ref={canvasRef}
-    id="waveform"
-    style={{
-      // width: '80%',
-      // height: '5rem',
-      backgroundColor: 'white',
-    }}/>
-    
-    {/* Display all existing audio recordings */}
-    {Object.keys(audioFiles).length > 0 && (
-      <Box sx={{ mt: 3 }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>{t('components:recordingStudio2.existingRecordings')}</Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {Object.values(audioFiles).map((file, index) => (
-            <AudioRecordingCard 
-              key={file.id || index}
-              file={file}
-              index={index}
-              identityId={identityId}
-            />
-          ))}
+      {error && (
+        <Box sx={{ mb: 2 }}>
+          <Typography color="error">{error}</Typography>
         </Box>
+      )}
+      <Box>
+        {audioFile && (
+          <>
+            <audio
+              controls={false}
+              ref={audioRef}
+              onEnded={handleEnded}
+            >
+              <source src={audioFile} />
+            </audio>
+            {!isPlaying && <PlayIcon
+              color="primary"
+              sx={{ position: 'relative', top: '0.2rem', cursor: 'pointer' }}
+              onClick={handlePlay} />}
+            {isPlaying && <PauseIcon
+              color="primary"
+              sx={{ position: 'relative', top: '0.2rem', cursor: 'pointer' }}
+              onClick={handlePause} />}
+          </>
+        )}
+        {!recording && (
+          <RecordIcon
+            color="primary"
+            onClick={startRecording}
+            sx={{ position: 'relative', top: '0.2rem', cursor: 'pointer' }}
+          />
+        )}
+        {recording && (
+          <StopIcon
+            onClick={stopRecording}
+            color="error"
+            sx={{ position: 'relative', top: '0.2rem', cursor: 'pointer' }}
+          />
+        )}
+        {audioBlob && (
+          <>
+            <audio
+              controls={false}
+              ref={audioRef}
+              onEnded={handleEnded}
+            >
+              <source src={URL.createObjectURL(audioBlob)} />
+            </audio>
+            {!isPlaying && <PlayIcon
+              color="primary"
+              sx={{ position: 'relative', top: '0.2rem', cursor: 'pointer' }}
+              onClick={handlePlay} />}
+            {isPlaying && <PauseIcon
+              color="primary"
+              sx={{ position: 'relative', top: '0.2rem', cursor: 'pointer' }}
+              onClick={handlePause} />}
+          </>
+        )}
       </Box>
-    )}
-    
-    {audioFile && (
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="caption" color="text.secondary">{t('components:recordingStudio2.staticWaveformPreview')}</Typography>
-        <StaticWaveform 
-          file={audioFile} 
-          width={600} 
-          height={80}
-        />
-      </Box>
-    )}
-    {waveformData && audioBlob && (
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="caption" color="text.secondary">{t('components:recordingStudio2.recordedAudioWaveform')}</Typography>
-        <StaticWaveform 
-          waveformData={waveformData} 
-          width={600} 
-          height={80}
-        />
-      </Box>
-    )}
+      <canvas
+        ref={canvasRef}
+        id="waveform"
+        style={{ backgroundColor: 'white' }}
+      />
+      {/* Display all existing audio recordings */}
+      {Object.keys(audioFiles).length > 0 && (
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>{t('components:recordingStudio2.existingRecordings')}</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {Object.values(audioFiles).map((file, index) => (
+              <AudioRecordingCard
+                key={file.id || index}
+                file={file}
+                index={index}
+                identityId={identityId}
+              />
+            ))}
+          </Box>
+        </Box>
+      )}
+      {audioFile && (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="caption" color="text.secondary">{t('components:recordingStudio2.staticWaveformPreview')}</Typography>
+          <StaticWaveform
+            file={audioFile}
+            width={600}
+            height={80}
+          />
+        </Box>
+      )}
+      {waveformData && audioBlob && (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="caption" color="text.secondary">{t('components:recordingStudio2.recordedAudioWaveform')}</Typography>
+          <StaticWaveform
+            waveformData={waveformData}
+            width={600}
+            height={80}
+          />
+        </Box>
+      )}
     </>
   );
 }

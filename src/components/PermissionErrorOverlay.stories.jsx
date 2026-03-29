@@ -1,7 +1,7 @@
 import React from 'react';
 import PermissionErrorOverlay from './PermissionErrorOverlay';
 import { I18nextProvider } from 'react-i18next';
-import i18n from '../../.storybook/__mocks__/i18next';
+import i18n from '../../.storybook/i18next';
 
 export default {
   title: 'Components/PermissionErrorOverlay',

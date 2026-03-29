@@ -287,7 +287,7 @@ export const EditableEmpty = {
   render: () => <EditableTemplate editorState={null} showInsertButton={true} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('@storybook/test');
+    const { expect } = await import('storybook/test');
     
     // Wait for insert button
     await waitFor(() => {
@@ -301,7 +301,7 @@ export const EditableWithExercise = {
   render: () => <EditableTemplate editorState={sampleMeaningAssociationState} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('@storybook/test');
+    const { expect } = await import('storybook/test');
     
     // Wait for meaning association exercise to render
     await waitFor(() => {
@@ -317,7 +317,7 @@ export const ReadOnlyWithExercise = {
   render: () => <ReadOnlyTemplate editorState={sampleMeaningAssociationState} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('@storybook/test');
+    const { expect } = await import('storybook/test');
     
     // Wait for read-only meaning association
     await waitFor(() => {

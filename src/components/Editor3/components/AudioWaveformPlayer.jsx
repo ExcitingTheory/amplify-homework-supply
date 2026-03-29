@@ -111,16 +111,63 @@ export default function AudioWaveformPlayer({
         }
     }, [audioBlob]);
 
+    // Local audio element for recording playback (bypasses shared context)
+    const localAudioRef = useRef(null);
+    const [localIsPlaying, setLocalIsPlaying] = useState(false);
+
+    useEffect(() => {
+        if (!recordedBlobUrl) {
+            localAudioRef.current = null;
+            return;
+        }
+        const audio = new Audio(recordedBlobUrl);
+        localAudioRef.current = audio;
+
+        const onMeta = () => {
+            const dur = audio.duration;
+            if (!isNaN(dur) && isFinite(dur)) {
+                setLocalDuration(dur);
+                setIsReady(true);
+            }
+        };
+        const onEnded = () => {
+            setLocalIsPlaying(false);
+            setLocalTime(0);
+            setLocalProgress(0);
+            currentTimeRef.current = 0;
+            displayTimeRef.current = 0;
+        };
+        const onPlay = () => setLocalIsPlaying(true);
+        const onPause = () => setLocalIsPlaying(false);
+
+        audio.addEventListener('loadedmetadata', onMeta);
+        audio.addEventListener('ended', onEnded);
+        audio.addEventListener('play', onPlay);
+        audio.addEventListener('pause', onPause);
+
+        return () => {
+            audio.removeEventListener('loadedmetadata', onMeta);
+            audio.removeEventListener('ended', onEnded);
+            audio.removeEventListener('play', onPlay);
+            audio.removeEventListener('pause', onPause);
+            audio.pause();
+            audio.src = '';
+            localAudioRef.current = null;
+            setLocalIsPlaying(false);
+        };
+    }, [recordedBlobUrl]);
+
     // Use audioUrl if provided, otherwise use blob URL, otherwise use recorded blob URL
     const sourceUrl = audioUrl || blobUrl || recordedBlobUrl;
+    const useLocalAudio = !!recordedBlobUrl;
 
     // Check if this player is currently active
-    const isActive = audioPlayer.currentSource === sourceUrl;
-    const isPlaying = isActive && audioPlayer.isPlaying;
+    const isActive = useLocalAudio ? !!localAudioRef.current : audioPlayer.currentSource === sourceUrl;
+    const isPlaying = useLocalAudio ? localIsPlaying : (isActive && audioPlayer.isPlaying);
 
-    // Subscribe to audio player events
+    // Subscribe to shared audio player events (only for non-recording sources)
     useEffect(() => {
-        if (!sourceUrl) return;
+        if (!sourceUrl || useLocalAudio) return;
 
         const listener = {
             onTimeUpdate: (time) => {
@@ -154,7 +201,7 @@ export default function AudioWaveformPlayer({
         };
 
         return audioPlayer.subscribe(listener);
-    }, [sourceUrl, isActive, audioPlayer, isSeeking]);
+    }, [sourceUrl, isActive, useLocalAudio, audioPlayer, isSeeking]);
 
     // Continuous animation loop for smooth progress updates
     useEffect(() => {
@@ -164,8 +211,8 @@ export default function AudioWaveformPlayer({
         }
 
         // Initialize displayTime to current audio position when playback starts
-        // Read directly from the audio element for the most accurate current time
-        const audioElement = audioPlayer.audioElement;
+        // Use local audio element for recordings, shared element otherwise
+        const audioElement = useLocalAudio ? localAudioRef.current : audioPlayer.audioElement;
         const initialTime = audioElement ? audioElement.currentTime : (audioPlayer.currentTime || 0);
         displayTimeRef.current = initialTime;
         currentTimeRef.current = initialTime;
@@ -215,28 +262,40 @@ export default function AudioWaveformPlayer({
                 cancelAnimationFrame(rafId);
             }
         };
-    }, [isActive, isPlaying, isSeeking, localDuration]);
+    }, [isActive, isPlaying, isSeeking, localDuration, useLocalAudio]);
 
-    // Load source when component mounts or URL changes
+    // Load source into shared audio context (only for non-recording sources)
     useEffect(() => {
+        if (useLocalAudio) return; // Recording uses its own Audio element
         if (sourceUrl && loadedSourceRef.current !== sourceUrl) {
+            loadedSourceRef.current = sourceUrl;
             setIsReady(false);
             audioPlayer.loadSource(sourceUrl);
-            loadedSourceRef.current = sourceUrl;
         }
-    }, [sourceUrl, audioPlayer]);
+    }, [sourceUrl, useLocalAudio, audioPlayer]);
 
     const togglePlayPause = useCallback(async () => {
-        if (!sourceUrl || !isReady) {
+        // Use local audio for recording playback
+        if (useLocalAudio && localAudioRef.current) {
+            if (localIsPlaying) {
+                localAudioRef.current.pause();
+            } else {
+                try {
+                    await localAudioRef.current.play();
+                } catch (err) {
+                    console.error('[AudioWaveformPlayer] Error playing recording:', err);
+                }
+            }
             return;
         }
 
+        if (!sourceUrl) return;
         if (isPlaying) {
             audioPlayer.pause();
         } else {
             await audioPlayer.play(sourceUrl);
         }
-    }, [sourceUrl, isReady, isPlaying, audioPlayer]);
+    }, [sourceUrl, isPlaying, localIsPlaying, useLocalAudio, audioPlayer]);
 
     const handleSliderChange = useCallback((event, newValue) => {
         // Mark that we're seeking to prevent animation loop from updating
@@ -261,7 +320,11 @@ export default function AudioWaveformPlayer({
         }
 
         const newTime = (newValue / 100) * localDuration;
-        audioPlayer.seek(newTime);
+        if (useLocalAudio && localAudioRef.current) {
+            localAudioRef.current.currentTime = newTime;
+        } else {
+            audioPlayer.seek(newTime);
+        }
         setLocalProgress(newValue);
         // Update refs so animation continues from new position
         currentTimeRef.current = newTime;
@@ -361,7 +424,6 @@ export default function AudioWaveformPlayer({
         }
         
         setPendingRecordingStart(false);
-        const setupRecording = async () => {
         const stream = mediaStreamRef.current;
         
         const recorder = new MediaRecorder(stream);
@@ -371,11 +433,6 @@ export default function AudioWaveformPlayer({
 
         // Setup real-time waveform visualization
         const audioContext = new AudioContext();
-        // Resume AudioContext - it may be suspended when created outside a user gesture
-        // Must await so the analyser produces real data before the draw loop starts
-        if (audioContext.state === 'suspended') {
-            await audioContext.resume();
-        }
         const source = audioContext.createMediaStreamSource(stream);
         const analyser = audioContext.createAnalyser();
         source.connect(analyser);
@@ -403,7 +460,7 @@ export default function AudioWaveformPlayer({
             const blob = new Blob(audioChunks, { type: actualMimeType });
             setAudioBlob(blob);
             
-            // Calculate waveform data (non-blocking — failures don't prevent upload/grading)
+            // Calculate waveform data (non-blocking — failures don't prevent upload/callback)
             let waveform = null;
             try {
                 waveform = await calculateWaveformData(blob, width);
@@ -462,7 +519,7 @@ export default function AudioWaveformPlayer({
                 }
             }
             
-            // Always call onRecordingComplete
+            // Always call onRecordingComplete so the story/UI gets feedback
             if (onRecordingComplete) {
                 const waveformJson = waveform ? JSON.stringify(waveform) : null;
                 onRecordingComplete(
@@ -508,8 +565,6 @@ export default function AudioWaveformPlayer({
 
         console.log('[AudioWaveformPlayer] Starting real-time waveform visualization');
         draw();
-        };
-        setupRecording();
     }, [pendingRecordingStart, recording, width, _g, _b, gradeId, nodeKey, metadata, identityId, onRecordingComplete]);
 
     const stopRecording = useCallback(() => {

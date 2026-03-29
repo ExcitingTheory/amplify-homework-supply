@@ -276,7 +276,7 @@ export const AudioOnlyQuestion = {
   render: () => <ReadOnlyTemplate editorState={audioQuestionState} questionIDs={['audio-q1', 'audio-q2']} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('@storybook/test');
+    const { expect } = await import('storybook/test');
     
     // Wait for audio question to render
     await waitFor(() => {
@@ -300,7 +300,7 @@ export const DrawingOnlyQuestion = {
   render: () => <ReadOnlyTemplate editorState={drawingQuestionState} questionIDs={['drawing-q1', 'drawing-q2']} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('@storybook/test');
+    const { expect } = await import('storybook/test');
     
     // Wait for drawing question to render
     await waitFor(() => {
@@ -324,7 +324,7 @@ export const MultiModalQuestion = {
   render: () => <ReadOnlyTemplate editorState={multiModalQuestionState} questionIDs={['multi-q1']} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('@storybook/test');
+    const { expect } = await import('storybook/test');
     
     // Wait for multi-modal question to render
     await waitFor(() => {
@@ -650,7 +650,7 @@ export const AnsweredAudioQuestion = {
   />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('@storybook/test');
+    const { expect } = await import('storybook/test');
     
     // Wait for answered audio question to render
     await waitFor(() => {
@@ -678,7 +678,7 @@ export const AnsweredDrawingQuestion = {
   />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const { expect } = await import('@storybook/test');
+    const { expect } = await import('storybook/test');
     
     // Wait for answered drawing question to render
     await waitFor(() => {

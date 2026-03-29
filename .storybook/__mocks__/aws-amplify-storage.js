@@ -1,6 +1,22 @@
 /**
  * Mock aws-amplify/storage for Storybook
+ * 
+ * Supports real recording round-trips: uploaded Blobs are converted to base64
+ * data URIs and stored in memory so getUrl can return playable audio/image URLs.
  */
+
+// In-memory store for uploaded blob data URLs (keyed by storage path)
+const uploadedBlobUrls = new Map();
+
+/** Convert a Blob to a base64 data URI */
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
 
 // Create a simple mock PDF blob URL
 const createMockPdfUrl = () => {
@@ -71,6 +87,11 @@ startxref
 export const getUrl = async ({ key, options = {} }) => {
   console.log('Mock getUrl called with:', key);
   
+  // Check in-memory uploaded blobs first (supports real recording round-trips)
+  if (uploadedBlobUrls.has(key)) {
+    return { url: { href: uploadedBlobUrls.get(key) } };
+  }
+  
   // If key is a data URL, return it as-is
   if (key?.startsWith('data:')) {
     return { url: { href: key } };
@@ -91,11 +112,22 @@ export const uploadData = ({ key, path, data, options = {} }) => {
   // Simulate the upload process (Gen 2 uses path, Gen 1 uses key)
   const mockPath = path || key || `mock-path-${Date.now()}`;
   
+  // If data is a Blob, convert to base64 data URL and store for later retrieval
+  const resultPromise = (async () => {
+    if (data instanceof Blob) {
+      try {
+        const dataUrl = await blobToDataUrl(data);
+        uploadedBlobUrls.set(mockPath, dataUrl);
+        console.log('[Mock Storage] Stored blob as data URL for path:', mockPath, `(${data.size} bytes, ${data.type})`);
+      } catch (err) {
+        console.warn('[Mock Storage] Failed to convert blob to data URL:', err);
+      }
+    }
+    return { key: mockPath, path: mockPath };
+  })();
+  
   return {
-    result: Promise.resolve({ 
-      key: mockPath,
-      path: mockPath
-    }),
+    result: resultPromise,
     state: 'SUCCESS',
     cancel: () => console.log('[Mock Storage] Upload cancelled')
   };
