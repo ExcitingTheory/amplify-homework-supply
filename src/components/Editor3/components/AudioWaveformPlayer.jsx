@@ -40,7 +40,7 @@ export default function AudioWaveformPlayer({
     file,
     waveformData,
     width = 600,
-    height = 80,
+    height = 100,
     title,
     showDuration = true,
     enableRecording = false,
@@ -210,44 +210,22 @@ export default function AudioWaveformPlayer({
             return;
         }
 
-        // Initialize displayTime to current audio position when playback starts
-        // Use local audio element for recordings, shared element otherwise
         const audioElement = useLocalAudio ? localAudioRef.current : audioPlayer.audioElement;
-        const initialTime = audioElement ? audioElement.currentTime : (audioPlayer.currentTime || 0);
+        const initialTime = audioElement ? audioElement.currentTime : 0;
         displayTimeRef.current = initialTime;
         currentTimeRef.current = initialTime;
         
         console.log('[AudioWaveformPlayer] Starting animation from time:', initialTime, 'duration:', localDuration);
         
-        // Reset frame time when starting animation
         lastFrameTimeRef.current = performance.now();
         
         let rafId;
-        const updateProgress = (timestamp) => {
-            const deltaTime = (timestamp - lastFrameTimeRef.current) / 1000; // Convert to seconds
-            lastFrameTimeRef.current = timestamp;
+        const updateProgress = () => {
+            // Read directly from the audio element for accurate position
+            const time = audioElement ? audioElement.currentTime : displayTimeRef.current;
+            displayTimeRef.current = time;
+            currentTimeRef.current = time;
             
-            // Clamp deltaTime to prevent huge jumps (e.g., when tab is backgrounded)
-            const clampedDelta = Math.min(deltaTime, 0.1);
-            
-            // Predict next position based on playback (assuming 1x speed)
-            displayTimeRef.current += clampedDelta;
-            
-            // Update currentTimeRef from audio element periodically
-            if (audioElement) {
-                currentTimeRef.current = audioElement.currentTime;
-            }
-            
-            // Check for large jumps (seeks) and snap immediately
-            const targetTime = currentTimeRef.current;
-            const drift = targetTime - displayTimeRef.current;
-            
-            if (Math.abs(drift) > 0.5) {
-                // Large difference - snap to correct position (likely a seek)
-                displayTimeRef.current = targetTime;
-            }
-            
-            const time = displayTimeRef.current;
             setLocalTime(time);
             const newProgress = Math.min((time / localDuration) * 100, 100);
             setLocalProgress(newProgress);
@@ -372,8 +350,10 @@ export default function AudioWaveformPlayer({
             canvasCtx.fillStyle = 'rgb(255, 255, 255)';
             canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
             
-            const samples = 100; // Number of waveform samples
-            const barWidth = canvas.width / samples;
+            const barW = 1; // 1px wide columns
+            const gap = 1; // 1px gap between columns
+            const step = barW + gap;
+            const samples = Math.floor(canvas.width / step);
             const centerY = canvas.height / 2;
             const maxAmplitude = canvas.height * 0.4; // Maximum bar height
             
@@ -391,15 +371,15 @@ export default function AudioWaveformPlayer({
                 const barHeight = amplitude * maxAmplitude;
                 
                 // Draw bar from center, extending both up and down
-                const x = i * barWidth;
-                const barActualWidth = Math.max(barWidth - 1, 1);
+                const x = i * step;
                 
-                // Use theme color with slight transparency
-                canvasCtx.fillStyle = `rgba(${_r}, ${_g}, ${_b}, 0.6)`;
+                // Match StaticWaveform color: intensity varies red channel
+                const intensity = Math.floor(amplitude * 155) + 100;
+                canvasCtx.fillStyle = `rgb(${intensity}, ${_g}, ${_b})`;
                 canvasCtx.fillRect(
                     x,
                     centerY - barHeight / 2,
-                    barActualWidth,
+                    barW,
                     barHeight
                 );
             }
@@ -538,7 +518,9 @@ export default function AudioWaveformPlayer({
             canvasCtx.fillStyle = 'rgb(255, 255, 255)';
             canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const barWidth = (canvas.width / bufferLength) * 2.5;
+            const liveBarW = 1; // 1px wide columns
+            const liveGap = 1; // 1px gap
+            const liveStep = liveBarW + liveGap;
             let barHeight;
             let x = 0;
 
@@ -548,16 +530,14 @@ export default function AudioWaveformPlayer({
             canvasCtx.scale(-1, 1);
             canvasCtx.translate(-canvas.width, 0);
 
-            for (let i = 0; i < bufferLength; i++) {
+            for (let i = 0; i < bufferLength && x < canvas.width; i++) {
                 barHeight = (dataArray[i] / max) * canvas.height / 2;
                 const amplitude = dataArray[i] / max;
-                const intensity = 0.3 + (amplitude * 0.7); // 0.3 to 1.0 range
-                const r = Math.floor(_r * intensity);
-                const g = Math.floor(_g * intensity);
-                const b = Math.floor(_b * intensity);
-                canvasCtx.fillStyle = `rgb(${r},${g},${b})`;
-                canvasCtx.fillRect(canvas.width - (x + barWidth / 2), canvas.height / 2 - (barHeight / 2), barWidth, barHeight);
-                x += barWidth + 1;
+                // Match StaticWaveform color: intensity varies red channel
+                const intensity = Math.floor(amplitude * 155) + 100;
+                canvasCtx.fillStyle = `rgb(${intensity},${_g},${_b})`;
+                canvasCtx.fillRect(canvas.width - (x + liveBarW), canvas.height / 2 - (barHeight / 2), liveBarW, barHeight);
+                x += liveStep;
             }
 
             canvasCtx.setTransform(1, 0, 0, 1, 0, 0);
@@ -650,6 +630,7 @@ export default function AudioWaveformPlayer({
                         height={height}
                         style={{
                             backgroundColor: 'white',
+                            border: '1px solid #e0e0e0',
                             borderRadius: '4px',
                             width: `${width}px`,
                             height: `${height}px`,

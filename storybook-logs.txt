@@ -119,3 +119,23 @@
 │  Plugin: vite:import-analysis
 │  File:
 │  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/CustomAnswerPlugin.audio-drawing.stories.jsx
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js

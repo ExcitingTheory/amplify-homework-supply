@@ -57,7 +57,14 @@ export const Learn = ({
   }, [wordIDs, dictionary]);
   
   const { grade, saveGrade } = React.useContext(UnitContext);
-  const inProgress = grade?.data?.[nodeKey] || {};
+  const gradeData = React.useMemo(() => {
+    if (!grade?.data) return {};
+    if (typeof grade.data === 'string') {
+      try { return JSON.parse(grade.data); } catch { return {}; }
+    }
+    return grade.data;
+  }, [grade?.data]);
+  const inProgress = gradeData[nodeKey] || {};
 
   // Show/hide completion screen based on completion status and tab index
   React.useEffect(() => {
@@ -297,7 +304,7 @@ export const Learn = ({
           vocabularyList={
             <Box>
               {dropAnswerVisibility.map((wordId) => {
-                const word = words.find(w => w.id === wordId) || dictionary[wordId];
+                const word = dictionary[wordId];
                 if (!word) return null;
                 return (
                   <Box key={wordId} sx={{ mb: 1, pb: 1, borderBottom: '1px solid #e0e0e0' }}>
