@@ -350,12 +350,11 @@ export default function AudioWaveformPlayer({
             canvasCtx.fillStyle = 'rgb(255, 255, 255)';
             canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
             
-            const barW = 1; // 1px wide columns
-            const gap = 1; // 1px gap between columns
-            const step = barW + gap;
-            const samples = Math.floor(canvas.width / step);
-            const centerY = canvas.height / 2;
-            const maxAmplitude = canvas.height * 0.4; // Maximum bar height
+            // Match StaticWaveform: samples = width, barWidth = width/samples = 1,
+            // actual drawn width = barWidth - 0.5, symmetric from center
+            const samples = canvas.width;
+            const barWidth = canvas.width / samples;
+            const middle = canvas.height / 2;
             
             // Draw waveform bars from center
             for (let i = 0; i < samples; i++) {
@@ -366,22 +365,18 @@ export default function AudioWaveformPlayer({
                 const wave3 = Math.sin(phase * 0.8 + t * Math.PI * 2) * 0.15;
                 const noise = (Math.random() - 0.5) * 0.1;
                 
-                // Combine waves for natural variation
+                // Combine waves for natural variation (0-1 range like normalizedData)
                 const amplitude = Math.abs(wave1 + wave2 + wave3 + noise);
-                const barHeight = amplitude * maxAmplitude;
+                const barHeight = amplitude * middle;
                 
-                // Draw bar from center, extending both up and down
-                const x = i * step;
+                const x = i * barWidth;
                 
                 // Match StaticWaveform color: intensity varies red channel
                 const intensity = Math.floor(amplitude * 155) + 100;
                 canvasCtx.fillStyle = `rgb(${intensity}, ${_g}, ${_b})`;
-                canvasCtx.fillRect(
-                    x,
-                    centerY - barHeight / 2,
-                    barW,
-                    barHeight
-                );
+                
+                // Draw from middle outward (symmetric) - matches StaticWaveform exactly
+                canvasCtx.fillRect(x, middle - barHeight, barWidth - 0.5, barHeight * 2);
             }
             
             phase += 0.03; // Slow, subtle animation
@@ -518,29 +513,36 @@ export default function AudioWaveformPlayer({
             canvasCtx.fillStyle = 'rgb(255, 255, 255)';
             canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const liveBarW = 1; // 1px wide columns
-            const liveGap = 1; // 1px gap
-            const liveStep = liveBarW + liveGap;
-            let barHeight;
-            let x = 0;
+            // Match StaticWaveform: downsample analyser data to canvas.width bins,
+            // use barWidth - 0.5 actual width, symmetric drawing from center
+            const targetSamples = canvas.width;
+            const barWidth = canvas.width / targetSamples;
+            const middle = canvas.height / 2;
 
             // Prevent division by zero when analyser returns silence (all zeros)
             const max = Math.max(...dataArray) || 1;
 
-            canvasCtx.scale(-1, 1);
-            canvasCtx.translate(-canvas.width, 0);
+            // Downsample frequency data to targetSamples bins
+            const binSize = Math.floor(bufferLength / targetSamples);
 
-            for (let i = 0; i < bufferLength && x < canvas.width; i++) {
-                barHeight = (dataArray[i] / max) * canvas.height / 2;
-                const amplitude = dataArray[i] / max;
+            for (let i = 0; i < targetSamples; i++) {
+                // Average the frequency bins for this sample
+                let sum = 0;
+                const start = i * binSize;
+                for (let j = start; j < start + binSize && j < bufferLength; j++) {
+                    sum += dataArray[j];
+                }
+                const amplitude = (sum / binSize) / max;
+                const barHeight = amplitude * middle;
+                const x = i * barWidth;
+
                 // Match StaticWaveform color: intensity varies red channel
                 const intensity = Math.floor(amplitude * 155) + 100;
                 canvasCtx.fillStyle = `rgb(${intensity},${_g},${_b})`;
-                canvasCtx.fillRect(canvas.width - (x + liveBarW), canvas.height / 2 - (barHeight / 2), liveBarW, barHeight);
-                x += liveStep;
-            }
 
-            canvasCtx.setTransform(1, 0, 0, 1, 0, 0);
+                // Draw from middle outward (symmetric) - matches StaticWaveform exactly
+                canvasCtx.fillRect(x, middle - barHeight, barWidth - 0.5, barHeight * 2);
+            }
         };
 
         console.log('[AudioWaveformPlayer] Starting real-time waveform visualization');
