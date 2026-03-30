@@ -88,10 +88,16 @@ export default function AudioWaveformPlayer({
     const lastFrameTimeRef = useRef(performance.now());
     const recordingCanvasRef = useRef(null);
     const mediaStreamRef = useRef(null);
+    const durationRef = useRef(0); // Always-current duration for RAF callbacks
     
     // Context
     const filesContext = useContext(FilesContext);
     const identityId = filesContext?.session?.identityId;
+
+    // Keep durationRef in sync with localDuration state for RAF callbacks
+    useEffect(() => {
+        durationRef.current = localDuration;
+    }, [localDuration]);
 
     // Create blob URL only once from file
     useEffect(() => {
@@ -130,10 +136,19 @@ export default function AudioWaveformPlayer({
         const audio = new Audio(recordedBlobUrl);
         localAudioRef.current = audio;
 
+        // For WebM blobs from MediaRecorder, audio.duration is often Infinity.
+        // We already have the correct duration from decodeAudioData (set in recording
+        // stop handler via setLocalDuration). So we just need basic event listeners
+        // and rely on durationRef for progress calculation in the RAF loop.
+
         const onMeta = () => {
             const dur = audio.duration;
-            if (!isNaN(dur) && isFinite(dur)) {
+            if (!isNaN(dur) && isFinite(dur) && dur > 0) {
                 setLocalDuration(dur);
+                setIsReady(true);
+            } else {
+                // Duration is Infinity/NaN (WebM) — rely on decodeAudioData value
+                // which was already set in the recording stop handler
                 setIsReady(true);
             }
         };
@@ -213,29 +228,30 @@ export default function AudioWaveformPlayer({
     // Continuous animation loop for smooth progress updates
     useEffect(() => {
         // Don't update if we're seeking - let the slider control the state
-        if (!isActive || !isPlaying || isSeeking || localDuration === 0) {
+        if (!isActive || !isPlaying || isSeeking) {
             return;
         }
 
         const audioElement = useLocalAudio ? localAudioRef.current : audioPlayer.audioElement;
-        const initialTime = audioElement ? audioElement.currentTime : 0;
-        displayTimeRef.current = initialTime;
-        currentTimeRef.current = initialTime;
-        
-        console.log('[AudioWaveformPlayer] Starting animation from time:', initialTime, 'duration:', localDuration);
-        
-        lastFrameTimeRef.current = performance.now();
+        if (!audioElement) return;
         
         let rafId;
         const updateProgress = () => {
-            // Read directly from the audio element for accurate position
-            const time = audioElement ? audioElement.currentTime : displayTimeRef.current;
+            const time = audioElement.currentTime;
+            // Use element duration if valid, otherwise fall back to durationRef
+            // (WebM blobs from MediaRecorder report Infinity from audio element,
+            // but durationRef is set from decodeAudioData which is always correct)
+            const elDur = audioElement.duration;
+            const dur = (isFinite(elDur) && elDur > 0) ? elDur : durationRef.current;
+            
             displayTimeRef.current = time;
             currentTimeRef.current = time;
-            
             setLocalTime(time);
-            const newProgress = Math.min((time / localDuration) * 100, 100);
-            setLocalProgress(newProgress);
+            
+            if (dur > 0) {
+                const newProgress = Math.min((time / dur) * 100, 100);
+                setLocalProgress(newProgress);
+            }
             
             rafId = requestAnimationFrame(updateProgress);
         };
@@ -247,7 +263,7 @@ export default function AudioWaveformPlayer({
                 cancelAnimationFrame(rafId);
             }
         };
-    }, [isActive, isPlaying, isSeeking, localDuration, useLocalAudio]);
+    }, [isActive, isPlaying, isSeeking, useLocalAudio]);
 
     // Load source into shared audio context (only for non-recording sources)
     useEffect(() => {
@@ -289,33 +305,36 @@ export default function AudioWaveformPlayer({
         }
         // Update progress while dragging without seeking
         setLocalProgress(newValue);
-        // Update time display immediately for visual feedback
-        const newTime = (newValue / 100) * localDuration;
+        // Read duration from audio element, fall back to durationRef
+        const audioElement = useLocalAudio ? localAudioRef.current : audioPlayer.audioElement;
+        const dur = audioElement?.duration;
+        const effectiveDuration = (dur && isFinite(dur) && dur > 0) ? dur : durationRef.current;
+        const newTime = effectiveDuration > 0 ? (newValue / 100) * effectiveDuration : 0;
         setLocalTime(newTime);
         displayTimeRef.current = newTime;
-    }, [localDuration, isSeeking]);
+    }, [isSeeking, useLocalAudio, audioPlayer]);
 
     const handleSeek = useCallback((event, newValue) => {
         // Prevent event propagation to other sliders
         event.stopPropagation();
-        
-        if (!isActive || !localDuration) {
-            setIsSeeking(false);
-            return;
-        }
 
-        const newTime = (newValue / 100) * localDuration;
-        if (useLocalAudio && localAudioRef.current) {
+        // Read duration from audio element, fall back to durationRef
+        const audioElement = useLocalAudio ? localAudioRef.current : audioPlayer.audioElement;
+        const dur = audioElement?.duration;
+        const effectiveDuration = (dur && isFinite(dur) && dur > 0) ? dur : durationRef.current;
+        const newTime = effectiveDuration > 0 ? (newValue / 100) * effectiveDuration : 0;
+
+        if (useLocalAudio && localAudioRef.current && effectiveDuration > 0) {
             localAudioRef.current.currentTime = newTime;
-        } else {
+        } else if (isActive && effectiveDuration > 0) {
             audioPlayer.seek(newTime);
         }
         setLocalProgress(newValue);
-        // Update refs so animation continues from new position
+        setLocalTime(newTime);
         currentTimeRef.current = newTime;
         displayTimeRef.current = newTime;
         setIsSeeking(false);
-    }, [isActive, localDuration, audioPlayer]);
+    }, [isActive, useLocalAudio, audioPlayer]);
 
     const formatTime = (seconds) => {
         if (!seconds || isNaN(seconds)) return '0:00';
@@ -514,6 +533,22 @@ export default function AudioWaveformPlayer({
             // Use the recorder's actual mimeType so decodeAudioData gets a valid container
             const actualMimeType = recorder.mimeType || 'audio/webm';
             const blob = new Blob(audioChunks, { type: actualMimeType });
+            
+            // Decode audio to get accurate duration (WebM blobs report Infinity via Audio element)
+            try {
+                const decodeCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const arrayBuffer = await blob.arrayBuffer();
+                const audioBuffer = await decodeCtx.decodeAudioData(arrayBuffer);
+                const realDuration = audioBuffer.duration;
+                console.log('[AudioWaveformPlayer] Decoded duration:', realDuration);
+                if (isFinite(realDuration) && realDuration > 0) {
+                    setLocalDuration(realDuration);
+                }
+                decodeCtx.close();
+            } catch (decodeErr) {
+                console.warn('[AudioWaveformPlayer] Duration decode failed:', decodeErr);
+            }
+            
             setAudioBlob(blob);
             
             // Calculate waveform data (non-blocking — failures don't prevent upload/callback)
@@ -684,7 +719,7 @@ export default function AudioWaveformPlayer({
             <Box sx={{ position: 'relative', borderRadius: 1, width: '100%' }}>
                 {/* Show static waveform when not recording and we have data */}
                 {!recording && (waveformData || file) && !audioBlob && (
-                    <>
+                    <div style={{ position: 'relative', width: `${width}px`, height: `${height}px` }}>
                         <StaticWaveform
                             file={file}
                             waveformData={waveformData}
@@ -693,28 +728,30 @@ export default function AudioWaveformPlayer({
                             showLoading={false}
                         />
                         
-                        {/* Progress overlay */}
+                        {/* Progress overlay — contains zero-width space to defeat
+                            Lexical's div:empty:last-child {display:none!important} rule */}
                         {localDuration > 0 && (
-                            <Box
-                                sx={{
+                            <div
+                                data-testid="waveform-overlay"
+                                style={{
                                     position: 'absolute',
                                     top: 0,
                                     left: 0,
-                                    width: '100%',
-                                    height: '100%',
-                                    backgroundColor: 'primary.main',
+                                    right: 0,
+                                    bottom: 0,
+                                    backgroundColor: theme.palette.primary.main,
                                     opacity: 0.2,
                                     pointerEvents: 'none',
                                     transformOrigin: 'left',
                                     transform: `scaleX(${Math.min(localProgress / 100, 1)})`,
                                     willChange: 'transform'
                                 }}
-                            />
+                            >{'\u200B'}</div>
                         )}
-                    </>
+                    </div>
                 )}
                 
-                {/* Canvas - shown for idle animation OR recording */}
+                {/* Canvas - shown for idle, preview, or recording */}
                 {enableRecording && !waveformData && !file && !audioBlob && (
                     <canvas
                         ref={recordingCanvasRef}
@@ -726,14 +763,15 @@ export default function AudioWaveformPlayer({
                             borderRadius: '4px',
                             width: `${width}px`,
                             height: `${height}px`,
-                            display: 'block'
+                            display: 'block',
+                            boxSizing: 'border-box'
                         }}
                     />
                 )}
                 
                 {/* Recorded audio waveform with progress overlay */}
                 {audioBlob && recordedWaveformData && !recording && (
-                    <>
+                    <div style={{ position: 'relative', width: `${width}px`, height: `${height}px` }}>
                         <StaticWaveform
                             waveformData={recordedWaveformData}
                             width={width}
@@ -741,33 +779,53 @@ export default function AudioWaveformPlayer({
                             showLoading={false}
                         />
                         
-                        {/* Progress overlay for recorded audio */}
+                        {/* Progress overlay for recorded audio — see comment above */}
                         {localDuration > 0 && (
-                            <Box
-                                sx={{
+                            <div
+                                data-testid="waveform-overlay"
+                                style={{
                                     position: 'absolute',
                                     top: 0,
                                     left: 0,
-                                    width: '100%',
-                                    height: '100%',
-                                    backgroundColor: 'primary.main',
+                                    right: 0,
+                                    bottom: 0,
+                                    backgroundColor: theme.palette.primary.main,
                                     opacity: 0.2,
                                     pointerEvents: 'none',
                                     transformOrigin: 'left',
                                     transform: `scaleX(${Math.min(localProgress / 100, 1)})`,
                                     willChange: 'transform'
                                 }}
-                            />
+                            >{'\u200B'}</div>
                         )}
-                    </>
+                    </div>
+                )}
+                
+                {/* Fallback: recorded blob exists but waveform not yet calculated */}
+                {audioBlob && !recordedWaveformData && !recording && (
+                    <canvas
+                        ref={recordingCanvasRef}
+                        width={width}
+                        height={height}
+                        style={{
+                            backgroundColor: 'white',
+                            border: '1px solid #e0e0e0',
+                            borderRadius: '4px',
+                            width: `${width}px`,
+                            height: `${height}px`,
+                            display: 'block',
+                            boxSizing: 'border-box'
+                        }}
+                    />
                 )}
             </Box>
 
-            {/* Playback and Recording controls */}
+            {/* Playback and Recording controls - fixed height to prevent layout shift */}
             <Box sx={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 2
+                gap: 2,
+                minHeight: 40
             }}>
                 {/* Left side: Record/Stop button OR Play/Pause button */}
                 <Box sx={{ minWidth: 40, display: 'flex', justifyContent: 'center' }}>
@@ -807,7 +865,7 @@ export default function AudioWaveformPlayer({
                 </Box>
 
                 {/* Center: Progress slider OR Recording indicator */}
-                <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', minHeight: 20 }}>
                     {!recording && (sourceUrl || audioBlob) && (
                         <Slider
                             value={isNaN(localProgress) || !isFinite(localProgress) ? 0 : localProgress}
