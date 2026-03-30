@@ -40,7 +40,7 @@ export default function AudioWaveformPlayer({
     file,
     waveformData,
     width = 600,
-    height = 100,
+    height = 80,
     title,
     showDuration = true,
     enableRecording = false,
@@ -236,21 +236,27 @@ export default function AudioWaveformPlayer({
         if (!audioElement) return;
         
         let rafId;
-        const updateProgress = () => {
-            const time = audioElement.currentTime;
-            // Use element duration if valid, otherwise fall back to durationRef
-            // (WebM blobs from MediaRecorder report Infinity from audio element,
-            // but durationRef is set from decodeAudioData which is always correct)
-            const elDur = audioElement.duration;
-            const dur = (isFinite(elDur) && elDur > 0) ? elDur : durationRef.current;
-            
-            displayTimeRef.current = time;
-            currentTimeRef.current = time;
-            setLocalTime(time);
-            
-            if (dur > 0) {
-                const newProgress = Math.min((time / dur) * 100, 100);
-                setLocalProgress(newProgress);
+        let lastUpdate = 0;
+        const UPDATE_INTERVAL = 33; // ~30fps — smooth enough for progress, halves re-renders
+        
+        const updateProgress = (timestamp) => {
+            // Throttle React state updates to reduce re-renders
+            if (timestamp - lastUpdate >= UPDATE_INTERVAL) {
+                lastUpdate = timestamp;
+                const time = audioElement.currentTime;
+                // Always use durationRef (synced with localDuration) — same source
+                // as the time display. For recordings, this comes from decodeAudioData
+                // which is accurate, unlike audioElement.duration (Infinity for WebM).
+                const dur = durationRef.current;
+                
+                displayTimeRef.current = time;
+                currentTimeRef.current = time;
+                setLocalTime(time);
+                
+                if (dur > 0) {
+                    const newProgress = Math.min((time / dur) * 100, 100);
+                    setLocalProgress(newProgress);
+                }
             }
             
             rafId = requestAnimationFrame(updateProgress);
@@ -871,13 +877,22 @@ export default function AudioWaveformPlayer({
                             value={isNaN(localProgress) || !isFinite(localProgress) ? 0 : localProgress}
                             min={0}
                             max={100}
+                            step={0.1}
                             onChange={handleSliderChange}
                             onChangeCommitted={handleSeek}
                             aria-label="Audio progress"
                             disabled={false}
                             track="normal"
                             size="small"
-                            sx={{ width: '100%' }}
+                            sx={{
+                                width: '100%',
+                                // Disable CSS transitions during playback so the thumb
+                                // tracks the RAF-driven value instantly instead of lagging
+                                ...(!isSeeking && isPlaying ? {
+                                    '& .MuiSlider-thumb': { transition: 'none' },
+                                    '& .MuiSlider-track': { transition: 'none' },
+                                } : {})
+                            }}
                         />
                     )}
                     
