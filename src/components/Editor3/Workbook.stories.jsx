@@ -273,7 +273,7 @@ const createSampleWorkbookState = (pdfPath) => ({
         version: 1,
         path: pdfPath,
         identityId: 'mock-user-sub',
-        filename: 'japanese-grammar-guide.md',
+        filename: 'japanese-grammar-guide.pdf',
       },
       {
         children: [
@@ -672,14 +672,14 @@ export const WorkbookWithContent = {
       const audioUrl = `${baseUrl}${MOCK_AUDIO_BASE64}`;
       const realWaveform = await computeRealWaveform(audioUrl);
       
-      const pdfPath = `${baseUrl}/story-mocks/japanese-grammar-guide.md`;
+      const pdfPath = `${baseUrl}/story-mocks/japanese-grammar-guide.pdf`;
       
       // Seed files including PDF - using static file from /story-mocks for faster load times
       // Using full HTTP URL so getCachedUrl doesn't try to sign it from S3
       const lessonFiles = [
         {
           id: 'file-1',
-          name: 'japanese-grammar-guide.md',
+          name: 'japanese-grammar-guide.pdf',
           path: pdfPath,
           type: 'application/pdf',
           level: 'PUBLIC',
@@ -694,7 +694,7 @@ export const WorkbookWithContent = {
       seedMockDocuments([
         {
           id: 'document-1',
-          filename: 'japanese-grammar-guide.md',
+          filename: 'japanese-grammar-guide.pdf',
           s3Key: 'file-1', // Reference to the File model
           status: 'completed',
           pageCount: 3,

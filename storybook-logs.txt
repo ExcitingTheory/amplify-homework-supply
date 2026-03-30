@@ -3341,3 +3341,7 @@
 │  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
 │  Vite hmr update
 │  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
