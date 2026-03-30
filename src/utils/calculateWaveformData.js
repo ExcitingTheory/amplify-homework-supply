@@ -79,3 +79,55 @@ export async function calculateWaveformData(audioSource, samples = 600) {
         throw error;
     }
 }
+
+/**
+ * Same as calculateWaveformData but also returns the AudioBuffer duration.
+ * Useful when the source (e.g. MediaRecorder WebM) lacks reliable duration metadata.
+ *
+ * @param {Blob|ArrayBuffer} audioSource - Audio blob or array buffer
+ * @param {number} samples - Number of data points to generate (default: 600)
+ * @returns {Promise<{ waveformData: number[], duration: number }>}
+ */
+export async function calculateWaveformDataWithDuration(audioSource, samples = 600) {
+    let arrayBuffer;
+    if (audioSource instanceof Blob) {
+        arrayBuffer = await audioSource.arrayBuffer();
+    } else {
+        arrayBuffer = audioSource;
+    }
+
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    const duration = audioBuffer.duration;
+
+    const rawData = audioBuffer.getChannelData(0);
+    const blockSize = Math.floor(rawData.length / samples);
+    const filteredData = [];
+
+    for (let i = 0; i < samples; i++) {
+        const blockStart = blockSize * i;
+        let sumSq = 0;
+        for (let j = 0; j < blockSize; j++) {
+            const val = rawData[blockStart + j];
+            sumSq += val * val;
+        }
+        filteredData.push(Math.sqrt(sumSq / blockSize));
+    }
+
+    const minAmplitude = Math.min(...filteredData);
+    const maxAmplitude = Math.max(...filteredData);
+    const range = maxAmplitude - minAmplitude;
+
+    let normalizedData;
+    if (range > 0) {
+        normalizedData = filteredData.map(n => (n - minAmplitude) / range);
+    } else if (maxAmplitude > 0) {
+        normalizedData = filteredData.map(() => 0.5);
+    } else {
+        normalizedData = filteredData;
+    }
+
+    audioContext.close();
+
+    return { waveformData: normalizedData, duration };
+}

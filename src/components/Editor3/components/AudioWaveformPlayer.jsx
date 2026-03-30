@@ -74,6 +74,13 @@ export default function AudioWaveformPlayer({
     const [recordedWaveformData, setRecordedWaveformData] = useState(null);
     const [pendingRecordingStart, setPendingRecordingStart] = useState(false);
     
+    // Mic preview state (hover to show room noise)
+    const [previewing, setPreviewing] = useState(false);
+    const previewStreamRef = useRef(null);
+    const previewAudioCtxRef = useRef(null);
+    const previewAnalyserRef = useRef(null);
+    const previewRafRef = useRef(null);
+    
     // Refs
     const loadedSourceRef = useRef(null);
     const currentTimeRef = useRef(0);
@@ -317,10 +324,125 @@ export default function AudioWaveformPlayer({
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
+    // Stop mic preview helper
+    const stopPreview = useCallback(() => {
+        if (previewRafRef.current) {
+            cancelAnimationFrame(previewRafRef.current);
+            previewRafRef.current = null;
+        }
+        if (previewAudioCtxRef.current) {
+            previewAudioCtxRef.current.close();
+            previewAudioCtxRef.current = null;
+        }
+        previewAnalyserRef.current = null;
+        // Only stop tracks if we're not handing off to recording
+        if (previewStreamRef.current && !recording) {
+            previewStreamRef.current.getTracks().forEach(track => track.stop());
+            previewStreamRef.current = null;
+        }
+        setPreviewing(false);
+    }, [recording]);
+
+    // Hover: start mic preview to show room noise
+    const handleMouseEnter = useCallback(async () => {
+        // Only preview when in recording mode with no content and not already active
+        if (!enableRecording || recording || audioBlob || sourceUrl || waveformData || file || previewing) return;
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            previewStreamRef.current = stream;
+            
+            const audioCtx = new AudioContext();
+            previewAudioCtxRef.current = audioCtx;
+            const src = audioCtx.createMediaStreamSource(stream);
+            const analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 2048;
+            analyser.smoothingTimeConstant = 0.8;
+            src.connect(analyser);
+            previewAnalyserRef.current = analyser;
+            
+            setPreviewing(true);
+        } catch (err) {
+            console.warn('[AudioWaveformPlayer] Mic preview denied:', err);
+        }
+    }, [enableRecording, recording, audioBlob, sourceUrl, waveformData, file, previewing]);
+
+    const handleMouseLeave = useCallback(() => {
+        if (recording || !previewing) return;
+        stopPreview();
+    }, [recording, previewing, stopPreview]);
+
+    // Draw live mic preview on canvas
+    useEffect(() => {
+        const canvas = recordingCanvasRef.current;
+        const analyser = previewAnalyserRef.current;
+        if (!canvas || !previewing || !analyser || recording) return;
+        
+        const canvasCtx = canvas.getContext('2d');
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        let active = true;
+        
+        const drawPreview = () => {
+            if (!active) return;
+            previewRafRef.current = requestAnimationFrame(drawPreview);
+            
+            analyser.getByteFrequencyData(dataArray);
+            canvasCtx.fillStyle = 'rgb(255, 255, 255)';
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const targetSamples = canvas.width;
+            const barWidth = canvas.width / targetSamples;
+            const middle = canvas.height / 2;
+            const max = Math.max(...dataArray) || 1;
+            const binSize = Math.floor(bufferLength / targetSamples);
+            
+            for (let i = 0; i < targetSamples; i++) {
+                let sum = 0;
+                const start = i * binSize;
+                for (let j = start; j < start + binSize && j < bufferLength; j++) {
+                    sum += dataArray[j];
+                }
+                const amplitude = (sum / binSize) / max;
+                const barHeight = amplitude * middle;
+                const x = i * barWidth;
+                const intensity = Math.floor(amplitude * 155) + 100;
+                canvasCtx.fillStyle = `rgb(${intensity},${_g},${_b})`;
+                canvasCtx.fillRect(x, middle - barHeight, barWidth - 0.5, barHeight * 2);
+            }
+        };
+        
+        drawPreview();
+        
+        return () => {
+            active = false;
+            if (previewRafRef.current) {
+                cancelAnimationFrame(previewRafRef.current);
+                previewRafRef.current = null;
+            }
+        };
+    }, [previewing, recording, _g, _b]);
+
     // Recording functions
     const startRecording = useCallback(async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            let stream;
+            // Reuse preview stream if available, otherwise request new one
+            if (previewStreamRef.current && previewStreamRef.current.active) {
+                stream = previewStreamRef.current;
+                // Stop preview drawing but keep the stream
+                if (previewRafRef.current) {
+                    cancelAnimationFrame(previewRafRef.current);
+                    previewRafRef.current = null;
+                }
+                if (previewAudioCtxRef.current) {
+                    previewAudioCtxRef.current.close();
+                    previewAudioCtxRef.current = null;
+                }
+                previewAnalyserRef.current = null;
+                setPreviewing(false);
+            } else {
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            }
             mediaStreamRef.current = stream;
             setPendingRecordingStart(true);
             setRecording(true);
@@ -329,68 +451,27 @@ export default function AudioWaveformPlayer({
         }
     }, []);
     
-    // Idle animation for canvas before recording starts
+    // Idle state: draw a flat center line (canvas looks "off")
     useEffect(() => {
         const canvas = recordingCanvasRef.current;
-        if (!canvas || recording || audioBlob || sourceUrl || waveformData || file) {
+        if (!canvas || recording || audioBlob || sourceUrl || waveformData || file || previewing) {
             return;
         }
         
-        // Only show idle animation when in recording mode with no content
         if (!enableRecording) {
             return;
         }
         
         const canvasCtx = canvas.getContext('2d');
-        let animationId;
-        let phase = 0;
+        // White background
+        canvasCtx.fillStyle = 'rgb(255, 255, 255)';
+        canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
         
-        const drawIdleWaveform = () => {
-            // Clear with white background
-            canvasCtx.fillStyle = 'rgb(255, 255, 255)';
-            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Match StaticWaveform: samples = width, barWidth = width/samples = 1,
-            // actual drawn width = barWidth - 0.5, symmetric from center
-            const samples = canvas.width;
-            const barWidth = canvas.width / samples;
-            const middle = canvas.height / 2;
-            
-            // Draw waveform bars from center
-            for (let i = 0; i < samples; i++) {
-                // Create smooth, realistic waveform pattern using multiple sine waves
-                const t = i / samples;
-                const wave1 = Math.sin(phase + t * Math.PI * 4) * 0.3;
-                const wave2 = Math.sin(phase * 1.5 + t * Math.PI * 8) * 0.2;
-                const wave3 = Math.sin(phase * 0.8 + t * Math.PI * 2) * 0.15;
-                const noise = (Math.random() - 0.5) * 0.1;
-                
-                // Combine waves for natural variation (0-1 range like normalizedData)
-                const amplitude = Math.abs(wave1 + wave2 + wave3 + noise);
-                const barHeight = amplitude * middle;
-                
-                const x = i * barWidth;
-                
-                // Match StaticWaveform color: intensity varies red channel
-                const intensity = Math.floor(amplitude * 155) + 100;
-                canvasCtx.fillStyle = `rgb(${intensity}, ${_g}, ${_b})`;
-                
-                // Draw from middle outward (symmetric) - matches StaticWaveform exactly
-                canvasCtx.fillRect(x, middle - barHeight, barWidth - 0.5, barHeight * 2);
-            }
-            
-            phase += 0.03; // Slow, subtle animation
-            animationId = requestAnimationFrame(drawIdleWaveform);
-        };
-        
-        drawIdleWaveform();
-        
-        return () => {
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-            }
-        };
-    }, [recording, audioBlob, sourceUrl, waveformData, file, enableRecording, _r, _g, _b]);
+        // Single flat line at center using theme color
+        const middle = canvas.height / 2;
+        canvasCtx.fillStyle = `rgb(${_r}, ${_g}, ${_b})`;
+        canvasCtx.fillRect(0, middle, canvas.width, 1);
+    }, [recording, audioBlob, sourceUrl, waveformData, file, enableRecording, previewing, _r, _g, _b]);
     
     // Effect to handle recording setup once canvas is available
     useEffect(() => {
@@ -560,6 +641,11 @@ export default function AudioWaveformPlayer({
             mediaStreamRef.current.getTracks().forEach(track => track.stop());
             mediaStreamRef.current = null;
         }
+        // Also clean up any leftover preview resources
+        if (previewStreamRef.current) {
+            previewStreamRef.current.getTracks().forEach(track => track.stop());
+            previewStreamRef.current = null;
+        }
     }, [mediaRecorder]);
 
     if (!sourceUrl && !file && !waveformData && !enableRecording) {
@@ -571,18 +657,22 @@ export default function AudioWaveformPlayer({
     }
 
     return (
-        <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 1,
-            p: 2,
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 2,
-            backgroundColor: 'background.paper',
-            width: '100%',
-            maxWidth: 'max-content'
-        }}>
+        <Box
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1,
+                p: 2,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 2,
+                backgroundColor: 'background.paper',
+                width: '100%',
+                maxWidth: 'max-content'
+            }}
+        >
             {/* Title */}
             {title && (
                 <Typography variant="subtitle2" color="text.secondary">
