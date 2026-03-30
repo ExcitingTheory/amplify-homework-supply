@@ -4,6 +4,20 @@ import React, { createContext, useContext, useRef, useState, useCallback } from 
  * Shared audio player context
  * Provides a single audio element that all AudioWaveformPlayers can use
  * Only one audio can play at a time
+ * 
+ * DO NOT MODIFY the duration normalization or event listener structure without
+ * testing both URL-based playback and recorded blob playback. Key invariants:
+ * 
+ * 1. SINGLE AUDIO ELEMENT: One Audio() instance shared across all players.
+ *    The active source is tracked via `currentSource` state.
+ * 
+ * 2. DURATION HANDLING: The `loadedmetadata` handler normalizes Infinity/NaN
+ *    durations to 0. For WebM recorded blobs, the real duration comes from
+ *    `decodeAudioData()` in AudioWaveformPlayer — not from this context.
+ * 
+ * 3. SUBSCRIBER PATTERN: Players subscribe via `audioPlayer.subscribe(listener)`
+ *    and receive onTimeUpdate, onDurationChange, onEnded, onCanPlay, onError
+ *    callbacks. Always unsubscribe in cleanup.
  */
 
 const AudioPlayerContext = createContext(null);

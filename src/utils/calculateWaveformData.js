@@ -1,6 +1,9 @@
 /**
  * Calculate waveform amplitude data from an audio blob or buffer.
  * Returns normalized amplitude data that can be stored in the database.
+ * 
+ * DO NOT MODIFY the algorithm or normalization without testing visual output
+ * across different audio sources (recordings, uploaded files, silence).
  *
  * ALGORITHM:
  *   1. Decode audio via AudioContext.decodeAudioData (first channel only).

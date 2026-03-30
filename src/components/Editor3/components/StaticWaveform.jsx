@@ -10,6 +10,22 @@ import { calculateWaveformData } from '../../../utils/calculateWaveformData';
  * StaticWaveform - Displays a static amplitude waveform for an audio file
  * Shows the audio amplitude over time without needing playback
  * 
+ * DO NOT MODIFY the rendering logic, canvas sizing, or wrapper Box structure
+ * without thorough testing. Key invariants:
+ * 
+ * 1. WRAPPER BOX: Returns `<Box sx={{ position: 'relative', width, height }}>` —
+ *    this provides the positioning context for progress overlays rendered as
+ *    siblings in AudioWaveformPlayer. Do NOT remove `position: 'relative'` or
+ *    the explicit width/height.
+ * 
+ * 2. CANVAS DIMENSIONS: Set programmatically via `canvas.width = width` /
+ *    `canvas.height = height` in drawWaveform(). The canvas element itself has
+ *    no inline width/height style — only display and border styles.
+ * 
+ * 3. WAVEFORM DRAWING: Bars are drawn symmetrically from the vertical center
+ *    using RMS amplitude data. Color intensity varies by amplitude. Bar width
+ *    is `(canvas.width / data.length) - 0.5` for subtle spacing.
+ * 
  * @param {Object} props
  * @param {Object} props.file - File object with path, identityId, and optional waveformData
  * @param {number[]} props.waveformData - Pre-calculated waveform data (overrides file calculation)

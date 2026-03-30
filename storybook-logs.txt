@@ -28,3 +28,3316 @@
 │  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
 │  Vite hmr update
 │  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/project-annotations.js,
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/project-annotations.js,
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at FileState.parse
+│  (file://./node_modules/react-docgen/dist/FileState.js:62:21)
+│  at FileState.resolveImportedValue
+│  (file://./node_modules/react-docgen/dist/importer/makeFsImporter.js:102:29)
+│  at FileState.import
+│  (file://./node_modules/react-docgen/dist/FileState.js:51:71)
+│  at findScopePath
+│  (file://./node_modules/react-docgen/dist/utils/resolveToValue.js:30:63)
+│  at resolveToValue
+│  (file://./node_modules/react-docgen/dist/utils/resolveToValue.js:96:32)
+│  at isReactBuiltinReference
+│  (file://./node_modules/react-docgen/dist/utils/isReactBuiltinReference.js:33:19)
+│  at isReactBuiltinCall
+│  (file://./node_modules/react-docgen/dist/utils/isReactBuiltinCall.js:11:12)
+│  at Object.enter
+│  (file://./node_modules/react-docgen/dist/handlers/componentMethodsHandler.js:52:18)
+│  at NodePath._call
+│  (./node_modules/@babel/traverse/lib/path/context.js:50:20)
+│  at NodePath.call
+│  (./node_modules/@babel/traverse/lib/path/context.js:40:18)
+│  at NodePath.visit
+│  (./node_modules/@babel/traverse/lib/path/context.js:87:31)
+│  at TraversalContext.visitQueue
+│  (./node_modules/@babel/traverse/lib/context.js:96:16)
+│  at TraversalContext.visitSingle
+│  (./node_modules/@babel/traverse/lib/context.js:72:19)
+│  at TraversalContext.visit
+│  (./node_modules/@babel/traverse/lib/context.js:119:19)
+│  at traverseNode
+│  (./node_modules/@babel/traverse/lib/traverse-node.js:130:17)
+│  at NodePath.visit
+│  (./node_modules/@babel/traverse/lib/path/context.js:93:52)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at FileState.parse
+│  (file://./node_modules/react-docgen/dist/FileState.js:62:21)
+│  at FileState.resolveImportedValue
+│  (file://./node_modules/react-docgen/dist/importer/makeFsImporter.js:102:29)
+│  at FileState.import
+│  (file://./node_modules/react-docgen/dist/FileState.js:51:71)
+│  at findScopePath
+│  (file://./node_modules/react-docgen/dist/utils/resolveToValue.js:30:63)
+│  at resolveToValue
+│  (file://./node_modules/react-docgen/dist/utils/resolveToValue.js:96:32)
+│  at isReactBuiltinReference
+│  (file://./node_modules/react-docgen/dist/utils/isReactBuiltinReference.js:33:19)
+│  at isReactBuiltinCall
+│  (file://./node_modules/react-docgen/dist/utils/isReactBuiltinCall.js:11:12)
+│  at Object.enter
+│  (file://./node_modules/react-docgen/dist/handlers/componentMethodsHandler.js:52:18)
+│  at NodePath._call
+│  (./node_modules/@babel/traverse/lib/path/context.js:50:20)
+│  at NodePath.call
+│  (./node_modules/@babel/traverse/lib/path/context.js:40:18)
+│  at NodePath.visit
+│  (./node_modules/@babel/traverse/lib/path/context.js:87:31)
+│  at TraversalContext.visitQueue
+│  (./node_modules/@babel/traverse/lib/context.js:96:16)
+│  at TraversalContext.visitSingle
+│  (./node_modules/@babel/traverse/lib/context.js:72:19)
+│  at TraversalContext.visit
+│  (./node_modules/@babel/traverse/lib/context.js:119:19)
+│  at traverseNode
+│  (./node_modules/@babel/traverse/lib/traverse-node.js:130:17)
+│  at NodePath.visit
+│  (./node_modules/@babel/traverse/lib/path/context.js:93:52)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at FileState.parse
+│  (file://./node_modules/react-docgen/dist/FileState.js:62:21)
+│  at FileState.resolveImportedValue
+│  (file://./node_modules/react-docgen/dist/importer/makeFsImporter.js:102:29)
+│  at FileState.import
+│  (file://./node_modules/react-docgen/dist/FileState.js:51:71)
+│  at findScopePath
+│  (file://./node_modules/react-docgen/dist/utils/resolveToValue.js:30:63)
+│  at resolveToValue
+│  (file://./node_modules/react-docgen/dist/utils/resolveToValue.js:96:32)
+│  at isReactBuiltinReference
+│  (file://./node_modules/react-docgen/dist/utils/isReactBuiltinReference.js:33:19)
+│  at isReactBuiltinCall
+│  (file://./node_modules/react-docgen/dist/utils/isReactBuiltinCall.js:11:12)
+│  at Object.enter
+│  (file://./node_modules/react-docgen/dist/handlers/componentMethodsHandler.js:52:18)
+│  at NodePath._call
+│  (./node_modules/@babel/traverse/lib/path/context.js:50:20)
+│  at NodePath.call
+│  (./node_modules/@babel/traverse/lib/path/context.js:40:18)
+│  at NodePath.visit
+│  (./node_modules/@babel/traverse/lib/path/context.js:87:31)
+│  at TraversalContext.visitQueue
+│  (./node_modules/@babel/traverse/lib/context.js:96:16)
+│  at TraversalContext.visitSingle
+│  (./node_modules/@babel/traverse/lib/context.js:72:19)
+│  at TraversalContext.visit
+│  (./node_modules/@babel/traverse/lib/context.js:119:19)
+│  at traverseNode
+│  (./node_modules/@babel/traverse/lib/traverse-node.js:130:17)
+│  at NodePath.visit
+│  (./node_modules/@babel/traverse/lib/path/context.js:93:52)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at FileState.parse
+│  (file://./node_modules/react-docgen/dist/FileState.js:62:21)
+│  at FileState.resolveImportedValue
+│  (file://./node_modules/react-docgen/dist/importer/makeFsImporter.js:102:29)
+│  at FileState.import
+│  (file://./node_modules/react-docgen/dist/FileState.js:51:71)
+│  at findScopePath
+│  (file://./node_modules/react-docgen/dist/utils/resolveToValue.js:30:63)
+│  at resolveToValue
+│  (file://./node_modules/react-docgen/dist/utils/resolveToValue.js:96:32)
+│  at isReactBuiltinReference
+│  (file://./node_modules/react-docgen/dist/utils/isReactBuiltinReference.js:33:19)
+│  at isReactBuiltinCall
+│  (file://./node_modules/react-docgen/dist/utils/isReactBuiltinCall.js:11:12)
+│  at Object.enter
+│  (file://./node_modules/react-docgen/dist/handlers/componentMethodsHandler.js:52:18)
+│  at NodePath._call
+│  (./node_modules/@babel/traverse/lib/path/context.js:50:20)
+│  at NodePath.call
+│  (./node_modules/@babel/traverse/lib/path/context.js:40:18)
+│  at NodePath.visit
+│  (./node_modules/@babel/traverse/lib/path/context.js:87:31)
+│  at TraversalContext.visitQueue
+│  (./node_modules/@babel/traverse/lib/context.js:96:16)
+│  at TraversalContext.visitSingle
+│  (./node_modules/@babel/traverse/lib/context.js:72:19)
+│  at TraversalContext.visit
+│  (./node_modules/@babel/traverse/lib/context.js:119:19)
+│  at traverseNode
+│  (./node_modules/@babel/traverse/lib/traverse-node.js:130:17)
+│  at NodePath.visit
+│  (./node_modules/@babel/traverse/lib/path/context.js:93:52)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/project-annotations.js,
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│
+■  Vite Pre-transform error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at FileState.parse
+│  (file://./node_modules/react-docgen/dist/FileState.js:62:21)
+│  at FileState.resolveImportedValue
+│  (file://./node_modules/react-docgen/dist/importer/makeFsImporter.js:102:29)
+│  at FileState.import
+│  (file://./node_modules/react-docgen/dist/FileState.js:51:71)
+│  at findScopePath
+│  (file://./node_modules/react-docgen/dist/utils/resolveToValue.js:30:63)
+│  at resolveToValue
+│  (file://./node_modules/react-docgen/dist/utils/resolveToValue.js:96:32)
+│  at isReactBuiltinReference
+│  (file://./node_modules/react-docgen/dist/utils/isReactBuiltinReference.js:33:19)
+│  at isReactBuiltinCall
+│  (file://./node_modules/react-docgen/dist/utils/isReactBuiltinCall.js:11:12)
+│  at Object.enter
+│  (file://./node_modules/react-docgen/dist/handlers/componentMethodsHandler.js:52:18)
+│  at NodePath._call
+│  (./node_modules/@babel/traverse/lib/path/context.js:50:20)
+│  at NodePath.call
+│  (./node_modules/@babel/traverse/lib/path/context.js:40:18)
+│  at NodePath.visit
+│  (./node_modules/@babel/traverse/lib/path/context.js:87:31)
+│  at TraversalContext.visitQueue
+│  (./node_modules/@babel/traverse/lib/context.js:96:16)
+│  at TraversalContext.visitSingle
+│  (./node_modules/@babel/traverse/lib/context.js:72:19)
+│  at TraversalContext.visit
+│  (./node_modules/@babel/traverse/lib/context.js:119:19)
+│  at traverseNode
+│  (./node_modules/@babel/traverse/lib/traverse-node.js:130:17)
+│  at NodePath.visit
+│  (./node_modules/@babel/traverse/lib/path/context.js:93:52)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at FileState.parse
+│  (file://./node_modules/react-docgen/dist/FileState.js:62:21)
+│  at FileState.resolveImportedValue
+│  (file://./node_modules/react-docgen/dist/importer/makeFsImporter.js:102:29)
+│  at FileState.import
+│  (file://./node_modules/react-docgen/dist/FileState.js:51:71)
+│  at findScopePath
+│  (file://./node_modules/react-docgen/dist/utils/resolveToValue.js:30:63)
+│  at resolveToValue
+│  (file://./node_modules/react-docgen/dist/utils/resolveToValue.js:96:32)
+│  at isReactBuiltinReference
+│  (file://./node_modules/react-docgen/dist/utils/isReactBuiltinReference.js:33:19)
+│  at isReactBuiltinCall
+│  (file://./node_modules/react-docgen/dist/utils/isReactBuiltinCall.js:11:12)
+│  at Object.enter
+│  (file://./node_modules/react-docgen/dist/handlers/componentMethodsHandler.js:52:18)
+│  at NodePath._call
+│  (./node_modules/@babel/traverse/lib/path/context.js:50:20)
+│  at NodePath.call
+│  (./node_modules/@babel/traverse/lib/path/context.js:40:18)
+│  at NodePath.visit
+│  (./node_modules/@babel/traverse/lib/path/context.js:87:31)
+│  at TraversalContext.visitQueue
+│  (./node_modules/@babel/traverse/lib/context.js:96:16)
+│  at TraversalContext.visitSingle
+│  (./node_modules/@babel/traverse/lib/context.js:72:19)
+│  at TraversalContext.visit
+│  (./node_modules/@babel/traverse/lib/context.js:119:19)
+│  at traverseNode
+│  (./node_modules/@babel/traverse/lib/traverse-node.js:130:17)
+│  at NodePath.visit
+│  (./node_modules/@babel/traverse/lib/path/context.js:93:52)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/components/AudioWaveformPlayer.jsx:3:0
+│  1  |  import React, { useState, useEffect, useRef, useCallback,
+│  useContext } from 'react';
+│  2  |  import { useTranslation } from 'next-i18next';
+│  |       ^
+│  3  |  import { Box, IconButton, Typography, Slider } from
+│  '@mui/material';
+│  4  |  import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at FileState.parse
+│  (file://./node_modules/react-docgen/dist/FileState.js:62:21)
+│  at FileState.resolveImportedValue
+│  (file://./node_modules/react-docgen/dist/importer/makeFsImporter.js:102:29)
+│  at FileState.import
+│  (file://./node_modules/react-docgen/dist/FileState.js:51:71)
+│  at findScopePath
+│  (file://./node_modules/react-docgen/dist/utils/resolveToValue.js:30:63)
+│  at resolveToValue
+│  (file://./node_modules/react-docgen/dist/utils/resolveToValue.js:96:32)
+│  at isReactBuiltinReference
+│  (file://./node_modules/react-docgen/dist/utils/isReactBuiltinReference.js:33:19)
+│  at isReactBuiltinCall
+│  (file://./node_modules/react-docgen/dist/utils/isReactBuiltinCall.js:11:12)
+│  at Object.enter
+│  (file://./node_modules/react-docgen/dist/handlers/componentMethodsHandler.js:52:18)
+│  at NodePath._call
+│  (./node_modules/@babel/traverse/lib/path/context.js:50:20)
+│  at NodePath.call
+│  (./node_modules/@babel/traverse/lib/path/context.js:40:18)
+│  at NodePath.visit
+│  (./node_modules/@babel/traverse/lib/path/context.js:87:31)
+│  at TraversalContext.visitQueue
+│  (./node_modules/@babel/traverse/lib/context.js:96:16)
+│  at TraversalContext.visitSingle
+│  (./node_modules/@babel/traverse/lib/context.js:72:19)
+│  at TraversalContext.visit
+│  (./node_modules/@babel/traverse/lib/context.js:119:19)
+│  at traverseNode
+│  (./node_modules/@babel/traverse/lib/traverse-node.js:130:17)
+│  at NodePath.visit
+│  (./node_modules/@babel/traverse/lib/path/context.js:93:52)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│
+■  Vite Internal server error:
+│  ./src/components/Editor3/context/AudioPlayerContext.jsx: Unterminated
+│  comment. (3:0)
+
+│  1 | import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2 |
+│  > 3 | /**
+│  | ^
+│  4 |  * Shared audio player context
+│  5 |  * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  6 |  * Only one audio can play at a time
+│  Plugin: storybook:react-docgen-plugin
+│  File: ./src/components/Editor3/context/AudioPlayerContext.jsx:3:0
+│  1  |  import React, { createContext, useContext, useRef, useState,
+│  useCallback } from 'react';
+│  2  |
+│  3  |  /**
+│  |  ^
+│  4  |   * Shared audio player context
+│  5  |   * Provides a single audio element that all AudioWaveformPlayers
+│  can use
+│  at constructor (./node_modules/@babel/parser/lib/index.js:365:19)
+│  at FlowParserMixin.raise
+│  (./node_modules/@babel/parser/lib/index.js:6599:19)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:5790:18)
+│  at FlowParserMixin.skipBlockComment
+│  (./node_modules/@babel/parser/lib/index.js:3704:18)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:5858:38)
+│  at FlowParserMixin.skipSpace
+│  (./node_modules/@babel/parser/lib/index.js:4769:42)
+│  at FlowParserMixin.nextToken
+│  (./node_modules/@babel/parser/lib/index.js:5775:10)
+│  at FlowParserMixin.next
+│  (./node_modules/@babel/parser/lib/index.js:5692:10)
+│  at FlowParserMixin.eat
+│  (./node_modules/@babel/parser/lib/index.js:5696:12)
+│  at FlowParserMixin.isLineTerminator
+│  (./node_modules/@babel/parser/lib/index.js:6891:17)
+│  at FlowParserMixin.semicolon
+│  (./node_modules/@babel/parser/lib/index.js:6894:25)
+│  at FlowParserMixin.parseImportSourceAndAttributes
+│  (./node_modules/@babel/parser/lib/index.js:14253:10)
+│  at FlowParserMixin.parseImportSpecifiersAndAfter
+│  (./node_modules/@babel/parser/lib/index.js:14244:17)
+│  at FlowParserMixin.parseImport
+│  (./node_modules/@babel/parser/lib/index.js:14235:17)
+│  at FlowParserMixin.parseStatementContent
+│  (./node_modules/@babel/parser/lib/index.js:12876:27)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:12767:17)
+│  at FlowParserMixin.parseStatementLike
+│  (./node_modules/@babel/parser/lib/index.js:2918:24)
+│  at FlowParserMixin.parseModuleItem
+│  (./node_modules/@babel/parser/lib/index.js:12744:17)
+│  at FlowParserMixin.parseBlockOrModuleBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13316:36)
+│  at FlowParserMixin.parseBlockBody
+│  (./node_modules/@babel/parser/lib/index.js:13309:10)
+│  at FlowParserMixin.parseProgram
+│  (./node_modules/@babel/parser/lib/index.js:12622:10)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:12612:25)
+│  at FlowParserMixin.parseTopLevel
+│  (./node_modules/@babel/parser/lib/index.js:3685:28)
+│  at FlowParserMixin.parse
+│  (./node_modules/@babel/parser/lib/index.js:14488:25)
+│  at parse (./node_modules/@babel/parser/lib/index.js:14501:26)
+│  at parser (./node_modules/@babel/core/lib/parser/index.js:41:34)
+│  at parser.next (<anonymous>)
+│  at parse (./node_modules/@babel/core/lib/parse.js:25:37)
+│  at parse.next (<anonymous>)
+│  at evaluateSync (./node_modules/gensync/index.js:251:28)
+│  at sync (./node_modules/gensync/index.js:89:14)
+│  at stopHiding - secret - don't use this - v1
+│  (./node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+│  at parseSync (./node_modules/@babel/core/lib/parse.js:38:72)
+│  at babelParser
+│  (file://./node_modules/react-docgen/dist/babelParser.js:59:17)
+│  at parse (file://./node_modules/react-docgen/dist/parse.js:33:17)
+│  at defaultParse
+│  (file://./node_modules/react-docgen/dist/main.js:26:12)
+│  at TransformPluginContext.transform
+│  (file://./node_modules/@storybook/react-vite/dist/_node-chunks/react-docgen-I7YNFTUQ.js:133:31)
+│  at EnvironmentPluginContainer.transform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:28797:51)
+│  at async loadAndTransform
+│  (file://./node_modules/vite/dist/node/chunks/config.js:22670:26)
+│  at async viteTransformMiddleware
+│  (file://./node_modules/vite/dist/node/chunks/config.js:24542:20)
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/project-annotations.js,
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/project-annotations.js,
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js

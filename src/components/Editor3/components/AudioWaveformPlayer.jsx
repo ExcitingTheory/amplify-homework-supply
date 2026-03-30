@@ -16,6 +16,33 @@ import FilesContext from '../../../context/fileContext';
 /**
  * AudioWaveformPlayer - Complete audio player with waveform visualization and recording
  * 
+ * DO NOT MODIFY the following behaviors without thorough testing across all playback
+ * and recording flows. These were hard-won fixes for browser-level edge cases:
+ * 
+ * 1. OVERLAY VISIBILITY: The progress overlay div contains a zero-width space
+ *    character ('\u200B') to prevent Lexical's `div:empty:last-child { display: none
+ *    !important }` CSS rule from hiding it. Do NOT make the div self-closing or empty.
+ * 
+ * 2. OVERLAY ANIMATION: Uses `transform: scaleX()` with `transformOrigin: 'left'`
+ *    for GPU-composited progress reveal. This is preferred over width-percentage
+ *    or clip-path approaches which were also tested.
+ * 
+ * 3. DURATION SOURCE: The RAF progress loop uses `durationRef.current` exclusively
+ *    (synced from `localDuration` via useEffect). Do NOT use `audioElement.duration`
+ *    — WebM blobs from MediaRecorder report `Infinity` for duration. The accurate
+ *    duration comes from `decodeAudioData()` in the recording stop handler.
+ * 
+ * 4. SLIDER TRANSITIONS: MUI Slider CSS transitions are disabled during playback
+ *    (`transition: 'none'` on thumb and track when `isPlaying && !isSeeking`).
+ *    Without this, the ~150ms default transitions fight the RAF updates, making
+ *    the thumb barely crawl instead of tracking smoothly.
+ * 
+ * 5. RAF THROTTLING: Progress updates are throttled to ~30fps (33ms interval)
+ *    to reduce React re-renders while remaining visually smooth.
+ * 
+ * 6. HEIGHT DEFAULT: Default height is 80px. Do NOT change without comparing
+ *    visual appearance of waveforms at different sizes.
+ *
  * Uses shared audio context to ensure only one audio plays at a time.
  * Displays a static waveform with playback controls and progress tracking.
  * Shows current playback position on the waveform.

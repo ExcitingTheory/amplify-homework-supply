@@ -1,4 +1,5 @@
 # Japanese Grammar Guide
+
 ## Particles: は (wa), が (ga), を (wo)
 
 This guide covers essential Japanese grammar concepts including particles, greetings, and foundational sentence patterns.
@@ -38,6 +39,7 @@ Particles are small words attached to nouns, verbs, and adjectives that indicate
 The particle は marks the **topic** of the sentence - what the sentence is about. It indicates known or previously mentioned information.
 
 **Example sentences:**
+
 - 私は学生です。(Watashi **wa** gakusei desu.) - I am a student.
 - 田中先生は英語の先生です。(Tanaka-sensei **wa** eigo no sensei desu.) - Tanaka-sensei is an English teacher.
 - 日本語は難しいです。(Nihongo **wa** muzukashii desu.) - Japanese is difficult.
@@ -47,6 +49,7 @@ The particle は marks the **topic** of the sentence - what the sentence is abou
 The particle が marks the **subject** of the sentence - who or what performs the action. It emphasizes new or specific information.
 
 **Example sentences:**
+
 - 猫が好きです。(Neko **ga** suki desu.) - I like cats. (emphasizing "cats" specifically)
 - 誰が来ましたか？(Dare **ga** kimashita ka?) - Who came?
 - 雨が降っています。(Ame **ga** futte imasu.) - It is raining.
@@ -55,17 +58,18 @@ The particle が marks the **subject** of the sentence - who or what performs th
 
 The distinction between は and が is one of the most challenging aspects of Japanese grammar:
 
-| は (wa) | が (ga) |
-|---------|---------|
-| Marks the topic (what we're talking about) | Marks the subject (who performs the action) |
-| Used for known or general information | Used for new, specific, or emphasized information |
-| Can replace が in many sentences | Cannot always replace は |
+| は (wa)                                    | が (ga)                                           |
+| ------------------------------------------ | ------------------------------------------------- |
+| Marks the topic (what we're talking about) | Marks the subject (who performs the action)       |
+| Used for known or general information      | Used for new, specific, or emphasized information |
+| Can replace が in many sentences           | Cannot always replace は                          |
 
 ### を (wo) - Object Marker
 
 The particle を marks the **direct object** - the thing that receives the action of the verb.
 
 **Example sentences:**
+
 - 水を飲みます。(Mizu **wo** nomimasu.) - I drink water.
 - 日本語を勉強します。(Nihongo **wo** benkyou shimasu.) - I study Japanese.
 - 本を読みます。(Hon **wo** yomimasu.) - I read a book.
@@ -75,6 +79,7 @@ The particle を marks the **direct object** - the thing that receives the actio
 The particle に indicates direction of movement, specific time, or existence location.
 
 **Example sentences:**
+
 - 学校に行きます。(Gakkou **ni** ikimasu.) - I go to school.
 - 7時に起きます。(Shichi-ji **ni** okimasu.) - I wake up at 7 o'clock.
 - 椅子に座ってください。(Isu **ni** suwatte kudasai.) - Please sit in the chair.
@@ -84,6 +89,7 @@ The particle に indicates direction of movement, specific time, or existence lo
 The particle で indicates where an action takes place or the means by which something is done.
 
 **Example sentences:**
+
 - 図書館で勉強します。(Toshokan **de** benkyou shimasu.) - I study at the library.
 - バスで学校に行きます。(Basu **de** gakkou ni ikimasu.) - I go to school by bus.
 - 日本語で話してください。(Nihongo **de** hanashite kudasai.) - Please speak in Japanese.
