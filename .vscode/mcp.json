@@ -10,6 +10,37 @@
 			],
 			"gallery": "https://api.mcp.github.com",
 			"version": "0.20.3"
+		},
+		"github": {
+			"type": "http",
+			"url": "https://api.githubcopilot.com/mcp/"
+		},
+		"io.github.upstash/context7": {
+			"type": "stdio",
+			"command": "${workspaceFolder}/.vscode/nvm-npx.sh",
+			"args": [
+				"-y",
+				"@upstash/context7-mcp@latest"
+			],
+			"gallery": "https://api.mcp.github.com"
+		},
+		"io.github.vercel/next-devtools-mcp": {
+			"type": "stdio",
+			"command": "${workspaceFolder}/.vscode/nvm-npx.sh",
+			"args": [
+				"-y",
+				"next-devtools-mcp@latest"
+			],
+			"gallery": "https://api.mcp.github.com"
+		},
+		"microsoft/playwright-mcp": {
+			"type": "stdio",
+			"command": "${workspaceFolder}/.vscode/nvm-npx.sh",
+			"args": [
+				"-y",
+				"@playwright/mcp@latest"
+			],
+			"gallery": "https://api.mcp.github.com"
 		}
 	},
 	"inputs": []

@@ -18,8 +18,7 @@ const config: StorybookConfig = {
     "@chromatic-com/storybook",
     "@storybook/addon-a11y",
     "@storybook/addon-docs",
-    // NOTE: @storybook/addon-vitest is NOT listed here - it's used only as a vitest plugin
-    // in vitest.config.ts via storybookTest(). Adding it to addons causes browser errors.
+    "@storybook/addon-vitest",
   ],
   "framework": "@storybook/nextjs-vite",
   "staticDirs": [
