@@ -1,11 +1,15 @@
-import { Excalidraw } from "@excalidraw/excalidraw";
-import { useState, useEffect, useRef, useContext } from "react";
-import { exportToCanvas } from "@excalidraw/excalidraw";
+import { lazy, Suspense, useState, useEffect, useRef, useContext } from "react";
+import "@excalidraw/excalidraw/index.css";
 import { getAmplifyClient } from "../../../utils/amplifyClient";
 import { uploadStudentSubmission } from "../../../utils/userSubmissionStorage";
 import UnitContext from "../../../context/unitContext";
-import { Button, Box, Typography } from "@mui/material";
+import { Button, Box, Typography, Skeleton } from "@mui/material";
 import { useTranslation } from "next-i18next";
+
+const LazyExcalidraw = lazy(() =>
+    import("@excalidraw/excalidraw").then((mod) => ({ default: mod.Excalidraw }))
+);
+const exportToCanvasPromise = import("@excalidraw/excalidraw").then((mod) => mod.exportToCanvas);
 // TODO Add a version to the data so that we can update the data when the version is higher than the current working copy, which should be one above the last saved version
 
 const SketchPad = ({ excalidrawData,
@@ -43,11 +47,12 @@ const SketchPad = ({ excalidrawData,
     const thisVersion = _excalidrawData.version;
     const nextVersion = thisVersion + 1;
 
-    const exportCanvas = (elements, appState) => {
+    const exportCanvas = async (elements, appState) => {
         console.log("exporting canvas");
         console.log("elements", elements);
         console.log("appState", appState);
         
+        const exportToCanvas = await exportToCanvasPromise;
         const canvas = exportToCanvas({
             elements,
             appState,
@@ -289,6 +294,7 @@ const SketchPad = ({ excalidrawData,
                     return;
                 }
 
+                const exportToCanvas = await exportToCanvasPromise;
                 const canvas = await exportToCanvas({
                     elements,
                     appState,
@@ -312,7 +318,16 @@ const SketchPad = ({ excalidrawData,
                 boxShadow: "0 0 10px rgba(33, 150, 243, 0.5)",
                 position: "relative",
             }}>
-                <Excalidraw
+                <Suspense fallback={
+                    <Skeleton
+                        variant="rectangular"
+                        width="100%"
+                        height="100%"
+                        animation="wave"
+                        sx={{ borderRadius: "4px" }}
+                    />
+                }>
+                <LazyExcalidraw
                 initialData={{
                     ...excalidrawData,
                     appState: {
@@ -359,7 +374,8 @@ const SketchPad = ({ excalidrawData,
                 zenModeEnabled={false}
                 gridModeEnabled={false}
                 >
-                </Excalidraw>
+                </LazyExcalidraw>
+                </Suspense>
             </div>
         </Box>
         );

@@ -134,68 +134,6 @@ Enhanced vocabulary review panel for PDF analysis with modern UX improvements.
 export default meta;
 type Story = StoryObj<typeof VocabularyReview2>;
 
-// Mock data helpers - for future use with loaders
-/*
-const createMockVocabulary = (count: number, options: any = {}) => {
-    const words = [
-        { word: '光合成', phonetic: 'こうごうせい', definition: 'Photosynthesis - the process by which plants convert light energy into chemical energy', context: '植物は光合成によってエネルギーを作ります。', page: 1 },
-        { word: '葉緑体', phonetic: 'ようりょくたい', definition: 'Chloroplast - organelle in plant cells where photosynthesis occurs', context: '葉緑体は光合成の場所です。', page: 1 },
-        { word: '二酸化炭素', phonetic: 'にさんかたんそ', definition: 'Carbon dioxide - gas used by plants in photosynthesis', context: '植物は二酸化炭素を吸収します。', page: 2 },
-        { word: '酸素', phonetic: 'さんそ', definition: 'Oxygen - gas released by plants during photosynthesis', context: '光合成で酸素が作られます。', page: 2 },
-        { word: 'グルコース', phonetic: 'ぐるこーす', definition: 'Glucose - simple sugar produced by photosynthesis', context: 'グルコースは植物の栄養源です。', page: 3 },
-        { word: '太陽光', phonetic: 'たいようこう', definition: 'Sunlight - light energy from the sun used in photosynthesis', context: '太陽光は光合成に必要です。', page: 3 },
-        { word: '水分', phonetic: 'すいぶん', definition: 'Water - essential component for photosynthesis', context: '植物は根から水分を吸収します。', page: 4 },
-        { word: '細胞', phonetic: 'さいぼう', definition: 'Cell - basic unit of life in organisms', context: '植物の細胞には葉緑体があります。', page: 4 },
-        { word: '栄養素', phonetic: 'えいようそ', definition: 'Nutrient - substance providing nourishment', context: '光合成で作られた栄養素は植物全体に運ばれます。', page: 5 },
-        { word: '生態系', phonetic: 'せいたいけい', definition: 'Ecosystem - biological community of interacting organisms', context: '植物は生態系の基礎です。', page: 5 },
-    ];
-    
-    const result = [];
-    for (let i = 0; i < count; i++) {
-        const template = words[i % words.length];
-        result.push({
-            ...template,
-            word: count > words.length ? `${template.word}_${Math.floor(i / words.length) + 1}` : template.word,
-            ...options,
-        });
-    }
-    return result;
-};
-
-const createMockParsedContent = (vocabItems: any[]) => ({
-    id: 'mock-parsed-content-1',
-    documentID: 'mock-doc-1',
-    vocabularyJSON: JSON.stringify(vocabItems),
-    summariesJSON: JSON.stringify([
-        {
-            title: 'Overview of Photosynthesis',
-            content: 'Photosynthesis is the process by which plants use sunlight to convert carbon dioxide and water into glucose and oxygen.',
-        },
-        {
-            title: 'Importance in Ecosystems',
-            content: 'Photosynthesis is fundamental to life on Earth, providing oxygen and serving as the base of most food chains.',
-        },
-    ]),
-    objectivesJSON: JSON.stringify([
-        { objective: 'Understand the basic process of photosynthesis' },
-        { objective: 'Identify the key components required for photosynthesis' },
-        { objective: 'Explain the role of chloroplasts in plant cells' },
-        { objective: 'Describe the products of photosynthesis' },
-    ]),
-    status: 'completed',
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
-    updatedAt: new Date(Date.now() - 1800000).toISOString(),
-});
-
-const createMockDocument = () => ({
-    id: 'mock-doc-1',
-    filename: 'japanese-lesson-photosynthesis.pdf',
-    pageCount: 5,
-    mimeType: 'application/pdf',
-    size: 1234567,
-});
-*/
-
 /**
  * Default state with 10 vocabulary items ready for review
  */

@@ -166,9 +166,6 @@ export const TranslationHelper = {
     expect(canvas.getByText(/ohayou gozaimasu/i)).toBeInTheDocument();
     expect(canvas.getByText(/polite form/i)).toBeInTheDocument();
   },
-  parameters: {
-    initializeMockData: false,
-  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -203,6 +200,7 @@ export const TranslationHelper = {
     }
   ],
   parameters: {
+    initializeMockData: false,
     docs: {
       description: {
         story: `
@@ -254,9 +252,6 @@ export const ContentCreation = {
     expect(canvas.getByText(/Learning Objectives/i)).toBeInTheDocument();
     expect(canvas.getByText(/Vocabulary/i)).toBeInTheDocument();
   },
-  parameters: {
-    initializeMockData: false,
-  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -291,6 +286,7 @@ export const ContentCreation = {
     }
   ],
   parameters: {
+    initializeMockData: false,
     docs: {
       description: {
         story: `
@@ -347,9 +343,6 @@ export const WithFileAttachments = {
     // Verify AI's analysis options are shown
     expect(canvas.getByText(/Extract vocabulary/i)).toBeInTheDocument();
   },
-  parameters: {
-    initializeMockData: false,
-  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -390,6 +383,7 @@ export const WithFileAttachments = {
     </TabProvider>
   ),
   parameters: {
+    initializeMockData: false,
     docs: {
       description: {
         story: 'Demonstrates file attachment handling. The user uploaded a PDF and the AI acknowledged it for analysis.',
@@ -413,9 +407,6 @@ export const QuizGenerator = {
     // Look for the preview content
     const quizPreview = canvas.getByText(/Which hiragana character represents/i);
     expect(quizPreview).toBeInTheDocument();
-  },
-  parameters: {
-    initializeMockData: false,
   },
   decorators: [
     (Story) => {
@@ -504,6 +495,7 @@ export const QuizGenerator = {
     }
   ],
   parameters: {
+    initializeMockData: false,
     docs: {
       description: {
         story: `
@@ -567,9 +559,6 @@ export const AnswerBlockGenerator = {
     
     // Verify answer block preview is shown
     expect(canvas.getByText(/insert_answer_block/i)).toBeInTheDocument();
-  },
-  parameters: {
-    initializeMockData: false,
   },
   decorators: [
     (Story) => {
@@ -641,6 +630,7 @@ export const AnswerBlockGenerator = {
     }
   ],
   parameters: {
+    initializeMockData: false,
     docs: {
       description: {
         story: `
@@ -697,9 +687,6 @@ export const MeaningAssociationGenerator = {
     
     // Verify modes are mentioned
     expect(canvas.getByText(/Learn mode/i)).toBeInTheDocument();
-  },
-  parameters: {
-    initializeMockData: false,
   },
   decorators: [
     (Story) => {
@@ -772,6 +759,7 @@ export const MeaningAssociationGenerator = {
     }
   ],
   parameters: {
+    initializeMockData: false,
     docs: {
       description: {
         story: `
@@ -828,9 +816,6 @@ export const CustomAnswerGenerator = {
     
     // Verify audio prompt method
     expect(canvas.getByText(/Listen and type/i)).toBeInTheDocument();
-  },
-  parameters: {
-    initializeMockData: false,
   },
   decorators: [
     (Story) => {
@@ -920,6 +905,7 @@ export const CustomAnswerGenerator = {
     }
   ],
   parameters: {
+    initializeMockData: false,
     docs: {
       description: {
         story: `
@@ -980,9 +966,6 @@ export const GrammarExplainer = {
     // Verify examples are shown
     expect(canvas.getByText(/が \(ga\) - Subject Marker/i)).toBeInTheDocument();
   },
-  parameters: {
-    initializeMockData: false,
-  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -1017,6 +1000,7 @@ export const GrammarExplainer = {
     }
   ],
   parameters: {
+    initializeMockData: false,
     docs: {
       description: {
         story: `
@@ -1066,9 +1050,6 @@ Get clear explanations of Japanese grammar concepts with examples.
 };
 
 export const ConversationHistory = {
-  parameters: {
-    initializeMockData: false,
-  },
   render: () => (
     <TabProvider>
       <ChatSidebar />
@@ -1097,6 +1078,7 @@ export const ConversationHistory = {
     }
   ],
   parameters: {
+    initializeMockData: false,
     docs: {
       description: {
         story: `
@@ -1128,9 +1110,6 @@ The AI understands "it", "that", and "this" in your questions because it remembe
 };
 
 export const ToolCallSearch = {
-  parameters: {
-    initializeMockData: false,
-  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -1210,6 +1189,7 @@ export const ToolCallSearch = {
     }
   ],
   parameters: {
+    initializeMockData: false,
     docs: {
       description: {
         story: `
@@ -1245,9 +1225,6 @@ Demonstrates the **search_content** tool in action. When users ask to search for
 };
 
 export const ToolCallCreateUnit = {
-  parameters: {
-    initializeMockData: false,
-  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -1305,6 +1282,7 @@ export const ToolCallCreateUnit = {
     }
   ],
   parameters: {
+    initializeMockData: false,
     docs: {
       description: {
         story: `
@@ -1339,9 +1317,6 @@ Shows the **create_unit** tool creating a new learning unit with a timer.
 };
 
 export const ToolCallGenerateContent = {
-  parameters: {
-    initializeMockData: false,
-  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -1502,6 +1477,7 @@ export const ToolCallGenerateContent = {
     }
   ],
   parameters: {
+    initializeMockData: false,
     docs: {
       description: {
         story: `
@@ -1550,9 +1526,6 @@ Demonstrates **insert_content_block** tool creating insertable educational conte
 };
 
 export const ToolCallMultiStep = {
-  parameters: {
-    initializeMockData: false,
-  },
   decorators: [
     (Story) => {
       seedMockAssistantChats([
@@ -1633,6 +1606,7 @@ export const ToolCallMultiStep = {
     }
   ],
   parameters: {
+    initializeMockData: false,
     docs: {
       description: {
         story: `

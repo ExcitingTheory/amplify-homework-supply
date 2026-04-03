@@ -21,7 +21,6 @@ import {
   $isRangeSelection,
   $createTextNode,
   $getNodeByKey,
-  $setSelection,
   COMMAND_PRIORITY_LOW,
   KEY_ARROW_RIGHT_COMMAND,
   KEY_ESCAPE_COMMAND,
@@ -88,26 +87,25 @@ export default function AIContentCompletionPlugin() {
       }
       
       if (suggestionNodeKey.current !== null) {
-        // Update existing node
-        console.log('Updating existing node with key:', suggestionNodeKey.current);
         const node = $getNodeByKey(suggestionNodeKey.current);
         if (node instanceof AIContentSuggestionNode) {
-          // Remove old node and create new one to force re-render
-          const selectionCopy = selection.clone();
-          node.remove();
+          // Update existing suggestion in place (no selection change needed)
+          console.log('Updating existing suggestion node in place');
+          node.setSuggestion(text);
+        } else if (node !== null && node.isAttached()) {
+          // Replace loading node (or other node type) with suggestion node
+          console.log('Replacing existing node with suggestion');
           const newNode = $createAIContentSuggestionNode(AI_SUGGESTION_UUID, text);
+          node.replace(newNode);
           suggestionNodeKey.current = newNode.getKey();
-          selection.insertNodes([newNode]);
-          $setSelection(selectionCopy);
         }
       } else {
-        // Create new node
+        // Create new node after the anchor (does not affect selection)
         console.log('Creating new suggestion node');
-        const selectionCopy = selection.clone();
+        const anchorNode = selection.anchor.getNode();
         const node = $createAIContentSuggestionNode(AI_SUGGESTION_UUID, text);
         suggestionNodeKey.current = node.getKey();
-        selection.insertNodes([node]);
-        $setSelection(selectionCopy);
+        anchorNode.insertAfter(node);
       }
       
       currentSuggestion.current = text;
@@ -130,11 +128,19 @@ export default function AIContentCompletionPlugin() {
       const selection = $getSelection();
       if (!$isRangeSelection(selection)) return;
       
-      const selectionCopy = selection.clone();
+      // Clear any existing suggestion/loading node first
+      if (suggestionNodeKey.current !== null) {
+        const existingNode = $getNodeByKey(suggestionNodeKey.current);
+        if (existingNode !== null && existingNode.isAttached()) {
+          existingNode.remove();
+        }
+        suggestionNodeKey.current = null;
+      }
+      
+      const anchorNode = selection.anchor.getNode();
       const loadingNode = $createAILoadingNode(AI_SUGGESTION_UUID);
       suggestionNodeKey.current = loadingNode.getKey();
-      selection.insertNodes([loadingNode]);
-      $setSelection(selectionCopy);
+      anchorNode.insertAfter(loadingNode);
     }, { tag: 'skip-collab' });
     
     try {

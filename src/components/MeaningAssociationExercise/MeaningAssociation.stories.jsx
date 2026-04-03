@@ -127,6 +127,76 @@ export const EasyExercise = {
 };
 
 export const EasyExerciseCompleted = {
+  decorators: [
+    (Story) => {
+      const completedGradeData = JSON.stringify({
+        'easy-2': {
+          complete: true,
+          tabIndex: 0,
+          easy: {
+            verifiedAnswers: ['1', '2', '3', '4'],
+            attemptedAnswers: { '1': ['1'], '2': ['2'], '3': ['3'], '4': ['4'] },
+            attemptsCount: 4,
+            accuracy: 1.0,
+            percentComplete: 1.0,
+            complete: true,
+          },
+          hard: {
+            verifiedAnswers: ['1', '2', '3', '4'],
+            attemptedAnswers: { '1': ['1'], '2': ['2'], '3': ['3'], '4': ['4'] },
+            attemptsCount: 4,
+            accuracy: 1.0,
+            percentComplete: 1.0,
+            complete: true,
+          },
+          learn: {
+            verifiedAnswers: ['1', '2', '3', '4'],
+            attemptedAnswers: { '1': ['1'], '2': ['2'], '3': ['3'], '4': ['4'] },
+            attemptsCount: 4,
+            accuracy: 1.0,
+            percentComplete: 1.0,
+            complete: true,
+            droppedPairs: { '1': '1', '2': '2', '3': '3', '4': '4' },
+          },
+        },
+      });
+
+      const mockUnitContext = React.useMemo(() => ({
+        unit: { id: 'test-unit' },
+        name: 'Test Unit',
+        description: 'Test Description',
+        rubric: [],
+        grade: { data: completedGradeData },
+        recentGrades: [],
+        dictionary: wordMapId,
+        files: {},
+        questionBank: {},
+        playlistUrls: {},
+        editorStateRef: { current: null },
+        editorSelectionRef: { current: null },
+        versionRef: { current: 0 },
+        finishedQuestions: 0,
+        showUnitComplete: false,
+        handleBeforeUnload: () => {},
+        setShowUnitComplete: () => {},
+        setFinishedQuestions: () => {},
+        saveName: async () => {},
+        saveDescription: async () => {},
+        handleDelete: async () => {},
+        handleStatusChange: async () => {},
+        saveEditorContent: async () => {},
+        saveGrade: async (data) => console.log('Mock saveGrade:', data),
+        createGrade: async () => console.log('Mock createGrade'),
+        session: { username: 'test-user' },
+      }), []);
+
+      return (
+        <UnitContext.Provider value={mockUnitContext}>
+          <Story />
+        </UnitContext.Provider>
+      );
+    },
+  ],
   render: () => {
     const [tabIndex, setTabIndex] = React.useState(0);
     return (
@@ -169,6 +239,76 @@ export const HardExercise = {
 };
 
 export const HardExerciseCompleted = {
+  decorators: [
+    (Story) => {
+      const completedGradeData = JSON.stringify({
+        'hard-2': {
+          complete: true,
+          tabIndex: 1,
+          easy: {
+            verifiedAnswers: ['1', '2', '3', '4'],
+            attemptedAnswers: { '1': ['1'], '2': ['2'], '3': ['3'], '4': ['4'] },
+            attemptsCount: 4,
+            accuracy: 1.0,
+            percentComplete: 1.0,
+            complete: true,
+          },
+          hard: {
+            verifiedAnswers: ['1', '2', '3', '4'],
+            attemptedAnswers: { '1': ['1'], '2': ['2'], '3': ['3'], '4': ['4'] },
+            attemptsCount: 4,
+            accuracy: 1.0,
+            percentComplete: 1.0,
+            complete: true,
+          },
+          learn: {
+            verifiedAnswers: ['1', '2', '3', '4'],
+            attemptedAnswers: { '1': ['1'], '2': ['2'], '3': ['3'], '4': ['4'] },
+            attemptsCount: 4,
+            accuracy: 1.0,
+            percentComplete: 1.0,
+            complete: true,
+            droppedPairs: { '1': '1', '2': '2', '3': '3', '4': '4' },
+          },
+        },
+      });
+
+      const mockUnitContext = React.useMemo(() => ({
+        unit: { id: 'test-unit' },
+        name: 'Test Unit',
+        description: 'Test Description',
+        rubric: [],
+        grade: { data: completedGradeData },
+        recentGrades: [],
+        dictionary: wordMapId,
+        files: {},
+        questionBank: {},
+        playlistUrls: {},
+        editorStateRef: { current: null },
+        editorSelectionRef: { current: null },
+        versionRef: { current: 0 },
+        finishedQuestions: 0,
+        showUnitComplete: false,
+        handleBeforeUnload: () => {},
+        setShowUnitComplete: () => {},
+        setFinishedQuestions: () => {},
+        saveName: async () => {},
+        saveDescription: async () => {},
+        handleDelete: async () => {},
+        handleStatusChange: async () => {},
+        saveEditorContent: async () => {},
+        saveGrade: async (data) => console.log('Mock saveGrade:', data),
+        createGrade: async () => console.log('Mock createGrade'),
+        session: { username: 'test-user' },
+      }), []);
+
+      return (
+        <UnitContext.Provider value={mockUnitContext}>
+          <Story />
+        </UnitContext.Provider>
+      );
+    },
+  ],
   render: () => {
     const [tabIndex, setTabIndex] = React.useState(0);
     return (
@@ -214,6 +354,76 @@ export const LearnExercise = {
 };
 
 export const LearnExerciseCompleted = {
+  decorators: [
+    (Story) => {
+      const completedGradeData = JSON.stringify({
+        'learn-2': {
+          complete: true,
+          tabIndex: 2,
+          easy: {
+            verifiedAnswers: ['1', '2', '3', '4'],
+            attemptedAnswers: { '1': ['1'], '2': ['2'], '3': ['3'], '4': ['4'] },
+            attemptsCount: 4,
+            accuracy: 1.0,
+            percentComplete: 1.0,
+            complete: true,
+          },
+          hard: {
+            verifiedAnswers: ['1', '2', '3', '4'],
+            attemptedAnswers: { '1': ['1'], '2': ['2'], '3': ['3'], '4': ['4'] },
+            attemptsCount: 4,
+            accuracy: 1.0,
+            percentComplete: 1.0,
+            complete: true,
+          },
+          learn: {
+            verifiedAnswers: ['1', '2', '3', '4'],
+            attemptedAnswers: { '1': ['1'], '2': ['2'], '3': ['3'], '4': ['4'] },
+            attemptsCount: 4,
+            accuracy: 1.0,
+            percentComplete: 1.0,
+            complete: true,
+            droppedPairs: { '1': '1', '2': '2', '3': '3', '4': '4' },
+          },
+        },
+      });
+
+      const mockUnitContext = React.useMemo(() => ({
+        unit: { id: 'test-unit' },
+        name: 'Test Unit',
+        description: 'Test Description',
+        rubric: [],
+        grade: { data: completedGradeData },
+        recentGrades: [],
+        dictionary: wordMapId,
+        files: {},
+        questionBank: {},
+        playlistUrls: {},
+        editorStateRef: { current: null },
+        editorSelectionRef: { current: null },
+        versionRef: { current: 0 },
+        finishedQuestions: 0,
+        showUnitComplete: false,
+        handleBeforeUnload: () => {},
+        setShowUnitComplete: () => {},
+        setFinishedQuestions: () => {},
+        saveName: async () => {},
+        saveDescription: async () => {},
+        handleDelete: async () => {},
+        handleStatusChange: async () => {},
+        saveEditorContent: async () => {},
+        saveGrade: async (data) => console.log('Mock saveGrade:', data),
+        createGrade: async () => console.log('Mock createGrade'),
+        session: { username: 'test-user' },
+      }), []);
+
+      return (
+        <UnitContext.Provider value={mockUnitContext}>
+          <Story />
+        </UnitContext.Provider>
+      );
+    },
+  ],
   render: () => {
     const [tabIndex, setTabIndex] = React.useState(0);
     return (

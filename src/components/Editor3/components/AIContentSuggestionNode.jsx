@@ -60,6 +60,10 @@ export class AIContentSuggestionNode extends DecoratorNode {
     return <AIContentSuggestionComponent suggestion={this.__suggestion} />;
   }
 
+  isInline() {
+    return true;
+  }
+
   setSuggestion(suggestion) {
     const writable = this.getWritable();
     writable.__suggestion = suggestion;
@@ -96,6 +100,10 @@ export class AILoadingNode extends DecoratorNode {
   constructor(uuid, key) {
     super(key);
     this.__uuid = uuid;
+  }
+
+  isInline() {
+    return true;
   }
 
   updateDOM(prevNode, dom, config) {

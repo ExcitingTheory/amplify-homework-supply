@@ -68,29 +68,6 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 /**
- * Example embedded in documentation
- * This is how it appears in the Help → Keyboard Shortcuts page
- */
-export const InDocumentation: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story: `
-This is how the trainer appears when embedded in the Keyboard Shortcuts help page.
-Users can practice shortcuts right from the documentation!
-
-**Try these shortcuts:**
-- **Bold**: ⌘B (Mac) or Ctrl+B (Windows)
-- **Italic**: ⌘I (Mac) or Ctrl+I (Windows)
-- **Heading 1**: ⌘⌥1 (Mac) or Ctrl+Alt+1 (Windows)
-- **Bullet List**: ⌘⇧8 (Mac) or Ctrl+Shift+8 (Windows)
-        `.trim(),
-      },
-    },
-  },
-};
-
-/**
  * Mobile responsive view
  */
 export const Mobile: Story = {

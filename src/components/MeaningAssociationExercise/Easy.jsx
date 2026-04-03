@@ -26,12 +26,13 @@ export const Easy = ({
   const [completedEasy, setCompletedEasy] = React.useState(0);
   const [startPositionEasy, setStartPositionEasy] = React.useState(0);
   const [showCompletion, setShowCompletion] = React.useState(false);
- 
-  // Generate consistent seed from nodeKey for deterministic shuffling
-  // Include mode name to ensure different ordering between modes
+  const hasAutoShownCompletion = React.useRef(false);
+
+  // Seed combines nodeKey with a per-mount random value so order
+  // differs each visit but stays stable within the session
+  const mountSeed = React.useRef(Math.floor(Math.random() * 2147483647));
   const shuffleSeed = React.useMemo(() => {
-    if (!nodeKey) return 0;
-    let hash = 0;
+    let hash = mountSeed.current;
     const str = String(nodeKey) + '-easy';
     for (let i = 0; i < str.length; i++) {
       hash = ((hash << 5) - hash) + str.charCodeAt(i);
@@ -68,15 +69,14 @@ export const Easy = ({
 
   const inProgress = gradeData[nodeKey] || {};
   
-  // Show/hide completion screen based on completion status and tab index
+  // Show completion screen once when exercise completes — don't re-show after dismiss
   React.useEffect(() => {
     const isComplete = inProgress?.easy?.complete;
-    if (isComplete) {
+    if (isComplete && !hasAutoShownCompletion.current) {
+      hasAutoShownCompletion.current = true;
       setShowCompletion(true);
-    } else {
-      setShowCompletion(false);
     }
-  }, [tabIndex, inProgress?.easy?.complete]);
+  }, [inProgress?.easy?.complete]);
   
   console.log('Easy.nodeKey', nodeKey, 'type:', typeof nodeKey);
   console.log('Easy.grade:', grade);
@@ -99,40 +99,31 @@ export const Easy = ({
     }
   }, [inProgress]);
 
-  let vocabList = []
-  let vocabListEasy = []
-  let assignmentEasy = [...filterEasy]
+  // Stable shuffled orders — computed once when answers load, never reshuffled mid-exercise
+  const shuffledWords = React.useMemo(() => {
+    if (answers.length === 0) return [];
+    return shuffle([...answers], shuffleSeed);
+  }, [answers, shuffleSeed]);
 
-  if (answers.length > 0) {
-    answers.forEach((word) => {
-      console.log('Easy.word', word)
-      const answer = word?.phrase
-      console.log('Easy.word.id', word?.id)
-      if (answer) {
-        vocabList.push(<DragBox answer={answer} wordID={word.id} key={word.id} />)
-        if (!filterEasy.includes(word.id)) {
-          vocabListEasy.push(<DragBox answer={answer} wordID={word.id} key={word.id} />)
-          assignmentEasy.push(word)
-        }
+  const shuffledDragOrder = React.useMemo(() => {
+    if (answers.length === 0) return [];
+    return shuffle([...answers], shuffleSeed + 1);
+  }, [answers, shuffleSeed]);
 
-      }
-    });
+  const shuffledDropOrder = React.useMemo(() => {
+    if (answers.length === 0) return [];
+    return shuffle([...answers], shuffleSeed + 2);
+  }, [answers, shuffleSeed]);
 
-  console.log('Easy.vocabList', vocabList)
-  console.log('Easy.vocabListEasy', vocabListEasy)
+  // Filter out matched cards from stable order — no reshuffling
+  const easyVocab = shuffledDragOrder
+    .filter(word => !filterEasy.includes(word?.id))
+    .map(word => <DragBox answer={word.phrase} wordID={word.id} key={word.id} />);
 
-    // Always shuffle using seeded random for consistent ordering
-    vocabList = shuffle(vocabList, shuffleSeed)
-    vocabListEasy = shuffle(vocabListEasy, shuffleSeed + 1)
-    assignment = shuffle(assignment, shuffleSeed + 2)
-    assignmentEasy = shuffle(assignmentEasy, shuffleSeed + 3)
-  }
-
-  const correctAnswer = assignment[startPositionEasy]
-  const currentQuestion = startPositionEasy
-  const easyAssignment = assignmentEasy
-  const easyVocab = vocabListEasy
-  const percentComplete = completedEasy
+  // Find the first unmatched word in the stable shuffled order
+  const correctAnswer = shuffledWords.find(word => !filterEasy.includes(word?.id));
+  const currentQuestion = startPositionEasy;
+  const percentComplete = completedEasy;
   const loadAttemptedAnswers = inProgress?.easy?.attemptedAnswers || {};
 
 
@@ -152,7 +143,7 @@ export const Easy = ({
 
   // const [attemptedAnswers, setAttemptedAnswers] = useState(loadAttemptedAnswers);
 
-  const easyAssignmentLength = easyAssignment.length;
+  const totalWords = shuffledWords.length;
 
 
   async function progressAssignment(draggedWordID, targetWordID) {
@@ -186,8 +177,8 @@ export const Easy = ({
     // setAttemptedAnswers(_attemptedAnswers);
     // setAttemptsCount(attempts);
 
-    // Check completion against the full assignment length, not filtered length
-    if (_verified.length === assignment.length) {
+    // Check completion against the full word count, not filtered length
+    if (_verified.length === totalWords) {
       // // console.log('newIndex === length')
       thisExerciseComplete = true;
 
@@ -210,13 +201,13 @@ export const Easy = ({
       };
     }
 
-    // console.log('easy _verified.length / length,', _verified.length, assignment.length)
+    // console.log('easy _verified.length / length,', _verified.length, totalWords)
     savedGradeCopy[nodeKey]['easy'] = {
       verifiedAnswers: _verified,
       attemptedAnswers: _attemptedAnswers,
       attemptsCount: attempts,
       accuracy: _verified.length / attempts,
-      percentComplete: _verified.length / assignment.length,
+      percentComplete: _verified.length / totalWords,
       complete: thisExerciseComplete
     };
 
@@ -230,7 +221,7 @@ export const Easy = ({
     setFilterEasy(_verified);
     setVerifiedAnswers(_verified);
     setStartPositionEasy(_verified.length);
-    setCompletedEasy((_verified.length / assignment.length) * 100);
+    setCompletedEasy((_verified.length / totalWords) * 100);
 
     await saveGrade(savedGradeCopy);
 
@@ -270,14 +261,14 @@ export const Easy = ({
       };
     }
 
-    // console.log('easy verifiedAnswers.length / length,', verifiedAnswers.length, assignment.length)
-    // console.log('easy currentQuestion+1 / length', currentQuestion + 1, assignment.length)
+    // console.log('easy verifiedAnswers.length / length,', verifiedAnswers.length, totalWords)
+    // console.log('easy currentQuestion+1 / length', currentQuestion + 1, totalWords)
     savedGradeCopy[nodeKey]['easy'] = {
       verifiedAnswers,
       attemptedAnswers: _attemptedAnswers,
       attemptsCount: attempts,
       accuracy: verifiedAnswers.length / attempts,
-      percentComplete: currentQuestion / assignment.length,
+      percentComplete: currentQuestion / totalWords,
       complete: false
     };
 
@@ -298,6 +289,10 @@ export const Easy = ({
     setTabIndex(2); // Move to Hard mode
   };
 
+  const handleDismissCompletion = () => {
+    setShowCompletion(false);
+  };
+
   return (
     <Box sx={{ 
       position: 'relative', 
@@ -307,19 +302,17 @@ export const Easy = ({
       width: '100%',
       maxWidth: '100vw',
     }}>
-      {showCompletion && (
-        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 5 }}>
+      {showCompletion ? (
           <CompletionScreen
             levelName="Easy Mode"
             accuracy={verifiedAnswers.length / (inProgress?.easy?.attemptsCount || 1)}
             attempts={inProgress?.easy?.attemptsCount || 0}
             onContinue={handleContinueFromCompletion}
+            onDismiss={handleDismissCompletion}
             nextLevelName="Hard Mode"
             isLastLevel={false}
           />
-        </Box>
-      )}
-
+      ) : (
       <Grid container direction="column" spacing={1} sx={{ overflow: 'hidden', height: '100%', width: '100%', maxWidth: '100%' }}>
       <Grid item xs={12} sx={{ flexShrink: 0, width: '100%' }}>
         <LinearProgressWithLabel value={percentComplete} />
@@ -361,6 +354,7 @@ export const Easy = ({
       </Grid>
       </Grid>
     </Grid>
+    )}
     </Box>
   );
 };

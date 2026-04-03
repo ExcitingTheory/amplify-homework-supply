@@ -1,5 +1,5 @@
 
-┌  storybook v10.3.1
+┌  storybook v10.2.19
 │
 ●  Starting...
 │
@@ -21,4 +21,497 @@
 │ [38;2;255;71;133m│[39m   https://github.com/storybookjs/storybook/blob/main/CHANGELOG.md          [38;2;255;71;133m│[39m
 │ [38;2;255;71;133m╰[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m─[39m[38;2;255;71;133m╯[39m
 │
-●  365 ms for manager and 364 ms for preview
+●  1.69 s for manager and 649 ms for preview
+│
+▲  Vite warning: Duplicate key "parameters" in object literal
+│  246 |          }
+│  247 |      ],
+│  248 |      parameters: {
+│  |      ^
+│  249 |          docs: {
+│  250 |              description: {
+
+│  Plugin: vite:esbuild
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/ChatSidebar.stories.jsx
+│
+▲  Vite warning: Duplicate key "parameters" in object literal
+│  350 |          }
+│  351 |      ],
+│  352 |      parameters: {
+│  |      ^
+│  353 |          docs: {
+│  354 |              description: {
+
+│  Plugin: vite:esbuild
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/ChatSidebar.stories.jsx
+│
+▲  Vite warning: Duplicate key "parameters" in object literal
+│  471 |              columnNumber: 17
+│  472 |          }, this),
+│  473 |      parameters: {
+│  |      ^
+│  474 |          docs: {
+│  475 |              description: {
+
+│  Plugin: vite:esbuild
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/ChatSidebar.stories.jsx
+│
+▲  Vite warning: Duplicate key "parameters" in object literal
+│  668 |          }
+│  669 |      ],
+│  670 |      parameters: {
+│  |      ^
+│  671 |          docs: {
+│  672 |              description: {
+
+│  Plugin: vite:esbuild
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/ChatSidebar.stories.jsx
+│
+▲  Vite warning: Duplicate key "parameters" in object literal
+│  855 |          }
+│  856 |      ],
+│  857 |      parameters: {
+│  |      ^
+│  858 |          docs: {
+│  859 |              description: {
+
+│  Plugin: vite:esbuild
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/ChatSidebar.stories.jsx
+│
+▲  Vite warning: Duplicate key "parameters" in object literal
+│  1048 |          }
+│  1049 |      ],
+│  1050 |      parameters: {
+│  |      ^
+│  1051 |          docs: {
+│  1052 |              description: {
+
+│  Plugin: vite:esbuild
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/ChatSidebar.stories.jsx
+│
+▲  Vite warning: Duplicate key "parameters" in object literal
+│  1230 |          }
+│  1231 |      ],
+│  1232 |      parameters: {
+│  |      ^
+│  1233 |          docs: {
+│  1234 |              description: {
+
+│  Plugin: vite:esbuild
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/ChatSidebar.stories.jsx
+│
+▲  Vite warning: Duplicate key "parameters" in object literal
+│  1342 |          }
+│  1343 |      ],
+│  1344 |      parameters: {
+│  |      ^
+│  1345 |          docs: {
+│  1346 |              description: {
+
+│  Plugin: vite:esbuild
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/ChatSidebar.stories.jsx
+│
+▲  Vite warning: Duplicate key "parameters" in object literal
+│  1437 |          }
+│  1438 |      ],
+│  1439 |      parameters: {
+│  |      ^
+│  1440 |          docs: {
+│  1441 |              description: {
+
+│  Plugin: vite:esbuild
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/ChatSidebar.stories.jsx
+│
+▲  Vite warning: Duplicate key "parameters" in object literal
+│  1563 |          }
+│  1564 |      ],
+│  1565 |      parameters: {
+│  |      ^
+│  1566 |          docs: {
+│  1567 |              description: {
+
+│  Plugin: vite:esbuild
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/ChatSidebar.stories.jsx
+│
+▲  Vite warning: Duplicate key "parameters" in object literal
+│  1677 |          }
+│  1678 |      ],
+│  1679 |      parameters: {
+│  |      ^
+│  1680 |          docs: {
+│  1681 |              description: {
+
+│  Plugin: vite:esbuild
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/ChatSidebar.stories.jsx
+│
+▲  Vite warning: Duplicate key "parameters" in object literal
+│  1975 |          }
+│  1976 |      ],
+│  1977 |      parameters: {
+│  |      ^
+│  1978 |          docs: {
+│  1979 |              description: {
+
+│  Plugin: vite:esbuild
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/ChatSidebar.stories.jsx
+│
+▲  Vite warning: Duplicate key "parameters" in object literal
+│  2128 |          }
+│  2129 |      ],
+│  2130 |      parameters: {
+│  |      ^
+│  2131 |          docs: {
+│  2132 |              description: {
+
+│  Plugin: vite:esbuild
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/ChatSidebar.stories.jsx
+│
+▲  Vite warning:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/CustomAnswerPlugin.audio-drawing.stories.jsx
+│  337 |    play: async ({ canvasElement }) => {
+│  338 |      const canvas = within(canvasElement);
+│  339 |      const { expect } = await import(__STORYBOOK_MODULE_TEST__);
+│  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+│  340 |      await waitFor(() => {
+│  341 |        expect(canvas.getByText(/Pronounce the
+│  following/i)).toBeInTheDocument();
+│  The above dynamic import cannot be analyzed by Vite.
+│  See ]8;;https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitationshttps://github.com/rollup/plugins/tree/master/packages/dynami...]8;;
+│  for supported dynamic import formats. If this is intended to be left
+│  as-is, you can use the /* @vite-ignore */ comment inside the import()
+│  call to suppress this warning.
+
+│  Plugin: vite:import-analysis
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/CustomAnswerPlugin.audio-drawing.stories.jsx
+│
+▲  Vite warning:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/CustomAnswerPlugin.audio-drawing.stories.jsx
+│  370 |    play: async ({ canvasElement }) => {
+│  371 |      const canvas = within(canvasElement);
+│  372 |      const { expect } = await import(__STORYBOOK_MODULE_TEST__);
+│  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+│  373 |      await waitFor(() => {
+│  374 |        expect(canvas.getByText(/Draw a
+│  diagram/i)).toBeInTheDocument();
+│  The above dynamic import cannot be analyzed by Vite.
+│  See ]8;;https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitationshttps://github.com/rollup/plugins/tree/master/packages/dynami...]8;;
+│  for supported dynamic import formats. If this is intended to be left
+│  as-is, you can use the /* @vite-ignore */ comment inside the import()
+│  call to suppress this warning.
+
+│  Plugin: vite:import-analysis
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/CustomAnswerPlugin.audio-drawing.stories.jsx
+│
+▲  Vite warning:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/CustomAnswerPlugin.audio-drawing.stories.jsx
+│  402 |    play: async ({ canvasElement }) => {
+│  403 |      const canvas = within(canvasElement);
+│  404 |      const { expect } = await import(__STORYBOOK_MODULE_TEST__);
+│  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+│  405 |      await waitFor(() => {
+│  406 |
+│  expect(canvas.getByText(/Explain.*photosynthesis/i)).toBeInTheDocument();
+│  The above dynamic import cannot be analyzed by Vite.
+│  See ]8;;https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitationshttps://github.com/rollup/plugins/tree/master/packages/dynami...]8;;
+│  for supported dynamic import formats. If this is intended to be left
+│  as-is, you can use the /* @vite-ignore */ comment inside the import()
+│  call to suppress this warning.
+
+│  Plugin: vite:import-analysis
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/CustomAnswerPlugin.audio-drawing.stories.jsx
+│
+▲  Vite warning:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/CustomAnswerPlugin.audio-drawing.stories.jsx
+│  1141 |    play: async ({ canvasElement }) => {
+│  1142 |      const canvas = within(canvasElement);
+│  1143 |      const { expect } = await
+│  import(__STORYBOOK_MODULE_TEST__);
+│  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+│  1144 |      await waitFor(() => {
+│  1145 |
+│  expect(canvas.getByText(/submitted|completed/i)).toBeInTheDocument();
+│  The above dynamic import cannot be analyzed by Vite.
+│  See ]8;;https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitationshttps://github.com/rollup/plugins/tree/master/packages/dynami...]8;;
+│  for supported dynamic import formats. If this is intended to be left
+│  as-is, you can use the /* @vite-ignore */ comment inside the import()
+│  call to suppress this warning.
+
+│  Plugin: vite:import-analysis
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/CustomAnswerPlugin.audio-drawing.stories.jsx
+│
+▲  Vite warning:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/CustomAnswerPlugin.audio-drawing.stories.jsx
+│  1174 |    play: async ({ canvasElement }) => {
+│  1175 |      const canvas = within(canvasElement);
+│  1176 |      const { expect } = await
+│  import(__STORYBOOK_MODULE_TEST__);
+│  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+│  1177 |      await waitFor(() => {
+│  1178 |
+│  expect(canvas.getByText(/submitted|completed/i)).toBeInTheDocument();
+│  The above dynamic import cannot be analyzed by Vite.
+│  See ]8;;https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitationshttps://github.com/rollup/plugins/tree/master/packages/dynami...]8;;
+│  for supported dynamic import formats. If this is intended to be left
+│  as-is, you can use the /* @vite-ignore */ comment inside the import()
+│  call to suppress this warning.
+
+│  Plugin: vite:import-analysis
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/CustomAnswerPlugin.audio-drawing.stories.jsx
+│
+▲  Vite warning:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/MeaningAssociationPlugin.stories.jsx
+│  430 |    play: async ({ canvasElement }) => {
+│  431 |      const canvas = within(canvasElement);
+│  432 |      const { expect } = await import(__STORYBOOK_MODULE_TEST__);
+│  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+│  433 |      await waitFor(() => {
+│  434 |        const insertButton = canvas.getByRole("button", {
+│  The above dynamic import cannot be analyzed by Vite.
+│  See ]8;;https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitationshttps://github.com/rollup/plugins/tree/master/packages/dynami...]8;;
+│  for supported dynamic import formats. If this is intended to be left
+│  as-is, you can use the /* @vite-ignore */ comment inside the import()
+│  call to suppress this warning.
+
+│  Plugin: vite:import-analysis
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/MeaningAssociationPlugin.stories.jsx
+│
+▲  Vite warning:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/MeaningAssociationPlugin.stories.jsx
+│  451 |    play: async ({ canvasElement }) => {
+│  452 |      const canvas = within(canvasElement);
+│  453 |      const { expect } = await import(__STORYBOOK_MODULE_TEST__);
+│  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+│  454 |      await waitFor(() => {
+│  455 |        expect(canvas.getByText(/Vocabulary Matching
+│  Exercise/i)).toBeInTheDocument();
+│  The above dynamic import cannot be analyzed by Vite.
+│  See ]8;;https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitationshttps://github.com/rollup/plugins/tree/master/packages/dynami...]8;;
+│  for supported dynamic import formats. If this is intended to be left
+│  as-is, you can use the /* @vite-ignore */ comment inside the import()
+│  call to suppress this warning.
+
+│  Plugin: vite:import-analysis
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/MeaningAssociationPlugin.stories.jsx
+│
+▲  Vite warning:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/MeaningAssociationPlugin.stories.jsx
+│  470 |    play: async ({ canvasElement }) => {
+│  471 |      const canvas = within(canvasElement);
+│  472 |      const { expect } = await import(__STORYBOOK_MODULE_TEST__);
+│  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+│  473 |      await waitFor(() => {
+│  474 |        expect(canvas.getByText(/Vocabulary Matching
+│  Exercise/i)).toBeInTheDocument();
+│  The above dynamic import cannot be analyzed by Vite.
+│  See ]8;;https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitationshttps://github.com/rollup/plugins/tree/master/packages/dynami...]8;;
+│  for supported dynamic import formats. If this is intended to be left
+│  as-is, you can use the /* @vite-ignore */ comment inside the import()
+│  call to suppress this warning.
+
+│  Plugin: vite:import-analysis
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/MeaningAssociationPlugin.stories.jsx
+│
+▲  Vite warning:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/WordBlockPlugin.stories.jsx
+│  364 |    play: async ({ canvasElement }) => {
+│  365 |      const canvas = within(canvasElement);
+│  366 |      const { expect } = await import(__STORYBOOK_MODULE_TEST__);
+│  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+│  367 |      await waitFor(() => {
+│  368 |        const insertButton = canvas.getByRole("button", {
+│  The above dynamic import cannot be analyzed by Vite.
+│  See ]8;;https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitationshttps://github.com/rollup/plugins/tree/master/packages/dynami...]8;;
+│  for supported dynamic import formats. If this is intended to be left
+│  as-is, you can use the /* @vite-ignore */ comment inside the import()
+│  call to suppress this warning.
+
+│  Plugin: vite:import-analysis
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/WordBlockPlugin.stories.jsx
+│
+▲  Vite warning:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/WordBlockPlugin.stories.jsx
+│  385 |    play: async ({ canvasElement }) => {
+│  386 |      const canvas = within(canvasElement);
+│  387 |      const { expect } = await import(__STORYBOOK_MODULE_TEST__);
+│  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+│  388 |      await waitFor(() => {
+│  389 |        expect(canvas.getByText(/Vocabulary Word
+│  Example/i)).toBeInTheDocument();
+│  The above dynamic import cannot be analyzed by Vite.
+│  See ]8;;https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitationshttps://github.com/rollup/plugins/tree/master/packages/dynami...]8;;
+│  for supported dynamic import formats. If this is intended to be left
+│  as-is, you can use the /* @vite-ignore */ comment inside the import()
+│  call to suppress this warning.
+
+│  Plugin: vite:import-analysis
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/WordBlockPlugin.stories.jsx
+│
+▲  Vite warning:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/WordBlockPlugin.stories.jsx
+│  404 |    play: async ({ canvasElement }) => {
+│  405 |      const canvas = within(canvasElement);
+│  406 |      const { expect } = await import(__STORYBOOK_MODULE_TEST__);
+│  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+│  407 |      await waitFor(() => {
+│  408 |        expect(canvas.getByText(/Vocabulary Word
+│  Example/i)).toBeInTheDocument();
+│  The above dynamic import cannot be analyzed by Vite.
+│  See ]8;;https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitationshttps://github.com/rollup/plugins/tree/master/packages/dynami...]8;;
+│  for supported dynamic import formats. If this is intended to be left
+│  as-is, you can use the /* @vite-ignore */ comment inside the import()
+│  call to suppress this warning.
+
+│  Plugin: vite:import-analysis
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/WordBlockPlugin.stories.jsx
+│
+▲  Vite warning:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/QuizPlugin.stories.jsx
+│  375 |    play: async ({ canvasElement }) => {
+│  376 |      const canvas = within(canvasElement);
+│  377 |      const { expect } = await import(__STORYBOOK_MODULE_TEST__);
+│  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+│  378 |      await waitFor(() => {
+│  379 |        const insertButton = canvas.getByRole("button", {
+│  The above dynamic import cannot be analyzed by Vite.
+│  See ]8;;https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitationshttps://github.com/rollup/plugins/tree/master/packages/dynami...]8;;
+│  for supported dynamic import formats. If this is intended to be left
+│  as-is, you can use the /* @vite-ignore */ comment inside the import()
+│  call to suppress this warning.
+
+│  Plugin: vite:import-analysis
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/QuizPlugin.stories.jsx
+│
+▲  Vite warning:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/QuizPlugin.stories.jsx
+│  396 |    play: async ({ canvasElement }) => {
+│  397 |      const canvas = within(canvasElement);
+│  398 |      const { expect } = await import(__STORYBOOK_MODULE_TEST__);
+│  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+│  399 |      await waitFor(() => {
+│  400 |        expect(canvas.getByText(/What is the capital of
+│  France/i)).toBeInTheDocument();
+│  The above dynamic import cannot be analyzed by Vite.
+│  See ]8;;https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitationshttps://github.com/rollup/plugins/tree/master/packages/dynami...]8;;
+│  for supported dynamic import formats. If this is intended to be left
+│  as-is, you can use the /* @vite-ignore */ comment inside the import()
+│  call to suppress this warning.
+
+│  Plugin: vite:import-analysis
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/QuizPlugin.stories.jsx
+│
+▲  Vite warning:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/QuizPlugin.stories.jsx
+│  418 |    play: async ({ canvasElement }) => {
+│  419 |      const canvas = within(canvasElement);
+│  420 |      const { expect } = await import(__STORYBOOK_MODULE_TEST__);
+│  |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+│  421 |      await waitFor(() => {
+│  422 |        expect(canvas.getByText(/What is the capital of
+│  France/i)).toBeInTheDocument();
+│  The above dynamic import cannot be analyzed by Vite.
+│  See ]8;;https://github.com/rollup/plugins/tree/master/packages/dynamic-import-vars#limitationshttps://github.com/rollup/plugins/tree/master/packages/dynami...]8;;
+│  for supported dynamic import formats. If this is intended to be left
+│  as-is, you can use the /* @vite-ignore */ comment inside the import()
+│  call to suppress this warning.
+
+│  Plugin: vite:import-analysis
+│  File:
+│  /Users/colinbarrett-fox/Projects/new-components/amplify-homework-supply/src/components/Editor3/plugins/QuizPlugin.stories.jsx
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js
+│  Vite hmr update
+│  /@id/__x00__virtual:/@storybook/builder-vite/vite-app.js

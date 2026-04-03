@@ -179,6 +179,7 @@ const config: StorybookConfig = {
       '@/utils/vectorStoreDB.jsx': path.resolve(__dirname, './__mocks__/vectorStoreDB.js'),
       '../../utils/vectorStoreDB': path.resolve(__dirname, './__mocks__/vectorStoreDB.js'),
       '../../utils/vectorStoreDB.jsx': path.resolve(__dirname, './__mocks__/vectorStoreDB.js'),
+
       // Absolute path mocks for vector store
       [path.resolve(__dirname, '../src/components/Editor3/components/FileManager2')]: path.resolve(__dirname, './__mocks__/FileManager2.js'),
       [path.resolve(__dirname, '../src/components/Editor3/components/FileManager2.jsx')]: path.resolve(__dirname, './__mocks__/FileManager2.js'),
@@ -186,6 +187,12 @@ const config: StorybookConfig = {
       [path.resolve(__dirname, '../src/utils/vectorStoreDB.jsx')]: path.resolve(__dirname, './__mocks__/vectorStoreDB.js'),
     };
     
+    // Deduplicate React to prevent multiple instances
+    if (!config.resolve) {
+      config.resolve = {};
+    }
+    config.resolve.dedupe = [...(config.resolve.dedupe || []), 'react', 'react-dom', 'react/jsx-runtime'];
+
     // Exclude YJS folder from being processed to prevent loading real files
     if (!config.optimizeDeps) {
       config.optimizeDeps = {};
@@ -203,6 +210,8 @@ const config: StorybookConfig = {
     // Add global polyfill and JSX loader for .js files
     config.optimizeDeps.esbuildOptions = {
       ...config.optimizeDeps.esbuildOptions,
+      // es2022 required for @excalidraw/excalidraw ESM locales ("Arbitrary module namespace identifier names")
+      target: 'es2022',
       loader: {
         '.js': 'jsx',  // Handle JSX syntax in .js files
       },

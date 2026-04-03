@@ -96,6 +96,9 @@ export default function StoryProgressPlugin() {
                                     accuracy: 1.0,
                                     percentComplete: 0.2,
                                     complete: false,
+                                    droppedPairs: {
+                                        'vocab-word-1': 'vocab-word-1',
+                                    },
                                 },
                             };
                         }

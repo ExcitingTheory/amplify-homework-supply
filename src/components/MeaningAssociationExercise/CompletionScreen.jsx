@@ -3,8 +3,8 @@
  * @category Components
  * @description Completion screen shown after finishing a level
  * 
- * Shows congratulations message, score stats, and auto-advances to next level
- * after a timeout (or user can click to continue immediately).
+ * Replaces the exercise tab content with score stats and a continue button.
+ * Auto-advances to next level after a timeout (once only).
  */
 
 import * as React from 'react';
@@ -13,25 +13,15 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const AUTO_ADVANCE_DELAY = 5000; // 5 seconds
 
-// Static styles defined outside component to avoid recreation
 const containerStyle = {
-  position: 'relative',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: 'rgba(255, 255, 255, 0.98)',
-  border: '2px solid #e0e0e0',
-  borderRadius: '8px',
-  zIndex: 1,
+  backgroundColor: '#fff',
   padding: 2,
-  minHeight: '100%',
   height: '100%',
-  maxHeight: '100%',
+  width: '100%',
   overflow: 'auto',
   boxSizing: 'border-box',
 };
@@ -53,6 +43,7 @@ export const CompletionScreen = ({
   accuracy,
   attempts,
   onContinue,
+  onDismiss,
   nextLevelName,
   isLastLevel = false,
   disableAutoAdvance = false,
@@ -62,34 +53,47 @@ export const CompletionScreen = ({
 }) => {
   const [timeRemaining, setTimeRemaining] = React.useState(AUTO_ADVANCE_DELAY / 1000);
   const [autoAdvanceEnabled, setAutoAdvanceEnabled] = React.useState(!disableAutoAdvance);
+  const hasAutoAdvanced = React.useRef(false);
 
-  // Use ref to avoid re-creating interval when onContinue changes
   const onContinueRef = React.useRef(onContinue);
   React.useEffect(() => {
     onContinueRef.current = onContinue;
   }, [onContinue]);
 
+  // Auto-advance timer: 1 update per second
   React.useEffect(() => {
-    if (!autoAdvanceEnabled || isLastLevel || disableAutoAdvance) return;
+    if (!autoAdvanceEnabled || isLastLevel || disableAutoAdvance || hasAutoAdvanced.current) return;
 
     const timer = setInterval(() => {
       setTimeRemaining((prev) => {
-        if (prev <= 0.25) {
+        if (prev <= 1) {
           clearInterval(timer);
-          onContinueRef.current();
+          if (!hasAutoAdvanced.current) {
+            hasAutoAdvanced.current = true;
+            onContinueRef.current();
+          }
           return 0;
         }
-        return prev - 0.25;
+        return prev - 1;
       });
-    }, 250); // Reduced from 100ms to 250ms (4 updates/sec instead of 10)
+    }, 1000);
 
     return () => clearInterval(timer);
   }, [autoAdvanceEnabled, isLastLevel, disableAutoAdvance]);
 
   const handleContinue = React.useCallback(() => {
+    hasAutoAdvanced.current = true;
     setAutoAdvanceEnabled(false);
     onContinueRef.current();
   }, []);
+
+  const handleDismiss = React.useCallback(() => {
+    hasAutoAdvanced.current = true;
+    setAutoAdvanceEnabled(false);
+    if (onDismiss) {
+      onDismiss();
+    }
+  }, [onDismiss]);
 
   const accuracyPercent = React.useMemo(() => Math.round((accuracy || 0) * 100), [accuracy]);
   const progressPercent = React.useMemo(
@@ -115,7 +119,7 @@ export const CompletionScreen = ({
           fontWeight: 600,
           fontSize: { xs: '1.5rem', sm: '2.125rem' },
         }}>
-          {levelName} Complete! 🎉
+          {levelName} Complete!
         </Typography>
 
         <Box my={{ xs: 2, sm: 3 }}>
@@ -151,21 +155,28 @@ export const CompletionScreen = ({
               Ready for <strong>{nextLevelName}</strong>?
             </Typography>
             {autoAdvanceEnabled && (
-              <>
-                <Typography variant="body2" color="textSecondary" gutterBottom>
-                  Auto-advancing in {Math.ceil(timeRemaining)}s...
-                </Typography>
-                <LinearProgress
-                  variant="determinate"
-                  value={progressPercent}
-                  sx={{ marginTop: '0.5rem', marginBottom: '1rem' }}
-                />
-              </>
+              <Typography variant="body2" color="textSecondary" gutterBottom>
+                Auto-advancing in {timeRemaining}s...
+              </Typography>
             )}
           </Box>
         )}
 
         <Box mt={2} sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {onDismiss && (
+            <Button
+              variant="outlined"
+              color="inherit"
+              size="large"
+              onClick={handleDismiss}
+              sx={{
+                padding: { xs: '0.5rem 1.5rem', sm: '0.75rem 2rem' },
+                fontSize: { xs: '1rem', sm: '1.1rem' },
+              }}
+            >
+              Back
+            </Button>
+          )}
           {showRetry && onRetry && (
             <Button
               variant="outlined"

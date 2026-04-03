@@ -4,6 +4,9 @@
  */
 
 import React from 'react';
+import { expect } from 'storybook/test';
+import { within, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -149,4 +152,26 @@ export const EditableEmpty = {
 
 export const EditableWithInstructions = {
   render: () => <EditableTemplate editorState={sampleAutocompleteState} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    
+    // Wait for the editor to render with instructions
+    await waitFor(() => {
+      expect(canvas.getByText(/Autocomplete Demo/i)).toBeInTheDocument();
+    }, { timeout: 5000 });
+
+    // Click into the editor to focus it
+    const editable = canvas.getByRole('textbox');
+    await userEvent.click(editable);
+
+    // Type a partial word to trigger autocomplete suggestions
+    await userEvent.type(editable, ' info');
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Editor pre-filled with instructions. A partial word is typed via the play function to trigger autocomplete suggestions.',
+      },
+    },
+  },
 };

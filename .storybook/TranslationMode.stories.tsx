@@ -82,13 +82,13 @@ type Story = StoryObj<typeof TranslationDemo>;
 
 export const Default: Story = {
   args: {
-    namespace: 'auth',
+    namespace: 'common',
     storyName: 'Translation Mode/Demo/Default',
   },
   parameters: {
     docs: {
       description: {
-        story: 'Authentication namespace with comprehensive metadata including context, component locations, usage patterns, impact levels, user types, tone guidelines, and alternative terms for each translation.',
+        story: 'Common namespace with shared UI translations like buttons, labels, and navigation elements.',
       },
     },
   },

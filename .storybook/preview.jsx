@@ -56,6 +56,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme } from '@mui/material/styles';
 import { fn } from 'storybook/test';
+import { useGlobals } from 'storybook/preview-api';
 import '../src/components/Editor3/theme.css';
 import '../src/components/Editor3/components/LanguageEditorTheme.css';
 import './storybook.css';
@@ -357,8 +358,8 @@ const preview = {
     },
     // Language switcher decorator - syncs with translation mode addon
     (Story, context) => {
-      const [globals] = React.useState(context.globals || {});
-      const language = globals.translationLanguage || 'en';
+      const [globals] = useGlobals();
+      const language = globals?.translationLanguage || 'en';
       
       // Update i18n language when global changes
       React.useEffect(() => {

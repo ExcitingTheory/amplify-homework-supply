@@ -221,7 +221,14 @@ const MeaningAssociationTabs = ({
 }) => {
 
   const { grade } = React.useContext(UnitContext);
-  const inProgress = grade?.data?.[nodeKey] || {};
+  const gradeData = React.useMemo(() => {
+    if (!grade?.data) return {};
+    if (typeof grade.data === 'string') {
+      try { return JSON.parse(grade.data); } catch { return {}; }
+    }
+    return grade.data;
+  }, [grade?.data]);
+  const inProgress = gradeData[nodeKey] || {};
   
   // Load saved tab index or default to 0
   const savedTabIndex = inProgress?.tabIndex || 0;
