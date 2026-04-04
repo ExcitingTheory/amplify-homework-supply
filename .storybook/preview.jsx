@@ -73,6 +73,7 @@ import { DictionaryProvider } from '../src/context/dictionaryContext';
 import { SectionProvider } from '../src/context/sectionContext';
 import { UnitProvider } from '../src/context/unitContext';
 import { AudioPlayerProvider } from '../src/components/Editor3/context/AudioPlayerContext';
+import { ChatContextProvider } from '../src/context/chatContext';
 
 // Import mock helpers
 import { clearMockData, initializeMockData } from './__mocks__/aws-amplify-data';
@@ -420,6 +421,7 @@ const preview = {
               }}
             >
               <AuthProvider {...authProps}>
+                <ChatContextProvider>
                 <AudioPlayerProvider>
                   <FilesProvider>
                     {disableDictionaryContext ? (
@@ -467,6 +469,7 @@ const preview = {
                     )}
                   </FilesProvider>
                 </AudioPlayerProvider>
+                </ChatContextProvider>
               </AuthProvider>
             </div>
           </ThemeProvider>

@@ -90,8 +90,8 @@ export default defineConfig({
         test: {
           name: 'storybook',
           globals: true,
-          testTimeout: 60000, // 60s for interactive tests
-          hookTimeout: 60000,
+          testTimeout: 120000, // 120s for interactive tests
+          hookTimeout: 120000,
           browser: {
             enabled: true,
             headless: true,

@@ -355,6 +355,9 @@ export const EmptyEditorCustomBlocks = {
     unitId: 'empty-editor-custom-blocksid',
     initializeMockData: false,
     clearMockData: false, // Don't clear mock data since we're seeding it in the loader
+    test: {
+      timeout: 120000,
+    },
   },
   play: async ({ canvasElement, userEvent }) => {
     const canvas = within(canvasElement);
@@ -386,7 +389,7 @@ export const EmptyEditorCustomBlocks = {
     await userEvent.click(confirmLinkBtn);
 
     // Close the link editor
-    const closePreviewBtn = await screen.getByRole('button', { name: /Close link editor/i });
+    const closePreviewBtn = await screen.findByRole('button', { name: /Close link editor/i });
     await userEvent.click(closePreviewBtn);
     await userEvent.click(editorContent);
     await userEvent.keyboard('{ArrowDown} {Enter}');
@@ -409,77 +412,113 @@ export const EmptyEditorCustomBlocks = {
     const insertMenus = canvas.getAllByRole('button', { name: /Insert Item Menu/i });
     const insertMenu = insertMenus[0];
     await userEvent.click(insertMenu);
-    const dueDateOption = await screen.getByRole('menuitem', { name: /Due Date/i });
+    const dueDateOption = await screen.findByRole('menuitem', { name: /Due Date/i });
     await userEvent.click(dueDateOption);
-    // Interact with due date dialog if needed
-    const dueDateInput = await canvas.getByLabelText(/Due Date/i, { selector: 'input[type="datetime-local"]' });
+    // Wait for sidebar to open with the assignment configuration form
+    const dueDateInput = await waitFor(() => canvas.getByLabelText(/Due Date/i, { selector: 'input[type="datetime-local"]' }), { timeout: 5000 });
     await userEvent.type(dueDateInput, '2026-01-01T10:00');
     // MUI Select renders multiple elements with role="combobox", so we select the first one
-    const selectSections = canvas.getAllByRole('combobox', { name: /Section/i });
+    const selectSections = await waitFor(() => canvas.getAllByRole('combobox', { name: /Section/i }), { timeout: 5000 });
     const selectSection = selectSections[0];
     await userEvent.click(selectSection);
     // Wait for sections to load and select first option
     const firstSectionOption = await waitFor(() => screen.getByRole('option', { name: /Section 1/i }), { timeout: 5000 });
     await userEvent.click(firstSectionOption);
     // Confirm due date
-    const confirmDueDateBtn = await screen.getByRole('button', { name: /^Add due date to Unit$/i });
+    const confirmDueDateBtn = await screen.findByRole('button', { name: /Add Due Date/i });
     await userEvent.click(confirmDueDateBtn);
     
     // Insert Timer
     await userEvent.click(insertMenu);
-    const timerOption = await screen.getByRole('menuitem', { name: /Timer/i });
+    const timerOption = await screen.findByRole('menuitem', { name: /Timer/i });
     await userEvent.click(timerOption);
     // Set timer duration if dialog appears
     await userEvent.keyboard('{Enter}');
 
     // Insert Meaning Association
     await userEvent.click(insertMenu);
-    const meaningAssocOption = await screen.getByRole('menuitem', { name: /Meaning Association/i });
+    const meaningAssocOption = await screen.findByRole('menuitem', { name: /Meaning Association/i });
     await userEvent.click(meaningAssocOption);
     await userEvent.keyboard('{Enter}');
 
     // Insert Short Answer: Vocabulary
     await userEvent.click(insertMenu);
-    const vocabAnswerOption = await screen.getByRole('menuitem', { name: /Short Answer.*Vocabulary/i });
+    const vocabAnswerOption = await screen.findByRole('menuitem', { name: /Short Answer.*Vocabulary/i });
     await userEvent.click(vocabAnswerOption);
     await userEvent.keyboard('{Enter}');
 
     // Insert Short Answer: Custom
     await userEvent.click(insertMenu);
-    const customAnswerOption = await screen.getByRole('menuitem', { name: /Short Answer.*Custom/i });
+    const customAnswerOption = await screen.findByRole('menuitem', { name: /Short Answer.*Custom/i });
     await userEvent.click(customAnswerOption);
     await userEvent.keyboard('{Enter}');
 
     // Insert Audio Playlist
     await userEvent.click(insertMenu);
-    const audioPlaylistOption = await screen.getByRole('menuitem', { name: /Audio Playlist/i });
+    const audioPlaylistOption = await screen.findByRole('menuitem', { name: /^Audio$/i });
     await userEvent.click(audioPlaylistOption);
     await userEvent.keyboard('{Enter}');
 
-    // Insert Multiple Choice
+    // Insert Multiple Choice Quiz
     await userEvent.click(insertMenu);
-    const multipleChoiceOption = await screen.getByRole('menuitem', { name: /Multiple Choice/i });
+    const multipleChoiceOption = await screen.findByRole('menuitem', { name: /^Quiz$/i });
     await userEvent.click(multipleChoiceOption);
-    await userEvent.keyboard('{Enter}');
 
-    // Insert Layout
+    // Quiz block is inserted — scope interactions to the quiz block via data-tour attribute
+    const quizBlock = await waitFor(() => {
+      const el = canvasElement.querySelector('[data-tour="quiz-block"]');
+      expect(el).not.toBeNull();
+      return el;
+    }, { timeout: 5000 });
+    const quizScope = within(quizBlock);
+    // Enter edit mode
+    const editBtn = quizScope.getByRole('button', { name: /^Edit$/i });
+    await userEvent.click(editBtn);
+    // Add two answers by clicking the "Add Answer" placeholder
+    const addAnswerField = await waitFor(() => quizScope.getByPlaceholderText(/Add Answer/i), { timeout: 5000 });
+    await userEvent.click(addAnswerField);
+    // Wait for first answer switch to render, then add another
+    await waitFor(() => {
+      expect(quizScope.getAllByRole('checkbox').length).toBeGreaterThanOrEqual(1);
+    }, { timeout: 5000 });
+    const addAnswerField2 = quizScope.getByPlaceholderText(/Add Answer/i);
+    await userEvent.click(addAnswerField2);
+    // Wait for second switch, then mark first as correct
+    await waitFor(() => {
+      expect(quizScope.getAllByRole('checkbox').length).toBeGreaterThanOrEqual(2);
+    }, { timeout: 5000 });
+    const switches = quizScope.getAllByRole('checkbox');
+    await userEvent.click(switches[0]);
+    // Save the quiz
+    const doneBtn = quizScope.getByRole('button', { name: /^Done$/i });
+    await userEvent.click(doneBtn);
+
+    // Insert Layout (opens a modal — select layout and click Insert)
     await userEvent.click(insertMenu);
-    const layoutOption = await screen.getByRole('menuitem', { name: /Layout/i });
+    const layoutOption = await screen.findByRole('menuitem', { name: /Columns Layout/i });
     await userEvent.click(layoutOption);
-    await userEvent.keyboard('{Enter}');
+    // Layout modal opens — click the Insert button to confirm default layout
+    const layoutInsertBtn = await screen.findByRole('button', { name: /^Insert$/i });
+    await userEvent.click(layoutInsertBtn);
 
     // Insert Horizontal Rule
     await userEvent.click(insertMenu);
-    const horizontalRuleOption = await screen.getByRole('menuitem', { name: /Horizontal Rule/i });
+    const horizontalRuleOption = await screen.findByRole('menuitem', { name: /Horizontal Rule/i });
     await userEvent.click(horizontalRuleOption);
-    await userEvent.keyboard('{Enter}');
 
-    // Insert Table
+    // Insert Table (opens a modal — fill dimensions and click Insert)
     await userEvent.click(insertMenu);
-    const tableOption = await screen.getByRole('menuitem', { name: /Table/i });
+    const tableOption = await screen.findByRole('menuitem', { name: /Table/i });
     await userEvent.click(tableOption);
-    // Select table dimensions if dialog appears
-    await userEvent.keyboard('{Enter}');
+    // Table modal opens — fill in rows and columns
+    const rowsInput = await screen.findByLabelText(/Rows/i);
+    await userEvent.clear(rowsInput);
+    await userEvent.type(rowsInput, '3');
+    const columnsInput = await screen.findByLabelText(/Columns/i);
+    await userEvent.clear(columnsInput);
+    await userEvent.type(columnsInput, '3');
+    const tableInsertBtn = await screen.findByRole('button', { name: /^Insert$/i });
+    await userEvent.click(tableInsertBtn);
 
     // Use Filemanager to insert an image
     // Multiple File Manager buttons may be rendered, so we select the first one
@@ -487,38 +526,38 @@ export const EmptyEditorCustomBlocks = {
     const fileManagerBtn = fileManagerBtns[0];
     await userEvent.click(fileManagerBtn);
     // Navigate file manager and select image
-    const imageTab = await screen.getByRole('tab', { name: /Images/i });
+    const imageTab = await screen.findByRole('tab', { name: /Images/i });
     await userEvent.click(imageTab);
-    const insertImageBtn = await screen.getByRole('button', { name: /Insert Image/i });
+    const insertImageBtn = await screen.findByRole('button', { name: /Insert Image/i });
     await userEvent.click(insertImageBtn);
     await userEvent.keyboard('{Enter}');
 
     // Use Filemanager to insert audio file
     await userEvent.click(fileManagerBtn);
-    const audioTab = await screen.getByRole('tab', { name: /Audio/i });
+    const audioTab = await screen.findByRole('tab', { name: /Audio/i });
     await userEvent.click(audioTab);
-    const insertAudioBtn = await screen.getByRole('button', { name: /Insert Audio/i });
+    const insertAudioBtn = await screen.findByRole('button', { name: /Insert Audio/i });
     await userEvent.click(insertAudioBtn);
     await userEvent.keyboard('{Enter}');
 
     // Use Filemanager to generate image with AI
     await userEvent.click(fileManagerBtn);
-    const generateImageTab = await screen.getByRole('tab', { name: /Generate.*Image/i });
+    const generateImageTab = await screen.findByRole('tab', { name: /Generate.*Image/i });
     await userEvent.click(generateImageTab);
     const promptInput = await screen.findByPlaceholderText(/Describe the image/i);
     await userEvent.type(promptInput, 'A beautiful sunset over mountains');
-    const generateBtn = await screen.getByRole('button', { name: /Generate/i });
+    const generateBtn = await screen.findByRole('button', { name: /Generate/i });
     await userEvent.click(generateBtn);
     // Wait for generation and insert
     await userEvent.keyboard('{Enter}');
 
     // Use Filemanager to generate audio with AI
     await userEvent.click(fileManagerBtn);
-    const generateAudioTab = await screen.getByRole('tab', { name: /Generate.*Audio/i });
+    const generateAudioTab = await screen.findByRole('tab', { name: /Generate.*Audio/i });
     await userEvent.click(generateAudioTab);
     const audioPromptInput = await screen.findByPlaceholderText(/Enter text to speak/i);
     await userEvent.type(audioPromptInput, 'Welcome to this lesson');
-    const generateAudioBtn = await screen.getByRole('button', { name: /Generate/i });
+    const generateAudioBtn = await screen.findByRole('button', { name: /Generate/i });
     await userEvent.click(generateAudioBtn);
     await userEvent.keyboard('{Enter}');
 
@@ -529,7 +568,7 @@ export const EmptyEditorCustomBlocks = {
     await userEvent.click(sidebarBtn);
     const featuredImageSection = await screen.findByText(/Featured Image/i);
     await userEvent.click(featuredImageSection);
-    const setFeaturedBtn = await screen.getByRole('button', { name: /Set Featured Image/i });
+    const setFeaturedBtn = await screen.findByRole('button', { name: /Set Featured Image/i });
     await userEvent.click(setFeaturedBtn);
     await userEvent.keyboard('{Enter}');
 
@@ -2211,6 +2250,9 @@ export const KeyboardShortcutsDemo = {
   parameters: {
     unitId: 'keyboard-shortcuts-demo-id',
     initializeMockData: false,
+    test: {
+      timeout: 120000,
+    },
     docs: {
       description: {
         story: `

@@ -98,6 +98,7 @@ export function SettingsMenu() {
       <Button
         id="settings-button"
         color="inherit"
+        aria-label="Settings"
         aria-controls={open ? 'settings-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
@@ -165,6 +166,7 @@ export function HelpMenu() {
 
         id="help-button"
         color="inherit"
+        aria-label="Help"
         aria-controls={open ? 'help-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
@@ -208,6 +210,7 @@ export function UserMenu() {
       <IconButton
         id="user-button"
         color="inherit"
+        aria-label="Account"
         aria-controls={open ? 'user-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}

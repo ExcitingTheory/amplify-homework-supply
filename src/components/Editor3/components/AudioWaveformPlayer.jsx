@@ -6,6 +6,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 import StopIcon from '@mui/icons-material/Stop';
 import RecordIcon from '@mui/icons-material/KeyboardVoice';
 import StaticWaveform from './StaticWaveform';
+import MicLevelIndicator from './MicLevelIndicator';
 import { useAudioPlayer } from '../context/AudioPlayerContext';
 import { calculateWaveformData } from '../../../utils/calculateWaveformData';
 import { uploadStudentSubmission } from '../../../utils/userSubmissionStorage';
@@ -107,6 +108,9 @@ export default function AudioWaveformPlayer({
     const previewAudioCtxRef = useRef(null);
     const previewAnalyserRef = useRef(null);
     const previewRafRef = useRef(null);
+    
+    // Shared analyser ref for MicLevelIndicator (points to whichever is active)
+    const [activeAnalyser, setActiveAnalyser] = useState(null);
     
     // Refs
     const loadedSourceRef = useRef(null);
@@ -387,6 +391,7 @@ export default function AudioWaveformPlayer({
             previewAudioCtxRef.current = null;
         }
         previewAnalyserRef.current = null;
+        if (!recording) setActiveAnalyser(null);
         // Only stop tracks if we're not handing off to recording
         if (previewStreamRef.current && !recording) {
             previewStreamRef.current.getTracks().forEach(track => track.stop());
@@ -411,6 +416,7 @@ export default function AudioWaveformPlayer({
             analyser.smoothingTimeConstant = 0.8;
             src.connect(analyser);
             previewAnalyserRef.current = analyser;
+            setActiveAnalyser(analyser);
             
             setPreviewing(true);
         } catch (err) {
@@ -547,6 +553,7 @@ export default function AudioWaveformPlayer({
         
         analyser.fftSize = 2048;
         analyser.smoothingTimeConstant = 0.8;
+        setActiveAnalyser(analyser);
     
         const canvas = recordingCanvasRef.current;
         const canvasCtx = canvas.getContext('2d');
@@ -562,6 +569,7 @@ export default function AudioWaveformPlayer({
         
         recorder.addEventListener("stop", async () => {
             isRecording = false;
+            setActiveAnalyser(null);
             audioContext.close();
             // Use the recorder's actual mimeType so decodeAudioData gets a valid container
             const actualMimeType = recorder.mimeType || 'audio/webm';
@@ -924,13 +932,21 @@ export default function AudioWaveformPlayer({
                     )}
                     
                     {recording && (
-                        <Typography variant="caption" color="error" sx={{ fontWeight: 'bold' }}>
-                            ● Recording...
-                        </Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, flexGrow: 1 }}>
+                            <Typography variant="caption" color="error" sx={{ fontWeight: 'bold' }}>
+                                ● Recording...
+                            </Typography>
+                            <MicLevelIndicator analyser={activeAnalyser} />
+                        </Box>
                     )}
                     
-                    {/* Empty space when not recording and no audio */}
-                    {!recording && !sourceUrl && !audioBlob && (
+                    {/* Mic level indicator during preview (hover before recording) */}
+                    {!recording && !sourceUrl && !audioBlob && previewing && (
+                        <MicLevelIndicator analyser={activeAnalyser} />
+                    )}
+                    
+                    {/* Empty space when not recording and no audio and not previewing */}
+                    {!recording && !sourceUrl && !audioBlob && !previewing && (
                         <Box sx={{ width: '100%' }} />
                     )}
                 </Box>

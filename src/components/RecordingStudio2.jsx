@@ -9,6 +9,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 import RecordIcon from '@mui/icons-material/KeyboardVoice';
 import StaticWaveform from './Editor3/components/StaticWaveform';
 import AudioWaveformPlayer from './Editor3/components/AudioWaveformPlayer';
+import MicLevelIndicator from './Editor3/components/MicLevelIndicator';
 import { calculateWaveformData } from '../utils/calculateWaveformData';
 // import { SvgConverter } from './Editor2';
 import { Box, Typography, Card, CardContent } from '@mui/material';
@@ -97,6 +98,8 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
   // const [objectUrl, setObjectUrl] = React.useState(null);
   const audioRef = React.useRef(null);
   const [isPlaying, setIsPlaying] = React.useState(false);
+  // Active analyser for mic level monitoring
+  const [recordingAnalyser, setRecordingAnalyser] = React.useState(null);
   // Track stream for cleanup
   const streamRef = React.useRef(null);
 
@@ -329,6 +332,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
       source.connect(analyser);
       analyser.fftSize = 2048;
       analyser.smoothingTimeConstant = 0.8;
+      setRecordingAnalyser(analyser);
       const canvas = canvasRef.current;
       const canvasCtx = canvas.getContext('2d');
       const bufferLength = analyser.frequencyBinCount;
@@ -395,6 +399,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
     setIsPlaying(false);
     setRecording(false);
     setMediaRecorder(null);
+    setRecordingAnalyser(null);
   };
 
   const doNothing = (e) => {
@@ -482,6 +487,12 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
         id="waveform"
         style={{ backgroundColor: 'white' }}
       />
+      {/* Mic level indicator during recording */}
+      {recording && (
+        <Box sx={{ mt: 1 }}>
+          <MicLevelIndicator analyser={recordingAnalyser} />
+        </Box>
+      )}
       {/* Display all existing audio recordings */}
       {Object.keys(audioFiles).length > 0 && (
         <Box sx={{ mt: 3 }}>

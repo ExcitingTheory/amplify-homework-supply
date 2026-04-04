@@ -517,7 +517,7 @@ export const CompletionScreenEasy = {
     expect(canvas.getByText(/15/)).toBeInTheDocument();
     
     // Verify next level name is shown
-    expect(canvas.getByText(/Hard Mode/i)).toBeInTheDocument();
+    expect(canvas.getByRole('button', { name: /Hard Mode/i })).toBeInTheDocument();
   },
 };
 

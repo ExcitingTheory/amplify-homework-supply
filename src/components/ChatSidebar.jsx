@@ -63,6 +63,7 @@ import { LexicalMessageRenderer } from './ChatSidebar/LexicalMessageRenderer';
 import ToolCallPreview from './ChatSidebar/ToolCallPreview';
 import ContentPreview from './ChatSidebar/ContentPreview';
 import BlockInsertPreview from './ChatSidebar/BlockInsertPreview';
+import RecordingScriptPreview from './ChatSidebar/RecordingScriptPreview';
 import { INSERT_QUIZ_COMMAND } from '../components/Editor3/plugins/QuizPlugin';
 import { INSERT_ANSWER_BLOCK_COMMAND } from '../components/Editor3/plugins/AnswerPlugin';
 import { INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND } from '../components/Editor3/plugins/MeaningAssociationPlugin';
@@ -1789,6 +1790,62 @@ const ChatSidebar = () => {
                                                 );
                                             }
 
+                                            // Handle create_recording_script tool
+                                            if (toolName === 'create_recording_script') {
+                                                let parsedOutput = null;
+                                                if (part.state === 'output-available' && part.output) {
+                                                    try {
+                                                        parsedOutput = typeof part.output === 'string'
+                                                            ? JSON.parse(part.output)
+                                                            : part.output;
+                                                    } catch (e) {
+                                                        console.error('[ChatSidebar] Failed to parse recording script output:', e);
+                                                    }
+                                                }
+
+                                                return (
+                                                    <Box
+                                                        key={callId || toolIdx}
+                                                        sx={{
+                                                            width: '100%',
+                                                            mb: 2,
+                                                            overflow: 'hidden',
+                                                            overflowWrap: 'break-word',
+                                                            wordBreak: 'break-word',
+                                                        }}
+                                                    >
+                                                        {part.state === 'input-streaming' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', fontStyle: 'italic', color: 'text.secondary' }}>
+                                                                Generating recording script...
+                                                            </Typography>
+                                                        )}
+
+                                                        {part.state === 'input-available' && (
+                                                            <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
+                                                                Creating {part.input?.preset} recording script...
+                                                            </Typography>
+                                                        )}
+
+                                                        {part.state === 'output-available' && parsedOutput && (
+                                                            <RecordingScriptPreview
+                                                                toolOutput={parsedOutput}
+                                                                unitId={unit?.id}
+                                                                owner={user?.username}
+                                                                identityId={user?.identityId}
+                                                            />
+                                                        )}
+
+                                                        {part.state === 'output-error' && (
+                                                            <Box sx={{ p: 2, bgcolor: 'error.light', borderRadius: 1, color: 'error.dark' }}>
+                                                                <Typography variant="body2">
+                                                                    Error creating recording script: {part.errorText}
+                                                                </Typography>
+                                                            </Box>
+                                                        )}
+                                                    </Box>
+                                                );
+                                            }
+
                                             // Handle generate_unit_content tool (deprecated - kept for backwards compatibility)
                                             if (toolName === 'generate_unit_content') {
                                                 return (
@@ -2284,6 +2341,7 @@ const ChatSidebar = () => {
                         <Button
                             type="submit"
                             variant="contained"
+                            aria-label="Send"
                             disabled={isLoading || !assistantChat?.id || !user}
                             data-testid="chat-send"
                             sx={{

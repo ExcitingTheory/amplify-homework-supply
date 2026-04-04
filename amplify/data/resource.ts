@@ -6,6 +6,7 @@ import { moderationHandler } from '../functions/moderation/resource';
 import { documentAnalysisHandler } from '../functions/documentAnalysis/resource';
 import { aiHandler } from '../functions/ai/resource';
 import { assistantHandler } from '../functions/assistant/resource';
+import { mediaConvertHandler } from '../functions/mediaConvert/resource';
 
 /**
  * Amplify Gen 2 Data Schema
@@ -422,6 +423,10 @@ const schema = a.schema({
       embedding: EmbeddingInfo,
       // Yjs CRDT snapshot for conflict-free file metadata management
       yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
+      // HLS transcoding — populated by MediaConvert pipeline
+      hlsUrl: a.string(), // S3 path to .m3u8 manifest (e.g. protected/{identityId}/{fileId}/{fileId}.m3u8)
+      transcodeStatus: a.string(), // PENDING | PROCESSING | COMPLETE | ERROR
+      mediaConvertJobId: a.string(), // AWS MediaConvert job ID for tracking
       // Versioning fields for conflict resolution
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
@@ -1186,6 +1191,16 @@ const schema = a.schema({
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
     .handler(a.handler.function(assistantHandler)),
+
+  // Media Transcoding Mutation
+  transcodeMedia: a
+    .mutation()
+    .arguments({
+      fileID: a.id().required(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(mediaConvertHandler)),
 
   // Section Management Mutations
   createSectionGroup: a

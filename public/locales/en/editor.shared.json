@@ -61,6 +61,12 @@
   "audioWaveformPlayer": {
     "noAudioSource": "No audio source provided"
   },
+  "micLevelIndicator": {
+    "noSignal": "No microphone signal detected. Check that your microphone is connected and not muted.",
+    "noSignalShort": "No signal",
+    "tooLow": "Microphone input is very low. Try speaking louder or moving closer to the microphone.",
+    "tooLowShort": "Too quiet"
+  },
   "staticWaveform": {
     "errorLoading": "Error loading waveform"
   },

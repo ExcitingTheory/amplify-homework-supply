@@ -10,7 +10,7 @@
  * - Non-destructive editing (all takes preserved)
  */
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useTranslation } from 'next-i18next';
 import {
   Box,
@@ -87,7 +87,7 @@ const TTS_VOICES = [
  * @param {Object} props.identityId - User identity for S3 uploads
  * @param {boolean} props.readOnly - Disable all editing
  */
-export default function RecordingStudio3({
+export default forwardRef(function RecordingStudio3({
   scriptData: initialScriptData,
   onScriptChange,
   onUpdateData,
@@ -96,7 +96,7 @@ export default function RecordingStudio3({
   nodeKey,
   identityId,
   readOnly = false,
-}) {
+}, ref) {
   const { t } = useTranslation('components');
   
   // Script data state
@@ -501,6 +501,11 @@ export default function RecordingStudio3({
       setTtsQueue(prev => prev.filter(id => id !== line.id));
     }
   };
+
+  // Expose imperative API for parent (e.g., RecordingStudio3Modal)
+  useImperativeHandle(ref, () => ({
+    triggerBatchTTS: handleBatchGenerateTTS,
+  }), [handleBatchGenerateTTS]);
 
   // Set active take
   const handleSetActiveTake = (dialogueId, takeIndex) => {
@@ -940,4 +945,4 @@ export default function RecordingStudio3({
       </Box>
     </Box>
   );
-}
+})

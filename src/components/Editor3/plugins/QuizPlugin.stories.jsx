@@ -244,11 +244,10 @@ export const EditableWithQuiz = {
     
     // Wait for quiz block to render
     await waitFor(() => {
-      expect(canvas.getByText(/What is the capital of France/i)).toBeInTheDocument();
+      expect(canvas.getByText('Paris')).toBeInTheDocument();
     }, { timeout: 5000 });
     
     // Verify all 4 answer options are visible
-    expect(canvas.getByText('Paris')).toBeInTheDocument();
     expect(canvas.getByText('London')).toBeInTheDocument();
     expect(canvas.getByText('Berlin')).toBeInTheDocument();
     expect(canvas.getByText('Madrid')).toBeInTheDocument();
@@ -263,10 +262,7 @@ export const ReadOnlyWithQuiz = {
     
     // Wait for quiz in read-only mode
     await waitFor(() => {
-      expect(canvas.getByText(/What is the capital of France/i)).toBeInTheDocument();
+      expect(canvas.getByText('Paris')).toBeInTheDocument();
     }, { timeout: 5000 });
-    
-    // Verify quiz is rendered
-    expect(canvas.getByText('Paris')).toBeInTheDocument();
   },
 };

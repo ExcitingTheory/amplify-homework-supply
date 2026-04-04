@@ -105,8 +105,10 @@ export default function AssignmentConfiguration() {
 
 
   const handleDueDateChange = async (event) => {
-    const date = new Date(Date.parse(event.target.value));
+    const parsed = Date.parse(event.target.value);
+    if (isNaN(parsed)) return;
 
+    const date = new Date(parsed);
     const isoDate = date.toISOString();
     console.log('ISO date:', isoDate);
     console.log('dueDate', dueDate);

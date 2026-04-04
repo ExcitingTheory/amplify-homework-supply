@@ -11,6 +11,8 @@ import {
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { HttpUserPoolAuthorizer } from 'aws-cdk-lib/aws-apigatewayv2-authorizers';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { EventType } from 'aws-cdk-lib/aws-s3';
+import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import { auth } from './auth/resource';
 import { data } from './data/resource';
 import { storage } from './storage/resource';
@@ -24,7 +26,9 @@ import { embeddingsHandler } from './functions/embeddings/resource';
 import { aiHandler } from './functions/ai/resource';
 import { assistantHandler } from './functions/assistant/resource';
 import { moderationHandler } from './functions/moderation/resource';
+import { mediaConvertHandler } from './functions/mediaConvert/resource';
 import { websocketHandler, WebSocketApiConstruct } from './custom/websocket/resource';
+import { MediaConvertConstruct } from './custom/mediaConvert/resource';
 
 /**
  * CDK Aspect to configure AppSync conflict detection on DynamoDB resolvers
@@ -96,6 +100,7 @@ export const backend = defineBackend({
   aiHandler,
   assistantHandler,
   moderationHandler,
+  mediaConvertHandler,
   websocketHandler,
 });
 
@@ -198,6 +203,59 @@ const embeddingsSelfInvokePolicy = new Policy(backend.embeddingsHandler.resource
 });
 
 backend.embeddingsHandler.resources.lambda.role?.attachInlinePolicy(embeddingsSelfInvokePolicy);
+
+// ==========================================================================
+// MediaConvert — HLS transcoding pipeline
+// ==========================================================================
+
+// CDK construct: MediaConvert service role + EventBridge completion rule
+const mediaConvert = new MediaConvertConstruct(dataStack, 'MediaConvert', {
+  bucket: backend.storage.resources.bucket,
+  handlerLambda: backend.mediaConvertHandler.resources.lambda,
+});
+
+// S3 event notifications — auto-trigger on video uploads
+const videoSuffixes = ['.mp4', '.mov', '.webm', '.avi', '.mkv'];
+for (const suffix of videoSuffixes) {
+  backend.storage.resources.bucket.addEventNotification(
+    EventType.OBJECT_CREATED_PUT,
+    new LambdaDestination(backend.mediaConvertHandler.resources.lambda),
+    { prefix: 'protected/', suffix },
+  );
+}
+
+// Environment variables
+backend.mediaConvertHandler.addEnvironment(
+  'API_ENDPOINT',
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+backend.mediaConvertHandler.addEnvironment(
+  'STORAGE_BUCKET',
+  backend.storage.resources.bucket.bucketName,
+);
+backend.mediaConvertHandler.addEnvironment(
+  'MEDIACONVERT_ROLE_ARN',
+  mediaConvert.mediaConvertRole.roleArn,
+);
+
+// AppSync GraphQL access (to update File records)
+const mediaConvertAppSyncPolicy = new Policy(
+  backend.mediaConvertHandler.resources.lambda.stack,
+  'MediaConvertAppSyncPolicy',
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ['appsync:GraphQL'],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+backend.mediaConvertHandler.resources.lambda.role?.attachInlinePolicy(
+  mediaConvertAppSyncPolicy,
+);
 
 /**
  * HTTP API for streaming endpoints

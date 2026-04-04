@@ -1,5 +1,5 @@
 import React from 'react';
-import { expect, within, waitFor, userEvent } from 'storybook/test';
+import { expect, within, waitFor, userEvent, screen } from 'storybook/test';
 import { SectionAssigner } from './SectionAssigner';
 import SectionContext from '../context/sectionContext';
 
@@ -68,11 +68,9 @@ export const Default = {
     ContentModel: mockContentModel,
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    
-    // Verify dialog is open and displays the dialog title
+    // MUI Dialog renders in a portal outside canvasElement, so use screen
     await waitFor(() => {
-      expect(canvas.queryByText(/Assign to Section/i)).toBeInTheDocument();
+      expect(screen.queryByText(/Assign to Section/i)).toBeInTheDocument();
     }, { timeout: 3000 });
   },
 };

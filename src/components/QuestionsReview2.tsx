@@ -339,12 +339,12 @@ export function QuestionCard({
                     )}
                     {item.hasAudio && (
                         <Tooltip title={t('questionsReview.hasAudio')}>
-                            <MicIcon fontSize="small" color="primary" />
+                            <MicIcon fontSize="small" color="primary" aria-label="audio" />
                         </Tooltip>
                     )}
                     {item.hasImage && (
                         <Tooltip title={t('questionsReview.hasImage')}>
-                            <ImageIcon fontSize="small" color="secondary" />
+                            <ImageIcon fontSize="small" color="secondary" aria-label="image" />
                         </Tooltip>
                     )}
                 </Box>

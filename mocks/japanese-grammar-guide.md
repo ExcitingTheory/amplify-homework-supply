@@ -106,13 +106,16 @@ Japanese verbs and copulas have polite (丁寧語, teineigo) forms used in forma
 - **ます (masu)** - polite verb ending
 
 **Positive:** 食べます (tabemasu) - I eat
-**Negative:** 食べません (tabemasen) - I don't eat
+**Negative:** 食べません (tbemasen) - I don't eat
 **Past:** 食べました (tabemashita) - I ate
 **Past Negative:** 食べませんでした (tabemasen deshita) - I didn't eat
 
 ### Question Formation
 
 Add か (ka) to the end of a sentence to make it a question:
+fffff
+
+ew qq ppp[]
 
 - 学生ですか？(Gakusei desu **ka**?) - Are you a student?
 - 日本語を話しますか？(Nihongo wo hanashimasu **ka**?) - Do you speak Japanese?
