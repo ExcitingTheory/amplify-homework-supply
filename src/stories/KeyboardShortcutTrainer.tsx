@@ -60,12 +60,45 @@ const ACHIEVEMENT_TIERS = [
 ];
 
 export const KeyboardShortcutTrainer: React.FC = () => {
-  const [completedShortcuts, setCompletedShortcuts] = useState<Set<string>>(new Set());
+  const [completedShortcuts, setCompletedShortcuts] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem('keyboard-trainer-completed');
+      if (stored) return new Set(JSON.parse(stored));
+    } catch { /* ignore */ }
+    return new Set();
+  });
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
   const [activeShortcut, setActiveShortcut] = useState<string | null>(null);
-  const [achievements, setAchievements] = useState<string[]>([]);
+  const [achievements, setAchievements] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem('keyboard-trainer-achievements');
+      if (stored) return JSON.parse(stored);
+    } catch { /* ignore */ }
+    return [];
+  });
   const [showCelebration, setShowCelebration] = useState(false);
   const [currentTier, setCurrentTier] = useState(0);
+
+  // Record start time on first mount if not already set
+  useEffect(() => {
+    if (!localStorage.getItem('keyboard-trainer-start')) {
+      localStorage.setItem('keyboard-trainer-start', String(Date.now()));
+    }
+  }, []);
+
+  // Persist completed shortcuts to localStorage
+  useEffect(() => {
+    if (completedShortcuts.size > 0) {
+      localStorage.setItem('keyboard-trainer-completed', JSON.stringify([...completedShortcuts]));
+    }
+  }, [completedShortcuts]);
+
+  // Persist achievements to localStorage
+  useEffect(() => {
+    if (achievements.length > 0) {
+      localStorage.setItem('keyboard-trainer-achievements', JSON.stringify(achievements));
+    }
+  }, [achievements]);
 
   // Check if keys match a shortcut
   const checkShortcut = useCallback((keys: Set<string>) => {

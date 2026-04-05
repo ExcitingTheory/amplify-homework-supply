@@ -19,29 +19,15 @@
  */
 export const ROUTE_TO_STORY_MAP: Record<string, string> = {
   // Main pages - Application Pages stories
-  '/': '?path=/story/pages-application-pages--index',
-  '/units': '?path=/story/pages-application-pages--units',
-  '/sections': '?path=/story/pages-application-pages--sections',
-  '/profile': '?path=/story/pages-application-pages--profile',
+  '/': '?path=/story/📄-pages-application-pages--index',
+  '/units': '?path=/story/📄-pages-application-pages--units',
+  '/sections': '?path=/story/📄-pages-application-pages--sections',
+  '/profile': '?path=/story/📄-pages-application-pages--profile',
   
   // Dynamic routes - will need ID substitution
-  '/unit/[id]': '?path=/story/pages-application-pages--unit-detail',
-  '/section/[id]': '?path=/story/pages-application-pages--section-detail',
-  '/workbook/[id]': '?path=/story/pages-application-pages--workbook',
-  
-  // Alternative page stories (Pages/Index namespace)
-  '/index': '?path=/story/pages-index--student-dashboard',
-  
-  // Editor and content creation (use Editor3 component story as main editor)
-  '/editor': '?path=/story/education-editor--instructor-view',
-  '/dictionary': '?path=/story/managing-content-dictionary--default',
-  '/questions': '?path=/story/managing-content-questions-review--default',
-  
-  // Recording and audio
-  '/recording-studio': '?path=/story/recording-audio-recording-studio--default',
-  
-  // AI Assistant
-  '/chat': '?path=/story/ai-tools-chat-assistant--default',
+  '/unit/[id]': '?path=/story/📄-pages-application-pages--unit-detail',
+  '/section/[id]': '?path=/story/📄-pages-application-pages--section-detail',
+  '/workbook/[id]': '?path=/story/📄-pages-application-pages--workbook',
 };
 
 /**
@@ -163,33 +149,33 @@ export function getStoryRoute(context: any): string | null {
  */
 export const STORY_CATEGORIES: Record<string, string> = {
   // Instructor workflows
-  'pages-application-pages--units': 'instructor-content',
-  'pages-application-pages--units-empty-state': 'instructor-content',
-  'pages-application-pages--sections': 'instructor-class-management',
-  'pages-application-pages--sections-empty-state': 'instructor-class-management',
-  'pages-application-pages--section-detail': 'instructor-class-management',
-  'pages-application-pages--unit-detail': 'instructor-content',
-  'education-editor--instructor-view': 'instructor-content',
-  'managing-content-dictionary--default': 'instructor-content',
+  '📄-pages-application-pages--units': 'instructor-content',
+  '📄-pages-application-pages--units-empty-state': 'instructor-content',
+  '📄-pages-application-pages--sections': 'instructor-class-management',
+  '📄-pages-application-pages--sections-empty-state': 'instructor-class-management',
+  '📄-pages-application-pages--section-detail': 'instructor-class-management',
+  '📄-pages-application-pages--unit-detail': 'instructor-content',
+  '📚-creating-lessons-editor--editor-with-content': 'instructor-content',
+  '📁-managing-content-vocabulary-review--default': 'instructor-content',
   
   // Alternative Index stories
-  'pages-index--student-dashboard': 'learner-dashboard',
-  'pages-index--instructor-dashboard': 'instructor-dashboard',
-  'pages-index--empty-state': 'general',
+  '📄-pages-index--student-dashboard': 'learner-dashboard',
+  '📄-pages-index--instructor-dashboard': 'instructor-dashboard',
+  '📄-pages-index--empty-state': 'general',
   
   // Learner workflows
-  'pages-application-pages--workbook': 'learner-coursework',
-  'pages-application-pages--workbook-timed-exercise': 'learner-coursework',
-  'pages-application-pages--index': 'learner-dashboard',
-  'pages-application-pages--index-assignments': 'learner-coursework',
-  'pages-application-pages--section-detail-student': 'learner-coursework',
+  '📄-pages-application-pages--workbook': 'learner-coursework',
+  '📄-pages-application-pages--workbook-timed-exercise': 'learner-coursework',
+  '📄-pages-application-pages--index': 'learner-dashboard',
+  '📄-pages-application-pages--index-assignments': 'learner-coursework',
+  '📄-pages-application-pages--section-detail-student': 'learner-coursework',
   
   // User management
-  'pages-application-pages--profile': 'developer-exploration',
-  'pages-application-pages--profile-password-change': 'developer-exploration',
+  '📄-pages-application-pages--profile': 'developer-exploration',
+  '📄-pages-application-pages--profile-password-change': 'developer-exploration',
   
   // AI Tools
-  'ai-tools-chat-assistant--default': 'ai-tools',
+  '💬-ai-assistant-chat-sidebar--getting-started': 'ai-tools',
 };
 
 /**

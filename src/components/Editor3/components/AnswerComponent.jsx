@@ -139,9 +139,9 @@ export default function AnswerComponent({
     const [feedback, setFeedback] = useState({});
     const [progress, setProgress] = useState(0);
 
-    const [currentInputMethod, setCurrentInputMethod] = useState(allowedInput[0] || 'text');
+    const [currentInputMethod, setCurrentInputMethod] = useState(allowedInput?.[0] || 'text');
     const [allowedInputMethods, setAllowedInputMethods] = useState(allowedInput || ['text', 'audio', 'writing']);
-    const [currentPromptMethod, setCurrentPromptMethod] = useState(promptMethod[0] || 'text');
+    const [currentPromptMethod, setCurrentPromptMethod] = useState(promptMethod?.[0] || 'text');
 
     const handleInputChange = (event, newInputMethod) => {
         // console.log('newInputMethods', newInputMethods)
@@ -168,10 +168,10 @@ export default function AnswerComponent({
     React.useEffect(() => {
         console.log('allowedInput', allowedInput)
         console.log('promptMethod', promptMethod)
-        setAllowedInputMethods(allowedInput);
-        setCurrentInputMethod(allowedInput[0]);
-        setCurrentPromptMethod(promptMethod[0]);
-        console.log('AnswerComponent.currentPromptMethod', promptMethod[0])
+        setAllowedInputMethods(allowedInput || ['text', 'audio', 'writing']);
+        setCurrentInputMethod(allowedInput?.[0] || 'text');
+        setCurrentPromptMethod(promptMethod?.[0] || 'text');
+        console.log('AnswerComponent.currentPromptMethod', promptMethod?.[0])
 
     }, []);
 

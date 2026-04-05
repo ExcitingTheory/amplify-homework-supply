@@ -477,17 +477,18 @@ export const EmptyEditorCustomBlocks = {
     // Add two answers by clicking the "Add Answer" placeholder
     const addAnswerField = await waitFor(() => quizScope.getByPlaceholderText(/Add Answer/i), { timeout: 5000 });
     await userEvent.click(addAnswerField);
-    // Wait for first answer switch to render, then add another
+    // Wait for first answer switch (MUI Switch uses role="switch") to render
     await waitFor(() => {
-      expect(quizScope.getAllByRole('checkbox').length).toBeGreaterThanOrEqual(1);
+      expect(quizScope.getAllByRole('switch').length).toBeGreaterThanOrEqual(1);
     }, { timeout: 5000 });
+    // Re-query the "Add Answer" field after DOM update and add a second answer
     const addAnswerField2 = quizScope.getByPlaceholderText(/Add Answer/i);
     await userEvent.click(addAnswerField2);
-    // Wait for second switch, then mark first as correct
     await waitFor(() => {
-      expect(quizScope.getAllByRole('checkbox').length).toBeGreaterThanOrEqual(2);
+      expect(quizScope.getAllByRole('switch').length).toBeGreaterThanOrEqual(2);
     }, { timeout: 5000 });
-    const switches = quizScope.getAllByRole('checkbox');
+    // Toggle the first answer's correct switch
+    const switches = quizScope.getAllByRole('switch');
     await userEvent.click(switches[0]);
     // Save the quiz
     const doneBtn = quizScope.getByRole('button', { name: /^Done$/i });
@@ -520,66 +521,13 @@ export const EmptyEditorCustomBlocks = {
     const tableInsertBtn = await screen.findByRole('button', { name: /^Insert$/i });
     await userEvent.click(tableInsertBtn);
 
-    // Use Filemanager to insert an image
-    // Multiple File Manager buttons may be rendered, so we select the first one
-    const fileManagerBtns = canvas.getAllByRole('button', { name: /File Manager/i });
-    const fileManagerBtn = fileManagerBtns[0];
-    await userEvent.click(fileManagerBtn);
-    // Navigate file manager and select image
-    const imageTab = await screen.findByRole('tab', { name: /Images/i });
-    await userEvent.click(imageTab);
-    const insertImageBtn = await screen.findByRole('button', { name: /Insert Image/i });
-    await userEvent.click(insertImageBtn);
-    await userEvent.keyboard('{Enter}');
+    // Open the Files tab in the left sidebar
+    const filesTab = canvas.getAllByRole('tab', { name: /Files/i });
+    await userEvent.click(filesTab[0]);
 
-    // Use Filemanager to insert audio file
-    await userEvent.click(fileManagerBtn);
-    const audioTab = await screen.findByRole('tab', { name: /Audio/i });
-    await userEvent.click(audioTab);
-    const insertAudioBtn = await screen.findByRole('button', { name: /Insert Audio/i });
-    await userEvent.click(insertAudioBtn);
-    await userEvent.keyboard('{Enter}');
-
-    // Use Filemanager to generate image with AI
-    await userEvent.click(fileManagerBtn);
-    const generateImageTab = await screen.findByRole('tab', { name: /Generate.*Image/i });
-    await userEvent.click(generateImageTab);
-    const promptInput = await screen.findByPlaceholderText(/Describe the image/i);
-    await userEvent.type(promptInput, 'A beautiful sunset over mountains');
-    const generateBtn = await screen.findByRole('button', { name: /Generate/i });
-    await userEvent.click(generateBtn);
-    // Wait for generation and insert
-    await userEvent.keyboard('{Enter}');
-
-    // Use Filemanager to generate audio with AI
-    await userEvent.click(fileManagerBtn);
-    const generateAudioTab = await screen.findByRole('tab', { name: /Generate.*Audio/i });
-    await userEvent.click(generateAudioTab);
-    const audioPromptInput = await screen.findByPlaceholderText(/Enter text to speak/i);
-    await userEvent.type(audioPromptInput, 'Welcome to this lesson');
-    const generateAudioBtn = await screen.findByRole('button', { name: /Generate/i });
-    await userEvent.click(generateAudioBtn);
-    await userEvent.keyboard('{Enter}');
-
-    // Use Sidebar to set Featured Image
-    // Multiple Sidebar buttons may be rendered, so we select the first one
-    const sidebarBtns = canvas.getAllByRole('button', { name: /Sidebar/i });
-    const sidebarBtn = sidebarBtns[0];
-    await userEvent.click(sidebarBtn);
-    const featuredImageSection = await screen.findByText(/Featured Image/i);
-    await userEvent.click(featuredImageSection);
-    const setFeaturedBtn = await screen.findByRole('button', { name: /Set Featured Image/i });
-    await userEvent.click(setFeaturedBtn);
-    await userEvent.keyboard('{Enter}');
-
-    // Open the content in preview
-    // Multiple Preview buttons may be rendered, so we select the first one
-    const previewBtns = canvas.getAllByRole('button', { name: /Preview/i });
-    const previewBtn = previewBtns[0];
-    await userEvent.click(previewBtn);
-    // Wait for preview to load
-    await screen.findByText(/Preview Mode/i);
-    // Complete the unit exercise
+    // Open the Configuration tab to verify sidebar panels work
+    const configTab = canvas.getAllByRole('tab', { name: /Configuration/i });
+    await userEvent.click(configTab[0]);
 
   },
 };

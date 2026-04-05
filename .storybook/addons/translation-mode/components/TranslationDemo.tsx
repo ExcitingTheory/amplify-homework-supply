@@ -62,11 +62,6 @@ export const TranslationDemo: React.FC<TranslationDemoProps> = ({ namespace = 'a
               Username
             </TranslationOverlay>
           }
-          placeholder={
-            <TranslationOverlay tKey="username_placeholder" namespace="auth" value="Enter your username" storyName={storyName}>
-              Enter your username
-            </TranslationOverlay>
-          }
           sx={{ mb: 2 }}
         />
 
@@ -78,7 +73,6 @@ export const TranslationDemo: React.FC<TranslationDemoProps> = ({ namespace = 'a
               Password
             </TranslationOverlay>
           }
-          placeholder={t('password_placeholder')}
           sx={{ mb: 2 }}
         />
  
@@ -89,7 +83,6 @@ export const TranslationDemo: React.FC<TranslationDemoProps> = ({ namespace = 'a
               Email
             </TranslationOverlay>
           }
-          placeholder={t('email_placeholder')}
           sx={{ mb: 2 }}
         />
 

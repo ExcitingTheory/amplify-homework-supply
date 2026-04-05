@@ -175,7 +175,7 @@ export const WordPreset = {
     identityId: { id: 'us-east-1:mock-identity-123' },
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
+    const canvas = within(document.body);
 
     // Modal should be open with title
     await waitFor(() => {
@@ -206,7 +206,7 @@ export const ConversationPreset = {
     lockedTracks: conversationPreset.lockedTracks,
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
+    const canvas = within(document.body);
 
     await waitFor(() => {
       expect(canvas.getByText(/Record Conversation/i)).toBeInTheDocument();
@@ -231,7 +231,7 @@ export const QuestionPreset = {
     lockedTracks: questionPreset.lockedTracks,
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
+    const canvas = within(document.body);
 
     await waitFor(() => {
       expect(canvas.getByText(/Audio Studio/i)).toBeInTheDocument();
@@ -289,7 +289,7 @@ export const ReadOnly = {
     readOnly: true,
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
+    const canvas = within(document.body);
 
     await waitFor(() => {
       expect(canvas.getByText(/Review Recording/i)).toBeInTheDocument();
@@ -315,7 +315,7 @@ export const ConversationWithRecordedTakes = {
     lockedTracks: [],
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
+    const canvas = within(document.body);
 
     await waitFor(() => {
       expect(canvas.getAllByText(/Good morning/i)[0]).toBeInTheDocument();

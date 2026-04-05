@@ -34,7 +34,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     description: 'Create a new class section for your students',
     instructions: [
       'Navigate to the Sections page',
-      'Click "Create Section" button',
+      'Open the Create Section form',
       'Enter a class name (e.g., "Japanese 101")',
       'Configure grade level and settings',
       'Save your section',
@@ -56,7 +56,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     description: 'Build interactive learning content',
     instructions: [
       'Go to the Units page',
-      'Click "Create New Unit"',
+      'Start creating a new unit',
       'Enter a title (e.g., "Japanese Greetings")',
       'Use the Editor to add content',
       'Add text, images, or media',
@@ -100,8 +100,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: 'Add Vocabulary Words',
     description: 'Build your class dictionary',
     instructions: [
-      'Navigate to Dictionary Editor',
-      'Click "Add Word" button',
+      'Navigate to the Dictionary Editor',
+      'Add a new vocabulary word',
       'Enter Japanese word and romanization',
       'Add English definition',
       'Optionally add audio pronunciation',
@@ -124,12 +124,12 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     description: 'Set up assignments with due dates',
     instructions: [
       'Go to your Section',
-      'Click "Create Assignment"',
+      'Open the assignment creation form',
       'Select a unit to assign',
       'Set a due date and time',
       'Configure assignment settings',
       'Assign to your section',
-      'Students can now see the assignment',
+      'Verify the assignment appears in the list',
     ],
     persona: 'instructor',
     category: 'Assignments',
@@ -147,9 +147,9 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     description: 'Review student submissions and performance',
     instructions: [
       'Go to your Section page',
-      'Select "Grades" tab',
+      'Switch to the "Grades" tab',
       'View submissions by student or assignment',
-      'Click on a submission to review responses',
+      'Open a submission to review responses',
       'View accuracy and scoring',
       'Leave feedback if needed',
     ],
@@ -169,10 +169,10 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     description: 'Let AI help create your lessons',
     instructions: [
       'Open a unit in the Editor',
-      'Click the chat icon in the sidebar',
+      'Open the chat sidebar',
       'Describe what you want to create',
       'Review AI suggestions',
-      'Click "Insert" to add suggested content',
+      'Insert the suggested content into the editor',
       'Customize as needed',
       'Save your unit',
     ],
@@ -208,6 +208,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: 'help-keyboard-shortcut-trainer--default', // Tutorial: Keyboard shortcut trainer
       quizStoryId: '📄-pages-application-pages--unit-detail', // Quiz: Editor page for practicing
+      requiredActions: ['onClick', 'onSave'], // Practicing shortcuts in editor
     },
   },
 
@@ -219,10 +220,10 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     instructions: [
       'Get the join code from your instructor',
       'Go to the Sections page',
-      'Click "Join Section"',
+      'Open the Join Section form',
       'Enter the join code',
       'Confirm you want to join',
-      'You\'re now part of the class!',
+      'Verify the section appears in your list',
     ],
     persona: 'learner',
     category: 'Getting Started',
@@ -240,10 +241,10 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     description: 'Find and access assigned units',
     instructions: [
       'Open your Section',
-      'View the "Assignments" tab',
+      'Switch to the "Assignments" tab',
       'See all units assigned to you',
       'Check due dates for each assignment',
-      'Click on an assignment to open it',
+      'Open an assignment to view its content',
     ],
     completionCriteria: {
       tutorialStoryId: '📄-pages-application-pages--section-detail', // Tutorial: Section page (no separate component)
@@ -265,8 +266,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       'Answer quiz questions',
       'Complete any fill-in-the-blank exercises',
       'Record your pronunciation (if requested)',
-      'Click "Submit" when done',
-      'View your score immediately',
+      'Submit your completed work',
+      'Review your score',
     ],
     completionCriteria: {
       tutorialStoryId: '📚-creating-lessons-workbook--workbook-with-content', // Tutorial: Workbook with actual content to learn from
@@ -327,7 +328,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: 'Get Help from AI Assistant',
     description: 'Ask AI for translations and explanations',
     instructions: [
-      'Click the chat icon in the sidebar',
+      'Open the chat sidebar',
       'Ask a question (e.g., "How do I say hello?")',
       'Read the AI response',
       'Ask follow-up questions',
@@ -364,6 +365,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: '📚-creating-lessons-workbook--workbook-with-content', // Tutorial: Workbook for practicing shortcuts
       quizStoryId: '📄-pages-application-pages--workbook', // Quiz: Actual workbook page
+      requiredActions: ['onClick', 'onSubmit'], // Practicing shortcuts in workbook
       customCheck: () => {
         // Check if user has used any keyboard shortcuts
         const shortcutUsed = localStorage.getItem('learner-shortcut-used');
@@ -379,9 +381,9 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     description: 'Understand the component library',
     instructions: [
       'Browse the Storybook sidebar',
-      'Visit "Technical Overview" page',
+      'Visit the "Technical Overview" page',
       'Read component documentation',
-      'Click through different categories',
+      'Explore the different categories',
       'Examine the tech stack',
       'Review architecture patterns',
     ],
@@ -527,6 +529,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     completionCriteria: {
       tutorialStoryId: '📚-creating-lessons-editor--empty-editor-text-formatting', // Tutorial: Simple editor (no keyboard demo actions)
       quizStoryId: '📄-pages-application-pages--unit-detail', // Quiz: Actual editor page
+      requiredActions: ['onClick', 'onSave'], // Interacting with editor shortcuts
     },
     persona: 'developer',
     category: 'Learning',
@@ -553,6 +556,22 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     category: '🎁 Extra Credit',
     order: 100,
     estimatedTime: 600,
+    completionCriteria: {
+      tutorialStoryId: 'help-keyboard-shortcut-trainer--default',
+      quizStoryId: 'help-keyboard-shortcut-trainer--default',
+      requiredActions: ['onClick'], // Any interaction in the trainer
+      customCheck: () => {
+        // All 20 shortcuts completed
+        try {
+          const stored = localStorage.getItem('keyboard-trainer-completed');
+          if (stored) {
+            const completed = JSON.parse(stored);
+            return Array.isArray(completed) && completed.length >= 20;
+          }
+        } catch { /* ignore */ }
+        return false;
+      },
+    },
   },
   {
     id: 'secret-speed-demon',
@@ -569,6 +588,23 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     category: '🎁 Extra Credit',
     order: 101,
     estimatedTime: 300,
+    completionCriteria: {
+      tutorialStoryId: 'help-keyboard-shortcut-trainer--default',
+      quizStoryId: 'help-keyboard-shortcut-trainer--default',
+      customCheck: () => {
+        // All 20 shortcuts completed in under 5 minutes
+        try {
+          const stored = localStorage.getItem('keyboard-trainer-completed');
+          const startTime = localStorage.getItem('keyboard-trainer-start');
+          if (stored && startTime) {
+            const completed = JSON.parse(stored);
+            const elapsed = Date.now() - Number(startTime);
+            return Array.isArray(completed) && completed.length >= 20 && elapsed < 5 * 60 * 1000;
+          }
+        } catch { /* ignore */ }
+        return false;
+      },
+    },
   },
   {
     id: 'secret-achievement-hunter',
@@ -585,10 +621,31 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     category: '🎁 Extra Credit',
     order: 102,
     estimatedTime: 420,
+    completionCriteria: {
+      tutorialStoryId: 'help-keyboard-shortcut-trainer--default',
+      quizStoryId: 'help-keyboard-shortcut-trainer--default',
+      customCheck: () => {
+        // All 8 individual achievements unlocked
+        const requiredAchievements = [
+          'Bold Beginner', 'Italic Expert', 'Format Master',
+          'Heading Hero', 'List Legend', 'Code Ninja',
+          'Alignment Ace', 'Time Traveler',
+        ];
+        try {
+          const stored = localStorage.getItem('keyboard-trainer-achievements');
+          if (stored) {
+            const achievements = JSON.parse(stored);
+            return Array.isArray(achievements) &&
+              requiredAchievements.every(a => achievements.includes(a));
+          }
+        } catch { /* ignore */ }
+        return false;
+      },
+    },
   },
   {
     id: 'secret-shortcut-evangelist',
-    title: '📢 SECRET: Shortcut Evangelistist',
+    title: '📢 SECRET: Shortcut Evangelist',
     description: 'Use shortcuts in your daily workflow',
     instructions: [
       'Apply what you learned in the training',
@@ -601,142 +658,170 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     category: '🎁 Extra Credit',
     order: 103,
     estimatedTime: 1800,
+    completionCriteria: {
+      tutorialStoryId: '📚-creating-lessons-editor--empty-editor-text-formatting',
+      quizStoryId: '📄-pages-application-pages--unit-detail',
+      requiredActions: ['onSave', 'onUpdate'], // Using shortcuts while creating real content
+    },
   },
 
   // ============ TRANSLATOR TASKS ============
   {
     id: 'translator-language-switcher',
     title: 'Try the Language Switcher',
-    description: 'Learn how to preview content in different languages',
+    description: 'Preview how UI text appears in each supported language',
     instructions: [
-      'Look for the 🌐 Globe icon in the top toolbar',
-      'Click it to open the language selector',
-      'Switch between languages (English, Japanese, Spanish, etc.)',
-      'Notice how UI text changes in real-time',
-      'Try viewing a component in each available language',
+      'Find the 🌐 Globe icon in the Storybook top toolbar',
+      'Click it to open the language selector dropdown',
+      'Switch to Japanese (ja) and observe how button labels, headings, and form fields change',
+      'Switch to Spanish (es) and compare the text length differences',
+      'Return to English (en) — this is the source locale',
+      'Notice any text that did NOT change — those are missing translations',
     ],
     persona: 'translator',
     category: 'Getting Started',
     order: 1,
     estimatedTime: 120,
     completionCriteria: {
-      tutorialStoryId: 'translation-mode-demo--default', // Tutorial: Translation demo with toolbar
-      requiredActions: ['onLanguageChange'],
+      tutorialStoryId: 'translation-mode-demo--default',
+      quizStoryId: 'translation-mode-demo--editor-namespace',
+      requiredActions: ['onLanguageChange', 'onClick'],
     },
   },
   {
     id: 'translator-translation-panel',
     title: 'Open the Translations Panel',
-    description: 'Discover the translation editing tools',
+    description: 'Use the addon panel to browse, edit, and export translation keys',
     instructions: [
-      'Look at the addon panel at the bottom of Storybook',
-      'Click on the "Translations" tab',
-      'Browse the translation keys for the current component',
-      'See which strings are translated vs missing',
-      'View the context and usage information',
+      'Look at the addon panel tabs at the bottom of Storybook',
+      'Click the "Translations" tab to open the translation panel',
+      'Browse the list of translation keys for the current story',
+      'Each row shows the key name, English value, and translation status',
+      'Click a row to expand metadata: context, component location, impact level',
+      'Use the "Export Translations" button to download JSON or CSV',
     ],
     persona: 'translator',
     category: 'Getting Started',
     order: 2,
     estimatedTime: 180,
     completionCriteria: {
-      tutorialStoryId: 'translation-mode-demo--default', // Tutorial: Translation demo with panel
-      requiredActions: ['onPanelOpen'],
+      tutorialStoryId: 'translation-mode-demo--default',
+      quizStoryId: 'translation-mode-demo--auth-namespace',
+      requiredActions: ['onPanelOpen', 'onClick'],
     },
   },
   {
     id: 'translator-view-missing',
     title: 'Find Missing Translations',
-    description: 'Identify strings that need translation',
+    description: 'Identify untranslated strings and prioritize by impact',
     instructions: [
-      'Open the Translations panel',
-      'Look for strings marked as "Missing" or with warning icons',
-      'Switch languages to see which locales are incomplete',
-      'Note the namespace and key for missing strings',
-      'Check the component context for translation hints',
+      'Open the Translations panel for a story',
+      'Look for rows marked with ⚠️ warning icons — these are missing translations',
+      'Switch the language selector to Japanese (ja) to see which keys lack Japanese text',
+      'Switch to Spanish (es) and note the different gaps',
+      'Check the "Impact" column: Critical (red) strings should be translated first',
+      'Use the filter/search box to narrow down to a specific namespace',
+      'Count how many strings are missing per locale',
     ],
     persona: 'translator',
     category: 'Translation Workflow',
     order: 3,
     estimatedTime: 300,
     completionCriteria: {
-      tutorialStoryId: 'translation-mode-demo--default', // Tutorial: Translation panel showing missing strings
+      tutorialStoryId: 'translation-mode-demo--default',
+      quizStoryId: 'translation-mode-demo--editor-namespace',
+      requiredActions: ['onLanguageChange', 'onClick'],
     },
   },
   {
     id: 'translator-locale-files',
     title: 'Understand Locale File Structure',
-    description: 'Learn where translation files are stored',
+    description: 'Learn where JSON locale files live and how namespaces map to components',
     instructions: [
-      'Translation files live in public/locales/{lang}/',
-      'Each namespace has its own JSON file (common.json, etc.)',
-      'Keys are organized hierarchically',
-      'English (en) is the source language',
-      'Other locales mirror the English structure',
+      'Locale files are in public/locales/{lang}/ (e.g., public/locales/en/, public/locales/ja/)',
+      'Each namespace is a separate JSON file: common.json, editor.json, auth.json, etc.',
+      'Keys inside are nested objects — e.g., common.buttons.save → { "buttons": { "save": "Save" } }',
+      'English (en) is the source of truth — all other locales mirror its key structure',
+      'Open the "Editor Namespace" story to see how editor.json keys appear in the panel',
+      'Compare a key like editor.toolbar.bold across en and ja to see the mapping',
     ],
     persona: 'translator',
     category: 'Translation Workflow',
     order: 4,
     estimatedTime: 300,
     completionCriteria: {
-      tutorialStoryId: 'translation-mode-demo--editor-namespace', // Tutorial: Editor namespace showing file structure
+      tutorialStoryId: 'translation-mode-demo--editor-namespace',
+      quizStoryId: 'translation-mode-demo--auth-namespace',
+      requiredActions: ['onClick', 'onSelect'],
     },
   },
   {
     id: 'translator-component-context',
     title: 'Review Component Context',
-    description: 'Understand where translations are used',
+    description: 'See exactly which components use each translation key and why',
     instructions: [
-      'Select a component story in the sidebar',
-      'Open the Translations panel',
-      'Review which translation keys the component uses',
-      'Check the "Used In" field to see file locations',
-      'Understand the UI context before translating',
+      'Open the "Auth Namespace" story — it shows login/signup translations',
+      'Open the Translations panel and click any translation row to expand it',
+      'Read the "Context" field — it describes when and why users see this text',
+      'Check "Component Location" — the file path of the React component using this key',
+      'Review "User Type" — who sees this text (learners, instructors, all)',
+      'Check "Tone" — formal, casual, or technical — this affects translation style',
+      'Use these metadata fields to make context-aware translation decisions',
     ],
     persona: 'translator',
     category: 'Translation Workflow',
     order: 5,
     estimatedTime: 240,
     completionCriteria: {
-      tutorialStoryId: 'translation-mode-demo--auth-namespace', // Tutorial: Auth namespace with component context
+      tutorialStoryId: 'translation-mode-demo--auth-namespace',
+      quizStoryId: 'translation-mode-demo--default',
+      requiredActions: ['onClick', 'onSelect'],
     },
   },
   {
     id: 'translator-test-rtl',
     title: 'Test RTL Language Support',
-    description: 'Verify right-to-left language layouts',
+    description: 'Verify that right-to-left languages render correctly across components',
     instructions: [
-      'Switch to a RTL language if available (Arabic, Hebrew)',
-      'Observe how the UI layout mirrors',
-      'Check that text alignment is correct',
-      'Verify icons and buttons are in the right position',
-      'Report any layout issues found',
+      'Switch to a RTL language using the language selector (Arabic or Hebrew if available)',
+      'Check that the overall page layout mirrors — sidebar on the right, content flows right-to-left',
+      'Verify text alignment: paragraphs should be right-aligned',
+      'Check that icons and directional buttons (arrows, chevrons) flip correctly',
+      'Look for layout breakage: overlapping text, misaligned buttons, clipped content',
+      'Navigate to 2-3 different component stories to test across the UI',
+      'Note any issues found — these need CSS logical properties (start/end vs left/right)',
     ],
     persona: 'translator',
     category: '🎁 Extra Credit',
     order: 101,
     estimatedTime: 300,
     completionCriteria: {
-      tutorialStoryId: 'translation-mode-demo--default', // Tutorial: Test RTL in translation demo
+      tutorialStoryId: 'translation-mode-demo--default',
+      quizStoryId: 'translation-mode-demo--editor-namespace',
+      requiredActions: ['onLanguageChange', 'onClick'],
     },
   },
   {
     id: 'translator-pluralization',
     title: 'Review Pluralization Rules',
-    description: 'Check translations with count variables',
+    description: 'Verify that count-dependent translations handle plural forms correctly per locale',
     instructions: [
-      'Find translations that use {{count}} variables',
-      'Verify plural forms are correct for each language',
-      'Test with different count values (0, 1, 2, 5, etc.)',
-      'Some languages need multiple plural forms',
-      'Check the i18next pluralization documentation',
+      'Find translation keys that contain {{count}} — these use i18next pluralization',
+      'English uses two forms: "key" (singular) and "key_other" (plural)',
+      'Japanese typically uses one form (no grammatical plural)',
+      'Arabic needs up to 6 plural forms: zero, one, two, few, many, other',
+      'In the Translations panel, look for keys ending in _one, _other, _few, etc.',
+      'Test with count values: 0, 1, 2, 5, 11, 100 to verify correct form selection',
+      'Check i18next docs for the plural rules of each target language',
     ],
     persona: 'translator',
     category: '🎁 Extra Credit',
     order: 102,
     estimatedTime: 600,
     completionCriteria: {
-      tutorialStoryId: 'translation-mode-demo--default', // Tutorial: Review plurals in translation panel
+      tutorialStoryId: 'translation-mode-demo--default',
+      quizStoryId: 'translation-mode-demo--auth-namespace',
+      requiredActions: ['onClick', 'onSelect'],
     },
   },
 ];

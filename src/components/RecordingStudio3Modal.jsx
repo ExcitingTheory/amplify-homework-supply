@@ -58,9 +58,8 @@ import {
   Warning as WarningIcon,
   MusicNote as AudioIcon,
   RecordVoiceOver as TtsIcon,
-  CircularProgress as CircularProgressIcon,
 } from '@mui/icons-material';
-import { LinearProgress } from '@mui/material';
+import { LinearProgress, CircularProgress as CircularProgressIcon } from '@mui/material';
 import RecordingStudio3 from './RecordingStudio3';
 
 // Slide-up transition for fullscreen dialog

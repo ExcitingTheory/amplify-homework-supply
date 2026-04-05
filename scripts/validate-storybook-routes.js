@@ -207,7 +207,7 @@ function generateSuggestedMappings(routes, stories, existingMap) {
       suggestions[route] = matchedStory;
     } else {
       // No match found - use placeholder
-      suggestions[route] = `?path=/story/pages-application-pages--${normalizedRouteName}`;
+      suggestions[route] = `?path=/story/📄-pages-application-pages--${normalizedRouteName}`;
     }
   }
   

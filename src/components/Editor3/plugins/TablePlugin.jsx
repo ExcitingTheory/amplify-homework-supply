@@ -95,6 +95,7 @@ export function InsertNewTableDialog({editor, onClose}) {
 
     const onClick = () => {
         editor.dispatchCommand(INSERT_NEW_TABLE_COMMAND, {columns, rows});
+        handleClose();
         onClose();
     };
 

@@ -2,8 +2,8 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { addons, types } from 'storybook/manager-api';
 import OnboardingPanel from '../../components/OnboardingPanel';
-import { getOnboardingEmitter, UserPersona } from '../onboarding-events';
-import { ONBOARDING_TASKS, getTasksForPersona } from '../onboarding-tasks';
+import { getOnboardingEmitter, UserPersona, OnboardingMode } from '../onboarding-events';
+import { ONBOARDING_TASKS, getTasksForPersona, OnboardingTaskWithCriteria } from '../onboarding-tasks';
 
 const ADDON_ID = 'storybook/addon-onboarding-custom';
 const PANEL_ID = `${ADDON_ID}/panel`;
@@ -586,6 +586,34 @@ addons.register(ADDON_ID, (api) => {
       console.log('[Onboarding] Welcome story detected, opening panel');
       panelOpenedForStory = storyId;
       openOnboardingPanel();
+    }
+    
+    // Auto-emit task-started when navigating to a task's story
+    const emitter = getOnboardingEmitter();
+    const persona = emitter.getPersona();
+    if (!persona) return;
+    
+    const mode = emitter.getMode();
+    const tasks = getTasksForPersona(persona);
+    
+    for (const task of tasks) {
+      if (!task.completionCriteria) continue;
+      if (emitter.isTaskCompleted(task.id, persona)) continue;
+      
+      const expectedStoryId = mode === 'tutorial'
+        ? task.completionCriteria.tutorialStoryId
+        : task.completionCriteria.quizStoryId;
+      
+      if (expectedStoryId && expectedStoryId === storyId) {
+        console.log(`[Onboarding] Story ${storyId} matches task ${task.id} (${mode} mode) — emitting task-started`);
+        emitter.emit({
+          type: 'task-started',
+          taskId: task.id,
+          persona,
+          timestamp: Date.now(),
+          metadata: { storyId, mode, autoDetected: true },
+        });
+      }
     }
   };
   

@@ -27,10 +27,11 @@ import CircleIcon from '@mui/icons-material/Circle';
 import PersonIcon from '@mui/icons-material/Person';
 import SchoolIcon from '@mui/icons-material/School';
 import CodeIcon from '@mui/icons-material/Code';
+import TranslateIcon from '@mui/icons-material/Translate';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LaunchIcon from '@mui/icons-material/Launch';
 import { useTheme } from '@mui/material/styles';
-import { getOnboardingEmitter, UserPersona } from '../code/onboarding-events';
+import { getOnboardingEmitter, UserPersona, OnboardingMode } from '../code/onboarding-events';
 import { ONBOARDING_TASKS, getTasksForPersona, getTasksByCategory, OnboardingTaskWithCriteria } from '../code/onboarding-tasks';
 import SpotlightOverlay, { SpotlightStep } from './SpotlightOverlay';
 import { getSpotlightConfigForTask } from '../code/spotlight-configs';
@@ -119,15 +120,22 @@ const PERSONAS: PersonaOption[] = [
     icon: <CodeIcon />,
     color: '#9C27B0',
   },
+  {
+    id: 'translator',
+    label: 'Translator',
+    icon: <TranslateIcon />,
+    color: '#FF9800',
+  },
 ];
 
 const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   const theme = useTheme();
+  const emitter = getOnboardingEmitter();
   const [selectedPersona, setSelectedPersona] = useState<UserPersona | null>(null);
   const [tabValue, setTabValue] = useState(0);
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
   const [completionPercentage, setCompletionPercentage] = useState(0);
-  const [mode, setMode] = useState<'tutorial' | 'quiz'>('tutorial');
+  const [mode, setModeState] = useState<OnboardingMode>(() => emitter.getMode());
   const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
   const [apiReady, setApiReady] = useState(false);
   
@@ -137,7 +145,11 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   const [spotlightCurrentStep, setSpotlightCurrentStep] = useState(0);
   const [activeTask, setActiveTask] = useState<OnboardingTaskWithCriteria | null>(null);
 
-  const emitter = getOnboardingEmitter();
+  // Wrap setMode to also sync to the emitter for task-completion matching
+  const setMode = (newMode: OnboardingMode) => {
+    setModeState(newMode);
+    emitter.setMode(newMode);
+  };
 
   // Wait for Storybook API to be ready
   useEffect(() => {
@@ -186,14 +198,14 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
         const completed = emitter.getCompletedTasks(event.persona);
         setCompletedTasks(new Set(completed.map((e) => e.taskId)));
         updateCompletionPercentage(event.persona);
-      } else if (event.type === 'task-completed' && event.persona && selectedPersona === event.persona) {
+      } else if (event.type === 'task-completed' && event.persona) {
         setCompletedTasks((prev) => new Set([...prev, event.taskId]));
         updateCompletionPercentage(event.persona);
       }
     });
 
     return unsubscribe;
-  }, [emitter, selectedPersona]);
+  }, [emitter]);
 
   const updateCompletionPercentage = (persona: UserPersona) => {
     const percentage = emitter.getCompletionPercentage(persona, ONBOARDING_TASKS);
@@ -348,8 +360,8 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
       id: `${task.id}-complete`,
       title: 'Task Complete!',
       description: mode === 'tutorial'
-        ? 'Great job! You\'ve learned about this feature. Click Complete to mark this task as done.'
-        : 'Did you successfully complete the task? Click Complete if you did, or Skip to try again later.',
+        ? 'Great job! You\'ve learned about this feature. Your progress is saved automatically.'
+        : 'Your actions are tracked automatically. Move on when you\'re ready, or skip to try again later.',
       tooltipPosition: 'center',
       isLast: true,
     });
@@ -753,7 +765,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                                   </Box>
                                   <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.5, fontSize: '0.65rem', fontStyle: 'italic' }}>
                                     {mode === 'quiz' 
-                                      ? 'Complete the task in the story to check it off automatically'
+                                      ? 'Your actions in the story are tracked — progress updates automatically'
                                       : 'Follow along with the interactive example to learn how it works'
                                     }
                                   </Typography>

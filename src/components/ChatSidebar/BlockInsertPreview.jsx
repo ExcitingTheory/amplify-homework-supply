@@ -99,7 +99,9 @@ const AnswerBlockPreview = ({ preview, blockData }) => (
         </Box>
         <AnswerComponent
             nodeKey="preview-answer"
-            ids={blockData || []}
+            wordIDs={blockData || []}
+            allowedInput={preview?.inputMethods || ['text', 'audio', 'writing']}
+            promptMethod={['text']}
         />
     </Box>
 );

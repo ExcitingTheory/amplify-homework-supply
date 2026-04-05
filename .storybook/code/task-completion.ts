@@ -51,7 +51,8 @@ export function initializeTaskCompletion(): () => void {
       );
       
       if (shouldComplete) {
-        console.log(`[Task Completion] Auto-completing task: ${task.id}`);
+        const mode = emitter.getMode();
+        console.log(`[Task Completion] Auto-completing task: ${task.id} (mode: ${mode})`);
         
         emitter.emit({
           type: 'task-completed',
@@ -74,7 +75,24 @@ export function initializeTaskCompletion(): () => void {
 }
 
 /**
+ * Get the correct story ID from criteria based on current mode
+ */
+function getExpectedStoryId(criteria: TaskCompletionCriteria, mode: 'tutorial' | 'quiz'): string | undefined {
+  if (mode === 'tutorial' && criteria.tutorialStoryId) {
+    return criteria.tutorialStoryId;
+  }
+  if (mode === 'quiz' && criteria.quizStoryId) {
+    return criteria.quizStoryId;
+  }
+  // Legacy fallback
+  return criteria.storyId;
+}
+
+/**
  * Check if an action satisfies task completion criteria
+ * 
+ * Mode-aware: uses tutorialStoryId or quizStoryId based on current mode.
+ * Both story ID and action must match for tasks that define mode-specific stories.
  */
 function checkCompletionCriteria(
   actionName: string,
@@ -83,8 +101,12 @@ function checkCompletionCriteria(
   taskId: string,
   sequenceTracker: any
 ): boolean {
-  // Check story ID matches (if specified)
-  if (criteria.storyId && criteria.storyId !== storyId) {
+  const emitter = getOnboardingEmitter();
+  const mode = emitter.getMode();
+  const expectedStoryId = getExpectedStoryId(criteria, mode);
+  
+  // If a story ID is specified for this mode, the action must occur on that story
+  if (expectedStoryId && expectedStoryId !== storyId) {
     return false;
   }
   
@@ -92,7 +114,7 @@ function checkCompletionCriteria(
   if (criteria.requiredActions) {
     const matches = criteria.requiredActions.includes(actionName);
     if (matches) {
-      console.log(`[Task Completion] Action ${actionName} matches required actions for ${taskId}`);
+      console.log(`[Task Completion] [${mode}] Action ${actionName} on story ${storyId} matches task ${taskId}`);
       return true;
     }
   }
@@ -106,7 +128,7 @@ function checkCompletionCriteria(
     );
     
     if (isComplete) {
-      console.log(`[Task Completion] Sequence completed for ${taskId}`);
+      console.log(`[Task Completion] [${mode}] Sequence completed for ${taskId}`);
       sequenceTracker.resetSequence(taskId); // Reset for next time
       return true;
     }

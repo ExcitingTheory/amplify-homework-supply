@@ -67,7 +67,7 @@ export const AutoDetectTaskCompletion: StoryObj = {
 
 /**
  * Example: Manual task tracking with startTask and completeTask
- * User must click the button to complete the task
+ * Demonstrates the useTrackTask hook for programmatic task control
  */
 export const ManualTaskTracking: StoryObj = {
   render: () => {

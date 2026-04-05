@@ -4,6 +4,7 @@
  */
 
 export type UserPersona = 'instructor' | 'learner' | 'developer' | 'translator';
+export type OnboardingMode = 'tutorial' | 'quiz';
 
 export interface OnboardingEvent {
   type: 'task-started' | 'task-completed' | 'task-skipped' | 'persona-selected' | 'action-performed';
@@ -30,6 +31,7 @@ class OnboardingEventEmitter {
   private listeners: Set<(event: OnboardingEvent) => void> = new Set();
   private completedTasks: Map<string, OnboardingEvent> = new Map();
   private currentPersona: UserPersona | null = null;
+  private currentMode: OnboardingMode = 'tutorial';
 
   /**
    * Subscribe to onboarding events
@@ -102,11 +104,27 @@ class OnboardingEventEmitter {
   }
 
   /**
+   * Set the current onboarding mode (tutorial or quiz)
+   */
+  setMode(mode: OnboardingMode): void {
+    this.currentMode = mode;
+    this.persistToLocalStorage();
+  }
+
+  /**
+   * Get the current onboarding mode
+   */
+  getMode(): OnboardingMode {
+    return this.currentMode;
+  }
+
+  /**
    * Clear all tracking data and notify listeners
    */
   reset(): void {
     this.completedTasks.clear();
     this.currentPersona = null;
+    this.currentMode = 'tutorial';
     this.clearLocalStorage();
     // Notify listeners so sidebar widget resets
     this.listeners.forEach((callback) => callback({
@@ -124,6 +142,7 @@ class OnboardingEventEmitter {
     const data = {
       completedTasks: Array.from(this.completedTasks.entries()),
       currentPersona: this.currentPersona,
+      currentMode: this.currentMode,
       timestamp: Date.now(),
     };
     try {
@@ -144,6 +163,9 @@ class OnboardingEventEmitter {
       }
       if (data.currentPersona) {
         this.currentPersona = data.currentPersona;
+      }
+      if (data.currentMode) {
+        this.currentMode = data.currentMode;
       }
     } catch {
       // localStorage might be unavailable

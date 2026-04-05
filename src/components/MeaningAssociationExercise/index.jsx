@@ -28,6 +28,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { Easy } from './Easy';
 import { Hard } from './Hard';
 import { Learn } from './Learn';
+import { DndWrapper } from './DndWrapper';
 import UnitContext from '../../context/unitContext';
 
 
@@ -307,7 +308,7 @@ const MeaningAssociationTabs = ({
           )}
         </Tabs>
       </AppBar>
-      {/* <DndWrapper> */}
+      <DndWrapper>
         {enabledModes.includes('learn') && (
           <TabPanel value={tabIndex} index={enabledModes.indexOf('learn')}>
               <Learn
@@ -338,7 +339,7 @@ const MeaningAssociationTabs = ({
               />
           </TabPanel>
         )}
-      {/* </DndWrapper> */}
+      </DndWrapper>
     </Box>
   )
 }

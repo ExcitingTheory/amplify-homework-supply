@@ -47,7 +47,7 @@ function getDefaultSteps(taskId: string, mode: 'tutorial' | 'quiz'): SpotlightSt
     {
       id: `${taskId}-complete`,
       title: 'Task Complete!',
-      description: 'Click Complete when you\'re ready to move on.',
+      description: 'Move on when you\'re ready.',
       tooltipPosition: 'center',
       isLast: true,
     },
@@ -72,7 +72,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         tooltipPosition: 'center',
         actions: [
           'We\'ll navigate to the Sections page',
-          'Click the "Create Section" button',
+          'Use the "Create Section" option',
           'Fill in class details',
           'Get a shareable join code',
         ],
@@ -92,7 +92,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: 'create-button',
         title: 'Create Section Button',
-        description: 'Click this button to start creating a new class section.',
+        description: 'Use this to start creating a new class section.',
         targetSelector: '[data-tour="create-section-button"], button:has-text("Create Section"), button:has-text("New Section")',
         tooltipPosition: 'bottom',
       },
@@ -702,7 +702,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: 'join-button',
         title: 'Join Section Button',
-        description: 'Click this button to open the join dialog.',
+        description: 'Use this to open the join dialog.',
         targetSelector: '[data-tour="join-section-button"]',
         tooltipPosition: 'bottom',
       },
@@ -723,7 +723,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: 'confirm',
         title: 'Submit to Join',
-        description: 'Click the submit button to enroll in the class.',
+        description: 'Submit your join code to enroll in the class.',
         targetSelector: '[data-tour="join-section-dialog"] button[type="submit"]',
         tooltipPosition: 'top',
       },
@@ -1884,6 +1884,535 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         id: 'verify',
         title: 'Knowledge Shared?',
         description: 'Complete when you\'ve taught others.',
+        tooltipPosition: 'center',
+        isLast: true,
+      },
+    ],
+  },
+
+  // ============================================================
+  // TRANSLATOR TASKS
+  // ============================================================
+
+  {
+    taskId: 'translator-language-switcher',
+    tutorialSteps: [
+      {
+        id: 'intro',
+        title: 'Language Switcher',
+        description: 'Learn how to preview content in each supported locale using the toolbar.',
+        tooltipPosition: 'center',
+        actions: [
+          'Find the globe icon in the toolbar',
+          'Switch between languages',
+          'Observe how UI text changes live',
+        ],
+      },
+      {
+        id: 'globe-icon',
+        title: 'Find the Globe Icon',
+        description: 'The 🌐 globe icon in the top toolbar opens the language selector.',
+        targetSelector: '[data-tour="language-switcher"], button[aria-label*="language"], button[aria-label*="locale"]',
+        tooltipPosition: 'bottom',
+      },
+      {
+        id: 'select-language',
+        title: 'Switch Language',
+        description: 'Pick a language from the dropdown to preview the UI in that locale.',
+        targetSelector: '[data-tour="language-dropdown"], [role="listbox"], [role="menu"]',
+        tooltipPosition: 'bottom',
+        actions: [
+          'Try Japanese (ja) — text becomes shorter/different characters',
+          'Try Spanish (es) — text often becomes longer',
+          'Return to English (en) — the source locale',
+        ],
+      },
+      {
+        id: 'observe-changes',
+        title: 'Spot the Differences',
+        description: 'Look for text that did NOT change — those are untranslated strings.',
+        tooltipPosition: 'center',
+        actions: [
+          'Buttons, labels, and headings should all update',
+          'Any English text remaining in a non-English locale is a gap',
+          'Note these for the "Find Missing Translations" task',
+        ],
+      },
+      {
+        id: 'complete',
+        title: 'Language Switcher Mastered! 🌐',
+        description: 'You can now preview the app in any supported language.',
+        tooltipPosition: 'center',
+        isLast: true,
+      },
+    ],
+    quizSteps: [
+      {
+        id: 'challenge',
+        title: '🎯 Challenge: Switch Languages',
+        description: 'Switch to two different languages and identify at least one untranslated string.',
+        tooltipPosition: 'center',
+      },
+      {
+        id: 'verify',
+        title: 'Languages Tested?',
+        description: 'Complete if you previewed the UI in multiple languages.',
+        tooltipPosition: 'center',
+        isLast: true,
+      },
+    ],
+  },
+
+  {
+    taskId: 'translator-translation-panel',
+    tutorialSteps: [
+      {
+        id: 'intro',
+        title: 'Translations Panel',
+        description: 'The panel at the bottom of Storybook is your main translation workspace.',
+        tooltipPosition: 'center',
+        actions: [
+          'Open the Translations tab',
+          'Browse translation keys',
+          'View metadata and status',
+          'Export translations',
+        ],
+      },
+      {
+        id: 'panel-tab',
+        title: 'Open the Translations Tab',
+        description: 'Find the "Translations" tab in the addon panel at the bottom.',
+        targetSelector: '[data-tour="translations-panel"], button[role="tab"]',
+        tooltipPosition: 'top',
+      },
+      {
+        id: 'key-list',
+        title: 'Translation Key List',
+        description: 'Each row shows a key, its English value, and translation status per locale.',
+        targetSelector: '[data-tour="translation-keys"]',
+        tooltipPosition: 'top',
+        actions: [
+          'Green check = translated',
+          'Warning icon = missing translation',
+          'Click a row to see full metadata',
+        ],
+      },
+      {
+        id: 'metadata',
+        title: 'View Key Metadata',
+        description: 'Click a row to expand rich context: description, component, impact, tone.',
+        targetSelector: '[data-tour="translation-metadata"]',
+        tooltipPosition: 'right',
+        actions: [
+          'Context — when/why users see this text',
+          'Component Location — the React file using this key',
+          'Impact — Critical, High, or Important',
+          'Tone — Formal, Casual, or Technical',
+        ],
+      },
+      {
+        id: 'export',
+        title: 'Export Translations',
+        description: 'Download translation data as JSON or CSV for offline editing.',
+        targetSelector: '[data-tour="export-button"], button:has-text("Export")',
+        tooltipPosition: 'left',
+      },
+      {
+        id: 'complete',
+        title: 'Panel Explored! 📋',
+        description: 'You now know where to find and edit all translation data.',
+        tooltipPosition: 'center',
+        isLast: true,
+      },
+    ],
+    quizSteps: [
+      {
+        id: 'challenge',
+        title: '🎯 Challenge: Explore the Panel',
+        description: 'Open the Translations panel and expand at least one key to view its metadata.',
+        tooltipPosition: 'center',
+      },
+      {
+        id: 'verify',
+        title: 'Panel Explored?',
+        description: 'Complete if you browsed keys and viewed metadata.',
+        tooltipPosition: 'center',
+        isLast: true,
+      },
+    ],
+  },
+
+  {
+    taskId: 'translator-view-missing',
+    tutorialSteps: [
+      {
+        id: 'intro',
+        title: 'Find Missing Translations',
+        description: 'Learn to identify gaps and prioritize what to translate first.',
+        tooltipPosition: 'center',
+        actions: [
+          'Open the Translations panel',
+          'Switch locales to spot gaps',
+          'Use impact levels to prioritize',
+        ],
+      },
+      {
+        id: 'open-panel',
+        title: 'Open Translations Panel',
+        description: 'Start by opening the panel for the current story.',
+        targetSelector: '[data-tour="translations-panel"]',
+        tooltipPosition: 'top',
+      },
+      {
+        id: 'warning-icons',
+        title: 'Spot Warning Icons',
+        description: 'Rows with ⚠️ icons indicate missing translations for the selected locale.',
+        targetSelector: '[data-tour="missing-translations"]',
+        tooltipPosition: 'right',
+        actions: [
+          'Yellow ⚠️ = at least one locale is missing',
+          'Red ❌ = no translation in any locale',
+          'Green ✅ = fully translated',
+        ],
+      },
+      {
+        id: 'switch-locale',
+        title: 'Switch Locales to Compare',
+        description: 'Change the language to see which locale has the most gaps.',
+        targetSelector: '[data-tour="language-switcher"]',
+        tooltipPosition: 'bottom',
+      },
+      {
+        id: 'prioritize',
+        title: 'Prioritize by Impact',
+        description: 'Critical (red) and High (orange) impact strings should be translated first.',
+        tooltipPosition: 'center',
+        actions: [
+          'Critical — login, error messages, core navigation',
+          'High — form labels, button text, headings',
+          'Important — tooltips, help text, descriptions',
+        ],
+      },
+      {
+        id: 'complete',
+        title: 'Gaps Identified! 🔍',
+        description: 'You can now find and prioritize missing translations.',
+        tooltipPosition: 'center',
+        isLast: true,
+      },
+    ],
+    quizSteps: [
+      {
+        id: 'challenge',
+        title: '🎯 Challenge: Find Gaps',
+        description: 'Switch between two locales and count the missing translations in the editor namespace.',
+        tooltipPosition: 'center',
+      },
+      {
+        id: 'verify',
+        title: 'Gaps Found?',
+        description: 'Complete if you identified missing translations.',
+        tooltipPosition: 'center',
+        isLast: true,
+      },
+    ],
+  },
+
+  {
+    taskId: 'translator-locale-files',
+    tutorialSteps: [
+      {
+        id: 'intro',
+        title: 'Locale File Structure',
+        description: 'Understand how translation JSON files are organized on disk.',
+        tooltipPosition: 'center',
+        actions: [
+          'Files live in public/locales/{lang}/',
+          'Each namespace = one JSON file',
+          'English (en) is the source of truth',
+        ],
+      },
+      {
+        id: 'directory',
+        title: 'Directory Layout',
+        description: 'Translation files follow this structure:',
+        tooltipPosition: 'center',
+        actions: [
+          'public/locales/en/common.json — shared UI strings',
+          'public/locales/en/editor.json — editor-specific strings',
+          'public/locales/en/auth.json — login/signup strings',
+          'public/locales/ja/ mirrors en/ with Japanese values',
+          'public/locales/es/ mirrors en/ with Spanish values',
+        ],
+      },
+      {
+        id: 'key-format',
+        title: 'Key Format',
+        description: 'Keys are nested JSON objects mapped to dot-notation paths.',
+        tooltipPosition: 'center',
+        actions: [
+          'common.buttons.save → { "buttons": { "save": "Save" } }',
+          'editor.toolbar.bold → { "toolbar": { "bold": "Bold" } }',
+          'The Translations panel shows the dot-notation key',
+        ],
+      },
+      {
+        id: 'editor-namespace',
+        title: 'Try the Editor Namespace',
+        description: 'The "Editor Namespace" story shows how editor.json keys appear in the panel.',
+        targetSelector: '[data-tour="namespace-selector"]',
+        tooltipPosition: 'bottom',
+      },
+      {
+        id: 'complete',
+        title: 'Structure Understood! 📂',
+        description: 'You now know where locale files live and how keys are organized.',
+        tooltipPosition: 'center',
+        isLast: true,
+      },
+    ],
+    quizSteps: [
+      {
+        id: 'challenge',
+        title: '🎯 Challenge: Trace a Key',
+        description: 'Find a key in the Translations panel and locate the corresponding file and path in public/locales/.',
+        tooltipPosition: 'center',
+      },
+      {
+        id: 'verify',
+        title: 'Key Located?',
+        description: 'Complete if you can map a panel key to its file on disk.',
+        tooltipPosition: 'center',
+        isLast: true,
+      },
+    ],
+  },
+
+  {
+    taskId: 'translator-component-context',
+    tutorialSteps: [
+      {
+        id: 'intro',
+        title: 'Component Context',
+        description: 'Use metadata to understand where and how each translated string appears in the UI.',
+        tooltipPosition: 'center',
+        actions: [
+          'Open the Auth Namespace story',
+          'Expand a translation row',
+          'Read context, tone, and user type metadata',
+        ],
+      },
+      {
+        id: 'auth-story',
+        title: 'Open Auth Namespace',
+        description: 'The Auth namespace has login/signup strings with rich context metadata.',
+        targetSelector: '[data-tour="auth-namespace"]',
+        tooltipPosition: 'right',
+      },
+      {
+        id: 'expand-row',
+        title: 'Expand a Translation Row',
+        description: 'Click any row to reveal the full metadata panel.',
+        targetSelector: '[data-tour="translation-row"]',
+        tooltipPosition: 'right',
+      },
+      {
+        id: 'context-field',
+        title: 'Read the Context Field',
+        description: 'This describes when users see the text and why it matters.',
+        tooltipPosition: 'center',
+        actions: [
+          'Context — "Shown on the login page when credentials are invalid"',
+          'Component — "src/components/AuthForm.tsx"',
+          'User Type — "All users" or "Instructors only"',
+          'Tone — "Formal" means avoid slang in translations',
+        ],
+      },
+      {
+        id: 'use-context',
+        title: 'Apply Context to Translation',
+        description: 'Better context leads to better translations.',
+        tooltipPosition: 'center',
+        actions: [
+          'A "Critical" login error needs precise, clear language',
+          'A "Casual" tooltip can be more conversational',
+          'Check "Alternative Terms" for synonym suggestions',
+        ],
+      },
+      {
+        id: 'complete',
+        title: 'Context Mastered! 🎯',
+        description: 'You can now make context-aware translation decisions.',
+        tooltipPosition: 'center',
+        isLast: true,
+      },
+    ],
+    quizSteps: [
+      {
+        id: 'challenge',
+        title: '🎯 Challenge: Read Context',
+        description: 'Expand 3 translation rows and describe the tone and user type for each.',
+        tooltipPosition: 'center',
+      },
+      {
+        id: 'verify',
+        title: 'Context Reviewed?',
+        description: 'Complete if you used metadata to understand string usage.',
+        tooltipPosition: 'center',
+        isLast: true,
+      },
+    ],
+  },
+
+  {
+    taskId: 'translator-test-rtl',
+    tutorialSteps: [
+      {
+        id: 'intro',
+        title: 'RTL Language Testing',
+        description: 'Verify that the UI renders correctly for right-to-left languages.',
+        tooltipPosition: 'center',
+        actions: [
+          'Switch to an RTL locale',
+          'Check layout mirroring',
+          'Look for breakage',
+        ],
+      },
+      {
+        id: 'switch-rtl',
+        title: 'Switch to RTL',
+        description: 'Select Arabic (ar) or Hebrew (he) if available in the language selector.',
+        targetSelector: '[data-tour="language-switcher"]',
+        tooltipPosition: 'bottom',
+      },
+      {
+        id: 'check-layout',
+        title: 'Check Layout Mirroring',
+        description: 'The entire layout should flip — navigation on the right, content flowing right-to-left.',
+        tooltipPosition: 'center',
+        actions: [
+          'Sidebar should appear on the right',
+          'Text should be right-aligned',
+          'Directional icons (arrows, chevrons) should flip',
+        ],
+      },
+      {
+        id: 'check-components',
+        title: 'Test Across Components',
+        description: 'Navigate to 2-3 different stories to verify RTL works everywhere.',
+        tooltipPosition: 'center',
+        actions: [
+          'Check forms — labels should be on the right of inputs',
+          'Check buttons — icon + text order may flip',
+          'Check lists — bullet alignment should be right-side',
+        ],
+      },
+      {
+        id: 'report',
+        title: 'Report Issues',
+        description: 'Note any elements that use left/right instead of start/end CSS properties.',
+        tooltipPosition: 'center',
+        actions: [
+          'Overlapping text = needs a width or direction fix',
+          'Misaligned buttons = needs logical CSS properties',
+          'Clipped content = needs overflow direction fix',
+        ],
+      },
+      {
+        id: 'complete',
+        title: 'RTL Tested! ↔️',
+        description: 'You\'ve verified right-to-left language support.',
+        tooltipPosition: 'center',
+        isLast: true,
+      },
+    ],
+    quizSteps: [
+      {
+        id: 'challenge',
+        title: '🎯 Challenge: Test RTL',
+        description: 'Switch to an RTL language and navigate to at least 2 different stories.',
+        tooltipPosition: 'center',
+      },
+      {
+        id: 'verify',
+        title: 'RTL Verified?',
+        description: 'Complete if you tested RTL layout across components.',
+        tooltipPosition: 'center',
+        isLast: true,
+      },
+    ],
+  },
+
+  {
+    taskId: 'translator-pluralization',
+    tutorialSteps: [
+      {
+        id: 'intro',
+        title: 'Pluralization Rules',
+        description: 'Learn how i18next handles count-dependent translation forms.',
+        tooltipPosition: 'center',
+        actions: [
+          'Find keys with {{count}}',
+          'Understand plural suffixes',
+          'Verify correct forms per locale',
+        ],
+      },
+      {
+        id: 'find-plural-keys',
+        title: 'Find Plural Keys',
+        description: 'Look for translation values containing {{count}} — these are pluralized.',
+        targetSelector: '[data-tour="translation-keys"]',
+        tooltipPosition: 'right',
+        actions: [
+          'English: "key" (1 item), "key_other" (0 or 2+ items)',
+          'Example: "1 assignment" vs "5 assignments"',
+        ],
+      },
+      {
+        id: 'locale-rules',
+        title: 'Per-Locale Plural Rules',
+        description: 'Different languages have different plural categories.',
+        tooltipPosition: 'center',
+        actions: [
+          'English: one, other (2 forms)',
+          'Japanese: other (1 form — no grammatical plural)',
+          'French: one, other (2 forms, but 0 is singular)',
+          'Arabic: zero, one, two, few, many, other (6 forms)',
+          'Russian: one, few, many, other (4 forms)',
+        ],
+      },
+      {
+        id: 'test-counts',
+        title: 'Test with Different Counts',
+        description: 'Verify the correct form is selected for each count value.',
+        tooltipPosition: 'center',
+        actions: [
+          'count=0 — English uses "other" (0 items)',
+          'count=1 — English uses "one" (1 item)',
+          'count=2 — English uses "other" (2 items)',
+          'count=5 — Verify "other" still applies',
+          'count=11 — Some languages have special rules for teens',
+        ],
+      },
+      {
+        id: 'complete',
+        title: 'Pluralization Mastered! 🔢',
+        description: 'You understand how to handle count-dependent translations.',
+        tooltipPosition: 'center',
+        isLast: true,
+      },
+    ],
+    quizSteps: [
+      {
+        id: 'challenge',
+        title: '🎯 Challenge: Verify Plurals',
+        description: 'Find a pluralized key and verify it has the correct suffix forms for both English and Japanese.',
+        tooltipPosition: 'center',
+      },
+      {
+        id: 'verify',
+        title: 'Plurals Verified?',
+        description: 'Complete if you checked plural forms for a key across locales.',
         tooltipPosition: 'center',
         isLast: true,
       },

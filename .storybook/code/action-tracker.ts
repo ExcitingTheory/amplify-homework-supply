@@ -162,6 +162,10 @@ export function createTrackableActions(context: {
     'onEdit',
     'onUpdate',
     'onCreate',
+    'onSend',
+    'onPlay',
+    'onLanguageChange',
+    'onPanelOpen',
   ];
   
   const trackableActions: Record<string, (...args: any[]) => any> = {};

@@ -3,7 +3,7 @@
  */
 
 export type { OnboardingEvent, OnboardingTask } from './onboarding-events';
-export type { UserPersona } from './onboarding-events';
+export type { UserPersona, OnboardingMode } from './onboarding-events';
 
 export { getOnboardingEmitter } from './onboarding-events';
 export { ONBOARDING_TASKS, getTasksForPersona, getTasksByCategory, findTaskById } from './onboarding-tasks';
