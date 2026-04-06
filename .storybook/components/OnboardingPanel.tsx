@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -31,6 +31,7 @@ import TranslateIcon from '@mui/icons-material/Translate';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LaunchIcon from '@mui/icons-material/Launch';
 import { useTheme } from '@mui/material/styles';
+import { useTheme as useStorybookTheme, themes as sbThemes, ensure } from 'storybook/theming';
 import { getOnboardingEmitter, UserPersona, OnboardingMode } from '../code/onboarding-events';
 import { ONBOARDING_TASKS, getTasksForPersona, getTasksByCategory, OnboardingTaskWithCriteria } from '../code/onboarding-tasks';
 import SpotlightOverlay, { SpotlightStep } from './SpotlightOverlay';
@@ -38,47 +39,49 @@ import { getSpotlightConfigForTask } from '../code/spotlight-configs';
 
 import './OnboardingPanel.css';
 
-// Force dark theme for panel to match Storybook UI
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    background: {
-      paper: '#1a1a1a',
-      default: '#1a1a1a',
+// Build MUI theme from Storybook's active theme
+function buildMuiTheme(isDark: boolean) {
+  return createTheme({
+    palette: {
+      mode: isDark ? 'dark' : 'light',
+      background: {
+        paper: isDark ? '#1a1a1a' : '#ffffff',
+        default: isDark ? '#1a1a1a' : '#f6f9fc',
+      },
+      text: {
+        primary: isDark ? '#e0e0e0' : '#2E3338',
+        secondary: isDark ? '#999999' : '#5C6570',
+      },
     },
-    text: {
-      primary: '#e0e0e0',
-      secondary: '#999999',
-    },
-  },
-});
+  });
+}
 
-const CardOutline = styled('div')({
+const CardOutline = styled('div')(({ theme }) => ({
   position: 'relative',
   width: '100%',
   height: '100%',
   padding: 1,
   overflow: 'hidden',
-  backgroundColor: '#1a1a1a',
+  backgroundColor: theme.palette.background.paper,
   borderRadius: 4,
-  boxShadow: 'inset 0 0 0 1px #3d3d3d',
+  boxShadow: `inset 0 0 0 1px ${theme.palette.divider}`,
   display: 'flex',
   flexDirection: 'column',
-});
+}));
 
-const CardContentWrapper = styled('div')({
+const CardContentWrapper = styled('div')(({ theme }) => ({
   borderRadius: 4,
-  backgroundColor: '#1a1a1a',
+  backgroundColor: theme.palette.background.paper,
   position: 'relative',
   flex: '1 1 0',
   minHeight: 0,
   overflowY: 'auto',
   overflowX: 'hidden',
-  color: '#e0e0e0',
+  color: theme.palette.text.primary,
   WebkitOverflowScrolling: 'touch',
   // Custom scrollbar styling
   scrollbarWidth: 'thin',
-  scrollbarColor: 'rgba(255, 255, 255, 0.2) transparent',
+  scrollbarColor: `${theme.palette.action.hover} transparent`,
   '&::-webkit-scrollbar': {
     width: '8px',
   },
@@ -86,13 +89,13 @@ const CardContentWrapper = styled('div')({
     background: 'transparent',
   },
   '&::-webkit-scrollbar-thumb': {
-    background: 'rgba(255, 255, 255, 0.2)',
+    background: theme.palette.action.hover,
     borderRadius: '4px',
   },
   '&::-webkit-scrollbar-thumb:hover': {
-    background: 'rgba(255, 255, 255, 0.3)',
+    background: theme.palette.action.selected,
   },
-});
+}));
 
 interface PersonaOption {
   id: UserPersona;
@@ -130,6 +133,12 @@ const PERSONAS: PersonaOption[] = [
 
 const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   const theme = useTheme();
+  // Detect Storybook theme to build matching MUI theme
+  let sbTheme: any;
+  try { sbTheme = useStorybookTheme(); } catch { sbTheme = null; }
+  const isDark = sbTheme?.base === 'dark' || 
+    (sbTheme == null && typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+  const muiTheme = useMemo(() => buildMuiTheme(isDark), [isDark]);
   const emitter = getOnboardingEmitter();
   const [selectedPersona, setSelectedPersona] = useState<UserPersona | null>(null);
   const [tabValue, setTabValue] = useState(0);
@@ -610,7 +619,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
                       '&:hover': {
                         backgroundColor: isCompleted 
                           ? 'rgba(76, 175, 80, 0.08)' 
-                          : 'rgba(255, 255, 255, 0.05)',
+                          : 'action.hover',
                         boxShadow: 2,
                         '& .spotlight-hint': {
                           opacity: 1,
@@ -706,7 +715,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
 
                           {/* Expandable content */}
                           <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                            <Box sx={{ mt: 1.5, pt: 1.5, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                            <Box sx={{ mt: 1.5, pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
                               {/* Instructions - Tutorial Mode Only */}
                               {mode === 'tutorial' && hasInstructions && (
                                 <Box sx={{ mb: storyLink ? 1.5 : 0 }}>
@@ -800,7 +809,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   };
 
   return (
-    <ThemeProvider theme={darkTheme}>
+    <ThemeProvider theme={muiTheme}>
       <CardOutline data-testid="onboarding-panel">
         <CardContentWrapper>
           {renderContent()}

@@ -61,7 +61,7 @@ export const DocsPageWithPanel: React.FC = () => {
         
         .docs-header {
           margin-bottom: 2rem;
-          border-bottom: 1px solid #e6e6e6;
+          border-bottom: 1px solid var(--docs-border, #e6e6e6);
           padding-bottom: 1rem;
         }
         
@@ -73,12 +73,12 @@ export const DocsPageWithPanel: React.FC = () => {
           font-size: 1.25rem;
           font-weight: 600;
           margin-bottom: 1rem;
-          color: #333;
+          color: var(--docs-heading, #333);
         }
         
         .docs-controls-panel {
-          background: #f8f9fa;
-          border: 1px solid #e6e6e6;
+          background: var(--docs-panel-bg, #f8f9fa);
+          border: 1px solid var(--docs-border, #e6e6e6);
           border-radius: 8px;
           padding: 1.5rem;
           margin-bottom: 2rem;
@@ -88,7 +88,7 @@ export const DocsPageWithPanel: React.FC = () => {
           font-size: 1.25rem;
           font-weight: 600;
           margin-bottom: 0.5rem;
-          color: #333;
+          color: var(--docs-heading, #333);
           display: flex;
           align-items: center;
           gap: 0.5rem;
@@ -100,7 +100,7 @@ export const DocsPageWithPanel: React.FC = () => {
         
         .docs-panel-description {
           font-size: 0.875rem;
-          color: #666;
+          color: var(--docs-muted, #666);
           margin-bottom: 1rem;
         }
         
@@ -112,7 +112,16 @@ export const DocsPageWithPanel: React.FC = () => {
           font-size: 1.25rem;
           font-weight: 600;
           margin-bottom: 1rem;
-          color: #333;
+          color: var(--docs-heading, #333);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+          :root {
+            --docs-border: #444;
+            --docs-heading: #e0e0e0;
+            --docs-panel-bg: #1e1e1e;
+            --docs-muted: #999;
+          }
         }
       `}</style>
     </div>

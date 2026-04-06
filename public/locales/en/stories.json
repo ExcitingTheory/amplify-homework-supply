@@ -1,0 +1,9 @@
+{
+  "demo": {
+    "title": "Translation Mode Demo",
+    "description": "Click on any text to see its full metadata including context, component location, usage, impact, tone, and alternative terms.",
+    "instructions": "Enable Translation Mode from the toolbar above, then click on any highlighted text to see the rich English metadata from translation files",
+    "auth_form_heading": "Authentication Form",
+    "password_reset_heading": "Password Reset Flow"
+  }
+}

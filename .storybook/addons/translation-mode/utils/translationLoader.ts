@@ -5,7 +5,23 @@
 
 type TranslationData = Record<string, any>;
 
+export interface TranslationMetadataEntry {
+  context?: string;
+  component?: {
+    location?: string;
+    description?: string;
+  };
+  usage?: string;
+  impact?: string;
+  userType?: string;
+  tone?: string;
+  alternativeTerms?: string[];
+}
+
+export type TranslationMetadata = Record<string, TranslationMetadataEntry>;
+
 const translationCache: Map<string, TranslationData> = new Map();
+const metadataCache: Map<string, TranslationMetadata> = new Map();
 const missingFiles: Set<string> = new Set();
 
 /**
@@ -87,8 +103,53 @@ export function getTranslationValue(
 }
 
 /**
+ * Load translation metadata for a namespace from translation-cache
+ * @param language - The language code (e.g., 'en')
+ * @param namespace - The namespace (e.g., 'auth', 'common')
+ * @returns The metadata object keyed by translation key
+ */
+export async function loadMetadata(
+  language: string,
+  namespace: string
+): Promise<TranslationMetadata | null> {
+  const cacheKey = `meta:${language}:${namespace}`;
+
+  if (metadataCache.has(cacheKey)) {
+    return metadataCache.get(cacheKey)!;
+  }
+
+  if (missingFiles.has(cacheKey)) {
+    return null;
+  }
+
+  // Try multiple paths: translation-cache static dir, then public locales dir
+  const paths = [
+    `/translation-cache/${language}/${namespace}.meta.json`,
+    `/locales/${language}/${namespace}.meta.json`,
+  ];
+
+  for (const path of paths) {
+    try {
+      const response = await fetch(path);
+      if (response.ok) {
+        const data: TranslationMetadata = await response.json();
+        metadataCache.set(cacheKey, data);
+        return data;
+      }
+    } catch {
+      // Try next path
+    }
+  }
+
+  missingFiles.add(cacheKey);
+  console.debug(`[i18n] No metadata file for ${language}/${namespace}`);
+  return null;
+}
+
+/**
  * Clear the translation cache
  */
 export function clearTranslationCache(): void {
   translationCache.clear();
+  metadataCache.clear();
 }

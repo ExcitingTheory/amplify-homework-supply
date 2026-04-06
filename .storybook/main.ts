@@ -19,11 +19,13 @@ const config: StorybookConfig = {
     "@storybook/addon-a11y",
     "@storybook/addon-docs",
     "@storybook/addon-vitest",
+    path.resolve(__dirname, 'addons/translation-mode/preset.js'),
   ],
   "framework": "@storybook/nextjs-vite",
   "staticDirs": [
     { from: "../public", to: "/" },
-    { from: "../mocks", to: "/story-mocks" }
+    { from: "../mocks", to: "/story-mocks" },
+    { from: "../translation-cache", to: "/translation-cache" }
   ],
   
   async viteFinal(config) {

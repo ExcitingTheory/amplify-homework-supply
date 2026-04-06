@@ -63,7 +63,22 @@
     "underline": "Underline",
     "undo": "Undo",
     "untitledUnit": "Untitled Unit",
-    "wordBlock": "Word Block"
+    "wordBlock": "Word Block",
+    "blockFormat": "Block format",
+    "normal": "Normal",
+    "heading1": "Heading 1",
+    "heading2": "Heading 2",
+    "heading3": "Heading 3",
+    "bulletedList": "Bulleted List",
+    "numberedList": "Numbered List",
+    "quoteBlock": "Quote",
+    "codeBlock": "Code Block",
+    "scrollToolbarLeft": "Scroll toolbar left",
+    "scrollToolbarRight": "Scroll toolbar right",
+    "textColor": "Text color",
+    "backgroundColor": "Background color",
+    "increaseFontSize": "Increase font size",
+    "decreaseFontSize": "Decrease font size"
   },
   "tabsVerticalRight": {
     "aiAssistantTab": "AI Assistant",

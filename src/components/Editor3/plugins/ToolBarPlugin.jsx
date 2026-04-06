@@ -96,6 +96,8 @@ import {
     Modal,
     Typography,
     TextField,
+    IconButton,
+    InputAdornment,
 } from '@mui/material';
 
 import MainToolbar from '../../MainToolbar';
@@ -132,6 +134,8 @@ import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import ColumnsIcon from '@mui/icons-material/ViewColumn';
 import FormatSizeIcon from '@mui/icons-material/FormatSize';
 import FontDownloadIcon from '@mui/icons-material/FontDownload';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
 import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
@@ -314,16 +318,9 @@ const FONT_FAMILY_OPTIONS = [
     ['Verdana', 'Verdana'],
 
 ];
-// make a function to get font size options
-const generateFontSizeOptions = (min, max) => {
-    const options = [];
-    for (let i = min; i <= max; i++) {
-        options.push([`${i}px`, `${i}`]);
-    }
-    return options;
-}
 
-const FONT_SIZE_OPTIONS = generateFontSizeOptions(8, 144);
+const MIN_FONT_SIZE = 1;
+const MAX_FONT_SIZE = 300;
 
 const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
@@ -881,8 +878,8 @@ const TextAlignmentDropdown = ({
                         activeEditor.focus();
                         handleClose();
                     }}
-                    label="Left Align"
-                    aria-label="Left Align"
+                    label={t('toolBarPlugin.alignLeft')}
+                    aria-label={t('toolBarPlugin.alignLeft')}
                 >
                     <FormatAlignLeftIcon />&nbsp;
                     <span className="text">{t('toolBarPlugin.alignLeft')}</span>
@@ -894,8 +891,8 @@ const TextAlignmentDropdown = ({
                         activeEditor.focus();
                         handleClose();
                     }}
-                    label="Center Align"
-                    aria-label="Center Align"
+                    label={t('toolBarPlugin.alignCenter')}
+                    aria-label={t('toolBarPlugin.alignCenter')}
                 >
                     <FormatAlignCenterIcon />&nbsp;
                     <span className="text">{t('toolBarPlugin.alignCenter')}</span>
@@ -907,8 +904,8 @@ const TextAlignmentDropdown = ({
                         activeEditor.focus();
                         handleClose();
                     }}
-                    label="Right Align"
-                    aria-label="Right Align"
+                    label={t('toolBarPlugin.alignRight')}
+                    aria-label={t('toolBarPlugin.alignRight')}
                 >
                     <FormatAlignRightIcon />&nbsp;
                     <span className="text">{t('toolBarPlugin.alignRight')}</span>
@@ -920,8 +917,8 @@ const TextAlignmentDropdown = ({
                         activeEditor.focus();
                         handleClose();
                     }}
-                    label="Justify Align"
-                    aria-label="Justify Align"
+                    label={t('toolBarPlugin.justifyAlign')}
+                    aria-label={t('toolBarPlugin.justifyAlign')}
                 >
                     <FormatAlignJustifyIcon />&nbsp;
                     <span className="text">{t('toolBarPlugin.justifyAlign')}</span>
@@ -935,8 +932,8 @@ const TextAlignmentDropdown = ({
                         handleClose();
                     }}
                     className="item"
-                    label={isRTL ? 'Indent' : 'Outdent'}
-                    aria-label="Outdent"
+                    label={isRTL ? t('toolBarPlugin.indent') : t('toolBarPlugin.outdent')}
+                    aria-label={t('toolBarPlugin.outdent')}
                     >
                     {isRTL ? (
                         <FormatIndentIncreaseIcon />
@@ -954,8 +951,8 @@ const TextAlignmentDropdown = ({
                         handleClose();
                     }}
                     className="item"
-                    label={isRTL ? 'Outdent' : 'Indent'}
-                    aria-label="Indent"
+                    label={isRTL ? t('toolBarPlugin.outdent') : t('toolBarPlugin.indent')}
+                    aria-label={t('toolBarPlugin.indent')}
                     >
                     <i className={'icon ' + (isRTL ? 'outdent' : 'indent')} />
                     {isRTL ? (
@@ -1059,7 +1056,7 @@ const InsertNodeDropDown = ({
                 disabled={disabled}
                 // className={'insert-node'}
                 title={t('toolBarPlugin.insert')}
-                aria-label="Insert Item Menu"
+                aria-label={t('toolBarPlugin.insert')}
                 color='inherit'
             >
                 <AddIcon />&nbsp;
@@ -1079,8 +1076,8 @@ const InsertNodeDropDown = ({
                         handleClose()
                     }}
                     className="item"
-                    title="Due Date"
-                    aria-label="Due Date">
+                    title={t('toolBarPlugin.dueDate')}
+                    aria-label={t('toolBarPlugin.dueDate')}>
                     <CalendarIcon />&nbsp;
                     <span className="text">{t('toolBarPlugin.dueDate')}</span>
 
@@ -1094,8 +1091,8 @@ const InsertNodeDropDown = ({
                         handleClose()
                     }}
                     className="item"
-                    title="Timer"
-                    aria-label="Timer">
+                    title={t('toolBarPlugin.timer')}
+                    aria-label={t('toolBarPlugin.timer')}>
                     <TimerIcon />&nbsp;
                     <span className="text">{t('toolBarPlugin.timer')}</span>
 
@@ -1110,8 +1107,8 @@ const InsertNodeDropDown = ({
                         );
                         handleClose();
                     }}
-                    title="Meaning Association"
-                    aria-label="Meaning Association">
+                    title={t('toolBarPlugin.meaningAssociation')}
+                    aria-label={t('toolBarPlugin.meaningAssociation')}>
                     <WordBlockIcon />&nbsp;
                     <span className="text">{t('toolBarPlugin.meaningAssociation')}</span>
                 </MenuItem>
@@ -1125,8 +1122,8 @@ const InsertNodeDropDown = ({
                         );
                         handleClose();
                     }}
-                    title="Word Block"
-                    aria-label="Insert Word Block">
+                    title={t('toolBarPlugin.wordBlock')}
+                    aria-label={t('toolBarPlugin.wordBlock')}>
                     <FontDownloadIcon />&nbsp;
                     <span className="text">{t('toolBarPlugin.wordBlock')}</span>
                 </MenuItem>
@@ -1145,8 +1142,8 @@ const InsertNodeDropDown = ({
                         handleClose();
                     }
                     }
-                    title="Short Answer"
-                    aria-label="Short Answer based on Vocabulary words">
+                    title={t('toolBarPlugin.shortAnswerVocabulary')}
+                    aria-label={t('toolBarPlugin.shortAnswerVocabulary')}>
                     <FormatSizeIcon />&nbsp;
                     <span className="text">{t('toolBarPlugin.shortAnswerVocabulary')}</span>
                 </MenuItem>
@@ -1161,8 +1158,8 @@ const InsertNodeDropDown = ({
                         handleClose();
                     }
                     }
-                    title="Short Answer"
-                    aria-label="Short Answer based on custom prompts">
+                    title={t('toolBarPlugin.shortAnswerCustom')}
+                    aria-label={t('toolBarPlugin.shortAnswerCustom')}>
                     <FormatSizeIcon />&nbsp;
                     <span className="text">{t('toolBarPlugin.shortAnswerCustom')}</span>
                 </MenuItem>
@@ -1195,8 +1192,8 @@ const InsertNodeDropDown = ({
                         );
                         handleClose();
                     }}
-                    title="Audio"
-                    aria-label="Audio">
+                    title={t('toolBarPlugin.audioPlaylist')}
+                    aria-label={t('toolBarPlugin.audioPlaylist')}>
                     <AudiotrackIcon />&nbsp;
                     <span className="text">{t('toolBarPlugin.audioPlaylist')}</span>
                 </MenuItem>
@@ -1210,8 +1207,8 @@ const InsertNodeDropDown = ({
                         );
                         handleClose();
                     }}
-                    title="Quiz"
-                    aria-label="Quiz">
+                    title={t('toolBarPlugin.multipleChoiceQuiz')}
+                    aria-label={t('toolBarPlugin.multipleChoiceQuiz')}>
                     <QuizIcon />&nbsp;
                     <span className="text">{t('toolBarPlugin.multipleChoiceQuiz')}</span>
                 </MenuItem>
@@ -1364,6 +1361,7 @@ function BlockFormatDropDown({
     rootType,
     disabled = false,
 }) {
+    const { t } = useTranslation('editor.authoring');
 
     // const [open, setOpen] = useState(false);
     // const [anchorEl, setAnchorEl] = useState(null);
@@ -1523,13 +1521,13 @@ function BlockFormatDropDown({
             >
                 <FormControl sx={{ minWidth: 'auto' }}>
                     <InputLabel id="block-format-select-label" sx={{ display: 'none' }}>
-                        Block format
+                        {t('toolBarPlugin.blockFormat')}
                     </InputLabel>
                     <Select
                         labelId="block-format-select-label"
                         id="block-format-select"
                         value={blockType}
-                        aria-label="Block format"
+                        aria-label={t('toolBarPlugin.blockFormat')}
                     >
 
                     <MenuItem
@@ -1539,7 +1537,7 @@ function BlockFormatDropDown({
                         tabIndex={-1}
                     >
                         <ParagraphIcon />&nbsp;
-                        <span className='text'>Normal</span>
+                        <span className='text'>{t('toolBarPlugin.normal')}</span>
                     </MenuItem>
                     <MenuItem
                         value="h1"
@@ -1548,7 +1546,7 @@ function BlockFormatDropDown({
                         tabIndex={-1}
                     >
                         <span className='icon'>H1</span>&nbsp;
-                        <span className='menu-htext'>Heading 1</span>
+                        <span className='menu-htext'>{t('toolBarPlugin.heading1')}</span>
                     </MenuItem>
                     <MenuItem
                         value='h2'
@@ -1557,7 +1555,7 @@ function BlockFormatDropDown({
                         tabIndex={-1}
                     >
                         <span className='icon'>H2</span>&nbsp;
-                        <span className='menu-htext'>Heading 2</span>
+                        <span className='menu-htext'>{t('toolBarPlugin.heading2')}</span>
                     </MenuItem>
                     <MenuItem
                         value='h3'
@@ -1566,7 +1564,7 @@ function BlockFormatDropDown({
                         tabIndex={-1}
                     >
                         <span className='icon'>H3</span>&nbsp;
-                        <span className='menu-htext'>Heading 3</span>
+                        <span className='menu-htext'>{t('toolBarPlugin.heading3')}</span>
                     </MenuItem>
 
                     <MenuItem
@@ -1579,7 +1577,7 @@ function BlockFormatDropDown({
                         tabIndex={-1}
                     >
                         <FormatListBulletedIcon />&nbsp;
-                        <span className='text'>Bulleted</span>
+                        <span className='text'>{t('toolBarPlugin.bulletedList')}</span>
                     </MenuItem>
                     <MenuItem
                         value='number'
@@ -1588,7 +1586,7 @@ function BlockFormatDropDown({
                         tabIndex={-1}
                     >
                         <FormatListNumberedIcon />&nbsp;
-                        <span className="text">Numbered</span>
+                        <span className="text">{t('toolBarPlugin.numberedList')}</span>
                     </MenuItem>
 
                     {/* TODO 
@@ -1608,7 +1606,7 @@ function BlockFormatDropDown({
                         tabIndex={-1}
                     >
                         <FormatQuoteIcon />&nbsp;
-                        <span className="text">Quote</span>
+                        <span className="text">{t('toolBarPlugin.quoteBlock')}</span>
                     </MenuItem>
                     <MenuItem
                         value='code'
@@ -1617,12 +1615,150 @@ function BlockFormatDropDown({
                         tabIndex={-1}
                     >
                         <CodeIcon />&nbsp;
-                        <span className="text">Code Block</span>
+                        <span className="text">{t('toolBarPlugin.codeBlock')}</span>
                     </MenuItem>
                 </Select>
             </FormControl>
             </Box>
         </>
+    );
+}
+
+function FontSizeInput({ editor, value, disabled = false }) {
+    const { t } = useTranslation('editor.authoring');
+    const [inputValue, setInputValue] = useState(() => {
+        return value ? value.replace('px', '') : '16';
+    });
+    const debounceRef = useRef(null);
+
+    // Sync input when external value changes (e.g. selecting different text)
+    useEffect(() => {
+        const num = value ? value.replace('px', '') : '16';
+        setInputValue(num);
+    }, [value]);
+
+    // Cleanup debounce timer on unmount
+    useEffect(() => {
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        };
+    }, []);
+
+    const applyFontSize = useCallback(
+        (newSize) => {
+            const size = Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, Number(newSize)));
+            if (isNaN(size)) return;
+            setInputValue(String(size));
+            editor.update(() => {
+                const selection = $getSelection();
+                if ($isRangeSelection(selection)) {
+                    $patchStyleText(selection, {
+                        'font-size': `${size}px`,
+                    });
+                }
+            });
+        },
+        [editor],
+    );
+
+    const handleChange = (e) => {
+        const val = e.target.value.replace(/[^0-9]/g, '');
+        setInputValue(val);
+
+        // Auto-apply after 500ms of no typing
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        if (val) {
+            debounceRef.current = setTimeout(() => {
+                applyFontSize(val);
+            }, 500);
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        const current = parseInt(inputValue, 10) || 16;
+        const step = e.shiftKey ? 10 : 1;
+
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+            applyFontSize(current + step);
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+            applyFontSize(current - step);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+            applyFontSize(inputValue);
+            editor.focus();
+        }
+    };
+
+    const handleBlur = () => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        applyFontSize(inputValue);
+    };
+
+    const increment = () => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        applyFontSize((parseInt(inputValue, 10) || 16) + 1);
+    };
+    const decrement = () => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        applyFontSize((parseInt(inputValue, 10) || 16) - 1);
+    };
+
+    return (
+        <Box sx={{ display: 'flex', alignItems: 'center', mx: 0.25 }}>
+            <TextField
+                value={inputValue}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+                onBlur={handleBlur}
+                disabled={disabled}
+                size="small"
+                title={t('toolBarPlugin.size')}
+                aria-label={t('toolBarPlugin.formattingSize')}
+                slotProps={{
+                    input: {
+                        endAdornment: (
+                            <InputAdornment position="end" sx={{ ml: 0 }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', mr: -1 }}>
+                                    <IconButton
+                                        size="small"
+                                        onClick={increment}
+                                        disabled={disabled}
+                                        tabIndex={-1}
+                                        aria-label={t('toolBarPlugin.increaseFontSize')}
+                                        sx={{ p: 0, height: 14, width: 20 }}
+                                    >
+                                        <ArrowDropUpIcon sx={{ fontSize: 16 }} />
+                                    </IconButton>
+                                    <IconButton
+                                        size="small"
+                                        onClick={decrement}
+                                        disabled={disabled}
+                                        tabIndex={-1}
+                                        aria-label={t('toolBarPlugin.decreaseFontSize')}
+                                        sx={{ p: 0, height: 14, width: 20 }}
+                                    >
+                                        <ArrowDropDownIcon sx={{ fontSize: 16 }} />
+                                    </IconButton>
+                                </Box>
+                            </InputAdornment>
+                        ),
+                    },
+                    htmlInput: {
+                        style: { width: '2.5ch', padding: '4px 0 4px 8px', textAlign: 'center' },
+                    },
+                }}
+                sx={{
+                    '& .MuiOutlinedInput-root': {
+                        height: 32,
+                    },
+                }}
+            />
+        </Box>
     );
 }
 
@@ -2389,8 +2525,8 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                                 boxShadow: '2px 0 6px rgba(0,0,0,0.15)',
                             },
                         }}
-                        title="Scroll toolbar left"
-                        aria-label="Scroll toolbar left"
+                        title={t('toolBarPlugin.scrollToolbarLeft')}
+                        aria-label={t('toolBarPlugin.scrollToolbarLeft')}
                     >
                         <KeyboardArrowLeftIcon />
                     </Button>
@@ -2460,9 +2596,8 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                         editor={activeEditor}
                     />
 
-                    <FontDropDown
+                    <FontSizeInput
                         disabled={!isEditable}
-                        style={'font-size'}
                         value={fontSize}
                         editor={activeEditor}
                     />
@@ -2509,7 +2644,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                         buttonAriaLabel={t('toolBarPlugin.formattingTextColor')}
                         color={fontColor}
                         onChange={onFontColorSelect}
-                        title="text color"
+                        title={t('toolBarPlugin.textColor')}
                         editor={activeEditor}
                     />
                     <DropdownColorPicker
@@ -2517,7 +2652,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                         buttonAriaLabel={t('toolBarPlugin.formattingBackgroundColor')}
                         color={bgColor}
                         onChange={onBgColorSelect}
-                        title="bg color"
+                        title={t('toolBarPlugin.backgroundColor')}
                         isBackgroundColor={true}
                         editor={activeEditor}
                     />
@@ -2593,8 +2728,8 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                                 boxShadow: '-2px 0 6px rgba(0,0,0,0.15)',
                             },
                         }}
-                        title="Scroll toolbar right"
-                        aria-label="Scroll toolbar right"
+                        title={t('toolBarPlugin.scrollToolbarRight')}
+                        aria-label={t('toolBarPlugin.scrollToolbarRight')}
                     >
                         <KeyboardArrowRightIcon />
                     </Button>

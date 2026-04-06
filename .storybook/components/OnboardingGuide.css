@@ -1,3 +1,5 @@
+@import './theme-vars.css';
+
 .onboarding-guide {
   max-width: 800px;
   margin: 0 auto;
@@ -12,17 +14,17 @@
 .onboarding-header h2 {
   margin: 0 0 0.5rem 0;
   font-size: 2rem;
-  color: #1a1a1a;
+  color: var(--sb-text-heading);
 }
 
 .onboarding-header p {
   margin: 0;
-  color: #666;
+  color: var(--sb-text-secondary);
   font-size: 1rem;
 }
 
 .progress-overview {
-  background: #f8f9fa;
+  background: var(--sb-bg-secondary);
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 2rem;
@@ -38,34 +40,34 @@
 
 .progress-label {
   font-size: 0.875rem;
-  color: #666;
+  color: var(--sb-text-secondary);
   margin-bottom: 0.5rem;
   font-weight: 500;
 }
 
 .progress-bar {
   height: 8px;
-  background: #e0e0e0;
+  background: var(--sb-border);
   border-radius: 4px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #37b24d, #51cf66);
+  background: linear-gradient(90deg, var(--sb-accent-green-fill), var(--sb-accent-green-fill-light));
   transition: width 0.3s ease;
 }
 
 .progress-fill.required {
-  background: linear-gradient(90deg, #1976d2, #42a5f5);
+  background: linear-gradient(90deg, var(--sb-accent-blue), #42a5f5);
 }
 
 .achievements {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--sb-border);
   font-size: 0.875rem;
-  color: #333;
+  color: var(--sb-text-primary);
 }
 
 .achievements strong {
@@ -77,8 +79,8 @@
 }
 
 .task-section {
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--sb-bg-primary);
+  border: 1px solid var(--sb-border);
   border-radius: 8px;
   margin-bottom: 1rem;
   overflow: hidden;
@@ -86,7 +88,7 @@
 }
 
 .task-section.active {
-  border-color: #1976d2;
+  border-color: var(--sb-accent-blue);
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
 }
 
@@ -101,13 +103,13 @@
 }
 
 .section-header:hover {
-  background: #f8f9fa;
+  background: var(--sb-bg-secondary);
 }
 
 .section-header h3 {
   margin: 0;
   font-size: 1.125rem;
-  color: #1a1a1a;
+  color: var(--sb-text-heading);
 }
 
 .section-progress {
@@ -118,7 +120,7 @@
 
 .section-progress span {
   font-size: 0.875rem;
-  color: #666;
+  color: var(--sb-text-secondary);
   min-width: 3rem;
   text-align: right;
 }
@@ -126,20 +128,20 @@
 .mini-progress-bar {
   width: 100px;
   height: 4px;
-  background: #e0e0e0;
+  background: var(--sb-border);
   border-radius: 2px;
   overflow: hidden;
 }
 
 .mini-progress-fill {
   height: 100%;
-  background: #37b24d;
+  background: var(--sb-accent-green-fill);
   transition: width 0.3s ease;
 }
 
 .task-list {
   padding: 0.5rem 1.5rem 1.5rem;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--sb-border-light);
 }
 
 .task-item {
@@ -154,7 +156,7 @@
 }
 
 .task-item:hover {
-  background: #f8f9fa;
+  background: var(--sb-bg-secondary);
 }
 
 .task-item.completed {
@@ -164,7 +166,7 @@
 .task-checkbox {
   width: 20px;
   height: 20px;
-  border: 2px solid #ccc;
+  border: 2px solid var(--sb-border-input);
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -175,15 +177,15 @@
 }
 
 .task-item.completed .task-checkbox {
-  background: #37b24d;
-  border-color: #37b24d;
+  background: var(--sb-accent-green-fill);
+  border-color: var(--sb-accent-green-fill);
   color: white;
 }
 
 .task-label {
   flex: 1;
   font-size: 0.9375rem;
-  color: #333;
+  color: var(--sb-text-primary);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -195,7 +197,7 @@
 
 .required-badge {
   font-size: 0.75rem;
-  background: #1976d2;
+  background: var(--sb-accent-blue);
   color: white;
   padding: 0.125rem 0.5rem;
   border-radius: 12px;
@@ -206,22 +208,22 @@
   display: flex;
   justify-content: flex-end;
   padding-top: 1rem;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--sb-border);
 }
 
 .reset-button {
   background: transparent;
-  border: 1px solid #ccc;
+  border: 1px solid var(--sb-border-input);
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.875rem;
-  color: #666;
+  color: var(--sb-text-secondary);
   transition: all 0.2s ease;
 }
 
 .reset-button:hover {
-  background: #f8f9fa;
-  border-color: #999;
-  color: #333;
+  background: var(--sb-bg-secondary);
+  border-color: var(--sb-text-muted);
+  color: var(--sb-text-primary);
 }

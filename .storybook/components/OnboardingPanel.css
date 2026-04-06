@@ -1,3 +1,5 @@
+@import './theme-vars.css';
+
 .onboarding-panel {
   height: 100%;
   overflow-y: auto;
@@ -6,7 +8,7 @@
 
   /* Custom scrollbar styling */
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  scrollbar-color: var(--sb-border) transparent;
 }
 
 .onboarding-panel::-webkit-scrollbar {
@@ -18,12 +20,12 @@
 }
 
 .onboarding-panel::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--sb-border);
   border-radius: 4px;
 }
 
 .onboarding-panel::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--sb-text-muted);
 }
 
 /* Task card animations */
@@ -32,5 +34,5 @@
 }
 
 .onboarding-panel .MuiCard-root:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--sb-card-hover-shadow);
 }

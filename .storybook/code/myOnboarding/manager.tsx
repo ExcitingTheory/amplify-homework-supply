@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { addons, types } from 'storybook/manager-api';
+import { useTheme, ThemeProvider, ensure, themes } from 'storybook/theming';
 import OnboardingPanel from '../../components/OnboardingPanel';
 import { getOnboardingEmitter, UserPersona, OnboardingMode } from '../onboarding-events';
 import { ONBOARDING_TASKS, getTasksForPersona, OnboardingTaskWithCriteria } from '../onboarding-tasks';
@@ -18,14 +19,6 @@ const keyframesStyle = `
       background-position: 100% 50%;
     }
   }
-  @keyframes onboarding-fade {
-    0%, 100% { 
-      opacity: 1;
-    }
-    50% { 
-      opacity: 0;
-    }
-  }
 `;
 
 // Outer container - no animations, just positioning
@@ -36,24 +29,26 @@ const cardContainerStyle: React.CSSProperties = {
   overflow: 'hidden',
 };
 
-// Gradient background layer - simulates :before pseudo-element
-const gradientLayerStyle: React.CSSProperties = {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  width: '100%',
-  height: '100%',
-  borderRadius: '4px',
-  border: '1px solid transparent',
-  background: `
-    linear-gradient(#1a1a1a, #1a1a1a) padding-box,
-    linear-gradient(90deg, #60a5fa, #a78bfa, #60a5fa) border-box
-  `,
-  backgroundSize: 'auto, 200% 100%',
-  animation: 'onboarding-gradient-border 10s ease-in-out infinite, onboarding-fade 60s ease-in-out infinite',
-  zIndex: 0,
-  pointerEvents: 'none',
-};
+// Gradient background layer - always shows the animated gradient border
+function getGradientLayerStyle(bg: string): React.CSSProperties {
+  return {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    borderRadius: '4px',
+    border: '1px solid transparent',
+    background: `
+      linear-gradient(${bg}, ${bg}) padding-box,
+      linear-gradient(90deg, #60a5fa, #a78bfa, #60a5fa) border-box
+    `,
+    backgroundSize: 'auto, 200% 100%',
+    animation: 'onboarding-gradient-border 10s ease-in-out infinite',
+    zIndex: 0,
+    pointerEvents: 'none',
+  };
+}
 
 // Content wrapper - sits above gradient
 const contentWrapperStyle: React.CSSProperties = {
@@ -64,6 +59,10 @@ const contentWrapperStyle: React.CSSProperties = {
 // Enhanced sidebar widget without MUI dependencies
 const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
   const emitter = getOnboardingEmitter();
+  const theme = useTheme();
+  // Resolve ensured theme properties (ensure() nests some flat props)
+  const textColor = theme.color?.defaultText || theme.textMutedColor || '#333';
+  const hoverBg = theme.background?.hoverable || 'rgba(0,0,0,0.05)';
   const [persona, setPersona] = React.useState<UserPersona | null>(emitter.getPersona());
   const [percentage, setPercentage] = React.useState(() => {
     if (persona) {
@@ -179,24 +178,24 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
       <>
         <style>{keyframesStyle}</style>
         <div style={cardContainerStyle}>
-          <div style={gradientLayerStyle} />
+          <div style={getGradientLayerStyle(theme.barBg)} />
           <div style={contentWrapperStyle}>
             <div style={{
             padding: '10px',
             paddingBottom: '8px',
-            borderBottom: '1px solid #3d3d3d'
+            borderBottom: `1px solid ${theme.appBorderColor}`
           }}>
               <div style={{
                 fontSize: '11px',
                 fontWeight: 600,
-                color: '#ccc',
+                color: textColor,
                 marginBottom: '2px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px'
               }}>
                 Onboarding
               </div>
-              <div style={{ fontSize: '9px', color: '#73828c', lineHeight: 1.2 }}>
+              <div style={{ fontSize: '9px', color: theme.textMutedColor, lineHeight: 1.2 }}>
                 Select your role
               </div>
             </div>
@@ -218,7 +217,7 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
                     marginBottom: '4px',
                     borderRadius: '3px',
                     cursor: 'pointer',
-                    border: '1px solid #444',
+                    border: `1px solid ${theme.appBorderColor}`,
                     transition: 'all 0.2s ease'
                   }}
                   onClick={() => {
@@ -226,10 +225,10 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderColor = p.color;
-                    e.currentTarget.style.backgroundColor = '#2a2a2a';
+                    e.currentTarget.style.backgroundColor = hoverBg;
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#444';
+                    e.currentTarget.style.borderColor = theme.appBorderColor;
                     e.currentTarget.style.backgroundColor = 'transparent';
                   }}
                 >
@@ -246,7 +245,7 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
                     <div style={{
                       fontSize: '11px',
                       fontWeight: 600,
-                      color: '#ccc'
+                      color: textColor
                     }}>
                       {p.label}
                     </div>
@@ -265,7 +264,7 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
   return (
     <div style={cardContainerStyle}>
       <style>{keyframesStyle}</style>
-      <div style={gradientLayerStyle} />
+      <div style={getGradientLayerStyle(theme.barBg)} />
       <div style={contentWrapperStyle}>
         <div style={{ 
         display: 'flex', 
@@ -273,7 +272,7 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
         gap: '8px', 
         padding: '10px',
         paddingBottom: '8px',
-        borderBottom: '1px solid #3d3d3d'
+        borderBottom: `1px solid ${theme.appBorderColor}`
       }}>
         <div style={{ 
           display: 'flex',
@@ -293,7 +292,7 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
           }}>
             {config.label}
           </div>
-          <div style={{ fontSize: '9px', color: '#73828c', lineHeight: 1.2 }}>
+          <div style={{ fontSize: '9px', color: theme.textMutedColor, lineHeight: 1.2 }}>
             {completedCount}/{totalCount} completed · {Math.round(percentage)}%
           </div>
         </div>
@@ -306,7 +305,7 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
           <div style={{
             height: '4px',
             backgroundColor: 'transparent',
-            border: '1px solid #3d3d3d',
+            border: `1px solid ${theme.appBorderColor}`,
             borderRadius: '2px',
             overflow: 'hidden'
           }}>
@@ -324,7 +323,7 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
           <div style={{ marginBottom: '8px' }}>
             <div style={{ 
               fontSize: '9px', 
-              color: '#73828c', 
+              color: theme.textMutedColor, 
               marginBottom: '6px',
               textTransform: 'uppercase',
               letterSpacing: '0.5px',
@@ -353,7 +352,7 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
                     api.setSelectedPanel(PANEL_ID);
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#2a2a2a';
+                    e.currentTarget.style.backgroundColor = hoverBg;
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent';
@@ -363,14 +362,14 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
                     fontSize: '12px',
                     flexShrink: 0,
                     marginTop: '-1px',
-                    color: isCompleted ? '#10b981' : '#555'
+                    color: isCompleted ? '#10b981' : theme.textMutedColor
                   }}>
                     {isCompleted ? '✓' : '○'}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
                       fontSize: '10px',
-                      color: isCompleted ? '#999' : '#ccc',
+                      color: isCompleted ? theme.textMutedColor : textColor,
                       lineHeight: 1.3,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -403,10 +402,10 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
             backgroundColor: 'transparent',
             borderRadius: '3px',
             fontSize: '9px',
-            color: '#73828c',
+            color: theme.barTextColor,
             textAlign: 'center',
             cursor: 'pointer',
-            border: '1px solid #444',
+            border: `1px solid ${theme.appBorderColor}`,
             transition: 'all 0.2s ease',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
@@ -422,14 +421,14 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
             console.log('[Onboarding] Panel opened and tab selected:', PANEL_ID);
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#3d3d3d';
-            e.currentTarget.style.borderColor = '#555';
-            e.currentTarget.style.color = '#fff';
+            e.currentTarget.style.backgroundColor = hoverBg;
+            e.currentTarget.style.borderColor = theme.barSelectedColor;
+            e.currentTarget.style.color = theme.barHoverColor;
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.borderColor = '#444';
-            e.currentTarget.style.color = '#73828c';
+            e.currentTarget.style.borderColor = theme.appBorderColor;
+            e.currentTarget.style.color = theme.barTextColor;
           }}
         >
           View All Tasks →
@@ -441,6 +440,12 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
 };
 
 let root: ReturnType<typeof createRoot> | null = null;
+
+function getPreferredScheme(): 'dark' | 'light' {
+  return typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
+}
 
 const injectIntoSidebar = (api: any) => {
   // Find the sidebar container - try multiple selectors
@@ -527,8 +532,14 @@ const injectIntoSidebar = (api: any) => {
     root = createRoot(container);
   }
   
-  // Render the compact summary widget
-  root.render(<SimpleSummaryWidget api={api} />);
+  // Render the compact summary widget wrapped in Storybook's ThemeProvider
+  // so useTheme() works inside the createRoot tree
+  const currentTheme = addons.getConfig()?.theme || themes[getPreferredScheme()];
+  root.render(
+    <ThemeProvider theme={ensure(currentTheme)}>
+      <SimpleSummaryWidget api={api} />
+    </ThemeProvider>
+  );
   console.log('[Onboarding] Summary widget rendered');
 };
 

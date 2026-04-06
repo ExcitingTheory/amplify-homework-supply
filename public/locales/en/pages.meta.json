@@ -1,0 +1,1795 @@
+{
+  "grades.title": {
+    "context": "This text appears as the main page title for the Grades section of the eLearning platform. Students see this heading when they navigate to view their assignment scores and performance feedback, while instructors see it when accessing the grading interface to evaluate student submissions.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This is the main grades page component that displays academic performance data and grading interfaces. It serves both students viewing their scores and instructors managing grade assignments for their courses."
+    },
+    "usage": "Translation key: grades.title",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Scores",
+      "Results",
+      "Evaluations",
+      "Marks"
+    ]
+  },
+  "grades.sections": {
+    "context": "This text appears as a section header or navigation label within the grades interface, helping users organize and view graded content by different sections or modules. Students and instructors see this when navigating through different parts of graded assignments or course content.",
+    "component": {
+      "location": "src/components/common",
+      "description": "A common UI component that displays section-based navigation or organization within the grading system. This component helps users categorize and access different portions of graded content in an organized manner."
+    },
+    "usage": "Translation key: grades.sections",
+    "impact": "Important - This organizational label helps users efficiently navigate through graded content and understand the structure of their coursework",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Parts",
+      "Modules",
+      "Divisions",
+      "Categories"
+    ]
+  },
+  "grades.mySections": {
+    "context": "This text appears as a navigation label or section header in the grades area of the platform, specifically identifying the instructor's own class sections. Users see this when accessing their grade management interface to view student progress and assignment results across their teaching sections.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the grades page interface where instructors can view and manage student performance data. It provides section-based organization allowing instructors to filter and review grades for their specific class sections."
+    },
+    "usage": "Navigation label or section heading that helps instructors identify and access their own class sections in the grades interface.",
+    "impact": "Important - Essential for instructors to efficiently navigate and manage their class sections when reviewing student grades and progress.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "My Classes",
+      "My Course Sections",
+      "Teaching Sections",
+      "Assigned Sections"
+    ]
+  },
+  "grades.studentHeader": {
+    "context": "This text appears as a column header in the grades interface, specifically identifying the column that displays student names or identifiers. Teachers see this when viewing grade books or assignment results to distinguish student information from other data columns like scores or submission dates.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the grades overview interface where instructors can view and manage student performance data. It displays tabular grade information with proper column headers to organize student data, assignments, and scoring metrics."
+    },
+    "usage": "Translation key: grades.studentHeader",
+    "impact": "Provides information to users",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Learner",
+      "Pupil",
+      "Participant",
+      "User"
+    ]
+  },
+  "grades.assignmentHeader": {
+    "context": "This text appears as a header or section title in the grades interface, displayed when viewing assignment-related grade information. Users see this when navigating to grade reports or assignment evaluation screens where individual assignment performance is shown.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the grades page interface where users can view assignment scores and evaluation details. It displays grading information in a structured format with headers to organize different types of assessments."
+    },
+    "usage": "Section header or table column title that categorizes assignment-related grade data.",
+    "impact": "Important because it helps users quickly identify and navigate to assignment grades within the broader grading interface.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Task",
+      "Exercise",
+      "Activity",
+      "Homework"
+    ]
+  },
+  "grades.gradeHeader": {
+    "context": "This text appears as a column header in grade tables or gradebook interfaces where instructors and students view academic performance data. Users see this header when accessing grade reports, assignment results, or gradebook pages to identify the column containing grade values.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders grade-related page interfaces, likely including gradebook tables, grade reports, or assignment result displays. It provides functionality for viewing and managing academic performance data within the eLearning platform."
+    },
+    "usage": "Translation key: grades.gradeHeader",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Score",
+      "Mark",
+      "Result",
+      "Rating"
+    ]
+  },
+  "index.title": {
+    "context": "This text appears as the main page title or header on the homepage of the Homework Supply eLearning platform. Users see this as the primary brand identifier when they first visit the site or navigate to the main landing page.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This is the main index page component that serves as the homepage for the eLearning platform. It displays the primary navigation, welcome content, and entry points for both instructors and students to access their respective features."
+    },
+    "usage": "Translation key: index.title",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Learning Resources",
+      "Study Materials",
+      "Educational Platform",
+      "Assignment Hub"
+    ]
+  },
+  "index.assignments": {
+    "context": "This text appears as a navigation element or section heading that allows users to access the assignments area of the eLearning platform. Students see this when navigating to view their homework assignments, while instructors use it to access assignment creation and management features.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component serves as a page-level navigation or section identifier for the assignments functionality. It provides users with clear access to assignment-related features including viewing, creating, and managing homework tasks within the elearning platform."
+    },
+    "usage": "Navigation link or section heading that users click to access assignment features",
+    "impact": "High - This is essential navigation text that helps users locate and access core platform functionality for homework management",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Tasks",
+      "Homework",
+      "Exercises",
+      "Activities"
+    ]
+  },
+  "index.viewWorkbook": {
+    "context": "This text appears as a clickable element that allows users to open and view a workbook associated with a learning unit or assignment. Users see this when browsing course content, assignment lists, or educational materials where workbooks are available for review.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders on pages where workbooks are displayed as part of the course content structure. It provides navigation functionality for users to access workbook materials that contain exercises, vocabulary, or other learning content."
+    },
+    "usage": "Button or link text that triggers workbook viewing functionality when clicked by users",
+    "impact": "High - This is essential navigation text that directly affects users' ability to access core learning materials and workbook content",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Open Workbook",
+      "Access Workbook",
+      "Browse Workbook",
+      "Review Workbook"
+    ]
+  },
+  "index.completedAssignments": {
+    "context": "This text appears as a section heading or filter label on the student dashboard or assignments page, indicating assignments that have been finished and submitted. Users see this when navigating their assignment history or when viewing their academic progress overview.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays the student's assignment management interface, showing different categories of assignments including those that have been completed. It provides navigation and organization tools for students to track their learning progress and review finished work."
+    },
+    "usage": "Translation key: index.completedAssignments",
+    "impact": "High - This is essential for students to track their academic progress and navigate to previously completed work for review or reference",
+    "userType": "students",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Finished Assignments",
+      "Submitted Assignments",
+      "Done Assignments",
+      "Completed Work"
+    ]
+  },
+  "index.myAssignments": {
+    "context": "This text appears as a section heading or navigation label on the student dashboard or assignments page. Students see this text when they want to view their assigned learning tasks and track their progress on homework and activities assigned by their instructors.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays a personalized view of assignments allocated to the current student user. It likely renders a list or grid of learning tasks, quizzes, and homework that the student needs to complete, along with due dates and completion status."
+    },
+    "usage": "Translation key: index.myAssignments",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "index.editUnit": {
+    "context": "This text appears as a button or link label that allows instructors to modify existing learning unit content. Users see this when viewing a list of units or within a unit details page where editing capabilities are provided.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders on pages where instructors can manage their course content and learning units. It provides access to unit editing functionality within the broader page context of unit management."
+    },
+    "usage": "Button or link text that triggers the unit editing interface when clicked by instructors.",
+    "impact": "High - Essential for instructors to modify and update their learning content, directly affecting their ability to maintain current course materials.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Modify Unit",
+      "Update Unit",
+      "Change Unit"
+    ]
+  },
+  "index.noSectionsYet": {
+    "context": "This text appears as an empty state message when viewing a learning unit or course that has no sections created yet. Users see this placeholder text in the main content area when instructors haven't added any learning sections to organize their course materials.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays course or unit content and shows empty states when no sections exist. It serves as a placeholder to guide instructors to add their first learning section to begin organizing course materials."
+    },
+    "usage": "Translation key: index.noSectionsYet",
+    "impact": "Provides information to users",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "No Sections Created",
+      "No Content Sections",
+      "Sections Not Added",
+      "Empty Section List"
+    ]
+  },
+  "index.joinSection": {
+    "context": "This text appears as a confirmation dialog or modal when a user attempts to join a specific section or class within the eLearning platform. Students likely encounter this when clicking to enroll in a new section, prompting them to confirm their intention to join.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles section enrollment functionality, displaying a confirmation dialog when users request to join a learning section. It likely manages the user interaction flow for section membership and enrollment processes."
+    },
+    "usage": "Translation key: index.joinSection",
+    "impact": "Provides information to users",
+    "userType": "students",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Enroll in Section?",
+      "Enter Section?",
+      "Register for Section?"
+    ]
+  },
+  "index.createNewSection": {
+    "context": "This text appears as a button or action label that allows instructors to add a new section to their learning unit or course content. Users see this when they are in the content creation interface and want to expand their course structure by adding additional sections.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component provides the interface for course content management, allowing instructors to organize their learning materials into structured sections. It displays when instructors are actively building or editing their course content and need to add new organizational units."
+    },
+    "usage": "Button or clickable action that triggers the creation of a new content section",
+    "impact": "High - Essential for instructors to organize and structure their course content effectively",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Add New Section",
+      "New Section",
+      "Create Section",
+      "Add Section"
+    ]
+  },
+  "index.mySections": {
+    "context": "This text appears as a navigation label or section heading that allows users to access their personally owned or assigned content sections. Users see this when navigating to view content they have created, been assigned to, or have access permissions for within the eLearning platform.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "A page-level component that displays a user's personal content sections, likely showing a list or grid of learning units, assignments, or course sections that belong to the current user. This component serves as a personalized dashboard area where users can manage and access their specific content."
+    },
+    "usage": "Translation key: index.mySections",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "index.untitledSection": {
+    "context": "This text appears as a default label for newly created or unnamed sections within learning units when instructors are building course content. It serves as a placeholder title that displays until the instructor provides a specific name for the section.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the display and management of learning unit sections in the content authoring interface. It provides instructors with the ability to create, organize, and edit different sections of their learning materials."
+    },
+    "usage": "Translation key: index.untitledSection",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "index.noDescription": {
+    "context": "This text appears as a placeholder or fallback message when a learning unit, assignment, or content item lacks a description field. Users see this across various pages when browsing content that hasn't been properly described by instructors.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "A page-level component that displays content listings or details where descriptions may be missing. This component handles the presentation of learning materials and shows fallback text when description data is unavailable."
+    },
+    "usage": "Static text label displayed in content cards, detail views, or listing components when description data is missing",
+    "impact": "Medium - helps maintain clean UI presentation and prevents empty spaces, though not critical to core platform functionality",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "No details",
+      "Description unavailable",
+      "No information provided",
+      "Details not specified"
+    ]
+  },
+  "index.viewSection": {
+    "context": "This text appears as a clickable element that allows users to navigate to and view the details of a specific learning section within a course or lesson. Users encounter this when browsing course content or navigating through different sections of their learning materials.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders navigation or content browsing elements that allow users to access different sections of learning materials. It provides the interface for users to explore and navigate through course content organized into distinct sections."
+    },
+    "usage": "Translation key: index.viewSection",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "index.sections": {
+    "context": "This text appears as a heading or navigation label in the main course content area when displaying the organizational structure of a learning unit. Users see this when browsing through course materials to understand how content is divided into manageable sections.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the main page structure for displaying course content organization, likely showing an index or table of contents view. It helps users navigate between different sections of a learning unit or course module."
+    },
+    "usage": "Translation key: index.sections",
+    "impact": "High - This is essential for course navigation and helps users understand content structure and find specific learning materials",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Chapters",
+      "Units",
+      "Parts",
+      "Modules"
+    ]
+  },
+  "profile.title": {
+    "context": "This text appears as the main heading on the user profile page where users can view and edit their personal account information. It is displayed prominently at the top of the profile section and serves as the primary navigation identifier when users access their account settings.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "The profile page component displays user account information, settings, and preferences. Users navigate here to update personal details, change preferences, or view their account status within the eLearning platform."
+    },
+    "usage": "Translation key: profile.title",
+    "impact": "High - this is essential navigation text that helps users understand they are in the correct section for managing their personal account information",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "My Account",
+      "User Profile",
+      "Account Details",
+      "Personal Settings"
+    ]
+  },
+  "profile.heading": {
+    "context": "This text appears as the main heading at the top of the user profile page where learners can view and edit their personal information, learning preferences, and account settings. Users see this heading whenever they navigate to their profile section from the main navigation or user menu.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the user profile page where students and instructors can manage their personal account information, update preferences, and configure learning settings. The heading serves as the primary identifier for this page section in the platform's navigation hierarchy."
+    },
+    "usage": "Translation key: profile.heading",
+    "impact": "Important - This heading helps users understand they are in the correct section for managing personal account information and provides clear navigation context",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "User Profile",
+      "Account Details",
+      "Personal Information",
+      "My Account"
+    ]
+  },
+  "profile.description": {
+    "context": "This descriptive text appears on the user profile page or profile settings section, providing users with a brief explanation of what they can accomplish in this area. It serves as instructional text that helps users understand the purpose of the profile management interface.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the user profile management page where users can view their personal information, account settings, and make necessary updates. It provides a centralized location for users to manage their account details and preferences within the eLearning platform."
+    },
+    "usage": "Translation key: profile.description",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "profile.userId": {
+    "context": "This text appears as a field label in user profile sections, typically displaying a unique identifier for the user account. Users see this when viewing their own profile information or when administrators are managing user accounts in the platform.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders user profile information pages where account details and settings are displayed. Users access this when navigating to their profile section or when administrators view user management interfaces."
+    },
+    "usage": "Translation key: profile.userId",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "profile.identityId": {
+    "context": "This text appears as a field label in user profile settings or account information sections, displaying a unique identifier assigned by AWS Cognito for user authentication. Users typically see this in profile management pages or administrative account details where technical identifiers are shown.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders user profile information and account details, allowing users to view their account settings and technical identifiers. It displays various user attributes including system-generated identifiers used for authentication and data management."
+    },
+    "usage": "Translation key: profile.identityId",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "profile.cancel": {
+    "context": "This cancel button appears on profile-related forms and modal dialogs, allowing users to exit without saving changes. Users see this when editing their profile information, account settings, or other personal details and need to discard their modifications.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles profile management functionality where users can view and edit their personal information. It provides form controls and actions for managing user account details including cancellation options."
+    },
+    "usage": "Cancel button that allows users to exit profile editing without saving changes",
+    "impact": "Important because it provides users with a clear escape route from profile editing, preventing accidental data loss and improving user confidence",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Abort",
+      "Discard",
+      "Exit",
+      "Back"
+    ]
+  },
+  "profile.updateProfile": {
+    "context": "This text appears as a button or link in the user profile section, allowing users to modify their personal information, preferences, or account settings. Users typically see this after navigating to their profile page when they want to make changes to their account details.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the user profile management interface where users can view and edit their personal information, learning preferences, and account settings. It provides form fields and controls for updating profile data with real-time synchronization through AWS Amplify DataStore."
+    },
+    "usage": "Button or clickable link that initiates the profile editing process",
+    "impact": "High - Essential for users to maintain current account information and customize their learning experience on the platform",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Edit Profile",
+      "Modify Profile",
+      "Change Profile",
+      "Save Changes"
+    ]
+  },
+  "profile.confirmEmail.title": {
+    "context": "This title appears on the email confirmation page that users see after registering for an account or when they need to verify a new email address. Users are directed to this page as part of the account setup process before they can fully access the platform.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the email confirmation page that guides users through the email verification process. It displays when users need to verify their email address to complete registration or update their profile settings."
+    },
+    "usage": "Page title or main heading displayed at the top of the email confirmation interface",
+    "impact": "High because this is a critical step in user onboarding that must be clear for successful account activation",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Verify your email",
+      "Email verification",
+      "Validate your email address"
+    ]
+  },
+  "profile.confirmEmail.message": {
+    "context": "This message appears on the email confirmation page immediately after a user registers for an account or requests to verify their email address. It displays as instructional text guiding users through the email verification process required to activate their account on the Homework Supply platform.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the email confirmation workflow for new user registration and email verification processes. It displays confirmation instructions and likely includes an input field for users to enter their verification code."
+    },
+    "usage": "Instructional message text displayed prominently on the email confirmation page",
+    "impact": "Critical - this text is essential for user onboarding as it guides users through mandatory account verification required to access the platform",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "verify",
+      "validate",
+      "authenticate",
+      "confirmation code"
+    ]
+  },
+  "profile.confirmEmail.button": {
+    "context": "This text appears on a button in the user profile section that allows users to confirm their email address during the account verification process. Users see this when they need to verify their email address after registration or when updating their email address in their profile settings.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the email confirmation process within the user profile page. It provides users with the ability to verify their email address through a confirmation workflow that is essential for account security and platform communication."
+    },
+    "usage": "Button text that triggers the email confirmation process when clicked.",
+    "impact": "Critical because email confirmation is essential for account security, password recovery, and receiving important platform communications.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Verify Email",
+      "Validate Email",
+      "Authenticate Email"
+    ]
+  },
+  "profile.changePassword.heading": {
+    "context": "This heading appears at the top of the password change form within the user profile section. Users see this text when they navigate to their profile settings and select the option to update their account password.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the user profile management interface where users can update their account settings and security preferences. It provides forms and options for modifying personal information, password, and other account-related configurations."
+    },
+    "usage": "Translation key: profile.changePassword.heading",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Update Password",
+      "Password Modification",
+      "Reset Password",
+      "Security Update"
+    ]
+  },
+  "profile.changePassword.description": {
+    "context": "This descriptive text appears on the user profile page within the change password section, providing context about why users should update their password. It is displayed as explanatory text near the password change form to help users understand the security importance of the action.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles user profile management functionality, displaying account settings and security options for authenticated users."
+    },
+    "usage": "Descriptive text or label that explains the purpose of the password change feature to users.",
+    "impact": "Important because it helps users understand the security benefits of updating their password, encouraging good security practices on the platform.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "modify",
+      "change",
+      "refresh",
+      "enhance protection",
+      "improve safety",
+      "strengthen security"
+    ]
+  },
+  "profile.changePassword.button": {
+    "context": "This text appears on a button within the user's profile settings or account management page. Users see this button when they want to update their current password for security purposes or when they've forgotten their existing password.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the user profile or account settings page where users can manage their personal information and security settings. It provides various options for users to update their account details including password management functionality."
+    },
+    "usage": "Button text that users click to initiate the password change process.",
+    "impact": "High - This is a critical security feature that allows users to maintain account security and recover access when needed.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Update Password",
+      "Modify Password",
+      "Reset Password",
+      "Set New Password"
+    ]
+  },
+  "profile.advanced.heading": {
+    "context": "This heading appears on the user profile page in an advanced settings or configuration section. Users see this text when they navigate to their profile and access more sophisticated or technical options beyond basic account settings.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the profile page where users can manage their account settings, preferences, and advanced configurations. It provides both basic and advanced sections for comprehensive user account management."
+    },
+    "usage": "Section heading that labels the advanced settings area on the profile page.",
+    "impact": "Medium - helps users navigate to more sophisticated settings but not critical for basic platform usage.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Expert",
+      "Professional",
+      "Sophisticated",
+      "Extended"
+    ]
+  },
+  "profile.advanced.description": {
+    "context": "This descriptive text appears in the profile settings section under an Advanced tab or accordion panel. Users see this explanation when navigating to their profile page and exploring advanced configuration options, helping them understand what functionality is available in this section.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the profile page with various settings sections including advanced options. It provides users with account management capabilities and system maintenance tools like cache clearing functionality."
+    },
+    "usage": "Descriptive text or subtitle that explains the purpose of the advanced settings section",
+    "impact": "Medium - helps users understand what advanced features are available but not critical for basic platform usage",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Configure advanced options",
+      "Control system settings",
+      "Adjust technical preferences",
+      "Handle data management"
+    ]
+  },
+  "profile.advanced.clearCache": {
+    "context": "This text appears on the advanced profile settings page as part of technical or troubleshooting options. Users see this when they navigate to their profile settings and access the advanced section, typically when experiencing performance issues or data synchronization problems.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the advanced profile settings page where users can access technical configuration options and troubleshooting tools. It provides users with controls for managing local data storage and application performance optimization."
+    },
+    "usage": "Button text that users click to clear locally stored application data and cached content.",
+    "impact": "Medium importance as this is a technical feature primarily used for troubleshooting performance issues or resolving data synchronization problems.",
+    "userType": "all",
+    "tone": "technical",
+    "alternativeTerms": [
+      "Clear Cache",
+      "Delete Local Data",
+      "Reset Local Storage"
+    ]
+  },
+  "profile.advanced.clearCacheDialog.title": {
+    "context": "This text appears as the title of a confirmation dialog box that opens when users click a clear cache button in the advanced settings section of their user profile. The dialog prompts users to confirm whether they want to clear their locally stored data cache before proceeding with the potentially disruptive action.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the advanced profile settings page where users can manage technical preferences and perform maintenance actions. It includes options for clearing cached data, managing offline content, and other advanced configuration settings that affect app performance and data storage."
+    },
+    "usage": "Dialog title heading that appears when users attempt to clear their local data cache from advanced profile settings",
+    "impact": "High - This title helps users understand they are about to perform a significant action that will clear their locally stored learning progress and cached content",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Clear Stored Data",
+      "Delete Local Cache",
+      "Remove Cached Content"
+    ]
+  },
+  "profile.advanced.clearCacheDialog.message": {
+    "context": "This message appears in a confirmation dialog when users attempt to clear their local cache from the advanced settings section of their profile. Users see this warning before confirming the cache clearing action to understand what data will be removed and that they'll need to reload content from the server afterward.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders a confirmation dialog for the clear cache functionality in the profile's advanced settings section. It displays warning information about the consequences of clearing locally cached data before users proceed with the action."
+    },
+    "usage": "Message text displayed within a confirmation dialog triggered by the clear cache action",
+    "impact": "High - This message is critical for preventing accidental data loss and ensuring users understand they'll need to reload content from the server",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "cached data",
+      "stored data",
+      "local storage",
+      "offline content",
+      "downloaded assignments",
+      "synced materials"
+    ]
+  },
+  "profile.advanced.clearCacheDialog.cancel": {
+    "context": "This text appears on a cancel button within a confirmation dialog that appears when users attempt to clear their cache in the advanced profile settings. Users see this dialog after clicking a clear cache button, and this cancel option allows them to abort the cache clearing operation and return to the previous state.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders a confirmation dialog for cache clearing operations in the user profile's advanced settings section. It provides users with options to either proceed with clearing their cache or cancel the operation to maintain their current cached data."
+    },
+    "usage": "Translation key: profile.advanced.clearCacheDialog.cancel",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "profile.advanced.clearCacheDialog.confirm": {
+    "context": "This text appears as the confirmation button label in a dialog that warns users about clearing their cache data in the advanced settings section of their profile. Users see this dialog after clicking a clear cache option and need to confirm their action before the cache is actually cleared.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders a confirmation dialog for destructive actions in the profile's advanced settings section. It appears as a modal overlay that requires user confirmation before proceeding with cache clearing operations."
+    },
+    "usage": "Confirmation button in a warning dialog that executes the cache clearing action when clicked.",
+    "impact": "High - This is a destructive action that could affect user experience by removing cached content and requiring re-downloads, so clear labeling is essential for informed consent.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Delete Cache",
+      "Remove Cache",
+      "Reset Cache",
+      "Purge Cache"
+    ]
+  },
+  "sections.title": {
+    "context": "This text appears as a heading or title in the UI when users are viewing or managing content sections within learning units. It serves as a navigational label and organizational header to help users understand they are in the sections area of the platform.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders page-level content related to sections management or display functionality. Users see this when navigating to areas where learning content is organized into discrete sections or modules."
+    },
+    "usage": "Translation key: sections.title",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Modules",
+      "Chapters",
+      "Units",
+      "Parts"
+    ]
+  },
+  "sections.createNew": {
+    "context": "This text appears as a primary action button or link that allows instructors to start creating new learning content such as units, lessons, or assignments. It's typically displayed prominently on dashboard pages or content management sections where instructors can see their existing materials and initiate the creation of new educational resources.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders a page-level interface element that provides instructors with the ability to initiate content creation workflows. It serves as an entry point for creating new learning materials and is positioned where instructors can easily access it from their main workspace."
+    },
+    "usage": "Translation key: sections.createNew",
+    "impact": "Critical - this is a core function that enables instructors to create the educational content that drives the entire platform experience.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Add New",
+      "Create Fresh",
+      "Build New",
+      "Start New"
+    ]
+  },
+  "sections.noSectionsYet": {
+    "context": "This message appears as a placeholder text when an instructor is viewing a learning unit or course that contains no sections yet. It displays in an empty state within the content management area, informing the instructor that they need to create sections to organize their learning materials.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the empty state interface for content sections within the eLearning platform. It provides visual feedback to instructors when no sections have been created yet in their learning units."
+    },
+    "usage": "Empty state message displayed as a heading or prominent text label when no content sections exist",
+    "impact": "Medium - helps instructors understand the current state and guides them toward creating their first sections",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "No Sections Created",
+      "No Content Sections",
+      "Sections Not Available",
+      "Empty Sections"
+    ]
+  },
+  "sections.createNewSection": {
+    "context": "This text appears as a button or link in the course content management interface when instructors are organizing their course structure. Users see this option when they want to add a new section to their course, typically displayed in the course builder or content management area.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component provides the course content organization interface where instructors can structure their Japanese language learning materials. It allows users to create, manage, and arrange sections within their courses to organize vocabulary lessons, quizzes, and other learning content."
+    },
+    "usage": "Button or link text that triggers the section creation workflow when clicked",
+    "impact": "High - This is essential for instructors to organize their course content structure and create meaningful learning progression for students",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Add New Section",
+      "New Section",
+      "Create Section",
+      "Add Section"
+    ]
+  },
+  "sections.untitledSection": {
+    "context": "This text appears as a default placeholder name for content sections that have not been given a custom title by the instructor. It displays in the content authoring interface when instructors are creating or editing learning materials and need to organize content into logical sections.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component manages the display and editing of section titles within the learning content structure. It provides a fallback label when instructors create new sections but haven't yet assigned meaningful names to organize their course materials."
+    },
+    "usage": "Translation key: sections.untitledSection",
+    "impact": "Medium - helps instructors identify and organize unnamed content sections during course creation",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Unnamed Section",
+      "Default Section",
+      "New Section"
+    ]
+  },
+  "sections.viewSection": {
+    "context": "This text appears as a navigation or action element that allows users to access and view a specific section within a learning unit or course. Users encounter this when browsing through course content or when they need to navigate to a particular section to view its contents.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component provides navigation functionality for accessing individual sections within the learning platform. It likely renders as a clickable element that takes users to a detailed view of a specific section's content and materials."
+    },
+    "usage": "Translation key: sections.viewSection",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "sections.loading": {
+    "context": "This loading message appears when the sections of a course or learning unit are being fetched and rendered. Users see this text during the brief moment when the platform is retrieving section data from AWS DataStore before displaying the actual content.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the rendering of course or unit sections and displays loading states while data is being synchronized. It manages the transition between loading and loaded states for section content display."
+    },
+    "usage": "Loading indicator text shown during section data retrieval and rendering",
+    "impact": "Medium - provides users with feedback that the system is working and content will appear shortly",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Please wait",
+      "Fetching",
+      "Loading content",
+      "Retrieving data"
+    ]
+  },
+  "sections.newSection.title": {
+    "context": "This title appears when instructors are creating or managing course content and need to add a new section to their learning unit. It's typically displayed as a heading or modal title during the content creation workflow when the instructor selects to add an additional section to organize their course materials.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the section creation interface where instructors can add new organizational units to their courses. It provides the form or interface elements needed to create and configure a new section within the course structure."
+    },
+    "usage": "Translation key: sections.newSection.title",
+    "impact": "Important because it helps instructors understand they are in the section creation workflow and guides them through organizing their course content effectively.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "New Chapter",
+      "Add Section",
+      "Create Section",
+      "New Module"
+    ]
+  },
+  "sections.newSection.description": {
+    "context": "This descriptive text appears above a form where instructors create new sections within their learning units. It provides guidance to users about what they need to do next in the section creation workflow.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the section creation form interface that allows instructors to add new sections to their learning units. It displays form fields and guidance text to help instructors structure their educational content effectively."
+    },
+    "usage": "Descriptive text displayed as instructional guidance above the new section creation form",
+    "impact": "Important because it provides clear direction to instructors on how to proceed with creating educational content structure",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Add a new Section",
+      "Build a new Section",
+      "Set up a new Section"
+    ]
+  },
+  "sections.newSection.nameLabel": {
+    "context": "This text appears as a form field label when instructors are creating a new section within a learning unit. Users see this label above or beside an input field where they enter the name for the section they are creating.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the form interface for creating new sections within learning units. It provides instructors with input fields and controls to define section properties including the section name."
+    },
+    "usage": "Translation key: sections.newSection.nameLabel",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "sections.newSection.descriptionLabel": {
+    "context": "This label appears in the section creation form when instructors are adding a new section to a learning unit. It identifies the text input field where instructors provide a detailed description of what the section will contain or teach.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "A form component that enables instructors to create new sections within learning units. The component provides input fields for section metadata including title, description, and other configuration options for organizing course content."
+    },
+    "usage": "Translation key: sections.newSection.descriptionLabel",
+    "impact": "Important - helps instructors understand what information to provide when structuring their course content, contributing to well-organized learning materials.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Summary",
+      "Details",
+      "Overview",
+      "Explanation"
+    ]
+  },
+  "sections.newSection.cancel": {
+    "context": "This text appears on a cancel button in the new section creation interface, allowing instructors to abandon the process of creating a new learning section. Users see this when they are in the middle of creating a new section and want to discard their changes and return to the previous view.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the new section creation interface where instructors can add learning sections to their courses. It provides form controls and action buttons including the cancel option to abandon the creation process."
+    },
+    "usage": "Translation key: sections.newSection.cancel",
+    "impact": "Provides information to users",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Discard",
+      "Abandon",
+      "Exit",
+      "Back"
+    ]
+  },
+  "sections.newSection.create": {
+    "context": "This text appears on a button that instructors use to create new sections within learning units. The button is visible in the content authoring interface where instructors are building their course structure and adding educational content.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component provides the interface for instructors to add new sections to their learning units. It appears as part of the content authoring workflow where instructors structure their Japanese language lessons and educational materials."
+    },
+    "usage": "Button text that triggers the creation of a new section when clicked by an instructor.",
+    "impact": "High - This is essential for content creation workflow as instructors need to easily add new sections to organize their learning materials effectively.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Add",
+      "Generate",
+      "Build",
+      "Make"
+    ]
+  },
+  "sectionDetail.noFeaturedImage": {
+    "context": "This text appears in the section detail view when an instructor is creating or editing a learning section but has not uploaded a featured image. It serves as a placeholder message indicating the absence of a visual element that would normally represent the section content.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays section details and content creation tools for instructors building learning units. It handles the display of section metadata including featured images, showing placeholder text when media is not available."
+    },
+    "usage": "Translation key: sectionDetail.noFeaturedImage",
+    "impact": "Provides information to users",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "No cover image selected",
+      "Featured image not available",
+      "No header image configured"
+    ]
+  },
+  "sectionDetail.dragAndDropPrompt": {
+    "context": "This instructional text appears in a drag-and-drop zone within the section detail editing interface when instructors are creating or editing learning content. Users see this prompt when they need to upload a featured image for their learning section, guiding them to use the drag-and-drop functionality rather than traditional file upload buttons.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the section detail editing interface where instructors can modify learning unit content and settings. It provides a drag-and-drop image upload area that allows instructors to easily set featured images for their educational content sections."
+    },
+    "usage": "Translation key: sectionDetail.dragAndDropPrompt",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "sectionDetail.uploadingImage": {
+    "context": "This text appears as a status message when users are uploading an image within the section detail interface of the eLearning platform. It displays temporarily during the image upload process to inform users that their image is being processed and uploaded to the system.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the section detail view where instructors can edit and manage content for learning units. It provides functionality for uploading and managing media assets including images that enhance the learning experience."
+    },
+    "usage": "Translation key: sectionDetail.uploadingImage",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "sectionDetail.uploadImagePrompt": {
+    "context": "This text appears as a prompt or call-to-action when users are in a section detail view and need to add visual content. It guides users through the image upload process within the content creation or editing workflow.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the section detail interface where instructors can add multimedia content to their learning units. It provides image upload functionality as part of the rich content authoring experience using the Lexical editor."
+    },
+    "usage": "Translation key: sectionDetail.uploadImagePrompt",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "sectionDetail.uploadImageInvalidFile": {
+    "context": "This error message appears in the section detail page when a user attempts to upload a file that is not a valid image format during content creation. The message is shown immediately after the file selection or upload attempt to inform the user that only image files with supported extensions are allowed.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the section detail view where instructors can create and edit learning content including images, text, and other media elements. It includes file upload functionality with validation to ensure only appropriate file types are accepted for different content types."
+    },
+    "usage": "Error message displayed during file upload validation for image content",
+    "impact": "High - Critical for preventing upload errors and guiding instructors to use correct file formats for their learning materials",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "supported format",
+      "acceptable file type",
+      "valid image format",
+      "permitted extension"
+    ]
+  },
+  "sectionDetail.joinCode": {
+    "context": "This text appears as a field label in the section detail view, displayed next to the unique join code that students use to enroll in a learning section. Users see this when viewing or managing section information, where the join code is prominently displayed for sharing with students.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays detailed information about a learning section, including enrollment details and access credentials. It provides instructors with section management tools and displays the join code that students need to access the section."
+    },
+    "usage": "Field label displayed before the actual join code value in the section details interface",
+    "impact": "High - This label is essential for instructors to identify and share the correct enrollment code with their students",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Access Code:",
+      "Enrollment Code:",
+      "Entry Code:",
+      "Class Code:"
+    ]
+  },
+  "sectionDetail.studentView": {
+    "context": "This text appears on a section detail page as a view option that allows instructors to preview how their content appears to students. It helps instructors understand the student experience before publishing or while reviewing their learning materials.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays the section detail page where instructors can manage and preview their learning content. It provides different view modes to help instructors see their content from both editing and student perspectives."
+    },
+    "usage": "Button or tab label that switches the interface to student perspective view",
+    "impact": "High - Critical for instructors to validate student experience and ensure content displays correctly",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Learner View",
+      "Student Perspective",
+      "Preview Mode"
+    ]
+  },
+  "sectionDetail.instructorView": {
+    "context": "This text appears as a view mode selector or toggle within a section detail page, allowing users to switch to see how the content appears from an instructor's perspective. It likely appears as a button, tab, or toggle option in the section navigation or toolbar area.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the section detail page with different view modes for various user types. It provides instructors and potentially admins the ability to preview content as it would appear to instructors, likely showing additional controls, editing options, or metadata not visible to students."
+    },
+    "usage": "Button or tab label that users click to switch to instructor perspective view of section content",
+    "impact": "Important because it provides critical functionality for content creators and administrators to preview and validate how instructors will experience the learning materials",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Teacher View",
+      "Educator Perspective",
+      "Faculty Mode",
+      "Teaching View"
+    ]
+  },
+  "sectionDetail.switchToInstructorView": {
+    "context": "This text appears as a button or link that allows users to change their viewing perspective within a section of the eLearning platform. It enables switching from a regular learner's view to an instructor's perspective, which likely shows additional tools, editing capabilities, and administrative features for that section.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the section detail view and provides interface switching functionality. It manages the display state between different user role perspectives and renders appropriate controls based on viewing mode."
+    },
+    "usage": "Interactive button or link element that users click to toggle viewing modes",
+    "impact": "High - This is essential for instructors who need to switch between how content appears to students versus their management interface",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Change to Teacher View",
+      "Toggle Instructor Mode",
+      "Enter Teaching Interface"
+    ]
+  },
+  "sectionDetail.previewStudentView": {
+    "context": "This text appears as a button or link within the section detail view that allows instructors to preview how their learning content will appear to students. It provides a way for instructors to test and validate their content before publishing it to students.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the section detail page where instructors can view and manage individual learning sections. It provides content authoring tools and preview functionality to help instructors create effective learning materials."
+    },
+    "usage": "Button or link text that instructors click to switch to student perspective view",
+    "impact": "Important - Essential for content quality assurance as it helps instructors ensure their materials display correctly for students",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "View as Student",
+      "Student Perspective",
+      "Preview Mode",
+      "Student Experience"
+    ]
+  },
+  "sectionDetail.students": {
+    "context": "This text appears as a heading or label in the section detail view, indicating the list of students enrolled in or associated with a particular learning section. Users see this when viewing detailed information about a specific course section or unit to understand student enrollment.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays detailed information about a learning section, including enrolled students, content, and other section-specific data. It provides instructors and administrators with a comprehensive view of section metrics and participant information."
+    },
+    "usage": "Section heading or label that identifies the students list within a section detail page.",
+    "impact": "Important - This label helps instructors and administrators quickly identify and navigate to student enrollment information within the section overview.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Learners",
+      "Participants",
+      "Enrollees"
+    ]
+  },
+  "sectionDetail.studentHeader": {
+    "context": "This text appears as a header or label in a section detail view, specifically identifying content or information related to students. It likely appears when viewing assignment details, progress reports, or student-specific sections within the eLearning platform.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays section details with different headers for different user types or content categories. It renders contextual information based on whether the content relates to students, instructors, or other platform entities."
+    },
+    "usage": "Translation key: sectionDetail.studentHeader",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Learner",
+      "Pupil",
+      "Trainee"
+    ]
+  },
+  "sectionDetail.emailHeader": {
+    "context": "This text appears as a header or label in the section detail view, specifically for email-related content or communication features. Users see this when viewing detailed information about a learning section that includes email functionality or contact information.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders detailed information about a learning section, including various communication methods and contact options. It displays structured data about section content with appropriate headers for different types of information."
+    },
+    "usage": "Translation key: sectionDetail.emailHeader",
+    "impact": "Medium - provides clear identification of email content but is primarily organizational rather than functional",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Electronic Mail",
+      "E-mail",
+      "Mail",
+      "Message"
+    ]
+  },
+  "sectionDetail.actionsHeader": {
+    "context": "This text appears as a section header in the detailed view of a learning unit or course section. Users see this header when they navigate to a specific section's detail page, where it introduces the available actions they can perform on that section.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays the detailed view of a course section with various interactive elements and controls. It provides users with section-specific information and actionable options for managing or interacting with the content."
+    },
+    "usage": "Translation key: sectionDetail.actionsHeader",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Operations",
+      "Controls",
+      "Options",
+      "Tools"
+    ]
+  },
+  "sectionDetail.gradebook": {
+    "context": "This text appears as a section title or navigation label within the gradebook area of the platform. Students and instructors see this when accessing grade-related functionality to view assignment scores, progress tracking, and assessment results.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays the gradebook interface where users can view and manage academic performance data. It provides access to student grades, assignment scores, and progress tracking within the eLearning platform."
+    },
+    "usage": "Section heading or navigation label that users click or view to access grading functionality",
+    "impact": "High - Essential for users to understand and access grade tracking features which are core to the educational experience",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Grade Book",
+      "Grade Center",
+      "Score Report",
+      "Academic Records"
+    ]
+  },
+  "sectionDetail.showingAssignments": {
+    "context": "This text appears in the section detail view when displaying a filtered or paginated list of assignments. Users see this informational text when not all assignments are visible at once, helping them understand how many assignments are currently displayed versus the total number available.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the section detail page where instructors and students can view assignments within a specific learning section. It handles the display of assignment lists with filtering and pagination capabilities to manage large numbers of assignments effectively."
+    },
+    "usage": "Informational label that displays assignment count status in parentheses below or near the assignment list header.",
+    "impact": "Medium - helps users understand the scope of displayed content and whether additional assignments exist beyond the current view.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "displaying",
+      "presenting",
+      "listing",
+      "revealing"
+    ]
+  },
+  "sectionDetail.showFutureAssignments": {
+    "context": "This text appears on the section detail page as a toggle or filter option that allows users to control the visibility of assignments that are scheduled for future dates. Users see this when viewing a course section and want to manage which assignments are displayed based on their timing.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays detailed information about a course section including assignments and learning materials. It provides filtering options for instructors and students to control what content is visible based on various criteria including timing."
+    },
+    "usage": "Button or toggle label that users click to show or hide future-dated assignments in the section view.",
+    "impact": "Medium - This helps users manage their view and focus on current vs upcoming assignments, improving content organization and user experience.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Show Upcoming",
+      "Display Future",
+      "View Scheduled",
+      "Show Later"
+    ]
+  },
+  "sectionDetail.showDraftAssignments": {
+    "context": "This text appears as a toggle or filter option in the section detail view where assignments are displayed. Users see this when they want to control whether draft assignments (assignments that are not yet published or finalized) are visible in their assignment list.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the section detail page where assignments are listed and managed. It provides filtering options to help users control what types of assignments are displayed in their view."
+    },
+    "usage": "Toggle button or checkbox label that allows users to show or hide draft assignments in the list",
+    "impact": "Important - This helps instructors manage their workflow by allowing them to see unpublished assignments while keeping the interface clean for students",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Display Drafts",
+      "View Drafts",
+      "Include Drafts"
+    ]
+  },
+  "sectionDetail.applyCurve": {
+    "context": "This text appears as a button or action in the section detail interface, likely within a grading or assessment management area. Users see this when they need to apply a grading curve to student scores or assignment results in a specific learning section.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles section-level details and management functions for learning units. It provides instructors with tools to modify grading parameters and apply adjustments to student performance data."
+    },
+    "usage": "Button text that triggers the application of a grading curve to section scores.",
+    "impact": "High - Essential for instructors who need to adjust grading scales and ensure fair assessment outcomes for their students.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Apply Grade Curve",
+      "Curve Grades",
+      "Adjust Scoring"
+    ]
+  },
+  "sectionDetail.curveMethod": {
+    "context": "This text appears as a label or heading in the section detail configuration area where instructors set up grading parameters for learning sections. Users see this when configuring how student performance will be evaluated and scored within a specific learning section.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the detailed configuration interface for learning sections, allowing instructors to set various parameters including grading methods and scoring criteria. It provides the interface for managing section-specific settings that affect how student work is evaluated and scored."
+    },
+    "usage": "Label text for a grading configuration option that instructors select when setting up section evaluation parameters.",
+    "impact": "Important because it directly affects how instructors understand and configure grading systems that determine student scoring and progress tracking.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Grading Curve",
+      "Score Adjustment",
+      "Grade Scaling",
+      "Curve Algorithm"
+    ]
+  },
+  "sectionDetail.scaleToTopMethod": {
+    "context": "This text appears as a scoring method option in a section configuration interface, likely displayed as a radio button or dropdown selection. It represents a grading method where student scores are normalized to a percentage scale with 100% being the top score achieved, allowing instructors to set relative performance standards.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders section configuration options where instructors can select different scoring methodologies for their learning units. It provides various grading scale options that determine how student performance is calculated and displayed in the gradebook."
+    },
+    "usage": "Label text for a scoring method selection option that instructors choose when configuring assignment grading parameters.",
+    "impact": "High - This affects how student performance is calculated and displayed, directly impacting grade accuracy and instructor workflow for assessment setup.",
+    "userType": "instructors",
+    "tone": "technical",
+    "alternativeTerms": [
+      "Normalize to Maximum Score",
+      "Percentage Scale to Highest Score",
+      "Top Score Scaling Method",
+      "Maximum Score Normalization"
+    ]
+  },
+  "sectionDetail.linearAdjustmentMethod": {
+    "context": "This text appears in a section detail view where learning assessment methods are configured or displayed. Users see this when reviewing or selecting grading algorithms that use linear adjustment calculations with an average rate of 75%.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays detailed information about learning sections including grading and assessment methodologies. It allows instructors to view or configure how student performance is calculated and adjusted within specific learning units."
+    },
+    "usage": "Label or option text for a grading method selection in assessment configuration.",
+    "impact": "High - This is critical for instructors to understand how student grades are calculated and affects the fairness and accuracy of assessments.",
+    "userType": "instructors",
+    "tone": "technical",
+    "alternativeTerms": [
+      "Progressive Adjustment",
+      "Proportional Scaling",
+      "Graduated Modification",
+      "Sequential Calibration"
+    ]
+  },
+  "sectionDetail.curveDebugInfo": {
+    "context": "This debug label appears in the section detail view when displaying technical information about curve calculations or grading curves. It's likely shown to instructors or administrators when they need to troubleshoot or verify curve-related functionality in assignments or assessments.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders detailed information about a learning section, including debug information for technical users. It displays various technical details that help instructors or administrators understand the underlying calculations and data processing."
+    },
+    "usage": "Label text that precedes curve debugging information in a section detail interface.",
+    "impact": "Low - This is technical debug information primarily used for troubleshooting and system verification rather than core user functionality.",
+    "userType": "instructors",
+    "tone": "technical",
+    "alternativeTerms": [
+      "Curve Debugging:",
+      "Curve Analysis:",
+      "Curve Information:",
+      "Curve Data:"
+    ]
+  },
+  "sectionDetail.selectAssignmentsToCurve": {
+    "context": "This text appears as an instructional prompt in the gradebook section detail view when instructors enable the curve feature. It appears above the assignment selection interface, guiding instructors to choose which specific assignments should have the grading curve applied to them.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the gradebook management interface where instructors can apply grading curves to individual assignments. It provides granular control over curve application, allowing instructors to selectively curve assignments rather than applying curves universally."
+    },
+    "usage": "Instructional label that guides instructors to select assignments for curve application.",
+    "impact": "High - This is essential for instructors to understand they can selectively apply curves to specific assignments rather than all assignments in the section.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Choose assignments for curving",
+      "Pick assignments to adjust",
+      "Select which assignments to curve"
+    ]
+  },
+  "sectionDetail.selectAll": {
+    "context": "This text appears as a button label in the assignment curve selection interface within the gradebook. Instructors see this when they want to quickly select all visible assignments to apply a grading curve, rather than selecting assignments individually.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component provides bulk selection functionality for the assignment curve feature in the gradebook. It allows instructors to efficiently manage which assignments receive curve adjustments by providing quick select/deselect actions."
+    },
+    "usage": "Button text that triggers selection of all available assignments for curve application.",
+    "impact": "Medium - Improves instructor efficiency by allowing bulk selection of assignments for grading curve application.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Choose All",
+      "Select Everything",
+      "Mark All"
+    ]
+  },
+  "sectionDetail.clearAll": {
+    "context": "This text appears as a button label in the assignment curve selection interface within the gradebook. Instructors use this to quickly deselect all assignments that have been selected for curve application, allowing them to start over with their selection.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component provides bulk deselection functionality for the assignment curve feature in the gradebook. It allows instructors to efficiently reset their assignment curve selections without manually deselecting each assignment individually."
+    },
+    "usage": "Button text that triggers deselection of all selected assignments in the curve interface.",
+    "impact": "Medium - Improves instructor workflow by providing quick reset functionality for assignment curve selections.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Deselect All",
+      "Reset Selection",
+      "Clear Selection"
+    ]
+  },
+  "sectionDetail.assignmentHeader": {
+    "context": "This text appears as a header in the section detail view when displaying assignment-type content within a learning unit. Students see this header when viewing assignments they need to complete, and instructors see it when reviewing or editing assignment sections in their course materials.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the detailed view of a specific section within a learning unit, displaying different types of content including assignments, vocabulary, and quizzes. It provides the main interface for users to interact with section-specific content and complete learning activities."
+    },
+    "usage": "Translation key: sectionDetail.assignmentHeader",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "sectionDetail.gradeHeader": {
+    "context": "This text appears as a header in the section detail view when displaying grade information for a completed assignment or learning unit. Users see this when viewing their performance results or when instructors are reviewing student submissions and grades.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays detailed information about a specific section or learning unit, including performance metrics and grading data. It provides both students and instructors with a comprehensive view of completion status and assessment results."
+    },
+    "usage": "Column header or section heading that labels grade-related information in a table or data display.",
+    "impact": "High - this header is essential for users to understand they are viewing grade information and assessment results.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Score",
+      "Mark",
+      "Rating",
+      "Assessment"
+    ]
+  },
+  "sectionDetail.totalAverage": {
+    "context": "This text appears on the section detail page where users can view comprehensive analytics and performance metrics for a specific learning section. It serves as a label or heading for displaying the calculated total average score across all assessments, quizzes, or activities within that section.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the section detail view showing performance analytics, progress tracking, and statistical summaries for a learning section. It displays various metrics including individual scores, progress indicators, and calculated averages to help users understand overall performance within the section."
+    },
+    "usage": "Translation key: sectionDetail.totalAverage",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "sectionDetail.learnerHeader": {
+    "context": "This text appears as a header or label in a section detail view, specifically identifying content or information related to a learner/student. Users see this when viewing detailed information about a student's progress, assignments, or profile within a learning unit or course section.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays detailed information about a specific section, likely showing both instructor and learner perspectives or data. It renders section-specific content with different headers to distinguish between different types of information or user roles."
+    },
+    "usage": "Header text that labels a section or area containing learner-specific information or content.",
+    "impact": "Important - helps users quickly identify and navigate to student-related information within the section details interface.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Student",
+      "Pupil",
+      "Participant"
+    ]
+  },
+  "sectionDetail.totalCompletion": {
+    "context": "This text appears as a column header or label in a section completion tracking interface, where users can view progress statistics. It specifically refers to the overall completion metric that aggregates all completion data for a particular section or course unit.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays detailed section analytics and progress tracking information for learning units. It presents completion statistics in a tabular or dashboard format where users can monitor student progress across different metrics."
+    },
+    "usage": "Column header or data label in a completion statistics table or progress dashboard",
+    "impact": "High - Essential for instructors to monitor overall student progress and completion rates across their learning sections",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Overall (Completion)",
+      "Total (Finished)",
+      "Complete (Total)",
+      "Total Progress"
+    ]
+  },
+  "sectionDetail.editTooltip": {
+    "context": "This tooltip text appears when users hover over an edit button or icon in the section detail view. It provides a helpful hint to users that clicking this element will allow them to modify the content of the current section.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays detailed information about a specific learning section and provides editing capabilities. Users can view section content and access modification tools through interactive elements with helpful tooltips."
+    },
+    "usage": "Translation key: sectionDetail.editTooltip",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "sectionDetail.assignments": {
+    "context": "This text appears as a section heading or tab label in the section detail view when displaying assignments within a course section. Users see this when navigating to view all assignments associated with a specific learning section or unit.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays the section detail page which shows comprehensive information about a learning section including its assignments. Students and instructors access this view to see assignment listings and details within the context of a specific course section."
+    },
+    "usage": "Translation key: sectionDetail.assignments",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "sectionDetail.viewWorkbook": {
+    "context": "This text appears as a navigation element in the section detail view, allowing users to access a downloadable or viewable workbook associated with the learning section. Users encounter this when they are viewing a specific section of a course and need to access supplementary materials or practice exercises.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the section detail page where users can view comprehensive information about a learning section including content, assignments, and resources. It provides navigation options to access related materials like workbooks and supplementary content."
+    },
+    "usage": "Button or link that opens or downloads a workbook file when clicked by the user.",
+    "impact": "High importance as workbooks are essential learning resources that students need to access for completing assignments and practice exercises.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Open Workbook",
+      "Access Workbook",
+      "Download Workbook",
+      "Show Workbook"
+    ]
+  },
+  "sectionDetail.deleteSection": {
+    "context": "This text appears as a button label in the section management interface when instructors are editing a learning unit. Users see this action when they want to permanently remove a section from their course content, typically accessed through a context menu or action panel.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the section detail view where instructors can manage individual sections of their learning units. It provides editing capabilities and destructive actions like deletion for content management."
+    },
+    "usage": "Translation key: sectionDetail.deleteSection",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "sectionDetail.deleteSectionConfirm": {
+    "context": "This confirmation dialog text appears when an instructor attempts to delete a section from a learning unit in the course authoring interface. The text displays in a modal dialog or confirmation popup to prevent accidental deletion of educational content.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles section management functionality within the course authoring interface, allowing instructors to create, edit, and delete sections of learning content. It includes confirmation dialogs to protect against unintended content loss."
+    },
+    "usage": "Translation key: sectionDetail.deleteSectionConfirm",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "sectionDetail.loading": {
+    "context": "This loading message appears when users navigate to view details of a specific learning section or unit. It displays during the data fetching process while the platform retrieves section content, quizzes, vocabulary, and media assets from AWS DataStore.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This page component handles the display of detailed section information including learning materials and interactive content. It manages the loading state while fetching section data and renders the complete section view once data is available."
+    },
+    "usage": "Status text displayed during section detail page data loading",
+    "impact": "Medium - provides user feedback during data loading to prevent confusion about page responsiveness",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Loading content",
+      "Please wait",
+      "Fetching data"
+    ]
+  },
+  "sectionDetail.overrideGrade.title": {
+    "context": "This title appears in a grading interface where instructors can manually adjust a student's automatically calculated grade for a specific section or assignment. The text likely appears as a modal header or form section title when an instructor chooses to override the system-generated grade with a custom value.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "A grading management component that allows instructors to manually override automatically calculated grades for student assignments or sections. This component provides the interface for grade adjustment functionality in the instructor dashboard."
+    },
+    "usage": "Translation key: sectionDetail.overrideGrade.title",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "sectionDetail.overrideGrade.student": {
+    "context": "This text appears as a label in the grade override interface within a section detail view, specifically identifying which student's grade is being modified. Instructors see this when they are manually adjusting or overriding a student's automatically calculated grade for a specific learning unit or assignment.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays detailed information about a learning section and provides instructors with grading management capabilities. It includes functionality for viewing student performance and manually overriding grades when necessary."
+    },
+    "usage": "Label text that precedes student identification information in the grade override form or display area.",
+    "impact": "Important because it clearly identifies which student's grade is being modified, preventing grading errors and ensuring instructors can accurately manage student assessments.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Learner:",
+      "Pupil:",
+      "Participant:",
+      "User:"
+    ]
+  },
+  "sectionDetail.overrideGrade.assignment": {
+    "context": "This label appears in the section detail view when an instructor is overriding grades for student assignments. It identifies the assignment being graded in a form or interface where instructors can manually adjust or enter grades for specific assignments.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays the section detail interface where instructors can view and manage student grades and assignments. It provides functionality for grade overrides and assignment management within a specific section of the course."
+    },
+    "usage": "Field label that identifies the assignment selection or display in a grade override form.",
+    "impact": "Important because it helps instructors identify which assignment they are grading or modifying, preventing errors in grade management.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Task:",
+      "Exercise:",
+      "Homework:",
+      "Activity:"
+    ]
+  },
+  "sectionDetail.overrideGrade.currentGrade": {
+    "context": "This text appears as a label in the grade override section of a learning unit or assignment detail view. Instructors see this when they are reviewing or manually adjusting a student's grade, where it displays the existing grade before any override is applied.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays detailed information about a section including grading functionality. It allows instructors to view and potentially override student grades within the context of a specific learning unit or assignment section."
+    },
+    "usage": "Label text that appears before displaying the current grade value in the grade override interface.",
+    "impact": "High - This label is essential for instructors to distinguish between the original grade and any override they might apply, preventing grading errors.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Existing Grade:",
+      "Original Grade:",
+      "Present Grade:",
+      "Current Score:"
+    ]
+  },
+  "sectionDetail.overrideGrade.noGrade": {
+    "context": "This text appears in the section detail grading interface when an instructor is reviewing student submissions but no grade has been assigned yet. It displays as a status indicator or placeholder where the grade value would normally appear, helping instructors identify ungraded assignments.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays section-specific details including student progress and grading interfaces for assignments within learning units. It allows instructors to view, evaluate, and override grades for individual student submissions."
+    },
+    "usage": "Status label displayed in grading interface when no grade has been assigned to a student submission.",
+    "impact": "High - Critical for instructors to quickly identify which assignments still need grading and understand the current grading status.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Ungraded",
+      "Not graded",
+      "Grade pending",
+      "No score"
+    ]
+  },
+  "sectionDetail.overrideGrade.prompt": {
+    "context": "This prompt text appears in a grade override dialog or modal when an instructor wants to manually adjust a student's grade for a specific section or assignment. The text is displayed as a label or instruction above an input field where the instructor can enter a new numerical grade value.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the section detail view where instructors can review student progress and manage grading for individual sections of learning content. It includes functionality for overriding automatically calculated grades with manual instructor input."
+    },
+    "usage": "Input field label prompting instructors to enter a numerical grade value between 0 and 100.",
+    "impact": "High - This text is critical for instructors to understand the expected format and range for grade input, ensuring accurate grade management.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Input new score",
+      "Set grade value",
+      "Override score",
+      "Modify grade"
+    ]
+  },
+  "sectionDetail.overrideGrade.label": {
+    "context": "This label appears in the section detail view when instructors are reviewing or grading student submissions. It identifies an input field or display area where instructors can manually override the automatically calculated grade by entering a percentage value.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays section-level details and grading information for instructors to review student progress and assignments. It provides functionality for instructors to view, assess, and potentially override grades for individual sections within learning units."
+    },
+    "usage": "Label text for a form input field where instructors enter grade percentage values",
+    "impact": "High - Essential for instructors to understand they can manually adjust grades and that the expected format is a percentage",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Score (%)",
+      "Mark (%)",
+      "Assessment (%)"
+    ]
+  },
+  "sectionDetail.overrideGrade.invalidScore": {
+    "context": "This error message appears when an instructor manually overrides a student's grade in the section detail view but enters an invalid score. The validation message displays immediately after the instructor inputs a score outside the acceptable range of 0-100 or enters non-numeric characters.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component manages the section detail view where instructors can review student progress and manually adjust grades. It includes form validation for grade override functionality to ensure data integrity."
+    },
+    "usage": "Error message displayed below a score input field when validation fails",
+    "impact": "High - prevents data corruption and guides instructors to enter correct grade values, which is essential for accurate student assessment records",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "valid grade",
+      "acceptable score",
+      "proper rating",
+      "correct points"
+    ]
+  },
+  "sectionDetail.overrideGrade.saveFailed": {
+    "context": "This error message appears when an instructor attempts to manually override a student's grade in the section detail view but the save operation fails due to network issues or database errors. The message displays prominently to inform the instructor that their grade override was not successfully saved and needs to be attempted again.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the section detail view where instructors can review student progress and manually override grades for assignments or activities. It provides grade management functionality with real-time data synchronization through AWS Amplify DataStore."
+    },
+    "usage": "Translation key: sectionDetail.overrideGrade.saveFailed",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "sectionDetail.overrideGrade.cancel": {
+    "context": "This text appears on a cancel button in the grade override dialog or form within the section detail page. Users see this when an instructor is manually adjusting a student's grade but decides to abandon the changes and close the override interface without saving.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the section detail page where instructors can view student progress and manage grading for specific learning sections. It includes functionality for overriding automatically calculated grades with manual adjustments when needed."
+    },
+    "usage": "Cancel button that abandons grade override changes and closes the override interface.",
+    "impact": "Important because it provides instructors with a safe way to exit grade modification without accidentally saving unintended changes.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Abort",
+      "Discard",
+      "Close",
+      "Exit"
+    ]
+  },
+  "sectionDetail.overrideGrade.save": {
+    "context": "This text appears on a save button in the section detail view when instructors are manually overriding or adjusting a student's grade. Users see this after making grade modifications and need to confirm their changes to persist them to the system.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the section detail interface where instructors can view student progress and make grade adjustments. It provides grade override functionality allowing instructors to manually modify automatically calculated grades when necessary."
+    },
+    "usage": "Save button text that instructors click to confirm and persist grade override changes.",
+    "impact": "Critical - This is essential for instructors to finalize grade adjustments and ensure student records are accurately updated in the system.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Save Changes",
+      "Confirm Grade",
+      "Update Grade",
+      "Apply Grade"
+    ]
+  },
+  "units.title": {
+    "context": "This text appears as a page title or main heading when users navigate to the units section of the eLearning platform. Users see this when viewing, managing, or browsing learning units that contain educational content like vocabulary lessons and quizzes.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the units page where instructors can create and manage learning units while students can view and access their assigned units. The page displays a collection of educational units with rich content including vocabulary, quizzes, and multimedia materials."
+    },
+    "usage": "Translation key: units.title",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "units.createNew": {
+    "context": "This text appears as a button or action element that instructors use to initiate the creation of a new learning unit. It is typically displayed prominently on the units management page or dashboard where instructors can view their existing units and choose to create additional content.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the units management interface where instructors can view, organize, and create new learning units for their Japanese language courses. The component provides navigation and action controls for unit management workflows."
+    },
+    "usage": "Translation key: units.createNew",
+    "impact": "Provides information to users",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Add New",
+      "Create Unit",
+      "New Unit",
+      "Start New"
+    ]
+  },
+  "units.noPublishedUnits": {
+    "context": "This message appears in the units overview section when an instructor has created learning units but none have been published yet. It displays as an empty state message in the units list view, helping instructors understand why no content is visible to students.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the units management page where instructors can view, create, and manage their learning units. It displays a list of published units or shows empty state messages when no published content is available."
+    },
+    "usage": "Translation key: units.noPublishedUnits",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "units.createNewUnit": {
+    "context": "This text appears as a call-to-action element for instructors when they are in the unit management section of the platform. It provides the option to create a new learning unit within a course or curriculum structure.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the unit management interface where instructors can view existing units and initiate the creation of new learning units. It serves as the entry point for instructors to begin building structured learning content with vocabulary, quizzes, and multimedia elements."
+    },
+    "usage": "Translation key: units.createNewUnit",
+    "impact": "Provides information to users",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Add New Unit",
+      "Build New Unit",
+      "Start New Unit",
+      "New Learning Unit"
+    ]
+  },
+  "units.publishedUnits": {
+    "context": "This text appears as a section heading or label on the units management page, specifically identifying the section that displays learning units that have been published and are available to students. Users see this when viewing or managing their published course content.",
+    "component": {
+      "location": "pages/units.js",
+      "description": "This is the units management page where instructors can view, organize, and manage their learning units. The page displays different categories of units including published ones that are live and accessible to students."
+    },
+    "usage": "Section heading or label that categorizes published learning units in the content management interface.",
+    "impact": "Important - This label helps instructors quickly identify which units are live and available to students, which is crucial for course management and content organization.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Live Units",
+      "Active Units",
+      "Available Units",
+      "Released Units"
+    ]
+  },
+  "units.untitledUnit": {
+    "context": "This text appears as a default placeholder name for newly created learning units that haven't been given a custom title by the instructor. Users see this label in unit lists, navigation menus, and editing interfaces when a unit exists but lacks a proper name.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the display and management of learning units within the platform. It shows unit titles in various contexts including course outlines, editing interfaces, and student navigation menus."
+    },
+    "usage": "Translation key: units.untitledUnit",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "units.viewWorkbook": {
+    "context": "This text appears as a clickable element that allows users to access and view a workbook associated with a learning unit. Users encounter this when browsing unit content or when they need to access supplementary materials and exercises within a specific unit.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders unit-related navigation and action elements on unit pages. It provides users with options to interact with unit content including accessing associated workbooks and supplementary materials."
+    },
+    "usage": "Translation key: units.viewWorkbook",
+    "impact": "High because this provides essential access to learning materials and workbook content that students need to complete their assignments",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Open Workbook",
+      "Access Workbook",
+      "See Workbook",
+      "Browse Workbook"
+    ]
+  },
+  "units.editUnit": {
+    "context": "This text appears as a button or link label when instructors are viewing their created learning units and want to modify unit content, settings, or structure. Users see this in unit management interfaces where they can access editing functionality for existing units.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders unit management interfaces where instructors can view, modify, and update their created learning units. It provides access to editing functionality for unit content, vocabulary, quizzes, and multimedia elements."
+    },
+    "usage": "Translation key: units.editUnit",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "units.myDrafts": {
+    "context": "This text appears as a navigation label or section heading that allows instructors to access their unpublished learning units. Users see this when they want to view and manage content they have created but not yet published to students.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays a collection or listing of draft learning units that instructors have created but not yet published. It provides access to incomplete or unpublished educational content for further editing and review."
+    },
+    "usage": "Translation key: units.myDrafts",
+    "impact": "High - This is essential for content creators to distinguish between published and draft content, directly affecting their workflow and content management.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Draft Content",
+      "Unpublished Units",
+      "Work in Progress",
+      "Saved Drafts"
+    ]
+  },
+  "units.archivedUnits": {
+    "context": "This text appears as a section heading or navigation label that identifies a collection of learning units that have been archived by instructors. Users see this when browsing through their course content to access previously archived educational materials that are no longer active but still available for reference.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays a page or section that lists archived learning units, allowing instructors and students to view and potentially restore previously active course content. It serves as an organizational tool to separate current active units from historical or completed ones while maintaining access to archived materials."
+    },
+    "usage": "Translation key: units.archivedUnits",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "unitDetail.loading": {
+    "context": "This loading message appears on the unit detail page while the system retrieves and renders unit content, including lessons, assignments, and associated media. Users see this text during the brief loading period when navigating to a specific learning unit or when the unit data is being synchronized from AWS Amplify DataStore.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays the detailed view of a learning unit, showing its content, structure, and associated resources to both instructors and students. It handles the loading state while fetching unit data and renders the complete unit interface once data is available."
+    },
+    "usage": "Translation key: unitDetail.loading",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "workbook.timerInstructions": {
+    "context": "This instructional text appears in workbook exercises that have time limits enabled. Students see this message before starting a timed quiz or assignment, informing them that they need to manually start the timer to begin the exercise.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component displays timed workbook exercises where students complete assignments within specified time limits. The component manages timer functionality and provides clear instructions before students begin their timed activities."
+    },
+    "usage": "Instructional text or label displayed above timed exercise content before the student activates the timer",
+    "impact": "High - Essential for students to understand they must manually start the timer and that the exercise is time-constrained, preventing confusion about exercise mechanics",
+    "userType": "students",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "timed activity",
+      "time-limited exercise",
+      "chronometer exercise",
+      "time-bound quiz"
+    ]
+  },
+  "workbook.start": {
+    "context": "This text appears on a start button that initiates a workbook session or assignment for students. Students see this when they are ready to begin working on their Japanese language learning exercises within a workbook unit.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component renders the workbook interface where students can access and complete their Japanese language learning assignments. It provides the entry point for students to begin their structured learning activities and exercises."
+    },
+    "usage": "Translation key: workbook.start",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  },
+  "workbook.loading": {
+    "context": "This loading message appears when users are waiting for a workbook to load, likely during the initial page render or when transitioning between workbook sections. Users see this text while the system retrieves workbook data from AWS Amplify DataStore or processes content for display.",
+    "component": {
+      "location": "src/components/pages",
+      "description": "This component handles the loading state for workbook pages, displaying feedback to users while workbook content, assignments, or learning materials are being fetched and rendered. It provides visual confirmation that the system is processing their request rather than being unresponsive."
+    },
+    "usage": "Translation key: workbook.loading",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": []
+  }
+}

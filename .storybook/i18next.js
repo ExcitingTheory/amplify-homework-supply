@@ -55,6 +55,7 @@ i18n
     lng: 'en',
     fallbackLng: 'en',
     debug: false,
+    saveMissing: true, // Enable missing key detection
     
     // Core namespaces (editor split into feature-based namespaces)
     ns: [
@@ -78,6 +79,19 @@ i18n
     react: {
       useSuspense: false, // Disable for Storybook compatibility
     },
+
+    // Emit custom events when missing keys are detected
+    missingKeyHandler: (lngs, namespace, key, fallbackValue) => {
+      const detail = { languages: lngs, namespace, key, fallbackValue };
+      console.debug('[i18next] Missing key:', `${namespace}:${key}`, 'for', lngs);
+      window.dispatchEvent(new CustomEvent('i18next-missing-key', { detail }));
+    },
   });
+
+// Emit custom event on language change so onboarding can detect it
+i18n.on('languageChanged', (lng) => {
+  console.debug('[i18next] Language changed to:', lng);
+  window.dispatchEvent(new CustomEvent('i18next-language-changed', { detail: { language: lng } }));
+});
 
 export default i18n;

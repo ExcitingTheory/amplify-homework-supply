@@ -1,10 +1,12 @@
-import React, { useContext, useState, useRef, useEffect } from 'react';
+import React, { useContext, useState, useRef, useEffect, useCallback } from 'react';
 import { Box, Tooltip, Typography } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { addons } from 'storybook/preview-api';
 import { TranslationModeContext } from '../contexts/TranslationModeContext';
 import { TranslationCaptureContext } from '../contexts/TranslationCaptureContext';
-import { loadTranslation, getTranslationValue } from '../utils/translationLoader';
+import { loadTranslation, loadMetadata, getTranslationValue } from '../utils/translationLoader';
+
+const NON_EN_LANGUAGES = ['ja', 'es', 'fr', 'zh', 'de'];
 
 export interface TranslationOverlayProps {
   tKey: string;
@@ -48,22 +50,26 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
     
     let isMounted = true;
     
-    async function loadMetadata() {
-      // Load English translation file to get full metadata
+    async function loadCaptureMetadata() {
+      // Load metadata from translation-cache .meta.json first, fall back to English locale file
+      const metaData = await loadMetadata('en', namespace);
+      const metaEntry = metaData?.[tKey];
+      
+      // Also load English translation value
       const enData = await loadTranslation('en', namespace);
-      const fullData = enData?.[tKey];
+      const enValue = getTranslationValue(enData, tKey);
       
       if (!isMounted) return;
       
-      // Extract metadata from the English translation file
-      const metadata = typeof fullData === 'object' && fullData !== null ? {
-        context: fullData.context || context,
-        component: fullData.component,
-        usage: fullData.usage,
-        impact: fullData.impact,
-        userType: fullData.userType,
-        tone: fullData.tone,
-        alternativeTerms: fullData.alternativeTerms,
+      // Prefer .meta.json metadata, fall back to inline locale data
+      const metadata = metaEntry ? {
+        context: metaEntry.context || context,
+        component: metaEntry.component,
+        usage: metaEntry.usage,
+        impact: metaEntry.impact,
+        userType: metaEntry.userType,
+        tone: metaEntry.tone,
+        alternativeTerms: metaEntry.alternativeTerms,
       } : {
         context,
       };
@@ -71,7 +77,7 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
       captureTranslation({
         key: tKey,
         namespace,
-        value: typeof fullData === 'object' && fullData !== null ? fullData.value : value,
+        value: enValue || value,
         defaultValue,
         usedIn: storyName ? [storyName] : undefined,
         ...metadata,
@@ -81,7 +87,7 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
       capturedRef.current = true;
     }
     
-    loadMetadata();
+    loadCaptureMetadata();
     
     return () => {
       isMounted = false;
@@ -115,16 +121,39 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
     };
   }, [displayLanguage, namespace, tKey]);
 
+  // Track translation availability across languages
+  const [missingLanguages, setMissingLanguages] = useState<string[]>([]);
+
+  // Check which languages are missing this key
+  const checkTranslationAvailability = useCallback(async () => {
+    const missing: string[] = [];
+    await Promise.all(
+      NON_EN_LANGUAGES.map(async (lang) => {
+        const data = await loadTranslation(lang, namespace);
+        const val = getTranslationValue(data, tKey);
+        if (!val) {
+          missing.push(lang);
+        }
+      })
+    );
+    setMissingLanguages(missing);
+  }, [namespace, tKey]);
+
+  useEffect(() => {
+    if (mode === 'off') return;
+    checkTranslationAvailability();
+  }, [mode, checkTranslationAvailability]);
+
   // Get the actual translated text to display
   const translation = getTranslation(tKey, namespace);
 
   if (mode === 'off') {
-    return <>{children}</>;
+    return <>{translatedText || children}</>;
   }
 
-  const hasAllTranslations = true; // TODO: Check if all languages have translations
-  const hasPartialTranslations = false; // TODO: Check if some languages are missing
-  const hasMissingTranslations = false; // TODO: Check if no translations exist
+  const hasMissingTranslations = missingLanguages.length === NON_EN_LANGUAGES.length;
+  const hasPartialTranslations = missingLanguages.length > 0 && !hasMissingTranslations;
+  const hasAllTranslations = missingLanguages.length === 0;
 
   const handleClick = (e: React.MouseEvent) => {
     // Allow normal click-through when holding Shift or Cmd/Ctrl
@@ -161,6 +190,9 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
   };
 
   const tooltipPath = `${namespace}.${tKey}`;
+  const missingLabel = missingLanguages.length > 0
+    ? `Missing: ${missingLanguages.join(', ').toUpperCase()}`
+    : 'All languages translated';
   
   const tooltipContent = (
     <Box
@@ -188,6 +220,17 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
           Edit: {tooltipPath}
         </Typography>
       </Box>
+      <Typography 
+        variant="caption" 
+        sx={{ 
+          fontSize: '0.65rem',
+          opacity: 0.85,
+          color: hasMissingTranslations ? 'error.light' : hasPartialTranslations ? 'warning.light' : 'success.light',
+          fontWeight: 600,
+        }}
+      >
+        {missingLabel}
+      </Typography>
       <Typography 
         variant="caption" 
         sx={{ 

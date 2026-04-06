@@ -18,6 +18,8 @@ export interface SpotlightStep {
   id: string;
   /** CSS selector for the element to highlight */
   targetSelector?: string;
+  /** Which frame to search for the target element: 'preview' (default) or 'manager' */
+  targetFrame?: 'preview' | 'manager';
   /** Manual position if no target selector */
   targetPosition?: {
     top: number;
@@ -165,19 +167,32 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
     }
 
     if (currentStep.targetSelector) {
-      // Find element in the iframe (Storybook preview) or main window
+      // Determine which document to search based on targetFrame
       const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
-      const targetDoc = iframe?.contentDocument || document;
-      const targetElement = targetDoc.querySelector(currentStep.targetSelector);
+      let targetDoc: Document;
+      let targetElement: Element | null;
+      let isManagerFrame = false;
 
-      console.log('[SpotlightOverlay] Looking for selector:', currentStep.targetSelector);
+      if (currentStep.targetFrame === 'manager') {
+        // Search in the manager (parent) document
+        targetDoc = document;
+        targetElement = document.querySelector(currentStep.targetSelector);
+        isManagerFrame = true;
+      } else {
+        // Default: search in the preview iframe
+        targetDoc = iframe?.contentDocument || document;
+        targetElement = targetDoc.querySelector(currentStep.targetSelector);
+        isManagerFrame = !iframe?.contentDocument;
+      }
+
+      console.log('[SpotlightOverlay] Looking for selector:', currentStep.targetSelector, 'in', isManagerFrame ? 'manager' : 'preview');
       console.log('[SpotlightOverlay] Element found:', !!targetElement);
 
       if (targetElement) {
         const rect = targetElement.getBoundingClientRect();
         
-        // Adjust for iframe offset if element is in iframe
-        if (iframe) {
+        // Adjust for iframe offset only if element is in the preview iframe
+        if (iframe && !isManagerFrame) {
           const iframeRect = iframe.getBoundingClientRect();
           setTargetRect(new DOMRect(
             rect.left + iframeRect.left,
@@ -193,7 +208,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
           });
         } else {
           setTargetRect(rect);
-          console.log('[SpotlightOverlay] Target rect:', {
+          console.log('[SpotlightOverlay] Target rect (manager):', {
             left: rect.left,
             top: rect.top,
             width: rect.width,
@@ -561,7 +576,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
                     color: 'inherit',
                     p: 0.5,
                   }}
-                  ariaLabel="Close spotlight guide"
+                  aria-label="Close spotlight guide"
                 >
                   <CloseIcon fontSize="small" />
                 </Button>
@@ -622,7 +637,6 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
                   onClick={onSkip}
                   startIcon={<SkipNextIcon />}
                   sx={{ textTransform: 'none' }}
-                  ariaLabel={false}
                 >
                   Skip
                 </Button>
@@ -639,7 +653,6 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
                       backgroundColor: mode === 'tutorial' ? '#45a049' : '#1976D2',
                     },
                   }}
-                  ariaLabel={false}
                 >
                   {isLastStep ? 'Complete' : 'Next'}
                 </Button>

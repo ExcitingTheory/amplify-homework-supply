@@ -1,0 +1,1084 @@
+{
+  "actions.add": {
+    "alternativeTerms": [
+      "Create",
+      "Insert",
+      "Append",
+      "Include"
+    ],
+    "component": {
+      "description": "This appears to be a reusable common component that provides standardized add functionality across multiple areas of the platform. The component likely renders as buttons, links, or interactive elements that trigger creation or insertion actions in various contexts throughout the application.",
+      "location": "src/components/common"
+    },
+    "context": "This generic 'Add' action appears throughout the eLearning platform in various forms and buttons where users need to create or insert new content, items, or elements. Users encounter this text when they want to add vocabulary words, create new learning units, insert media elements, or append any new data to existing collections.",
+    "impact": "High - This is a fundamental action word that enables core platform functionality for both instructors creating content and students potentially adding responses or notes.",
+    "tone": "polite-formal",
+    "usage": "Generic action button or link text that triggers content creation or item addition functionality.",
+    "userType": "all"
+  },
+  "actions.back": {
+    "alternativeTerms": [
+      "Return",
+      "Previous",
+      "Go Back"
+    ],
+    "component": {
+      "description": "A common navigation component used throughout the platform to provide consistent backward navigation functionality. This component appears in various contexts where users need to return to a previous state or screen.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a navigation action that allows users to return to the previous screen or step in their workflow. Users encounter this when navigating through multi-step processes like content creation, assignment completion, or settings configuration.",
+    "impact": "High - Essential for user navigation and prevents users from getting stuck in workflows",
+    "tone": "polite-formal",
+    "usage": "Navigation button or link that takes users to the previous screen or step",
+    "userType": "all"
+  },
+  "actions.cancel": {
+    "alternativeTerms": [
+      "Abort",
+      "Dismiss",
+      "Close",
+      "Back"
+    ],
+    "component": {
+      "description": "The MainToolbar component provides the primary navigation and action controls at the top of the application interface. It displays essential buttons and controls that users interact with for core platform functions like creating, editing, and managing learning content.",
+      "location": "components/MainToolbar.js"
+    },
+    "context": "This text appears on a cancel button within the main toolbar interface, allowing users to abandon or exit their current action. Users see this when they need to back out of operations like creating content, editing assignments, or making changes without saving.",
+    "impact": "High - This is essential for user experience as it provides a safe way to exit operations without consequences",
+    "tone": "polite-formal",
+    "usage": "Button text that allows users to abort their current operation and return to the previous state",
+    "userType": "all"
+  },
+  "actions.clear": {
+    "alternativeTerms": [
+      "Reset",
+      "Empty",
+      "Erase",
+      "Remove"
+    ],
+    "component": {
+      "description": "This is likely a reusable action component that provides clearing functionality across various forms and interfaces. It appears in multiple contexts where users need to reset or empty content they have entered or selected.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a button or link label that allows users to clear form fields, search results, or reset content to an empty state. It is commonly found in search bars, form controls, and content editing interfaces throughout the platform.",
+    "impact": "Medium - Essential for user control and form usability, allowing users to quickly reset their inputs without manually deleting content.",
+    "tone": "polite-formal",
+    "usage": "Button or clickable link that triggers clearing of input fields or resetting interface elements.",
+    "userType": "all"
+  },
+  "actions.close": {
+    "alternativeTerms": [
+      "Dismiss",
+      "Cancel",
+      "Exit",
+      "Done"
+    ],
+    "component": {
+      "description": "A reusable close button component used across modal dialogs, notifications, and overlay interfaces. This component provides a consistent way for users to dismiss UI elements and return to the main interface.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears on close buttons throughout the platform, allowing users to dismiss modal dialogs, popups, sidebars, and overlay components. Users see this when they need to exit or cancel out of various interface elements without saving changes.",
+    "impact": "High - Essential for navigation and user control, allowing users to exit interfaces and maintain workflow",
+    "tone": "polite-formal",
+    "usage": "Button label for dismissing modal dialogs, popups, and overlay components",
+    "userType": "all"
+  },
+  "actions.confirm": {
+    "alternativeTerms": [
+      "Accept",
+      "Proceed",
+      "Approve",
+      "Submit"
+    ],
+    "component": {
+      "description": "This is likely a reusable confirmation button or modal component used across multiple features in the platform. The component handles user confirmations for various actions and maintains consistent UI patterns throughout the application.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears on confirmation buttons and dialogs throughout the platform when users need to verify their actions. Users see this when confirming content creation, assignment submission, grade finalization, or any other action that requires explicit user approval before proceeding.",
+    "impact": "Critical - this is essential for users to complete key platform actions and provides necessary control over important decisions",
+    "tone": "polite-formal",
+    "usage": "Translation key: actions.confirm",
+    "userType": "all"
+  },
+  "actions.continue": {
+    "alternativeTerms": [
+      "Proceed",
+      "Next",
+      "Move Forward",
+      "Advance"
+    ],
+    "component": {
+      "description": "A reusable button component that handles forward navigation and progression actions across the platform. This component is likely used in various workflows where users need to advance to the next step, complete an action, or proceed with their learning journey.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears on action buttons throughout the eLearning platform when users need to proceed to the next step in a multi-step process. Users encounter this during lesson navigation, quiz progression, assignment submission workflows, and onboarding sequences where they need to advance forward after completing a current step.",
+    "impact": "High",
+    "tone": "polite-formal",
+    "usage": "Action button that triggers forward progression in workflows and multi-step processes.",
+    "userType": "all"
+  },
+  "actions.copy": {
+    "alternativeTerms": [
+      "Duplicate",
+      "Clone",
+      "Replicate"
+    ],
+    "component": {
+      "description": "A reusable copy action component that allows users to copy various types of content to their clipboard. The component likely provides visual feedback when the copy operation is successful and handles different data types across the platform.",
+      "location": "src/components/common/CopyButton.js"
+    },
+    "context": "This text appears on copy buttons or actions throughout the platform where users can duplicate content to their clipboard. Users see this when interacting with shareable links, code snippets, text content, or assignment URLs that need to be copied for sharing or reference purposes.",
+    "impact": "Medium - Essential for content sharing and workflow efficiency, but not critical for core learning functions.",
+    "tone": "polite-formal",
+    "usage": "Button or icon label for clipboard copy functionality that users click to duplicate content.",
+    "userType": "all"
+  },
+  "actions.create": {
+    "alternativeTerms": [
+      "Add",
+      "New",
+      "Build",
+      "Generate"
+    ],
+    "component": {
+      "description": "This is a common UI component that provides a standardized create action across multiple sections of the platform. It serves as a primary call-to-action button for content creation workflows used by instructors and potentially administrators.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears on action buttons throughout the eLearning platform when users need to create new content or entities. Users see this label when initiating the creation of learning units, assignments, quizzes, vocabulary sets, or other educational content.",
+    "impact": "Provides information to users",
+    "tone": "polite-formal",
+    "usage": "Translation key: actions.create",
+    "userType": "instructors"
+  },
+  "actions.delete": {
+    "alternativeTerms": [
+      "Remove",
+      "Erase",
+      "Destroy",
+      "Eliminate"
+    ],
+    "component": {
+      "description": "A reusable delete action component that renders buttons or menu items for content removal operations. This component likely handles confirmation flows and triggers deletion logic across various sections of the platform.",
+      "location": "src/components/common/ActionButton.js"
+    },
+    "context": "This text appears on delete action buttons and confirmation dialogs throughout the platform whenever users need to permanently remove items. Users see this when they want to delete learning units, assignments, media files, user accounts, or other content they have created or manage.",
+    "impact": "Critical - This action is irreversible and users must clearly understand they are permanently removing content",
+    "tone": "polite-formal",
+    "usage": "Button text or menu item label that users click to initiate deletion of content or data",
+    "userType": "all"
+  },
+  "actions.download": {
+    "alternativeTerms": [
+      "Save",
+      "Export",
+      "Get",
+      "Retrieve"
+    ],
+    "component": {
+      "description": "A reusable download component that provides file download functionality across different sections of the platform. This component handles various file types including PDFs, audio files, images, and other learning materials that users need to access locally.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears on download buttons and links throughout the platform where users can save files, content, or resources to their device. It is commonly seen in content libraries, assignment sections, and resource downloads where instructors and students need to access materials offline.",
+    "impact": "Provides information to users",
+    "tone": "polite-formal",
+    "usage": "Translation key: actions.download",
+    "userType": "all"
+  },
+  "actions.edit": {
+    "alternativeTerms": [
+      "Modify",
+      "Update",
+      "Change",
+      "Revise"
+    ],
+    "component": {
+      "description": "This is a common component used across multiple interface elements to provide editing functionality. It appears in various contexts where users need to modify existing content or settings.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a generic edit action label throughout the platform interface. Users see this when they have permission to modify content, assignments, or settings in various sections of the eLearning platform.",
+    "impact": "High - Essential for content management and user control over their data",
+    "tone": "polite-formal",
+    "usage": "Button or link text that triggers edit mode for content modification",
+    "userType": "all"
+  },
+  "actions.finish": {
+    "alternativeTerms": [
+      "Complete",
+      "Submit",
+      "Done",
+      "Finalize"
+    ],
+    "component": {
+      "description": "A reusable action component that provides completion functionality across various learning modules and workflows. This component handles final submission states and completion confirmations for both student assignments and instructor content management tasks.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears on completion buttons or actions when users reach the end of a learning activity, quiz, or multi-step process. Students see this when they are ready to submit their final answers or complete an assignment, while instructors see it when finalizing content creation or grading workflows.",
+    "impact": "High - This is a key action word that signals task completion and must be clearly understood to ensure users can successfully submit their work or finalize their activities.",
+    "tone": "polite-formal",
+    "usage": "Button text for final submission or completion actions in learning activities and administrative tasks.",
+    "userType": "all"
+  },
+  "actions.next": {
+    "alternativeTerms": [
+      "Continue",
+      "Proceed",
+      "Forward",
+      "Advance"
+    ],
+    "component": {
+      "description": "A reusable navigation component that provides forward progression functionality across various UI contexts. This component likely handles state management and routing to advance users through sequential content or processes.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears on navigation buttons throughout the eLearning platform to help users proceed to the next step, page, or content item. Users encounter this action label when progressing through learning units, quiz questions, setup wizards, or multi-step forms.",
+    "impact": "Critical because this is essential navigation text that enables users to progress through core learning workflows and platform functionality",
+    "tone": "polite-formal",
+    "usage": "Translation key: actions.next",
+    "userType": "all"
+  },
+  "actions.remove": {
+    "alternativeTerms": [
+      "Delete",
+      "Erase",
+      "Clear",
+      "Eliminate"
+    ],
+    "component": {
+      "description": "This appears to be a reusable action component used across multiple UI elements for deletion or removal operations. It likely provides consistent styling and behavior for remove actions throughout the platform's interface.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a button or action label throughout the platform when users need to delete or remove items from lists, forms, or collections. Users see this when managing content like removing vocabulary words from lists, deleting quiz questions, removing students from classes, or clearing uploaded media files.",
+    "impact": "Important - This is a destructive action label that users must understand clearly to avoid accidentally deleting content or losing data",
+    "tone": "polite-formal",
+    "usage": "Button or action link text that triggers deletion or removal of an item when clicked",
+    "userType": "all"
+  },
+  "actions.reset": {
+    "alternativeTerms": [
+      "Clear",
+      "Restore",
+      "Revert",
+      "Start Over"
+    ],
+    "component": {
+      "description": "A reusable action component that provides reset functionality across different UI elements in the platform. This component is used in forms, filters, settings panels, and other interactive elements where users need to revert changes or clear current selections.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears on reset buttons throughout the platform's common UI components, allowing users to clear forms, restore default settings, or return elements to their initial state. Users encounter this action in various contexts such as clearing search filters, resetting form fields, or restoring component configurations.",
+    "impact": "Important - Essential for user control and form usability, allowing users to easily correct mistakes or start over without navigating away from their current task.",
+    "tone": "polite-formal",
+    "usage": "Button or interactive element that triggers a reset action to clear or restore default values.",
+    "userType": "all"
+  },
+  "actions.retry": {
+    "alternativeTerms": [
+      "Try Again",
+      "Reattempt",
+      "Repeat",
+      "Redo"
+    ],
+    "component": {
+      "description": "A common retry button component used across the platform for error recovery scenarios. This component provides users with a way to re-attempt failed operations such as content loading, assignment submissions, or AI-powered features.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears on retry buttons throughout the eLearning platform when operations fail or need to be attempted again. Users encounter this when network requests fail, AI features timeout, or other system errors occur that can be resolved by trying the action again.",
+    "impact": "High - Essential for user experience as it provides error recovery and prevents users from getting stuck when temporary failures occur",
+    "tone": "polite-formal",
+    "usage": "Button text that triggers re-execution of a previously failed action",
+    "userType": "all"
+  },
+  "actions.save": {
+    "alternativeTerms": [
+      "Store",
+      "Preserve",
+      "Keep",
+      "Submit"
+    ],
+    "component": {
+      "description": "This is a shared component containing common UI elements and actions used across multiple features in the platform. It provides standardized interface elements like buttons, forms, and action triggers that maintain consistency throughout the user experience.",
+      "location": "src/components/common"
+    },
+    "context": "This generic \"Save\" label appears throughout the eLearning platform on various save buttons and form submission elements. Users encounter this text when completing any action that requires saving data, such as creating learning units, updating user profiles, submitting quiz answers, or saving progress on assignments.",
+    "impact": "Critical - this is one of the most essential interface elements as users must be able to clearly understand how to save their work and progress throughout the platform.",
+    "tone": "polite-formal",
+    "usage": "Primary action button label that triggers saving functionality when clicked by users.",
+    "userType": "all"
+  },
+  "actions.send": {
+    "alternativeTerms": [],
+    "component": {
+      "description": "This appears to be part of a reusable action component or button library used across multiple areas of the platform. The component likely handles various submission actions and provides consistent UI patterns for sending data or messages throughout the application.",
+      "location": "src/components/common"
+    },
+    "context": "This action label appears on buttons throughout the platform when users need to submit or transmit information, such as sending messages, submitting forms, or delivering content. Users encounter this text in various contexts including chat interfaces, contact forms, assignment submissions, and communication features.",
+    "impact": "Provides information to users",
+    "tone": "polite-formal",
+    "usage": "Translation key: actions.send",
+    "userType": "all"
+  },
+  "actions.share": {
+    "alternativeTerms": [
+      "Distribute",
+      "Send",
+      "Forward",
+      "Publish"
+    ],
+    "component": {
+      "description": "A reusable share component that provides sharing functionality across different areas of the platform. This component likely handles various sharing methods including social media integration, email sharing, and link copying for course materials and user-generated content.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears on share buttons throughout the eLearning platform, allowing users to share content, assignments, or learning materials with others. Users encounter this action when they want to distribute course content, student work, or platform resources via social media, email, or direct links.",
+    "impact": "Provides information to users",
+    "tone": "polite-formal",
+    "usage": "Translation key: actions.share",
+    "userType": "all"
+  },
+  "actions.submit": {
+    "alternativeTerms": [
+      "Send",
+      "Confirm",
+      "Save",
+      "Complete"
+    ],
+    "component": {
+      "description": "This is part of common UI components used throughout the platform for standardized submit actions. The component likely handles form submissions and user confirmations across multiple features like assignment completion, content creation, and user profile updates.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears on submit buttons throughout the platform when users need to finalize an action or save their input. Users see this when completing forms, submitting assignments, saving lesson content, or confirming various operations across the eLearning interface.",
+    "impact": "Critical - this is essential for users to complete any action on the platform and must be clearly understood to ensure proper functionality.",
+    "tone": "polite-formal",
+    "usage": "Translation key: actions.submit",
+    "userType": "all"
+  },
+  "actions.update": {
+    "alternativeTerms": [
+      "Save",
+      "Apply",
+      "Modify",
+      "Revise"
+    ],
+    "component": {
+      "description": "This is likely a reusable button or action component used across multiple forms and editing interfaces. The component provides consistent styling and behavior for update operations throughout the platform.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears on buttons throughout the platform when users need to save changes to existing content or data. Users see this when editing profiles, modifying learning units, updating assignment settings, or making changes to any existing platform content.",
+    "impact": "Critical - this is essential for users to save their work and changes across all platform features",
+    "tone": "polite-formal",
+    "usage": "Translation key: actions.update",
+    "userType": "all"
+  },
+  "actions.upload": {
+    "alternativeTerms": [
+      "Add Files",
+      "Import",
+      "Attach",
+      "Submit Files"
+    ],
+    "component": {
+      "description": "This is a common action component used across multiple areas of the platform for file upload functionality. It provides a consistent interface for users to add various types of media, documents, and content to the learning management system.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears on buttons and actions throughout the platform where users can upload files, media, or content. It is prominently displayed when instructors add materials to learning units or when students submit assignments, appearing as a clickable element that initiates the file selection dialog.",
+    "impact": "Provides information to users",
+    "tone": "polite-formal",
+    "usage": "Translation key: actions.upload",
+    "userType": "all"
+  },
+  "app.name": {
+    "alternativeTerms": [
+      "Assignment Hub",
+      "Study Supply",
+      "Learning Platform",
+      "Educational Resources"
+    ],
+    "component": {
+      "description": "Common component that displays the application branding and name across multiple UI contexts. This component ensures consistent presentation of the platform identity throughout the user interface.",
+      "location": "src/components/common"
+    },
+    "context": "This is the primary application name that appears throughout the platform interface, including the browser title, main navigation header, and authentication screens. Users see this text consistently across all pages as the core brand identifier for the eLearning platform.",
+    "impact": "Critical - This is the core brand identity that users rely on to identify and navigate the platform.",
+    "tone": "polite-formal",
+    "usage": "Application title displayed in headers, page titles, and branding elements throughout the platform.",
+    "userType": "all"
+  },
+  "app.tagline": {
+    "alternativeTerms": [
+      "Japanese Learning System",
+      "Japanese Study Platform",
+      "Japanese Education Portal",
+      "Japanese Language Learning Hub"
+    ],
+    "component": {
+      "description": "This is likely a header or hero component that displays the main branding and descriptive text for the platform. The component appears across multiple pages to maintain consistent messaging about the platform's identity and purpose.",
+      "location": "src/components/common"
+    },
+    "context": "This tagline appears prominently on the platform's main landing page and header areas to identify and describe the core purpose of the Homework Supply application. Users see this text when first visiting the platform or navigating to the home page, serving as the primary descriptor of what the platform offers.",
+    "impact": "High - This tagline is crucial for immediately communicating the platform's purpose and helping users understand they are in the right place for Japanese language learning",
+    "tone": "polite-formal",
+    "usage": "Translation key: app.tagline",
+    "userType": "all"
+  },
+  "common.about": {
+    "alternativeTerms": [
+      "Information",
+      "Details",
+      "Overview",
+      "Platform Info"
+    ],
+    "component": {
+      "description": "This is a reusable common component that provides navigation or informational links across multiple pages of the platform. It appears consistently in shared UI elements like headers, footers, or navigation menus to maintain platform-wide consistency.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears in common UI navigation elements throughout the eLearning platform, typically in main navigation menus, footer sections, or sidebar links. Users encounter this when exploring platform information or seeking details about the Homework Supply service and its features.",
+    "impact": "Provides information to users",
+    "tone": "polite-formal",
+    "usage": "Translation key: common.about",
+    "userType": "all"
+  },
+  "common.filter": {
+    "alternativeTerms": [
+      "Sort",
+      "Refine",
+      "Search",
+      "Select"
+    ],
+    "component": {
+      "description": "This is a reusable common component that provides filtering functionality across multiple sections of the platform. Users interact with this component whenever they need to sort, categorize, or narrow down displayed content based on specific criteria.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a standard filter control label throughout the platform wherever users need to narrow down displayed content or search results. It is commonly seen in content lists, assignment libraries, vocabulary sections, and administrative dashboards where filtering capabilities help users find specific items.",
+    "impact": "High - Essential for content discoverability and platform navigation, especially important as course content and assignments scale up",
+    "tone": "polite-formal",
+    "usage": "Button or dropdown label that triggers filtering options when clicked",
+    "userType": "all"
+  },
+  "common.help": {
+    "alternativeTerms": [
+      "Support",
+      "Assistance",
+      "Documentation"
+    ],
+    "component": {
+      "description": "A common UI component that provides access to help resources, documentation, or support features. This component is likely reused across multiple areas of the platform to maintain consistent help access patterns.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a help or support option throughout the platform, typically in navigation menus, headers, or as standalone buttons/links. Users see this when they need assistance with platform features, content creation, or technical issues.",
+    "impact": "High - Essential for user support and platform adoption, especially critical for users learning new features or troubleshooting issues.",
+    "tone": "polite-formal",
+    "usage": "Navigation link or button that opens help documentation or support resources.",
+    "userType": "all"
+  },
+  "common.no": {
+    "alternativeTerms": [
+      "Decline",
+      "Reject",
+      "Cancel",
+      "Disagree"
+    ],
+    "component": {
+      "description": "This common component provides standardized negative response options across various UI elements including dialogs, buttons, and form controls. It ensures consistent user experience for declining or rejecting actions throughout the eLearning platform.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a negative response option in confirmation dialogs, modal windows, and form submissions throughout the platform. Users see this when they need to decline actions like deleting content, canceling operations, or responding to yes/no questions in quizzes and surveys.",
+    "impact": "Critical because users must clearly understand how to decline actions, cancel operations, or provide negative responses in assessments.",
+    "tone": "polite-formal",
+    "usage": "Button text, dialog option, or form control label for declining or rejecting an action.",
+    "userType": "all"
+  },
+  "common.ok": {
+    "alternativeTerms": [
+      "Confirm",
+      "Accept",
+      "Continue",
+      "Proceed"
+    ],
+    "component": {
+      "description": "Common UI component that renders confirmation buttons and dialog actions across the platform. This component is used in various modal dialogs, alert messages, and confirmation screens where users need to acknowledge or proceed with an action.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a confirmation button label in modal dialogs, alert boxes, and confirmation popups throughout the eLearning platform. Users see this when they need to acknowledge a message, confirm an action, or close a dialog after completing a task.",
+    "impact": "High - This is a fundamental UI element that users interact with frequently to navigate and confirm actions throughout the platform.",
+    "tone": "polite-formal",
+    "usage": "Button label for confirming actions or acknowledging messages in dialog boxes.",
+    "userType": "all"
+  },
+  "common.search": {
+    "alternativeTerms": [
+      "Find",
+      "Look for",
+      "Locate",
+      "Browse"
+    ],
+    "component": {
+      "description": "This is likely a reusable search component that provides search functionality across different sections of the platform. It appears in various contexts where users need to locate specific learning materials or platform content.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a label or placeholder text for search input fields throughout the eLearning platform. Users see this when they need to find specific content, courses, vocabulary items, or other platform resources.",
+    "impact": "High - This is essential for platform navigation and content discovery, directly affecting user ability to find learning materials efficiently.",
+    "tone": "polite-formal",
+    "usage": "Input field placeholder text or search button label that users interact with to initiate searches.",
+    "userType": "all"
+  },
+  "common.settings": {
+    "alternativeTerms": [
+      "Configuration",
+      "Preferences",
+      "Options",
+      "Account Settings"
+    ],
+    "component": {
+      "description": "This is likely a reusable navigation or menu component that provides access to user configuration options. The component appears across multiple pages and user interfaces to maintain consistent access to settings functionality.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a navigation label or menu item that allows users to access configuration and preference options throughout the eLearning platform. Users typically see this in navigation menus, header bars, or as a standalone link to access their account settings, notification preferences, or platform customization options.",
+    "impact": "High - This is essential for platform usability as users need clear access to customize their learning experience, notification preferences, and account configurations.",
+    "tone": "polite-formal",
+    "usage": "Navigation menu item or button that users click to access configuration options.",
+    "userType": "all"
+  },
+  "common.sort": {
+    "alternativeTerms": [
+      "Order",
+      "Arrange",
+      "Organize"
+    ],
+    "component": {
+      "description": "This is a reusable sorting component that provides data ordering functionality across multiple sections of the platform. It appears in various contexts where users need to organize lists of content, assignments, or other educational materials by different criteria.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a sorting control in lists and tables throughout the eLearning platform, allowing users to arrange content in different orders. Users see this when viewing collections of learning materials, student assignments, vocabulary lists, or other organized data that can be reordered.",
+    "impact": "Medium - Essential for content organization and navigation, helping users find and arrange educational materials efficiently",
+    "tone": "polite-formal",
+    "usage": "Button or dropdown control that triggers sorting options for data lists",
+    "userType": "all"
+  },
+  "common.view": {
+    "alternativeTerms": [
+      "See",
+      "Display",
+      "Show",
+      "Open"
+    ],
+    "component": {
+      "description": "This is a shared component used across multiple areas of the platform to provide consistent viewing functionality. It enables users to access detailed information or content by triggering navigation to expanded views or modal dialogs.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a generic action label throughout the platform interface when users can access, examine, or display specific content or information. It is commonly used in buttons, links, and menu items that allow users to navigate to detailed views of assignments, learning units, student progress, or other platform elements.",
+    "impact": "High - This is a fundamental navigation action that enables users to access and review essential platform content and information.",
+    "tone": "polite-formal",
+    "usage": "Generic action button or link that opens detailed content views when clicked.",
+    "userType": "all"
+  },
+  "common.yes": {
+    "alternativeTerms": [
+      "Affirmative",
+      "Confirm",
+      "Accept",
+      "OK"
+    ],
+    "component": {
+      "description": "This appears to be part of a shared common components library that provides reusable UI elements across the platform. The component likely handles standard user confirmation interactions and decision-making workflows that are used consistently throughout the application.",
+      "location": "src/components/common"
+    },
+    "context": "This is a universal affirmative response text that appears throughout the platform in confirmation dialogs, forms, and decision-making interfaces. Users encounter this text when confirming actions like saving content, submitting assignments, accepting terms, or responding to yes/no questions in quizzes and system prompts.",
+    "impact": "Critical - Essential for user confirmation workflows and platform navigation, as users need clear affirmative options to complete actions.",
+    "tone": "polite-formal",
+    "usage": "Confirmation button or selection option for affirmative user responses in dialogs and forms.",
+    "userType": "all"
+  },
+  "mainToolbar.addToSection.add": {
+    "context": "This text appears on a button in the main toolbar interface when users are in the process of adding content to a specific section. Users see this text as the final confirmation action after selecting content items they want to add to a learning unit section.",
+    "component": {
+      "location": "src/components/MainToolbar.jsx",
+      "description": "MainToolbar is a primary navigation and action component that provides key functionality across the platform. It contains action buttons and controls that allow users to perform common tasks like adding content, managing sections, and accessing platform features."
+    },
+    "usage": "Button text for confirming the addition of selected content to a learning section",
+    "impact": "High - This is a primary action button that enables the core content creation workflow for instructors building learning units",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Insert",
+      "Include",
+      "Append",
+      "Attach"
+    ]
+  },
+  "mainToolbar.addToSection.codeLabel": {
+    "context": "This text appears as a label in the MainToolbar component, specifically within the 'addToSection' functionality where users can add coded elements or programming content to learning sections. Users see this when they are adding structured code blocks or labeled code snippets to their educational content.",
+    "component": {
+      "location": "src/components/MainToolbar.jsx",
+      "description": "MainToolbar is a primary navigation and content creation toolbar that provides instructors with tools to add various content types to learning sections. It appears when users are actively creating or editing educational content and need quick access to content insertion options."
+    },
+    "usage": "Label text for a code insertion or code labeling feature within the content creation toolbar.",
+    "impact": "Medium - Important for instructors who need to add programming content or code examples to Japanese language learning materials, though not critical for basic platform functionality.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Code Title",
+      "Code Caption",
+      "Programming Label",
+      "Code Identifier"
+    ]
+  },
+  "mainToolbar.addToSection.description": {
+    "context": "This text appears as a form field label in the MainToolbar component when instructors are adding content to a learning section. Users see this label when they are in the content creation workflow, specifically when prompted to provide descriptive information about the section or content they are adding.",
+    "component": {
+      "location": "src/components/MainToolbar.jsx",
+      "description": "The MainToolbar component provides primary navigation and content creation tools for instructors. It displays when users are actively creating or editing learning materials and includes various action buttons and form fields for content management."
+    },
+    "usage": "Form field label that prompts instructors to enter descriptive text about the section content they are adding.",
+    "impact": "Important because it guides instructors to provide essential metadata that helps students understand the purpose and content of each learning section.",
+    "userType": "instructors",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Summary",
+      "Details",
+      "Information",
+      "Overview"
+    ]
+  },
+  "mainToolbar.addToSection.title": {
+    "context": "This text appears as a field label or column header within the 'Add to Section' dialog or modal in the main toolbar. Users see this when they are organizing or adding content items to course sections and need to specify or view the title of the content being added.",
+    "component": {
+      "location": "src/components/MainToolbar.jsx",
+      "description": "MainToolbar is the primary navigation and action bar component that provides quick access to content creation and organization features. It displays essential tools and controls that instructors use frequently when building and managing their course content."
+    },
+    "usage": "Field label or column header identifying where users enter or view the title of content being added to a section.",
+    "impact": "High - This label is essential for content organization as it helps instructors identify and properly title their learning materials within course sections.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Name",
+      "Heading",
+      "Label",
+      "Caption"
+    ]
+  },
+  "mainToolbar.help": {
+    "context": "This text appears as a clickable element in the main toolbar that is visible across all pages of the eLearning platform. Users see this help option consistently in the top navigation area to access assistance, documentation, or support resources whenever they need guidance while using the platform.",
+    "component": {
+      "location": "src/components/MainToolbar.jsx",
+      "description": "The MainToolbar component renders the primary navigation bar that appears at the top of the application interface. It provides users with quick access to essential platform features and support options that remain consistently available throughout their learning or teaching session."
+    },
+    "usage": "Navigation button or link that users click to access help documentation or support resources.",
+    "impact": "High - Essential for user support and platform usability, especially important for new users learning to navigate the elearning platform.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Support",
+      "Assistance",
+      "Documentation",
+      "Guide"
+    ]
+  },
+  "mainToolbar.settings.darkMode": {
+    "context": "This text appears as a toggle option within the settings menu of the main application toolbar, allowing users to switch between light and dark visual themes. Users see this when they click on the settings icon in the main toolbar and want to customize their visual experience.",
+    "component": {
+      "location": "src/components/MainToolbar.jsx",
+      "description": "The MainToolbar component provides the primary navigation and settings interface that appears at the top of the application across all pages. It contains essential controls and settings options that users can access from anywhere in the platform."
+    },
+    "usage": "Toggle switch or checkbox label that allows users to enable dark mode theme.",
+    "impact": "Medium - Enhances user experience by providing visual customization options that can reduce eye strain and improve accessibility.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Night Mode",
+      "Dark Theme",
+      "Low Light Mode"
+    ]
+  },
+  "mainToolbar.settings.disableNotifications": {
+    "context": "This text appears as an option in the settings menu of the main toolbar, allowing users to control their notification preferences. Users see this when they access the settings dropdown from the main navigation toolbar to customize their platform experience.",
+    "component": {
+      "location": "src/components/MainToolbar.jsx",
+      "description": "The MainToolbar component provides the primary navigation and control interface at the top of the platform. It contains essential user actions, settings access, and global controls that remain consistent across different platform views."
+    },
+    "usage": "Settings menu option or toggle control that users can select to turn off platform notifications.",
+    "impact": "Medium - Important for user experience customization as it allows users to control interruptions and manage their learning environment preferences.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Turn Off Notifications",
+      "Mute Notifications",
+      "Stop Notifications",
+      "Silence Alerts"
+    ]
+  },
+  "mainToolbar.settings.experimentalFeatures": {
+    "context": "This text appears as a menu item or section header in the main toolbar's settings dropdown, allowing users to access beta or preview features that are still in development. Users see this when they open the settings menu from the main navigation toolbar.",
+    "component": {
+      "location": "src/components/MainToolbar.jsx",
+      "description": "The MainToolbar component provides the primary navigation and settings access for the platform. It contains dropdown menus and controls that are available across different pages of the application."
+    },
+    "usage": "Menu item or section label that users click to access experimental platform features.",
+    "impact": "Medium - helps users discover and opt into new features while clearly indicating their experimental status.",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Beta Features",
+      "Preview Features",
+      "Advanced Features",
+      "Test Features"
+    ]
+  },
+  "mainToolbar.settings.studentMode": {
+    "context": "This text appears as a toggle or button option in the main toolbar settings menu, allowing users to switch between different interface modes. It enables a simplified view mode designed specifically for students to focus on learning content without instructor authoring tools visible.",
+    "component": {
+      "location": "src/components/MainToolbar.jsx",
+      "description": "The MainToolbar component provides the primary navigation and settings interface at the top of the application. It contains various controls and options that appear across different pages of the eLearning platform, including mode switching capabilities."
+    },
+    "usage": "Translation key: mainToolbar.settings.studentMode",
+    "impact": "Provides information to users",
+    "userType": "all",
+    "tone": "polite-formal",
+    "alternativeTerms": [
+      "Learner Mode",
+      "Study Mode",
+      "Learning View",
+      "Student View"
+    ]
+  },
+  "navigation.grades": {
+    "alternativeTerms": [
+      "Scores",
+      "Results",
+      "Marks",
+      "Assessments"
+    ],
+    "component": {
+      "description": "A common navigation component that provides links to different sections of the platform. This component is reused across multiple pages to ensure consistent navigation experience for all user types.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a navigation element in the primary or secondary navigation menu of the eLearning platform. Students and instructors see this when navigating between different sections of the platform to access grade-related information and assessment results.",
+    "impact": "High - Essential navigation element that allows users to easily find and access their academic performance data and assessment results",
+    "tone": "polite-formal",
+    "usage": "Translation key: navigation.grades",
+    "userType": "all"
+  },
+  "navigation.home": {
+    "alternativeTerms": [
+      "Main Page",
+      "Dashboard",
+      "Start"
+    ],
+    "component": {
+      "description": "The MainToolbar component renders the primary navigation bar that remains visible across different pages of the platform. This component provides consistent navigation options allowing users to quickly access key sections of the eLearning platform from any location.",
+      "location": "components/MainToolbar.js"
+    },
+    "context": "This text appears as a navigation element in the main toolbar that users see at the top of the platform interface. Users encounter this text when they need to return to the main dashboard or starting page from anywhere within the eLearning platform.",
+    "impact": "Critical - this is essential for primary navigation and helps users orient themselves within the platform structure",
+    "tone": "polite-formal",
+    "usage": "Navigation link or button that users click to return to the main dashboard page",
+    "userType": "all"
+  },
+  "navigation.profile": {
+    "alternativeTerms": [
+      "Account",
+      "User Info",
+      "My Account",
+      "Settings"
+    ],
+    "component": {
+      "description": "MainToolbar is a persistent navigation component that displays primary navigation options across the platform. It provides quick access to essential user functions and appears on most authenticated pages.",
+      "location": "components/MainToolbar.js"
+    },
+    "context": "This text appears as a navigation item in the main toolbar that allows users to access their personal profile page. Users see this consistently across the platform when logged in, typically in the top navigation bar or main menu area.",
+    "impact": "High - Essential for user account management and platform navigation, directly affects user ability to manage their personal information and settings.",
+    "tone": "polite-formal",
+    "usage": "Navigation link or button that users click to access their profile settings and information.",
+    "userType": "all"
+  },
+  "navigation.sections": {
+    "alternativeTerms": [
+      "Modules",
+      "Units",
+      "Chapters",
+      "Categories"
+    ],
+    "component": {
+      "description": "MainToolbar is a persistent navigation component that provides primary navigation options across the eLearning platform. It displays key navigation links and controls that users need to access different functional areas of the application.",
+      "location": "components/MainToolbar.js"
+    },
+    "context": "This text appears as a navigation label in the main toolbar, allowing users to access different sections or modules of learning content. Users see this consistently across the platform when navigating between different parts of their courses or administrative areas.",
+    "impact": "High - Essential navigation element that enables users to move between different areas of the platform effectively",
+    "tone": "polite-formal",
+    "usage": "Navigation link or button label that users click to access sections of content",
+    "userType": "all"
+  },
+  "navigation.units": {
+    "alternativeTerms": [
+      "Lessons",
+      "Modules",
+      "Chapters",
+      "Sections"
+    ],
+    "component": {
+      "description": "The MainToolbar component provides primary navigation functionality across the eLearning platform. It displays key navigation options including Units, allowing users to quickly access different sections of the application from any page.",
+      "location": "components/MainToolbar.js"
+    },
+    "context": "This text appears as a navigation element in the main toolbar, allowing users to access the Units section of the eLearning platform. Users see this when they need to browse, manage, or select different learning units within the Japanese language learning curriculum.",
+    "impact": "High - This is essential navigation text that directly affects users' ability to find and access learning content organized into units",
+    "tone": "polite-formal",
+    "usage": "Navigation link or button text that users click to access the Units section",
+    "userType": "all"
+  },
+  "navigation.workbook": {
+    "alternativeTerms": [],
+    "component": {
+      "description": "This appears to be part of the common navigation component that provides primary navigation links throughout the platform. The component likely renders navigation menus or breadcrumbs that help users move between different sections of the eLearning interface.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears in the main navigation system of the eLearning platform, likely as a navigation menu item or link. Users see this when browsing the primary interface sections to access their workbook area where assignments and learning materials are organized.",
+    "impact": "Provides information to users",
+    "tone": "polite-formal",
+    "usage": "Translation key: navigation.workbook",
+    "userType": "all"
+  },
+  "quizComponent.grade": {
+    "alternativeTerms": [
+      "Score",
+      "Points"
+    ],
+    "component": {
+      "description": "Quiz component displaying student grade information.",
+      "location": "src/components/Editor3/components/QuizComponent1.js"
+    },
+    "context": "Displays the current grade/score for a quiz component. Shows numerical grade value.",
+    "impact": "High - important feedback for students",
+    "tone": "polite-formal",
+    "usage": "Grade display label with score value",
+    "userType": "students"
+  },
+  "status.complete": {
+    "alternativeTerms": [
+      "Finished",
+      "Done",
+      "Completed",
+      "Accomplished"
+    ],
+    "component": {
+      "description": "A reusable status indicator component that displays completion states across various UI elements. This component provides consistent visual feedback to users about the completion status of educational content and assignments throughout the platform.",
+      "location": "src/components/common"
+    },
+    "context": "This status label appears throughout the platform to indicate when a task, assignment, lesson, or learning unit has been finished. Students see this when they have successfully completed coursework, and instructors see it when reviewing student progress or marking content as finished.",
+    "impact": "High - Essential for users to understand their progress and completion status in the learning platform",
+    "tone": "polite-formal",
+    "usage": "Translation key: status.complete",
+    "userType": "all"
+  },
+  "status.downloading": {
+    "alternativeTerms": [
+      "Loading",
+      "Fetching",
+      "Retrieving"
+    ],
+    "component": {
+      "description": "This appears to be a common status indicator component used throughout the platform to show download progress. It displays during file operations and content loading states to provide user feedback.",
+      "location": "src/components/common"
+    },
+    "context": "This status message appears when the platform is downloading files or content, such as audio files, images, or learning materials. Users see this temporary loading state during file downloads or when the system is fetching content from AWS storage services.",
+    "impact": "Medium - provides important feedback to users during download operations, helping them understand the system is working and they should wait",
+    "tone": "polite-formal",
+    "usage": "Translation key: status.downloading",
+    "userType": "all"
+  },
+  "status.error": {
+    "alternativeTerms": [
+      "Failure",
+      "Issue",
+      "Problem",
+      "Malfunction"
+    ],
+    "component": {
+      "description": "This appears to be part of a shared status or messaging component used across the platform. The component likely displays different status states including error conditions for various user interactions and system operations.",
+      "location": "src/components/common"
+    },
+    "context": "This generic error status text appears throughout the platform when operations fail or encounter issues. Users see this in various UI components like status indicators, error messages, and system notifications when something goes wrong with data loading, saving, or processing.",
+    "impact": "Critical - Users need to understand when errors occur to take appropriate action or seek help",
+    "tone": "polite-formal",
+    "usage": "Translation key: status.error",
+    "userType": "all"
+  },
+  "status.incomplete": {
+    "alternativeTerms": [
+      "Unfinished",
+      "In Progress",
+      "Pending",
+      "Partial"
+    ],
+    "component": {
+      "description": "A reusable status indicator component that displays completion states across various platform features. It provides visual feedback to help users quickly identify items that require attention or further action.",
+      "location": "src/components/common"
+    },
+    "context": "This status label appears throughout the eLearning platform to indicate that a task, assignment, or learning unit has not been fully completed. Users see this status in assignment lists, progress dashboards, and unit tracking interfaces when work remains to be done.",
+    "impact": "High - This status indicator is crucial for helping users identify unfinished work and maintain progress in their learning journey",
+    "tone": "polite-formal",
+    "usage": "Translation key: status.incomplete",
+    "userType": "all"
+  },
+  "status.loading": {
+    "alternativeTerms": [
+      "Processing",
+      "Please wait",
+      "Working"
+    ],
+    "component": {
+      "description": "A generic status component used across the platform to indicate loading states during data fetching, content processing, or API communications. This component provides visual feedback to users while backend operations complete, ensuring they understand the system is working on their request.",
+      "location": "src/components/common"
+    },
+    "context": "This loading message appears throughout the platform whenever data is being fetched or processed, such as when students load assignments, instructors access course materials, or when AI features are processing requests. Users see this text as a temporary status indicator while the system communicates with AWS Amplify DataStore or OpenAI services.",
+    "impact": "Medium - Essential for user experience as it prevents confusion during wait times and reassures users that their actions are being processed.",
+    "tone": "polite-formal",
+    "usage": "Status text displayed in loading spinners, progress indicators, or placeholder areas during asynchronous operations.",
+    "userType": "all"
+  },
+  "status.pending": {
+    "alternativeTerms": [
+      "Waiting",
+      "In Progress",
+      "Processing",
+      "Queued"
+    ],
+    "component": {
+      "description": "A status display component that shows the current state of various platform operations and user submissions. It appears in lists, cards, and status bars to inform users about the progress of their interactions with the system.",
+      "location": "src/components/common"
+    },
+    "context": "This status indicator appears throughout the platform when processes, assignments, or operations have been initiated but are still awaiting completion or approval. Users see this in assignment dashboards, content upload interfaces, and system operation feedback areas to understand that their action is being processed.",
+    "impact": "High - Users need clear feedback about the state of their submissions and operations to understand when they can proceed with next steps.",
+    "tone": "polite-formal",
+    "usage": "Translation key: status.pending",
+    "userType": "all"
+  },
+  "status.processing": {
+    "alternativeTerms": [
+      "Loading",
+      "Working",
+      "In progress",
+      "Please wait"
+    ],
+    "component": {
+      "description": "A reusable status component that displays processing states across different parts of the platform. It provides visual feedback to users during asynchronous operations like content uploads, quiz submissions, or AI feature execution.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a status indicator when the platform is processing user actions or data operations. Users see this message during various operations like content saving, assignment submissions, AI-powered features processing, or data synchronization between client and AWS Amplify DataStore.",
+    "impact": "High - Essential for user experience as it provides feedback during operations and prevents user confusion about system responsiveness",
+    "tone": "polite-formal",
+    "usage": "Status message or loading indicator that appears during system processing operations",
+    "userType": "all"
+  },
+  "status.saving": {
+    "alternativeTerms": [
+      "Processing",
+      "Updating",
+      "Syncing"
+    ],
+    "component": {
+      "description": "A reusable status indicator component that displays temporary feedback messages during data operations. It appears in forms, editors, and other interactive elements where users need confirmation that their actions are being processed.",
+      "location": "src/components/common"
+    },
+    "context": "This status message appears during save operations throughout the platform when users are creating or editing content. It displays temporarily as a loading indicator while data is being synchronized to AWS Amplify DataStore, providing feedback that the system is processing their changes.",
+    "impact": "Important - Provides essential user feedback during data operations to prevent confusion and ensure users know their changes are being processed",
+    "tone": "polite-formal",
+    "usage": "Status text that appears during save operations to indicate processing is in progress",
+    "userType": "all"
+  },
+  "status.success": {
+    "alternativeTerms": [
+      "Complete",
+      "Done",
+      "Completed",
+      "Successful"
+    ],
+    "component": {
+      "description": "A reusable status message component that displays confirmation feedback to users across various platform operations. This component likely appears as a temporary notification, alert banner, or inline message to communicate successful completion of user actions.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a status message throughout the platform to indicate that an operation has completed successfully. Users see this confirmation message after actions like saving content, submitting assignments, completing quizzes, or updating profile settings.",
+    "impact": "Important because it provides essential feedback confirmation that helps users understand their actions were completed successfully",
+    "tone": "polite-formal",
+    "usage": "Translation key: status.success",
+    "userType": "all"
+  },
+  "status.uploading": {
+    "alternativeTerms": [
+      "Transferring",
+      "Sending",
+      "Loading"
+    ],
+    "component": {
+      "description": "A common status indicator component that displays upload progress feedback across various forms and content creation interfaces. This component provides real-time feedback during file transfer operations to keep users informed of the upload state.",
+      "location": "src/components/common"
+    },
+    "context": "This status message appears during file upload operations throughout the platform when users are uploading media files, documents, or other content. Users see this text as a progress indicator while the system processes their upload to AWS storage services.",
+    "impact": "High - This status message is critical for user experience as it provides essential feedback during potentially slow upload operations and prevents user confusion about system responsiveness.",
+    "tone": "polite-formal",
+    "usage": "Translation key: status.uploading",
+    "userType": "all"
+  },
+  "time.completed": {
+    "alternativeTerms": [
+      "Finished",
+      "Done",
+      "Accomplished",
+      "Fulfilled"
+    ],
+    "component": {
+      "description": "A common status component that displays completion states across various learning activities and assignments. This reusable component helps maintain consistent completion messaging throughout the platform's interface.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a status indicator showing that a student has finished a learning activity, assignment, or unit. It is displayed in progress tracking sections, dashboards, or activity lists to communicate successful completion of educational content.",
+    "impact": "High - Essential for students and instructors to track learning progress and understand which activities have been successfully finished",
+    "tone": "polite-formal",
+    "usage": "Translation key: time.completed",
+    "userType": "all"
+  },
+  "time.created": {
+    "alternativeTerms": [
+      "Established",
+      "Generated",
+      "Authored",
+      "Made"
+    ],
+    "component": {
+      "description": "This is a common component used across multiple areas of the platform to display creation timestamps or dates. It appears in content listings, user profiles, and administrative views where creation metadata is relevant to users.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a label or heading indicating when content or items were created in the platform. Users see this in various contexts such as course listings, assignment details, content management areas, and profile sections to provide temporal information about platform resources.",
+    "impact": "Medium - provides useful contextual information that helps users understand content freshness and organize their learning materials chronologically.",
+    "tone": "polite-formal",
+    "usage": "Text label displayed alongside timestamps or in table headers to indicate creation date information.",
+    "userType": "all"
+  },
+  "time.due": {
+    "alternativeTerms": [
+      "Deadline",
+      "Expires",
+      "Required by"
+    ],
+    "component": {
+      "description": "A common UI component that displays time-related status information for assignments and tasks. This component likely appears in multiple contexts such as assignment cards, calendar views, or notification areas to communicate deadline information to users.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a label or status indicator for assignments, tasks, or deadlines throughout the eLearning platform. Users see this when viewing assignment lists, course schedules, or dashboard notifications to identify when something needs to be completed.",
+    "impact": "High - This is critical for students to understand assignment deadlines and prioritize their coursework effectively",
+    "tone": "polite-formal",
+    "usage": "Translation key: time.due",
+    "userType": "all"
+  },
+  "time.updated": {
+    "alternativeTerms": [
+      "Modified",
+      "Revised",
+      "Changed",
+      "Refreshed"
+    ],
+    "component": {
+      "description": "A reusable timestamp component that displays modification dates across various platform features. This component likely formats and presents last-updated information for content items, user profiles, and assignment data.",
+      "location": "src/components/common"
+    },
+    "context": "This text appears as a timestamp label next to content items, assignments, or user data to indicate when something was last modified. Users see this throughout the platform when viewing lists of learning units, assignments, or profile information to understand recency of changes.",
+    "impact": "Provides information to users",
+    "tone": "polite-formal",
+    "usage": "Translation key: time.updated",
+    "userType": "all"
+  }
+}

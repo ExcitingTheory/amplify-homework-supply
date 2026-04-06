@@ -1,3 +1,5 @@
+@import './theme-vars.css';
+
 .keyboard-shortcuts {
   max-width: 800px;
   margin: 0 auto;
@@ -7,17 +9,17 @@
 .keyboard-shortcuts h1 {
   font-size: 2rem;
   margin: 0 0 0.5rem 0;
-  color: #1a1a1a;
+  color: var(--sb-text-heading);
 }
 
 .keyboard-shortcuts p {
-  color: #666;
+  color: var(--sb-text-secondary);
   margin: 0 0 2rem 0;
 }
 
 .shortcuts-table {
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--sb-bg-primary);
+  border: 1px solid var(--sb-border);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -27,10 +29,10 @@
   grid-template-columns: 1fr auto;
   gap: 2rem;
   padding: 1rem 1.5rem;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--sb-bg-secondary);
+  border-bottom: 1px solid var(--sb-border);
   font-weight: 600;
-  color: #666;
+  color: var(--sb-text-secondary);
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -41,7 +43,7 @@
   grid-template-columns: 1fr auto;
   gap: 2rem;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--sb-border-light);
   transition: background 0.2s ease;
 }
 
@@ -50,11 +52,11 @@
 }
 
 .shortcut-row:hover {
-  background: #f8f9fa;
+  background: var(--sb-bg-secondary);
 }
 
 .command {
-  color: #333;
+  color: var(--sb-text-primary);
   font-size: 0.9375rem;
 }
 
@@ -69,11 +71,11 @@ kbd {
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
   font-family: monospace;
-  background: #f0f0f0;
-  border: 1px solid #ccc;
+  background: var(--sb-kbd-bg);
+  border: 1px solid var(--sb-kbd-border);
   border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  color: #333;
+  box-shadow: 0 1px 2px var(--sb-kbd-shadow);
+  color: var(--sb-text-code);
   min-width: 1.75rem;
   text-align: center;
 }

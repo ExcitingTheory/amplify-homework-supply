@@ -1901,7 +1901,8 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         id: 'intro',
         title: 'Language Switcher',
         description: 'Learn how to preview content in each supported locale using the toolbar.',
-        tooltipPosition: 'center',
+        targetSelector: '[data-tour="translation-demo"]',
+        tooltipPosition: 'right',
         actions: [
           'Find the globe icon in the toolbar',
           'Switch between languages',
@@ -1911,15 +1912,17 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: 'globe-icon',
         title: 'Find the Globe Icon',
-        description: 'The 🌐 globe icon in the top toolbar opens the language selector.',
-        targetSelector: '[data-tour="language-switcher"], button[aria-label*="language"], button[aria-label*="locale"]',
+        description: 'The 🌐 globe icon labeled "Translation Mode" toggles highlight/edit mode. Click it to enable Translation Mode.',
+        targetSelector: 'button[title="Translation Mode"], button[title="Off"], button[title="Highlight"], button[title="Edit"]',
+        targetFrame: 'manager',
         tooltipPosition: 'bottom',
       },
       {
         id: 'select-language',
         title: 'Switch Language',
-        description: 'Pick a language from the dropdown to preview the UI in that locale.',
-        targetSelector: '[data-tour="language-dropdown"], [role="listbox"], [role="menu"]',
+        description: 'Click the "Language" toolbar button to open the locale dropdown. Select a language to preview the UI in that locale.',
+        targetSelector: 'button[title="Language"], button[title="English"], button[title="en"], button[title="ja"], button[title="es"]',
+        targetFrame: 'manager',
         tooltipPosition: 'bottom',
         actions: [
           'Try Japanese (ja) — text becomes shorter/different characters',
@@ -1930,12 +1933,13 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: 'observe-changes',
         title: 'Spot the Differences',
-        description: 'Look for text that did NOT change — those are untranslated strings.',
-        tooltipPosition: 'center',
+        description: 'Look at the form below — text that did NOT change is untranslated.',
+        targetSelector: '[data-tour="translation-auth-form"]',
+        tooltipPosition: 'top',
         actions: [
           'Buttons, labels, and headings should all update',
           'Any English text remaining in a non-English locale is a gap',
-          'Note these for the "Find Missing Translations" task',
+          'The Translations panel highlights missing keys per language automatically',
         ],
       },
       {
@@ -1970,7 +1974,8 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         id: 'intro',
         title: 'Translations Panel',
         description: 'The panel at the bottom of Storybook is your main translation workspace.',
-        tooltipPosition: 'center',
+        targetSelector: '[data-tour="translation-demo"]',
+        tooltipPosition: 'right',
         actions: [
           'Open the Translations tab',
           'Browse translation keys',
@@ -1981,16 +1986,17 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: 'panel-tab',
         title: 'Open the Translations Tab',
-        description: 'Find the "Translations" tab in the addon panel at the bottom.',
-        targetSelector: '[data-tour="translations-panel"], button[role="tab"]',
+        description: 'Click the "Translations" tab in the addon panel below. If the panel is collapsed, click the horizontal bar at the bottom to expand it.',
+        targetSelector: 'button[role="tab"]#tabbutton-translation-mode-addon-translation-mode-panel, button[role="tab"][id*="translation"]',
+        targetFrame: 'manager',
         tooltipPosition: 'top',
       },
       {
         id: 'key-list',
         title: 'Translation Key List',
-        description: 'Each row shows a key, its English value, and translation status per locale.',
-        targetSelector: '[data-tour="translation-keys"]',
-        tooltipPosition: 'top',
+        description: 'Each row in the Translations panel shows a key, its English value, and translation status per locale.',
+        targetSelector: '[data-tour="translation-demo-instructions"]',
+        tooltipPosition: 'bottom',
         actions: [
           'Green check = translated',
           'Warning icon = missing translation',
@@ -2000,9 +2006,9 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: 'metadata',
         title: 'View Key Metadata',
-        description: 'Click a row to expand rich context: description, component, impact, tone.',
-        targetSelector: '[data-tour="translation-metadata"]',
-        tooltipPosition: 'right',
+        description: 'Click a row in the panel to expand rich context: description, component, impact, tone.',
+        targetSelector: '[data-tour="translation-auth-form"]',
+        tooltipPosition: 'top',
         actions: [
           'Context — when/why users see this text',
           'Component Location — the React file using this key',
@@ -2013,9 +2019,9 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: 'export',
         title: 'Export Translations',
-        description: 'Download translation data as JSON or CSV for offline editing.',
-        targetSelector: '[data-tour="export-button"], button:has-text("Export")',
-        tooltipPosition: 'left',
+        description: 'Use the "Export Translations" button in the Translations panel to download JSON or CSV files for offline editing.',
+        targetSelector: '[data-tour="translation-auth-buttons"]',
+        tooltipPosition: 'top',
       },
       {
         id: 'complete',
@@ -2043,89 +2049,14 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
   },
 
   {
-    taskId: 'translator-view-missing',
-    tutorialSteps: [
-      {
-        id: 'intro',
-        title: 'Find Missing Translations',
-        description: 'Learn to identify gaps and prioritize what to translate first.',
-        tooltipPosition: 'center',
-        actions: [
-          'Open the Translations panel',
-          'Switch locales to spot gaps',
-          'Use impact levels to prioritize',
-        ],
-      },
-      {
-        id: 'open-panel',
-        title: 'Open Translations Panel',
-        description: 'Start by opening the panel for the current story.',
-        targetSelector: '[data-tour="translations-panel"]',
-        tooltipPosition: 'top',
-      },
-      {
-        id: 'warning-icons',
-        title: 'Spot Warning Icons',
-        description: 'Rows with ⚠️ icons indicate missing translations for the selected locale.',
-        targetSelector: '[data-tour="missing-translations"]',
-        tooltipPosition: 'right',
-        actions: [
-          'Yellow ⚠️ = at least one locale is missing',
-          'Red ❌ = no translation in any locale',
-          'Green ✅ = fully translated',
-        ],
-      },
-      {
-        id: 'switch-locale',
-        title: 'Switch Locales to Compare',
-        description: 'Change the language to see which locale has the most gaps.',
-        targetSelector: '[data-tour="language-switcher"]',
-        tooltipPosition: 'bottom',
-      },
-      {
-        id: 'prioritize',
-        title: 'Prioritize by Impact',
-        description: 'Critical (red) and High (orange) impact strings should be translated first.',
-        tooltipPosition: 'center',
-        actions: [
-          'Critical — login, error messages, core navigation',
-          'High — form labels, button text, headings',
-          'Important — tooltips, help text, descriptions',
-        ],
-      },
-      {
-        id: 'complete',
-        title: 'Gaps Identified! 🔍',
-        description: 'You can now find and prioritize missing translations.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-    quizSteps: [
-      {
-        id: 'challenge',
-        title: '🎯 Challenge: Find Gaps',
-        description: 'Switch between two locales and count the missing translations in the editor namespace.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'verify',
-        title: 'Gaps Found?',
-        description: 'Complete if you identified missing translations.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-  },
-
-  {
     taskId: 'translator-locale-files',
     tutorialSteps: [
       {
         id: 'intro',
         title: 'Locale File Structure',
         description: 'Understand how translation JSON files are organized on disk.',
-        tooltipPosition: 'center',
+        targetSelector: '[data-tour="translation-demo"]',
+        tooltipPosition: 'right',
         actions: [
           'Files live in public/locales/{lang}/',
           'Each namespace = one JSON file',
@@ -2159,9 +2090,8 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: 'editor-namespace',
         title: 'Try the Editor Namespace',
-        description: 'The "Editor Namespace" story shows how editor.json keys appear in the panel.',
-        targetSelector: '[data-tour="namespace-selector"]',
-        tooltipPosition: 'bottom',
+        description: 'Navigate to the "Editor Namespace" story in the sidebar under Translation Mode/Demo. It shows how editor.json keys appear in the panel.',
+        tooltipPosition: 'center',
       },
       {
         id: 'complete',
@@ -2195,7 +2125,8 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         id: 'intro',
         title: 'Component Context',
         description: 'Use metadata to understand where and how each translated string appears in the UI.',
-        tooltipPosition: 'center',
+        targetSelector: '[data-tour="translation-demo"]',
+        tooltipPosition: 'right',
         actions: [
           'Open the Auth Namespace story',
           'Expand a translation row',
@@ -2205,16 +2136,17 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: 'auth-story',
         title: 'Open Auth Namespace',
-        description: 'The Auth namespace has login/signup strings with rich context metadata.',
-        targetSelector: '[data-tour="auth-namespace"]',
-        tooltipPosition: 'right',
+        description: 'This story shows login/signup strings with rich context metadata. The auth form below contains translatable fields.',
+        targetSelector: '[data-tour="translation-auth-form"]',
+        tooltipPosition: 'top',
       },
       {
         id: 'expand-row',
         title: 'Expand a Translation Row',
-        description: 'Click any row to reveal the full metadata panel.',
-        targetSelector: '[data-tour="translation-row"]',
-        tooltipPosition: 'right',
+        description: 'In the Translations panel at the bottom, click any row to reveal the full metadata panel with context, tone, and usage info.',
+        targetSelector: 'button[role="tab"]#tabbutton-translation-mode-addon-translation-mode-panel, button[role="tab"][id*="translation"]',
+        targetFrame: 'manager',
+        tooltipPosition: 'top',
       },
       {
         id: 'context-field',
@@ -2271,7 +2203,8 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         id: 'intro',
         title: 'RTL Language Testing',
         description: 'Verify that the UI renders correctly for right-to-left languages.',
-        tooltipPosition: 'center',
+        targetSelector: '[data-tour="translation-demo"]',
+        tooltipPosition: 'right',
         actions: [
           'Switch to an RTL locale',
           'Check layout mirroring',
@@ -2281,15 +2214,17 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: 'switch-rtl',
         title: 'Switch to RTL',
-        description: 'Select Arabic (ar) or Hebrew (he) if available in the language selector.',
-        targetSelector: '[data-tour="language-switcher"]',
+        description: 'Select Arabic (ar) or Hebrew (he) from the Language toolbar button if available.',
+        targetSelector: 'button[title="Language"], button[title="English"], button[title="en"], button[title="ja"], button[title="es"]',
+        targetFrame: 'manager',
         tooltipPosition: 'bottom',
       },
       {
         id: 'check-layout',
         title: 'Check Layout Mirroring',
         description: 'The entire layout should flip — navigation on the right, content flowing right-to-left.',
-        tooltipPosition: 'center',
+        targetSelector: '[data-tour="translation-demo"]',
+        tooltipPosition: 'right',
         actions: [
           'Sidebar should appear on the right',
           'Text should be right-aligned',
@@ -2350,7 +2285,8 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         id: 'intro',
         title: 'Pluralization Rules',
         description: 'Learn how i18next handles count-dependent translation forms.',
-        tooltipPosition: 'center',
+        targetSelector: '[data-tour="translation-demo"]',
+        tooltipPosition: 'right',
         actions: [
           'Find keys with {{count}}',
           'Understand plural suffixes',
@@ -2360,9 +2296,9 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: 'find-plural-keys',
         title: 'Find Plural Keys',
-        description: 'Look for translation values containing {{count}} — these are pluralized.',
-        targetSelector: '[data-tour="translation-keys"]',
-        tooltipPosition: 'right',
+        description: 'In the Translations panel, look for translation values containing {{count}} — these are pluralized.',
+        targetSelector: '[data-tour="translation-auth-form"]',
+        tooltipPosition: 'top',
         actions: [
           'English: "key" (1 item), "key_other" (0 or 2+ items)',
           'Example: "1 assignment" vs "5 assignments"',

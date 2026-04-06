@@ -20,8 +20,7 @@ import {
     Button,
 } from '@mui/material';
 
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Chip from '@mui/material/Chip';
 
 import UnitContext from '../../../context/unitContext';
 
@@ -139,41 +138,14 @@ export default function AnswerComponent({
     const [feedback, setFeedback] = useState({});
     const [progress, setProgress] = useState(0);
 
-    const [currentInputMethod, setCurrentInputMethod] = useState(allowedInput?.[0] || 'text');
-    const [allowedInputMethods, setAllowedInputMethods] = useState(allowedInput || ['text', 'audio', 'writing']);
+    const currentInputMethod = allowedInput?.[0] || 'text';
     const [currentPromptMethod, setCurrentPromptMethod] = useState(promptMethod?.[0] || 'text');
 
-    const handleInputChange = (event, newInputMethod) => {
-        // console.log('newInputMethods', newInputMethods)
-        setCurrentInputMethod(newInputMethod);
-    }
-
     React.useEffect(() => {
-        if (allowedInput?.length > 0) {
-            console.log('allowedInput', allowedInput)
-            console.log('promptMethod', promptMethod)
-            console.log('AnswerComponent.currentPromptMethod', currentPromptMethod)
-            setAllowedInputMethods(allowedInput);
-            setCurrentInputMethod(allowedInput[0]);
-        }
-    }, [JSON.stringify(allowedInput)])
-
-    React.useEffect(() => {
-        console.log('AnswerComponent.promptMethod', promptMethod)
         if (promptMethod?.length > 0) {
             setCurrentPromptMethod(promptMethod[0])
         }
-    }, [JSON.stringify(promptMethod)])
-
-    React.useEffect(() => {
-        console.log('allowedInput', allowedInput)
-        console.log('promptMethod', promptMethod)
-        setAllowedInputMethods(allowedInput || ['text', 'audio', 'writing']);
-        setCurrentInputMethod(allowedInput?.[0] || 'text');
-        setCurrentPromptMethod(promptMethod?.[0] || 'text');
-        console.log('AnswerComponent.currentPromptMethod', promptMethod?.[0])
-
-    }, []);
+    }, [JSON.stringify(promptMethod)]);
 
     const {
         dictionary,
@@ -248,37 +220,12 @@ export default function AnswerComponent({
                 </Typography>
             </Box>
 
-            {/**
-             * Buttons to allow the user to select an input method, or have the input method(s) selected for them. Each set of words could be run with progressively more difficult input methods. Typing, writing, speaking, etc.
-             */}
-
-            <ToggleButtonGroup
-                exclusive
-                value={currentInputMethod}
-                onChange={handleInputChange}
-                aria-label="change input method"
-            >
-                <ToggleButton
-                    disabled={!allowedInputMethods.includes('text')}
-                    value="text"
-                    aria-label="text entry"
-                >
-                    {t('answerComponent.inputMethods.text')}
-                </ToggleButton>
-                <ToggleButton
-                    disabled={!allowedInputMethods.includes('audio')}
-                    value="audio" aria-label="audio input">
-                    {t('answerComponent.inputMethods.audio')}
-                </ToggleButton>
-                {/* <ToggleButton value="listening" aria-label="listening exercise">
-        Listening
-      </ToggleButton> */}
-                <ToggleButton
-                    disabled={!allowedInputMethods.includes('writing')}
-                    value="writing" aria-label="writing and drawing input">
-                    {t('answerComponent.inputMethods.writing')}
-                </ToggleButton>
-            </ToggleButtonGroup>
+            <Chip
+                label={t(`answerComponent.inputMethods.${currentInputMethod}`)}
+                variant="outlined"
+                size="small"
+                sx={{ my: 1 }}
+            />
 
             {/**
              * Progress bar to show the user how many questions they have answered correctly

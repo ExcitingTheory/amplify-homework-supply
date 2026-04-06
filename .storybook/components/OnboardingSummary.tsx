@@ -1,12 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, LinearProgress, Stack, Chip, Divider } from '@mui/material';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Box, Typography, LinearProgress, Stack, Chip, Divider, ThemeProvider, createTheme } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import SchoolIcon from '@mui/icons-material/School';
 import CodeIcon from '@mui/icons-material/Code';
+import { useTheme as useStorybookTheme } from 'storybook/theming';
 import { getOnboardingEmitter, UserPersona } from '../code/onboarding-events';
 import { ONBOARDING_TASKS, getTasksForPersona } from '../code/onboarding-tasks';
+
+function buildMuiTheme(isDark: boolean) {
+  return createTheme({
+    palette: {
+      mode: isDark ? 'dark' : 'light',
+      background: {
+        paper: isDark ? '#1a1a1a' : '#ffffff',
+        default: isDark ? '#1a1a1a' : '#f6f9fc',
+      },
+      text: {
+        primary: isDark ? '#e0e0e0' : '#2E3338',
+        secondary: isDark ? '#999999' : '#5C6570',
+      },
+    },
+  });
+}
 
 interface OnboardingSummaryProps {
   api?: any;
@@ -15,6 +32,12 @@ interface OnboardingSummaryProps {
 
 const OnboardingSummary: React.FC<OnboardingSummaryProps> = ({ api, onClick }) => {
   const emitter = getOnboardingEmitter();
+
+  // Derive MUI theme from Storybook theme
+  let sbTheme: any;
+  try { sbTheme = useStorybookTheme(); } catch { sbTheme = null; }
+  const isDark = sbTheme?.base === 'dark' || (sbTheme == null && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+  const muiTheme = useMemo(() => buildMuiTheme(isDark), [isDark]);
   
   // Initialize state from emitter synchronously to avoid flash
   const initialPersona = emitter.getPersona();
@@ -73,15 +96,17 @@ const OnboardingSummary: React.FC<OnboardingSummaryProps> = ({ api, onClick }) =
 
   if (!persona) {
     return (
+      <ThemeProvider theme={muiTheme}>
       <Box
         sx={{
           p: 2,
           bgcolor: 'transparent',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          border: 1,
+          borderColor: 'divider',
           borderRadius: 1,
         }}
       >
-        <Typography variant="caption" sx={{ color: '#999', display: 'block', mb: 1.5, textTransform: 'uppercase', fontSize: '0.7rem' }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5, textTransform: 'uppercase', fontSize: '0.7rem' }}>
           Select Persona
         </Typography>
         <Stack spacing={1}>
@@ -92,18 +117,18 @@ const OnboardingSummary: React.FC<OnboardingSummaryProps> = ({ api, onClick }) =
               sx={{
                 p: 1,
                 borderLeft: `3px solid ${p.color}`,
-                bgcolor: 'rgba(255, 255, 255, 0.05)',
+                bgcolor: 'action.hover',
                 borderRadius: '4px',
                 cursor: 'pointer',
                 transition: 'background-color 0.2s ease',
                 '&:hover': {
-                  bgcolor: 'rgba(255, 255, 255, 0.08)',
+                  bgcolor: 'action.selected',
                 },
               }}
             >
               <Stack direction="row" alignItems="center" spacing={1}>
                 <Box sx={{ color: p.color }}>{p.icon}</Box>
-                <Typography variant="caption" sx={{ color: '#ccc', fontSize: '0.75rem' }}>
+                <Typography variant="caption" sx={{ color: 'text.primary', fontSize: '0.75rem' }}>
                   {p.label}
                 </Typography>
               </Stack>
@@ -111,6 +136,7 @@ const OnboardingSummary: React.FC<OnboardingSummaryProps> = ({ api, onClick }) =
           ))}
         </Stack>
       </Box>
+      </ThemeProvider>
     );
   }
 
@@ -118,32 +144,34 @@ const OnboardingSummary: React.FC<OnboardingSummaryProps> = ({ api, onClick }) =
   const nextTasks = tasks.filter((t) => !completedTasks.has(t.id)).slice(0, 2);
 
   return (
+    <ThemeProvider theme={muiTheme}>
     <Box
       onClick={handleClick}
       sx={{
         p: 2,
         bgcolor: 'transparent',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        border: 1,
+        borderColor: 'divider',
         borderRadius: 1,
         cursor: 'pointer',
         transition: 'all 0.2s ease',
         '&:hover': {
-          bgcolor: 'rgba(255, 255, 255, 0.05)',
-          borderColor: 'rgba(255, 255, 255, 0.15)',
+          bgcolor: 'action.hover',
+          borderColor: 'action.selected',
         },
       }}
     >
       {/* Header */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-        <Typography variant="caption" sx={{ color: '#999', textTransform: 'uppercase', fontSize: '0.7rem' }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.7rem' }}>
           Onboarding
         </Typography>
         <Chip
           label={`${percentage}%`}
           size="small"
           sx={{
-            bgcolor: percentage === 100 ? '#4caf50' : '#666',
-            color: '#fff',
+            bgcolor: percentage === 100 ? 'success.main' : 'action.disabledBackground',
+            color: 'common.white',
             fontSize: '0.7rem',
             height: '20px',
           }}
@@ -158,9 +186,9 @@ const OnboardingSummary: React.FC<OnboardingSummaryProps> = ({ api, onClick }) =
           mb: 1.5,
           height: 4,
           borderRadius: 2,
-          bgcolor: '#444',
+          bgcolor: 'action.disabledBackground',
           '& .MuiLinearProgress-bar': {
-            bgcolor: percentage === 100 ? '#4caf50' : '#2196F3',
+            bgcolor: percentage === 100 ? 'success.main' : 'primary.main',
           },
         }}
       />
@@ -168,13 +196,13 @@ const OnboardingSummary: React.FC<OnboardingSummaryProps> = ({ api, onClick }) =
       {/* Next Tasks */}
       {nextTasks.length > 0 ? (
         <Stack spacing={0.75}>
-          <Typography variant="caption" sx={{ color: '#888', fontSize: '0.7rem' }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
             Up Next:
           </Typography>
           {nextTasks.map((task) => (
             <Stack key={task.id} direction="row" spacing={0.5} alignItems="flex-start">
-              <CircleOutlinedIcon sx={{ fontSize: 12, color: '#666', mt: 0.3 }} />
-              <Typography variant="caption" sx={{ color: '#bbb', fontSize: '0.75rem', lineHeight: 1.3 }}>
+              <CircleOutlinedIcon sx={{ fontSize: 12, color: 'text.disabled', mt: 0.3 }} />
+              <Typography variant="caption" sx={{ color: 'text.primary', fontSize: '0.75rem', lineHeight: 1.3 }}>
                 {task.title}
               </Typography>
             </Stack>
@@ -182,8 +210,8 @@ const OnboardingSummary: React.FC<OnboardingSummaryProps> = ({ api, onClick }) =
         </Stack>
       ) : (
         <Stack direction="row" spacing={0.5} alignItems="center">
-          <CheckCircleIcon sx={{ fontSize: 14, color: '#4caf50' }} />
-          <Typography variant="caption" sx={{ color: '#4caf50', fontSize: '0.75rem' }}>
+          <CheckCircleIcon sx={{ fontSize: 14, color: 'success.main' }} />
+          <Typography variant="caption" sx={{ color: 'success.main', fontSize: '0.75rem' }}>
             All tasks completed!
           </Typography>
         </Stack>
@@ -193,7 +221,7 @@ const OnboardingSummary: React.FC<OnboardingSummaryProps> = ({ api, onClick }) =
       <Typography
         variant="caption"
         sx={{
-          color: '#666',
+          color: 'text.disabled',
           fontSize: '0.65rem',
           display: 'block',
           mt: 1,
@@ -203,6 +231,7 @@ const OnboardingSummary: React.FC<OnboardingSummaryProps> = ({ api, onClick }) =
         Click to view all tasks →
       </Typography>
     </Box>
+    </ThemeProvider>
   );
 };
 

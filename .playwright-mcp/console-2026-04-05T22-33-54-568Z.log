@@ -1,0 +1,169 @@
+[     682ms] [LOG] [Storybook] Custom onboarding addon registered @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53563
+[     682ms] [LOG] [Storybook] Translation Mode addon registered @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:71254
+[     728ms] [WARNING] The 'ariaLabel' prop on 'Button' will become mandatory in Storybook 11. Buttons with text content should set 'ariaLabel={false}' to indicate that they are accessible as-is. Buttons without text content must provide a meaningful 'ariaLabel' for accessibility. The button content is: Get started for free. @ http://localhost:6006/sb-manager/globals-runtime.js:5810
+[     729ms] [WARNING] The 'ariaLabel' prop on 'Button' will become mandatory in Storybook 11. Buttons with text content should set 'ariaLabel={false}' to indicate that they are accessible as-is. Buttons without text content must provide a meaningful 'ariaLabel' for accessibility. The button content is: [object Object]. @ http://localhost:6006/sb-manager/globals-runtime.js:5810
+[     734ms] [WARNING] `IconButton` is deprecated and will be removed in Storybook 11, use `Button` instead. @ http://localhost:6006/sb-manager/globals-runtime.js:5810
+[     736ms] [WARNING] The 'ariaLabel' prop on 'Button' will become mandatory in Storybook 11. Buttons with text content should set 'ariaLabel={false}' to indicate that they are accessible as-is. Buttons without text content must provide a meaningful 'ariaLabel' for accessibility. The button content is: Uninstall. @ http://localhost:6006/sb-manager/globals-runtime.js:5810
+[     879ms] [LOG] [OnboardingPanel] API available without readyPromise @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:52934
+[     879ms] [LOG] [OnboardingPanel] Panel mounted - select a persona to begin @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:52940
+[    1377ms] [WARNING] The 'ariaLabel' prop on 'Button' will become mandatory in Storybook 11. Buttons with text content should set 'ariaLabel={false}' to indicate that they are accessible as-is. Buttons without text content must provide a meaningful 'ariaLabel' for accessibility. The button content is: Sign in with Chromatic. @ http://localhost:6006/sb-manager/globals-runtime.js:5810
+[    1377ms] [WARNING] The 'ariaLabel' prop on 'Button' will become mandatory in Storybook 11. Buttons with text content should set 'ariaLabel={false}' to indicate that they are accessible as-is. Buttons without text content must provide a meaningful 'ariaLabel' for accessibility. The button content is: Sign in with SSO. @ http://localhost:6006/sb-manager/globals-runtime.js:5810
+[    1813ms] [LOG] [Onboarding] Found sidebar: container sidebar-container css-r1cy5n  @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53525
+[    1813ms] [LOG] [Onboarding] Sidebar has 3 children: @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53527
+[    1813ms] [LOG]   Child 0: {tag: H1, class: sb-sr-only, id: global-site-h1, hasSearchInput: false, childCount: 0} @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53529
+[    1814ms] [LOG]   Child 1: {tag: svg, class: SVGAnimatedString, id: , hasSearchInput: false, childCount: 9} @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53529
+[    1814ms] [LOG]     Grandchild 1-0: {tag: symbol, class: SVGAnimatedString, id: icon--group, hasSearchInput: false} @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53537
+[    1814ms] [LOG]     Grandchild 1-1: {tag: symbol, class: SVGAnimatedString, id: icon--component, hasSearchInput: false} @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53537
+[    1814ms] [LOG]     Grandchild 1-2: {tag: symbol, class: SVGAnimatedString, id: icon--document, hasSearchInput: false} @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53537
+[    1814ms] [LOG]     Grandchild 1-3: {tag: symbol, class: SVGAnimatedString, id: icon--story, hasSearchInput: false} @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53537
+[    1814ms] [LOG]     Grandchild 1-4: {tag: symbol, class: SVGAnimatedString, id: icon--test, hasSearchInput: false} @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53537
+[    1814ms] [LOG]     Grandchild 1-5: {tag: symbol, class: SVGAnimatedString, id: icon--success, hasSearchInput: false} @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53537
+[    1814ms] [LOG]     Grandchild 1-6: {tag: symbol, class: SVGAnimatedString, id: icon--error, hasSearchInput: false} @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53537
+[    1814ms] [LOG]     Grandchild 1-7: {tag: symbol, class: SVGAnimatedString, id: icon--warning, hasSearchInput: false} @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53537
+[    1814ms] [LOG]     Grandchild 1-8: {tag: symbol, class: SVGAnimatedString, id: icon--dot, hasSearchInput: false} @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53537
+[    1815ms] [LOG]   Child 2: {tag: DIV, class: css-90phk4, id: , hasSearchInput: true, childCount: 2} @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53529
+[    1815ms] [LOG]     Grandchild 2-0: {tag: STYLE, class: , id: , hasSearchInput: false} @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53537
+[    1815ms] [LOG]     Grandchild 2-1: {tag: DIV, class: css-uwwqev, id: , hasSearchInput: true} @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53537
+[    1815ms] [LOG] [Onboarding] Found main container with 2 children @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53550
+[    1815ms] [LOG] [Onboarding] Tree parent: DIV css-1jj07fx @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53554
+[    1815ms] [LOG] [Onboarding] Inserted before tree in its parent container @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53554
+[    1815ms] [LOG] [Onboarding] Summary widget rendered @ http://localhost:6006/sb-addons/storybook-5/manager-bundle.js:53560
+[    2640ms] [LOG] [MOCK authContext.js] Module loaded - Re-exporting production AuthContext @ http://localhost:6006/.storybook/__mocks__/authContext.js:29
+[    2644ms] [LOG] [Mock Data] Initialized stores: {File: 6, Document: 3, ParsedContent: 3} @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:63
+[    2647ms] [LOG] [MOCK vectorStoreDB.js] Module loaded - mock IndexedDB operations @ http://localhost:6006/.storybook/__mocks__/vectorStoreDB.js:4
+[    2648ms] [LOG] [Mock Data] generateClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:742
+[    2648ms] [LOG] [Mock amplifyClient] getAmplifyClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/amplifyClient.js:9
+[    2754ms] [INFO] 🌐 i18next is made possible by our own product, Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙 @ http://localhost:6006/node_modules/.cache/storybook/10.2.19/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/i18next.js?v=e5d13375:1784
+[    3010ms] [LOG] [Mock Data] Clearing all data stores @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:994
+[    3011ms] [LOG] [Mock Data] All data stores cleared @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:1002
+[    3011ms] [LOG] [Preview] Cleared mock data for story @ http://localhost:6006/.storybook/preview.jsx:465
+[    3011ms] [LOG] [Mock Data Gen 2] Initializing mock data @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:1144
+[    3011ms] [LOG] [Mock Data] seedMockAssistantChats: Replacing with 1 assistant chats @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:969
+[    3011ms] [LOG] [Mock Data Gen 2] Seeded AssistantChat: mock-assistant-chat-1 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:1150
+[    3011ms] [LOG] [Mock Data] seedMockFiles: Adding 6 files @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:764
+[    3012ms] [LOG] [Mock Data Gen 2] Seeded Files: 6 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:1155
+[    3012ms] [LOG] [Mock Data Gen 2] Initializing mock data @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:1144
+[    3012ms] [LOG] [Mock Data] seedMockAssistantChats: Replacing with 1 assistant chats @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:969
+[    3012ms] [LOG] [Mock Data Gen 2] Seeded AssistantChat: mock-assistant-chat-1 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:1150
+[    3012ms] [LOG] [Mock Data] seedMockFiles: Adding 6 files @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:764
+[    3012ms] [LOG] [Mock Data Gen 2] Seeded Files: 6 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:1155
+[    3012ms] [LOG] [Preview] Initialized default mock data for story @ http://localhost:6006/.storybook/preview.jsx:472
+[    3228ms] [LOG] [Mock AuthContext] Providing auth: {user: Object, session: Object, isLoading: false, error: undefined} @ http://localhost:6006/.storybook/__mocks__/authContext.js:76
+[    3231ms] [LOG] [MOCK CourseVectorStore] Initialized with mock data @ http://localhost:6006/.storybook/__mocks__/FileManager2.js:64
+[    3245ms] [LOG] [useTranslationWithCapture] t() called: {key: confirm_password_placeholder, namespace: auth, mode: off, value: Re-enter your password} @ http://localhost:6006/.storybook/addons/translation-mode/hooks/useTranslationWithCapture.tsx:15
+[    3322ms] [LOG] [TranslationOverlay] Mode changed to: off for key: demo.title @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3325ms] [LOG] [TranslationOverlay] Mode changed to: off for key: demo.description @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3327ms] [LOG] [TranslationOverlay] Mode changed to: off for key: demo.instructions @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3329ms] [LOG] [TranslationOverlay] Mode changed to: off for key: demo.auth_form_heading @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3331ms] [LOG] [TranslationOverlay] Mode changed to: off for key: username @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3333ms] [LOG] [TranslationOverlay] Mode changed to: off for key: username @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3335ms] [LOG] [TranslationOverlay] Mode changed to: off for key: password @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3337ms] [LOG] [TranslationOverlay] Mode changed to: off for key: password @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3339ms] [LOG] [TranslationOverlay] Mode changed to: off for key: email @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3341ms] [LOG] [TranslationOverlay] Mode changed to: off for key: email @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3343ms] [LOG] [TranslationOverlay] Mode changed to: off for key: sign_in @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3345ms] [LOG] [TranslationOverlay] Mode changed to: off for key: sign_up @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3346ms] [LOG] [TranslationOverlay] Mode changed to: off for key: forgot_password @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3348ms] [LOG] [TranslationOverlay] Mode changed to: off for key: reset_password @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3349ms] [LOG] [TranslationOverlay] Mode changed to: off for key: sign_out @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3351ms] [LOG] [TranslationOverlay] Mode changed to: off for key: demo.password_reset_heading @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3352ms] [LOG] [TranslationOverlay] Mode changed to: off for key: confirm_password @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3354ms] [LOG] [TranslationOverlay] Mode changed to: off for key: confirm_password @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3356ms] [LOG] [TranslationOverlay] Mode changed to: off for key: confirm_password_placeholder @ http://localhost:6006/.storybook/addons/translation-mode/components/TranslationOverlay.tsx:24
+[    3357ms] [LOG] [TranslationModeController] Setting mode to: off @ http://localhost:6006/.storybook/addons/translation-mode/decorator.tsx:41
+[    3358ms] [LOG] [TranslationModeController] Setting mode to: off @ http://localhost:6006/.storybook/addons/translation-mode/decorator.tsx:41
+[    3359ms] [LOG] [SectionContext] useEffect triggered {authLoading: false, hasUser: true, userSub: mock-user-sub} @ http://localhost:6006/src/context/sectionContext.jsx:15
+[    3359ms] [LOG] [SectionContext] Fetching sections for userId: mock-user-sub @ http://localhost:6006/src/context/sectionContext.jsx:30
+[    3360ms] [LOG] [Mock Data] generateClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:742
+[    3360ms] [LOG] [Mock amplifyClient] getAmplifyClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/amplifyClient.js:9
+[    3360ms] [LOG] [Mock Data] Section.list() called with options: undefined @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:435
+[    3361ms] [LOG] [Mock Data] generateClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:742
+[    3361ms] [LOG] [Mock amplifyClient] getAmplifyClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/amplifyClient.js:9
+[    3361ms] [LOG] [Mock Data] Assignment.list() called with options: {filter: Object} @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:435
+[    3362ms] [LOG] [Mock Data] generateClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:742
+[    3362ms] [LOG] [Mock amplifyClient] getAmplifyClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/amplifyClient.js:9
+[    3363ms] [LOG] [Mock Data] Grade.observeQuery() called with filter: {filter: Object} @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:418
+[    3363ms] [LOG] [Mock Data] Grade.observeQuery() applying filter: {unitID: Object} @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:222
+[    3363ms] [LOG] [Mock Data] Grade.observeQuery() items before filter: 0 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:223
+[    3364ms] [LOG] [Mock Data] Grade.observeQuery() items after filter: 0 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:240
+[    3364ms] [LOG] [Mock Data] Grade.observeQuery() returning 0 items (filter applied) {filter: Object} @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:242
+[    3364ms] [LOG] [Mock Data] Grade subscription added. Total subscriptions: 1 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:251
+[    3365ms] [LOG] [UnitContext] useEffect triggered {id: mock-unit-id, authLoading: false, hasUser: true, userSub: mock-user-sub} @ http://localhost:6006/src/context/unitContext.jsx:378
+[    3365ms] [LOG] [UnitContext] Fetching unit data for id: mock-unit-id @ http://localhost:6006/src/context/unitContext.jsx:395
+[    3365ms] [LOG] [Mock Data] generateClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:742
+[    3366ms] [LOG] [Mock amplifyClient] getAmplifyClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/amplifyClient.js:9
+[    3366ms] [LOG] [Mock Data] Unit.observeQuery() called with filter: {filter: Object} @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:418
+[    3366ms] [LOG] [Mock Data] Unit.observeQuery() applying filter: {id: Object} @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:222
+[    3367ms] [LOG] [Mock Data] Unit.observeQuery() items before filter: 0 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:223
+[    3367ms] [LOG] [Mock Data] Unit.observeQuery() items after filter: 0 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:240
+[    3367ms] [LOG] [Mock Data] Unit.observeQuery() returning 0 items (filter applied) {filter: Object} @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:242
+[    3367ms] [LOG] [Mock Data] Unit subscription added. Total subscriptions: 1 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:251
+[    3368ms] [LOG] [Mock Data] generateClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:742
+[    3368ms] [LOG] [Mock amplifyClient] getAmplifyClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/amplifyClient.js:9
+[    3369ms] [LOG] [Mock Data] Word.observeQuery() called with filter: undefined @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:418
+[    3369ms] [LOG] [Mock Data] Word.observeQuery() returning 0 items (filter applied) undefined @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:242
+[    3369ms] [LOG] [Mock Data] Word subscription added. Total subscriptions: 1 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:251
+[    3370ms] [LOG] [Mock Data] generateClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:742
+[    3370ms] [LOG] [Mock amplifyClient] getAmplifyClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/amplifyClient.js:9
+[    3370ms] [LOG] [Mock Data] Question.observeQuery() called with filter: undefined @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:418
+[    3371ms] [LOG] [Mock Data] Question.observeQuery() returning 0 items (filter applied) undefined @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:242
+[    3371ms] [LOG] [Mock Data] Question subscription added. Total subscriptions: 1 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:251
+[    3372ms] [LOG] [FilesContext] Initializing vector store from IndexedDB @ http://localhost:6006/src/context/fileContext.jsx:62
+[    3372ms] [LOG] [FilesContext] fetchFiles called @ http://localhost:6006/src/context/fileContext.jsx:208
+[    3373ms] [LOG] [FilesContext] User authenticated: mock-user-sub @ http://localhost:6006/src/context/fileContext.jsx:210
+[    3373ms] [LOG] [FilesContext] Identity ID: us-east-1:mock-identity-123 @ http://localhost:6006/src/context/fileContext.jsx:211
+[    3373ms] [LOG] [FilesContext] About to subscribe to File model @ http://localhost:6006/src/context/fileContext.jsx:219
+[    3374ms] [LOG] [Mock Data] generateClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:742
+[    3374ms] [LOG] [Mock amplifyClient] getAmplifyClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/amplifyClient.js:9
+[    3374ms] [LOG] [Mock Data] File.observeQuery() called with filter: undefined @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:418
+[    3375ms] [LOG] [Mock Data] File.observeQuery() returning 6 items (filter applied) undefined @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:242
+[    3375ms] [LOG] [Mock Data] File subscription added. Total subscriptions: 1 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:251
+[    3376ms] [LOG] [Mock Data] generateClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:742
+[    3376ms] [LOG] [Mock amplifyClient] getAmplifyClient() called - returning mock client @ http://localhost:6006/.storybook/__mocks__/amplifyClient.js:9
+[    3376ms] [LOG] [Mock Data] Document.observeQuery() called with filter: undefined @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:418
+[    3376ms] [LOG] [Mock Data] Document.observeQuery() returning 0 items (filter applied) undefined @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:242
+[    3376ms] [LOG] [Mock Data] Document subscription added. Total subscriptions: 1 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:251
+[    3377ms] [LOG] [ChatContext] Setting up observeQuery for AssistantChat @ http://localhost:6006/src/context/chatContext.jsx:70
+[    3377ms] [LOG] [Mock Data] AssistantChat.observeQuery() called with filter: {sortDirection: DESC, sortField: createdAt} @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:418
+[    3378ms] [LOG] [Mock Data] AssistantChat.observeQuery() returning 1 items (filter applied) {sortDirection: DESC, sortField: createdAt} @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:242
+[    3378ms] [LOG] [Mock Data] AssistantChat subscription added. Total subscriptions: 1 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:251
+[    3379ms] [LOG] [ChatContext] Waiting for subscription to initialize @ http://localhost:6006/src/context/chatContext.jsx:156
+[    3383ms] [LOG] [useTranslationWithCapture] t() called: {key: confirm_password_placeholder, namespace: auth, mode: off, value: Re-enter your password} @ http://localhost:6006/.storybook/addons/translation-mode/hooks/useTranslationWithCapture.tsx:15
+[    3416ms] [LOG] [SectionContext] Initial sections: 0 [] @ http://localhost:6006/src/context/sectionContext.jsx:38
+[    3417ms] [LOG] [Mock Data] Section.onCreate() called with filter: undefined @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:423
+[    3417ms] [LOG] [Mock Data] Section.onCreate() subscription added. Total: 1 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:388
+[    3417ms] [LOG] [Mock Data] Section.onUpdate() called with filter: undefined @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:427
+[    3417ms] [LOG] [Mock Data] Section.onUpdate() subscription added. Total: 1 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:388
+[    3417ms] [LOG] [Mock Data] Section.onDelete() called with filter: undefined @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:431
+[    3417ms] [LOG] [Mock Data] Section.onDelete() subscription added. Total: 1 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:388
+[    3417ms] [LOG] [Mock Data] Assignment.onCreate() called with filter: {filter: Object} @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:423
+[    3417ms] [LOG] [Mock Data] Assignment.onCreate() subscription added. Total: 1 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:388
+[    3417ms] [LOG] [Mock Data] Assignment.onUpdate() called with filter: {filter: Object} @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:427
+[    3418ms] [LOG] [Mock Data] Assignment.onUpdate() subscription added. Total: 1 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:388
+[    3418ms] [LOG] [Mock Data] Assignment.onDelete() called with filter: {filter: Object} @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:431
+[    3418ms] [LOG] [Mock Data] Assignment.onDelete() subscription added. Total: 1 @ http://localhost:6006/.storybook/__mocks__/aws-amplify-data.js:388
+[    3442ms] [LOG] [FilesContext] File observeQuery subscription triggered: @ http://localhost:6006/src/context/fileContext.jsx:223
+[    3442ms] [LOG]   - items.length: 6 @ http://localhost:6006/src/context/fileContext.jsx:224
+[    3442ms] [LOG]   - isSynced: true @ http://localhost:6006/src/context/fileContext.jsx:225
+[    3442ms] [LOG]   - items: [Object, Object, Object, Object, Object, Object] @ http://localhost:6006/src/context/fileContext.jsx:226
+[    3443ms] [LOG] [ChatContext] AssistantChat query update: 1 items (synced) @ http://localhost:6006/src/context/chatContext.jsx:81
+[    3443ms] [LOG] [ChatContext] First item details: {id: mock-assistant-chat-1, updatedAt: 2024-01-26T10:15:00.000Z} @ http://localhost:6006/src/context/chatContext.jsx:83
+[    3443ms] [LOG] [ChatContext] AssistantChat subscription initialized @ http://localhost:6006/src/context/chatContext.jsx:95
+[    3443ms] [LOG] [ChatContext] AssistantChat list updated: 1 chats @ http://localhost:6006/src/context/chatContext.jsx:99
+[    3444ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:6006/iframe.html?id=translation-mode-demo--default&viewMode=story&globals=:0
+[    3444ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:6006/iframe.html?id=translation-mode-demo--default&viewMode=story&globals=:0
+[    3494ms] [LOG] [ChatContext] Setting initial chat: mock-assistant-chat-1 @ http://localhost:6006/src/context/chatContext.jsx:107
+[    3494ms] [LOG] [FilesContext] Files count changed: 0 → 6 @ http://localhost:6006/src/context/fileContext.jsx:254
+[    3494ms] [LOG] [MOCK CourseVectorStore] Initialized with mock data @ http://localhost:6006/.storybook/__mocks__/FileManager2.js:64
+[    3495ms] [LOG] [MOCK CourseVectorStore] Initialized with mock data @ http://localhost:6006/.storybook/__mocks__/FileManager2.js:64
+[    3547ms] [LOG] [FilesContext] Vector store population triggered {isInitialLoad: true, filesCount: 6, currentVectorStoreSize: 3, documentsCount: 0} @ http://localhost:6006/src/context/fileContext.jsx:85
+[    3548ms] [LOG] [FilesContext] Vector store population complete - 3 total embeddings @ http://localhost:6006/src/context/fileContext.jsx:193
+[    3548ms] [LOG] [ChatContext] Chat exists and not archived, skipping creation @ http://localhost:6006/src/context/chatContext.jsx:164
+[    3654ms] [LOG] [useTranslationWithCapture] t() called: {key: confirm_password_placeholder, namespace: auth, mode: off, value: Re-enter your password} @ http://localhost:6006/.storybook/addons/translation-mode/hooks/useTranslationWithCapture.tsx:15
+[    4000ms] [LOG] [Task Completion] Auto-completion detector initialized @ http://localhost:6006/.storybook/code/task-completion.ts:33
+[    4000ms] [LOG] [Preview] Task completion detector initialized @ http://localhost:6006/.storybook/preview.jsx:96
+[    4091ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:6006/locales/ja/stories.json:0
+[    4092ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:6006/locales/es/stories.json:0
+[    4092ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:6006/locales/fr/stories.json:0
+[    4093ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:6006/locales/zh/stories.json:0
+[    4093ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:6006/locales/de/stories.json:0

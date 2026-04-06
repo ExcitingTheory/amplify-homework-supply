@@ -10,27 +10,25 @@ import InputIcon from '@mui/icons-material/Input';
 import { useTranslation } from 'next-i18next';
 
 export const AllowedInputSelector = React.memo(({
-    ids, defaultAllowedInputs = ['text', 'audio'], allowedInput = [], setAllowedInput,
+    ids, defaultAllowedInputs = ['text'], allowedInput = [], setAllowedInput,
     // wordIDs,
 }) => {
     const { t } = useTranslation('editor.ai');
     const [anchorEl, setAnchorEl] = React.useState(null);
-    const [_allowedInputs, setAllowedInputs] = React.useState(allowedInput.length > 0 ? allowedInput : defaultAllowedInputs);
+    const [_allowedInput, setAllowedInputLocal] = React.useState(
+        allowedInput.length > 0 ? [allowedInput[0]] : defaultAllowedInputs
+    );
     const open = Boolean(anchorEl);
 
     // Sync external allowedInput prop with internal state
     React.useEffect(() => {
         if (allowedInput && allowedInput.length > 0) {
-            const newAllowedInputString = JSON.stringify(allowedInput);
-            const currentAllowedInputString = JSON.stringify(_allowedInputs);
-            if (newAllowedInputString !== currentAllowedInputString) {
-                setAllowedInputs(allowedInput);
+            const selected = [allowedInput[0]];
+            if (JSON.stringify(selected) !== JSON.stringify(_allowedInput)) {
+                setAllowedInputLocal(selected);
             }
         }
     }, [allowedInput]);
-
-    // Removed the useEffect that was causing infinite loop
-    // Only update parent when menu closes
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -38,13 +36,13 @@ export const AllowedInputSelector = React.memo(({
 
     const handleClose = () => {
         setAnchorEl(null);
-        setAllowedInput(_allowedInputs);
+        setAllowedInput(_allowedInput);
     };
 
     const handleSelect = (event) => {
         const value = event.target.getAttribute('value');
-        const mergeInputs = _allowedInputs.includes(value) ? _allowedInputs.filter((x) => x !== value) : [..._allowedInputs, value];
-        setAllowedInputs(mergeInputs);
+        // Single-select: always set to just the clicked value
+        setAllowedInputLocal([value]);
     };
 
     return (
@@ -79,28 +77,28 @@ export const AllowedInputSelector = React.memo(({
                     }}
                     value='text'>
 
-                    {_allowedInputs.includes('text') &&
+                    {_allowedInput.includes('text') &&
                         <ListItemIcon>
                             <Check />
                         </ListItemIcon>}
                     {t('promptMethodSelector.menuItems.text')}</MenuItem>
                 <MenuItem onClick={handleSelect} value='audio'>
 
-                    {_allowedInputs.includes('audio') &&
+                    {_allowedInput.includes('audio') &&
                         <ListItemIcon>
                             <Check />
                         </ListItemIcon>}
                     {t('promptMethodSelector.menuItems.audio')}</MenuItem>
                 <MenuItem onClick={handleSelect} value='image'>
 
-                    {_allowedInputs.includes('image') &&
+                    {_allowedInput.includes('image') &&
                         <ListItemIcon>
                             <Check />
                         </ListItemIcon>}
                     {t('promptMethodSelector.menuItems.image')}</MenuItem>
                 <MenuItem onClick={handleSelect} value='writing'>
 
-                    {_allowedInputs.includes('writing') &&
+                    {_allowedInput.includes('writing') &&
                         <ListItemIcon>
                             <Check />
                         </ListItemIcon>}
@@ -111,7 +109,7 @@ export const AllowedInputSelector = React.memo(({
                     }}
                 >
 
-                    {_allowedInputs.includes('video') &&
+                    {_allowedInput.includes('video') &&
                         <ListItemIcon>
                             <Check />
                         </ListItemIcon>}

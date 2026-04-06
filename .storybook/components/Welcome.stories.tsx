@@ -6,7 +6,7 @@
  * onboarding tools in the sidebar and addon panel.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 import { linkTo } from '@storybook/addon-links';
 import { 
@@ -16,7 +16,10 @@ import {
   Paper,
   Button,
   Link,
+  ThemeProvider,
+  createTheme,
 } from '@mui/material';
+import { useTheme as useStorybookTheme } from 'storybook/theming';
 import SchoolIcon from '@mui/icons-material/School';
 import PersonIcon from '@mui/icons-material/Person';
 import CodeIcon from '@mui/icons-material/Code';
@@ -30,6 +33,22 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import TranslateIcon from '@mui/icons-material/Translate';
 import LanguageIcon from '@mui/icons-material/Language';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+
+function buildMuiTheme(isDark: boolean) {
+  return createTheme({
+    palette: {
+      mode: isDark ? 'dark' : 'light',
+      background: {
+        default: isDark ? '#1a1a2e' : '#f6f9fc',
+        paper: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+      },
+      text: {
+        primary: isDark ? '#e0e0e0' : '#2E3338',
+        secondary: isDark ? '#b0b0b0' : '#5C6570',
+      },
+    },
+  });
+}
 
 const meta: Meta = {
   title: 'Getting Started/Welcome',
@@ -62,12 +81,18 @@ type Story = StoryObj;
  */
 export const Welcome: Story = {
   render: () => {
+    let sbTheme: any;
+    try { sbTheme = useStorybookTheme(); } catch { sbTheme = null; }
+    const isDark = sbTheme?.base === 'dark' || (sbTheme == null && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+    const muiTheme = useMemo(() => buildMuiTheme(isDark), [isDark]);
+
     return (
+      <ThemeProvider theme={muiTheme}>
       <Box
         sx={{
           minHeight: '100vh',
-          bgcolor: '#1a1a2e',
-          color: '#e0e0e0',
+          bgcolor: 'background.default',
+          color: 'text.primary',
           py: 6,
         }}
       >
@@ -79,7 +104,7 @@ export const Welcome: Story = {
               component="h1"
               gutterBottom
               sx={{ 
-                color: '#fff', 
+                color: 'text.primary', 
                 fontWeight: 700,
               }}
             >
@@ -87,7 +112,7 @@ export const Welcome: Story = {
             </Typography>
             <Typography
               variant="h5"
-              sx={{ color: '#b0b0b0', mb: 4, maxWidth: 600, mx: 'auto' }}
+              sx={{ color: 'text.secondary', mb: 4, maxWidth: 600, mx: 'auto' }}
             >
               An interactive e-learning platform for creating, sharing, and completing educational content
             </Typography>
@@ -102,7 +127,7 @@ export const Welcome: Story = {
               border: '1px solid rgba(33, 150, 243, 0.3)',
             }}
           >
-            <Typography variant="h5" sx={{ color: '#fff', mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h5" sx={{ color: 'text.primary', mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
               🚀 Getting Started
             </Typography>
             
@@ -124,11 +149,11 @@ export const Welcome: Story = {
                   1
                 </Box>
                 <Box>
-                  <Typography variant="h6" sx={{ color: '#fff', mb: 0.5 }}>
+                  <Typography variant="h6" sx={{ color: 'text.primary', mb: 0.5 }}>
                     <ArrowBackIcon sx={{ fontSize: 18, mr: 1, verticalAlign: 'middle' }} />
                     Select Your Role in the Sidebar
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#b0b0b0' }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Look at the <strong>Onboarding widget</strong> in the left sidebar. Choose your role: 
                     <strong> Instructor</strong>, <strong>Learner</strong>, <strong>Developer</strong>, or <strong>Translator</strong> 
                     to see personalized tasks.
@@ -153,11 +178,11 @@ export const Welcome: Story = {
                   2
                 </Box>
                 <Box>
-                  <Typography variant="h6" sx={{ color: '#fff', mb: 0.5 }}>
+                  <Typography variant="h6" sx={{ color: 'text.primary', mb: 0.5 }}>
                     <ArrowDownwardIcon sx={{ fontSize: 18, mr: 1, verticalAlign: 'middle' }} />
                     View Tasks in the Onboarding Panel
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#b0b0b0' }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Click the <strong>"Onboarding"</strong> tab in the addon panel at the bottom of the screen 
                     to see your full task list, progress tracking, and interactive tutorials.
                   </Typography>
@@ -181,10 +206,10 @@ export const Welcome: Story = {
                   3
                 </Box>
                 <Box>
-                  <Typography variant="h6" sx={{ color: '#fff', mb: 0.5 }}>
+                  <Typography variant="h6" sx={{ color: 'text.primary', mb: 0.5 }}>
                     Explore Stories in the Sidebar
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#b0b0b0' }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Browse the component stories in the sidebar menu. Try the{' '}
                     <Link 
                       component="button" 
@@ -231,11 +256,11 @@ export const Welcome: Story = {
                   4
                 </Box>
                 <Box>
-                  <Typography variant="h6" sx={{ color: '#fff', mb: 0.5 }}>
+                  <Typography variant="h6" sx={{ color: 'text.primary', mb: 0.5 }}>
                     <ArrowUpwardIcon sx={{ fontSize: 18, mr: 1, verticalAlign: 'middle' }} />
                     Try the Translation Feature
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#b0b0b0' }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Look for the <TranslateIcon sx={{ fontSize: 16, verticalAlign: 'middle', mx: 0.5 }} /> 
                     <strong>Globe icon</strong> in the toolbar at the top. Click it to switch languages 
                     and see how components adapt to different locales (English, Japanese, Spanish, French, Chinese, German).
@@ -246,54 +271,54 @@ export const Welcome: Story = {
           </Paper>
 
           {/* Role Overview */}
-          <Typography variant="h5" sx={{ color: '#fff', mb: 3 }}>
+          <Typography variant="h5" sx={{ color: 'text.primary', mb: 3 }}>
             Available Roles
           </Typography>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
-            <Paper sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
               <PersonIcon sx={{ fontSize: 32, color: '#2196F3' }} />
               <Box>
-                <Typography variant="subtitle1" sx={{ color: '#fff', fontWeight: 600 }}>
+                <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 600 }}>
                   Instructor
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#b0b0b0' }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                   Create lessons, manage classes, and track student progress
                 </Typography>
               </Box>
             </Paper>
 
-            <Paper sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
               <SchoolIcon sx={{ fontSize: 32, color: '#4CAF50' }} />
               <Box>
-                <Typography variant="subtitle1" sx={{ color: '#fff', fontWeight: 600 }}>
+                <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 600 }}>
                   Learner
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#b0b0b0' }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                   Join classes, complete assignments, and track your learning
                 </Typography>
               </Box>
             </Paper>
 
-            <Paper sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
               <CodeIcon sx={{ fontSize: 32, color: '#9C27B0' }} />
               <Box>
-                <Typography variant="subtitle1" sx={{ color: '#fff', fontWeight: 600 }}>
+                <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 600 }}>
                   Developer
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#b0b0b0' }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                   Explore component library and technical documentation
                 </Typography>
               </Box>
             </Paper>
 
-            <Paper sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
               <LanguageIcon sx={{ fontSize: 32, color: '#FF9800' }} />
               <Box>
-                <Typography variant="subtitle1" sx={{ color: '#fff', fontWeight: 600 }}>
+                <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 600 }}>
                   Translator
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#b0b0b0' }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                   Localize content and review translations across languages
                 </Typography>
               </Box>
@@ -301,7 +326,7 @@ export const Welcome: Story = {
           </Box>
 
           {/* Platform Features */}
-          <Typography variant="h5" sx={{ color: '#fff', mb: 3 }}>
+          <Typography variant="h5" sx={{ color: 'text.primary', mb: 3 }}>
             Platform Features
           </Typography>
 
@@ -309,70 +334,66 @@ export const Welcome: Story = {
             <Paper 
               sx={{ 
                 p: 2, 
-                bgcolor: 'rgba(255,255,255,0.03)', 
                 textAlign: 'center',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.08)', transform: 'translateY(-2px)' },
+                '&:hover': { bgcolor: 'action.hover', transform: 'translateY(-2px)' },
               }}
               onClick={linkTo('📚 Creating Lessons/Workbook', 'WorkbookWithContent')}
             >
               <MenuBookIcon sx={{ fontSize: 40, color: '#2196F3', mb: 1 }} />
-              <Typography variant="subtitle2" sx={{ color: '#fff' }}>Rich Editor</Typography>
-              <Typography variant="caption" sx={{ color: '#b0b0b0' }}>Quizzes, vocabulary, multimedia</Typography>
+              <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>Rich Editor</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>Quizzes, vocabulary, multimedia</Typography>
             </Paper>
 
             <Paper 
               sx={{ 
                 p: 2, 
-                bgcolor: 'rgba(255,255,255,0.03)', 
                 textAlign: 'center',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.08)', transform: 'translateY(-2px)' },
+                '&:hover': { bgcolor: 'action.hover', transform: 'translateY(-2px)' },
               }}
               onClick={linkTo('💬 AI Assistant/Chat Sidebar', 'GettingStarted')}
             >
               <ChatIcon sx={{ fontSize: 40, color: '#4CAF50', mb: 1 }} />
-              <Typography variant="subtitle2" sx={{ color: '#fff' }}>AI Assistant</Typography>
-              <Typography variant="caption" sx={{ color: '#b0b0b0' }}>Content creation & translations</Typography>
+              <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>AI Assistant</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>Content creation & translations</Typography>
             </Paper>
 
             <Paper 
               sx={{ 
                 p: 2, 
-                bgcolor: 'rgba(255,255,255,0.03)', 
                 textAlign: 'center',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.08)', transform: 'translateY(-2px)' },
+                '&:hover': { bgcolor: 'action.hover', transform: 'translateY(-2px)' },
               }}
               onClick={linkTo('🎙️ Recording Audio/Recording Studio', 'StartFromScratch')}
             >
               <RecordVoiceOverIcon sx={{ fontSize: 40, color: '#FF9800', mb: 1 }} />
-              <Typography variant="subtitle2" sx={{ color: '#fff' }}>Audio Tools</Typography>
-              <Typography variant="caption" sx={{ color: '#b0b0b0' }}>Recording & text-to-speech</Typography>
+              <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>Audio Tools</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>Recording & text-to-speech</Typography>
             </Paper>
 
             <Paper 
               sx={{ 
                 p: 2, 
-                bgcolor: 'rgba(255,255,255,0.03)', 
                 textAlign: 'center',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.08)', transform: 'translateY(-2px)' },
+                '&:hover': { bgcolor: 'action.hover', transform: 'translateY(-2px)' },
               }}
               onClick={linkTo('📄 Pages/Application Pages', 'Index')}
             >
               <FolderIcon sx={{ fontSize: 40, color: '#9C27B0', mb: 1 }} />
-              <Typography variant="subtitle2" sx={{ color: '#fff' }}>Full Pages</Typography>
-              <Typography variant="caption" sx={{ color: '#b0b0b0' }}>Complete user flows</Typography>
+              <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>Full Pages</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>Complete user flows</Typography>
             </Paper>
           </Box>
 
           {/* Quick Links */}
-          <Typography variant="h5" sx={{ color: '#fff', mb: 3, mt: 4 }}>
+          <Typography variant="h5" sx={{ color: 'text.primary', mb: 3, mt: 4 }}>
             Quick Links
           </Typography>
 
@@ -381,7 +402,7 @@ export const Welcome: Story = {
               variant="outlined" 
               size="small" 
               onClick={linkTo('📚 Creating Lessons/Editor', 'EmptyEditorTextFormatting')}
-              sx={{ color: '#b0b0b0', borderColor: '#444' }}
+              sx={{ color: 'text.secondary', borderColor: 'divider' }}
             >
               Editor
             </Button>
@@ -389,7 +410,7 @@ export const Welcome: Story = {
               variant="outlined" 
               size="small" 
               onClick={linkTo('📁 Managing Content/Vocabulary Review', 'Default')}
-              sx={{ color: '#b0b0b0', borderColor: '#444' }}
+              sx={{ color: 'text.secondary', borderColor: 'divider' }}
             >
               Vocabulary
             </Button>
@@ -397,7 +418,7 @@ export const Welcome: Story = {
               variant="outlined" 
               size="small" 
               onClick={linkTo('📁 Managing Content/File Manager', 'Default')}
-              sx={{ color: '#b0b0b0', borderColor: '#444' }}
+              sx={{ color: 'text.secondary', borderColor: 'divider' }}
             >
               File Manager
             </Button>
@@ -405,7 +426,7 @@ export const Welcome: Story = {
               variant="outlined" 
               size="small" 
               onClick={linkTo('Translation Mode/Demo', 'Default')}
-              sx={{ color: '#b0b0b0', borderColor: '#444' }}
+              sx={{ color: 'text.secondary', borderColor: 'divider' }}
             >
               Translation Demo
             </Button>
@@ -413,20 +434,21 @@ export const Welcome: Story = {
               variant="outlined" 
               size="small" 
               onClick={linkTo('📄 Pages/Application Pages', 'Sections')}
-              sx={{ color: '#b0b0b0', borderColor: '#444' }}
+              sx={{ color: 'text.secondary', borderColor: 'divider' }}
             >
               Sections Page
             </Button>
           </Box>
 
           {/* Footer */}
-          <Box sx={{ textAlign: 'center', mt: 6, color: '#666' }}>
+          <Box sx={{ textAlign: 'center', mt: 6, color: 'text.disabled' }}>
             <Typography variant="body2">
               Built with Next.js • AWS Amplify • Material UI • OpenAI
             </Typography>
           </Box>
         </Container>
       </Box>
+      </ThemeProvider>
     );
   },
 };

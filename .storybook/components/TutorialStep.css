@@ -1,15 +1,17 @@
+@import './theme-vars.css';
+
 .tutorial-step {
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--sb-border);
   border-radius: 8px;
   padding: 20px;
   margin: 20px 0;
-  background: #f9f9f9;
+  background: var(--sb-bg-input);
   transition: all 0.3s ease;
 }
 
 .tutorial-step[data-completed="true"] {
-  border-color: #4caf50;
-  background: #f1f8f4;
+  border-color: var(--sb-accent-green);
+  background: var(--sb-accent-green-light);
 }
 
 .tutorial-step-header {
@@ -29,28 +31,28 @@
   margin: 0 0 8px 0;
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: var(--sb-text-primary);
 }
 
 .step-description {
   margin: 0;
   font-size: 14px;
-  color: #666;
+  color: var(--sb-text-secondary);
   line-height: 1.5;
 }
 
 .tutorial-demo {
   margin: 16px 0;
   padding: 16px;
-  background: white;
+  background: var(--sb-bg-primary);
   border-radius: 4px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--sb-border);
 }
 
 .demo-label {
   font-size: 14px;
   font-weight: 600;
-  color: #1976d2;
+  color: var(--sb-accent-blue);
   margin-bottom: 12px;
 }
 
@@ -73,31 +75,31 @@
 }
 
 .tutorial-button.primary {
-  background: #1976d2;
+  background: var(--sb-accent-blue);
   color: white;
 }
 
 .tutorial-button.primary:hover:not(:disabled) {
-  background: #1565c0;
+  background: var(--sb-accent-blue-hover);
 }
 
 .tutorial-button.primary:disabled {
-  background: #ccc;
+  background: var(--sb-border-input);
   cursor: not-allowed;
 }
 
 .tutorial-button.secondary {
-  background: white;
-  color: #1976d2;
-  border: 1px solid #1976d2;
+  background: var(--sb-bg-primary);
+  color: var(--sb-accent-blue);
+  border: 1px solid var(--sb-accent-blue);
 }
 
 .tutorial-button.secondary:hover {
-  background: #e3f2fd;
+  background: var(--sb-accent-blue-light);
 }
 
 .completion-message {
-  color: #4caf50;
+  color: var(--sb-accent-green);
   font-weight: 500;
   font-size: 14px;
 }

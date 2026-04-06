@@ -88,7 +88,7 @@ export function useTranslationWithCapture(
         // In highlight or edit mode, wrap the text in TranslationOverlay for visual feedback
         if (mode === 'highlight' || mode === 'edit') {
           console.log('[useTranslationWithCapture] Wrapping in TranslationOverlay:', key);
-          return React.createElement(
+          const element = React.createElement(
             TranslationOverlay,
             {
               tKey: key,
@@ -98,6 +98,19 @@ export function useTranslationWithCapture(
             },
             displayValue
           );
+          // Return a Proxy so the element renders as a React component in JSX
+          // but coerces to the plain string in title/aria-label attributes
+          return new Proxy(element, {
+            get(target, prop) {
+              if (prop === Symbol.toPrimitive) {
+                return () => String(displayValue);
+              }
+              if (prop === 'toString' || prop === 'valueOf') {
+                return () => String(displayValue);
+              }
+              return (target as any)[prop];
+            },
+          }) as any;
         }
 
         return displayValue;

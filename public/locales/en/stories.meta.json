@@ -1,0 +1,57 @@
+{
+  "demo.title": {
+    "context": "Main heading for the Translation Mode demo component in Storybook",
+    "component": {
+      "location": ".storybook/addons/translation-mode/components/TranslationDemo.tsx",
+      "description": "Demo component showcasing TranslationOverlay wrapping and translation metadata"
+    },
+    "usage": "Page title for the translation demo story",
+    "impact": "low",
+    "userType": "developer",
+    "tone": "neutral"
+  },
+  "demo.description": {
+    "context": "Introductory paragraph explaining how to use translation mode",
+    "component": {
+      "location": ".storybook/addons/translation-mode/components/TranslationDemo.tsx",
+      "description": "Demo component showcasing TranslationOverlay wrapping and translation metadata"
+    },
+    "usage": "Descriptive text below the title",
+    "impact": "low",
+    "userType": "developer",
+    "tone": "instructional"
+  },
+  "demo.instructions": {
+    "context": "Info alert telling the user how to activate translation mode",
+    "component": {
+      "location": ".storybook/addons/translation-mode/components/TranslationDemo.tsx",
+      "description": "Demo component showcasing TranslationOverlay wrapping and translation metadata"
+    },
+    "usage": "Inline help text in an info Alert",
+    "impact": "low",
+    "userType": "developer",
+    "tone": "instructional"
+  },
+  "demo.auth_form_heading": {
+    "context": "Section heading for the authentication form demo area",
+    "component": {
+      "location": ".storybook/addons/translation-mode/components/TranslationDemo.tsx",
+      "description": "Demo component showcasing TranslationOverlay wrapping and translation metadata"
+    },
+    "usage": "Section heading",
+    "impact": "low",
+    "userType": "developer",
+    "tone": "neutral"
+  },
+  "demo.password_reset_heading": {
+    "context": "Section heading for the password reset demo area",
+    "component": {
+      "location": ".storybook/addons/translation-mode/components/TranslationDemo.tsx",
+      "description": "Demo component showcasing TranslationOverlay wrapping and translation metadata"
+    },
+    "usage": "Section heading",
+    "impact": "low",
+    "userType": "developer",
+    "tone": "neutral"
+  }
+}

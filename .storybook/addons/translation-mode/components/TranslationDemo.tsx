@@ -18,14 +18,14 @@ export const TranslationDemo: React.FC<TranslationDemoProps> = ({ namespace = 'a
   const { t } = useTranslation('auth');
   
   return (
-    <Box sx={{ p: 3, maxWidth: 600 }}>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{ p: 3, maxWidth: 600 }} data-tour="translation-demo">
+      <Typography variant="h4" gutterBottom data-tour="translation-demo-title">
         <TranslationOverlay tKey="demo.title" namespace="stories" value="Translation Mode Demo" storyName={storyName}>
           Translation Mode Demo
         </TranslationOverlay>
       </Typography>
 
-      <Typography variant="body1" paragraph>
+      <Typography variant="body1" paragraph data-tour="translation-demo-description">
         <TranslationOverlay 
           tKey="demo.description" 
           namespace="stories" 
@@ -36,7 +36,7 @@ export const TranslationDemo: React.FC<TranslationDemoProps> = ({ namespace = 'a
         </TranslationOverlay>
       </Typography>
 
-      <Alert severity="info" sx={{ mb: 2 }}>
+      <Alert severity="info" sx={{ mb: 2 }} data-tour="translation-demo-instructions">
         <TranslationOverlay 
           tKey="demo.instructions" 
           namespace="stories" 
@@ -48,7 +48,7 @@ export const TranslationDemo: React.FC<TranslationDemoProps> = ({ namespace = 'a
       </Alert>
 
       {/* Auth form demo with actual keys from auth.json */}
-      <Box sx={{ mb: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+      <Box sx={{ mb: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }} data-tour="translation-auth-form">
         <Typography variant="h6" gutterBottom>
           <TranslationOverlay tKey="demo.auth_form_heading" namespace="stories" value="Authentication Form" storyName={storyName}>
             Authentication Form
@@ -86,7 +86,7 @@ export const TranslationDemo: React.FC<TranslationDemoProps> = ({ namespace = 'a
           sx={{ mb: 2 }}
         />
 
-        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+        <Box sx={{ display: 'flex', gap: 2, mb: 2 }} data-tour="translation-auth-buttons">
           <Button variant="contained" fullWidth>
             <TranslationOverlay tKey="sign_in" namespace="auth" value="Sign In" storyName={storyName}>
               Sign In
@@ -121,7 +121,7 @@ export const TranslationDemo: React.FC<TranslationDemoProps> = ({ namespace = 'a
         </Button>
       </Box>
 
-      <Box sx={{ mt: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+      <Box sx={{ mt: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }} data-tour="translation-password-reset">
         <Typography variant="h6" gutterBottom>
           <TranslationOverlay tKey="demo.password_reset_heading" namespace="stories" value="Password Reset Flow" storyName={storyName}>
             Password Reset Flow
@@ -135,7 +135,12 @@ export const TranslationDemo: React.FC<TranslationDemoProps> = ({ namespace = 'a
               Confirm Password
             </TranslationOverlay>
           }
-          placeholder={t('confirm_password_placeholder')}
+          placeholder="Re-enter your password"
+          helperText={
+            <TranslationOverlay tKey="confirm_password_placeholder" namespace="auth" value="Re-enter your password" storyName={storyName}>
+              {t('confirm_password_placeholder', 'Re-enter your password')}
+            </TranslationOverlay>
+          }
           sx={{ mb: 2 }}
         />
       </Box>

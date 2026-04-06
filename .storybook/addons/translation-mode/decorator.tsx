@@ -88,10 +88,23 @@ const TranslationModeController: React.FC<TranslationModeControllerProps> = ({ m
   useEffect(() => {
     const channel = addons.getChannel();
     const timeoutId = setTimeout(() => {
-      channel.emit('translation-mode/update-all', translations);
+      // Serialize Map as entries array for cross-iframe channel compatibility
+      channel.emit('translation-mode/update-all', Array.from(translations.entries()));
     }, 100); // Debounce for 100ms
     
     return () => clearTimeout(timeoutId);
+  }, [translations]);
+
+  // Respond to panel requesting current state (e.g. when panel tab activates after translations were already emitted)
+  useEffect(() => {
+    const channel = addons.getChannel();
+    const handleRequest = () => {
+      channel.emit('translation-mode/update-all', Array.from(translations.entries()));
+    };
+    channel.on('translation-mode/request-all', handleRequest);
+    return () => {
+      channel.off('translation-mode/request-all', handleRequest);
+    };
   }, [translations]);
 
   return <>{children}</>;

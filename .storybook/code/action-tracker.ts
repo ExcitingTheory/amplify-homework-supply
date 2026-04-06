@@ -298,3 +298,77 @@ export function getSequenceTracker(): ActionSequenceTracker {
   }
   return sequenceTracker;
 }
+
+/**
+ * Initialize i18next event listeners that bridge to the onboarding action system.
+ * 
+ * Listens for:
+ * - `i18next-language-changed` → emits `onLanguageChange` action
+ * - `i18next-missing-key` → emits `onMissingKeyDetected` action
+ * 
+ * Call once during Storybook preview initialization.
+ * 
+ * @param storyId - Current story ID for action context
+ * @returns Cleanup function to remove listeners
+ */
+export function initI18nEventBridge(storyId: string): () => void {
+  const handleLanguageChanged = (e: Event) => {
+    const detail = (e as CustomEvent).detail;
+    try {
+      const emitter = getOnboardingEmitter();
+      const persona = emitter.getPersona();
+      emitter.emit({
+        type: 'action-performed',
+        actionName: 'onLanguageChange',
+        storyId,
+        persona,
+        timestamp: Date.now(),
+        metadata: {
+          actionName: 'onLanguageChange',
+          storyId,
+          context: { language: detail?.language },
+        },
+      } as any);
+      console.log('[Action Tracker] Language changed:', detail?.language);
+    } catch (error) {
+      console.error('[Action Tracker] Failed to track language change:', error);
+    }
+  };
+
+  const handleMissingKey = (e: Event) => {
+    const detail = (e as CustomEvent).detail;
+    try {
+      const emitter = getOnboardingEmitter();
+      const persona = emitter.getPersona();
+      emitter.emit({
+        type: 'action-performed',
+        actionName: 'onMissingKeyDetected',
+        storyId,
+        persona,
+        timestamp: Date.now(),
+        metadata: {
+          actionName: 'onMissingKeyDetected',
+          storyId,
+          context: {
+            namespace: detail?.namespace,
+            key: detail?.key,
+            languages: detail?.languages,
+          },
+        },
+      } as any);
+      console.log('[Action Tracker] Missing key detected:', `${detail?.namespace}:${detail?.key}`);
+    } catch (error) {
+      console.error('[Action Tracker] Failed to track missing key:', error);
+    }
+  };
+
+  window.addEventListener('i18next-language-changed', handleLanguageChanged);
+  window.addEventListener('i18next-missing-key', handleMissingKey);
+
+  console.log('[Action Tracker] i18n event bridge initialized');
+
+  return () => {
+    window.removeEventListener('i18next-language-changed', handleLanguageChanged);
+    window.removeEventListener('i18next-missing-key', handleMissingKey);
+  };
+}
