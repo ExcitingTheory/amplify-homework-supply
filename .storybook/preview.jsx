@@ -402,10 +402,28 @@ const preview = {
       const [globals] = useGlobals();
       const colorScheme = globals?.colorScheme || 'light';
       
+      // Resolve 'system' to actual OS preference
+      const [resolvedScheme, setResolvedScheme] = React.useState(() => {
+        if (colorScheme !== 'system') return colorScheme;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      });
+      
+      React.useEffect(() => {
+        if (colorScheme !== 'system') {
+          setResolvedScheme(colorScheme);
+          return;
+        }
+        const mql = window.matchMedia('(prefers-color-scheme: dark)');
+        setResolvedScheme(mql.matches ? 'dark' : 'light');
+        const handler = (e) => setResolvedScheme(e.matches ? 'dark' : 'light');
+        mql.addEventListener('change', handler);
+        return () => mql.removeEventListener('change', handler);
+      }, [colorScheme]);
+      
       // Apply color scheme attribute so CSS variables resolve correctly
       React.useEffect(() => {
-        document.documentElement.setAttribute('data-mui-color-scheme', colorScheme === 'system' ? 'light' : colorScheme);
-      }, [colorScheme]);
+        document.documentElement.setAttribute('data-mui-color-scheme', resolvedScheme);
+      }, [resolvedScheme]);
       
       return (
         <RouterContext.Provider value={mockRouter}>
@@ -413,7 +431,7 @@ const preview = {
             <CssBaseline />
             <div 
               className="storybook-wrapper"
-              data-mui-color-scheme={colorScheme === 'system' ? 'light' : colorScheme}
+              data-mui-color-scheme={resolvedScheme}
               style={{
                 height: isFullscreen ? '100vh' : 'auto',
                 width: '100%',

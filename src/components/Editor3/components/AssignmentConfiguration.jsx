@@ -258,8 +258,8 @@ export default function AssignmentConfiguration() {
                 label={t('assignmentConfiguration.timerLabel')}
                 title="Set timer in seconds"
                 type="number"
-                InputLabelProps={{
-                  shrink: true,
+                slotProps={{
+                  inputLabel: { shrink: true },
                 }}
                 value={timer}
                 onChange={handleTimerChange}
@@ -324,14 +324,13 @@ export default function AssignmentConfiguration() {
             sx={{ margin: '1rem' }}
             id="datetime-local"
             data-tour="due-date-picker"
-            // label="Due Date"
-            hiddenLabel
-            // ariaLabel='Due Date'
             required
             label={t('assignmentConfiguration.dueDateLabel')}
             type="datetime-local"
             defaultValue={dueDate}
-
+            slotProps={{
+              inputLabel: { shrink: true },
+            }}
             onChange={handleDueDateChange}
           />
 

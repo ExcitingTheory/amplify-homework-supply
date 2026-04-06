@@ -141,8 +141,8 @@ export const SectionAssigner = ({ setOpenAssignmentDialog, openAssignmentDialog,
             onClick={(e) => e.stopPropagation()}
             defaultValue={dueDate}
             onChange={handleDueDateChange}
-            InputLabelProps={{
-              shrink: true,
+            slotProps={{
+              inputLabel: { shrink: true },
             }} />
           {
             /**

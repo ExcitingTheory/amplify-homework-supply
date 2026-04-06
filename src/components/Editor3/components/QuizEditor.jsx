@@ -104,6 +104,12 @@ const QuizEditor = ({
                 (payload) => {
                     const event = payload;
                     if (quizRef.current && quizRef.current.contains(event.target)) {
+                        // Let interactive form elements (Switch, Checkbox, Button, etc.) handle their own clicks
+                        const tag = event.target.tagName;
+                        const role = event.target.getAttribute('role');
+                        if (tag === 'INPUT' || tag === 'BUTTON' || tag === 'TEXTAREA' || role === 'checkbox' || role === 'switch') {
+                            return false;
+                        }
                         event.preventDefault();
                         if (event.shiftKey) {
                             setSelected(!isSelected);
