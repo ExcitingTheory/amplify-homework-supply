@@ -368,7 +368,7 @@ export default function InstructorDashboard({ sections = [] }) {
                                   key={student.studentId}
                                   sx={{ 
                                     backgroundColor: idx < 3 ? `rgba(255, 215, 0, ${0.1 - idx * 0.03})` : 'inherit',
-                                    '&:hover': { backgroundColor: '#f5f5f5' }
+                                    '&:hover': { backgroundColor: 'grey.100' }
                                   }}
                                 >
                                   <TableCell>

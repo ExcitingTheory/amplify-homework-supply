@@ -317,7 +317,7 @@ export default function MeaningAssociationEditor({
             style={{
                 maxHeight: '32rem',
                 maxWidth: '72rem',
-                border: isSelected ? '2px solid #1976d2' : '1px solid transparent',
+                border: isSelected ? '2px solid var(--mui-palette-primary-main, #1976d2)' : '1px solid transparent',
                 borderRadius: '4px',
                 padding: '8px',
                 cursor: 'pointer',

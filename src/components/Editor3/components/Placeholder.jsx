@@ -9,7 +9,7 @@ export default function Placeholder({
             <style jsx>{`
                 .Placeholder__root {
                     font-size: 15px;
-                    color: #999;
+                    color: var(--mui-palette-text-disabled, #999);
                     overflow: hidden;
                     position: absolute;
                     text-overflow: ellipsis;

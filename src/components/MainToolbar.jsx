@@ -40,6 +40,11 @@ import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
 import { uploadData } from 'aws-amplify/storage';
 import { Section } from '../../src/models';
 import Switch from '@mui/material/Switch';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 
 import {
   Dialog,
@@ -53,6 +58,7 @@ import {
 import { useRouter } from 'next/router';
 import { Help, Settings } from '@mui/icons-material';
 import { getAmplifyClient } from '../utils/amplifyClient';
+import { useColorMode } from '../hooks/useColorMode';
 
 function ToggleMenuItem(props) {
   const [checked, setChecked] = React.useState(true);
@@ -79,6 +85,7 @@ export function SettingsMenu() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const router = useRouter()  
+  const { mode: colorMode, setColorMode } = useColorMode();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -98,7 +105,7 @@ export function SettingsMenu() {
       <Button
         id="settings-button"
         color="inherit"
-        aria-label="Settings"
+        aria-label={t('common.settings', { ns: 'common' })}
         aria-controls={open ? 'settings-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
@@ -116,20 +123,27 @@ export function SettingsMenu() {
           'aria-labelledby': 'basic-button',
         }}
       >
-        {
-          /**
-           * In the settings menu display the following as toggles:
-           * 
-           * - Disable notifications
-           * - Dark mode
-           * - Experimental features
-           * - Student mode for teachers, this will allow them to see the app as a student would.
-           * (So they can show students how to use it without divulging other students' grades)
-           * - 
-           */
-        }
         <ToggleMenuItem label={t('mainToolbar.settings.disableNotifications', 'Disable notifications')} />
-        <ToggleMenuItem label={t('mainToolbar.settings.darkMode', 'Dark mode')} /> 
+        <MenuItem>
+          <ListItemText primary={t('mainToolbar.settings.colorMode', 'Color mode')} />
+          <ToggleButtonGroup
+            value={colorMode}
+            exclusive
+            onChange={(e, val) => val && setColorMode(val)}
+            size="small"
+            sx={{ ml: 1 }}
+          >
+            <ToggleButton value="light" aria-label="Light mode">
+              <LightModeIcon fontSize="small" />
+            </ToggleButton>
+            <ToggleButton value="auto" aria-label="System mode">
+              <SettingsBrightnessIcon fontSize="small" />
+            </ToggleButton>
+            <ToggleButton value="dark" aria-label="Dark mode">
+              <DarkModeIcon fontSize="small" />
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </MenuItem>
         <ToggleMenuItem label={t('mainToolbar.settings.experimentalFeatures', 'Experimental features')} />
         <ToggleMenuItem label={t('mainToolbar.settings.studentMode', 'Student mode')} />
 
@@ -166,7 +180,7 @@ export function HelpMenu() {
 
         id="help-button"
         color="inherit"
-        aria-label="Help"
+        aria-label={t('common.help', { ns: 'common' })}
         aria-controls={open ? 'help-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
@@ -210,7 +224,7 @@ export function UserMenu() {
       <IconButton
         id="user-button"
         color="inherit"
-        aria-label="Account"
+        aria-label={t('navigation.profile', { ns: 'common' })}
         aria-controls={open ? 'user-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
@@ -376,7 +390,7 @@ export default function MainToolbar({ children }) {
         <IconButton
           edge="start"
           color="inherit"
-          aria-label="menu"
+          aria-label={t('mainToolbar.menuAttribute', { ns: 'editor.authoring' })}
           onClick={(e) => {
             handleSecretDebugActivation();
             toggleDrawer('left', true)(e);
@@ -392,7 +406,7 @@ export default function MainToolbar({ children }) {
         <Box sx={{ flexGrow: 1 }} />
         <IconButton
           color="inherit"
-          aria-label="Add User to Section"
+          aria-label={t('mainToolbar.addToSection.title', { ns: 'common' })}
           data-tour="join-section-button"
           onClick={() => setOpenAddStudentToSection(true)}
         >
@@ -433,7 +447,7 @@ export default function MainToolbar({ children }) {
             slotProps={{
               backdrop: {
                 sx: {
-                  backgroundColor: 'rgba(0,0,0,0.25)',
+                  backgroundColor: 'action.disabledBackground',
                 },
               },
             }}
@@ -441,7 +455,7 @@ export default function MainToolbar({ children }) {
               {
                 sx: {
                   backdropFilter: 'blur(7px)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                  backgroundColor: 'custom.glassNavbar',
                 }
               }
             }
@@ -457,7 +471,7 @@ export default function MainToolbar({ children }) {
             >
               <List
                 sx={{
-                  color: 'black',
+                  color: 'text.primary',
                 }}
               >
                 <ListItem disablePadding>
@@ -465,7 +479,7 @@ export default function MainToolbar({ children }) {
                     <ListItemIcon
                     
                     sx={{
-                      color: 'black',
+                      color: 'text.primary',
                     }}
                     >
                       <HomeIcon />
@@ -486,7 +500,7 @@ export default function MainToolbar({ children }) {
                   <ListItemIcon
                     
                     sx={{
-                      color: 'black',
+                      color: 'text.primary',
                     }}
                     >
                       <PeopleIcon />
@@ -507,7 +521,7 @@ export default function MainToolbar({ children }) {
                   <ListItemIcon
                     
                     sx={{
-                      color: 'black',
+                      color: 'text.primary',
                     }}
                     >
                       <MenuBookIcon />

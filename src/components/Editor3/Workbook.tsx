@@ -3,6 +3,7 @@
  */
 
 import * as React from 'react';
+import { useTranslation } from 'next-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@mui/material';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
@@ -49,6 +50,7 @@ import { Drawer, DrawerHeader } from './styledComponents';
  * Displays unit content with grading and progress tracking
  */
 export function Workbook(): JSX.Element {
+  const { t } = useTranslation('common');
   const theme = useTheme();
   const [openTab, setOpenTab] = React.useState<boolean>(false);
   const [tabValue, setTabValue] = React.useState<number>(0);
@@ -230,7 +232,7 @@ export function Workbook(): JSX.Element {
                     >
                       <ContentEditable
                         data-lexical-editor="true"
-                        aria-label="Workbook content"
+                        aria-label={t('navigation.workbook', { ns: 'common' })}
                         style={{
                           width: '100%',
                           maxWidth: '100%',

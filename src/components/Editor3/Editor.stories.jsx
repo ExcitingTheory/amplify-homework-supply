@@ -288,17 +288,17 @@ export const EmptyEditorTextFormatting = {
     // left align
     await userEvent.keyboard('{Enter}');
     await userEvent.click(alignMenu);
-    const leftAlignBtn = await screen.findByRole('menuitem', { name: /Left Align/i });
+    const leftAlignBtn = await screen.findByRole('menuitem', { name: /Align Left/i });
     await userEvent.click(leftAlignBtn);
     await userEvent.keyboard('This text is left-aligned.{Enter}{Enter}');
     // center align
     await userEvent.click(alignMenu);
-    const centerAlignBtn = await screen.findByRole('menuitem', { name: /Center Align/i });
+    const centerAlignBtn = await screen.findByRole('menuitem', { name: /Align Center/i });
     await userEvent.click(centerAlignBtn);
     await userEvent.keyboard('This text is center-aligned.{Enter}{Enter}');
     // right align
     await userEvent.click(alignMenu);
-    const rightAlignBtn = await screen.findByRole('menuitem', { name: /Right Align/i });
+    const rightAlignBtn = await screen.findByRole('menuitem', { name: /Align Right/i });
     await userEvent.click(rightAlignBtn);
     await userEvent.keyboard('This text is right-aligned.{Enter}{Enter}');
     // justify align
@@ -409,7 +409,7 @@ export const EmptyEditorCustomBlocks = {
 
     // Insert Due Date
     // Multiple Insert Item Menu buttons may be rendered, so we select the first one
-    const insertMenus = canvas.getAllByRole('button', { name: /Insert Item Menu/i });
+    const insertMenus = canvas.getAllByRole('button', { name: /^Insert$/i });
     const insertMenu = insertMenus[0];
     await userEvent.click(insertMenu);
     const dueDateOption = await screen.findByRole('menuitem', { name: /Due Date/i });
@@ -455,13 +455,13 @@ export const EmptyEditorCustomBlocks = {
 
     // Insert Audio Playlist
     await userEvent.click(insertMenu);
-    const audioPlaylistOption = await screen.findByRole('menuitem', { name: /^Audio$/i });
+    const audioPlaylistOption = await screen.findByRole('menuitem', { name: /Audio Playlist/i });
     await userEvent.click(audioPlaylistOption);
     await userEvent.keyboard('{Enter}');
 
     // Insert Multiple Choice Quiz
     await userEvent.click(insertMenu);
-    const multipleChoiceOption = await screen.findByRole('menuitem', { name: /^Quiz$/i });
+    const multipleChoiceOption = await screen.findByRole('menuitem', { name: /Multiple Choice Quiz/i });
     await userEvent.click(multipleChoiceOption);
 
     // Quiz block is inserted — scope interactions to the quiz block via data-tour attribute

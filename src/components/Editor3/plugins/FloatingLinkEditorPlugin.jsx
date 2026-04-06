@@ -119,9 +119,9 @@ export function setFloatingElemPositionForLinkEditor(
     floatingElem.style.opacity = '1';
     floatingElem.style.display = 'flex';
     floatingElem.style.visibility = 'visible';
-    floatingElem.style.boxShadow = '0 5px 10px rgba(0, 0, 0, 0.3)';
-    floatingElem.style.border = '1px solid #333';
-    floatingElem.style.outline = '1px solid #eee';
+    floatingElem.style.boxShadow = '0 5px 10px var(--mui-palette-action-focus, rgba(0, 0, 0, 0.3))';
+    floatingElem.style.border = '1px solid var(--mui-palette-divider, #333)';
+    floatingElem.style.outline = '1px solid var(--mui-palette-divider, #eee)';
     floatingElem.style.borderRadius = '0 0 9px 9px';
     floatingElem.style.top = `${top}px`;
     floatingElem.style.left = `${left}px`;
@@ -396,13 +396,14 @@ function FloatingLinkEditor({
             opacity: 0;
             visibility: hidden;
             display: flex;
-            background-color: #fff;
+            background-color: var(--mui-palette-background-paper, #fff);
+            color: var(--mui-palette-text-primary, inherit);
             border-radius: 0 0 9px 9px;
             transition: opacity 0.5s, visibility 0.5s;
             will-change: transform;
-            outline: 1px solid #eee;
+            outline: 1px solid var(--mui-palette-divider, #eee);
             outline-offset: -1px;
-            border: 1px solid #333;
+            border: 1px solid var(--mui-palette-divider, #333);
         }
 
         .link-editor a,
@@ -416,6 +417,18 @@ function FloatingLinkEditor({
             white-space: nowrap;
             font-size: 0.875rem;
             line-height: 1.25rem;
+            color: var(--mui-palette-text-primary, inherit);
+        }
+
+        .link-editor input {
+            background: var(--mui-palette-background-default, #fff);
+            border: 1px solid var(--mui-palette-divider, #ccc);
+            border-radius: 4px;
+            padding: 4px 8px;
+        }
+
+        .link-editor a {
+            color: var(--mui-palette-primary-main, #1976d2);
         }
 
         .link-editor [role="button"] {

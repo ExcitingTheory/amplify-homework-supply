@@ -6,6 +6,21 @@
     text-align: right;
 }
 
+/* CSS custom properties for dark mode support */
+:root {
+    --editor-placeholder: #757575;
+    --editor-drag-hover: #efefef;
+    --editor-drag-target: #0099ff;
+    --editor-drag-target-glow: rgba(0, 153, 255, 0.6);
+}
+
+[data-mui-color-scheme="dark"] {
+    --editor-placeholder: #666666;
+    --editor-drag-hover: #333333;
+    --editor-drag-target: #4db8ff;
+    --editor-drag-target-glow: rgba(77, 184, 255, 0.6);
+}
+
 .editor-paragraph {
     /* margin: 0 0 15px 0; */
     padding: 0;
@@ -28,7 +43,7 @@ div.ImageNode__contentEditable {
 * Placeholder styling
 */
 .editor-placeholder {
-    color: #757575;
+    color: var(--editor-placeholder);
     overflow: hidden;
     position: absolute;
     text-overflow: ellipsis;
@@ -155,7 +170,7 @@ p {
   }
   
   .draggable-block-menu:hover {
-    background-color: #efefef;
+    background-color: var(--editor-drag-hover);
   }
   
   /* Show drag handle when hovering near a block */
@@ -169,7 +184,7 @@ p {
   
   .draggable-block-target-line {
     pointer-events: none;
-    background: #0099ff;
+    background: var(--editor-drag-target);
     height: 4px;
     position: absolute;
     left: 0;
@@ -178,7 +193,7 @@ p {
     will-change: transform;
     z-index: 50;
     border-radius: 2px;
-    box-shadow: 0 0 8px rgba(0, 153, 255, 0.6);
+    box-shadow: 0 0 8px var(--editor-drag-target-glow);
     display: block !important; /* Override Storybook's div:empty:last-child rule */
   }
 

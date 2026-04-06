@@ -147,11 +147,31 @@ const PlainTextCell: React.FC<PlainTextCellProps> = ({
     },
   };
 
-  const borderColor = highlighted ? '#2196F3' : theme.palette.divider;
+  const isDark = theme.palette.mode === 'dark';
+  const borderColor = highlighted ? (isDark ? '#aaaaaa' : '#555555') : isDark ? '#555555' : '#bbbbbb';
+  const hoverBorderColor = isDark ? '#aaaaaa' : '#555555';
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div style={{ position: 'relative' }}>
+      <div
+        style={{ position: 'relative' }}
+        onMouseEnter={(e) => {
+          const el = e.currentTarget.querySelector('[contenteditable]') as HTMLElement;
+          if (el && !el.matches(':focus')) el.style.borderColor = hoverBorderColor;
+        }}
+        onMouseLeave={(e) => {
+          const el = e.currentTarget.querySelector('[contenteditable]') as HTMLElement;
+          if (el && !el.matches(':focus')) el.style.borderColor = borderColor;
+        }}
+        onFocusCapture={(e) => {
+          const el = e.currentTarget.querySelector('[contenteditable]') as HTMLElement;
+          if (el) el.style.borderColor = hoverBorderColor;
+        }}
+        onBlurCapture={(e) => {
+          const el = e.currentTarget.querySelector('[contenteditable]') as HTMLElement;
+          if (el) el.style.borderColor = borderColor;
+        }}
+      >
         <PlainTextPlugin
           ErrorBoundary={LexicalErrorBoundary}
           contentEditable={
@@ -159,16 +179,17 @@ const PlainTextCell: React.FC<PlainTextCellProps> = ({
               style={{
                 minHeight: multiline ? minHeight : 28,
                 padding: '6px 10px',
-                border: `1px solid ${borderColor}`,
+                border: `1.5px solid ${borderColor}`,
                 borderRadius: '4px',
                 fontSize: '0.85rem',
                 fontFamily: 'inherit',
                 outline: 'none',
                 color: theme.palette.text.primary,
-                backgroundColor: 'transparent',
+                backgroundColor: isDark ? 'transparent' : '#ffffff',
                 lineHeight: 1.5,
                 resize: multiline ? 'vertical' : 'none',
                 overflow: 'auto',
+                transition: 'border-color 0.15s ease',
                 ...style,
               }}
             />

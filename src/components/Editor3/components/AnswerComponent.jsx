@@ -331,7 +331,7 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                                 textWrap: 'wrap',
                                 wordBreak: 'normal',
                                 fontStyle: 'italic',
-                                color: 'gray',
+                                color: 'text.disabled',
                             }}>
                                 {dictionary[wordId]?.phrase} {t('answerComponent.audioNotAvailableParens')}
                             </Typography>
@@ -368,7 +368,7 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                                 [key]: e.target.value,
                             });
                         } }
-                        aria-label={`Answer text for question ${key}`}
+                        aria-label={t('customAnswerComponent.yourAnswer', { ns: 'editor' })}
                         placeholder="Answer text"
                         type="text"
                         variant="standard" />
@@ -461,7 +461,7 @@ onClick={async () => {
                     <Typography
                         variant="body1"
                         component="div"
-                        sx={{ flexGrow: 1, fontStyle: 'italic', color: 'gray' }}>
+                        sx={{ flexGrow: 1, fontStyle: 'italic', color: 'text.disabled' }}>
                         {t('answerComponent.audioNotAvailable', { text: dictionary[wordId]?.phrase })}
                     </Typography>
                 )
@@ -535,7 +535,7 @@ onClick={async () => {
                             title={dictionary[wordId].phrase}
                         />
                     ) : (
-                        <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'gray' }}>
+                        <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'text.disabled' }}>
                             {t('answerComponent.audioNotAvailable', { text: dictionary[wordId]?.phrase })}
                         </Typography>
                     )
@@ -617,7 +617,7 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                                 title={dictionary[wordId].definition}
                             />
                         ) : (
-                            <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'gray' }}>
+                            <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'text.disabled' }}>
                                 {t('answerComponent.audioNotAvailable', { text: dictionary[wordId]?.definition })}
                             </Typography>
                         )
@@ -718,7 +718,7 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                             title={dictionary[wordId].definition}
                         />
                     ) : (
-                        <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'gray' }}>
+                        <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'text.disabled' }}>
                             {t('answerComponent.audioNotAvailable', { text: dictionary[wordId]?.definition })}
                         </Typography>
                     )
@@ -767,7 +767,7 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                             title={dictionary[wordId].definition}
                         />
                     ) : (
-                        <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'gray' }}>
+                        <Typography variant="body2" component="div" sx={{ flexGrow: 1, fontStyle: 'italic', color: 'text.disabled' }}>
                             {t('answerComponent.audioNotAvailable', { text: dictionary[wordId]?.definition })}
                         </Typography>
                     )

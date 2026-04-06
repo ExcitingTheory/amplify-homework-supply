@@ -428,7 +428,7 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
                             border: '3px solid #e0e0e0', 
                             borderRadius: 2, 
                             minHeight: '120px',
-                            bgcolor: '#fafafa',
+                            bgcolor: 'grey.100',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -1315,7 +1315,7 @@ function NestedWordField({
                                 position: 'absolute',
                                 top: 0,
                                 left: label ? '80px' : 0,
-                                color: '#999',
+                                color: 'text.disabled',
                                 pointerEvents: 'none',
                             }}
                         >

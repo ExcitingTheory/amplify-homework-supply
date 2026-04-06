@@ -111,7 +111,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
           variant="outlined" 
           sx={{ 
             my: 2,
-            bgcolor: '#f5f5f5',
+            bgcolor: 'grey.100',
             border: 'none',
             borderRadius: 2,
             boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
@@ -141,7 +141,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
                         '& rt': {
                           fontWeight: 400,
                           fontSize: '0.5em',
-                          color: '#666',
+                          color: 'text.secondary',
                         }
                       }}
                       dangerouslySetInnerHTML={{ __html: word.rubyTags }}
@@ -184,11 +184,11 @@ import getCachedUrl from '../../../utils/getCachedUrl';
                 {/* Pronunciation */}
                 {word.pronunciation && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                    <RecordVoiceOverIcon sx={{ fontSize: 18, color: '#666' }} />
+                    <RecordVoiceOverIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
                     <Typography 
                       variant="body1" 
                       sx={{ 
-                        color: '#666',
+                        color: 'text.secondary',
                         fontStyle: 'italic',
                         fontFamily: 'monospace'
                       }}

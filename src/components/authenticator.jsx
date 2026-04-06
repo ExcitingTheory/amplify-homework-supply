@@ -12,11 +12,88 @@
  */
 
 import React from 'react';
-import { Authenticator } from '@aws-amplify/ui-react';
+import { Authenticator, ThemeProvider as AmplifyThemeProvider } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
+import { useColorScheme } from '@mui/material/styles';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import { Hub } from 'aws-amplify/utils';
+
+const amplifyAuthTheme = {
+    name: 'homework-supply-auth',
+    tokens: {
+        colors: {
+            brand: {
+                primary: {
+                    10: { value: '#eef0fa' },
+                    20: { value: '#d5d9f0' },
+                    40: { value: '#9aa3e0' },
+                    60: { value: '#6f7bd6' },
+                    80: { value: '#556cd6' },
+                    90: { value: '#4458b8' },
+                    100: { value: '#344499' },
+                },
+            },
+            background: {
+                primary: { value: '#fafafa' },
+                secondary: { value: '#ffffff' },
+            },
+            font: {
+                primary: { value: '#1a1a1a' },
+                secondary: { value: '#666666' },
+            },
+            border: {
+                primary: { value: '#e0e0e0' },
+            },
+        },
+        components: {
+            authenticator: {
+                router: {
+                    borderWidth: { value: '0' },
+                    boxShadow: { value: '0 4px 24px rgba(0, 0, 0, 0.1)' },
+                },
+            },
+        },
+    },
+    overrides: [
+        {
+            colorMode: 'dark',
+            tokens: {
+                colors: {
+                    brand: {
+                        primary: {
+                            10: { value: '#1a1e3a' },
+                            20: { value: '#2a3060' },
+                            40: { value: '#4a5690' },
+                            60: { value: '#6670b0' },
+                            80: { value: '#7986cb' },
+                            90: { value: '#9fa8da' },
+                            100: { value: '#c5cae9' },
+                        },
+                    },
+                    background: {
+                        primary: { value: '#121212' },
+                        secondary: { value: '#1e1e1e' },
+                    },
+                    font: {
+                        primary: { value: '#e0e0e0' },
+                        secondary: { value: '#a0a0a0' },
+                    },
+                    border: {
+                        primary: { value: '#333333' },
+                    },
+                },
+                components: {
+                    authenticator: {
+                        router: {
+                            boxShadow: { value: '0 4px 24px rgba(0, 0, 0, 0.4)' },
+                        },
+                    },
+                },
+            },
+        },
+    ],
+};
 
 function getFormFields(t) {
     return {
@@ -53,6 +130,9 @@ export default function MyAuth({ children }) {
     const { t } = useTranslation('components');
     const formFields = getFormFields(t);
     const router = useRouter();
+    const { mode } = useColorScheme();
+    // Map MUI mode to Amplify UI colorMode ('light' | 'dark' | 'system')
+    const colorMode = mode || 'system';
     
     React.useEffect(() => {
         // Listen for successful sign in events
@@ -74,14 +154,16 @@ export default function MyAuth({ children }) {
     }, [router]);
     
     return (
-        <Authenticator
-            usernameAttributes="email"
-            variant="modal"
-            formFields={formFields}
-        >
-            {({ signOut, user }) => React.Children.map(children, (child) =>
-                React.cloneElement(child, { signOut, user })
-            )}
-        </Authenticator>
+        <AmplifyThemeProvider theme={amplifyAuthTheme} colorMode={colorMode}>
+            <Authenticator
+                usernameAttributes="email"
+                variant="modal"
+                formFields={formFields}
+            >
+                {({ signOut, user }) => React.Children.map(children, (child) =>
+                    React.cloneElement(child, { signOut, user })
+                )}
+            </Authenticator>
+        </AmplifyThemeProvider>
     )
 }

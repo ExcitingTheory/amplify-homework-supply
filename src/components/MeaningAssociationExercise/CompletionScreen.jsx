@@ -18,7 +18,7 @@ const containerStyle = {
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: '#fff',
+  backgroundColor: 'background.paper',
   padding: 2,
   height: '100%',
   width: '100%',
@@ -32,7 +32,7 @@ const paperStyle = {
   textAlign: 'center',
   maxWidth: '500px',
   width: '100%',
-  backgroundColor: '#f8f9fa',
+  backgroundColor: 'grey.100',
   maxHeight: '100%',
   overflowY: 'auto',
   boxSizing: 'border-box',
@@ -110,12 +110,12 @@ export const CompletionScreen = ({
       }}>
         <CheckCircleIcon sx={{
           fontSize: { xs: '3rem', sm: '4rem' },
-          color: '#4caf50',
+          color: 'success.main',
           marginBottom: '1rem',
         }} />
 
         <Typography variant="h4" gutterBottom sx={{ 
-          color: '#2e7d32', 
+          color: 'success.dark', 
           fontWeight: 600,
           fontSize: { xs: '1.5rem', sm: '2.125rem' },
         }}>
@@ -127,7 +127,7 @@ export const CompletionScreen = ({
             Your Score
           </Typography>
           <Typography variant="h3" sx={{ 
-            color: '#1976d2', 
+            color: 'primary.main', 
             fontWeight: 700,
             fontSize: { xs: '2rem', sm: '3rem' },
           }}>

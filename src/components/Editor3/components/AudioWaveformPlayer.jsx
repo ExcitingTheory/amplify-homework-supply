@@ -799,8 +799,8 @@ export default function AudioWaveformPlayer({
                         width={width}
                         height={height}
                         style={{
-                            backgroundColor: 'white',
-                            border: '1px solid #e0e0e0',
+                            backgroundColor: 'var(--mui-palette-background-paper, white)',
+                            border: '1px solid var(--mui-palette-divider, #e0e0e0)',
                             borderRadius: '4px',
                             width: `${width}px`,
                             height: `${height}px`,
@@ -849,8 +849,8 @@ export default function AudioWaveformPlayer({
                         width={width}
                         height={height}
                         style={{
-                            backgroundColor: 'white',
-                            border: '1px solid #e0e0e0',
+                            backgroundColor: 'var(--mui-palette-background-paper, white)',
+                            border: '1px solid var(--mui-palette-divider, #e0e0e0)',
                             borderRadius: '4px',
                             width: `${width}px`,
                             height: `${height}px`,
@@ -915,7 +915,7 @@ export default function AudioWaveformPlayer({
                             step={0.1}
                             onChange={handleSliderChange}
                             onChangeCommitted={handleSeek}
-                            aria-label="Audio progress"
+                            aria-label={t('answerComponent.inputMethods.audio', { ns: 'editor' })}
                             disabled={false}
                             track="normal"
                             size="small"

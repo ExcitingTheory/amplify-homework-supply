@@ -160,7 +160,7 @@ const highlightMatches = (text, searchTerm) => {
 
     return parts.map((part, i) =>
         regex.test(part)
-            ? React.createElement('mark', { key: i, style: { backgroundColor: '#ffeb3b', padding: '0 2px' } }, part)
+            ? React.createElement('mark', { key: i, style: { backgroundColor: 'var(--mui-palette-custom-searchHighlight, #ffeb3b)', padding: '0 2px' } }, part)
             : part
     );
 };
@@ -569,7 +569,7 @@ function InlineEditorField({
                                 position: 'absolute',
                                 top: multiline ? '8px' : '6px',
                                 left: '12px',
-                                color: '#999',
+                                color: 'var(--mui-palette-text-disabled, #999)',
                                 fontSize: '0.875rem',
                                 pointerEvents: 'none',
                             }}
@@ -705,7 +705,7 @@ function FileNameField({ value, fileId, onSave, searchTerm }) {
             ref={editableRef}
             contentEditable
             suppressContentEditableWarning
-            aria-label="File name"
+            aria-label={t('fileMetadataComponent.filename', { ns: 'editor.files' })}
             onInput={handleInput}
             onClick={handleClick}
             onKeyDown={handleKeyDown}
@@ -1262,7 +1262,7 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
                         }} />
                     <Button
                         variant="outlined"
-                        aria-label="Generate"
+                        aria-label={t('unifiedGenerateModal.generate', { ns: 'editor.ai' })}
                         onClick={async () => {
 
                             setIsOpen(true);
@@ -1453,7 +1453,7 @@ function NewVideoFileForm({ open, toggleNewVideoFileForm }) {
                     }} />
                 <Button
                     variant="outlined"
-                    aria-label="Generate"
+                    aria-label={t('unifiedGenerateModal.generate', { ns: 'editor.ai' })}
                     onClick={() => {
                         // send graphql mutation to create new image file
                         // close form
@@ -1647,7 +1647,7 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
                         }} />
                     <Button
                         variant="outlined"
-                        aria-label="Generate"
+                        aria-label={t('unifiedGenerateModal.generate', { ns: 'editor.ai' })}
                         onClick={async () => {
 
                             setIsOpen(true);

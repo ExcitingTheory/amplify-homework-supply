@@ -48,7 +48,8 @@ function DraggableAnswer({
     <Draggable draggableId={`id-${index}`} index={index}>
       {provided => (
         <Stack
-          border="thin solid #E8E8E8"
+          border="thin solid"
+          borderColor="divider"
           padding="0.5rem"
           margin="0.5rem"
           direction="row"
@@ -80,7 +81,7 @@ function DraggableAnswer({
             labelPlacement="bottom"
           />
           <IconButton
-            aria-label="delete"
+            aria-label={t('actions.delete', { ns: 'common' })}
             onClick={() => { onQuestionDelete(index) }}
           >
             <ClearIcon />
@@ -549,7 +550,8 @@ class QuestionBlock extends React.Component {
               direction="row"
               spacing={2}
               alignItems="center"
-              border="thin solid #E8E8E8"
+              border="thin solid"
+              borderColor="divider"
               padding="0.5rem"
               margin="0.5rem"
               maxWidth="40rem"

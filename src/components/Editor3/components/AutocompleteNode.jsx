@@ -76,7 +76,7 @@ function AutocompleteComponent() {
       ? userAgentData.mobile
       : window.innerWidth <= 800 && window.innerHeight <= 600;
   return (
-    <span style={{ color: '#ccc' }} spellCheck="false">
+    <span style={{ color: 'var(--mui-palette-text-disabled, #ccc)' }} spellCheck="false">
       {autocompleteChunk} {isMobile ? t('autocompleteNode.mobileHint') : t('autocompleteNode.desktopHint')}
     </span>
   );

@@ -205,23 +205,23 @@ export default function CustomAnswerComponent({
                 exclusive
                 value={currentInputMethod}
                 onChange={handleInputChange}
-                aria-label="change input method"
+                aria-label={t('promptMethodSelector.inputButton', { ns: 'editor.ai' })}
             >
                 <ToggleButton
                     disabled={!allowedInputMethods.includes('text')}
                     value="text"
-                    aria-label="text entry"
+                    aria-label={t('customAnswerComponent.text', { ns: 'editor' })}
                 >
                     {t('customAnswerComponent.text')}
                 </ToggleButton>
                 <ToggleButton
                     disabled={!allowedInputMethods.includes('audio')}
-                    value="audio" aria-label="audio input">
+                    value="audio" aria-label={t('customAnswerComponent.audio', { ns: 'editor' })}>
                     {t('customAnswerComponent.audio')}
                 </ToggleButton>
                 <ToggleButton
                     disabled={!allowedInputMethods.includes('writing')}
-                    value="writing" aria-label="writing and drawing input">
+                    value="writing" aria-label={t('customAnswerComponent.writing', { ns: 'editor' })}>
                     {t('customAnswerComponent.writing')}
                 </ToggleButton>
             </ToggleButtonGroup>
@@ -379,7 +379,7 @@ export default function CustomAnswerComponent({
                                     });
                                 }}
 
-                                aria-label={`Answer text for question ${questionID}`}
+                                aria-label={t('customAnswerComponent.yourAnswer', { ns: 'editor' })}
                                 placeholder={t('customAnswerComponent.answerPlaceholder')}
                                 type="text"
                                 variant="standard"

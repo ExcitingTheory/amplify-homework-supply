@@ -769,7 +769,7 @@ const StatusSelect = () => {
                 }
 
                 #status-select > span.text {
-                    color: #505050;
+                    color: var(--mui-palette-text-secondary, #505050);
                 }
 
                 #status-select > svg {
@@ -1487,7 +1487,7 @@ function BlockFormatDropDown({
         }
 
         #block-format-select > span.icon {
-            color: #505050;
+            color: var(--mui-palette-text-secondary, #505050);
         }
 
         #block-format-select > svg,
@@ -1505,13 +1505,13 @@ function BlockFormatDropDown({
         ul[aria-labelledby="block-format-select-label"] li span.text,
         ul[aria-labelledby="block-format-select-label"] li span.menu-htext {
             display: inline !important;
-            color: #505050 !important;
+            color: var(--mui-palette-text-secondary, #505050) !important;
             margin-left: 0.5rem;
         }
 
         ul[aria-labelledby="block-format-select-label"] li svg,
         ul[aria-labelledby="block-format-select-label"] li span.icon {
-            color: #505050 !important;
+            color: var(--mui-palette-text-secondary, #505050) !important;
         }
 
         `}</style>

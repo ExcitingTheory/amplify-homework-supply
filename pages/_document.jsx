@@ -1,25 +1,30 @@
 import * as React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import createEmotionServer from '@emotion/server/create-instance';
+import { getInitColorSchemeScript } from '@mui/material/styles';
 import theme from '../src/theme';
 import createEmotionCache from '../src/createEmotionCache';
 
 export default class MyDocument extends Document {
   render() {
     return (
-      <Html lang="en">
+      <Html lang="en" suppressHydrationWarning>
         <Head>
           {/* PWA primary color */}
           <meta name="theme-color" content={theme.palette.primary.main} />
           <link rel="shortcut icon" href="/static/favicon.ico" />
-          {/* <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
-          /> */}
+          {/* Prevent FOUC: apply background color before CSS variables resolve */}
+          <style dangerouslySetInnerHTML={{ __html: `
+            html, body {
+              background-color: var(--mui-palette-background-default, #fafafa);
+              color: var(--mui-palette-text-primary, #000);
+            }
+          `}} />
           {/* Inject MUI styles first to match with the prepend: true configuration. */}
           {this.props.emotionStyleTags}
         </Head>
         <body>
+          {getInitColorSchemeScript({ defaultMode: 'system', attribute: 'data-mui-color-scheme' })}
           <Main />
           <NextScript />
         </body>

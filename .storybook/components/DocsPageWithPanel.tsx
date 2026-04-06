@@ -123,6 +123,13 @@ export const DocsPageWithPanel: React.FC = () => {
             --docs-muted: #999;
           }
         }
+        
+        [data-mui-color-scheme="dark"] {
+          --docs-border: #444;
+          --docs-heading: #e0e0e0;
+          --docs-panel-bg: #1e1e1e;
+          --docs-muted: #999;
+        }
       `}</style>
     </div>
   );

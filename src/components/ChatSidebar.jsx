@@ -1245,7 +1245,7 @@ const ChatSidebar = () => {
                         flex: 1,
                         display: 'flex',
                         flexDirection: 'column',
-                        bgcolor: 'grey.50',
+                        bgcolor: 'background.default',
                         minHeight: 0,
                         overflow: 'hidden',
                     }}
@@ -1350,7 +1350,7 @@ const ChatSidebar = () => {
                                                                     mb: 0.5,
                                                                     bgcolor: isActive ? 'primary.light' : 'transparent',
                                                                     '&:hover': {
-                                                                        bgcolor: isActive ? 'primary.light' : 'grey.100',
+                                                                        bgcolor: isActive ? 'primary.light' : 'action.hover',
                                                                     },
                                                                 }}
                                                             >
@@ -1443,7 +1443,7 @@ const ChatSidebar = () => {
                                                                     mb: 0.5,
                                                                     bgcolor: isActive ? 'primary.light' : 'transparent',
                                                                     '&:hover': {
-                                                                        bgcolor: isActive ? 'primary.light' : 'grey.100',
+                                                                        bgcolor: isActive ? 'primary.light' : 'action.hover',
                                                                     },
                                                                     opacity: 0.7,
                                                                 }}
@@ -1550,11 +1550,12 @@ const ChatSidebar = () => {
                                                         marginLeft: 'auto',
                                                         borderBottomRightRadius: '0.25rem',
                                                     } : {
-                                                        bgcolor: '#f3f4f6',
-                                                        color: '#1f2937',
+                                                        bgcolor: 'custom.chatBubbleAssistant',
+                                                        color: 'text.primary',
                                                         alignSelf: 'flex-start',
                                                         borderBottomLeftRadius: '0.25rem',
-                                                        border: '1px solid #e5e7eb',
+                                                        border: 1,
+                                                        borderColor: 'divider',
                                                         position: 'relative',
                                                         pr: 6,
                                                         pb: 4,
@@ -2013,8 +2014,9 @@ const ChatSidebar = () => {
                                                         gap: 0.5,
                                                         p: '0.75rem 1rem',
                                                         borderRadius: '1rem',
-                                                        bgcolor: '#f3f4f6',
-                                                        border: '1px solid #e5e7eb',
+                                                        bgcolor: 'custom.chatBubbleAssistant',
+                                                        border: 1,
+                                                        borderColor: 'divider',
                                                     }}
                                                 >
                                                     <Box
@@ -2022,7 +2024,7 @@ const ChatSidebar = () => {
                                                             width: 8,
                                                             height: 8,
                                                             borderRadius: '50%',
-                                                            bgcolor: '#9ca3af',
+                                                            bgcolor: 'text.disabled',
                                                             animation: 'typing 1s infinite',
                                                             animationDelay: '0s',
                                                             '@keyframes typing': {
@@ -2042,7 +2044,7 @@ const ChatSidebar = () => {
                                                             width: 8,
                                                             height: 8,
                                                             borderRadius: '50%',
-                                                            bgcolor: '#9ca3af',
+                                                            bgcolor: 'text.disabled',
                                                             animation: 'typing 1s infinite',
                                                             animationDelay: '0.2s',
                                                             '@keyframes typing': {
@@ -2062,7 +2064,7 @@ const ChatSidebar = () => {
                                                             width: 8,
                                                             height: 8,
                                                             borderRadius: '50%',
-                                                            bgcolor: '#9ca3af',
+                                                            bgcolor: 'text.disabled',
                                                             animation: 'typing 1s infinite',
                                                             animationDelay: '0.4s',
                                                             '@keyframes typing': {
@@ -2144,16 +2146,16 @@ const ChatSidebar = () => {
                                                 status?.status === 'error' ? 'error.light' :
                                                     status?.status === 'analyzed' ? 'success.light' :
                                                         status?.status === 'analyzing' || status?.status === 'extracting' ? 'warning.light' :
-                                                            status?.status === 'cancelled' ? 'grey.200' :
-                                                                'grey.100'
-                                            ) : 'grey.100',
+                                                            status?.status === 'cancelled' ? 'action.disabledBackground' :
+                                                                'action.hover'
+                                            ) : 'action.hover',
                                             border: isDocument ? '1px solid' : 'none',
                                             borderColor: isDocument ? (
                                                 status?.status === 'error' ? 'error.main' :
                                                     status?.status === 'analyzed' ? 'success.main' :
                                                         status?.status === 'analyzing' || status?.status === 'extracting' ? 'warning.main' :
-                                                            status?.status === 'cancelled' ? 'grey.400' :
-                                                                'grey.300'
+                                                            status?.status === 'cancelled' ? 'text.disabled' :
+                                                                'divider'
                                             ) : 'transparent',
                                         }}
                                     >
@@ -2341,7 +2343,7 @@ const ChatSidebar = () => {
                         <Button
                             type="submit"
                             variant="contained"
-                            aria-label="Send"
+                            aria-label={t('actions.send', { ns: 'common' })}
                             disabled={isLoading || !assistantChat?.id || !user}
                             data-testid="chat-send"
                             sx={{

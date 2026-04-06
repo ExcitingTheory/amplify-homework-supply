@@ -6,7 +6,7 @@
  * onboarding tools in the sidebar and addon panel.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 import { linkTo } from '@storybook/addon-links';
 import { 
@@ -16,10 +16,8 @@ import {
   Paper,
   Button,
   Link,
-  ThemeProvider,
-  createTheme,
+  useTheme,
 } from '@mui/material';
-import { useTheme as useStorybookTheme } from 'storybook/theming';
 import SchoolIcon from '@mui/icons-material/School';
 import PersonIcon from '@mui/icons-material/Person';
 import CodeIcon from '@mui/icons-material/Code';
@@ -33,22 +31,6 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import TranslateIcon from '@mui/icons-material/Translate';
 import LanguageIcon from '@mui/icons-material/Language';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-
-function buildMuiTheme(isDark: boolean) {
-  return createTheme({
-    palette: {
-      mode: isDark ? 'dark' : 'light',
-      background: {
-        default: isDark ? '#1a1a2e' : '#f6f9fc',
-        paper: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
-      },
-      text: {
-        primary: isDark ? '#e0e0e0' : '#2E3338',
-        secondary: isDark ? '#b0b0b0' : '#5C6570',
-      },
-    },
-  });
-}
 
 const meta: Meta = {
   title: 'Getting Started/Welcome',
@@ -81,13 +63,10 @@ type Story = StoryObj;
  */
 export const Welcome: Story = {
   render: () => {
-    let sbTheme: any;
-    try { sbTheme = useStorybookTheme(); } catch { sbTheme = null; }
-    const isDark = sbTheme?.base === 'dark' || (sbTheme == null && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
-    const muiTheme = useMemo(() => buildMuiTheme(isDark), [isDark]);
+    const theme = useTheme();
+    const isDark = theme.palette.mode === 'dark';
 
     return (
-      <ThemeProvider theme={muiTheme}>
       <Box
         sx={{
           minHeight: '100vh',
@@ -123,8 +102,9 @@ export const Welcome: Story = {
             sx={{ 
               p: 4, 
               mb: 4, 
-              bgcolor: 'rgba(33, 150, 243, 0.1)', 
-              border: '1px solid rgba(33, 150, 243, 0.3)',
+              bgcolor: isDark ? 'rgba(33, 150, 243, 0.15)' : 'rgba(33, 150, 243, 0.1)', 
+              border: '1px solid',
+              borderColor: isDark ? 'rgba(33, 150, 243, 0.4)' : 'rgba(33, 150, 243, 0.3)',
             }}
           >
             <Typography variant="h5" sx={{ color: 'text.primary', mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -141,8 +121,8 @@ export const Welcome: Story = {
                   width: 36, 
                   height: 36, 
                   borderRadius: '50%', 
-                  bgcolor: '#2196F3',
-                  color: '#fff',
+                  bgcolor: 'info.main',
+                  color: 'info.contrastText',
                   fontWeight: 700,
                   flexShrink: 0,
                 }}>
@@ -170,8 +150,8 @@ export const Welcome: Story = {
                   width: 36, 
                   height: 36, 
                   borderRadius: '50%', 
-                  bgcolor: '#4CAF50',
-                  color: '#fff',
+                  bgcolor: 'success.main',
+                  color: 'success.contrastText',
                   fontWeight: 700,
                   flexShrink: 0,
                 }}>
@@ -198,8 +178,8 @@ export const Welcome: Story = {
                   width: 36, 
                   height: 36, 
                   borderRadius: '50%', 
-                  bgcolor: '#FF9800',
-                  color: '#fff',
+                  bgcolor: 'warning.main',
+                  color: 'warning.contrastText',
                   fontWeight: 700,
                   flexShrink: 0,
                 }}>
@@ -214,7 +194,7 @@ export const Welcome: Story = {
                     <Link 
                       component="button" 
                       onClick={linkTo('📚 Creating Lessons/Workbook', 'WorkbookWithContent')}
-                      sx={{ color: '#2196F3', cursor: 'pointer' }}
+                      sx={{ color: 'info.main', cursor: 'pointer' }}
                     >
                       📚 Creating Lessons
                     </Link>
@@ -222,7 +202,7 @@ export const Welcome: Story = {
                     <Link 
                       component="button" 
                       onClick={linkTo('💬 AI Assistant/Chat Sidebar', 'GettingStarted')}
-                      sx={{ color: '#4CAF50', cursor: 'pointer' }}
+                      sx={{ color: 'success.main', cursor: 'pointer' }}
                     >
                       💬 AI Assistant
                     </Link>
@@ -230,7 +210,7 @@ export const Welcome: Story = {
                     <Link 
                       component="button" 
                       onClick={linkTo('📄 Pages/Application Pages', 'Index')}
-                      sx={{ color: '#9C27B0', cursor: 'pointer' }}
+                      sx={{ color: 'secondary.main', cursor: 'pointer' }}
                     >
                       📄 Pages
                     </Link>
@@ -248,8 +228,8 @@ export const Welcome: Story = {
                   width: 36, 
                   height: 36, 
                   borderRadius: '50%', 
-                  bgcolor: '#9C27B0',
-                  color: '#fff',
+                  bgcolor: 'secondary.main',
+                  color: 'secondary.contrastText',
                   fontWeight: 700,
                   flexShrink: 0,
                 }}>
@@ -277,7 +257,7 @@ export const Welcome: Story = {
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
             <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <PersonIcon sx={{ fontSize: 32, color: '#2196F3' }} />
+              <PersonIcon sx={{ fontSize: 32, color: 'info.main' }} />
               <Box>
                 <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 600 }}>
                   Instructor
@@ -289,7 +269,7 @@ export const Welcome: Story = {
             </Paper>
 
             <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <SchoolIcon sx={{ fontSize: 32, color: '#4CAF50' }} />
+              <SchoolIcon sx={{ fontSize: 32, color: 'success.main' }} />
               <Box>
                 <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 600 }}>
                   Learner
@@ -301,7 +281,7 @@ export const Welcome: Story = {
             </Paper>
 
             <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <CodeIcon sx={{ fontSize: 32, color: '#9C27B0' }} />
+              <CodeIcon sx={{ fontSize: 32, color: 'secondary.main' }} />
               <Box>
                 <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 600 }}>
                   Developer
@@ -313,7 +293,7 @@ export const Welcome: Story = {
             </Paper>
 
             <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <LanguageIcon sx={{ fontSize: 32, color: '#FF9800' }} />
+              <LanguageIcon sx={{ fontSize: 32, color: 'warning.main' }} />
               <Box>
                 <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 600 }}>
                   Translator
@@ -341,7 +321,7 @@ export const Welcome: Story = {
               }}
               onClick={linkTo('📚 Creating Lessons/Workbook', 'WorkbookWithContent')}
             >
-              <MenuBookIcon sx={{ fontSize: 40, color: '#2196F3', mb: 1 }} />
+              <MenuBookIcon sx={{ fontSize: 40, color: 'info.main', mb: 1 }} />
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>Rich Editor</Typography>
               <Typography variant="caption" sx={{ color: 'text.secondary' }}>Quizzes, vocabulary, multimedia</Typography>
             </Paper>
@@ -356,7 +336,7 @@ export const Welcome: Story = {
               }}
               onClick={linkTo('💬 AI Assistant/Chat Sidebar', 'GettingStarted')}
             >
-              <ChatIcon sx={{ fontSize: 40, color: '#4CAF50', mb: 1 }} />
+              <ChatIcon sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>AI Assistant</Typography>
               <Typography variant="caption" sx={{ color: 'text.secondary' }}>Content creation & translations</Typography>
             </Paper>
@@ -371,7 +351,7 @@ export const Welcome: Story = {
               }}
               onClick={linkTo('🎙️ Recording Audio/Recording Studio', 'StartFromScratch')}
             >
-              <RecordVoiceOverIcon sx={{ fontSize: 40, color: '#FF9800', mb: 1 }} />
+              <RecordVoiceOverIcon sx={{ fontSize: 40, color: 'warning.main', mb: 1 }} />
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>Audio Tools</Typography>
               <Typography variant="caption" sx={{ color: 'text.secondary' }}>Recording & text-to-speech</Typography>
             </Paper>
@@ -386,7 +366,7 @@ export const Welcome: Story = {
               }}
               onClick={linkTo('📄 Pages/Application Pages', 'Index')}
             >
-              <FolderIcon sx={{ fontSize: 40, color: '#9C27B0', mb: 1 }} />
+              <FolderIcon sx={{ fontSize: 40, color: 'secondary.main', mb: 1 }} />
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>Full Pages</Typography>
               <Typography variant="caption" sx={{ color: 'text.secondary' }}>Complete user flows</Typography>
             </Paper>
@@ -448,7 +428,6 @@ export const Welcome: Story = {
           </Box>
         </Container>
       </Box>
-      </ThemeProvider>
     );
   },
 };

@@ -13,6 +13,7 @@
 
 import * as React from 'react'
 import { useDrop } from 'react-dnd'
+import { useTranslation } from 'next-i18next';
 
 import {
   Box,
@@ -97,7 +98,7 @@ export const AnswerDropLearn = ({ correctAnswer, pronunciation, definition, id, 
               <Typography component="span" style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.25rem', fontSize: '1.1rem' }}>
                 {matchedWord.phrase}
               </Typography>
-              <Typography component="span" style={{ display: 'block', fontStyle: 'italic', color: '#888', marginBottom: '0.25rem' }}>
+              <Typography component="span" style={{ display: 'block', fontStyle: 'italic', color: 'var(--mui-palette-text-disabled, #888)', marginBottom: '0.25rem' }}>
                 {pronunciation}
               </Typography>
             </Box>
@@ -221,6 +222,7 @@ const MeaningAssociationTabs = ({
   enabledModes = ['learn', 'easy', 'hard'],
 }) => {
 
+  const { t } = useTranslation('common');
   const { grade } = React.useContext(UnitContext);
   const gradeData = React.useMemo(() => {
     if (!grade?.data) return {};
@@ -267,7 +269,7 @@ const MeaningAssociationTabs = ({
           textColor="primary"
           variant="scrollable"
           scrollButtons="auto"
-          aria-label="scrollable tabs of different difficulties"
+          aria-label={t('common.filter', { ns: 'common' })}
           style={{
             margin: 0,
             padding: 0,
@@ -278,7 +280,7 @@ const MeaningAssociationTabs = ({
               label={
                 <Box display="flex" alignItems="center" gap={1}>
                   Learn
-                  {learnComplete && <CheckCircleIcon style={{ fontSize: '1rem', color: '#4caf50' }} />}
+                  {learnComplete && <CheckCircleIcon style={{ fontSize: '1rem', color: 'var(--mui-palette-success-main, #4caf50)' }} />}
                 </Box>
               } 
               {...a11yProps(enabledModes.indexOf('learn'))} 
@@ -289,7 +291,7 @@ const MeaningAssociationTabs = ({
               label={
                 <Box display="flex" alignItems="center" gap={1}>
                   Easy
-                  {easyComplete && <CheckCircleIcon style={{ fontSize: '1rem', color: '#4caf50' }} />}
+                  {easyComplete && <CheckCircleIcon style={{ fontSize: '1rem', color: 'var(--mui-palette-success-main, #4caf50)' }} />}
                 </Box>
               } 
               {...a11yProps(enabledModes.indexOf('easy'))} 
@@ -300,7 +302,7 @@ const MeaningAssociationTabs = ({
               label={
                 <Box display="flex" alignItems="center" gap={1}>
                   Hard
-                  {hardComplete && <CheckCircleIcon style={{ fontSize: '1rem', color: '#4caf50' }} />}
+                  {hardComplete && <CheckCircleIcon style={{ fontSize: '1rem', color: 'var(--mui-palette-success-main, #4caf50)' }} />}
                 </Box>
               } 
               {...a11yProps(enabledModes.indexOf('hard'))} 

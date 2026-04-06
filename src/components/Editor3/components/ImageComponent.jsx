@@ -1,4 +1,5 @@
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
+import { useTranslation } from 'next-i18next';
 // import { useCollaborationContext } from '@lexical/react/LexicalCollaborationContext';
 // import { CollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
@@ -91,6 +92,7 @@ const ImageComponent = React.memo(function ImageComponent({
     caption,
     captionsEnabled,
 }) {
+    const { t } = useTranslation('components');
     const imageRef = useRef(null);
     const buttonRef = useRef(null);
     const [isSelected, setSelected, clearSelection] =
@@ -322,7 +324,7 @@ const ImageComponent = React.memo(function ImageComponent({
                             <AutoLinkPlugin />
                             <RichTextPlugin
                                 contentEditable={
-                                    <ContentEditable className="ImageNode__contentEditable" aria-label="Image caption" />
+                                    <ContentEditable className="ImageNode__contentEditable" aria-label={t('svgPreview.caption', { ns: 'components' })} />
                                 }
                                 placeholder={
                                     <Placeholder className="ImageNode__placeholder">

@@ -136,7 +136,7 @@ function LexicalField({
                                     minHeight: multiline ? '80px' : '36px',
                                     padding: '8px 12px',
                                     border: '1px solid',
-                                    borderColor: 'rgba(0, 0, 0, 0.23)',
+                                    borderColor: 'var(--mui-palette-divider, rgba(0, 0, 0, 0.23))',
                                     borderRadius: '4px',
                                     fontSize: '0.875rem',
                                     fontFamily: 'inherit',
@@ -151,7 +151,7 @@ function LexicalField({
                                     position: 'absolute',
                                     top: '8px',
                                     left: '12px',
-                                    color: 'rgba(0, 0, 0, 0.38)',
+                                    color: 'var(--mui-palette-text-disabled, rgba(0, 0, 0, 0.38))',
                                     pointerEvents: 'none',
                                     fontSize: '0.875rem',
                                 }}
@@ -352,7 +352,7 @@ export default function MetadataEditor({
                                     variant="outlined" 
                                     sx={{ 
                                         p: 1.5, 
-                                        bgcolor: 'grey.50',
+                                        bgcolor: 'action.hover',
                                         fontSize: '0.875rem',
                                         fontFamily: 'inherit',
                                         whiteSpace: 'pre-wrap',

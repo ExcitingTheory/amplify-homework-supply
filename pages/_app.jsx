@@ -17,6 +17,7 @@ import { Amplify } from 'aws-amplify';
 import { parseAmplifyConfig } from 'aws-amplify/utils';
 import { DebugPanelProvider } from '../src/components/DebugPanel';
 import { AuthProvider } from '../src/context/authContext';
+import { SettingsProvider } from '../src/context/settingsContext';
 import { TourProvider } from '../src/context/tourContext';
 import { ChatContextProvider } from '../src/context/chatContext';
 import GlobalChatButton from '../src/components/GlobalChatButton';
@@ -118,14 +119,16 @@ function MyApp(props) {
         <CssBaseline />
         <DebugPanelProvider>
           <AuthProvider>
-            <ChatContextProvider>
-              <TourProvider>
-                <Component {...pageProps} />
-                {/* Global Chat UI - available on all pages except Workbook and Unit */}
-                <GlobalChatButton show={!hideChatButton} />
-                <GlobalChatDrawer />
-              </TourProvider>
-            </ChatContextProvider>
+            <SettingsProvider>
+              <ChatContextProvider>
+                <TourProvider>
+                  <Component {...pageProps} />
+                  {/* Global Chat UI - available on all pages except Workbook and Unit */}
+                  <GlobalChatButton show={!hideChatButton} />
+                  <GlobalChatDrawer />
+                </TourProvider>
+              </ChatContextProvider>
+            </SettingsProvider>
           </AuthProvider>
         </DebugPanelProvider>
       </ThemeProvider>

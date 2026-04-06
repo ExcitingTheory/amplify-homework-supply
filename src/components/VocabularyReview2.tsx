@@ -168,7 +168,7 @@ function NestedVocabField({
                                     fontWeight: field === 'word' ? 600 : 400,
                                     outline: 'none',
                                     resize: multiline ? 'vertical' : 'none',
-                                    backgroundColor: '#fff',
+                                    backgroundColor: 'background.paper',
                                     cursor: 'text',
                                     overflow: 'hidden',
                                     overflowWrap: 'break-word',

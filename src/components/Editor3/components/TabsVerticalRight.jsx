@@ -163,7 +163,8 @@ export default function TabsVerticalRight({
         bgcolor: 'background.paper', 
         display: 'flex',
         flexDirection: 'row',
-        borderLeft: '1px solid #e0e0e0',
+        borderLeft: '1px solid',
+        borderColor: 'divider',
         position: 'relative',
       }}
     >
@@ -176,11 +177,11 @@ export default function TabsVerticalRight({
           bottom: 0,
           width: '5px',
           cursor: 'ew-resize',
-          backgroundColor: isResizing ? '#1976d2' : 'transparent',
+          backgroundColor: isResizing ? 'var(--mui-palette-primary-main, #1976d2)' : 'transparent',
           zIndex: 1000,
           transition: 'background-color 0.2s',
         }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1976d2'}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--mui-palette-primary-main, #1976d2)'}
         onMouseLeave={(e) => !isResizing && (e.currentTarget.style.backgroundColor = 'transparent')}
       />
       <Box sx={{ flexGrow: 1, minWidth: 0, order: 1 }}>
@@ -282,18 +283,18 @@ export default function TabsVerticalRight({
               display: 'flex', 
               alignItems: 'center', 
               gap: 1,
-              color: '#1a1a1a',
+              color: 'text.primary',
               fontWeight: 600
             }}>
-              <ForumIcon sx={{ fontSize: 28, color: '#2196f3' }} />
+              <ForumIcon sx={{ fontSize: 28, color: 'primary.main' }} />
               {t('tabsVerticalRight.cohortChatHeading')}
             </Typography>
-            <Typography variant="body2" sx={{ color: 'rgba(0,0,0,0.75)', lineHeight: 1.6 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
               {t('tabsVerticalRight.cohortChatDesc')}
             </Typography>
           </Box>
           <Box sx={{ px: 2 }}>
-            <Box sx={{ mb: 2, p: 2, bgcolor: 'background.default', borderRadius: 1, borderLeft: '3px solid #2196f3' }}>
+            <Box sx={{ mb: 2, p: 2, bgcolor: 'background.default', borderRadius: 1, borderLeft: 3, borderLeftColor: 'primary.main' }}>
               <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: 'text.primary' }}>
                 {t('tabsVerticalRight.tagKaiLabel')}
               </Typography>
@@ -301,7 +302,7 @@ export default function TabsVerticalRight({
                 {t('tabsVerticalRight.tagKaiDesc')}
               </Typography>
             </Box>
-            <Box sx={{ mb: 2, p: 2, bgcolor: 'background.default', borderRadius: 1, borderLeft: '3px solid #ff9800' }}>
+            <Box sx={{ mb: 2, p: 2, bgcolor: 'background.default', borderRadius: 1, borderLeft: '3px solid', borderLeftColor: 'warning.main' }}>
               <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: 'text.primary' }}>
                 {t('tabsVerticalRight.useTopicsLabel')}
               </Typography>
@@ -319,13 +320,14 @@ export default function TabsVerticalRight({
         orientation="vertical"
         variant="standard"
         value={value}
-        aria-label="Vertical tabs example"
+        aria-label={t('tabsVerticalRight.gradesTab', { ns: 'editor.authoring' })}
         sx={{
           overflowY: 'hidden',
           minWidth: '2.5rem',
           maxWidth: '2.5rem',
           order: 2,
-          borderLeft: '1px solid #e0e0e0',
+          borderLeft: '1px solid',
+          borderLeftColor: 'divider',
           '& .MuiTab-root': {
             minWidth: '2.5rem',
             maxWidth: '2.5rem',

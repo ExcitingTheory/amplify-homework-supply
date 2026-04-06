@@ -88,7 +88,7 @@ function MetadataField({
                     }}
                 >
                     {label}
-                    {required && <span style={{ color: 'red', marginLeft: '4px' }}>*</span>}
+                    {required && <span style={{ color: 'var(--mui-palette-error-main, red)', marginLeft: '4px' }}>*</span>}
                     {isDraft && <span style={{ marginLeft: '4px' }}>({t('metadataField.unsavedChanges')})</span>}
                 </Typography>
             )}

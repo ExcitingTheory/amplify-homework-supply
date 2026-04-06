@@ -299,7 +299,7 @@ function Index({ signOut, user }) {
         position="fixed"
         color="default"
         sx={{
-          backgroundColor: 'rgba(255, 255, 255, 0.72)',
+          backgroundColor: 'custom.glassNavbar',
           backdropFilter: 'blur(8px)',
         }}
       >

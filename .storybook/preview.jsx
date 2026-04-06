@@ -54,12 +54,14 @@ if (typeof window !== 'undefined') {
 import React from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { createTheme } from '@mui/material/styles';
 import { fn } from 'storybook/test';
 import { useGlobals } from 'storybook/preview-api';
 import '../src/components/Editor3/theme.css';
 import '../src/components/Editor3/components/LanguageEditorTheme.css';
 import './storybook.css';
+
+// Import the app's shared theme (with cssVariables + colorSchemes)
+import theme from '../src/theme';
 
 // Import action tracking
 import { createTrackableActions } from './code/action-tracker';
@@ -85,7 +87,7 @@ import { RouterContext, createMockRouter } from './__mocks__/next-router';
 
 // Import translation mode addon
 import { withTranslationMode } from './addons/translation-mode';
-import { globalTypes } from './addons/translation-mode/globalTypes';
+import { globalTypes as translationGlobalTypes } from './addons/translation-mode/globalTypes';
 
 // Import custom docs page template
 import DocsPageWithPanel from './components/DocsPageWithPanel';
@@ -153,33 +155,28 @@ if (typeof window !== 'undefined') {
   });
 }
 
-// Create a basic theme - you can customize this to match your app's theme
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-  typography: {
-    fontFamily: [
-      '-apple-system',
-      'BlinkMacSystemFont',
-      '"Segoe UI"',
-      'Roboto',
-      '"Helvetica Neue"',
-      'Arial',
-      'sans-serif',
-    ].join(','),
-  },
-});
+// Use the app's shared theme with CSS variables and dark mode support
+// The theme is imported from src/theme.js
 
 /** @type { import('@storybook/nextjs').Preview } */
 const preview = {
-  globalTypes,
+  globalTypes: {
+    ...translationGlobalTypes,
+    colorScheme: {
+      description: 'Color scheme',
+      defaultValue: 'light',
+      toolbar: {
+        title: 'Color Scheme',
+        icon: 'mirror',
+        items: [
+          { value: 'light', title: 'Light', icon: 'sun' },
+          { value: 'dark', title: 'Dark', icon: 'moon' },
+          { value: 'system', title: 'System', icon: 'settings' },
+        ],
+        dynamicTitle: true,
+      },
+    },
+  },
   parameters: {
     // Disable onboarding addon  
     onboarding: {
@@ -401,18 +398,28 @@ const preview = {
         error: mockAuth.error,
       };
       
+      // Get color scheme from Storybook globals
+      const [globals] = useGlobals();
+      const colorScheme = globals?.colorScheme || 'light';
+      
+      // Apply color scheme attribute so CSS variables resolve correctly
+      React.useEffect(() => {
+        document.documentElement.setAttribute('data-mui-color-scheme', colorScheme === 'system' ? 'light' : colorScheme);
+      }, [colorScheme]);
+      
       return (
         <RouterContext.Provider value={mockRouter}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <div 
               className="storybook-wrapper"
+              data-mui-color-scheme={colorScheme === 'system' ? 'light' : colorScheme}
               style={{
                 height: isFullscreen ? '100vh' : 'auto',
                 width: '100%',
                 overflow: isFullscreen ? 'auto' : 'visible',
                 position: 'relative',
-                backgroundColor: 'white',
+                backgroundColor: 'var(--mui-palette-background-default, #fafafa)',
                 // Ensure proper scrolling for fullscreen layouts
                 ...(isFullscreen && {
                   overflowX: 'auto',

@@ -4,6 +4,7 @@
 
 import * as React from 'react';
 import { useContext, useState, useCallback, useRef, useEffect } from 'react';
+import { useTranslation } from 'next-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
@@ -134,6 +135,7 @@ function EditorRefPlugin(): null {
  * Main Editor component with collaborative editing support
  */
 export default function Editor(): JSX.Element {
+  const { t } = useTranslation('common');
   const { unit, session, editorRef, files, dictionary, questionBank } = useContext(UnitContext);
   const { sections } = useContext(SectionContext);
   const vectorStoreContext = useContext(VectorStoreContext);
@@ -408,12 +410,12 @@ export default function Editor(): JSX.Element {
                   .layout-container > div {
                     margin: 0.25rem;
                     padding: 0.25rem;
-                    border: 1px dashed #ccc;
+                    border: 1px dashed var(--let-layout-border, #ccc);
                   }
 
                   .editor:focus {
                     outline: none;
-                    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+                    box-shadow: inset 0 2px 4px var(--mui-palette-action-focus, rgba(0, 0, 0, 0.1));
                   }
                 `}</style>
                 <AutoFocusPlugin />
@@ -553,7 +555,7 @@ export default function Editor(): JSX.Element {
                               className="editor"
                               data-tour="editor"
                               data-lexical-editor="true"
-                              aria-label="Main editor content"
+                              aria-label={t('actions.edit', { ns: 'common' })}
                               style={{
                                 maxWidth: '100%',
                                 outline: 'none',

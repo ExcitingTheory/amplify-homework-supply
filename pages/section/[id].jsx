@@ -883,7 +883,7 @@ function SectionDetail({ user, signOut }) {
         position="fixed"
         color="default"
         sx={{
-          backgroundColor: 'rgba(255, 255, 255, 0.72)',
+          backgroundColor: 'custom.glassNavbar',
           backdropFilter: 'blur(8px)',
         }}
       >
@@ -1108,7 +1108,7 @@ function SectionDetail({ user, signOut }) {
 
           <TableContainer component={Paper}>
             <Table
-              aria-label="simple table"
+              aria-label={t('sectionDetail.students', { ns: 'pages' })}
               size="small"
             >
 
@@ -1135,7 +1135,7 @@ function SectionDetail({ user, signOut }) {
                       </TableCell>
                       <TableCell align="right">{student.email}</TableCell>
                       <TableCell align="right">
-                        <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(student)}>
+                        <IconButton edge="end" aria-label={t('actions.delete', { ns: 'common' })} onClick={() => handleDelete(student)}>
                           <DeleteIcon />
                         </IconButton>
                       </TableCell>
@@ -1284,7 +1284,7 @@ function SectionDetail({ user, signOut }) {
         {/* Student View - Simple Two Column Table */}
         {(!isOwner || viewAsStudent) && (
           <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
-            <Table aria-label="student grades" size="small" sx={{ minWidth: 400 }}>
+            <Table aria-label={t('sectionDetail.gradebook', { ns: 'pages' })} size="small" sx={{ minWidth: 400 }}>
               <TableHead>
                 <TableRow>
                   <TableCell>{t('sectionDetail.assignmentHeader')}</TableCell>
@@ -1309,9 +1309,9 @@ function SectionDetail({ user, signOut }) {
                       onClick={() => setSelectedRow(selectedRow === assignment.id ? null : assignment.id)}
                       sx={{
                         cursor: 'pointer',
-                        backgroundColor: selectedRow === assignment.id ? '#e3f2fd' : 'transparent',
-                        '&:nth-of-type(odd)': { backgroundColor: selectedRow === assignment.id ? '#e3f2fd' : '#fafafa' },
-                        '&:hover': { backgroundColor: selectedRow === assignment.id ? '#e3f2fd' : '#f5f5f5' },
+                        backgroundColor: selectedRow === assignment.id ? 'action.selected' : 'transparent',
+                        '&:nth-of-type(odd)': { backgroundColor: selectedRow === assignment.id ? 'action.selected' : 'grey.100' },
+                        '&:hover': { backgroundColor: selectedRow === assignment.id ? 'action.selected' : 'grey.100' },
                         '& td': { backgroundColor: 'inherit' },
                         transition: 'background-color 0.2s ease',
                       }}
@@ -1323,7 +1323,7 @@ function SectionDetail({ user, signOut }) {
                 })}
                 
                 {/* Total Row */}
-                <TableRow sx={{ backgroundColor: '#f5f5f5', '& td': { backgroundColor: 'inherit' } }}>
+                <TableRow sx={{ backgroundColor: 'grey.100', '& td': { backgroundColor: 'inherit' } }}>
                   <TableCell sx={{ fontWeight: 'bold' }}>{t('sectionDetail.totalAverage')}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 'bold' }}>
                     {(() => {
@@ -1362,7 +1362,7 @@ function SectionDetail({ user, signOut }) {
         {isOwner && !viewAsStudent && (
           <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
           <Table
-            aria-label="simple table"
+            aria-label={t('sectionDetail.assignments', { ns: 'pages' })}
             size="small"
             sx={{ minWidth: 650, tableLayout: 'auto' }}
           >
@@ -1371,7 +1371,7 @@ function SectionDetail({ user, signOut }) {
                 <TableCell sx={{ 
                   position: 'sticky', 
                   left: 0, 
-                  backgroundColor: '#fff',
+                  backgroundColor: 'background.paper',
                   zIndex: 10,
                   minWidth: 150,
                   boxSizing: 'border-box',
@@ -1395,7 +1395,7 @@ function SectionDetail({ user, signOut }) {
                     </TableCell>
                   )
                 })}
-                <TableCell align="right" sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
+                <TableCell align="right" sx={{ fontWeight: 'bold', backgroundColor: 'grey.100' }}>
                   Total (Completion)
                 </TableCell>
               </TableRow>
@@ -1439,9 +1439,9 @@ function SectionDetail({ user, signOut }) {
                     sx={{ 
                       '&:last-child td, &:last-child th': { borderBottom: 0 },
                       cursor: 'pointer',
-                      backgroundColor: selectedRow === student.id ? '#e3f2fd' : '#fff',
-                      '&:nth-of-type(odd)': { backgroundColor: selectedRow === student.id ? '#e3f2fd' : '#fafafa' },
-                      '&:hover': { backgroundColor: selectedRow === student.id ? '#e3f2fd' : '#f5f5f5' },
+                      backgroundColor: selectedRow === student.id ? 'action.selected' : 'background.paper',
+                      '&:nth-of-type(odd)': { backgroundColor: selectedRow === student.id ? 'action.selected' : 'grey.100' },
+                      '&:hover': { backgroundColor: selectedRow === student.id ? 'action.selected' : 'grey.100' },
                       '& td, & th': { backgroundColor: 'inherit' },
                       transition: 'background-color 0.2s ease',
                     }}
@@ -1458,7 +1458,8 @@ function SectionDetail({ user, signOut }) {
                         minWidth: 150,
                         boxSizing: 'border-box',
                         boxShadow: '2px 0 4px rgba(0,0,0,0.1)',
-                        borderRight: '2px solid #e0e0e0',
+                        borderRight: 2,
+                        borderRightColor: 'divider',
                       }}
                     >
                       {student.name}
@@ -1520,8 +1521,8 @@ function SectionDetail({ user, signOut }) {
                       align="right" 
                       sx={{ 
                         fontWeight: 'bold', 
-                        backgroundColor: '#f5f5f5',
-                        color: completionPercentage === 100 ? '#2e7d32' : '#666'
+                        backgroundColor: 'grey.100',
+                        color: completionPercentage === 100 ? 'success.dark' : 'text.secondary'
                       }}
                     >
                       {completedAssignments > 0 ? `${displayAverage}%` : '-'} ({completionPercentage}%)

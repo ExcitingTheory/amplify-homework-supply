@@ -130,7 +130,7 @@ function AILoadingComponent() {
   return (
     <span 
       style={{ 
-        color: '#666',
+        color: 'var(--mui-palette-text-secondary, #666)',
         opacity: 0.7,
         fontStyle: 'italic',
         userSelect: 'none',
@@ -146,7 +146,7 @@ function AILoadingComponent() {
         display: 'inline-block',
         width: '8px',
         height: '8px',
-        border: '2px solid #666',
+        border: '2px solid var(--mui-palette-text-secondary, #666)',
         borderTopColor: 'transparent',
         borderRadius: '50%',
         animation: 'spin 0.8s linear infinite',
@@ -171,7 +171,7 @@ function AIContentSuggestionComponent({ suggestion }) {
   return (
     <span 
       style={{ 
-        color: '#444',
+        color: 'var(--mui-palette-text-primary, #444)',
         opacity: 0.9,
         fontStyle: 'italic',
         userSelect: 'none',

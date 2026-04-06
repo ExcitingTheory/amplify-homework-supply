@@ -52,9 +52,9 @@
   padding: 0.5rem 1rem;
 }
 
-/* Better canvas background */
+/* Better canvas background — adapts to dark mode */
 .sb-show-main {
-  background: #f5f5f5;
+  background: var(--mui-palette-background-default, #f5f5f5);
 }
 
 /* Improve addon panels */

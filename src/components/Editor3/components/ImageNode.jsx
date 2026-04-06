@@ -210,7 +210,7 @@ export class ImageNode extends DecoratorNode {
                     
                     .ImageNode__placeholder {
                         font-size: 12px;
-                        color: #888;
+                        color: var(--mui-palette-text-disabled, #888);
                         overflow: hidden;
                         position: absolute;
                         text-overflow: ellipsis;

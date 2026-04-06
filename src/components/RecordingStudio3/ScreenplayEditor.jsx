@@ -53,8 +53,8 @@ const ScreenplayContentEditable = styled(ContentEditable)(({ theme }) => ({
   padding: '1in 1in 1in 1.5in', // top, right, bottom, left
   minHeight: 'calc(100vh - 100px)',
   outline: 'none',
-  backgroundColor: '#fff',
-  color: '#000',
+  backgroundColor: 'background.paper',
+  color: 'text.primary',
   position: 'relative',
   
   // Page setup - approximately 55 lines per page
@@ -74,7 +74,7 @@ const FloatingFormatSelector = styled(Paper, {
   display: show ? 'flex' : 'none',
   alignItems: 'center',
   gap: theme.spacing(1),
-  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  backgroundColor: 'var(--mui-palette-background-paper, rgba(255, 255, 255, 0.95))',
   boxShadow: theme.shadows[3],
 }));
 
@@ -232,7 +232,7 @@ export default function ScreenplayEditor() {
   };
 
   return (
-    <Box sx={{ width: '100%', height: '100vh', backgroundColor: '#f5f5f5' }}>
+    <Box sx={{ width: '100%', height: '100vh', backgroundColor: 'grey.100' }}>
       <style jsx global>{`
         .screenplay-element {
           margin: 0;

@@ -155,7 +155,7 @@ export default function VerticalTabsRo({
         orientation="vertical"
         variant="standard"
         value={value}
-        aria-label="Vertical tabs example"
+        aria-label={t('verticalTabsRo.settings', { ns: 'workbook' })}
         sx={{
           overflow: 'hidden',
           minWidth: '2.5rem',

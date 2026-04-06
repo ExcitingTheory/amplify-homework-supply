@@ -4,6 +4,7 @@ import { getAmplifyClient } from "../../../utils/amplifyClient";
 import { uploadStudentSubmission } from "../../../utils/userSubmissionStorage";
 import UnitContext from "../../../context/unitContext";
 import { Button, Box, Typography, Skeleton } from "@mui/material";
+import { useColorScheme } from "@mui/material/styles";
 import { useTranslation } from "next-i18next";
 
 const LazyExcalidraw = lazy(() =>
@@ -20,6 +21,7 @@ const SketchPad = ({ excalidrawData,
     questionID
  }) => {
     const { t } = useTranslation('editor.shared');
+    const { mode } = useColorScheme();
     const [isHovering, setIsHovering] = useState(false);
     const [excalidrawAPI, setExcalidrawAPI] = useState(null);
     const [imageData, setImageData] = useState(null);
@@ -371,6 +373,7 @@ const SketchPad = ({ excalidrawData,
                     welcomeScreen: false,
                 }}
                 viewModeEnabled={false}
+                theme={mode === 'dark' ? 'dark' : 'light'}
                 zenModeEnabled={false}
                 gridModeEnabled={false}
                 >

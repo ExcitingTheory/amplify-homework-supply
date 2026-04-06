@@ -4,6 +4,19 @@
  * Styles for the virtualized chat message list container
  */
 
+/* Dark mode variable overrides */
+[data-mui-color-scheme="dark"] .container {
+  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
+  --message-divider: rgba(255, 255, 255, 0.06);
+  --message-hover-bg: rgba(255, 255, 255, 0.02);
+  --user-message-bg: rgba(100, 150, 255, 0.1);
+  --button-bg: #5a9cf5;
+  --button-text: white;
+  --button-hover-bg: #4080d0;
+  --text-secondary: #aaa;
+}
+
 .container {
   position: relative;
   height: 100%;

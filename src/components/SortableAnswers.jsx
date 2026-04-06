@@ -83,10 +83,10 @@ function Answer({ data, index, answers, onQuestionReorder, onQuestionChange, onC
     });
 
     return (
-        <div ref={drop} style={{ backgroundColor: isOver ? 'lightblue' : 'white' }}>
+        <div ref={drop} style={{ backgroundColor: isOver ? 'var(--mui-palette-action-hover, lightblue)' : 'var(--mui-palette-background-paper, white)' }}>
             <div ref={drag} style={{ opacity: isDragging ? 0.5 : 1 }}>
                 <Stack
-                    border="thin solid #E8E8E8"
+                    border="thin solid"
                     padding="0.5rem"
                     margin="0.5rem"
                     direction="row"
@@ -116,7 +116,7 @@ function Answer({ data, index, answers, onQuestionReorder, onQuestionChange, onC
                         labelPlacement="bottom"
                     />
                     <IconButton
-                        aria-label="delete"
+                        aria-label={t('actions.delete', { ns: 'common' })}
                         onClick={() => { onQuestionDelete(index) }}
                     >
                         <ClearIcon />

@@ -61,7 +61,7 @@ function TimerWrappedEditor() {
         position="fixed"
         color="default"
         sx={{
-          backgroundColor: 'rgba(255, 255, 255, 0.72)',
+          backgroundColor: 'custom.glassNavbar',
           backdropFilter: 'blur(8px)',
         }}
       >
@@ -229,7 +229,7 @@ function TimerWrappedEditor() {
                                           flex: 1,
                                           textAlign: 'center',
                                           flexGrow: 1,
-                                          borderBottom: '1px dashed #000',
+                                          borderBottom: '1px dashed currentColor',
                                           margin: '0 0.4rem',
                                           position: 'relative',
                                           top: '-0.5rem',

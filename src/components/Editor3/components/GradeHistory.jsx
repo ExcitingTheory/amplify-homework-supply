@@ -136,7 +136,7 @@ export default function GradeHistory() {
               transform: translateY(-50%);
               width: 2rem;
               text-align: center;
-              color: #666;
+              color: var(--mui-palette-text-secondary, #666);
             }
           `}</style>
 

@@ -807,7 +807,7 @@ export default forwardRef(function RecordingStudio3({
           )}
 
           {/* Timeline/Waveform View */}
-          <Box sx={{ flex: 1, p: 2, overflow: 'auto', bgcolor: 'grey.50' }}>
+          <Box sx={{ flex: 1, p: 2, overflow: 'auto', bgcolor: 'action.hover' }}>
             <Typography variant="subtitle2" gutterBottom>
               {t('recordingStudio3.timeline')}
             </Typography>

@@ -5,6 +5,18 @@
  * Uses CSS variables for theme compatibility
  */
 
+/* Dark mode variable overrides */
+:global([data-mui-color-scheme="dark"]) .messageRenderer {
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --code-bg: #161b22;
+  --code-border: #30363d;
+  --code-inline-bg: rgba(110, 118, 129, 0.4);
+  --link-color: #6cb6ff;
+  --quote-border: #555;
+  --divider-color: #30363d;
+}
+
 .messageRenderer {
   font-size: 14px;
   line-height: 1.6;
@@ -220,6 +232,47 @@
 
 .messageRenderer :global(.chat-code-variable) {
   color: #e36209;
+}
+
+/* Dark mode syntax highlighting overrides */
+:global([data-mui-color-scheme="dark"]) .messageRenderer :global(.chat-code-comment) {
+  color: #8b949e;
+}
+:global([data-mui-color-scheme="dark"]) .messageRenderer :global(.chat-code-keyword) {
+  color: #ff7b72;
+}
+:global([data-mui-color-scheme="dark"]) .messageRenderer :global(.chat-code-string) {
+  color: #a5d6ff;
+}
+:global([data-mui-color-scheme="dark"]) .messageRenderer :global(.chat-code-number) {
+  color: #79c0ff;
+}
+:global([data-mui-color-scheme="dark"]) .messageRenderer :global(.chat-code-function) {
+  color: #d2a8ff;
+}
+:global([data-mui-color-scheme="dark"]) .messageRenderer :global(.chat-code-class-name) {
+  color: #d2a8ff;
+}
+:global([data-mui-color-scheme="dark"]) .messageRenderer :global(.chat-code-operator) {
+  color: #ff7b72;
+}
+:global([data-mui-color-scheme="dark"]) .messageRenderer :global(.chat-code-punctuation) {
+  color: #c9d1d9;
+}
+:global([data-mui-color-scheme="dark"]) .messageRenderer :global(.chat-code-property) {
+  color: #79c0ff;
+}
+:global([data-mui-color-scheme="dark"]) .messageRenderer :global(.chat-code-boolean) {
+  color: #79c0ff;
+}
+:global([data-mui-color-scheme="dark"]) .messageRenderer :global(.chat-code-tag) {
+  color: #7ee787;
+}
+:global([data-mui-color-scheme="dark"]) .messageRenderer :global(.chat-code-attr) {
+  color: #d2a8ff;
+}
+:global([data-mui-color-scheme="dark"]) .messageRenderer :global(.chat-code-variable) {
+  color: #ffa657;
 }
 
 /* Loading state for streaming messages */

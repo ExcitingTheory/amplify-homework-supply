@@ -170,14 +170,14 @@ function NestedQuestionField({
                                 style={{
                                     minHeight: multiline ? '80px' : '24px',
                                     padding: multiline ? '8px' : '4px 8px',
-                                    border: '1px solid rgba(0, 0, 0, 0.12)',
+                                    border: '1px solid var(--mui-palette-divider, rgba(0, 0, 0, 0.12))',
                                     borderRadius: '4px',
                                     fontSize: field === 'prompt' ? '1rem' : '0.875rem',
                                     fontFamily: 'inherit',
                                     fontWeight: field === 'prompt' ? 500 : 400,
                                     outline: 'none',
                                     resize: multiline ? 'vertical' : 'none',
-                                    backgroundColor: '#fff',
+                                    backgroundColor: 'background.paper',
                                     cursor: 'text',
                                 }}
                             />
@@ -189,7 +189,7 @@ function NestedQuestionField({
                                         position: 'absolute',
                                         top: multiline ? '8px' : '4px',
                                         left: '8px',
-                                        color: 'rgba(0, 0, 0, 0.38)',
+                                        color: 'var(--mui-palette-text-disabled, rgba(0, 0, 0, 0.38))',
                                         pointerEvents: 'none',
                                         fontSize: '0.875rem',
                                     }}
@@ -243,7 +243,7 @@ export function QuestionCard({
     return (
         <ListItem
             sx={{
-                backgroundColor: isEvenRow ? 'background.paper' : 'grey.50',
+                backgroundColor: isEvenRow ? 'background.paper' : 'action.hover',
                 flexDirection: 'column',
                 alignItems: 'stretch',
                 padding: 0,
@@ -339,12 +339,12 @@ export function QuestionCard({
                     )}
                     {item.hasAudio && (
                         <Tooltip title={t('questionsReview.hasAudio')}>
-                            <MicIcon fontSize="small" color="primary" aria-label="audio" />
+                            <MicIcon fontSize="small" color="primary" aria-label={t('questionsReview.hasAudio')} />
                         </Tooltip>
                     )}
                     {item.hasImage && (
                         <Tooltip title={t('questionsReview.hasImage')}>
-                            <ImageIcon fontSize="small" color="secondary" aria-label="image" />
+                            <ImageIcon fontSize="small" color="secondary" aria-label={t('questionsReview.hasImage')} />
                         </Tooltip>
                     )}
                 </Box>
@@ -696,7 +696,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                         {showSummaries ? t('questionsReview.hide') : t('questionsReview.show')} {t('questionsReview.summariesAndObjectives')}
                     </Button>
                     <Collapse in={showSummaries}>
-                        <Paper elevation={0} sx={{ p: 2, mt: 1, bgcolor: 'grey.50' }}>
+                        <Paper elevation={0} sx={{ p: 2, mt: 1, bgcolor: 'action.hover' }}>
                             {summaries.length > 0 && (
                                 <Box sx={{ mb: 2 }}>
                                     <Typography variant="subtitle2" gutterBottom fontWeight={600}>

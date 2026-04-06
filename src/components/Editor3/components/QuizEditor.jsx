@@ -358,7 +358,7 @@ const QuizEditor = ({
                 display: 'flex',
                 flexDirection: 'column',
                 marginBottom: '2rem',
-                border: isSelected ? '2px solid #1976d2' : '1px solid transparent',
+                border: isSelected ? '2px solid var(--mui-palette-primary-main, #1976d2)' : '1px solid transparent',
                 borderRadius: '4px',
                 padding: '8px',
                 cursor: 'pointer',
@@ -431,7 +431,8 @@ const QuizEditor = ({
                         direction="row"
                         spacing={2}
                         alignItems="center"
-                        border="thin solid #E8E8E8"
+                        border="thin solid"
+                        borderColor="divider"
                         padding="0.5rem"
                         margin="0.5rem"
                         maxWidth="40rem"

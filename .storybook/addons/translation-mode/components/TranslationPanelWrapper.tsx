@@ -232,12 +232,12 @@ const KeyList: React.FC<KeyListProps> = ({
                     {/* Editable metadata fields */}
                     {editMeta && (
                       <Box sx={{ mb: 1.5 }}>
-                        <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block', mb: 0.5 }}>
+                        <Typography variant="subtitle2" sx={{ color: 'text.primary', fontWeight: 700, display: 'block', mb: 1, fontSize: '0.9rem' }}>
                           Metadata
                         </Typography>
                         <Stack spacing={1}>
                           <Box>
-                            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.25 }}>Context</Typography>
+                            <Typography variant="body2" sx={{ color: 'text.primary', display: 'block', mb: 0.5, fontWeight: 600 }}>Context</Typography>
                             <PlainTextCell
                               value={editMeta.context}
                               onChange={(text) => onMetadataChange(fullKey, 'context', text)}
@@ -249,7 +249,7 @@ const KeyList: React.FC<KeyListProps> = ({
                             />
                           </Box>
                           <Box>
-                            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.25 }}>Usage</Typography>
+                            <Typography variant="body2" sx={{ color: 'text.primary', display: 'block', mb: 0.5, fontWeight: 600 }}>Usage</Typography>
                             <PlainTextCell
                               value={editMeta.usage}
                               onChange={(text) => onMetadataChange(fullKey, 'usage', text)}
@@ -262,7 +262,7 @@ const KeyList: React.FC<KeyListProps> = ({
                           </Box>
                           <Stack direction="row" spacing={1}>
                             <Box sx={{ flex: 1 }}>
-                              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.25 }}>Impact</Typography>
+                              <Typography variant="body2" sx={{ color: 'text.primary', display: 'block', mb: 0.5, fontWeight: 600 }}>Impact</Typography>
                               <PlainTextCell
                                 value={editMeta.impact}
                                 onChange={(text) => onMetadataChange(fullKey, 'impact', text)}
@@ -274,7 +274,7 @@ const KeyList: React.FC<KeyListProps> = ({
                               />
                             </Box>
                             <Box sx={{ flex: 1 }}>
-                              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.25 }}>Tone</Typography>
+                              <Typography variant="body2" sx={{ color: 'text.primary', display: 'block', mb: 0.5, fontWeight: 600 }}>Tone</Typography>
                               <PlainTextCell
                                 value={editMeta.tone}
                                 onChange={(text) => onMetadataChange(fullKey, 'tone', text)}
@@ -293,7 +293,7 @@ const KeyList: React.FC<KeyListProps> = ({
                     <Divider sx={{ my: 1 }} />
 
                     {/* Inline translation editors per language */}
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: 'block', mb: 0.5 }}>
+                    <Typography variant="subtitle2" sx={{ color: 'text.primary', fontWeight: 700, display: 'block', mb: 1, fontSize: '0.9rem' }}>
                       Translations
                     </Typography>
                     <Stack spacing={1}>
@@ -318,15 +318,15 @@ const KeyList: React.FC<KeyListProps> = ({
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                 <Typography
-                                  variant="caption"
+                                  variant="body2"
                                   sx={{
                                     fontWeight: 700,
-                                    color: isMissing ? 'error.light' : isCurrent ? 'primary.main' : 'text.secondary',
+                                    color: isMissing ? 'error.light' : isCurrent ? 'primary.main' : 'text.primary',
                                   }}
                                 >
                                   {lang.code.toUpperCase()}
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 500 }}>
                                   {lang.label} {isSource && '(Source)'}
                                 </Typography>
                                 {isCurrent && (

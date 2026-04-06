@@ -167,7 +167,7 @@ export default function TabsVerticalLeft({
         orientation="vertical"
         variant="standard"
         value={value}
-        aria-label="Vertical tabs example"
+        aria-label={t('tabsVerticalLeft.tabs.configuration', { ns: 'editor.authoring' })}
         sx={{
           overflow: 'hidden',
           minWidth: '2.5rem',

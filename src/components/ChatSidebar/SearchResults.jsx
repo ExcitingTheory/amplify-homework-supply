@@ -41,7 +41,7 @@ const highlightMatches = (text, searchTerm) => {
     
     return parts.map((part, index) => 
         regex.test(part) ? (
-            <mark key={index} style={{ backgroundColor: '#ffeb3b', padding: '0 2px', borderRadius: '2px' }}>
+            <mark key={index} style={{ backgroundColor: 'var(--mui-palette-custom-searchHighlight, #ffeb3b)', padding: '0 2px', borderRadius: '2px' }}>
                 {part}
             </mark>
         ) : part
