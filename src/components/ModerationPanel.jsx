@@ -120,7 +120,7 @@ export default function ModerationPanel({ item, title }) {
         </Stack>
       </Box>
 
-      <Box sx={{ mt: 2, p: 1, bgcolor: 'grey.50', borderRadius: 1 }}>
+      <Box sx={{ mt: 2, p: 1, bgcolor: 'action.hover', borderRadius: 1 }}>
         <Typography variant="caption" color="text.secondary">
           {t('moderationPanel.checked', { date: new Date(item.moderationCheckedAt).toLocaleString() })}
         </Typography>

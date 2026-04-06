@@ -586,6 +586,21 @@ const mockClient = {
       dataStores.Section.set(sectionId, mockSection);
       return { data: `Successfully joined section with code ${input?.code}`, errors: null };
     },
+    moderateContent: async (input) => {
+      console.log('[Mock Data] moderateContent() called with:', input);
+      return {
+        data: {
+          moderateContent: {
+            flagged: false,
+            categories: {},
+            categoryScores: {},
+            model: 'text-moderation-latest',
+            error: null,
+          },
+        },
+        errors: null,
+      };
+    },
   },
 
   // Mock queries for custom query handlers (Lambda-backed)

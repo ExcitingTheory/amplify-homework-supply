@@ -26,7 +26,6 @@ import { AutocompleteProvider } from './context/SharedAutocompleteContext';
 import { DndWrapper } from '../MeaningAssociationExercise/DndWrapper';
 import LanguageEditorTheme from './components/LanguageEditorTheme';
 
-import DataPlugin from './plugins/DataPlugin';
 import StoryProgressPlugin from './plugins/StoryProgressPlugin';
 // @ts-ignore - JSX file without proper module exports
 import WorkbookStatePlugin from './plugins/WorkbookStatePlugin';
@@ -146,7 +145,6 @@ export function Workbook(): JSX.Element {
             <YouTubePlugin />
             <WordBlockPlugin />
             <QuizPlugin />
-            <DataPlugin />
             <WorkbookStatePlugin />
             <StoryProgressPlugin />
             <MeaningAssociationPlugin />

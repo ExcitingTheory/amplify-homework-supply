@@ -41,7 +41,7 @@ function MetadataCard({
     return (
         <Box
             sx={{
-                backgroundColor: isEditing ? 'warning.50' : 'grey.50',
+                backgroundColor: isEditing ? 'warning.50' : 'action.hover',
                 borderRadius: 1,
                 borderLeft: '4px solid',
                 borderLeftColor: isEditing ? 'warning.main' : 'divider',

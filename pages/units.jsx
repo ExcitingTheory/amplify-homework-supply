@@ -382,7 +382,7 @@ function Units() {
                                                 maxWidth: '80rem',
                                                 borderRadius: 2,
                                                 borderLeft: '4px solid',
-                                                borderLeftColor: 'grey.900',
+                                                borderLeftColor: 'text.primary',
                                                 transition: 'all 0.3s ease-in-out',
                                                 '&:hover': {
                                                     elevation: 6,
@@ -418,12 +418,12 @@ function Units() {
                                                             mr: 1,
                                                             borderRadius: 2,
                                                             boxShadow: 2,
-                                                            color: 'grey.900',
-                                                            borderColor: 'grey.900',
+                                                            color: 'text.primary',
+                                                            borderColor: 'text.primary',
                                                             '&:hover': {
                                                                 boxShadow: 4,
-                                                                borderColor: 'grey.900',
-                                                                backgroundColor: 'grey.50',
+                                                                borderColor: 'text.primary',
+                                                                backgroundColor: 'action.hover',
                                                             },
                                                         }}
                                                     >
@@ -441,12 +441,12 @@ function Units() {
                                                             py: 1,
                                                             borderRadius: 2,
                                                             boxShadow: 2,
-                                                            color: 'grey.900',
-                                                            borderColor: 'grey.900',
+                                                            color: 'text.primary',
+                                                            borderColor: 'text.primary',
                                                             '&:hover': {
                                                                 boxShadow: 4,
-                                                                borderColor: 'grey.900',
-                                                                backgroundColor: 'grey.50',
+                                                                borderColor: 'text.primary',
+                                                                backgroundColor: 'action.hover',
                                                             },
                                                         }}
                                                     >
@@ -495,7 +495,7 @@ function Units() {
                                                 maxWidth: '80rem',
                                                 borderRadius: 2,
                                                 borderLeft: '4px solid',
-                                                borderLeftColor: 'grey.900',
+                                                borderLeftColor: 'text.primary',
                                                 transition: 'all 0.3s ease-in-out',
                                                 '&:hover': {
                                                     elevation: 6,
@@ -531,12 +531,12 @@ function Units() {
                                                             mr: 1,
                                                             borderRadius: 2,
                                                             boxShadow: 2,
-                                                            color: 'grey.900',
-                                                            borderColor: 'grey.900',
+                                                            color: 'text.primary',
+                                                            borderColor: 'text.primary',
                                                             '&:hover': {
                                                                 boxShadow: 4,
-                                                                borderColor: 'grey.900',
-                                                                backgroundColor: 'grey.50',
+                                                                borderColor: 'text.primary',
+                                                                backgroundColor: 'action.hover',
                                                             },
                                                         }}
                                                     >
@@ -554,12 +554,12 @@ function Units() {
                                                             py: 1,
                                                             borderRadius: 2,
                                                             boxShadow: 2,
-                                                            color: 'grey.900',
-                                                            borderColor: 'grey.900',
+                                                            color: 'text.primary',
+                                                            borderColor: 'text.primary',
                                                             '&:hover': {
                                                                 boxShadow: 4,
-                                                                borderColor: 'grey.900',
-                                                                backgroundColor: 'grey.50',
+                                                                borderColor: 'text.primary',
+                                                                backgroundColor: 'action.hover',
                                                             },
                                                         }}
                                                     >
@@ -605,7 +605,7 @@ function Units() {
                                                 maxWidth: '80rem',
                                                 borderRadius: 2,
                                                 borderLeft: '4px solid',
-                                                borderLeftColor: 'grey.900',
+                                                borderLeftColor: 'text.primary',
                                                 transition: 'all 0.3s ease-in-out',
                                                 '&:hover': {
                                                     elevation: 6,
@@ -641,12 +641,12 @@ function Units() {
                                                             mr: 1,
                                                             borderRadius: 2,
                                                             boxShadow: 2,
-                                                            color: 'grey.900',
-                                                            borderColor: 'grey.900',
+                                                            color: 'text.primary',
+                                                            borderColor: 'text.primary',
                                                             '&:hover': {
                                                                 boxShadow: 4,
-                                                                borderColor: 'grey.900',
-                                                                backgroundColor: 'grey.50',
+                                                                borderColor: 'text.primary',
+                                                                backgroundColor: 'action.hover',
                                                             },
                                                         }}
                                                     >
@@ -664,12 +664,12 @@ function Units() {
                                                             py: 1,
                                                             borderRadius: 2,
                                                             boxShadow: 2,
-                                                            color: 'grey.900',
-                                                            borderColor: 'grey.900',
+                                                            color: 'text.primary',
+                                                            borderColor: 'text.primary',
                                                             '&:hover': {
                                                                 boxShadow: 4,
-                                                                borderColor: 'grey.900',
-                                                                backgroundColor: 'grey.50',
+                                                                borderColor: 'text.primary',
+                                                                backgroundColor: 'action.hover',
                                                             },
                                                         }}
                                                     >

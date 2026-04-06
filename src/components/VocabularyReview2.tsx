@@ -240,7 +240,7 @@ export function VocabularyCard({
     return (
         <ListItem
             sx={{
-                backgroundColor: isEvenRow ? 'background.paper' : 'grey.50',
+                backgroundColor: isEvenRow ? 'background.paper' : 'action.hover',
                 flexDirection: 'column',
                 alignItems: 'stretch',
                 padding: 0,
@@ -751,7 +751,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
                         {showSummaries ? t('vocabularyReview.hide') : t('vocabularyReview.show')} {t('vocabularyReview.summariesAndObjectives')}
                     </Button>
                     <Collapse in={showSummaries}>
-                        <Paper elevation={0} sx={{ p: 2, mt: 1, bgcolor: 'grey.50' }}>
+                        <Paper elevation={0} sx={{ p: 2, mt: 1, bgcolor: 'action.hover' }}>
                             {summaries.length > 0 && (
                                 <Box sx={{ mb: 2 }}>
                                     <Typography variant="subtitle2" gutterBottom fontWeight={600}>

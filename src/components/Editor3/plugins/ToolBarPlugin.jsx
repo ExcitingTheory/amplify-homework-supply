@@ -626,7 +626,7 @@ const PreviewModal = () => {
 
 
 
-const UnitTitleDescriptionEditor = () => {
+const UnitTitleDescriptionEditor = ({ isScrolled = false }) => {
     const { t } = useTranslation('editor.authoring');
     const {
         name,
@@ -663,15 +663,48 @@ const UnitTitleDescriptionEditor = () => {
     }
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+        <Box sx={{
+            display: 'flex',
+            flexDirection: isScrolled ? 'row' : 'column',
+            alignItems: isScrolled ? 'center' : 'flex-start',
+            width: '100%',
+            transition: 'all 0.3s ease',
+            gap: isScrolled ? 2 : 0,
+            overflow: 'hidden',
+        }}>
             <Head>
                 <title>{name}</title>
             </Head>
-            <Box sx={{ flexGrow: 1, px: 2, py: 0.5, minHeight: '2.5rem', display: 'flex', alignItems: 'center' }}>
+            <Box sx={{
+                flexGrow: 1,
+                px: 2,
+                py: isScrolled ? 0.25 : 0.5,
+                minHeight: isScrolled ? '2rem' : '2.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                minWidth: 0,
+                overflow: 'hidden',
+                transition: 'all 0.3s ease',
+            }}>
                 {!editName &&
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1, lineHeight: '2rem', borderBottom: '1px solid transparent', pb: '2px' }} onClick={(event) => {
-                        setEditName(true)
-                    }}>
+                    <Typography
+                        variant={isScrolled ? 'body1' : 'h6'}
+                        component="div"
+                        sx={{
+                            flexGrow: 1,
+                            lineHeight: isScrolled ? '1.5rem' : '2rem',
+                            borderBottom: '1px solid transparent',
+                            pb: '2px',
+                            transition: 'all 0.3s ease',
+                            fontWeight: isScrolled ? 500 : 400,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                        }}
+                        onClick={(event) => {
+                            setEditName(true)
+                        }}
+                    >
                         {newName || t('toolBarPlugin.untitledUnit')}
                     </Typography>
                 }
@@ -684,7 +717,7 @@ const UnitTitleDescriptionEditor = () => {
                         placeholder={t('toolBarPlugin.untitledUnit')}
                         onChange={(event) => { onNameChange(event) }}
                         InputProps={{
-                            sx: { fontSize: '1.25rem', fontWeight: 400 }
+                            sx: { fontSize: isScrolled ? '1rem' : '1.25rem', fontWeight: isScrolled ? 500 : 400 }
                         }}
                         inputRef={(input) => {
                             if (input != null) {
@@ -701,7 +734,8 @@ const UnitTitleDescriptionEditor = () => {
                 }
             </Box>
 
-            <Box sx={{ flexGrow: 1, px: 2, py: 0.5, minHeight: '2rem', display: 'flex', alignItems: 'center' }}>
+            {!isScrolled && (
+            <Box sx={{ flexGrow: 1, px: 2, py: 0.5, minHeight: '2rem', display: 'flex', alignItems: 'center', transition: 'opacity 0.3s ease' }}>
                 {!editDescription &&
                     <Typography variant="body2" component="div" sx={{ flexGrow: 1, lineHeight: '1.5rem', borderBottom: '1px solid transparent', pb: '2px' }} onClick={(event) => {
                         // event.preventDefault()
@@ -736,6 +770,7 @@ const UnitTitleDescriptionEditor = () => {
                     />
                 }
             </Box>
+            )}
         </Box>
     )
 }
@@ -1867,6 +1902,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
     open,
     setOpen,
     setTabValue,
+    isScrolled = false,
 }, ref) {
     const { t } = useTranslation('editor.authoring');
     const [editor] = useLexicalComposerContext();
@@ -2473,7 +2509,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                     overflowY: 'visible',
                     boxShadow: 'none',
                     zIndex: (theme) => theme.zIndex.drawer + 2,
-                    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                    backgroundColor: 'custom.glassNavbar',
                     backdropFilter: 'blur(7px)',
                     display: 'flex',
                     flexDirection: 'column',
@@ -2481,7 +2517,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                 }}
             >
                 <MainToolbar />
-                <UnitTitleDescriptionEditor />
+                <UnitTitleDescriptionEditor isScrolled={isScrolled} />
             </AppBar>
             <AppBar
                 ref={secondAppBarRef}
@@ -2496,9 +2532,10 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                     opacity: firstAppBarHeight > 0 ? 1 : 0,
                     transition: 'opacity 0.1s ease-in-out',
                     paddingTop: '0.25rem',
-                    borderBottom: '1px solid #e0e0e0',
+                    borderBottom: 1,
+                    borderColor: 'divider',
                     paddingBottom: '0.25rem',
-                    backgroundColor: 'rgba(255, 255, 255, 1)',
+                    backgroundColor: 'custom.glassNavbar',
                     backdropFilter: 'blur(7px)',
                 }}
             >
@@ -2517,12 +2554,13 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                             height: '2rem',
                             padding: '0.2rem',
                             borderRadius: 0,
-                            backgroundColor: '#ffffff',
-                            border: '1px solid #e0e0e0',
-                            boxShadow: '2px 0 4px rgba(0,0,0,0.1)',
+                            backgroundColor: 'background.paper',
+                            border: 1,
+                            borderColor: 'divider',
+                            boxShadow: 2,
                             '&:hover': {
-                                backgroundColor: '#f5f5f5',
-                                boxShadow: '2px 0 6px rgba(0,0,0,0.15)',
+                                backgroundColor: 'action.hover',
+                                boxShadow: 3,
                             },
                         }}
                         title={t('toolBarPlugin.scrollToolbarLeft')}
@@ -2720,12 +2758,13 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                             height: '2rem',
                             padding: '0.2rem',
                             borderRadius: 0,
-                            backgroundColor: '#ffffff',
-                            border: '1px solid #e0e0e0',
-                            boxShadow: '-2px 0 4px rgba(0,0,0,0.1)',
+                            backgroundColor: 'background.paper',
+                            border: 1,
+                            borderColor: 'divider',
+                            boxShadow: 2,
                             '&:hover': {
-                                backgroundColor: '#f5f5f5',
-                                boxShadow: '-2px 0 6px rgba(0,0,0,0.15)',
+                                backgroundColor: 'action.hover',
+                                boxShadow: 3,
                             },
                         }}
                         title={t('toolBarPlugin.scrollToolbarRight')}

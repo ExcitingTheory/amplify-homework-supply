@@ -271,7 +271,7 @@ export default function PdfViewerComponent({
                 sx={{ 
                     p: 4, 
                     textAlign: 'center',
-                    bgcolor: 'grey.50',
+                    bgcolor: 'action.hover',
                     my: 2,
                 }}
             >
@@ -412,7 +412,7 @@ export default function PdfViewerComponent({
             <Box 
                 sx={{ 
                     p: 2,
-                    bgcolor: 'grey.50',
+                    bgcolor: 'action.hover',
                     display: 'flex',
                     justifyContent: 'center',
                     minHeight: 400,

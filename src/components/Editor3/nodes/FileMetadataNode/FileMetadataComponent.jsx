@@ -377,7 +377,7 @@ export default function FileMetadataComponent({
         <Box sx={{ margin: 0 }}>
             <ListItem
                 sx={{
-                    backgroundColor: isEvenRow ? 'background.paper' : 'grey.50',
+                    backgroundColor: isEvenRow ? 'background.paper' : 'action.hover',
                     flexDirection: 'column',
                     alignItems: 'stretch',
                     padding: 0,

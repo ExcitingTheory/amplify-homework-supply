@@ -326,7 +326,7 @@ export default function CustomAnswerComponent({
                                     border: 1, 
                                     borderColor: feedback[questionID]?.answer === true ? 'success.main' : 'error.main',
                                     borderRadius: 1,
-                                    bgcolor: 'grey.50'
+                                    bgcolor: 'action.hover'
                                 }}>
                                     {feedback[questionID]?.userResponse && (
                                         <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontStyle: 'italic' }}>

@@ -760,7 +760,7 @@ function MetadataEditor({ file, onUpdate, onClose }) {
     };
 
     return (
-        <Box sx={{ p: 2, backgroundColor: 'grey.50', borderRadius: 1, mt: 1 }}>
+        <Box sx={{ p: 2, backgroundColor: 'action.hover', borderRadius: 1, mt: 1 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant="h6">{t('fileManager2.metadataEditor.heading')}</Typography>
                 {!editing && (
@@ -919,7 +919,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
     console.log('ExpandedFileContent render', { file, parsedContent });
 
     return (
-        <Box sx={{ p: 2, backgroundColor: 'grey.50', borderRadius: 1, mt: 1 }}>
+        <Box sx={{ p: 2, backgroundColor: 'action.hover', borderRadius: 1, mt: 1 }}>
             {/* Audio/Image Metadata */}
             {metadata && (
                 <Box>

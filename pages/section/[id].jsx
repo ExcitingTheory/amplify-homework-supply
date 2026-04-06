@@ -1126,7 +1126,7 @@ function SectionDetail({ user, signOut }) {
                       key={student.id}
                       sx={{ 
                         '&:last-child td, &:last-child th': { border: 0 },
-                        '&:nth-of-type(odd)': { backgroundColor: '#fafafa' },
+                        '&:nth-of-type(odd)': { backgroundColor: 'action.hover' },
                         '& td, & th': { backgroundColor: 'inherit' },
                       }}
                     >

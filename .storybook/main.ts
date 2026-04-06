@@ -75,10 +75,6 @@ const config: StorybookConfig = {
             console.log('[mock-yjs-imports] -> useYjsUnit.js');
             return path.resolve(mockPath, 'useYjsUnit.js');
           }
-          if (source.includes('CollaborationPlugin')) {
-            console.log('[mock-yjs-imports] -> CollaborationPlugin.js');
-            return path.resolve(mockPath, 'CollaborationPlugin.js');
-          }
           if (source.match(/yjs\/(index)?$/)) {
             console.log('[mock-yjs-imports] -> yjs-index.js');
             return path.resolve(mockPath, 'yjs-index.js');
@@ -153,13 +149,7 @@ const config: StorybookConfig = {
       '../hooks/useYjsUnit.ts': path.resolve(__dirname, './__mocks__/useYjsUnit.js'),
       '../../hooks/useYjsUnit': path.resolve(__dirname, './__mocks__/useYjsUnit.js'),
       '../../hooks/useYjsUnit.ts': path.resolve(__dirname, './__mocks__/useYjsUnit.js'),
-      // Mock CollaborationPlugin
-      '@/components/Editor3/plugins/CollaborationPlugin': path.resolve(__dirname, './__mocks__/CollaborationPlugin.js'),
-      '@/components/Editor3/plugins/CollaborationPlugin.tsx': path.resolve(__dirname, './__mocks__/CollaborationPlugin.js'),
-      './plugins/CollaborationPlugin': path.resolve(__dirname, './__mocks__/CollaborationPlugin.js'),
-      './plugins/CollaborationPlugin.tsx': path.resolve(__dirname, './__mocks__/CollaborationPlugin.js'),
-      '../plugins/CollaborationPlugin': path.resolve(__dirname, './__mocks__/CollaborationPlugin.js'),
-      '../plugins/CollaborationPlugin.tsx': path.resolve(__dirname, './__mocks__/CollaborationPlugin.js'),
+      // CollaborationPlugin uses real @lexical/yjs - no mock needed
       // Mock YJS index (directory imports)
       '@/yjs': path.resolve(__dirname, './__mocks__/yjs-index.js'),
       '@/yjs/index': path.resolve(__dirname, './__mocks__/yjs-index.js'),

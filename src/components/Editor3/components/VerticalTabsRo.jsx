@@ -130,7 +130,8 @@ export default function VerticalTabsRo({
         bgcolor: 'background.paper', 
         display: 'flex',
         flexDirection: 'row',
-        borderRight: '1px solid #e0e0e0',
+        borderRight: 1,
+        borderColor: 'divider',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -144,11 +145,11 @@ export default function VerticalTabsRo({
           bottom: 0,
           width: '5px',
           cursor: 'ew-resize',
-          backgroundColor: isResizing ? '#1976d2' : 'transparent',
+          backgroundColor: isResizing ? 'var(--mui-palette-primary-main, #1976d2)' : 'transparent',
           zIndex: 100,
           transition: 'background-color 0.2s',
         }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1976d2'}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--mui-palette-primary-main, #1976d2)'}
         onMouseLeave={(e) => !isResizing && (e.currentTarget.style.backgroundColor = 'transparent')}
       />
       <Tabs
@@ -167,7 +168,8 @@ export default function VerticalTabsRo({
             margin: 0,
           },
           '& .MuiTabs-scroller': {
-            borderRight: '1px solid #e0e0e0',
+            borderRight: 1,
+            borderColor: 'divider',
             margin: 0,
             overflow: 'hidden !important',
           },

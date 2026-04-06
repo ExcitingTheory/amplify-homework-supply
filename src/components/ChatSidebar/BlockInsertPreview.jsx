@@ -215,7 +215,7 @@ const ContentBlockPreview = ({ preview, blockData }) => {
             <Paper
                 sx={{
                     p: 2,
-                    bgcolor: 'grey.50',
+                    bgcolor: 'action.hover',
                     border: '1px solid',
                     borderColor: 'divider',
                     borderRadius: 1,

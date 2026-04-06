@@ -208,7 +208,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
 
       {/* Topic */}
       {topic && (
-        <Box sx={{ px: 2, py: 1, bgcolor: 'grey.50', borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ px: 2, py: 1, bgcolor: 'action.hover', borderBottom: 1, borderColor: 'divider' }}>
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
             {t('chatSidebar.contentPreview.topic')}: {topic}
           </Typography>
@@ -219,7 +219,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
       <Tabs
         value={viewMode}
         onChange={(_, newValue) => setViewMode(newValue)}
-        sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'grey.50' }}
+        sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'action.hover' }}
       >
         <Tab
           label={t('chatSidebar.contentPreview.preview')}
@@ -305,7 +305,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
               border: 1,
               borderColor: 'divider',
               borderRadius: 1,
-              bgcolor: 'grey.50',
+              bgcolor: 'action.hover',
             }}
           >
             <Typography variant="body2" component="div" sx={{ whiteSpace: 'pre-wrap' }}>
@@ -320,8 +320,8 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
             sx={{
               m: 0,
               p: 2,
-              bgcolor: 'grey.900',
-              color: 'grey.100',
+              bgcolor: 'custom.codeBlock',
+              color: 'text.primary',
               borderRadius: 1,
               fontSize: '0.85rem',
               fontFamily: 'monospace',
@@ -340,7 +340,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
         <Box
           sx={{
             p: 1.5,
-            bgcolor: 'grey.50',
+            bgcolor: 'action.hover',
             borderTop: 1,
             borderColor: 'divider',
             display: 'flex',

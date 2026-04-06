@@ -120,7 +120,7 @@ export default function PdfThumbnail({
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            bgcolor: 'grey.50',
+                            bgcolor: 'action.hover',
                             border: showBorder ? '1px solid' : 'none',
                             borderColor: 'divider',
                         }}

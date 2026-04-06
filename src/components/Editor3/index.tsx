@@ -62,7 +62,6 @@ import QuizPlugin from './plugins/QuizPlugin';
 import AutocompletePlugin from './plugins/AutocompletePlugin';
 import DragDropPastePlugin from './plugins/DragDropPastePlugin';
 import ImagesPlugin from './plugins/ImagesPlugin';
-import DataPlugin from './plugins/DataPlugin';
 import PlaylistPlugin from './plugins/PlaylistPlugin';
 import PdfViewerPlugin from './plugins/PdfViewerPlugin';
 import { LayoutPlugin } from './plugins/LayoutPlugin';
@@ -244,6 +243,27 @@ export default function Editor(): JSX.Element {
   const drawerRefRight = React.useRef<HTMLDivElement>(null);
   const toolbarRef = React.useRef<HTMLDivElement>(null);
   const [toolbarHeight, setToolbarHeight] = React.useState<number>(0);
+  const [isScrolled, setIsScrolled] = React.useState<boolean>(false);
+
+  // Track scroll position for header compression using callback ref
+  // to handle remounts when LexicalComposer key changes
+  const scrollListenerRef = React.useRef<(() => void) | null>(null);
+  const contentRef = React.useCallback((node: HTMLDivElement | null) => {
+    // Clean up previous listener
+    if (scrollListenerRef.current) {
+      scrollListenerRef.current();
+      scrollListenerRef.current = null;
+    }
+
+    if (node) {
+      const handleScroll = (event: Event): void => {
+        const target = event.target as HTMLElement;
+        setIsScrolled(target.scrollTop > 50);
+      };
+      node.addEventListener('scroll', handleScroll);
+      scrollListenerRef.current = () => node.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
 
   const handleDrawerLeftClose = (): void => {
     setOpenTabVerticalLeft(false);
@@ -319,12 +339,15 @@ export default function Editor(): JSX.Element {
     }
   };
 
-  const initialConfig: any = {
+  const initialConfig: any = React.useMemo(() => ({
     namespace: 'LanguageEditor',
     nodes: [...EditorNodes],
     theme: LanguageEditorTheme as EditorThemeClasses,
     onError,
-  };
+    // Set initial editor state from unit.data so CollaborationPlugin
+    // can bootstrap the Y.Doc with content via shouldBootstrap=true
+    editorState: unit?.data || null,
+  }), [unit?.id]); // Re-create only when unit changes (LexicalComposer reads this once on mount)
 
   // Create debounced save function with stable reference
   const debouncedSaveTimer = useRef<NodeJS.Timeout | null>(null);
@@ -400,7 +423,7 @@ export default function Editor(): JSX.Element {
         <DndWrapper>
           <AutocompleteProvider>
             <AudioPlayerProvider>
-              <LexicalComposer initialConfig={initialConfig}>
+              <LexicalComposer key={unit?.id || 'no-unit'} initialConfig={initialConfig}>
                 {/* @ts-ignore - Next.js styled-jsx */}
                 <style jsx global>{`
                   .layout-container {
@@ -432,7 +455,6 @@ export default function Editor(): JSX.Element {
                 <CodeActionMenuPlugin />
                 <WordBlockPlugin />
                 <QuizPlugin />
-                <DataPlugin />
                 <MeaningAssociationPlugin />
                 <PlaylistPlugin />
                 <PdfViewerPlugin />
@@ -477,7 +499,7 @@ export default function Editor(): JSX.Element {
                 >
                   <ToolBarPlugin
                     ref={toolbarRef}
-                    {...{ setOpen: setOpenTabVerticalLeft, open: openTabVerticalLeft, setTabValue: setTabValueLeft } as any}
+                    {...{ setOpen: setOpenTabVerticalLeft, open: openTabVerticalLeft, setTabValue: setTabValueLeft, isScrolled } as any}
                   />
                   {/* Left Drawer */}
                   <Drawer
@@ -533,6 +555,7 @@ export default function Editor(): JSX.Element {
                       }}
                     />
                     <div
+                      ref={contentRef}
                       style={{
                         flexGrow: 1,
                         overflow: 'auto',

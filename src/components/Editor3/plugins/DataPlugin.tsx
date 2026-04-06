@@ -31,8 +31,13 @@
  * ```
  */
 
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useRef } from 'react';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import UnitContext from '../../../context/unitContext';
+
+interface DataPluginProps {
+  provider?: any;
+}
 
 /**
  * DataPlugin - Lightweight coordinator for Yjs-based saving
@@ -41,39 +46,31 @@ import UnitContext from '../../../context/unitContext';
  * 1. CollaborationPlugin - Binds Lexical editor state to Yjs Y.Text
  * 2. useYjsUnit hook - Debounces saves to DataStore every 5 seconds
  * 
- * This plugin provides a minimal coordination layer for:
- * - Force saving on unmount (to ensure latest changes persist)
- * - Future metadata sync if needed (title, description, tags)
- * 
- * **Migration Notes**:
- * - Old DataPlugin.js handled initial load → now done by CollaborationPlugin
- * - Old version checking logic → now done by Yjs CRDT automatic conflict resolution
- * - Old DataStore subscriptions → now done by Yjs WebSocket real-time sync
+ * When no Yjs provider is available (e.g., Storybook, offline fallback),
+ * this plugin loads unit.data directly into the Lexical editor.
  */
-export default function DataPlugin(): null {
-  // Type assertion for legacy JS context (will be typed in future migration)
+export default function DataPlugin({ provider }: DataPluginProps): null {
+  const [editor] = useLexicalComposerContext();
   const { unit } = useContext(UnitContext) as any;
+  const hasLoadedRef = useRef(false);
 
-  /**
-   * Phase 1: Minimal implementation - just returns null
-   * 
-   * Future enhancements (Phase 2+):
-   * - Call forceSave() on unmount to persist pending changes
-   * - Sync metadata (title, description) independent of editor content
-   * - Handle offline mode fallback to DataStore-only sync
-   * 
-   * Example future implementation:
-   * ```typescript
-   * const { forceSave } = useContext(YjsContext); // from future YjsProvider
-   * 
-   * useEffect(() => {
-   *   return () => {
-   *     // Force save on unmount
-   *     forceSave().catch(console.error);
-   *   };
-   * }, [forceSave]);
-   * ```
-   */
+  // Fallback: load unit.data into editor when no Yjs provider is available
+  useEffect(() => {
+    if (provider || hasLoadedRef.current) return;
+    if (!unit?.data) return;
+
+    try {
+      const parsed = typeof unit.data === 'string' ? JSON.parse(unit.data) : unit.data;
+      if (parsed?.root) {
+        const editorState = editor.parseEditorState(parsed);
+        editor.setEditorState(editorState);
+        hasLoadedRef.current = true;
+        console.log('[DataPlugin] Loaded unit.data as fallback (no Yjs provider)');
+      }
+    } catch (err) {
+      console.warn('[DataPlugin] Failed to parse unit.data:', err);
+    }
+  }, [editor, unit?.data, provider]);
 
   // Log migration status for debugging
   useEffect(() => {
