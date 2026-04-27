@@ -33,8 +33,7 @@ import {
   useTutorPresence,
 } from '@/yjs/workbookHooks'
 import UnitContext from '@/context/unitContext'
-import { DataStore } from '@aws-amplify/datastore'
-import { Grade } from '@/models'
+import { getAmplifyClient } from '@/utils/amplifyClient'
 
 interface WorkbookProps {
   gradeId: string
@@ -78,7 +77,7 @@ export function CollaborativeWorkbook({ gradeId, unitId }: WorkbookProps) {
       console.log(`Tutor ${tutor.displayName} left`)
     },
     onSyncToGrade: async (data, feedback) => {
-      // Sync to DataStore
+      // Sync to Amplify Gen 2 Data Client
       if (!grade) return
 
       try {
@@ -94,15 +93,16 @@ export function CollaborativeWorkbook({ gradeId, unitId }: WorkbookProps) {
           blocks.reduce((sum: number, b: any) => sum + (b.accuracy || 0), 0) / blocks.length
         )
 
-        await DataStore.save(
-          Grade.copyOf(grade, (updated) => {
-            updated.data = data
-            updated.feedback = JSON.stringify(feedback)
-            updated.complete = complete
-            updated.percentComplete = percentComplete
-            updated.accuracy = accuracy
-          })
-        )
+        const client = getAmplifyClient()
+        await client.models.Grade.update({
+          id: grade.id,
+          data,
+          feedback: JSON.stringify(feedback),
+          complete,
+          percentComplete,
+          accuracy,
+          _version: grade._version,
+        })
 
         console.log('[Workbook] Synced to Grade.data')
       } catch (error) {

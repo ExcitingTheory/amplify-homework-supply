@@ -1,11 +1,10 @@
 /**
  * Mock Question Data for Storybook - Question Editor & Semantic Search
  * 
- * Comprehensive mock Question records with embedded media data URIs
+ * Comprehensive mock Question records with media file references
  * and realistic embeddings for semantic search testing.
  */
 
-import { MOCK_MEDIA } from './mockMediaData';
 import { generateMockEmbedding } from './mockEmbeddingUtils';
 
 /**

@@ -3,50 +3,98 @@
  * @module UnitCompletedPlugin
  * 
  * Shows a congratulatory modal when a unit is completed, displaying
- * the unit name and top grades/scores.
+ * the unit name, top grades/scores, and action buttons (Try Again, Peer Review).
+ * The modal persists across navigation until the student explicitly starts a new attempt.
  */
 
 import * as React from 'react';
-import { useEffect, useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
 
 import UnitContext from '../../../context/unitContext';
+import { useXP } from '../../../context/xpContext';
+import { OpenPeerReviewButton } from '../../PeerReview/OpenPeerReviewButton';
+import { HomeworkXPSummary } from '../../Gamification/HomeworkXPSummary';
+import { getAmplifyClient } from '../../../utils/amplifyClient';
 import {
     Modal,
     Card,
     Typography,
     Box,
     Button,
+    Divider,
 } from '@mui/material';
+import ReplayIcon from '@mui/icons-material/Replay';
 
 
 /**
  * UnitCompletedPlugin - Displays modal when unit is completed.
  * 
- * Shows a modal with unit name and recent grades when the user completes
- * all exercises in a unit. Controlled by showUnitComplete from UnitContext.
+ * Shows a modal with unit name, recent grades, and action buttons.
+ * If retryEnabled is true on the unit, a "Try Again" button creates a new grade.
+ * An "Open for Peer Review" button launches the peer review flow.
+ * The modal cannot be dismissed by backdrop click — student must take an action.
  * 
  * @returns {JSX.Element} Unit completion modal component
  */
 export default function UnitCompletedPlugin() {
     const { t } = useTranslation('workbook');
+    const router = useRouter();
 
     const {
+        unit,
         name,
+        grade,
         showUnitComplete,
         setShowUnitComplete,
+        createGrade,
         recentGrades = [],
     } = useContext(UnitContext) || {};
 
+    const [retrying, setRetrying] = useState(false);
+    const { totalXP, xpLogs } = useXP();
 
-    console.log('unitcompleted_PPPPlugin', name)
+    const retryEnabled = unit?.retryEnabled === true;
+    // Most recent completed grade for peer review
+    const latestCompletedGrade = recentGrades[0];
+
+    const handleTryAgain = async () => {
+        setRetrying(true);
+        try {
+            await createGrade(0, false);
+            setShowUnitComplete(false);
+        } catch (err) {
+            console.error('[UnitCompletedPlugin] Error creating new grade:', err);
+        } finally {
+            setRetrying(false);
+        }
+    };
+
+    const handleCreateRoom = async (gradeId, invitedUserIds) => {
+        const client = getAmplifyClient();
+        const { data: room } = await client.models.HomeworkRoom.create({
+            gradeId,
+            status: 'open',
+            peerGroup: invitedUserIds,
+        });
+        return room.id;
+    };
+
+    const handleRoomCreated = (roomId) => {
+        router.push(`/review/${roomId}`);
+    };
 
 
     return (
         <Modal
             open={showUnitComplete}
-            onClose={() => {
-                setShowUnitComplete(false)
+            onClose={(_, reason) => {
+                // Only allow close if retryEnabled, or if there's an active incomplete grade
+                if (retryEnabled || grade) {
+                    setShowUnitComplete(false);
+                }
+                // Otherwise: no backdrop/escape dismiss — student must use Try Again
             }}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
@@ -58,7 +106,6 @@ export default function UnitCompletedPlugin() {
             slotProps={{
                 backdrop: {
                     sx: {
-                        //Your style here....
                         backdropFilter: 'blur(5px)',
                     },
                 },
@@ -73,11 +120,12 @@ export default function UnitCompletedPlugin() {
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
                     width: '70vw',
+                    maxWidth: '700px',
                     bgcolor: 'background.paper',
                     boxShadow: '0 0 10px 3px rgba(0, 0, 0, .3)',
                     backdropFilter: 'blur(5px)',
                     overflow: 'auto',
-                    // p: 4,
+                    maxHeight: '90vh',
                 }}
             >
 
@@ -90,18 +138,9 @@ export default function UnitCompletedPlugin() {
                     {t('unitCompletedPlugin.completionMessage')} {name}
                 </Typography>
 
-                {/* <Typography variant="h6" component="h6" sx={{
-                    flexGrow: 1,
-                    textAlign: 'center',
-                    margin: '0.5rem',
-                }}>
-                    {`${description}`}
-                </Typography> */}
-
                 <Typography variant="h6" component="h6" sx={{
                     flexGrow: 1,
                     textAlign: 'center',
-                    // margin: '1rem',
                 }}>
                     {t('unitCompletedPlugin.sectionHeading')}
                 </Typography>
@@ -132,42 +171,25 @@ export default function UnitCompletedPlugin() {
                     style={{
                         padding: '0 2rem',
                         margin: '1rem 2rem',
-                        maxHeight: '50vh',
+                        maxHeight: '40vh',
                         overflow: 'auto',
-                        // alignContent: 'center',
-                        // backgroundColor: 'rgb(248 248 248)',
-                        // borderRadius: '3px',
-                        // border: '1px solid #e0e0e0',
                     }}
 
                 >
                     {recentGrades.map((grade, index) => {
-                        // get local time from UTC
-                        // get timezone from client browser
                         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                        // get timezone from user profile TBD
-                        // Convert time
                         const localTime = new Date(grade?.createdAt).toLocaleString(undefined, {
                             timeZone
                         });
 
                         const _roundedAccuracy = Math.round(grade?.accuracy * 100) / 100
 
-
-                        console.log('grade', grade)
                         return (
-                            <li key={index}
-                                style={{
-                                    // padding: '1rem',
-                                    // margin: '0.25rem',
-                                }}
-                            >
+                            <li key={index}>
                                 <Box sx={{ display: 'flex', justifyContent: 'center', margin: '0' }}>
                                     <Typography variant="h6" component="div" sx={{
-                                        // flex: 1,
                                         textAlign: 'left',
                                         paddingLeft: '2rem',
-                                        // margin: '1rem',
                                     }}>
                                         {`${localTime}`}
                                     </Typography>
@@ -176,16 +198,14 @@ export default function UnitCompletedPlugin() {
                                         flex: 1,
                                         textAlign: 'center',
                                         flexGrow: 1,
-                                        borderBottom: '1px dashed #000',
+                                        borderBottom: '1px dashed currentColor',
                                         margin: '0 0.4rem',
                                         position: 'relative',
                                         top: '-0.5rem',
-                                        // margin: '1rem',
                                     }}>
                                     </div>
 
                                     <Typography variant="h6" component="div" sx={{
-                                        // flex: 1,
                                         textAlign: 'right',
                                         margin: '0',
                                     }}>
@@ -196,19 +216,63 @@ export default function UnitCompletedPlugin() {
                         )
                     })}
                 </ol>
-                <Box sx={{ display: 'flex', justifyContent: 'center', margin: '1rem' }}>
-                    <Button
-                        variant="contained"
-                        sx={{
-                            margin: '2rem',
-                            width: '100%',
-                        }}
-                        onClick={() => {
-                            setShowUnitComplete(false)
-                        }}
-                    >
-                        {t('unitCompletedPlugin.continueButton')}
-                    </Button>
+
+                {/* XP Summary for this homework */}
+                {xpLogs.length > 0 && (() => {
+                    // Show XP earned from this grade's reference
+                    const gradeId = latestCompletedGrade?.id;
+                    const relevantLogs = gradeId
+                        ? xpLogs.filter(l => l.referenceId === gradeId)
+                        : xpLogs.slice(-3);
+                    if (relevantLogs.length === 0) return null;
+                    const lineItems = relevantLogs.map(l => ({
+                        label: l.reason?.replace(/_/g, ' ') || 'XP',
+                        xp: l.xpAmount || 0,
+                    }));
+                    const earnedXP = lineItems.reduce((s, i) => s + i.xp, 0);
+                    return (
+                        <Box sx={{ px: 3, pb: 1 }}>
+                            <HomeworkXPSummary
+                                lineItems={lineItems}
+                                totalXP={earnedXP}
+                                cumulativeXP={totalXP}
+                            />
+                        </Box>
+                    );
+                })()}
+
+                <Divider sx={{ mx: 2 }} />
+
+                <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column',
+                    gap: 1.5,
+                    p: 3,
+                    alignItems: 'center',
+                }}>
+                    {retryEnabled && (
+                        <Button
+                            variant="contained"
+                            size="large"
+                            startIcon={<ReplayIcon />}
+                            onClick={handleTryAgain}
+                            disabled={retrying}
+                            sx={{ width: '100%', maxWidth: '400px' }}
+                        >
+                            {retrying
+                                ? t('unitCompletedPlugin.retrying', 'Starting new attempt...')
+                                : t('unitCompletedPlugin.tryAgain', 'Try Again')
+                            }
+                        </Button>
+                    )}
+
+                    {latestCompletedGrade && (
+                        <OpenPeerReviewButton
+                            gradeId={latestCompletedGrade.id}
+                            onCreateRoom={handleCreateRoom}
+                            onRoomCreated={handleRoomCreated}
+                        />
+                    )}
                 </Box>
             </Card>
         </Modal>

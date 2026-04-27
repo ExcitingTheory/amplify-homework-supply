@@ -4,7 +4,7 @@ import { TranslationPanelWrapper } from './components/TranslationPanelWrapper';
 
 // Register the translation mode addon
 addons.register('storybook/addon-translation-mode', (api) => {
-  console.log('[Storybook] Translation Mode addon registered');
+  console.debug('[Storybook] Translation Mode addon registered');
   
   // Add translation editor panel to the addons panel
   addons.add('storybook/addon-translation-mode/panel', {

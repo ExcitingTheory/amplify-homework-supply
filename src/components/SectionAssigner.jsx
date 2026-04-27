@@ -17,7 +17,6 @@ import {
   FormHelperText
 } from '@mui/material';
 import SectionContext from '../context/sectionContext';
-import { Assignment, Unit } from '../models';
 import { useTranslation } from 'next-i18next';
 
 

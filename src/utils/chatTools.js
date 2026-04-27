@@ -4,7 +4,6 @@
  */
 
 import { getAmplifyClient } from './amplifyClient';
-import { Unit, Section, Assignment, Word, Question, File as FileModel } from '../models';
 import * as EmbeddingWorker from './embeddingWorkerManager';
 
 // Vector store instance - will be set from context
@@ -552,6 +551,40 @@ export const toolDefinitions = [
       parameters: {
         type: 'object',
         properties: {},
+        required: []
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'start_practice_drill',
+      description: 'Start an AI practice drill for the current unit. Generates varied practice questions from unit vocabulary, questions, documents, and text content. Students practice in a read-only workbook popup.',
+      parameters: {
+        type: 'object',
+        properties: {
+          drillType: {
+            type: 'string',
+            enum: ['mixed', 'vocabulary', 'comprehension', 'review'],
+            description: 'Type of practice drill. mixed = balanced across all block types, vocabulary = focus on word definitions/matching, comprehension = document-derived questions, review = prioritizes previously incorrect answers',
+            default: 'mixed'
+          },
+          count: {
+            type: 'number',
+            description: 'Number of practice questions to generate (5-20)',
+            default: 10
+          },
+          sources: {
+            type: 'object',
+            description: 'Which content sources to include in the drill',
+            properties: {
+              vocabulary: { type: 'boolean', description: 'Include vocabulary words', default: true },
+              questions: { type: 'boolean', description: 'Include question bank', default: true },
+              text: { type: 'boolean', description: 'Include lesson text content', default: true },
+              documents: { type: 'boolean', description: 'Include uploaded documents', default: true }
+            }
+          }
+        },
         required: []
       }
     }
@@ -1578,7 +1611,8 @@ export async function executeTool(toolName, args) {
     insert_custom_answer: executeInsertCustomAnswer,
     publish_unit: executePublishUnit,
     navigate_to_editor_tab: executeNavigateToEditorTab,
-    get_editor_buttons: executeGetEditorButtons
+    get_editor_buttons: executeGetEditorButtons,
+    start_practice_drill: executeStartPracticeDrill
   };
 
   const executor = toolMap[toolName];
@@ -1592,4 +1626,40 @@ export async function executeTool(toolName, args) {
     console.error(`Tool execution error (${toolName}):`, error);
     return { success: false, error: error.message };
   }
+}
+
+// ============================================================================
+// Practice Drill Tool — callback-based (UI managed by ChatSidebar)
+// ============================================================================
+
+let practiceDrillCallback = null;
+
+/**
+ * Set the callback invoked when the AI triggers start_practice_drill.
+ * ChatSidebar registers this on mount so it can open PracticeDrillDialog.
+ */
+export function setPracticeDrillCallback(fn) {
+  practiceDrillCallback = fn;
+  console.log('[chatTools] Practice drill callback registered:', !!fn);
+}
+
+async function executeStartPracticeDrill({ drillType = 'mixed', count = 10, sources } = {}) {
+  const config = {
+    drillType,
+    count: Math.min(20, Math.max(5, count)),
+    sources: sources || { vocabulary: true, questions: true, text: true, documents: true },
+  };
+
+  if (practiceDrillCallback) {
+    practiceDrillCallback(config);
+    return {
+      success: true,
+      message: `Starting a ${config.drillType} practice drill with ${config.count} questions.`,
+    };
+  }
+
+  return {
+    success: false,
+    error: 'Practice drill is not available on this page. Navigate to a unit workbook or the units list first.',
+  };
 }

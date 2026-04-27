@@ -24,7 +24,6 @@ import {
   COPY_COMMAND,
   createEditor,
   CUT_COMMAND,
-  EditorThemeClasses,
   FORMAT_TEXT_COMMAND,
   HISTORY_PUSH_TAG,
   KEY_ARROW_DOWN_COMMAND,
@@ -954,7 +953,22 @@ export default function TableComponent({
         const isOnBottomEdge =
           event.target === addRowsRef.current ||
           (clientY > y + height * 0.85 &&
-            clientY < y + height + 5 &&
+            clientY < y + height + 30 &&
+            !mouseDownRef.current);
+        setShowAddRows(isOnBottomEdge);
+      } else {
+        // Also show add buttons when editing near edges
+        const {clientX, clientY} = event;
+        const {width, x, y, height} = tableRect;
+        const isOnRightEdge =
+          clientX > x + width - 10 &&
+          clientX < x + width + 40 &&
+          !mouseDownRef.current;
+        setShowAddColumns(isOnRightEdge);
+        const isOnBottomEdge =
+          event.target === addRowsRef.current ||
+          (clientY > y + height - 10 &&
+            clientY < y + height + 30 &&
             !mouseDownRef.current);
         setShowAddRows(isOnBottomEdge);
       }
@@ -1541,33 +1555,42 @@ export default function TableComponent({
             if (y < rows.length - 1) {
               // Move to cell below
               event.preventDefault();
-              const cell = getCell(rows, primarySelectedCellID, cellCoordMap);
-              saveEditorToCell(cell);
+              saveEditorToJSON();
               setIsEditing(false);
               const nextCellID = rows[y + 1].cells[x].id;
               modifySelectedCells(x, y + 1, false);
               setTimeout(() => {
                 const nextCell = getCell(rows, nextCellID, cellCoordMap);
-                loadContentIntoCell(nextCell);
+                if (nextCell && cellEditor) {
+                  const editorState = cellEditor.parseEditorState(nextCell.json);
+                  cellEditor.setEditorState(editorState);
+                }
                 setIsEditing(true);
               }, 0);
               return true;
             } else {
-              // Last row - exit table
+              // Last row - add a new row and move into it (like Word/Google Docs)
               event.preventDefault();
-              const cell = getCell(rows, primarySelectedCellID, cellCoordMap);
-              saveEditorToCell(cell);
+              saveEditorToJSON();
               setIsEditing(false);
-              setPrimarySelectedCellID(null);
-              // Insert paragraph after table
               updateTableNode((tableNode) => {
-                const nextSibling = tableNode.getNextSibling();
-                if (!nextSibling) {
-                  const paragraph = $createParagraphNode();
-                  tableNode.insertAfter(paragraph);
-                  paragraph.select();
-                }
+                $addUpdateTag(HISTORY_PUSH_TAG);
+                tableNode.addRows(1);
               });
+              setTimeout(() => {
+                modifySelectedCells(x, y + 1, false);
+                setTimeout(() => {
+                  const nextCellID = rows[y + 1]?.cells[x]?.id;
+                  if (nextCellID && cellEditor) {
+                    const nextCell = getCell(rows, nextCellID, cellCoordMap);
+                    if (nextCell) {
+                      const editorState = cellEditor.parseEditorState(nextCell.json);
+                      cellEditor.setEditorState(editorState);
+                    }
+                    setIsEditing(true);
+                  }
+                }, 0);
+              }, 0);
               return true;
             }
           }
@@ -1621,19 +1644,13 @@ export default function TableComponent({
                 nextY = y + 1;
                 nextX = 0;
               } else {
-                // At last cell, tab exits table
-                setPrimarySelectedCellID(null);
+                // At last cell, tab adds a new row (like Word/Google Docs)
                 updateTableNode((tableNode) => {
-                  const nextSibling = tableNode.getNextSibling();
-                  if (!nextSibling) {
-                    const paragraph = $createParagraphNode();
-                    tableNode.insertAfter(paragraph);
-                    paragraph.select();
-                  } else {
-                    tableNode.selectNext();
-                  }
+                  $addUpdateTag(HISTORY_PUSH_TAG);
+                  tableNode.addRows(1);
                 });
-                return true;
+                nextY = y + 1;
+                nextX = 0;
               }
             } else if (!isBackward) {
               nextX = x + 1;
@@ -1643,7 +1660,9 @@ export default function TableComponent({
               nextY = y;
             }
             if (nextX !== null && nextY !== null) {
-              modifySelectedCells(nextX, nextY, false);
+              setTimeout(() => {
+                modifySelectedCells(nextX, nextY, false);
+              }, 0);
               return true;
             }
           }
@@ -1652,8 +1671,7 @@ export default function TableComponent({
             event.preventDefault();
             const isBackward = event.shiftKey;
             const [x, y] = cellCoordMap.get(primarySelectedCellID);
-            const cell = getCell(rows, primarySelectedCellID, cellCoordMap);
-            saveEditorToCell(cell);
+            saveEditorToJSON();
             setIsEditing(false);
             
             let nextX = null;
@@ -1676,19 +1694,13 @@ export default function TableComponent({
                 nextY = y + 1;
                 nextX = 0;
               } else {
-                // Exit at end
-                setPrimarySelectedCellID(null);
+                // At last cell while editing, tab adds a new row (like Word/Google Docs)
                 updateTableNode((tableNode) => {
-                  const nextSibling = tableNode.getNextSibling();
-                  if (!nextSibling) {
-                    const paragraph = $createParagraphNode();
-                    tableNode.insertAfter(paragraph);
-                    paragraph.select();
-                  } else {
-                    tableNode.selectNext();
-                  }
+                  $addUpdateTag(HISTORY_PUSH_TAG);
+                  tableNode.addRows(1);
                 });
-                return true;
+                nextY = y + 1;
+                nextX = 0;
               }
             } else if (!isBackward) {
               nextX = x + 1;
@@ -1699,12 +1711,19 @@ export default function TableComponent({
             }
             
             if (nextX !== null && nextY !== null) {
-              const nextCellID = rows[nextY].cells[nextX].id;
-              modifySelectedCells(nextX, nextY, false);
               setTimeout(() => {
-                const nextCell = getCell(rows, nextCellID, cellCoordMap);
-                loadContentIntoCell(nextCell);
-                setIsEditing(true);
+                const nextCellID = rows[nextY]?.cells[nextX]?.id;
+                if (nextCellID) {
+                  modifySelectedCells(nextX, nextY, false);
+                  setTimeout(() => {
+                    const nextCell = getCell(rows, nextCellID, cellCoordMap);
+                    if (nextCell && cellEditor) {
+                      const editorState = cellEditor.parseEditorState(nextCell.json);
+                      cellEditor.setEditorState(editorState);
+                    }
+                    setIsEditing(true);
+                  }, 0);
+                }
               }, 0);
               return true;
             }
@@ -1752,20 +1771,21 @@ export default function TableComponent({
             event.preventDefault();
             const [x, y] = cellCoordMap.get(primarySelectedCellID);
             if (y > 0) {
-              const cell = getCell(rows, primarySelectedCellID, cellCoordMap);
-              saveEditorToCell(cell);
+              saveEditorToJSON();
               setIsEditing(false);
               const prevCellID = rows[y - 1].cells[x].id;
               modifySelectedCells(x, y - 1, false);
               setTimeout(() => {
                 const prevCell = getCell(rows, prevCellID, cellCoordMap);
-                loadContentIntoCell(prevCell);
+                if (prevCell && cellEditor) {
+                  const editorState = cellEditor.parseEditorState(prevCell.json);
+                  cellEditor.setEditorState(editorState);
+                }
                 setIsEditing(true);
               }, 0);
             } else {
               // At first row, exit table
-              const cell = getCell(rows, primarySelectedCellID, cellCoordMap);
-              saveEditorToCell(cell);
+              saveEditorToJSON();
               setIsEditing(false);
               setPrimarySelectedCellID(null);
               updateTableNode((tableNode) => {
@@ -1836,32 +1856,40 @@ export default function TableComponent({
             event.preventDefault();
             const [x, y] = cellCoordMap.get(primarySelectedCellID);
             if (y < rows.length - 1) {
-              const cell = getCell(rows, primarySelectedCellID, cellCoordMap);
-              saveEditorToCell(cell);
+              saveEditorToJSON();
               setIsEditing(false);
               const nextCellID = rows[y + 1].cells[x].id;
               modifySelectedCells(x, y + 1, false);
               setTimeout(() => {
                 const nextCell = getCell(rows, nextCellID, cellCoordMap);
-                loadContentIntoCell(nextCell);
+                if (nextCell && cellEditor) {
+                  const editorState = cellEditor.parseEditorState(nextCell.json);
+                  cellEditor.setEditorState(editorState);
+                }
                 setIsEditing(true);
               }, 0);
             } else {
-              // At last row, exit table
-              const cell = getCell(rows, primarySelectedCellID, cellCoordMap);
-              saveEditorToCell(cell);
+              // At last row while editing, add a new row and move into it
+              saveEditorToJSON();
               setIsEditing(false);
-              setPrimarySelectedCellID(null);
               updateTableNode((tableNode) => {
-                const nextSibling = tableNode.getNextSibling();
-                if (!nextSibling) {
-                  const paragraph = $createParagraphNode();
-                  tableNode.insertAfter(paragraph);
-                  paragraph.select();
-                } else {
-                  tableNode.selectNext();
-                }
+                $addUpdateTag(HISTORY_PUSH_TAG);
+                tableNode.addRows(1);
               });
+              setTimeout(() => {
+                modifySelectedCells(x, y + 1, false);
+                setTimeout(() => {
+                  const nextCellID = rows[y + 1]?.cells[x]?.id;
+                  if (nextCellID && cellEditor) {
+                    const nextCell = getCell(rows, nextCellID, cellCoordMap);
+                    if (nextCell) {
+                      const editorState = cellEditor.parseEditorState(nextCell.json);
+                      cellEditor.setEditorState(editorState);
+                    }
+                    setIsEditing(true);
+                  }
+                }, 0);
+              }, 0);
             }
             return true;
           }
@@ -1890,7 +1918,39 @@ export default function TableComponent({
             return false;
           }
           if (selection.isCollapsed() && selection.anchor.offset === 0) {
+            // At start of cell content while editing, wrap to previous cell
             event.preventDefault();
+            const [x, y] = cellCoordMap.get(primarySelectedCellID);
+            if (x > 0) {
+              // Move to previous cell in same row
+              saveEditorToJSON();
+              setIsEditing(false);
+              const prevCellID = rows[y].cells[x - 1].id;
+              modifySelectedCells(x - 1, y, false);
+              setTimeout(() => {
+                const prevCell = getCell(rows, prevCellID, cellCoordMap);
+                if (prevCell && cellEditor) {
+                  const editorState = cellEditor.parseEditorState(prevCell.json);
+                  cellEditor.setEditorState(editorState);
+                }
+                setIsEditing(true);
+              }, 0);
+            } else if (y > 0) {
+              // Wrap to last cell of previous row
+              saveEditorToJSON();
+              setIsEditing(false);
+              const prevRow = rows[y - 1];
+              const prevCellID = prevRow.cells[prevRow.cells.length - 1].id;
+              modifySelectedCells(prevRow.cells.length - 1, y - 1, false);
+              setTimeout(() => {
+                const prevCell = getCell(rows, prevCellID, cellCoordMap);
+                if (prevCell && cellEditor) {
+                  const editorState = cellEditor.parseEditorState(prevCell.json);
+                  cellEditor.setEditorState(editorState);
+                }
+                setIsEditing(true);
+              }, 0);
+            }
             return true;
           }
           return false;
@@ -1933,7 +1993,38 @@ export default function TableComponent({
               (anchor.type === 'element' &&
                 anchor.offset === anchor.getNode().getChildrenSize())
             ) {
+              // At end of cell content while editing, wrap to next cell
               event.preventDefault();
+              const [x, y] = cellCoordMap.get(primarySelectedCellID);
+              if (x < rows[y].cells.length - 1) {
+                // Move to next cell in same row
+                saveEditorToJSON();
+                setIsEditing(false);
+                const nextCellID = rows[y].cells[x + 1].id;
+                modifySelectedCells(x + 1, y, false);
+                setTimeout(() => {
+                  const nextCell = getCell(rows, nextCellID, cellCoordMap);
+                  if (nextCell && cellEditor) {
+                    const editorState = cellEditor.parseEditorState(nextCell.json);
+                    cellEditor.setEditorState(editorState);
+                  }
+                  setIsEditing(true);
+                }, 0);
+              } else if (y < rows.length - 1) {
+                // Wrap to first cell of next row
+                saveEditorToJSON();
+                setIsEditing(false);
+                const nextCellID = rows[y + 1].cells[0].id;
+                modifySelectedCells(0, y + 1, false);
+                setTimeout(() => {
+                  const nextCell = getCell(rows, nextCellID, cellCoordMap);
+                  if (nextCell && cellEditor) {
+                    const editorState = cellEditor.parseEditorState(nextCell.json);
+                    cellEditor.setEditorState(editorState);
+                  }
+                  setIsEditing(true);
+                }, 0);
+              }
               return true;
             }
           }
@@ -2014,11 +2105,15 @@ export default function TableComponent({
     return;
   }
 
+  const showTableControls = isEditable && (isSelected || primarySelectedCellID !== null || isEditing);
+
   return (
     <div
+      className={theme.tableWrapper}
       style={{
         position: 'relative',
-        width: (tableRef.current?.offsetWidth || 0) + 'px',
+        paddingRight: isEditable ? '28px' : '0',
+        paddingBottom: isEditable ? '28px' : '0',
       }}>
       <table
         className={`${theme.table} ${isSelected ? theme.tableSelected : ''}`}
@@ -2051,15 +2146,20 @@ export default function TableComponent({
           ))}
         </tbody>
       </table>
-      {showAddColumns && isEditable && (
-        <button className={theme.tableAddColumns} onClick={addColumns} />
-      )}
-      {showAddRows && isEditable && (
+      {isEditable && (
         <button
-          className={theme.tableAddRows}
+          className={`${theme.tableAddColumns} ${showTableControls ? theme.tableAddColumnsVisible : ''}`}
+          onClick={addColumns}
+          aria-label="Add column"
+        >{'\u200B'}</button>
+      )}
+      {isEditable && (
+        <button
+          className={`${theme.tableAddRows} ${showTableControls ? theme.tableAddRowsVisible : ''}`}
           onClick={addRows}
           ref={addRowsRef}
-        />
+          aria-label="Add row"
+        >{'\u200B'}</button>
       )}
       {resizingID !== null && (
         <div className={theme.tableResizeRuler} ref={tableResizerRulerRef} />

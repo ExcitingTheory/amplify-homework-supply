@@ -66,15 +66,26 @@ export const handler: Handler = async (event: any, context: any) => {
   }
 };
 
+/** Safe fallback when moderation cannot be performed */
+const MODERATION_FALLBACK = {
+  flagged: false,
+  categories: {},
+  categoryScores: {},
+  model: 'text-moderation-latest',
+};
+
 async function handleModerateContent(args: any): Promise<any> {
   const { content } = args;
+  
+  // Guard against empty, null-like, or meaningless content
+  if (!content || content.trim().length === 0 || content.trim() === 'null' || content.trim() === 'undefined') {
+    console.warn('[Moderation Handler] Skipping moderation for empty/null content');
+    return MODERATION_FALLBACK;
+  }
+
   const openai = await getOpenAI();
   
   try {
-    if (!content || content.trim().length === 0) {
-      throw new Error('Content cannot be empty');
-    }
-
     const response = await openai.moderations.create({
       input: content,
     });
@@ -85,10 +96,15 @@ async function handleModerateContent(args: any): Promise<any> {
       flagged: result.flagged,
       categories: result.categories,
       categoryScores: result.category_scores,
-      model: response.model || 'text-moderation-latest', // Model is on response, not result
+      model: response.model || 'text-moderation-latest',
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Moderate Content Error]:', error);
+    // Return safe fallback on rate limit or transient errors instead of crashing
+    if (error?.status === 429 || error?.status >= 500) {
+      console.warn(`[Moderation Handler] OpenAI returned ${error.status}, returning safe fallback`);
+      return MODERATION_FALLBACK;
+    }
     throw error;
   }
 }

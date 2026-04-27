@@ -49,6 +49,7 @@ export default function GradeHistory() {
 
   return (
     <Box
+      data-tour="grades-list"
       sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -155,6 +156,7 @@ export default function GradeHistory() {
               return (
                 <li
                   key={attemptGrade.id || index}
+                  data-tour="grade-detail"
                   style={{
                     position: 'relative',
                     paddingLeft: '2.5rem',

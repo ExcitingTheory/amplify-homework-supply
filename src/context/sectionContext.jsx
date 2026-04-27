@@ -8,6 +8,24 @@ const SectionContext = React.createContext({
     assignments: [],
 });
 
+/**
+ * Check if a subscription error is transient (safe to ignore).
+ * DuplicatedOperationError occurs during rapid mount/unmount cycles
+ * (React StrictMode, navigation) and resolves on its own.
+ */
+function isTransientSubscriptionError(error) {
+    const msg = error?.message || error?.errors?.[0]?.message || JSON.stringify(error);
+    return msg.includes('DuplicatedOperationError');
+}
+
+function handleSubscriptionError(label, error) {
+    if (isTransientSubscriptionError(error)) {
+        console.warn(`[SectionContext] ${label}: transient DuplicatedOperationError (safe to ignore)`);
+        return;
+    }
+    console.error(`[SectionContext] ${label}:`, error);
+}
+
 const SectionProvider = ({ children, unitId }) => {
     // Get auth state from centralized context
     const { user, isLoading: authLoading } = React.useContext(AuthContext);
@@ -26,6 +44,7 @@ const SectionProvider = ({ children, unitId }) => {
 
         // Track subscriptions for cleanup
         const subscriptions = [];
+        let cancelled = false;
 
         async function fetchSections() {
             const userId = user.attributes.sub;
@@ -33,11 +52,10 @@ const SectionProvider = ({ children, unitId }) => {
 
             const client = getAmplifyClient();
 
-            // Use list() + individual subscriptions instead of observeQuery()
-            // This bypasses the internal findIndexByFields() that crashes on null items
             try {
                 // Initial fetch
                 const { data: initialSections, errors } = await client.models.Section.list();
+                if (cancelled) return;
                 if (errors?.length) {
                     console.error('[SectionContext] Initial fetch errors:', errors);
                 }
@@ -47,6 +65,8 @@ const SectionProvider = ({ children, unitId }) => {
                 
                 // Update state with initial data
                 updateSectionsState(validItems);
+
+                if (cancelled) return;
                 
                 // Subscribe to new sections
                 const createSub = client.models.Section.onCreate().subscribe({
@@ -66,7 +86,7 @@ const SectionProvider = ({ children, unitId }) => {
                         });
                         setSectionMap(prev => ({ ...prev, [newSection.id]: newSection }));
                     },
-                    error: (error) => console.error('[SectionContext] onCreate error:', error)
+                    error: (error) => handleSubscriptionError('Section onCreate', error)
                 });
                 subscriptions.push(createSub);
                 
@@ -79,7 +99,7 @@ const SectionProvider = ({ children, unitId }) => {
                         setSections(prev => prev.map(s => s.id === updatedSection.id ? updatedSection : s));
                         setSectionMap(prev => ({ ...prev, [updatedSection.id]: updatedSection }));
                     },
-                    error: (error) => console.error('[SectionContext] onUpdate error:', error)
+                    error: (error) => handleSubscriptionError('Section onUpdate', error)
                 });
                 subscriptions.push(updateSub);
                 
@@ -96,7 +116,7 @@ const SectionProvider = ({ children, unitId }) => {
                             return newMap;
                         });
                     },
-                    error: (error) => console.error('[SectionContext] onDelete error:', error)
+                    error: (error) => handleSubscriptionError('Section onDelete', error)
                 });
                 subscriptions.push(deleteSub);
                 
@@ -136,6 +156,7 @@ const SectionProvider = ({ children, unitId }) => {
 
         return () => {
             console.log('[SectionContext] Cleaning up subscriptions');
+            cancelled = true;
             subscriptions.forEach(sub => sub?.unsubscribe());
         };
     }, [user, authLoading]);
@@ -144,6 +165,7 @@ const SectionProvider = ({ children, unitId }) => {
         if(!unitId) return
 
         const subscriptions = [];
+        let cancelled = false;
 
         async function fetchAssignments() {
             const client = getAmplifyClient();
@@ -153,12 +175,15 @@ const SectionProvider = ({ children, unitId }) => {
                 const { data: initialAssignments, errors } = await client.models.Assignment.list({
                     filter: { unitID: { eq: unitId } }
                 });
+                if (cancelled) return;
                 if (errors?.length) {
                     console.error('[SectionContext] Assignment fetch errors:', errors);
                 }
                 
                 const validItems = (initialAssignments || []).filter(item => item != null && item.id != null);
                 updateAssignmentsState(validItems);
+
+                if (cancelled) return;
                 
                 // Subscribe to new assignments with filter
                 const createSub = client.models.Assignment.onCreate({
@@ -174,7 +199,7 @@ const SectionProvider = ({ children, unitId }) => {
                             return [...prev, newAssignment];
                         });
                     },
-                    error: (error) => console.error('[SectionContext] Assignment onCreate error:', error)
+                    error: (error) => handleSubscriptionError('Assignment onCreate', error)
                 });
                 subscriptions.push(createSub);
                 
@@ -189,7 +214,7 @@ const SectionProvider = ({ children, unitId }) => {
                         console.log('[SectionContext] Assignment updated:', updatedAssignment.id);
                         setAssignments(prev => prev.map(a => a.id === updatedAssignment.id ? updatedAssignment : a));
                     },
-                    error: (error) => console.error('[SectionContext] Assignment onUpdate error:', error)
+                    error: (error) => handleSubscriptionError('Assignment onUpdate', error)
                 });
                 subscriptions.push(updateSub);
                 
@@ -203,7 +228,7 @@ const SectionProvider = ({ children, unitId }) => {
                         console.log('[SectionContext] Assignment deleted:', deletedAssignment.id);
                         setAssignments(prev => prev.filter(a => a.id !== deletedAssignment.id));
                     },
-                    error: (error) => console.error('[SectionContext] Assignment onDelete error:', error)
+                    error: (error) => handleSubscriptionError('Assignment onDelete', error)
                 });
                 subscriptions.push(deleteSub);
                 
@@ -226,6 +251,7 @@ const SectionProvider = ({ children, unitId }) => {
         fetchAssignments();
 
         return () => {
+            cancelled = true;
             subscriptions.forEach(sub => sub?.unsubscribe());
         };
     }, [unitId]);

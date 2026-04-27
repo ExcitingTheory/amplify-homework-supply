@@ -7,15 +7,28 @@
  */
 
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {$insertNodeToNearestRoot} from '@lexical/utils';
-import {COMMAND_PRIORITY_EDITOR, createCommand} from 'lexical';
+import {$insertNodeToNearestRoot, mergeRegister} from '@lexical/utils';
+import {useLexicalNodeSelection} from '@lexical/react/useLexicalNodeSelection';
+import {
+  COMMAND_PRIORITY_EDITOR,
+  COMMAND_PRIORITY_LOW,
+  createCommand,
+  $getNodeByKey,
+  $getSelection,
+  $isNodeSelection,
+  $createParagraphNode,
+  CLICK_COMMAND,
+  KEY_DELETE_COMMAND,
+  KEY_BACKSPACE_COMMAND,
+  KEY_ESCAPE_COMMAND,
+  KEY_ENTER_COMMAND,
+} from 'lexical';
 import {BlockWithAlignableContents} from '@lexical/react/LexicalBlockWithAlignableContents';
 import {
 DecoratorBlockNode,
 } from '@lexical/react/LexicalDecoratorBlockNode';
-import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import * as React from 'react';
-import { useEffect, useContext, useState, useRef } from 'react';
+import { useEffect, useContext, useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'next-i18next';
 
 import DictionaryContext from '../../../context/dictionaryContext';
@@ -50,7 +63,6 @@ import getCachedUrl from '../../../utils/getCachedUrl';
 
     const { wordMapId: dictionary } = useContext(DictionaryContext);
     const word = dictionary[wordID];
-    const isEditable = useLexicalEditable();
     const [signedAudioUrl, setSignedAudioUrl] = useState(null);
     const [audioLoading, setAudioLoading] = useState(false);
 
@@ -60,7 +72,7 @@ import getCachedUrl from '../../../utils/getCachedUrl';
         if (word?.audio && word.audio[0]) {
           setAudioLoading(true);
           try {
-            const url = await getCachedUrl(word.audio[0], 'protected', word.identityId);
+            const url = await getCachedUrl(word.audio[0]);
             setSignedAudioUrl(url);
           } catch (error) {
             console.error('Error signing word audio URL:', error);
@@ -243,6 +255,114 @@ import getCachedUrl from '../../../utils/getCachedUrl';
       </BlockWithAlignableContents>
     );
   });
+
+  /**
+   * WordBlockEditor - Edit-mode wrapper with selection and keyboard controls.
+   */
+  const WordBlockEditor = React.memo(function WordBlockEditor({
+    className,
+    format,
+    nodeKey,
+    wordID,
+  }) {
+    const [editor] = useLexicalComposerContext();
+    const containerRef = useRef(null);
+    const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey);
+
+    const onDelete = useCallback(
+      (payload) => {
+        if (isSelected && $isNodeSelection($getSelection())) {
+          payload.preventDefault();
+          editor.update(() => {
+            const node = $getNodeByKey(nodeKey);
+            if ($isWordBlockNode(node)) {
+              node.remove();
+            }
+          });
+          return true;
+        }
+        return false;
+      },
+      [isSelected, nodeKey, editor]
+    );
+
+    const onEscape = useCallback(
+      (payload) => {
+        if (isSelected) {
+          payload.preventDefault();
+          clearSelection();
+          return true;
+        }
+        return false;
+      },
+      [isSelected, clearSelection]
+    );
+
+    const onEnter = useCallback(
+      (payload) => {
+        if (isSelected && $isNodeSelection($getSelection())) {
+          payload.preventDefault();
+          editor.update(() => {
+            const node = $getNodeByKey(nodeKey);
+            if ($isWordBlockNode(node)) {
+              const paragraph = $createParagraphNode();
+              node.insertAfter(paragraph);
+              paragraph.select();
+            }
+          });
+          return true;
+        }
+        return false;
+      },
+      [isSelected, nodeKey, editor]
+    );
+
+    useEffect(() => {
+      return mergeRegister(
+        editor.registerCommand(
+          CLICK_COMMAND,
+          (payload) => {
+            const event = payload;
+            if (containerRef.current && containerRef.current.contains(event.target)) {
+              if (event.shiftKey) {
+                setSelected(!isSelected);
+              } else {
+                clearSelection();
+                setSelected(true);
+              }
+              return true;
+            }
+            return false;
+          },
+          COMMAND_PRIORITY_LOW
+        ),
+        editor.registerCommand(KEY_DELETE_COMMAND, onDelete, COMMAND_PRIORITY_LOW),
+        editor.registerCommand(KEY_BACKSPACE_COMMAND, onDelete, COMMAND_PRIORITY_LOW),
+        editor.registerCommand(KEY_ESCAPE_COMMAND, onEscape, COMMAND_PRIORITY_LOW),
+        editor.registerCommand(KEY_ENTER_COMMAND, onEnter, COMMAND_PRIORITY_LOW),
+      );
+    }, [editor, isSelected, onDelete, onEscape, onEnter, setSelected, clearSelection]);
+
+    return (
+      <div
+        ref={containerRef}
+        style={{
+          border: isSelected
+            ? '2px solid var(--mui-palette-primary-main, #1976d2)'
+            : '1px solid transparent',
+          borderRadius: 8,
+          transition: 'border 0.2s ease',
+        }}
+      >
+        <WordBlockComponent
+          className={className}
+          format={format}
+          nodeKey={nodeKey}
+          wordID={wordID}
+        />
+      </div>
+    );
+  });
   
   function convertYoutubeElement(
     domNode,
@@ -333,13 +453,26 @@ import getCachedUrl from '../../../utils/getCachedUrl';
         base: embedBlockTheme.base || '',
         focus: embedBlockTheme.focus || '',
       };
+      const isEditable = _editor.isEditable();
       return (
-        <WordBlockComponent
-          className={className}
-          format={this.__format}
-          nodeKey={this.getKey()}
-          wordID={this.__id}
-        />
+        <>
+          {isEditable && (
+            <WordBlockEditor
+              className={className}
+              format={this.__format}
+              nodeKey={this.getKey()}
+              wordID={this.__id}
+            />
+          )}
+          {!isEditable && (
+            <WordBlockComponent
+              className={className}
+              format={this.__format}
+              nodeKey={this.getKey()}
+              wordID={this.__id}
+            />
+          )}
+        </>
       );
     }
   }

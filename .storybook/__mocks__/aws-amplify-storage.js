@@ -84,26 +84,32 @@ startxref
   return URL.createObjectURL(blob);
 };
 
-export const getUrl = async ({ key, options = {} }) => {
-  console.log('Mock getUrl called with:', key);
+export const getUrl = async ({ key, path, options = {} }) => {
+  const resolvedKey = key || path;
+  console.log('Mock getUrl called with:', resolvedKey);
   
   // Check in-memory uploaded blobs first (supports real recording round-trips)
-  if (uploadedBlobUrls.has(key)) {
-    return { url: { href: uploadedBlobUrls.get(key) } };
+  if (uploadedBlobUrls.has(resolvedKey)) {
+    return { url: { href: uploadedBlobUrls.get(resolvedKey) } };
   }
   
   // If key is a data URL, return it as-is
-  if (key?.startsWith('data:')) {
-    return { url: { href: key } };
+  if (resolvedKey?.startsWith('data:')) {
+    return { url: { href: resolvedKey } };
   }
   
-  // If it's a PDF, return a mock PDF blob URL
-  if (key?.endsWith('.pdf')) {
+  // For story-mock paths or /mocks/ paths, return as-is (real static files)
+  if (resolvedKey?.includes('story-mocks/') || resolvedKey?.includes('/mocks/')) {
+    return { url: { href: resolvedKey } };
+  }
+  
+  // If it's a PDF without a known path, return a mock PDF blob URL
+  if (resolvedKey?.endsWith('.pdf')) {
     return { url: { href: createMockPdfUrl() } };
   }
   
   // Otherwise return the key wrapped in URL object
-  return { url: { href: key || 'mock-url' } };
+  return { url: { href: resolvedKey || 'mock-url' } };
 };
 
 export const uploadData = ({ key, path, data, options = {} }) => {

@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+import { describe, it, expect, afterAll } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import { backfillDocblocks, analyzeFile, generateDocblock } from '../scripts/backfill-docblocks';
@@ -16,39 +17,15 @@ if (!fs.existsSync(testDir)) {
   fs.mkdirSync(testDir, { recursive: true });
 }
 
-interface TestResult {
-  name: string;
-  passed: boolean;
-  error?: string;
-}
-
-const results: TestResult[] = [];
-
-function test(name: string, fn: () => void | Promise<void>) {
-  try {
-    const result = fn();
-    if (result instanceof Promise) {
-      result.then(() => {
-        results.push({ name, passed: true });
-        console.log(`✅ ${name}`);
-      }).catch((error) => {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        results.push({ name, passed: false, error: errorMessage });
-        console.error(`❌ ${name}: ${errorMessage}`);
-      });
-    } else {
-      results.push({ name, passed: true });
-      console.log(`✅ ${name}`);
+describe('docblock-backfill', () => {
+  afterAll(() => {
+    if (fs.existsSync(testDir)) {
+      fs.rmSync(testDir, { recursive: true, force: true });
     }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    results.push({ name, passed: false, error: errorMessage });
-    console.error(`❌ ${name}: ${errorMessage}`);
-  }
-}
+  });
 
 // Test 1: Analyze file without docblock
-test('analyzeFile - detects missing docblock', () => {
+it('analyzeFile - detects missing docblock', () => {
   const testFile = path.join(testDir, 'NoDocblock.tsx');
   fs.writeFileSync(testFile, `export const TestComponent: React.FC = () => {
   return <div>Test</div>;
@@ -76,7 +53,7 @@ test('analyzeFile - detects missing docblock', () => {
 });
 
 // Test 2: Analyze file with existing docblock
-test('analyzeFile - detects existing docblock', () => {
+it('analyzeFile - detects existing docblock', () => {
   const testFile = path.join(testDir, 'WithDocblock.tsx');
   fs.writeFileSync(testFile, `/**
  * TestComponent - Test component
@@ -97,7 +74,7 @@ export const TestComponent: React.FC = () => {
 });
 
 // Test 3: Generate docblock from component info
-test('generateDocblock - creates valid JSDoc', () => {
+it('generateDocblock - creates valid JSDoc', () => {
   const info = {
     name: 'TestComponent',
     type: 'component' as const,
@@ -121,7 +98,7 @@ test('generateDocblock - creates valid JSDoc', () => {
 });
 
 // Test 4: Generate docblock with metadata
-test('generateDocblock - includes metadata when provided', () => {
+it('generateDocblock - includes metadata when provided', () => {
   const info = {
     name: 'TestComponent',
     type: 'component' as const,
@@ -155,7 +132,7 @@ test('generateDocblock - includes metadata when provided', () => {
 });
 
 // Test 5: Validate file with correct docblock
-test('validateFile - passes valid docblock', () => {
+it('validateFile - passes valid docblock', () => {
   const testFile = path.join(testDir, 'ValidDocblock.tsx');
   fs.writeFileSync(testFile, `/**
  * TestComponent - Test component
@@ -179,7 +156,7 @@ export const TestComponent: React.FC<Props> = ({ props }) => {
 });
 
 // Test 6: Validate file with parameter mismatch
-test('validateFile - detects parameter mismatch', () => {
+it('validateFile - detects parameter mismatch', () => {
   const testFile = path.join(testDir, 'InvalidDocblock.tsx');
   fs.writeFileSync(testFile, `/**
  * TestComponent - Test component
@@ -203,7 +180,7 @@ export const TestComponent: React.FC = ({ correctParam }: Props) => {
 });
 
 // Test 7: Validate util file (non-component)
-test('analyzeFile - handles utility files', () => {
+it('analyzeFile - handles utility files', () => {
   const testFile = path.join(testDir, 'util.ts');
   fs.writeFileSync(testFile, `export function testUtil() {
   return 'test';
@@ -219,22 +196,4 @@ test('analyzeFile - handles utility files', () => {
   fs.unlinkSync(testFile);
 });
 
-// Summary
-setTimeout(() => {
-  console.log('\n📊 Test Summary:');
-  console.log(`  - Total: ${results.length}`);
-  console.log(`  - Passed: ${results.filter(r => r.passed).length}`);
-  console.log(`  - Failed: ${results.filter(r => !r.passed).length}`);
-  
-  const failures = results.filter(r => !r.passed);
-  if (failures.length > 0) {
-    console.log('\n❌ Failures:');
-    failures.forEach(f => {
-      console.log(`  - ${f.name}: ${f.error}`);
-    });
-    process.exit(1);
-  } else {
-    console.log('\n✅ All tests passed!');
-    process.exit(0);
-  }
-}, 500);
+}); // end describe

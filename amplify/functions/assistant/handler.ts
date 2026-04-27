@@ -30,7 +30,8 @@ async function getOpenAI(): Promise<any> {
  * Verifies user is authenticated
  */
 function requireAuth(event: any, context: any) {
-  const userId = event.requestContext?.authorizer?.claims?.sub;
+  // AppSync provides identity in event.identity, not requestContext
+  const userId = event.identity?.sub || event.identity?.username;
   
   if (!userId) {
     throw new Error('Unauthorized: User authentication required');
@@ -40,9 +41,14 @@ function requireAuth(event: any, context: any) {
 }
 
 export const handler: Handler = async (event: any, context: any) => {
-  const operationName = context?.['x-operation-name'] || event.info?.fieldName;
+  const operationName = event.info?.fieldName || event.fieldName;
   const args = event.arguments || {};
-  
+
+  if (!operationName) {
+    console.error('[Assistant Handler] No operation name found in event:', JSON.stringify(event, null, 2));
+    throw new Error('Unable to determine operation name from event');
+  }
+
   // Require authentication for all operations
   const { userId } = requireAuth(event, context);
 

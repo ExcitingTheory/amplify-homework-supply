@@ -52,7 +52,7 @@ export function useStudentSubmission({ submissionKey, grade, userGroups = [] }) 
         if (isOwner) {
           // Student accessing their own file - use direct private access
           console.log('[useStudentSubmission] Owner access - using direct private URL');
-          const directUrl = await getCachedUrl(submissionKey, 'private', grade.identityId);
+          const directUrl = await getCachedUrl(submissionKey);
           setUrl(directUrl);
         } else if (isInstructor) {
           // Teacher accessing student file - use GraphQL endpoint
@@ -120,7 +120,7 @@ export function useStudentSubmissions({ submissionKeys = [], grade, userGroups =
         const urlPromises = submissionKeys.map(async (key) => {
           try {
             if (isOwner) {
-              const directUrl = await getCachedUrl(key, 'private', grade.identityId);
+              const directUrl = await getCachedUrl(key);
               return [key, directUrl];
             } else if (isInstructor) {
               const client = getAmplifyClient();

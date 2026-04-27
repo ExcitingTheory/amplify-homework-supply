@@ -53,6 +53,11 @@ const SettingsProvider = ({ children }) => {
         }
       },
       error: (error) => {
+        const msg = error?.message || error?.errors?.[0]?.message || error?.error?.errors?.[0]?.message || JSON.stringify(error);
+        if (msg.includes('DuplicatedOperationError')) {
+          console.warn('[SettingsContext] Settings subscription: transient DuplicatedOperationError (safe to ignore)');
+          return;
+        }
         console.error('[SettingsContext] Settings subscription error:', error);
         // Stop retrying on auth errors to prevent rate limiting
         if (error?.message?.includes('No current user') || 

@@ -69,7 +69,7 @@ export async function moderateContent(content) {
       ? content 
       : extractTextContent(content);
     
-    if (!textToModerate || textToModerate.length === 0) {
+    if (!textToModerate || textToModerate.length === 0 || textToModerate === 'null' || textToModerate === 'undefined') {
       return {
         flagged: false,
         categories: {},
@@ -85,7 +85,8 @@ export async function moderateContent(content) {
       content: textToModerate
     });
     
-    return response.data.moderateContent;
+    const result = response?.data?.moderateContent ?? response?.data;
+    return typeof result === 'string' ? JSON.parse(result) : result;
   } catch (error) {
     console.error('Error moderating content:', error);
     // Return non-flagged result on error - don't block saves

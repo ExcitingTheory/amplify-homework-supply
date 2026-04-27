@@ -22,7 +22,7 @@ import ChatContext from '../context/chatContext';
  * @returns {JSX.Element}
  */
 export function GlobalChatButton({ show = true, unreadCount = 0 }) {
-    const { t, ready } = useTranslation('common');
+    const { t } = useTranslation('common', { bindI18nStore: '' });
     const { isChatOpen, setIsChatOpen } = useContext(ChatContext);
     
     const handleClick = () => {
@@ -30,8 +30,8 @@ export function GlobalChatButton({ show = true, unreadCount = 0 }) {
         setIsChatOpen(true);
     };
     
-    // Don't show if explicitly hidden, chat is already open, or translations not ready
-    if (!show || isChatOpen || !ready) {
+    // Don't show if explicitly hidden or chat is already open
+    if (!show || isChatOpen) {
         return null;
     }
     
@@ -58,6 +58,7 @@ export function GlobalChatButton({ show = true, unreadCount = 0 }) {
                         },
                     }}
                     data-testid="global-chat-button"
+                    data-tour="chat-button"
                 >
                     <Badge
                         badgeContent={unreadCount}

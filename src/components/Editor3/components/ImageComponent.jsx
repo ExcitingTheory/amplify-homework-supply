@@ -283,7 +283,7 @@ const ImageComponent = React.memo(function ImageComponent({
         if (!imageRef.current) return
 
         const fetchImage = async () => {
-            const _href = await getCachedUrl(path, 'protected', identityId)
+            const _href = await getCachedUrl(path)
             imageRef.current.src = _href;
         }
         fetchImage()

@@ -6,7 +6,7 @@ import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 const s3Client = new S3Client();
 
-async function getS3Object(s3Key: string): Promise<Buffer> {
+export async function getS3Object(s3Key: string): Promise<Buffer> {
   const bucketName = process.env.STORAGE_BUCKET || '';
   
   const command = new GetObjectCommand({
@@ -120,11 +120,11 @@ export async function extractPdfText(s3Key: string): Promise<{
 /**
  * Extract text from buffer based on file type
  */
-export async function extractTextFromBuffer(s3Key: string, fileType: 'docx'): Promise<string> {
+export async function extractTextFromBuffer(s3Key: string, fileType: 'docx' | 'doc' | 'md' | 'txt'): Promise<string> {
   const buffer = await getS3Object(s3Key);
   
-  if (fileType === 'docx') {
-    console.log('[extractTextFromBuffer] Extracting DOCX...');
+  if (fileType === 'docx' || fileType === 'doc') {
+    console.log(`[extractTextFromBuffer] Extracting ${fileType.toUpperCase()}...`);
     // Dynamic import to avoid TypeScript type issues
     // @ts-ignore - mammoth types not available at compile time
     const mammoth = await import('mammoth');
@@ -136,6 +136,13 @@ export async function extractTextFromBuffer(s3Key: string, fileType: 'docx'): Pr
     
     console.log(`[extractTextFromBuffer] Extracted ${result.value.length} characters`);
     return result.value;
+  }
+  
+  if (fileType === 'md' || fileType === 'txt') {
+    console.log(`[extractTextFromBuffer] Extracting ${fileType.toUpperCase()} as plain text...`);
+    const text = buffer.toString('utf-8');
+    console.log(`[extractTextFromBuffer] Extracted ${text.length} characters`);
+    return text;
   }
   
   throw new Error(`Unsupported file type: ${fileType}`);

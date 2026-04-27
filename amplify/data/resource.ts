@@ -7,6 +7,9 @@ import { documentAnalysisHandler } from '../functions/documentAnalysis/resource'
 import { aiHandler } from '../functions/ai/resource';
 import { assistantHandler } from '../functions/assistant/resource';
 import { mediaConvertHandler } from '../functions/mediaConvert/resource';
+import { gamificationHandler } from '../functions/gamification/resource';
+import { peerReviewAIHandler } from '../functions/peerReviewAI/resource';
+import { generatePracticeDrillHandler } from '../functions/generatePracticeDrill/resource';
 
 /**
  * Amplify Gen 2 Data Schema
@@ -57,6 +60,8 @@ const AiFeedbackReason = a.enum([
   'POOR_QUALITY',
   'OTHER',
 ]);
+
+const PracticeDrillType = a.enum(['MIXED', 'VOCABULARY', 'COMPREHENSION', 'REVIEW']);
 
 
 // Consolidated types for DRY principles
@@ -157,6 +162,7 @@ const schema = a.schema({
       data: a.json(),
       status: PublishedStatus,
       timeLimitSeconds: a.integer(),
+      retryEnabled: a.boolean(),
       // Relationships
       assignments: a.hasMany('Assignment', ['unitID']),
       grades: a.hasMany('Grade', ['unitID']),
@@ -180,10 +186,6 @@ const schema = a.schema({
       isDraft: a.boolean(),
       // Yjs CRDT snapshot for conflict-free collaborative editing
       yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       // Owners (creators - typically Instructors) have full control
@@ -216,10 +218,6 @@ const schema = a.schema({
       // Tracking
       learner: a.string(),
       owner: a.string(),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       // Student owns their assignment
@@ -245,6 +243,15 @@ const schema = a.schema({
       feedback: a.json(), // Generated feedback by block
       files: a.string().array(), // Submitted file paths
       unitVersion: a.integer(),
+      // Peer review
+      reviewRoomId: a.id(),
+      aiReviewSummary: a.string(),
+      nailedItCount: a.integer(),
+      // Dynamic group auth for peer review — Cognito group name like 'review-{roomId}-peers'
+      peerReviewGroup: a.string(),
+      // Practice drill link — null for workbook grades
+      practiceSessionID: a.id(),
+      attempt: a.integer(),
       // Foreign keys
       unitID: a.id().required(),
       unit: a.belongsTo('Unit', ['unitID']),
@@ -256,11 +263,10 @@ const schema = a.schema({
       // Metadata
       identityId: a.string(),
       moderation: ModerationInfo,
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
+    .secondaryIndexes((index) => [
+      index('practiceSessionID').name('byPracticeSession'),
+    ])
     .authorization((allow) => [
       // Student owns their grade
       allow.owner(),
@@ -269,6 +275,8 @@ const schema = a.schema({
       // Dynamic group authorization: only instructors of the section can read/update
       // Single group with access to this grade
       allow.groupDefinedIn('instructorGroup').to(['read', 'update']),
+      // Dynamic group authorization: peers invited to review can read
+      allow.groupDefinedIn('peerReviewGroup').to(['read']),
     ]),
 
   Section: a
@@ -298,10 +306,8 @@ const schema = a.schema({
       curveEnabled: a.boolean(),
       curveMethod: a.string(), // 'scale-to-top' or 'linear-adjustment'
       curveAssignments: a.string().array(), // Array of unitIDs to apply curve to
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
+      // Leaderboard
+      leaderboardEnabled: a.boolean(), // Instructor toggle — show leaderboard for this section
     })
     .authorization((allow) => [
       allow.owner(),
@@ -353,10 +359,6 @@ const schema = a.schema({
       documentQuestions: a.hasMany('DocumentQuestion', ['questionID']),
       // Yjs CRDT snapshot for conflict-free collaborative editing
       yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -427,10 +429,6 @@ const schema = a.schema({
       hlsUrl: a.string(), // S3 path to .m3u8 manifest (e.g. protected/{identityId}/{fileId}/{fileId}.m3u8)
       transcodeStatus: a.string(), // PENDING | PROCESSING | COMPLETE | ERROR
       mediaConvertJobId: a.string(), // AWS MediaConvert job ID for tracking
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       // Owner has full control
@@ -441,6 +439,8 @@ const schema = a.schema({
       allow.group('Learners').to(['read']),
       // Admins have full access
       allow.group('Admins'),
+      // Note: Lambda function access (openai, documentAnalysis, embeddings, mediaConvert)
+      // is granted via schema-level .authorization() - see bottom of schema definition
     ]),
 
   Word: a
@@ -471,10 +471,6 @@ const schema = a.schema({
       documentWords: a.hasMany('DocumentWord', ['wordID']),
       // Yjs CRDT snapshot for conflict-free collaborative editing
       yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -492,10 +488,6 @@ const schema = a.schema({
       unit: a.belongsTo('Unit', ['unitID']),
       fileID: a.id().required(),
       file: a.belongsTo('File', ['fileID']),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -505,10 +497,6 @@ const schema = a.schema({
       unit: a.belongsTo('Unit', ['unitID']),
       wordID: a.id().required(),
       word: a.belongsTo('Word', ['wordID']),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -518,10 +506,6 @@ const schema = a.schema({
       question: a.belongsTo('Question', ['questionID']),
       unitID: a.id().required(),
       unit: a.belongsTo('Unit', ['unitID']),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -531,10 +515,6 @@ const schema = a.schema({
       unit: a.belongsTo('Unit', ['unitID']),
       documentID: a.id().required(),
       document: a.belongsTo('Document', ['documentID']),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -544,10 +524,6 @@ const schema = a.schema({
       question: a.belongsTo('Question', ['questionID']),
       fileID: a.id().required(),
       file: a.belongsTo('File', ['fileID']),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -557,10 +533,6 @@ const schema = a.schema({
       word: a.belongsTo('Word', ['wordID']),
       fileID: a.id().required(),
       file: a.belongsTo('File', ['fileID']),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -570,10 +542,6 @@ const schema = a.schema({
       question: a.belongsTo('Question', ['questionID']),
       wordID: a.id().required(),
       word: a.belongsTo('Word', ['wordID']),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -583,10 +551,6 @@ const schema = a.schema({
       document: a.belongsTo('Document', ['documentID']),
       wordID: a.id().required(),
       word: a.belongsTo('Word', ['wordID']),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -596,10 +560,6 @@ const schema = a.schema({
       document: a.belongsTo('Document', ['documentID']),
       questionID: a.id().required(),
       question: a.belongsTo('Question', ['questionID']),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -609,10 +569,6 @@ const schema = a.schema({
       chat: a.belongsTo('AssistantChat', ['chatID']),
       fileID: a.id().required(),
       file: a.belongsTo('File', ['fileID']),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [allow.owner(), allow.group('Admins')]),
 
@@ -663,6 +619,7 @@ const schema = a.schema({
       pageCount: a.integer(),
       fileSize: a.integer(),
       mimeType: a.string(),
+      sourceFormat: a.string(), // Detected format: pdf, txt, md, csv, doc, docx, xls, xlsx, ppt, pptx, odt, ods, odp, scorm-1.2, scorm-2004, imscc-1.1, imscc-1.2, imscc-1.3, imscp-1.2, qti-2.1, qti-3.0, epub-2, epub-3, gift
       uploadedAt: a.datetime(),
       // Processing State - for resuming long-running operations on timeout
       resumeState: a.json(), // { lastProcessedPage, accumulatedPages, totalPages }
@@ -678,10 +635,6 @@ const schema = a.schema({
       metadata: a.json(),
       // Yjs CRDT snapshot for conflict-free document status management
       yjsSnapshot: a.string(), // Base64-encoded Y.Doc state
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       // Document owner (student) can manage their documents
@@ -692,6 +645,8 @@ const schema = a.schema({
       allow.group('Instructors'),
       // Learners can read documents (section-based access controlled by Lambda/client-side)
       allow.group('Learners').to(['read']),
+      // Note: Lambda function access (documentAnalysis, embeddings)
+      // is granted via schema-level .authorization() - see bottom of schema definition
       // Note: readableGroups/writableGroups used for client-side filtering
       // Cannot use allow.groupsDefinedIn() - it generates invalid containsAny subscription filters
     ]),
@@ -721,15 +676,13 @@ const schema = a.schema({
       // Timestamps (createdAt/updatedAt auto-generated)
       importedAt: a.datetime(),
       metadata: a.json(),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       allow.owner(),
       allow.group('Learners').to(['read']),
       allow.group('Admins'),
+      // Note: Lambda function access (documentAnalysis, embeddings)
+      // is granted via schema-level .authorization() - see bottom of schema definition
     ]),
 
   AgentJob: a
@@ -755,10 +708,6 @@ const schema = a.schema({
       retryCount: a.integer(),
       metadata: a.json(),
       identityId: a.string(),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -790,10 +739,6 @@ const schema = a.schema({
       outputTokens: a.string(),
       // Relationships
       chatFiles: a.hasMany('AssistantChatFile', ['chatID']),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -824,11 +769,9 @@ const schema = a.schema({
       // Localization
       language: a.string(),
       timezone: a.string(),
+      // Leaderboard & gamification
+      leaderboardOptIn: a.boolean(), // Student opt-in for overall leaderboard
       metadata: a.json(),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -857,15 +800,260 @@ const schema = a.schema({
       messageId: a.string(),
       sessionId: a.string(),
       metadata: a.json(),
-      // Versioning fields for conflict resolution
-      _version: a.integer(),
-      _lastChangedAt: a.timestamp(),
-      _deleted: a.boolean(),
     })
     .authorization((allow) => [
       allow.owner(),
       allow.group('Admins'),
       allow.authenticated(),
+    ]),
+
+  // ========================================================================
+  // GAMIFICATION, PEER REVIEW & AI MEMORY MODELS
+  // ========================================================================
+
+  WorkbookComment: a
+    .model({
+      gradeId: a.id().required(),
+      blockId: a.string().required(),
+      threadId: a.string().required(),
+      content: a.string().required(),
+      resolved: a.boolean(),
+      replies: a.json(),
+    })
+    .secondaryIndexes((index) => [
+      index('gradeId').sortKeys(['blockId']).name('byGradeBlock'),
+    ])
+    .authorization((allow) => [
+      allow.owner(),
+      allow.group('Admins'),
+      allow.group('Instructors'),
+    ]),
+
+  HomeworkRoom: a
+    .model({
+      gradeId: a.id().required(),
+      ownerId: a.string().required(),
+      sectionID: a.id(), // Section this room belongs to (for same-section validation)
+      status: a.enum(['OPEN', 'IN_REVIEW', 'REVIEW_COMPLETE']),
+      code: a.string(), // Short join code for self-join (like Section.code)
+      invitedUserIds: a.string().array(),
+      messages: a.json(),
+      aiReviewSummary: a.string(),
+      closedAt: a.datetime(),
+      // Dynamic group auth — Cognito group name like 'review-{roomId}-peers'
+      peerGroup: a.string(),
+    })
+    .secondaryIndexes((index) => [
+      index('gradeId').name('byGrade'),
+      index('ownerId').name('byOwner'),
+      index('code').name('byCode'),
+    ])
+    .authorization((allow) => [
+      allow.owner(),
+      allow.group('Admins'),
+      allow.group('Instructors').to(['read']),
+      // Invited peers can read the room
+      allow.groupDefinedIn('peerGroup').to(['read']),
+    ]),
+
+  StudentXPLog: a
+    .model({
+      studentId: a.string().required(),
+      xpAmount: a.integer().required(),
+      reason: a.enum([
+        'HOMEWORK_SUBMITTED',
+        'AI_FEEDBACK_REVISED',
+        'ALL_BLOCKS_COMPLETED',
+        'PEER_REVIEW_GIVEN',
+        'PEER_REVIEW_HOSTED',
+        'NAILED_IT',
+        'ON_TIME_SUBMISSION',
+        'STREAK_3DAY',
+        'STREAK_7DAY',
+        'PERFECT_SCORE',
+      ]),
+      referenceId: a.string(),
+    })
+    .secondaryIndexes((index) => [
+      index('studentId').name('byStudent'),
+    ])
+    .authorization((allow) => [
+      allow.owner(),
+      allow.group('Admins'),
+      allow.authenticated().to(['read']),
+    ]),
+
+  StudentBadge: a
+    .model({
+      studentId: a.string().required(),
+      badgeType: a.enum([
+        'FIRST_SUBMISSION',
+        'GOOD_EYE',
+        'QUICK_DRAW',
+        'SHARPSHOOTER',
+        'CONSISTENT',
+        'TEAM_PLAYER',
+        'DEEP_THINKER',
+        'TOP_OF_CLASS',
+        'PERFECTIONIST',
+      ]),
+      sourceId: a.string(),
+      awardedAt: a.datetime(),
+    })
+    .secondaryIndexes((index) => [
+      index('studentId').name('byStudent'),
+      index('sourceId').name('bySource'),
+    ])
+    .authorization((allow) => [
+      allow.owner(),
+      allow.group('Admins'),
+      allow.authenticated().to(['read']),
+    ]),
+
+  StudentStreak: a
+    .model({
+      studentId: a.string().required(),
+      currentStreak: a.integer().required(),
+      longestStreak: a.integer().required(),
+      lastActivityDate: a.date(),
+    })
+    .secondaryIndexes((index) => [
+      index('studentId').name('byStudent'),
+    ])
+    .authorization((allow) => [
+      allow.owner(),
+      allow.group('Admins'),
+      allow.authenticated().to(['read']),
+    ]),
+
+  StudentMemory: a
+    .model({
+      studentId: a.string().required(),
+      memoryMarkdown: a.string().required(),
+      structuredProfile: a.json(),
+      lastUpdatedBy: a.string(),
+      version: a.integer(),
+    })
+    .secondaryIndexes((index) => [
+      index('studentId').name('byStudent'),
+    ])
+    .authorization((allow) => [
+      allow.owner(),
+      allow.group('Admins'),
+      allow.group('Instructors').to(['read']),
+    ]),
+
+  StudentUnitMemory: a
+    .model({
+      studentId: a.string().required(),
+      unitID: a.string().required(),
+      // Concept tracking
+      weakConcepts: a.json(),
+      strongConcepts: a.json(),
+      confusionPairs: a.json(),
+      // Accuracy aggregates
+      accuracyBySource: a.json(),
+      totalAttempts: a.integer().default(0),
+      averageAccuracy: a.float(),
+      // Spaced repetition
+      reviewPriority: a.float(),
+      lastPracticedAt: a.datetime(),
+    })
+    .secondaryIndexes((index) => [
+      index('studentId').name('byStudent'),
+      index('unitID').name('byUnit'),
+    ])
+    .authorization((allow) => [
+      allow.owner(),
+      allow.group('Admins'),
+      allow.group('Instructors').to(['read']),
+    ]),
+
+  LeaderboardEntry: a
+    .model({
+      cohortId: a.string().required(),
+      studentId: a.string().required(),
+      studentName: a.string().required(),
+      avatarColor: a.string(),
+      totalXP: a.integer().required(),
+      level: a.integer().required(),
+      completedAssignments: a.integer(),
+      currentStreak: a.integer(),
+      nailedItCount: a.integer(),
+      lastUpdated: a.datetime(),
+    })
+    .secondaryIndexes((index) => [
+      index('cohortId').name('byCohort'),
+    ])
+    .authorization((allow) => [
+      allow.owner(),
+      allow.group('Admins'),
+      allow.authenticated().to(['read']),
+    ]),
+
+  // ========================================================================
+  // PRACTICE DRILL MODELS
+  // ========================================================================
+
+  PracticeSession: a
+    .model({
+      unitID: a.string().required(),
+      drillType: PracticeDrillType,
+      data: a.json(),               // Same format as Grade.data — keyed by generated block IDs
+      accuracy: a.float(),          // Overall accuracy 0-100
+      blockCount: a.integer(),      // How many blocks in this drill
+      blocksCompleted: a.integer(),
+      complete: a.boolean().default(false),
+      xpAwarded: a.integer().default(0),
+      generatedContent: a.json(),   // PracticeDrillBlock[] for replay/review
+      sourcesEnabled: a.json(),     // { vocabulary: true, questions: true, ... }
+      coverageSnapshot: a.json(),   // { vocabulary: { total, covered }, ... }
+      // Collaborative practice
+      collaborative: a.boolean().default(false),
+      roomCode: a.string(),         // Short join code for group sessions
+      maxParticipants: a.integer(),
+      participantIds: a.json(),     // string[] — Cognito subs of participants
+      // Versioning
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
+    })
+    .secondaryIndexes((index) => [
+      index('unitID').name('byUnit'),
+      index('roomCode').name('byRoomCode'),
+    ])
+    .authorization((allow) => [
+      allow.owner(),
+      allow.group('Admins').to(['read', 'create', 'update', 'delete']),
+      allow.group('Instructors').to(['read']),
+      allow.authenticated().to(['read']),
+    ]),
+
+  InstructorInsight: a
+    .model({
+      unitID: a.string().required(),
+      studentId: a.string().required(),
+      practiceSessionId: a.string(),
+      drillType: a.string(),
+      accuracy: a.float(),
+      weakAreas: a.json(),           // string[] of concepts the student got wrong
+      strongAreas: a.json(),         // string[] of concepts the student got right
+      sourcesUsed: a.json(),         // string[] — which toggles were on
+      blockBreakdown: a.json(),      // { vocabulary: 85, questions: 72, text: 60 }
+      timestamp: a.datetime(),
+      // Versioning
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
+    })
+    .secondaryIndexes((index) => [
+      index('unitID').name('byUnit'),
+      index('studentId').name('byStudent'),
+    ])
+    .authorization((allow) => [
+      allow.owner(),
+      allow.group('Admins').to(['read', 'create', 'update', 'delete']),
+      allow.group('Instructors').to(['read']),
     ]),
 
   // ========================================================================
@@ -880,6 +1068,8 @@ const schema = a.schema({
       expected: a.string().required(),
       definition: a.string().required(),
       model: a.string(),
+      studentMemory: a.string(),
+      contentContext: a.string(),
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
@@ -892,6 +1082,8 @@ const schema = a.schema({
       expected: a.string().required(),
       definition: a.string().required(),
       model: a.string(),
+      studentMemory: a.string(),
+      contentContext: a.string(),
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
@@ -904,6 +1096,8 @@ const schema = a.schema({
       answer: a.string().required(),
       prompt: a.string().required(),
       model: a.string(),
+      studentMemory: a.string(),
+      contentContext: a.string(),
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
@@ -926,6 +1120,8 @@ const schema = a.schema({
       audio: a.string().required(),
       model: a.string(),
       chatModel: a.string().required(),
+      studentMemory: a.string(),
+      contentContext: a.string(),
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
@@ -938,6 +1134,8 @@ const schema = a.schema({
       audioUrl: a.string().required(),
       model: a.string().required(),
       chatModel: a.string().required(),
+      studentMemory: a.string(),
+      contentContext: a.string(),
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
@@ -979,6 +1177,8 @@ const schema = a.schema({
       expected: a.string().required(),
       image: a.string().required(),
       model: a.string(),
+      studentMemory: a.string(),
+      contentContext: a.string(),
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
@@ -990,6 +1190,8 @@ const schema = a.schema({
       expected: a.string().required(),
       imageUrl: a.string().required(),
       model: a.string(),
+      studentMemory: a.string(),
+      contentContext: a.string(),
     })
     .returns(a.string())
     .authorization(allow => [allow.authenticated()])
@@ -1049,6 +1251,19 @@ const schema = a.schema({
     .handler(a.handler.function(openaiHandler)),
 
   // Document Analysis Mutations
+
+  generatePracticeDrill: a
+    .mutation()
+    .arguments({
+      unitId: a.string().required(),
+      drillType: a.string().required(),
+      count: a.integer().required(),
+      sourcesEnabled: a.json().required(),
+    })
+    .returns(a.json())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(generatePracticeDrillHandler)),
+
   analyzeDocument: a
     .mutation()
     .arguments({
@@ -1222,6 +1437,26 @@ const schema = a.schema({
     .authorization(allow => [allow.authenticated()])
     .handler(a.handler.function(sectionHandler)),
 
+  // Peer Review Mutations
+  createPeerReviewRoom: a
+    .mutation()
+    .arguments({
+      gradeId: a.id().required(),
+      invitedUserIds: a.string().array(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(sectionHandler)),
+
+  joinPeerReview: a
+    .mutation()
+    .arguments({
+      code: a.string().required(),
+    })
+    .returns(a.string())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(sectionHandler)),
+
   // Section Management Queries
   listSectionStudents: a
     .query()
@@ -1231,7 +1466,119 @@ const schema = a.schema({
     .returns(a.ref('StudentInfo').array())
     .authorization(allow => [allow.authenticated()])
     .handler(a.handler.function(sectionHandler)),
-});
+
+  // Gamification Mutations
+  awardXP: a
+    .mutation()
+    .arguments({
+      studentId: a.string().required(),
+      reason: a.string().required(),
+      referenceId: a.string(),
+    })
+    .returns(a.json())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(gamificationHandler)),
+
+  checkBadges: a
+    .mutation()
+    .arguments({
+      studentId: a.string().required(),
+    })
+    .returns(a.json())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(gamificationHandler)),
+
+  updateStreak: a
+    .mutation()
+    .arguments({
+      studentId: a.string().required(),
+    })
+    .returns(a.json())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(gamificationHandler)),
+
+  rebuildLeaderboard: a
+    .mutation()
+    .arguments({
+      cohortId: a.string().required(),
+    })
+    .returns(a.json())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(gamificationHandler)),
+
+  upsertStudentMemory: a
+    .mutation()
+    .arguments({
+      studentId: a.string().required(),
+      feedbackMarkdown: a.string().required(),
+      source: a.string().required(),
+    })
+    .returns(a.json())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(gamificationHandler)),
+
+  bootstrapStudentMemory: a
+    .mutation()
+    .arguments({
+      studentId: a.string().required(),
+    })
+    .returns(a.json())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(gamificationHandler)),
+
+  updateStudentUnitMemoryFromGrade: a
+    .mutation()
+    .arguments({
+      studentId: a.string().required(),
+      unitID: a.string().required(),
+      accuracy: a.float().required(),
+      weakAreas: a.json(),
+      strongAreas: a.json(),
+      confusionPairs: a.json(),
+      accuracyBySource: a.json(),
+      sourceType: a.string(),
+    })
+    .returns(a.json())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(gamificationHandler)),
+
+  rebuildStudentMemoryProfile: a
+    .mutation()
+    .arguments({
+      studentId: a.string().required(),
+    })
+    .returns(a.json())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(gamificationHandler)),
+
+  // Peer Review AI Mutations
+  handleAIMention: a
+    .mutation()
+    .arguments({
+      roomId: a.id().required(),
+      message: a.string().required(),
+      chatHistory: a.string(),
+    })
+    .returns(a.json())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(peerReviewAIHandler)),
+
+  generateReviewSummary: a
+    .mutation()
+    .arguments({
+      roomId: a.id().required(),
+      chatLog: a.string().required(),
+    })
+    .returns(a.json())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(peerReviewAIHandler)),
+})
+.authorization(allow => [
+  allow.resource(openaiHandler),
+  allow.resource(documentAnalysisHandler),
+  allow.resource(embeddingsHandler),
+  allow.resource(mediaConvertHandler),
+]);
 
 export type Schema = ClientSchema<typeof schema>;
 

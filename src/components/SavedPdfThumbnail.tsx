@@ -68,7 +68,7 @@ export default function SavedPdfThumbnail({
                 setError(null);
 
                 // @ts-ignore - getCachedUrl is JS file, types don't match
-                const url = await getCachedUrl(thumbnailKey, level, identityId);
+                const url = await getCachedUrl(thumbnailKey);
                 
                 if (cancelled) return;
                 

@@ -15,8 +15,8 @@ import { Box, CircularProgress, Typography, Paper } from '@mui/material';
 import { PictureAsPdf as PdfIcon, Error as ErrorIcon } from '@mui/icons-material';
 import { useTranslation } from 'next-i18next';
 
-// Configure PDF.js worker from local public directory
-if (typeof window !== 'undefined') {
+// Configure PDF.js worker from local public directory (skip if already configured by Storybook)
+if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
   pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 }
 
@@ -111,6 +111,11 @@ export default function PdfThumbnail({
                 file={url}
                 onLoadSuccess={onDocumentLoadSuccess}
                 onLoadError={onDocumentLoadError}
+                options={{
+                    cMapUrl: '/cmaps/',
+                    cMapPacked: true,
+                    standardFontDataUrl: '/standard_fonts/',
+                }}
                 loading={
                     <Paper
                         sx={{

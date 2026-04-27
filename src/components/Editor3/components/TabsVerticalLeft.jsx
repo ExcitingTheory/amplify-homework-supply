@@ -142,7 +142,8 @@ export default function TabsVerticalLeft({
         bgcolor: 'background.paper', 
         display: 'flex',
         flexDirection: 'row',
-        borderRight: '1px solid #e0e0e0',
+        borderRight: '1px solid',
+        borderColor: 'divider',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -165,11 +166,11 @@ export default function TabsVerticalLeft({
       />
       <Tabs
         orientation="vertical"
-        variant="standard"
+        variant="scrollable"
+        scrollButtons="auto"
         value={value}
         aria-label={t('tabsVerticalLeft.tabs.configuration', { ns: 'editor.authoring' })}
         sx={{
-          overflow: 'hidden',
           minWidth: '2.5rem',
           maxWidth: '2.5rem',
           '& .MuiTab-root': {
@@ -179,13 +180,16 @@ export default function TabsVerticalLeft({
             margin: 0,
           },
           '& .MuiTabs-scroller': {
-            borderRight: '1px solid #e0e0e0',
+            borderRight: '1px solid',
+            borderRightColor: 'divider',
             margin: 0,
-            overflow: 'hidden !important',
           },
-          '& .MuiTabs-flexContainer': {
-            overflow: 'hidden',
-          }
+          '& .MuiTabScrollButton-root': {
+            width: '2.5rem',
+            '&.Mui-disabled': {
+              opacity: 0.3,
+            },
+          },
         }}
       >
 

@@ -80,7 +80,7 @@ export default function MediaPlayerComponent({
                     
                     if (key === 0 && url) {
                         // sign url
-                        const src = await getCachedUrl(url, 'protected', unit.identityId);
+                        const src = await getCachedUrl(url);
                         if (src) {
                             // Detect MIME type from file extension
                             const ext = url.split('.').pop().toLowerCase();
@@ -127,7 +127,7 @@ export default function MediaPlayerComponent({
                     
                     if (key === 0 && url) {
                         // sign url
-                        const src = await getCachedUrl(url, 'protected', targetIdentityId);
+                        const src = await getCachedUrl(url);
                         if (src) {
                             const ext = url.split('.').pop().toLowerCase();
                             const mimeType = ext === 'mp4' ? 'video/mp4' : 
@@ -173,7 +173,7 @@ export default function MediaPlayerComponent({
                     
                     if (key === 0 && url) {
                         // sign url
-                        const src = await getCachedUrl(url, 'protected', targetIdentityId);
+                        const src = await getCachedUrl(url);
                         if (src) {
                             const ext = url.split('.').pop().toLowerCase();
                             const mimeType = ext === 'mp4' ? 'video/mp4' : 

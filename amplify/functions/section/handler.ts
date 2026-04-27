@@ -154,6 +154,85 @@ const CREATE_ASSIGNMENT = /* GraphQL */ `
   }
 `;
 
+// Peer Review GraphQL operations
+const GET_GRADE = /* GraphQL */ `
+  query GetGrade($id: ID!) {
+    getGrade(id: $id) {
+      id
+      sectionID
+      owner
+      _version
+    }
+  }
+`;
+
+const UPDATE_GRADE = /* GraphQL */ `
+  mutation UpdateGrade($input: UpdateGradeInput!) {
+    updateGrade(input: $input) {
+      id
+      reviewRoomId
+      peerReviewGroup
+      _version
+    }
+  }
+`;
+
+const CREATE_HOMEWORK_ROOM = /* GraphQL */ `
+  mutation CreateHomeworkRoom($input: CreateHomeworkRoomInput!) {
+    createHomeworkRoom(input: $input) {
+      id
+      code
+      gradeId
+      ownerId
+      sectionID
+      status
+      peerGroup
+      invitedUserIds
+      _version
+    }
+  }
+`;
+
+const LIST_HOMEWORK_ROOMS_BY_CODE = /* GraphQL */ `
+  query ListHomeworkRoomsByCode($code: String!) {
+    listHomeworkRooms(filter: { code: { eq: $code } }) {
+      items {
+        id
+        code
+        gradeId
+        ownerId
+        sectionID
+        status
+        peerGroup
+        invitedUserIds
+        _version
+      }
+    }
+  }
+`;
+
+const UPDATE_HOMEWORK_ROOM = /* GraphQL */ `
+  mutation UpdateHomeworkRoom($input: UpdateHomeworkRoomInput!) {
+    updateHomeworkRoom(input: $input) {
+      id
+      invitedUserIds
+      _version
+    }
+  }
+`;
+
+const LIST_GRADES_BY_SECTION = /* GraphQL */ `
+  query ListGradesBySection($filter: ModelGradeFilterInput) {
+    listGrades(filter: $filter) {
+      items {
+        id
+        sectionID
+        owner
+      }
+    }
+  }
+`;
+
 // Initialize client lazily to ensure environment variables are set
 let client: any = null;
 
@@ -203,6 +282,10 @@ export const handler: Handler = async (event: any, context: any) => {
                 return await handleAddSelfToSection(args, userId, username || userId, groupManager);
             case 'listSectionStudents':
                 return await handleListSectionStudents(args, userId, groupManager);
+            case 'createPeerReviewRoom':
+                return await handleCreatePeerReviewRoom(args, userId, username || userId, groupManager);
+            case 'joinPeerReview':
+                return await handleJoinPeerReview(args, userId, username || userId, groupManager);
             default:
                 throw new Error(`Unknown operation: ${operationName}`);
         }
@@ -418,5 +501,239 @@ async function handleListSectionStudents(
     } catch (error) {
         console.error('[List Section Students Error]:', error);
         throw error;
+    }
+}
+
+// ========================================================================
+// PEER REVIEW HANDLERS
+// ========================================================================
+
+/**
+ * Creates a peer review room.
+ *
+ * 1. Verifies the caller owns the Grade
+ * 2. Creates a Cognito group `review-{roomId}-peers`
+ * 3. Adds invited users to the group (validates same section)
+ * 4. Creates HomeworkRoom record with join code
+ * 5. Updates Grade with reviewRoomId and peerReviewGroup
+ */
+async function handleCreatePeerReviewRoom(
+    args: any,
+    userId: string,
+    username: string,
+    groupManager: GroupManager,
+): Promise<string> {
+    const { gradeId, invitedUserIds } = args;
+    const client = getClient();
+
+    try {
+        // 1. Fetch grade and verify ownership
+        const { data: gradeData, errors: gradeErrors } = await client.graphql({
+            query: GET_GRADE,
+            variables: { id: gradeId },
+        });
+
+        if (gradeErrors || !gradeData?.getGrade) {
+            throw new Error(`Grade ${gradeId} not found`);
+        }
+
+        const grade = gradeData.getGrade;
+        if (grade.owner !== userId && grade.owner !== username) {
+            throw new Error('Only the grade owner can create a peer review room');
+        }
+
+        const sectionId = grade.sectionID;
+
+        // 2. Generate room ID and join code
+        const roomId = crypto.randomUUID();
+        const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const peerGroupName = `review-${roomId}-peers`;
+
+        // 3. Create Cognito group for peers
+        try {
+            await groupManager.createPeerReviewGroup(roomId);
+        } catch (groupError) {
+            console.error('[PeerReview] Failed to create Cognito group:', groupError);
+            // Continue — group auth is additive, room still works via invitedUserIds check
+        }
+
+        // 4. Validate invited users are in the same section and add to group
+        const validInvites: string[] = [];
+        if (invitedUserIds && invitedUserIds.length > 0 && sectionId) {
+            for (const invitedUserId of invitedUserIds) {
+                const isSameSection = await isUserInSection(client, invitedUserId, sectionId);
+                if (isSameSection) {
+                    validInvites.push(invitedUserId);
+                    try {
+                        await groupManager.addToPeerReviewGroup(invitedUserId, roomId);
+                    } catch (err) {
+                        console.warn(`[PeerReview] Failed to add ${invitedUserId} to group:`, err);
+                    }
+                } else {
+                    console.warn(`[PeerReview] Skipping ${invitedUserId} — not in section ${sectionId}`);
+                }
+            }
+        }
+
+        // 5. Create HomeworkRoom
+        const { data: roomData, errors: roomErrors } = await client.graphql({
+            query: CREATE_HOMEWORK_ROOM,
+            variables: {
+                input: {
+                    id: roomId,
+                    gradeId,
+                    ownerId: userId,
+                    sectionID: sectionId || null,
+                    status: 'OPEN',
+                    code,
+                    peerGroup: peerGroupName,
+                    invitedUserIds: validInvites,
+                },
+            },
+        });
+
+        if (roomErrors || !roomData?.createHomeworkRoom) {
+            console.error('[PeerReview] Failed to create room:', roomErrors);
+            throw new Error('Failed to create peer review room');
+        }
+
+        // 6. Update Grade with room reference
+        await client.graphql({
+            query: UPDATE_GRADE,
+            variables: {
+                input: {
+                    id: gradeId,
+                    reviewRoomId: roomId,
+                    peerReviewGroup: peerGroupName,
+                    _version: grade._version,
+                },
+            },
+        });
+
+        return JSON.stringify({
+            success: true,
+            roomId,
+            code,
+            invitedCount: validInvites.length,
+            skippedCount: (invitedUserIds?.length || 0) - validInvites.length,
+            message: `Peer review room created with code ${code}`,
+        });
+    } catch (error) {
+        console.error('[Create Peer Review Room Error]:', error);
+        throw error;
+    }
+}
+
+/**
+ * Joins a peer review room via join code.
+ *
+ * 1. Looks up HomeworkRoom by code
+ * 2. Validates room is open
+ * 3. Validates caller is in the same section as the room's Grade
+ * 4. Adds caller to invitedUserIds and Cognito group
+ */
+async function handleJoinPeerReview(
+    args: any,
+    userId: string,
+    username: string,
+    groupManager: GroupManager,
+): Promise<string> {
+    const { code } = args;
+    const client = getClient();
+
+    try {
+        // 1. Look up room by code
+        const { data: listData, errors: lookupErrors } = await client.graphql({
+            query: LIST_HOMEWORK_ROOMS_BY_CODE,
+            variables: { code },
+        });
+
+        if (lookupErrors || !listData?.listHomeworkRooms?.items?.length) {
+            throw new Error(`No peer review room found with code ${code}`);
+        }
+
+        const room = listData.listHomeworkRooms.items[0];
+
+        // 2. Validate room is not closed
+        if (room.status === 'REVIEW_COMPLETE') {
+            throw new Error('This peer review session has ended');
+        }
+
+        // 3. Prevent self-join by owner
+        if (room.ownerId === userId || room.ownerId === username) {
+            throw new Error('You cannot join your own review room');
+        }
+
+        // 4. Check if already joined
+        const existingInvites: string[] = room.invitedUserIds || [];
+        if (existingInvites.includes(userId) || existingInvites.includes(username)) {
+            return JSON.stringify({
+                success: true,
+                roomId: room.id,
+                alreadyJoined: true,
+                message: 'You have already joined this review room',
+            });
+        }
+
+        // 5. Validate same section
+        if (room.sectionID) {
+            const isSameSection = await isUserInSection(client, userId, room.sectionID);
+            if (!isSameSection) {
+                throw new Error('You must be in the same class section to join this review');
+            }
+        }
+
+        // 6. Add to Cognito group
+        if (room.peerGroup) {
+            try {
+                await groupManager.addToPeerReviewGroup(username, room.id.replace('review-', '').replace('-peers', ''));
+            } catch (err) {
+                console.warn(`[PeerReview] Failed to add ${username} to Cognito group:`, err);
+            }
+        }
+
+        // 7. Update invitedUserIds on the room
+        const updatedInvites = [...existingInvites, userId];
+        await client.graphql({
+            query: UPDATE_HOMEWORK_ROOM,
+            variables: {
+                input: {
+                    id: room.id,
+                    invitedUserIds: updatedInvites,
+                    _version: room._version,
+                },
+            },
+        });
+
+        return JSON.stringify({
+            success: true,
+            roomId: room.id,
+            gradeId: room.gradeId,
+            message: `Successfully joined peer review room`,
+        });
+    } catch (error) {
+        console.error('[Join Peer Review Error]:', error);
+        throw error;
+    }
+}
+
+/**
+ * Checks if a user has a Grade in the given section (same-section validation).
+ */
+async function isUserInSection(client: any, userId: string, sectionID: string): Promise<boolean> {
+    try {
+        const { data } = await client.graphql({
+            query: LIST_GRADES_BY_SECTION,
+            variables: {
+                filter: {
+                    sectionID: { eq: sectionID },
+                    owner: { eq: userId },
+                },
+            },
+        });
+        return (data?.listGrades?.items?.length || 0) > 0;
+    } catch (error) {
+        console.warn(`[PeerReview] Section check failed for ${userId}:`, error);
+        return false;
     }
 }

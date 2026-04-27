@@ -63,6 +63,12 @@ import { calculateWaveformData } from '../utils/calculateWaveformData';
 import getCachedUrl from '../utils/getCachedUrl';
 import AudioWaveformPlayer from './Editor3/components/AudioWaveformPlayer';
 import StaticWaveform from './Editor3/components/StaticWaveform';
+import MicLevelIndicator from './Editor3/components/MicLevelIndicator';
+import { RecordingStudio2 } from './RecordingStudio2';
+import ScreenplayEditor from './RecordingStudio3/ScreenplayEditor';
+import HorizontalTimeline from './RecordingStudio3/HorizontalTimeline';
+import { parseFountainToScriptData, scriptDataToFountain } from './RecordingStudio3/parseFountainToScriptData';
+import { getAmplifyClient } from '../utils/amplifyClient';
 
 // Available TTS voices
 const TTS_VOICES = [
@@ -119,6 +125,12 @@ export default forwardRef(function RecordingStudio3({
   const [recordingMode, setRecordingMode] = useState('overdub'); // 'overdub', 'punch-in', 'replace'
   const [ttsQueue, setTtsQueue] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [recordingAnalyser, setRecordingAnalyser] = useState(null);
+
+  // Fountain screenplay text — bidirectional sync with scriptData
+  const [fountainText, setFountainText] = useState(() =>
+    scriptDataToFountain(initialScriptData || { metadata: { title: '', scene: '', date: '', version: '1.0' }, speakers: {}, dialogue: [] })
+  );
 
   // Refs
   const mediaRecorderRef = useRef(null);
@@ -295,6 +307,17 @@ export default forwardRef(function RecordingStudio3({
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      // Create AudioContext + AnalyserNode for MicLevelIndicator
+      const audioContext = new AudioContext();
+      audioContextRef.current = audioContext;
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      source.connect(analyser);
+      analyser.fftSize = 2048;
+      analyser.smoothingTimeConstant = 0.8;
+      setRecordingAnalyser(analyser);
+
       const recorder = new MediaRecorder(stream);
       const chunks = [];
 
@@ -308,6 +331,11 @@ export default forwardRef(function RecordingStudio3({
         const audioBlob = new Blob(chunks, { type: 'audio/mp3' });
         await handleRecordingComplete(audioBlob, 'human');
         stream.getTracks().forEach(track => track.stop());
+        setRecordingAnalyser(null);
+        if (audioContextRef.current) {
+          audioContextRef.current.close();
+          audioContextRef.current = null;
+        }
       };
 
       recorder.start();
@@ -324,6 +352,11 @@ export default forwardRef(function RecordingStudio3({
     if (mediaRecorderRef.current && recording) {
       mediaRecorderRef.current.stop();
       setRecording(false);
+      setRecordingAnalyser(null);
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
     }
   };
 
@@ -460,7 +493,7 @@ export default forwardRef(function RecordingStudio3({
       }
       
       // Get audio URL
-      const audioUrl = await getCachedUrl(fileData.path, 'protected', fileData.identityId);
+      const audioUrl = await getCachedUrl(fileData.path);
       
       // Fetch audio as blob
       const audioResponse = await fetch(audioUrl);
@@ -570,6 +603,7 @@ export default forwardRef(function RecordingStudio3({
       try {
         const imported = JSON.parse(e.target.result);
         setScriptData(imported);
+        setFountainText(scriptDataToFountain(imported));
         if (onScriptChange) {
           onScriptChange(imported);
         }
@@ -581,15 +615,117 @@ export default forwardRef(function RecordingStudio3({
     reader.readAsText(file);
   };
 
+  // Handle AI prompt submission — generate/modify Fountain screenplay
+  const handlePromptSubmit = useCallback(async (prompt) => {
+    setIsGenerating(true);
+    try {
+      const client = getAmplifyClient();
+      const systemMessage = [
+        'You are a screenplay writer. Output ONLY valid Fountain format text, no explanation.',
+        'Fountain format rules:',
+        '- Title page: "Title: ..." and "Date: ..." at the top, followed by a blank line',
+        '- Scene headings: lines starting with INT. or EXT.',
+        '- Character names: UPPERCASE on their own line before dialogue',
+        '- Dialogue: normal text on the line after the character name',
+        '- Parentheticals: (emotion) between character name and dialogue',
+        '- Notes: [[direction notes]] inside dialogue text',
+        '- Blank line between each dialogue block',
+      ].join('\n');
+
+      // Include current script as context if it exists
+      const currentContext = scriptData.dialogue.length > 0
+        ? `\n\nCurrent screenplay:\n${fountainText}\n\nModify or extend the above based on the user request.`
+        : '';
+
+      const messages = JSON.stringify([
+        { role: 'system', content: systemMessage + currentContext },
+        { role: 'user', content: prompt },
+      ]);
+
+      const { data, errors } = await client.mutations.chat({ messages });
+
+      if (errors?.length > 0) {
+        throw new Error(errors[0].message || 'Chat mutation failed');
+      }
+
+      if (data) {
+        const newFountain = data.trim();
+        setFountainText(newFountain);
+
+        // Parse into scriptData
+        const existingVoices = {};
+        for (const [key, speaker] of Object.entries(scriptData.speakers)) {
+          existingVoices[key] = speaker.voice;
+        }
+        const parsed = parseFountainToScriptData(newFountain, existingVoices);
+        updateScriptData(parsed, 'AI_GENERATE', { prompt });
+      }
+    } catch (err) {
+      console.error('AI script generation failed:', err);
+      alert(t('recordingStudio3.aiGenerationFailed', 'Failed to generate script. Please try again.'));
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [scriptData.speakers, scriptData.dialogue.length, fountainText, updateScriptData, t]);
+
+  // Handle Fountain editor changes — re-parse into scriptData, preserving takes
+  const handleFountainChange = useCallback((newText) => {
+    setFountainText(newText);
+    try {
+      // Build existing voice map so parser preserves voice assignments
+      const existingVoices = {};
+      for (const [key, speaker] of Object.entries(scriptData.speakers)) {
+        existingVoices[key] = speaker.voice;
+      }
+      const parsed = parseFountainToScriptData(newText, existingVoices);
+
+      // Preserve takes from current dialogue lines by matching on speaker+text
+      const takesMap = new Map();
+      for (const line of scriptData.dialogue) {
+        const key = `${line.speaker}::${line.text}`;
+        if (line.takes?.length > 0) {
+          takesMap.set(key, { takes: line.takes, activeTakeIndex: line.activeTakeIndex });
+        }
+      }
+      for (const line of parsed.dialogue) {
+        const key = `${line.speaker}::${line.text}`;
+        const existing = takesMap.get(key);
+        if (existing) {
+          line.takes = existing.takes;
+          line.activeTakeIndex = existing.activeTakeIndex;
+        }
+      }
+
+      updateScriptData(parsed, 'FOUNTAIN_CHANGE', { fountainText: newText });
+    } catch (err) {
+      console.warn('Fountain parse error (waiting for valid text):', err);
+    }
+  }, [scriptData.speakers, scriptData.dialogue, updateScriptData]);
+
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <Paper sx={{ p: 2, borderRadius: 0 }}>
+      <Paper sx={{ p: 1.5, borderRadius: 0 }}>
         <Stack direction="row" spacing={2} alignItems="center">
           <Typography variant="h6" sx={{ flex: 1 }}>
             {scriptData.metadata.title}
           </Typography>
-          
+
+          <Button
+            startIcon={<WaveformIcon />}
+            onClick={handleBatchGenerateTTS}
+            disabled={readOnly || isGenerating}
+            variant="contained"
+            size="small"
+          >
+            {t('recordingStudio3.generateAllMissing')}
+          </Button>
+          {ttsQueue.length > 0 && (
+            <Box sx={{ width: 120 }}>
+              <LinearProgress />
+            </Box>
+          )}
+
           <input
             type="file"
             accept="application/json"
@@ -607,7 +743,7 @@ export default forwardRef(function RecordingStudio3({
               {t('recordingStudio3.importJson')}
             </Button>
           </label>
-          
+
           <Button
             startIcon={<DownloadIcon />}
             onClick={handleExportJSON}
@@ -619,108 +755,47 @@ export default forwardRef(function RecordingStudio3({
         </Stack>
       </Paper>
 
-      <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {/* Script Panel - Left */}
-        <Paper sx={{ width: 350, borderRadius: 0, overflow: 'auto' }}>
-          <Box sx={{ p: 2 }}>
-            <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ flex: 1 }}>
-                {t('recordingStudio3.script')}
-              </Typography>
-              <Button
-                size="small"
-                startIcon={<AddIcon />}
-                onClick={handleAddDialogueLine}
-                disabled={readOnly}
-              >
-                {t('recordingStudio3.addLine')}
-              </Button>
-            </Stack>
-
-            <List dense>
-              {scriptData.dialogue.map((line, index) => {
-                const speaker = scriptData.speakers[line.speaker];
-                const hasRecording = line.takes && line.takes.length > 0;
-                const isSelected = selectedDialogueId === line.id;
-
-                return (
-                  <ListItem
-                    key={line.id}
-                    disablePadding
-                    secondaryAction={
-                      !readOnly && (
-                        <IconButton
-                          edge="end"
-                          size="small"
-                          onClick={() => handleDeleteDialogueLine(line.id)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      )
-                    }
-                  >
-                    <ListItemButton
-                      selected={isSelected}
-                      onClick={() => setSelectedDialogueId(line.id)}
-                    >
-                      <ListItemText
-                        primary={
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <Typography variant="body2" color="text.secondary">
-                              {index + 1}.
-                            </Typography>
-                            <Chip
-                              label={speaker?.name || 'Unknown'}
-                              size="small"
-                              sx={{ fontSize: '0.7rem' }}
-                            />
-                            {hasRecording && (
-                              <WaveformIcon fontSize="small" color="primary" />
-                            )}
-                          </Stack>
-                        }
-                        secondary={
-                          <Typography variant="caption" noWrap>
-                            {line.text || '(empty)'}
-                          </Typography>
-                        }
-                      />
-                    </ListItemButton>
-                  </ListItem>
-                );
-              })}
-            </List>
-          </Box>
-        </Paper>
-
-        {/* Center - Properties and Timeline */}
+      {/* ── Top section: Screenplay Editor + Speakers Panel ── */}
+      <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+        {/* Screenplay Editor (left) */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          {/* Properties Panel */}
-          {selectedDialogue && (
-            <Paper sx={{ p: 2, borderRadius: 0 }}>
-              <Typography variant="subtitle2" gutterBottom>
-                {t('recordingStudio3.lineNumber', { 
-                  number: scriptData.dialogue.findIndex(d => d.id === selectedDialogue.id) + 1,
-                  speaker: selectedSpeaker?.name 
-                })}
-              </Typography>
+          <ScreenplayEditor
+            fountainText={fountainText}
+            onFountainChange={handleFountainChange}
+            onPromptSubmit={handlePromptSubmit}
+            isGenerating={isGenerating}
+            readOnly={readOnly}
+          />
+        </Box>
 
-              <Stack spacing={2}>
-                {/* Text */}
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  label="Text"
-                  value={selectedDialogue.text || ''}
-                  onChange={(e) => handleUpdateDialogueLine(selectedDialogue.id, { text: e.target.value })}
-                  disabled={readOnly}
-                />
+        {/* Right: Speakers Panel + Properties (when card selected) */}
+        <Paper sx={{ width: 300, borderRadius: 0, overflow: 'auto', flexShrink: 0 }}>
+          <Box sx={{ p: 2 }}>
+            {/* ── Properties Panel (shown when a timeline card is selected) ── */}
+            {selectedDialogue && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  {t('recordingStudio3.lineNumber', {
+                    number: scriptData.dialogue.findIndex(d => d.id === selectedDialogue.id) + 1,
+                    speaker: selectedSpeaker?.name,
+                  })}
+                </Typography>
 
-                <Stack direction="row" spacing={2}>
-                  {/* Direction */}
+                <Stack spacing={1.5}>
                   <TextField
                     fullWidth
+                    multiline
+                    rows={2}
+                    size="small"
+                    label="Text"
+                    value={selectedDialogue.text || ''}
+                    onChange={(e) => handleUpdateDialogueLine(selectedDialogue.id, { text: e.target.value })}
+                    disabled={readOnly}
+                  />
+
+                  <TextField
+                    fullWidth
+                    size="small"
                     label="Direction"
                     value={selectedDialogue.direction || ''}
                     onChange={(e) => handleUpdateDialogueLine(selectedDialogue.id, { direction: e.target.value })}
@@ -728,120 +803,90 @@ export default forwardRef(function RecordingStudio3({
                     placeholder="e.g., entering, out of breath"
                   />
 
-                  {/* Emotion */}
                   <TextField
                     fullWidth
+                    size="small"
                     label="Emotion"
                     value={selectedDialogue.emotion || ''}
                     onChange={(e) => handleUpdateDialogueLine(selectedDialogue.id, { emotion: e.target.value })}
                     disabled={readOnly}
                     placeholder="e.g., cheerful, tired"
                   />
-                </Stack>
 
-                {/* Recording/TTS Controls */}
-                <Stack direction="row" spacing={1}>
-                  <Button
-                    variant={recording ? 'contained' : 'outlined'}
-                    color={recording ? 'error' : 'primary'}
-                    startIcon={recording ? <StopIcon /> : <RecordIcon />}
-                    onClick={recording ? handleStopRecording : handleStartRecording}
-                    disabled={readOnly || isGenerating}
-                  >
-                    {recording ? t('recordingStudio3.stop') : t('recordingStudio3.record')}
-                  </Button>
-
-                  <Button
-                    variant="outlined"
-                    startIcon={<WaveformIcon />}
-                    onClick={() => handleGenerateTTS(selectedDialogue.id)}
-                    disabled={readOnly || isGenerating || !selectedDialogue.text}
-                  >
-                    {t('recordingStudio3.generateTts')}
-                  </Button>
-                </Stack>
-
-                {/* Takes List */}
-                {selectedDialogue.takes && selectedDialogue.takes.length > 0 && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      {t('recordingStudio3.takes')}
-                    </Typography>
-                    <List dense>
-                      {selectedDialogue.takes.map((take, index) => {
-                        const isActive = selectedDialogue.activeTakeIndex === index;
-                        return (
-                          <ListItem
-                            key={take.id}
-                            secondaryAction={
-                              !readOnly && (
-                                <IconButton
-                                  edge="end"
-                                  size="small"
-                                  onClick={() => handleDeleteTake(selectedDialogue.id, index)}
-                                >
-                                  <DeleteIcon fontSize="small" />
-                                </IconButton>
-                              )
-                            }
-                          >
-                            <IconButton
-                              size="small"
-                              onClick={() => handleSetActiveTake(selectedDialogue.id, index)}
-                              disabled={readOnly}
-                            >
-                              {isActive ? <StarIcon color="primary" /> : <StarBorderIcon />}
-                            </IconButton>
-                            <ListItemText
-                              primary={`Take ${index + 1} (${take.type})`}
-                              secondary={new Date(take.createdAt).toLocaleTimeString()}
-                            />
-                          </ListItem>
-                        );
-                      })}
-                    </List>
-                  </Box>
-                )}
-              </Stack>
-            </Paper>
-          )}
-
-          {/* Timeline/Waveform View */}
-          <Box sx={{ flex: 1, p: 2, overflow: 'auto', bgcolor: 'action.hover' }}>
-            <Typography variant="subtitle2" gutterBottom>
-              {t('recordingStudio3.timeline')}
-            </Typography>
-            
-            {scriptData.dialogue.map((line) => {
-              const speaker = scriptData.speakers[line.speaker];
-              const activeTake = line.activeTakeIndex !== null && line.takes?.[line.activeTakeIndex];
-              
-              return (
-                <Paper key={line.id} sx={{ p: 1, mb: 1 }}>
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <Chip label={speaker?.name || 'Unknown'} size="small" />
-                    <Typography variant="caption" sx={{ flex: 1 }} noWrap>
-                      {line.text}
-                    </Typography>
-                    {activeTake && activeTake.waveformData && (
-                      <Box sx={{ width: 200 }}>
-                        <StaticWaveform
-                          waveformData={activeTake.waveformData}
-                          width={200}
-                          height={40}
-                        />
-                      </Box>
+                  {/* Recording / TTS controls */}
+                  <Stack spacing={1}>
+                    {!readOnly && (
+                      <RecordingStudio2
+                        embedded
+                        onRecordingComplete={(audioBlob) => handleRecordingComplete(audioBlob, 'human')}
+                        item={{ phrase: selectedDialogue.text, definition: '', pronunciation: '' }}
+                      />
                     )}
-                  </Stack>
-                </Paper>
-              );
-            })}
-          </Box>
-        </Box>
 
-        {/* Right Panel - Speakers */}
-        <Paper sx={{ width: 300, borderRadius: 0, overflow: 'auto' }}>
-          <Box sx={{ p: 2 }}>
+                    {/* Mic level indicator during active recording */}
+                    {recording && recordingAnalyser && (
+                      <MicLevelIndicator analyser={recordingAnalyser} />
+                    )}
+
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<WaveformIcon />}
+                      onClick={() => handleGenerateTTS(selectedDialogue.id)}
+                      disabled={readOnly || isGenerating || !selectedDialogue.text}
+                    >
+                      {t('recordingStudio3.generateTts')}
+                    </Button>
+                  </Stack>
+
+                  {/* Takes list */}
+                  {selectedDialogue.takes && selectedDialogue.takes.length > 0 && (
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">
+                        {t('recordingStudio3.takes')}
+                      </Typography>
+                      <List dense>
+                        {selectedDialogue.takes.map((take, index) => {
+                          const isActive = selectedDialogue.activeTakeIndex === index;
+                          return (
+                            <ListItem
+                              key={take.id}
+                              secondaryAction={
+                                !readOnly && (
+                                  <IconButton
+                                    edge="end"
+                                    size="small"
+                                    onClick={() => handleDeleteTake(selectedDialogue.id, index)}
+                                  >
+                                    <DeleteIcon fontSize="small" />
+                                  </IconButton>
+                                )
+                              }
+                            >
+                              <IconButton
+                                size="small"
+                                onClick={() => handleSetActiveTake(selectedDialogue.id, index)}
+                                disabled={readOnly}
+                              >
+                                {isActive ? <StarIcon color="primary" /> : <StarBorderIcon />}
+                              </IconButton>
+                              <ListItemText
+                                primary={`Take ${index + 1} (${take.type})`}
+                                secondary={new Date(take.createdAt).toLocaleTimeString()}
+                              />
+                            </ListItem>
+                          );
+                        })}
+                      </List>
+                    </Box>
+                  )}
+                </Stack>
+
+                <Divider sx={{ my: 2 }} />
+              </Box>
+            )}
+
+            {/* ── Speakers ── */}
             <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
               <Typography variant="subtitle1" sx={{ flex: 1 }}>
                 {t('recordingStudio3.speakers')}
@@ -859,9 +904,9 @@ export default forwardRef(function RecordingStudio3({
             <Stack spacing={2}>
               {Object.entries(scriptData.speakers).map(([speakerId, speaker]) => {
                 const isLocked = isTrackLocked(speakerId);
-                
+
                 return (
-                  <Paper key={speakerId} variant="outlined" sx={{ p: 2 }}>
+                  <Paper key={speakerId} variant="outlined" sx={{ p: 1.5 }}>
                     <Stack spacing={1}>
                       <Stack direction="row" spacing={1} alignItems="center">
                         <TextField
@@ -919,30 +964,22 @@ export default forwardRef(function RecordingStudio3({
                 );
               })}
             </Stack>
-
-            {/* Batch TTS Generation */}
-            <Box sx={{ mt: 3 }}>
-              <Button
-                fullWidth
-                variant="contained"
-                startIcon={<WaveformIcon />}
-                onClick={handleBatchGenerateTTS}
-                disabled={readOnly || isGenerating}
-              >
-                {t('recordingStudio3.generateAllMissing')}
-              </Button>
-              {ttsQueue.length > 0 && (
-                <Box sx={{ mt: 1 }}>
-                  <LinearProgress />
-                  <Typography variant="caption" color="text.secondary">
-                    {t('recordingStudio3.processingLines', { count: ttsQueue.length })}
-                  </Typography>
-                </Box>
-              )}
-            </Box>
           </Box>
         </Paper>
       </Box>
+
+      {/* ── Bottom: Horizontal Timeline ── */}
+      <HorizontalTimeline
+        scriptData={scriptData}
+        selectedDialogueId={selectedDialogueId}
+        onSelectDialogue={setSelectedDialogueId}
+        recording={recording}
+        playing={playing}
+        onPlay={() => setPlaying(true)}
+        onStop={() => { setPlaying(false); handleStopRecording(); }}
+        onRecordingComplete={(audioBlob) => handleRecordingComplete(audioBlob, 'human')}
+        readOnly={readOnly}
+      />
     </Box>
   );
 })

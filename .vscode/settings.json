@@ -70,12 +70,9 @@
     "npm run build": true,
     "npm run storybook": true,
     "npm run lint": true,
-    // compiler 
     "npx tsc": true,
     "npx eslint": true,
     "npx prettier": true,
-    
-    // Git commands
     "git status": true,
     "git diff": true,
     "git log": true,
@@ -83,7 +80,7 @@
     "git branch": true,
     "git blame": true,
     "git grep": true,
-    // Common safe shell commands
+    "sed": true,
     "cat": true,
     "ls": true,
     "find": true,
@@ -112,7 +109,6 @@
     "docker-compose build": true,
     "docker-compose up": true,
     "docker-compose down": true,
-    // /tmp/ file operations (safe temporary directory)
     "cat /tmp/*": true,
     "ls /tmp/*": true,
     "rm /tmp/*": true,
@@ -123,9 +119,7 @@
     "touch /tmp/*": true,
     "echo * > /tmp/*": true,
     "tee /tmp/*": true,
-    // lsof commands
     "lsof": true,
-    // System monitoring commands
     "top": true,
     "htop": true,
     "df -h": true,
@@ -143,6 +137,7 @@
     "ps -aux": true,
     "ps -ef": true,
     "ps -eo": true,
+    "npx vitest": true
   },
   // Editor settings for safety
   "editor.formatOnSave": true,

@@ -1,324 +1,273 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+/**
+ * @fileoverview ScreenplayEditor — editable Fountain editor + AI prompt input.
+ *
+ * Two-zone layout:
+ *  1. **Fountain editor** — Editable Lexical plain-text editor with monospace
+ *     Fountain styling. Manual edits re-parse into RS3 `scriptData` on every
+ *     change (debounced 500ms) via the parent's `onFountainChange` callback.
+ *  2. **Prompt input** — Text field for AI-assisted screenplay generation.
+ *
+ * The component is controlled: it receives `fountainText` and calls
+ * `onFountainChange(newText)` whenever the editor or AI updates the script.
+ * The parent (RecordingStudio3) calls `parseFountainToScriptData()` and
+ * merges the result into its state.
+ */
+
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'next-i18next';
-import { Box, Select, MenuItem, Paper } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import {
+  Box,
+  TextField,
+  IconButton,
+  Typography,
+  Stack,
+  CircularProgress,
+} from '@mui/material';
+import { Send as SendIcon } from '@mui/icons-material';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { 
-  $getSelection, 
-  $isRangeSelection,
-  $createParagraphNode,
-  $getRoot,
-  $createTextNode,
-  COMMAND_PRIORITY_LOW,
-  KEY_ENTER_COMMAND,
-} from 'lexical';
+import { $getRoot, $createParagraphNode, $createTextNode } from 'lexical';
 
-import {
-  SceneHeadingNode,
-  ActionNode,
-  CharacterNode,
-  ParentheticalNode,
-  DialogueNode,
-  TransitionNode,
-  ShotNode,
-  FadeInNode,
-  FadeOutNode,
-} from './nodes/ScreenplayParagraphNode';
-import { ScreenplayFormatPlugin } from './plugins/ScreenplayFormatPlugin';
-import { ScreenplayTheme } from './theme/ScreenplayTheme';
+// ── Debounce helper ──
 
-// Map of node types for the dropdown
-const NODE_TYPE_MAP = {
-  'scene-heading': { class: SceneHeadingNode, label: 'Scene Heading' },
-  'action': { class: ActionNode, label: 'Action' },
-  'character': { class: CharacterNode, label: 'Character' },
-  'parenthetical': { class: ParentheticalNode, label: 'Parenthetical' },
-  'dialogue': { class: DialogueNode, label: 'Dialogue' },
-  'transition': { class: TransitionNode, label: 'Transition' },
-  'shot': { class: ShotNode, label: 'Shot' },
-  'fade-in': { class: FadeInNode, label: 'Fade In' },
-  'fade-out': { class: FadeOutNode, label: 'Fade Out' },
-};
+function useDebouncedCallback(callback, delay) {
+  const timerRef = useRef(null);
+  const callbackRef = useRef(callback);
+  callbackRef.current = callback;
 
-// Styled components for screenplay formatting
-const ScreenplayContentEditable = styled(ContentEditable)(({ theme }) => ({
-  fontFamily: 'Courier, "Courier New", monospace',
-  fontSize: '12pt',
-  lineHeight: '1.5',
-  padding: '1in 1in 1in 1.5in', // top, right, bottom, left
-  minHeight: 'calc(100vh - 100px)',
-  outline: 'none',
-  backgroundColor: 'background.paper',
-  color: 'text.primary',
-  position: 'relative',
-  
-  // Page setup - approximately 55 lines per page
-  '@media print': {
-    padding: '1in 1in 1in 1.5in',
-  },
-}));
-
-const FloatingFormatSelector = styled(Paper, {
-  shouldForwardProp: (prop) => prop !== 'show',
-})(({ theme, show }) => ({
-  position: 'fixed',
-  top: 20,
-  right: 20,
-  padding: theme.spacing(1, 2),
-  zIndex: 1000,
-  display: show ? 'flex' : 'none',
-  alignItems: 'center',
-  gap: theme.spacing(1),
-  backgroundColor: 'var(--mui-palette-background-paper, rgba(255, 255, 255, 0.95))',
-  boxShadow: theme.shadows[3],
-}));
-
-// Plugin for floating format selector
-function FloatingFormatSelectorPlugin() {
-  const [editor] = useLexicalComposerContext();
-  const { t } = useTranslation('components');
-  const [currentType, setCurrentType] = useState('action');
-  const [showSelector, setShowSelector] = useState(false);
-
-  useEffect(() => {
-    return editor.registerUpdateListener(({ editorState }) => {
-      editorState.read(() => {
-        const selection = $getSelection();
-        if (!$isRangeSelection(selection)) {
-          setShowSelector(false);
-          return;
-        }
-
-        setShowSelector(true);
-
-        const nodes = selection.getNodes();
-        if (nodes.length === 0) {
-          return;
-        }
-
-        let paragraphNode = nodes[0];
-        while (paragraphNode && !NODE_TYPE_MAP[paragraphNode.__type]) {
-          paragraphNode = paragraphNode.getParent();
-        }
-
-        if (paragraphNode) {
-          setCurrentType(paragraphNode.__type);
-        }
-      });
-    });
-  }, [editor]);
-
-  const handleTypeChange = (event) => {
-    const newType = event.target.value;
-    const NodeClass = NODE_TYPE_MAP[newType].class;
-    
-    editor.update(() => {
-      const selection = $getSelection();
-      if (!$isRangeSelection(selection)) {
-        return;
-      }
-
-      const nodes = selection.getNodes();
-      const nodesToUpdate = new Set();
-      
-      nodes.forEach((node) => {
-        let paragraphNode = node;
-        while (paragraphNode && !NODE_TYPE_MAP[paragraphNode.__type]) {
-          paragraphNode = paragraphNode.getParent();
-        }
-
-        if (paragraphNode) {
-          nodesToUpdate.add(paragraphNode);
-        }
-      });
-
-      nodesToUpdate.forEach((oldNode) => {
-        // Create a new node of the selected type
-        const newNode = new NodeClass();
-        
-        // Copy over all children
-        const children = oldNode.getChildren();
-        children.forEach(child => {
-          newNode.append(child);
-        });
-        
-        // Replace the old node with the new one
-        oldNode.replace(newNode);
-        
-        // Restore selection
-        newNode.select();
-      });
-    });
-  };
-
-  return (
-    <FloatingFormatSelector show={showSelector} elevation={3}>
-      <Box sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>{t('screenplayEditor.formatLabel')}:</Box>
-      <Select
-        value={currentType}
-        onChange={handleTypeChange}
-        size="small"
-        sx={{ 
-          minWidth: 150,
-          '& .MuiSelect-select': {
-            py: 0.5,
-            fontSize: '0.875rem',
-          }
-        }}
-      >
-        {Object.entries(NODE_TYPE_MAP).map(([value, { label }]) => (
-          <MenuItem key={value} value={value}>
-            {label}
-          </MenuItem>
-        ))}
-      </Select>
-    </FloatingFormatSelector>
+  return useCallback(
+    (...args) => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => callbackRef.current(...args), delay);
+    },
+    [delay],
   );
 }
 
-// Initialize editor with screenplay content
-function InitializeScreenplayPlugin() {
+// ── Plugin: Set editor content from outside ──
+
+function SetContentPlugin({ text }) {
   const [editor] = useLexicalComposerContext();
-  const [initialized, setInitialized] = useState(false);
+  const lastSetRef = useRef('');
 
   useEffect(() => {
-    if (!initialized) {
-      editor.update(() => {
-        const root = $getRoot();
-        if (root.getChildrenSize() === 0) {
-          // Create initial FADE IN
-          const fadeIn = new ScreenplayParagraphNode(SCREENPLAY_TYPES.FADE_IN);
-          root.append(fadeIn);
-          
-          // Create initial scene heading
-          const sceneHeading = new ScreenplayParagraphNode(SCREENPLAY_TYPES.SCENE_HEADING);
-          root.append(sceneHeading);
-          sceneHeading.select();
-        }
-      });
-      setInitialized(true);
-    }
-  }, [editor, initialized]);
+    // Only set content when the external source (AI / parent) pushes new text
+    // that differs from what we last set. Avoids fighting the user's cursor.
+    if (text === lastSetRef.current) return;
+    lastSetRef.current = text;
+
+    editor.update(() => {
+      const root = $getRoot();
+      root.clear();
+      const lines = text.split('\n');
+      for (const line of lines) {
+        const p = $createParagraphNode();
+        p.append($createTextNode(line));
+        root.append(p);
+      }
+    });
+  }, [editor, text]);
 
   return null;
 }
 
-function onError(error) {
-  console.error(error);
-}
+// ── Fountain syntax highlighting theme ──
 
-export default function ScreenplayEditor() {
+const fountainTheme = {
+  paragraph: 'screenplay-line',
+  root: 'screenplay-root',
+};
+
+// ── Main component ──
+
+/**
+ * @param {Object} props
+ * @param {string}  props.fountainText - Current Fountain plain text
+ * @param {Function} props.onFountainChange - Called with updated Fountain text (debounced)
+ * @param {Function} [props.onPromptSubmit] - Called with prompt string for AI generation
+ * @param {boolean} [props.isGenerating] - Shows spinner on prompt input while AI works
+ * @param {boolean} [props.readOnly] - Disable editing
+ */
+export default function ScreenplayEditor({
+  fountainText = '',
+  onFountainChange,
+  onPromptSubmit,
+  isGenerating = false,
+  readOnly = false,
+}) {
   const { t } = useTranslation('components');
-  const initialConfig = {
-    namespace: 'ScreenplayEditor',
-    theme: ScreenplayTheme,
-    onError,
-    nodes: [
-      SceneHeadingNode,
-      ActionNode,
-      CharacterNode,
-      ParentheticalNode,
-      DialogueNode,
-      TransitionNode,
-      ShotNode,
-      FadeInNode,
-      FadeOutNode,
-    ],
-  };
+  const [promptValue, setPromptValue] = useState('');
+
+  // Track the text that the editor itself produced so we can distinguish
+  // "editor changed locally" from "parent pushed new text".
+  const localTextRef = useRef(fountainText);
+
+  // Debounced callback that fires onFountainChange
+  const debouncedChange = useDebouncedCallback((newText) => {
+    localTextRef.current = newText;
+    onFountainChange?.(newText);
+  }, 500);
+
+  // Lexical onChange handler — extract plain text from editor state
+  // NOTE: We join paragraph text with single '\n' (not getTextContent which uses
+  // '\n\n' between block nodes) so Fountain format stays intact — character names
+  // must be on the line immediately before their dialogue.
+  const handleEditorChange = useCallback(
+    (editorState) => {
+      editorState.read(() => {
+        const root = $getRoot();
+        const paragraphs = root.getChildren();
+        const text = paragraphs.map(p => p.getTextContent()).join('\n');
+        debouncedChange(text);
+      });
+    },
+    [debouncedChange],
+  );
+
+  // We want SetContentPlugin to react only when the *parent* pushes new text
+  // (e.g., AI generation result), not when the user types. We detect this by
+  // comparing against localTextRef.
+  const externalText = useMemo(() => {
+    if (fountainText !== localTextRef.current) {
+      localTextRef.current = fountainText;
+      return fountainText;
+    }
+    return localTextRef.current;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fountainText]);
+
+  const handlePromptSubmit = useCallback(() => {
+    const trimmed = promptValue.trim();
+    if (!trimmed || isGenerating) return;
+    onPromptSubmit?.(trimmed);
+    setPromptValue('');
+  }, [promptValue, isGenerating, onPromptSubmit]);
+
+  const handlePromptKeyDown = useCallback(
+    (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handlePromptSubmit();
+      }
+    },
+    [handlePromptSubmit],
+  );
+
+  const initialConfig = useMemo(
+    () => ({
+      namespace: 'ScreenplayEditor',
+      theme: fountainTheme,
+      onError: (error) => console.error('ScreenplayEditor Lexical error:', error),
+      editable: !readOnly,
+    }),
+    [readOnly],
+  );
 
   return (
-    <Box sx={{ width: '100%', height: '100vh', backgroundColor: 'grey.100' }}>
-      <style jsx global>{`
-        .screenplay-element {
-          margin: 0;
-          padding: 0;
-        }
-        
-        .screenplay-scene-heading {
-          text-align: left;
-          text-transform: uppercase;
-          font-weight: bold;
-          margin-top: 1.5em;
-          margin-bottom: 0.5em;
-        }
-        
-        .screenplay-action {
-          text-align: left;
-          margin-bottom: 0.5em;
-        }
-        
-        .screenplay-character {
-          margin-left: 2.2in;
-          text-align: left;
-          text-transform: uppercase;
-          font-weight: bold;
-          margin-top: 1em;
-          margin-bottom: 0;
-        }
-        
-        .screenplay-parenthetical {
-          margin-left: 1.6in;
-          text-align: left;
-          margin-bottom: 0;
-        }
-        
-        .screenplay-dialogue {
-          margin-left: 1.0in;
-          margin-right: 1.5in;
-          text-align: left;
-          margin-bottom: 0.5em;
-        }
-        
-        .screenplay-transition {
-          text-align: right;
-          text-transform: uppercase;
-          margin-top: 1em;
-          margin-bottom: 1em;
-        }
-        
-        .screenplay-shot {
-          text-align: left;
-          text-transform: uppercase;
-          margin-top: 0.5em;
-          margin-bottom: 0.5em;
-        }
-        
-        .screenplay-fade-in {
-          text-align: left;
-          text-transform: uppercase;
-          margin-bottom: 1em;
-        }
-        
-        .screenplay-fade-out {
-          text-align: right;
-          text-transform: uppercase;
-          margin-top: 1em;
-        }
-      `}</style>
-      <LexicalComposer initialConfig={initialConfig}>
-        <Box sx={{ maxWidth: '8.5in', mx: 'auto', my: 2, boxShadow: 3 }}>
-          <HistoryPlugin />
-          <ScreenplayFormatPlugin />
-          <InitializeScreenplayPlugin />
-          <FloatingFormatSelectorPlugin />
-          
-          <RichTextPlugin
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        overflow: 'hidden',
+      }}
+    >
+      {/* ── Fountain editor ── */}
+      <Box
+        sx={{
+          flex: 1,
+          overflow: 'auto',
+          position: 'relative',
+          '& .screenplay-root': {
+            fontFamily: '"Courier New", Courier, monospace',
+            fontSize: '12pt',
+            lineHeight: 1.6,
+            padding: '16px 24px',
+            outline: 'none',
+            minHeight: '100%',
+            whiteSpace: 'pre-wrap',
+          },
+          '& .screenplay-line': {
+            margin: 0,
+          },
+        }}
+      >
+        <LexicalComposer initialConfig={initialConfig}>
+          <PlainTextPlugin
             contentEditable={
-              <ScreenplayContentEditable
-                className="screenplay-editor"
-                aria-placeholder={t('screenplayEditor.placeholder')}
+              <ContentEditable
+                className="screenplay-root"
+                aria-label={t('screenplayEditor.editorLabel', 'Fountain screenplay editor')}
               />
             }
-            placeholder={null}
             ErrorBoundary={LexicalErrorBoundary}
           />
+          <HistoryPlugin />
+          <OnChangePlugin onChange={handleEditorChange} />
+          <SetContentPlugin text={externalText} />
+        </LexicalComposer>
+      </Box>
+
+      {/* ── AI prompt input ── */}
+      {onPromptSubmit && !readOnly && (
+        <Box
+          sx={{
+            borderTop: 1,
+            borderColor: 'divider',
+            p: 1.5,
+            bgcolor: 'background.paper',
+          }}
+        >
+          <Stack direction="row" spacing={1} alignItems="flex-end">
+            <TextField
+              fullWidth
+              size="small"
+              multiline
+              maxRows={3}
+              placeholder={t(
+                'screenplayEditor.promptPlaceholder',
+                'Describe what you want\u2026 e.g. "Add a scene where the student practices ordering coffee"',
+              )}
+              value={promptValue}
+              onChange={(e) => setPromptValue(e.target.value)}
+              onKeyDown={handlePromptKeyDown}
+              disabled={isGenerating}
+              slotProps={{
+                input: {
+                  sx: { fontFamily: 'inherit', fontSize: '0.875rem' },
+                },
+              }}
+            />
+            <IconButton
+              onClick={handlePromptSubmit}
+              disabled={isGenerating || !promptValue.trim()}
+              color="primary"
+              aria-label={t('screenplayEditor.send', 'Send prompt')}
+            >
+              {isGenerating ? (
+                <CircularProgress size={20} />
+              ) : (
+                <SendIcon />
+              )}
+            </IconButton>
+          </Stack>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ mt: 0.5, display: 'block' }}
+          >
+            {t(
+              'screenplayEditor.examples',
+              'Examples: "Add a scene where they practice at a train station" \u00b7 "Make Akiko speak more casually" \u00b7 "Add direction notes for pauses"',
+            )}
+          </Typography>
         </Box>
-      </LexicalComposer>
+      )}
     </Box>
   );
 }

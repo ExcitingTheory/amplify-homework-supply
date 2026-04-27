@@ -225,7 +225,7 @@ const seedMockData = async () => {
   }
   
   const { seedMockFiles, seedMockDocuments, seedMockParsedContent } = await import('../../../../.storybook/__mocks__/aws-amplify-data');
-  const { MOCK_IMAGE_URL_1, MOCK_IMAGE_URL_2, mockWaveformData } = await import('../../../../.storybook/__mocks__/media');
+  const { MOCK_IMAGE_URL_1, MOCK_IMAGE_URL_2, MOCK_AUDIO_URL_1, MOCK_AUDIO_URL_2 } = await import('../../../../.storybook/__mocks__/media');
   
   const timestamp = new Date().toISOString();
   const identityId = 'us-east-1:mock-identity-123';
@@ -267,10 +267,15 @@ const seedMockData = async () => {
     {
       id: MOCK_FILE_ID_IMAGE_1,
       name: 'cell-diagram.jpg',
-      path: 'public/images/cell-diagram.jpg',
+      path: MOCK_IMAGE_URL_1,
       mimeType: 'image/jpeg',
       level: 'PUBLIC',
       size: 234567,
+      metadata: JSON.stringify({
+        analysis: {
+          description: 'A detailed biological diagram showing the internal structure of a plant cell, including organelles such as the nucleus, chloroplasts, mitochondria, and cell wall.',
+        }
+      }),
       owner,
       identityId,
       createdAt: new Date(Date.now() - 5400000).toISOString(),
@@ -279,10 +284,15 @@ const seedMockData = async () => {
     {
       id: MOCK_FILE_ID_IMAGE_2,
       name: 'seasons-illustration.png',
-      path: 'public/images/seasons.png',
+      path: MOCK_IMAGE_URL_2,
       mimeType: 'image/png',
       level: 'PUBLIC',
       size: 345678,
+      metadata: JSON.stringify({
+        analysis: {
+          description: 'An illustration depicting the four seasons with representative landscapes and weather patterns for spring, summer, autumn, and winter.',
+        }
+      }),
       owner,
       identityId,
       createdAt: new Date(Date.now() - 1800000).toISOString(),
@@ -292,12 +302,17 @@ const seedMockData = async () => {
     {
       id: MOCK_FILE_ID_AUDIO_1,
       name: 'photosynthesis-pronunciation.mp3',
-      path: 'protected/audio/photosynthesis.mp3',
+      path: MOCK_AUDIO_URL_1,
       mimeType: 'audio/mpeg',
       level: 'PROTECTED',
       size: 123456,
       duration: 12,
-      waveformData: JSON.stringify(mockWaveformData),
+      metadata: JSON.stringify({
+        analysis: {
+          transcription: 'Kougousei wa shokubutsu ga hikari enerugi wo riyou shite nisan katanso to mizu kara tou wo tsukuru purosesu desu.',
+          description: 'Audio pronunciation of Japanese photosynthesis vocabulary terms.',
+        }
+      }),
       owner,
       identityId,
       createdAt: new Date(Date.now() - 9000000).toISOString(),
@@ -306,12 +321,17 @@ const seedMockData = async () => {
     {
       id: MOCK_FILE_ID_AUDIO_2,
       name: 'seasons-audio.mp3',
-      path: 'protected/audio/seasons.mp3',
+      path: MOCK_AUDIO_URL_2,
       mimeType: 'audio/mpeg',
       level: 'PROTECTED',
       size: 98765,
       duration: 8,
-      waveformData: JSON.stringify(mockWaveformData),
+      metadata: JSON.stringify({
+        analysis: {
+          transcription: 'Le printemps, l\'été, l\'automne, l\'hiver. Les quatre saisons de l\'année.',
+          description: 'Audio pronunciation of French seasonal vocabulary.',
+        }
+      }),
       owner,
       identityId,
       createdAt: new Date(Date.now() - 2700000).toISOString(),
@@ -483,7 +503,8 @@ export const Default = {
   render: () => (
     <FileManagerWrapper showDebug={true}>
       <Paper sx={{ 
-        height: 600,
+        flex: 1,
+        minHeight: 0,
         overflow: 'hidden', 
         display: 'flex', 
         flexDirection: 'column',
@@ -502,7 +523,7 @@ export const WithExpandedContent = {
   },
   render: () => (
     <FileManagerWrapper>
-      <Paper sx={{ height: 700, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <Paper sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <Typography variant="h6" sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
           File Manager - Expanded Content Demo
         </Typography>
@@ -522,7 +543,7 @@ export const EmptyState = {
   },
   render: () => (
     <FileManagerWrapper>
-      <Paper sx={{ height: 500, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <Paper sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <Typography variant="h6" sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
           File Manager - Empty State
         </Typography>
@@ -540,7 +561,7 @@ export const ExpandedPDFContent = {
   },
   render: () => (
     <FileManagerWrapper>
-      <Paper sx={{ height: 800, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <Paper sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <Typography variant="h6" sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
           File Manager - Expanded PDF Content
         </Typography>

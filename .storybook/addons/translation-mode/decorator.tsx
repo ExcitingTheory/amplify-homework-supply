@@ -43,7 +43,7 @@ const TranslationModeController: React.FC<TranslationModeControllerProps> = ({ m
   const { translations, updateTranslation } = useContext(TranslationCaptureContext);
 
   useEffect(() => {
-    console.log(`[TranslationModeController] Setting mode to: ${mode}`);
+    console.debug(`[TranslationModeController] Setting mode to: ${mode}`);
     setMode(mode);
   }, [mode, setMode]);
 
@@ -71,7 +71,7 @@ const TranslationModeController: React.FC<TranslationModeControllerProps> = ({ m
     const handleExport = () => {
       // Note: This will capture the translations at the time of the export click
       // We access it through the context, not the closure
-      console.log('Export translations triggered');
+      console.debug('Export translations triggered');
       // TODO: Implement export functionality
     };
 

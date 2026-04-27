@@ -11,8 +11,9 @@ import {
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { HttpUserPoolAuthorizer } from 'aws-cdk-lib/aws-apigatewayv2-authorizers';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { EventType } from 'aws-cdk-lib/aws-s3';
-import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
+import * as events from 'aws-cdk-lib/aws-events';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
+import { CfnBucket } from 'aws-cdk-lib/aws-s3';
 import { auth } from './auth/resource';
 import { data } from './data/resource';
 import { storage } from './storage/resource';
@@ -29,6 +30,9 @@ import { moderationHandler } from './functions/moderation/resource';
 import { mediaConvertHandler } from './functions/mediaConvert/resource';
 import { websocketHandler, WebSocketApiConstruct } from './custom/websocket/resource';
 import { MediaConvertConstruct } from './custom/mediaConvert/resource';
+import { gamificationHandler } from './functions/gamification/resource';
+import { peerReviewAIHandler } from './functions/peerReviewAI/resource';
+import { streakResetCronHandler } from './functions/streakResetCron/resource';
 
 /**
  * CDK Aspect to configure AppSync conflict detection on DynamoDB resolvers
@@ -102,6 +106,9 @@ export const backend = defineBackend({
   moderationHandler,
   mediaConvertHandler,
   websocketHandler,
+  gamificationHandler,
+  peerReviewAIHandler,
+  streakResetCronHandler,
 });
 
 // Enable conflict detection and resolution for AppSync API
@@ -164,6 +171,36 @@ backend.embeddingsHandler.addEnvironment('API_ENDPOINT', backend.data.resources.
 backend.documentAnalysisHandler.addEnvironment('API_ENDPOINT', backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl);
 backend.openaiHandler.addEnvironment('API_ENDPOINT', backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl);
 
+// Grant Document Analysis handler permission to call AppSync GraphQL API
+const documentAnalysisAppSyncPolicy = new Policy(
+  backend.documentAnalysisHandler.resources.lambda.stack,
+  'DocumentAnalysisAppSyncPolicy',
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ['appsync:GraphQL'],
+        resources: [`${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`],
+      }),
+    ],
+  },
+);
+backend.documentAnalysisHandler.resources.lambda.role?.attachInlinePolicy(documentAnalysisAppSyncPolicy);
+
+// Grant Embeddings handler permission to call AppSync GraphQL API
+const embeddingsAppSyncPolicy = new Policy(
+  backend.embeddingsHandler.resources.lambda.stack,
+  'EmbeddingsAppSyncPolicy',
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ['appsync:GraphQL'],
+        resources: [`${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`],
+      }),
+    ],
+  },
+);
+backend.embeddingsHandler.resources.lambda.role?.attachInlinePolicy(embeddingsAppSyncPolicy);
+
 // Grant OpenAI handler permission to invoke itself for async operations (audio generation)
 const openaiSelfInvokePolicy = new Policy(backend.openaiHandler.resources.lambda.stack, 'OpenAISelfInvokePolicy', {
   statements: [
@@ -214,15 +251,30 @@ const mediaConvert = new MediaConvertConstruct(dataStack, 'MediaConvert', {
   handlerLambda: backend.mediaConvertHandler.resources.lambda,
 });
 
-// S3 event notifications — auto-trigger on video uploads
-const videoSuffixes = ['.mp4', '.mov', '.webm', '.avi', '.mkv'];
-for (const suffix of videoSuffixes) {
-  backend.storage.resources.bucket.addEventNotification(
-    EventType.OBJECT_CREATED_PUT,
-    new LambdaDestination(backend.mediaConvertHandler.resources.lambda),
-    { prefix: 'protected/', suffix },
-  );
-}
+// S3 event notifications via EventBridge — avoids circular dependency between storage and data stacks.
+// Instead of bucket.addEventNotification (which creates storage → data cross-stack ref),
+// we enable EventBridge on the bucket and create a rule in the data stack (one-way data → storage).
+const cfnBucket = backend.storage.resources.bucket.node.defaultChild as CfnBucket;
+cfnBucket.addPropertyOverride('NotificationConfiguration.EventBridgeConfiguration', {
+  EventBridgeEnabled: true,
+});
+
+new events.Rule(dataStack, 'S3VideoUploadRule', {
+  description: 'Routes S3 video uploads to MediaConvert handler via EventBridge',
+  eventPattern: {
+    source: ['aws.s3'],
+    detailType: ['Object Created'],
+    detail: {
+      bucket: {
+        name: [backend.storage.resources.bucket.bucketName],
+      },
+      object: {
+        key: [{ prefix: 'protected/' }],
+      },
+    },
+  },
+  targets: [new targets.LambdaFunction(backend.mediaConvertHandler.resources.lambda)],
+});
 
 // Environment variables
 backend.mediaConvertHandler.addEnvironment(
@@ -363,12 +415,14 @@ backend.addOutput({
  */
 const websocketApi = new WebSocketApiConstruct(dataStack, 'WebSocketApi', {
   unitTable: backend.data.resources.tables['Unit'],
+  homeworkRoomTable: backend.data.resources.tables['HomeworkRoom'],
   websocketLambda: backend.websocketHandler.resources.lambda,
 });
 
 // Set environment variables for Lambda
 backend.websocketHandler.addEnvironment('CONNECTIONS_TABLE_NAME', websocketApi.connectionsTable.tableName);
 backend.websocketHandler.addEnvironment('UNIT_TABLE_NAME', backend.data.resources.tables['Unit'].tableName);
+backend.websocketHandler.addEnvironment('HOMEWORK_ROOM_TABLE_NAME', backend.data.resources.tables['HomeworkRoom'].tableName);
 
 // Export WebSocket endpoint using CFN intrinsic functions to construct URL at deploy time
 backend.addOutput({
@@ -380,3 +434,63 @@ backend.addOutput({
     },
   },
 });
+
+// ==========================================================================
+// Gamification Handler — IAM + env config
+// ==========================================================================
+
+backend.gamificationHandler.addEnvironment('API_ENDPOINT', backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl);
+
+const gamificationAppSyncPolicy = new Policy(
+  backend.gamificationHandler.resources.lambda.stack,
+  'GamificationAppSyncPolicy',
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ['appsync:GraphQL'],
+        resources: [`${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`],
+      }),
+    ],
+  },
+);
+backend.gamificationHandler.resources.lambda.role?.attachInlinePolicy(gamificationAppSyncPolicy);
+
+// ==========================================================================
+// Peer Review AI Handler — IAM + env config
+// ==========================================================================
+
+backend.peerReviewAIHandler.addEnvironment('API_ENDPOINT', backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl);
+
+const peerReviewAIAppSyncPolicy = new Policy(
+  backend.peerReviewAIHandler.resources.lambda.stack,
+  'PeerReviewAIAppSyncPolicy',
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ['appsync:GraphQL'],
+        resources: [`${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`],
+      }),
+    ],
+  },
+);
+backend.peerReviewAIHandler.resources.lambda.role?.attachInlinePolicy(peerReviewAIAppSyncPolicy);
+
+// ==========================================================================
+// Streak Reset Cron Handler — IAM + env config
+// ==========================================================================
+
+backend.streakResetCronHandler.addEnvironment('API_ENDPOINT', backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl);
+
+const streakResetCronAppSyncPolicy = new Policy(
+  backend.streakResetCronHandler.resources.lambda.stack,
+  'StreakResetCronAppSyncPolicy',
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ['appsync:GraphQL'],
+        resources: [`${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`],
+      }),
+    ],
+  },
+);
+backend.streakResetCronHandler.resources.lambda.role?.attachInlinePolicy(streakResetCronAppSyncPolicy);

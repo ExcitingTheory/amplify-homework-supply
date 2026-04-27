@@ -147,9 +147,10 @@ export class CustomAnswerNode extends DecoratorNode {
 
   removeIntersection(questionIDs) {
     const writable = this.getWritable();
+    const idsArray = Array.isArray(questionIDs) ? questionIDs : [...questionIDs];
 
     let intersection = this.__ids.filter((x) => {
-      return !questionIDs.includes(x);
+      return !idsArray.includes(x);
     });
 
     // if intersection is undefined, set it to empty array

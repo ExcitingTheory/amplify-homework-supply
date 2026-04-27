@@ -10,21 +10,24 @@ import { getAmplifyClient } from '../../../utils/amplifyClient';
 
 import { useEffect, useState, useRef } from 'react';
 
-import TextareaAutosize from '@mui/material/TextareaAutosize';
-
 import {
     Box,
-    Input,
     LinearProgress,
     Typography,
-    Button,
 } from '@mui/material';
+
+import { createEmptyHistoryState } from '@lexical/react/LexicalHistoryPlugin';
+import PlainTextAnswerInput from './PlainTextAnswerInput';
+import AudioAutoSubmitWrapper from './AudioAutoSubmitWrapper';
 
 import Chip from '@mui/material/Chip';
 
 import UnitContext from '../../../context/unitContext';
 
 import dynamic from "next/dynamic";
+
+import { WorkbookBlockEnhancements } from './WorkbookBlockEnhancements';
+import { useVerifyContext } from '../../../hooks/useVerifyContext';
 
 const SketchPad = dynamic(
   async () => (await import("./SketchPad")).default,
@@ -47,7 +50,7 @@ function SignedAudioPlayer({ audioKey, identityId, waveformData, width, height, 
     const signUrl = async () => {
       if (audioKey) {
         try {
-          const url = await getCachedUrl(audioKey, 'protected', identityId);
+          const url = await getCachedUrl(audioKey);
           setSignedUrl(url);
         } catch (error) {
           console.error('Error signing audio URL:', error);
@@ -137,6 +140,7 @@ export default function AnswerComponent({
     const [answers, setAnswers] = useState({});
     const [feedback, setFeedback] = useState({});
     const [progress, setProgress] = useState(0);
+    const sharedHistoryState = useRef(createEmptyHistoryState());
 
     const currentInputMethod = allowedInput?.[0] || 'text';
     const [currentPromptMethod, setCurrentPromptMethod] = useState(promptMethod?.[0] || 'text');
@@ -150,8 +154,11 @@ export default function AnswerComponent({
     const {
         dictionary,
         grade,
-        saveGrade
+        saveGrade,
+        workbook,
     } = React.useContext(UnitContext);
+
+    const { studentMemory, contentContext } = useVerifyContext();
 
     // Reset local state when grade changes (e.g., new grade after unit completion)
     const gradeIdRef = useRef(grade?.id);
@@ -180,23 +187,26 @@ export default function AnswerComponent({
         // Check if all words have been answered correctly
         const answeredWords = Object.keys(feedback);
         const correctAnswers = answeredWords.filter(wordId => feedback[wordId]?.answer === true);
-        const incorrectAnswers = answeredWords.filter(wordId => feedback[wordId]?.answer === false);
         
         const totalWords = wordIDs.length;
         const answeredCount = answeredWords.length;
         const correctCount = correctAnswers.length;
         
+        // Update local progress bar
+        const progressValue = totalWords > 0 ? Math.floor((correctCount / totalWords) * 100) : 0;
+        setProgress(progressValue);
+
         // Consider complete if all words have been attempted
         const isComplete = answeredCount >= totalWords;
         const accuracy = totalWords > 0 ? Math.floor((correctCount / totalWords) * 100) : 0;
 
-        if (isComplete) {
-            // Update grade data
+        // Save grade data on every answer (partial and complete)
+        if (answeredCount > 0) {
             const currentGradeData = grade?.data || {};
             const updatedGradeData = {
                 ...currentGradeData,
                 [nodeKey]: {
-                    complete: true,
+                    complete: isComplete,
                     accuracy,
                     totalWords,
                     correctCount,
@@ -210,9 +220,11 @@ export default function AnswerComponent({
     }, [feedback, wordIDs, saveGrade, nodeKey, grade]);
 
 
-    return (
-        // a list of word inputs to prompt the user to answer the question, if the request definition is provided then the user is prompted to define the word in a short answer.
+    const blockGradeData = grade?.data?.[nodeKey];
+    const nailedIt = blockGradeData?.nailedIt === true;
 
+    return (
+        <WorkbookBlockEnhancements blockId={nodeKey} nailedIt={nailedIt}>
         <div className={className}>
             <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -234,16 +246,17 @@ export default function AnswerComponent({
                 <LinearProgressWithLabel value={progress} />
             </Box>
             {!requestDefinition &&
-                ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t)
+                ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t, sharedHistoryState.current)
             }
             {requestDefinition &&
-                ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t, saveGrade)
+                ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t, saveGrade, sharedHistoryState.current)
             }
         </div>
+        </WorkbookBlockEnhancements>
     );
 }
 
-function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t, saveGrade) {
+function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t, saveGrade, historyState) {
 
     console.log('ByWordList', wordIDs, feedback, answers);
     console.log('ByWordList.currentPromptMethod', currentPromptMethod);
@@ -344,58 +357,21 @@ function ByWordList(wordIDs, feedback, dictionary, answers, setAnswers, setFeedb
                         }}
                     >
 
-                    <TextareaAutosize
-                        minRows={3}
-                        data-testid="answer-input"
-                        data-word-id={wordId}
-                        style={{
-                            flexBasis: '80%',
-                            maxWidth: '50rem',
-                            color: isCorrect === true ? 'green' : isCorrect === false ? 'red' : 'black',
-                            border: borderStyle,
-                            borderRadius: '12px',
-                            padding: '16px',
-                            fontSize: '16px',
-                            lineHeight: '1.5',
-                            fontFamily: 'inherit',
-                            resize: 'vertical',
-                        }}
-                        id={`${dictionary[wordId]?.phrase}-${key}`}
+                    <PlainTextAnswerInput
                         value={answers[key] || ''}
-                        onChange={(e) => {
+                        onChange={(text) => {
                             setAnswers({
                                 ...answers,
-                                [key]: e.target.value,
+                                [key]: text,
                             });
-                        } }
-                        aria-label={t('customAnswerComponent.yourAnswer', { ns: 'editor' })}
-                        placeholder="Answer text"
-                        type="text"
-                        variant="standard" />
-
-                    {/**
-* A button to submit the answer
-*/}
-
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        data-testid="answer-submit-button"
-                        data-word-id={wordId}
-                        style={{
-                            marginLeft: '1rem',
-                            minWidth: 'fit-content',
                         }}
-
-onClick={async () => {
-                        // verify definition
-                        // verifyDefinition(word: String!, expected: String!, definition: String!, model: String): String @function(name: "openai-${env}")
+                        onAutoSubmit={async (text) => {
                             const client = getAmplifyClient();
 
                             const response = await client.queries.verifyDefinition({
                                 word: dictionary[wordId]?.phrase,
                                 expected: dictionary[wordId]?.definition,
-                                definition: answers[key],
+                                definition: text,
                                 model: 'gpt-3.5-turbo',
                             });
 
@@ -405,18 +381,20 @@ onClick={async () => {
 
                             console.log('verifyDefinition parsed data', data);
 
-
-
                             setFeedback({
                                 ...feedback,
                                 [key]: data,
                             });
-                            // const progress = (correctCount / questions.length) * 100;
-                            // setProgress(progress);
-                        } }
-                    >
-                        {t('answerComponent.submit')}
-                    </Button>
+                        }}
+                        historyState={historyState}
+                        placeholder="Answer text"
+                        ariaLabel={t('customAnswerComponent.yourAnswer', { ns: 'editor' })}
+                        borderStyle={borderStyle}
+                        textColor={isCorrect === true ? 'green' : isCorrect === false ? 'red' : 'inherit'}
+                        testId="answer-input"
+                        wordId={wordId}
+                        disabled={isCorrect !== undefined}
+                    />
                     </Box>
                 </li>
             </React.Fragment>
@@ -466,46 +444,54 @@ onClick={async () => {
                     </Typography>
                 )
             )}
-            <AudioWaveformPlayer
-                enableRecording={true}
-                gradeId={grade?.id}
-                nodeKey={`${nodeKey}-${wordId}`}
-                title={dictionary[wordId]?.phrase}
-                onRecordingComplete={async (audioFile, uploadResult) => {
-                    const currentGradeData = grade?.data || {};
-                    const audioNodeKey = `${nodeKey}-${wordId}`;
-                    const updatedGradeData = {
-                        ...currentGradeData,
-                        [audioNodeKey]: {
-                            ...currentGradeData[audioNodeKey],
-                            audioFilePath: audioFile?.path || null,
-                            audioFileId: audioFile?.id || null,
-                            inputMethod: 'audio',
-                        }
-                    };
-                    saveGrade(updatedGradeData);
-
-                    // Verify the recorded audio against expected word
-                    try {
-                        const client = getAmplifyClient();
-                        const audioUrl = audioFile?.path || uploadResult?.path;
-                        if (audioUrl) {
-                            const { data, errors } = await client.queries.verifyAudioUrl({
-                                expected: dictionary[wordId]?.phrase,
-                                audioUrl,
-                                model: 'whisper-1',
-                                chatModel: 'gpt-3.5-turbo',
-                            });
-                            if (!errors && data) {
-                                const feedbackData = JSON.parse(data);
-                                setFeedback(prev => ({ ...prev, [key]: feedbackData }));
+            <AudioAutoSubmitWrapper>
+              {({ wrapOnRecordingComplete }) => (
+                <AudioWaveformPlayer
+                    enableRecording={true}
+                    gradeId={grade?.id}
+                    nodeKey={`${nodeKey}-${wordId}`}
+                    title={dictionary[wordId]?.phrase}
+                    onRecordingComplete={wrapOnRecordingComplete(async (audioFile, uploadResult) => {
+                        const currentGradeData = grade?.data || {};
+                        const audioNodeKey = `${nodeKey}-${wordId}`;
+                        const updatedGradeData = {
+                            ...currentGradeData,
+                            [audioNodeKey]: {
+                                ...currentGradeData[audioNodeKey],
+                                audioFilePath: audioFile?.path || null,
+                                audioFileId: audioFile?.id || null,
+                                inputMethod: 'audio',
                             }
+                        };
+                        saveGrade(updatedGradeData);
+
+                        // Verify the recorded audio against expected word
+                        try {
+                            const client = getAmplifyClient();
+                            const audioUrl = audioFile?.path || uploadResult?.path;
+                            if (audioUrl) {
+                                const { data, errors } = await client.queries.verifyAudioUrl({
+                                    expected: dictionary[wordId]?.phrase,
+                                    audioUrl,
+                                    model: 'whisper-1',
+                                    chatModel: 'gpt-3.5-turbo',
+                                    studentMemory,
+                                    contentContext,
+                                });
+                                if (!errors && data) {
+                                    const feedbackData = JSON.parse(data);
+                                    setFeedback(prev => ({ ...prev, [key]: feedbackData }));
+                                    // Broadcast to collaborators via Yjs
+                                    workbook?.setFeedback?.(nodeKey, { text: feedbackData?.reason || '', timestamp: Date.now() });
+                                }
+                            }
+                        } catch (err) {
+                            console.error('[AnswerComponent] Audio verification error:', err);
                         }
-                    } catch (err) {
-                        console.error('[AnswerComponent] Audio verification error:', err);
-                    }
-                }}
-            />
+                    })}
+                />
+              )}
+            </AudioAutoSubmitWrapper>
             </li>)
         })}
 
@@ -560,6 +546,8 @@ onClick={async () => {
                             ...feedback,
                             [wordId]: data,
                         });
+                        // Broadcast to collaborators via Yjs
+                        workbook?.setFeedback?.(nodeKey, { text: data?.reason || '', timestamp: Date.now() });
                     }}
                     feedback={feedback}
                     questionID={key}
@@ -571,7 +559,7 @@ onClick={async () => {
     </ol>;
 }
 
-function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t) {
+function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers, setFeedback, currentInputMethod, currentPromptMethod, grade, nodeKey, t, historyState) {
     // Add defensive check for dictionary
     if (!dictionary) {
         return <Typography variant="body2" color="error">{t('answerComponent.noDictionaryAvailable')}</Typography>;
@@ -626,41 +614,18 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                  * Area for feedback from api call
                  */}
 
-                <Input
-                    onChange={(e) => {
+                <PlainTextAnswerInput
+                    value={answers[key] || ''}
+                    onChange={(text) => {
                         setAnswers({
                             ...answers,
-                            [key]: e.target.value,
+                            [key]: text,
                         });
-                    } }
-                    style={{
-                        border: borderStyle,
-                        borderRadius: '12px',
-                        padding: '12px 16px',
-                        fontSize: '16px',
-                        width: '100%',
-                        maxWidth: '500px',
-                        color: feedback[key]?.answer === true ? 'green' : feedback[key]?.answer === false ? 'red' : 'black',
                     }}
-                    disableUnderline
-                    value={answers[key] || ''}
-                    placeholder={'Enter answer here'} />
-                <Button
-                    variant="contained"
-                    color="primary"
-
-                    style={{
-                        marginLeft: '1rem',
-                        minWidth: 'fit-content',
-                    }}
-
-                    onClick={async () => {
-                        // verify word 
-                        //   verifyWord(word: String!, expected: String!, definition: String!, model: String): String @function(name: "openai-${env}")
-                        // "{"id":"chatcmpl-9PctoIeFEcMWLkBVRUWkbc2M0TLQM","object":"chat.completion","created":1715894756,"model":"gpt-3.5-turbo-0125","choices":[{"index":0,"message":{"role":"assistant","content":"{\"answer\": false, \"reason\": \"because the definition is this instead\"}"},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":107,"completion_tokens":16,"total_tokens":123},"system_fingerprint":null}"
+                    onAutoSubmit={async (text) => {
                         const client = getAmplifyClient();
                         const response = await client.queries.verifyWord({
-                            word: answers[key],
+                            word: text,
                             expected: dictionary[wordId]?.phrase,
                             definition: dictionary[wordId]?.definition,
                             model: 'gpt-3.5-turbo',
@@ -674,15 +639,14 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                             ...feedback,
                             [key]: data,
                         });
-
-                        // if the answer is correct
-                        // grade the answer
-                        // update the progress bar
-                        // save in chat history
-                    } }
-                >
-                    {t('answerComponent.submit')}
-                </Button>
+                    }}
+                    historyState={historyState}
+                    placeholder="Enter answer here"
+                    borderStyle={borderStyle}
+                    textColor={feedback[key]?.answer === true ? 'green' : feedback[key]?.answer === false ? 'red' : 'inherit'}
+                    style={{ maxWidth: '500px' }}
+                    disabled={feedback[key]?.answer !== undefined}
+                />
                 </li>
             );
 
@@ -724,19 +688,23 @@ function ByDefinitionWordList(wordIDs, dictionary, feedback, setAnswers, answers
                     )
                 )}
 
-                <RecordingStudio2
-                    item={dictionary[wordId]}
-                    word={dictionary[wordId]?.definition}
-                    requestDefinition={true}
-                    feedback={feedback}
-                    qk={wordId}
-                    setFeedback={(data) => {
-                        setFeedback({
-                            ...feedback,
-                            [wordId]: data,
-                        });
-                    }}
-                />
+                <AudioAutoSubmitWrapper>
+                  {({ wrapSetFeedback }) => (
+                    <RecordingStudio2
+                        item={dictionary[wordId]}
+                        word={dictionary[wordId]?.definition}
+                        requestDefinition={true}
+                        feedback={feedback}
+                        qk={wordId}
+                        setFeedback={wrapSetFeedback((data) => {
+                            setFeedback({
+                                ...feedback,
+                                [wordId]: data,
+                            });
+                        })}
+                    />
+                  )}
+                </AudioAutoSubmitWrapper>
                 
             </li>)
         })}

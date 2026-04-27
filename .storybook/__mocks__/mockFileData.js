@@ -1,7 +1,7 @@
 /**
  * Mock File Data for Storybook - FileManager, Dictionary Editor, Question Editor
  * 
- * Comprehensive mock File records with base64-encoded media data URIs
+ * Comprehensive mock File records with static file URLs from /story-mocks/
  * to work in isolated Storybook environments without S3 dependencies.
  * Files can optionally include embeddings for semantic search.
  */

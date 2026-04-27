@@ -4,7 +4,6 @@
 
 import * as React from 'react';
 import { useTranslation } from 'next-i18next';
-import { useTheme } from '@mui/material/styles';
 import { Box } from '@mui/material';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -43,6 +42,8 @@ import UnitCompletedPlugin from './plugins/UnitCompletedPlugin';
 
 import { EditorNodes, ALL_TRANSFORMERS, onError, DRAWER_WIDTH } from './editorConfig';
 import { Drawer, DrawerHeader } from './styledComponents';
+import { TutorPresenceBanner, WorkbookProgress, TutorCursorOverlay, WorkbookPresenceBar, AIFeedbackSnackbar } from '../Workbook';
+import UnitContext from '../../context/unitContext';
 
 /**
  * Workbook component - read-only editor view for students
@@ -50,7 +51,6 @@ import { Drawer, DrawerHeader } from './styledComponents';
  */
 export function Workbook(): JSX.Element {
   const { t } = useTranslation('common');
-  const theme = useTheme();
   const [openTab, setOpenTab] = React.useState<boolean>(false);
   const [tabValue, setTabValue] = React.useState<number>(0);
   const drawerRef = React.useRef<HTMLDivElement>(null);
@@ -159,7 +159,7 @@ export function Workbook(): JSX.Element {
               sx={{
                 display: 'flex',
                 overflow: 'hidden',
-                height: 'calc(100vh - var(--app-bar-height, 11rem))',
+                height: '100vh',
               }}
             >
               <ToolBarRoPlugin
@@ -228,6 +228,12 @@ export function Workbook(): JSX.Element {
                         boxSizing: 'border-box',
                       }}
                     >
+                      <Box sx={{ px: 1, pt: 1 }}>
+                        <WorkbookPresenceBar />
+                        <TutorPresenceBanner />
+                        <WorkbookProgress variant="compact" />
+                      </Box>
+                      <TutorCursorOverlay />
                       <ContentEditable
                         data-lexical-editor="true"
                         aria-label={t('navigation.workbook', { ns: 'common' })}
@@ -247,8 +253,21 @@ export function Workbook(): JSX.Element {
               </Box>
             </Box>
           </LexicalComposer>
+          <WorkbookAIFeedback />
         </AudioPlayerProvider>
       </AutocompleteProvider>
     </DndWrapper>
+  );
+}
+
+/** Renders AIFeedbackSnackbar using UnitContext workbook provider */
+function WorkbookAIFeedback() {
+  const { workbook, workbookEnabled, session } = React.useContext(UnitContext);
+  if (!workbookEnabled || !workbook?.provider) return null;
+  return (
+    <AIFeedbackSnackbar
+      provider={workbook.provider}
+      currentUsername={session?.username || ''}
+    />
   );
 }

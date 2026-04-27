@@ -49,12 +49,14 @@ export const FullToolbar = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     
-    // Verify toolbar is rendered (MUI Toolbar renders a plain div, query by menu button instead)
-    const menuButton = canvas.getByRole('button', { name: /menu/i });
+    // Wait for toolbar to render (DeferredStory decorator delays initial render)
+    const menuButton = await canvas.findByRole('button', { name: /menu/i }, { timeout: 10000 });
     expect(menuButton).toBeInTheDocument();
     
     // Verify page content is visible
-    expect(canvas.getByText('Page Content')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(canvas.getByText('Page Content')).toBeInTheDocument();
+    }, { timeout: 5000 });
   },
   parameters: {
     docs: {
@@ -134,8 +136,8 @@ export const UserMenuOnly = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     
-    // Wait for user menu button and click it
-    const userButton = await canvas.findByRole('button', { name: /account/i });
+    // Wait for user menu button and click it (DeferredStory decorator delays initial render)
+    const userButton = await canvas.findByRole('button', { name: /profile/i }, { timeout: 10000 });
     expect(userButton).toBeInTheDocument();
     
     await userEvent.click(userButton);
@@ -172,8 +174,8 @@ export const JoinSectionDemo = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // Click the "Add User to Section" button to open the dialog
-    const joinButton = await canvas.findByRole('button', { name: /add user to section/i });
+    // Click the "Add to Section" button to open the dialog (DeferredStory decorator delays initial render)
+    const joinButton = await canvas.findByRole('button', { name: /add to section/i }, { timeout: 10000 });
     await userEvent.click(joinButton);
 
     // Wait for the dialog to appear

@@ -66,6 +66,20 @@ global.console = {
   // Keep error for debugging
 };
 
+// Mock Web Worker for test environment (used by embeddingWorkerManager etc.)
+if (typeof globalThis.Worker === 'undefined') {
+  globalThis.Worker = class MockWorker {
+    onmessage: ((ev: MessageEvent) => void) | null = null;
+    onerror: ((ev: ErrorEvent) => void) | null = null;
+    constructor() {}
+    postMessage() {}
+    terminate() {}
+    addEventListener() {}
+    removeEventListener() {}
+    dispatchEvent() { return false; }
+  } as any;
+}
+
 // Global test setup
 beforeAll(() => {
   console.info('🧪 Starting integration test suite...');

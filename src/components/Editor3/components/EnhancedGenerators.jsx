@@ -5,7 +5,6 @@ import { getAmplifyClient } from '../../../utils/amplifyClient';
 import getCachedUrl from '../../../utils/getCachedUrl';
 import UnifiedGenerateModal from './UnifiedGenerateModal';
 import ImageMaskEditor from './ImageMaskEditor';
-import RecordingStudioEnhanced from '../../RecordingStudioEnhanced';
 import { useTranslation } from 'next-i18next';
 
 /**
@@ -34,7 +33,7 @@ export function EnhancedImageGenerator({ open, onClose }) {
 
         const path = data.path;
 
-        const presignedUrl = await getCachedUrl(path, 'protected', identityId);
+        const presignedUrl = await getCachedUrl(path);
 
         const imageData = {
             path,
@@ -98,7 +97,7 @@ export function EnhancedImageGenerator({ open, onClose }) {
 
         const path = data.path;
 
-        const presignedUrl = await getCachedUrl(path, 'protected', identityId);
+        const presignedUrl = await getCachedUrl(path);
 
         return {
             path,
@@ -164,11 +163,12 @@ export function EnhancedImageGenerator({ open, onClose }) {
 }
 
 /**
- * Enhanced Audio Generation with RecordingStudio integration
+ * Enhanced Audio Generation — TTS generation only.
+ * For multi-speaker dialogue recording, use RecordingStudio3 via FileManager2's
+ * "Record Conversation" button.
  */
-export function EnhancedAudioGenerator({ open, onClose, gradeId, nodeKey }) {
+export function EnhancedAudioGenerator({ open, onClose }) {
     const { t } = useTranslation('editor.ai');
-    const [showRecordingStudio, setShowRecordingStudio] = useState(false);
 
     const handleGenerate = async (prompt) => {
         const {
@@ -188,8 +188,7 @@ export function EnhancedAudioGenerator({ open, onClose, gradeId, nodeKey }) {
         }
 
         const path = data.path;
-
-        const presignedUrl = await getCachedUrl(path, 'protected', identityId);
+        const presignedUrl = await getCachedUrl(path);
 
         return {
             path,
@@ -203,40 +202,14 @@ export function EnhancedAudioGenerator({ open, onClose, gradeId, nodeKey }) {
                             width: '100%',
                         }}
                     />
-                    <Button
-                        variant="outlined"
-                        fullWidth
-                        sx={{ mt: 2 }}
-                        onClick={() => setShowRecordingStudio(true)}
-                    >
-                        {t('enhancedGenerators.openRecordingStudio')}
-                    </Button>
                 </Box>
             ),
         };
     };
 
     const handleRegenerate = async (prompt) => {
-        // Same as generate for audio
         return handleGenerate(prompt);
     };
-
-    if (showRecordingStudio) {
-        return (
-            <Box sx={{ width: '100%', height: '80vh' }}>
-                <Button
-                    onClick={() => setShowRecordingStudio(false)}
-                    sx={{ mb: 2 }}
-                >
-                    {t('enhancedGenerators.backToGenerator')}
-                </Button>
-                <RecordingStudioEnhanced
-                    gradeId={gradeId}
-                    nodeKey={nodeKey}
-                />
-            </Box>
-        );
-    }
 
     return (
         <UnifiedGenerateModal
@@ -283,7 +256,7 @@ export function ImageGeneratorButton({ open, onSuccess }) {
 
         const path = data.path;
 
-        const presignedUrl = await getCachedUrl(path, 'protected', identityId);
+        const presignedUrl = await getCachedUrl(path);
 
         const imageData = {
             path,
@@ -357,7 +330,7 @@ export function AudioGeneratorButton({ open, onSuccess }) {
 
         const path = data.path;
 
-        const presignedUrl = await getCachedUrl(path, 'protected', identityId);
+        const presignedUrl = await getCachedUrl(path);
 
         return {
             path,

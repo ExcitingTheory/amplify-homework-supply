@@ -40,7 +40,6 @@ import {
     TextField,
     Tooltip,
     Typography,
-    useTheme,
     Tabs,
     Tab,
 } from '@mui/material';
@@ -57,7 +56,8 @@ import {
     Add as AddIcon,
 } from '@mui/icons-material';
 import CircularProgress from '@mui/material/CircularProgress';
-import RecordingStudioEnhanced from './RecordingStudioEnhanced';
+import RecordingStudio3Modal from './RecordingStudio3Modal';
+import { createWordPreset } from '../utils/recordingStudioPresets';
 
 // Context imports
 import DictionaryContext from '../context/dictionaryContext';
@@ -973,6 +973,12 @@ function WordRowComponent({
     const [rubyDialogOpen, setRubyDialogOpen] = React.useState(false);
     const { unit } = React.useContext(UnitContext);
 
+    // Memoize word preset to avoid recreating on every render
+    const wordPreset = React.useMemo(
+        () => createWordPreset({ phrase, pronunciation, definition }),
+        [phrase, pronunciation, definition]
+    );
+
     // Get the actual word object for RubyTagEditor
     const { filteredDictionary: dictionary } = React.useContext(DictionaryContext);
     const word = React.useMemo(() => {
@@ -1168,54 +1174,49 @@ function WordRowComponent({
                 </DialogContent>
             </Dialog>
 
-            {/* Recording Studio Dialog */}
-            <Dialog
+            {/* Recording Studio 3 Modal */}
+            <RecordingStudio3Modal
                 open={recordingDialogOpen}
                 onClose={() => setRecordingDialogOpen(false)}
-                maxWidth="md"
-                fullWidth
-            >
-                <DialogTitle>
-                    {t('dictionaryEditor.audioStudioTitle')} - {phrase}
-                </DialogTitle>
-                <DialogContent>
-                    <RecordingStudioEnhanced
-                        onSave={async (files) => {
-                            const _audio = [];
-                            for (let i = 0; i < files.length; i++) {
-                                const file = files[i];
-                                const name = `${unit.id}_${wordId}_${Date.now()}_${i}.ogg`;
-                                
-                                try {
-                                    // Gen 2 API requires full path with protection level prefix
-                                    const s3Path = `protected/${identityId}/audio/${name}`;
-                                    
-                                    const result = await uploadData({
-                                        path: s3Path,
-                                        data: file,
-                                        options: {
-                                            contentType: 'audio/ogg',
-                                        },
-                                    }).result;
+                onSave={async (payload) => {
+                    const { phraseAudio, definitionAudio, scriptData } = payload;
+                    const updates = {};
 
-                                    _audio.push(result.path);
-                                } catch (error) {
-                                    console.error('Error uploading file:', error);
-                                }
-                            }
+                    // Map phrase track takes to Word.audio[]
+                    if (phraseAudio?.length > 0) {
+                        const newPaths = phraseAudio.map(t => t.audioPath).filter(Boolean);
+                        const audioUrls = audio || [];
+                        updates.audio = deduplicateUrls([...audioUrls, ...newPaths]);
+                        if (phraseAudio[0]?.waveformData) {
+                            updates.waveformData = phraseAudio[0].waveformData;
+                        }
+                    }
 
-                            if (_audio.length > 0 && onUpdate) {
-                                const audioUrls = audio || [];
-                                const newAudio = deduplicateUrls([...audioUrls, ..._audio]);
-                                await onUpdate(wordId, { audio: newAudio }, version);
-                            }
+                    // Map definition track takes to Word.definitionAudio[]
+                    if (definitionAudio?.length > 0) {
+                        const newPaths = definitionAudio.map(t => t.audioPath).filter(Boolean);
+                        const defUrls = word?.definitionAudio || [];
+                        updates.definitionAudio = deduplicateUrls([...defUrls, ...newPaths]);
+                        if (definitionAudio[0]?.waveformData) {
+                            updates.definitionWaveformData = definitionAudio[0].waveformData;
+                        }
+                    }
 
-                            setRecordingDialogOpen(false);
-                        }}
-                        onCancel={() => setRecordingDialogOpen(false)}
-                    />
-                </DialogContent>
-            </Dialog>
+                    // Persist full scriptData for re-opening
+                    if (scriptData) {
+                        updates.scriptData = JSON.stringify(scriptData);
+                    }
+
+                    if (Object.keys(updates).length > 0 && onUpdate) {
+                        await onUpdate(wordId, updates, version);
+                    }
+                }}
+                title={`${t('dictionaryEditor.audioStudioTitle')} - ${phrase}`}
+                preset="word"
+                scriptData={wordPreset.scriptData}
+                lockedTracks={wordPreset.lockedTracks}
+                identityId={identityId}
+            />
         </Box>
     );
 }
@@ -1477,7 +1478,6 @@ export function DictionaryEditor2() {
     const [rubyDialogWord, setRubyDialogWord] = React.useState(null);
     const [newWordFormOpen, setNewWordFormOpen] = React.useState(false);
 
-    const theme = useTheme();
     const { filteredDictionary: dictionary } = React.useContext(DictionaryContext);
     const { audioFiles, refreshAudioFiles, session } = React.useContext(FilesContext);
     const { identityId } = session || {};
@@ -1709,6 +1709,7 @@ export function DictionaryEditor2() {
                             size="small"
                             onClick={expandedItems.size === 0 ? handleExpandAll : handleCollapseAll}
                             disabled={!filteredDictionary || Object.keys(filteredDictionary).length === 0}
+                            aria-label={expandedItems.size === 0 ? t('dictionaryEditor.expandAll') : t('dictionaryEditor.collapseAll')}
                         >
                             {expandedItems.size === 0 ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
                         </IconButton>
@@ -1731,6 +1732,7 @@ export function DictionaryEditor2() {
                         color="primary" 
                         size="small"
                         data-tour="add-word-button"
+                        aria-label={t('dictionaryEditor.newWordButton')}
                     >
                         <Description />
                     </IconButton>
@@ -1743,6 +1745,7 @@ export function DictionaryEditor2() {
                         }
                         size="small"
                         disabled={selectedItems.size === 0}
+                        aria-label={t('dictionaryEditor.actionsButton')}
                     >
                         <MoreVertIcon />
                     </IconButton>

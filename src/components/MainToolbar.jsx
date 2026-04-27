@@ -22,6 +22,7 @@ import UserIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import Button from '@mui/material/Button';
 import List from '@mui/material/List';
@@ -35,10 +36,10 @@ import HomeIcon from '@mui/icons-material/Home';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import PeopleIcon from '@mui/icons-material/People';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import GroupsIcon from '@mui/icons-material/Groups';
+import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import { signOut } from 'aws-amplify/auth';
 import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
-import { uploadData } from 'aws-amplify/storage';
-import { Section } from '../../src/models';
 import Switch from '@mui/material/Switch';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -59,6 +60,14 @@ import { useRouter } from 'next/router';
 import { Help, Settings } from '@mui/icons-material';
 import { getAmplifyClient } from '../utils/amplifyClient';
 import { useColorMode } from '../hooks/useColorMode';
+import { LevelBadge } from './Gamification/LevelBadge';
+import SyncStatusIndicator from './SyncStatusIndicator';
+import { useXP } from '../context/xpContext';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import RateReviewIcon from '@mui/icons-material/RateReview';
+import JoinPracticeDialog from './PracticeDrill/JoinPracticeDialog';
+import { JoinWorkbookDialog } from './Workbook';
+import { JoinPeerReviewDialog } from './PeerReview';
 
 function ToggleMenuItem(props) {
   const [checked, setChecked] = React.useState(true);
@@ -185,6 +194,7 @@ export function HelpMenu() {
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
+        data-tour="help-menu"
       >
         <Help />
       </Button>
@@ -251,7 +261,9 @@ export function UserMenu() {
             <MenuItem onClick={() => {
               router.push('/profile')
             }}><UserIcon/>&nbsp;{t('common:navigation.profile')}</MenuItem>
-            {/* <MenuItem onClick={handleClose}>My account</MenuItem> */}
+            <MenuItem onClick={() => {
+              router.push('/settings')
+            }}><SettingsBrightnessIcon/>&nbsp;{t('common:navigation.settings', 'Settings')}</MenuItem>
             <MenuItem onClick={() => {
               signOut();
             }}>
@@ -265,7 +277,8 @@ export function UserMenu() {
 
 
 export default function MainToolbar({ children }) {
-  const { t } = useTranslation(['common', 'components']);
+  const { t } = useTranslation(['common', 'components', 'editor.authoring']);
+  const { level } = useXP();
   const [state, setState] = React.useState({
     // top: false,
     left: false,
@@ -279,6 +292,9 @@ export default function MainToolbar({ children }) {
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false)
 
   const [openAddStudentToSection, setOpenAddStudentToSection] = React.useState(false);
+  const [openJoinStudyGroup, setOpenJoinStudyGroup] = React.useState(false);
+  const [openJoinWorkbook, setOpenJoinWorkbook] = React.useState(false);
+  const [openJoinPeerReview, setOpenJoinPeerReview] = React.useState(false);
 
   // Secret debug mode activation: Click menu icon 7 times within 3 seconds
   const clickTimestamps = React.useRef([]);
@@ -404,6 +420,16 @@ export default function MainToolbar({ children }) {
         }
         {/* </Typography> */}
         <Box sx={{ flexGrow: 1 }} />
+        <SyncStatusIndicator />
+        <LevelBadge level={level} showProgress size="small" />
+        <IconButton
+          color="inherit"
+          aria-label={t('mainToolbar.joinStudyGroup', { ns: 'common', defaultValue: 'Join Study Group' })}
+          data-tour="join-study-group-button"
+          onClick={() => setOpenJoinStudyGroup(true)}
+        >
+          <GroupsIcon />
+        </IconButton>
         <IconButton
           color="inherit"
           aria-label={t('mainToolbar.addToSection.title', { ns: 'common' })}
@@ -529,6 +555,73 @@ export default function MainToolbar({ children }) {
                     <ListItemText primary={t('common:navigation.units')} />
                   </ListItemButton>
                 </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton component="a" href='/leaderboard'>
+                  <ListItemIcon
+                    sx={{
+                      color: 'text.primary',
+                    }}
+                    >
+                      <LeaderboardIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t('common:navigation.leaderboard', 'Leaderboard')} />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+              <Divider />
+              <List
+                sx={{
+                  color: 'text.primary',
+                }}
+              >
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setOpenJoinStudyGroup(true)
+                    }}
+                  >
+                    <ListItemIcon sx={{ color: 'text.primary' }}>
+                      <GroupsIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={t('common:navigation.joinStudyGroup', 'Join Study Group')}
+                      secondary={t('common:navigation.joinStudyGroupDesc', 'Enter a room code')}
+                    />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setOpenJoinWorkbook(true)
+                    }}
+                  >
+                    <ListItemIcon sx={{ color: 'text.primary' }}>
+                      <EditNoteIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={t('common:navigation.joinWorkbook', 'Join Workbook Session')}
+                      secondary={t('common:navigation.joinWorkbookDesc', 'Enter a workbook link or ID')}
+                    />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setOpenJoinPeerReview(true)
+                    }}
+                  >
+                    <ListItemIcon sx={{ color: 'text.primary' }}>
+                      <RateReviewIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={t('common:navigation.joinPeerReview', 'Join Peer Review')}
+                      secondary={t('common:navigation.joinPeerReviewDesc', 'Enter a review room code')}
+                    />
+                  </ListItemButton>
+                </ListItem>
               </List>
             </Box>
           </SwipeableDrawer>
@@ -590,6 +683,44 @@ export default function MainToolbar({ children }) {
                         </DialogActions>
                     </form>
                 </Dialog>
+
+                {/* Join Study Group Dialog */}
+                <JoinPracticeDialog
+                  open={openJoinStudyGroup}
+                  onClose={() => setOpenJoinStudyGroup(false)}
+                  onJoin={(sessionInfo) => {
+                    setOpenJoinStudyGroup(false)
+                    // Navigate to units page with join params
+                    router.push({
+                      pathname: '/units',
+                      query: {
+                        joinSession: sessionInfo.sessionId,
+                        joinRoom: sessionInfo.roomCode,
+                        joinUnit: sessionInfo.unitID,
+                      },
+                    })
+                  }}
+                />
+
+                {/* Join Workbook Session Dialog */}
+                <JoinWorkbookDialog
+                  open={openJoinWorkbook}
+                  onClose={() => setOpenJoinWorkbook(false)}
+                  onJoin={({ unitId }) => {
+                    setOpenJoinWorkbook(false)
+                    router.push(`/workbook/${unitId}`)
+                  }}
+                />
+
+                {/* Join Peer Review Dialog */}
+                <JoinPeerReviewDialog
+                  open={openJoinPeerReview}
+                  onClose={() => setOpenJoinPeerReview(false)}
+                  onJoin={({ roomId }) => {
+                    setOpenJoinPeerReview(false)
+                    router.push(`/review/${roomId}`)
+                  }}
+                />
 
 
         </React.Fragment>

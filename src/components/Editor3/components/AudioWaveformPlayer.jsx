@@ -10,7 +10,7 @@ import MicLevelIndicator from './MicLevelIndicator';
 import { useAudioPlayer } from '../context/AudioPlayerContext';
 import { calculateWaveformData } from '../../../utils/calculateWaveformData';
 import { uploadStudentSubmission } from '../../../utils/userSubmissionStorage';
-import { useTheme } from '@mui/material/styles';
+import { useColorScheme } from '@mui/material/styles';
 import { hexToRgb } from '../../../utils/hexToRgb';
 import FilesContext from '../../../context/fileContext';
 
@@ -78,12 +78,20 @@ export default function AudioWaveformPlayer({
     onRecordingComplete
 }) {
     const { t } = useTranslation('editor.shared');
-    const theme = useTheme();
-    const mainColor = theme.palette.primary.main;
-    const rgbColor = hexToRgb(mainColor);
-    const _r = rgbColor.r;
-    const _g = rgbColor.g;
-    const _b = rgbColor.b;
+    const { mode } = useColorScheme();
+
+    // Resolve CSS variables for canvas drawing (canvas API can't use var())
+    // Re-computed when color mode changes (light <-> dark)
+    const canvasBg = React.useMemo(() => {
+        if (typeof document === 'undefined') return '#ffffff';
+        return getComputedStyle(document.documentElement).getPropertyValue('--mui-palette-background-paper').trim() || '#ffffff';
+    }, [mode]);
+    const { mainColor, _r, _g, _b } = React.useMemo(() => {
+        if (typeof document === 'undefined') return { mainColor: '#556cd6', _r: 85, _g: 108, _b: 214 };
+        const mc = getComputedStyle(document.documentElement).getPropertyValue('--mui-palette-primary-main').trim() || '#556cd6';
+        const rgb = hexToRgb(mc);
+        return { mainColor: mc, _r: rgb.r, _g: rgb.g, _b: rgb.b };
+    }, [mode]);
     
     const audioPlayer = useAudioPlayer();
     
@@ -445,7 +453,7 @@ export default function AudioWaveformPlayer({
             previewRafRef.current = requestAnimationFrame(drawPreview);
             
             analyser.getByteFrequencyData(dataArray);
-            canvasCtx.fillStyle = 'rgb(255, 255, 255)';
+            canvasCtx.fillStyle = canvasBg;
             canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
             
             const targetSamples = canvas.width;
@@ -521,8 +529,8 @@ export default function AudioWaveformPlayer({
         }
         
         const canvasCtx = canvas.getContext('2d');
-        // White background
-        canvasCtx.fillStyle = 'rgb(255, 255, 255)';
+        // Theme-aware background
+        canvasCtx.fillStyle = canvasBg;
         canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
         
         // Single flat line at center using theme color
@@ -667,7 +675,7 @@ export default function AudioWaveformPlayer({
             requestAnimationFrame(draw);
 
             analyser.getByteFrequencyData(dataArray);
-            canvasCtx.fillStyle = 'rgb(255, 255, 255)';
+            canvasCtx.fillStyle = canvasBg;
             canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
             // Match StaticWaveform: downsample analyser data to canvas.width bins,
@@ -780,7 +788,7 @@ export default function AudioWaveformPlayer({
                                     left: 0,
                                     right: 0,
                                     bottom: 0,
-                                    backgroundColor: theme.palette.primary.main,
+                                    backgroundColor: 'var(--mui-palette-primary-main)',
                                     opacity: 0.2,
                                     pointerEvents: 'none',
                                     transformOrigin: 'left',
@@ -799,7 +807,7 @@ export default function AudioWaveformPlayer({
                         width={width}
                         height={height}
                         style={{
-                            backgroundColor: 'var(--mui-palette-background-paper, white)',
+                            backgroundColor: 'var(--mui-palette-background-paper)',
                             border: '1px solid var(--mui-palette-divider, #e0e0e0)',
                             borderRadius: '4px',
                             width: `${width}px`,
@@ -830,7 +838,7 @@ export default function AudioWaveformPlayer({
                                     left: 0,
                                     right: 0,
                                     bottom: 0,
-                                    backgroundColor: theme.palette.primary.main,
+                                    backgroundColor: 'var(--mui-palette-primary-main)',
                                     opacity: 0.2,
                                     pointerEvents: 'none',
                                     transformOrigin: 'left',
@@ -849,7 +857,7 @@ export default function AudioWaveformPlayer({
                         width={width}
                         height={height}
                         style={{
-                            backgroundColor: 'var(--mui-palette-background-paper, white)',
+                            backgroundColor: 'var(--mui-palette-background-paper)',
                             border: '1px solid var(--mui-palette-divider, #e0e0e0)',
                             borderRadius: '4px',
                             width: `${width}px`,

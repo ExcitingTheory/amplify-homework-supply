@@ -360,6 +360,7 @@ export const ContentPreview: React.FC<ContentPreviewProps> = ({
             onClick={handleInsert}
             disabled={inserted}
             color={inserted ? 'success' : 'primary'}
+            data-tour="insert-button"
           >
             {inserted ? t('chatSidebar.contentPreview.inserted') : t('chatSidebar.contentPreview.insertIntoEditor')}
           </Button>

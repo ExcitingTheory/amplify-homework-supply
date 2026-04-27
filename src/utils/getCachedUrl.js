@@ -1,7 +1,7 @@
 import { Cache } from 'aws-amplify/utils';
 import { getUrl } from 'aws-amplify/storage';
 
-const getCachedUrl = async (filePath, accessLevel = 'protected', targetIdentityId = null) => {
+const getCachedUrl = async (filePath) => {
 
     if (!filePath) {
         return null;
@@ -13,9 +13,8 @@ const getCachedUrl = async (filePath, accessLevel = 'protected', targetIdentityI
         return filePath;
     }
     
-    // Cache.clear();
-    console.log('getCachedUrl', filePath, accessLevel, targetIdentityId);
-    const cachePath = 'getCachedUrl_' + accessLevel + targetIdentityId + filePath;
+    console.log('getCachedUrl', filePath);
+    const cachePath = 'getCachedUrl_' + filePath;
     const cachedFile = await Cache.getItem(cachePath);
     if (cachedFile) {
         console.log('getCachedUrl.cachedFile', cachedFile);
@@ -23,15 +22,8 @@ const getCachedUrl = async (filePath, accessLevel = 'protected', targetIdentityI
     }
     else {
         console.log('getCachedUrl.cachedFile not found');
-        const expires = (new Date()).getTime() + 3540000; // 60 minutes in milliseconds, the url expiration time from getUrl is 60 minutes
-        const _file = await getUrl({
-            key: filePath,
-            options: {
-                accessLevel,
-                targetIdentityId,
-                expiresIn: 3600
-            }
-        });
+        const expires = (new Date()).getTime() + 3540000; // 60 minutes
+        const _file = await getUrl({ path: filePath });
         console.log('getCachedUrl._file', _file);
         const _href = _file?.url?.href;
         console.log('getCachedUrl._href', _href);

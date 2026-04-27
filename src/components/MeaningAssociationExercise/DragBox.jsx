@@ -38,7 +38,7 @@ export const DragBox = ({ answer, wordID }) => {
       component='div'
       ref={drag}
       variant="outlined"
-      boxShadow='0 2px 4px rgba(0,0,0,0.1)'
+      boxShadow='0 2px 4px var(--mui-palette-action-disabledBackground)'
       onTouchStart={onTouchMove}
       data-testid="drag-box"
       data-word-id={wordID}
@@ -51,18 +51,23 @@ export const DragBox = ({ answer, wordID }) => {
         cursor: 'move',
         opacity: opacity,
         borderRadius: '8px',
-        border: '2px solid #90caf9',
-        backgroundColor: 'background.paper',
-        color: 'primary.main',
+        border: '2px dotted var(--mui-palette-primary-light)',
+        backgroundColor: 'var(--mui-palette-background-default)',
+        color: 'var(--mui-palette-primary-main)',
         fontWeight: 500,
         touchAction: 'none',
         transition: 'all 0.2s ease',
-        maxWidth: 'calc(100% - 0.6rem)',
+        width: '140px',
+        minWidth: '140px',
+        maxWidth: '140px',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'normal',
         wordBreak: 'break-word',
         flexShrink: 0,
+        justifyContent: 'center',
+        textAlign: 'center',
+        boxSizing: 'border-box',
       }}>
       {answer}
     </Box>

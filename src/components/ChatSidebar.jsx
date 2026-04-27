@@ -26,6 +26,7 @@ import {
     Tooltip,
 } from "@mui/material";
 import { getAmplifyClient } from '../utils/amplifyClient';
+import { awardXPAndCheck } from '../utils/gamificationActions';
 import ChatIcon from '@mui/icons-material/Chat';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
@@ -39,7 +40,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import AddIcon from '@mui/icons-material/Add';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
-import { Section, Document, AssistantChat, File } from "../models";
+import CloseIcon from '@mui/icons-material/Close';
 import UnitContext from "../context/unitContext";
 import SectionContext from "../context/sectionContext";
 import VectorStoreContext from "../context/vectorStoreContext";
@@ -52,11 +53,14 @@ import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } fro
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { post } from 'aws-amplify/api';
 import { uploadAndAnalyzePDF, cancelPDFAnalysis } from '../utils/fileUploadUtils';
+import { useNailedItDetection } from '../hooks/useNailedItDetection';
+import { NailedItCelebration } from './Gamification/NailedItCelebration';
 import FilesContext from "../context/fileContext";
 import VocabularyReview from "./VocabularyReview2";
-import { toolDefinitions, executeTool, setVectorStoreSearch } from '../utils/chatTools';
+import { toolDefinitions, executeTool, setVectorStoreSearch, setPracticeDrillCallback } from '../utils/chatTools';
 import AIFeedbackWidget from './AIFeedbackWidget';
 import SearchResults from './ChatSidebar/SearchResults';
+import { PracticeDrillDialog } from './PracticeDrill';
 import { TextStreamChatTransport } from 'ai';
 import { VirtualizedMessageList } from './ChatSidebar/VirtualizedMessageList';
 import { LexicalMessageRenderer } from './ChatSidebar/LexicalMessageRenderer';
@@ -69,11 +73,8 @@ import { INSERT_ANSWER_BLOCK_COMMAND } from '../components/Editor3/plugins/Answe
 import { INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND } from '../components/Editor3/plugins/MeaningAssociationPlugin';
 import { INSERT_CUSTOM_ANSWER_BLOCK_COMMAND } from '../components/Editor3/plugins/CustomAnswerPlugin';
 
-const ChatSidebar = () => {
+const ChatSidebar = ({ onClose }) => {
     const { t, ready } = useTranslation('components');
-
-    // Don't render until translations are ready to prevent hydration errors
-    if (!ready) return null;
 
     // Utility function to deep clone messages to prevent frozen object errors
     // The AI SDK mutates message objects during streaming, so they must be mutable
@@ -236,6 +237,28 @@ const ChatSidebar = () => {
     // Get auth state
     const { user, isLoading: authLoading } = React.useContext(AuthContext);
 
+    // Fetch student memory for AI context
+    const [studentMemory, setStudentMemory] = React.useState(null);
+    React.useEffect(() => {
+        if (!user?.username) return;
+        const client = getAmplifyClient();
+        if (!client?.models?.StudentMemory) return;
+        const sub = client.models.StudentMemory.observeQuery({
+            filter: { studentId: { eq: user.username } },
+        }).subscribe({
+            next: ({ items }) => {
+                const valid = items.filter(i => i != null && i.id != null);
+                if (valid.length > 0) {
+                    setStudentMemory(valid[0].memoryMarkdown || null);
+                }
+            },
+            error: (err) => {
+                console.warn('[ChatSidebar] StudentMemory fetch error:', err?.message);
+            },
+        });
+        return () => sub.unsubscribe();
+    }, [user?.username]);
+
     // Get tour context (optional - may not be available in all pages)
     const tourContext = useTourSafe();
 
@@ -335,6 +358,18 @@ const ChatSidebar = () => {
         };
     }, [vectorStoreCtx]);
 
+    // Practice drill state — opened by chat tool call
+    const [practiceDrillConfig, setPracticeDrillConfig] = React.useState(null);
+    const [practiceDrillOpen, setPracticeDrillOpen] = React.useState(false);
+
+    React.useEffect(() => {
+        setPracticeDrillCallback((config) => {
+            setPracticeDrillConfig(config);
+            setPracticeDrillOpen(true);
+        });
+        return () => setPracticeDrillCallback(null);
+    }, []);
+
     // Simple context data for chat API
     const contextData = useMemo(() => ({
         unit: unit ? {
@@ -343,18 +378,18 @@ const ChatSidebar = () => {
             description: unit.description,
             data: unit.data,
         } : null,
-        files: files ? Object.values(files).map(f => ({
+        files: files ? Object.values(files).filter(f => f != null).map(f => ({
             id: f.id,
             name: f.name,
             description: f.description,
             mimeType: f.mimeType,
         })) : [],
-        questionBank: questionBank ? Object.values(questionBank).map(q => ({
+        questionBank: questionBank ? Object.values(questionBank).filter(q => q != null).map(q => ({
             id: q.id,
             prompt: q.prompt,
             answer: q.answer,
         })) : [],
-        dictionary: dictionary ? Object.values(dictionary).map(d => ({
+        dictionary: dictionary ? Object.values(dictionary).filter(d => d != null).map(d => ({
             id: d.id,
             phrase: d.phrase,
             definition: d.definition,
@@ -364,11 +399,65 @@ const ChatSidebar = () => {
             name: s.name,
             description: s.description,
         })) || [],
-    }), [unit, files, questionBank, dictionary, sections]);
+        studentMemory: studentMemory || null,
+    }), [unit, files, questionBank, dictionary, sections, studentMemory]);
 
     // Memoize the fetch function to prevent recreation on every render
     const customFetch = useCallback(async (url, options) => {
         console.log('[ChatSidebar] Custom fetch with Amplify post client, ignoring AI SDK url:', url);
+
+        // ── Offline: route through on-device AI ─────────────────────────
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+            console.log('[ChatSidebar] Offline — routing through AIRouter');
+            try {
+                const { aiRouter } = await import('../offline/AIRouter');
+                const requestBody = options.body ? JSON.parse(options.body) : {};
+                const userMessages = requestBody.messages || [];
+
+                // Build SSE stream from AIRouter async generator
+                const stream = new ReadableStream({
+                    async start(controller) {
+                        const encoder = new TextEncoder();
+                        try {
+                            const generator = aiRouter.chat(userMessages, {
+                                dictionary: contextData.dictionary,
+                                unit: contextData.unit,
+                            });
+                            let fullText = '';
+                            for await (const chunk of generator) {
+                                fullText += chunk;
+                                // Emit AI SDK "data" stream protocol format
+                                const event = `0:${JSON.stringify(chunk)}\n`;
+                                controller.enqueue(encoder.encode(event));
+                            }
+                            // Send finish event
+                            const finishEvent = `d:{"finishReason":"stop"}\n`;
+                            controller.enqueue(encoder.encode(finishEvent));
+                            controller.close();
+                        } catch (err) {
+                            console.error('[ChatSidebar] Offline chat error:', err);
+                            const errorChunk = `0:${JSON.stringify('Sorry, offline AI is not available right now.')}\n`;
+                            controller.enqueue(encoder.encode(errorChunk));
+                            const finishEvent = `d:{"finishReason":"stop"}\n`;
+                            controller.enqueue(encoder.encode(finishEvent));
+                            controller.close();
+                        }
+                    },
+                });
+
+                return new Response(stream, {
+                    status: 200,
+                    headers: new Headers({
+                        'Content-Type': 'text/event-stream',
+                        'Cache-Control': 'no-cache',
+                    }),
+                });
+            } catch (err) {
+                console.error('[ChatSidebar] Failed to load AIRouter:', err);
+                throw err;
+            }
+        }
+        // ── End offline routing ─────────────────────────────────────────
 
         try {
             // Get the current auth session to include the token
@@ -467,7 +556,8 @@ const ChatSidebar = () => {
             'list_units',
             'get_unit_details',
             'update_unit',
-            'delete_assignment'
+            'delete_assignment',
+            'start_practice_drill'
         ];
 
         // Register each client-side tool
@@ -565,6 +655,14 @@ const ChatSidebar = () => {
         }
     }, []);
 
+    // Nailed It detection — processes AI responses for mastery signals
+    const { processResponse: processNailedIt, showCelebration, dismissCelebration, lastResult: nailedItResult } = useNailedItDetection({
+        onAwardXP: (xp, reason) => {
+            if (!user?.username) return;
+            awardXPAndCheck(user.username, reason);
+        },
+    });
+
     // Use Vercel AI SDK's useChat hook with memoized transport
     const chatHookResult = useChat({
         transport,
@@ -582,6 +680,11 @@ const ChatSidebar = () => {
 
         onFinish: (message) => {
             console.log('[ChatSidebar] Message finished:', message);
+            // Check AI response for Nailed It signals
+            const textContent = message?.parts?.filter(p => p.type === 'text').map(p => p.text).join('') || '';
+            if (textContent) {
+                processNailedIt(textContent);
+            }
             // Save messages when streaming completes
             if (assistantChat) {
                 saveMessages(messages, assistantChat, input);
@@ -1061,6 +1164,9 @@ const ChatSidebar = () => {
         });
     }, [uploadedFiles.length, unit?.id]); // Use length instead of the full objects to prevent infinite loops
 
+    // Don't render until translations are ready to prevent hydration errors
+    if (!ready) return null;
+
     return (
         <>
             <Box
@@ -1235,6 +1341,16 @@ const ChatSidebar = () => {
                                     <ArchiveIcon fontSize="small" />
                                 </IconButton>
                             </>
+                        )}
+                        {onClose && (
+                            <IconButton
+                                size="small"
+                                onClick={onClose}
+                                aria-label={t('chatSidebar.close')}
+                                data-testid="chat-close-button"
+                            >
+                                <CloseIcon fontSize="small" />
+                            </IconButton>
                         )}
                     </Box>
                 </Paper>
@@ -1537,6 +1653,7 @@ const ChatSidebar = () => {
                                             <Box
                                                 className={message.role === 'user' ? 'user' : 'assistant'}
                                                 data-role={message.role}
+                                                {...(message.role === 'assistant' ? { 'data-tour': 'ai-message' } : {})}
                                                 sx={{
                                                     m: 0.75,
                                                     p: '0.75rem 1rem',
@@ -2446,6 +2563,16 @@ const ChatSidebar = () => {
                     </Alert>
                 </Snackbar>
             </Portal>
+            <NailedItCelebration open={showCelebration} nailedItReason={nailedItResult?.nailedItReason || ''} onClose={dismissCelebration} />
+            {practiceDrillOpen && practiceDrillConfig && (
+                <PracticeDrillDialog
+                    open={practiceDrillOpen}
+                    onClose={() => { setPracticeDrillOpen(false); setPracticeDrillConfig(null); }}
+                    unitId={unit?.id || ''}
+                    unitName={unit?.name || ''}
+                    config={practiceDrillConfig}
+                />
+            )}
         </>
     );
 }

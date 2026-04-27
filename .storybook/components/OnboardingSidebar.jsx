@@ -13,7 +13,7 @@ import {
 import { useTheme } from '@mui/material/styles';
 import PersonIcon from '@mui/icons-material/Person';
 import SchoolIcon from '@mui/icons-material/School';
-import CodeIcon from '@mui/icons-material/Code';
+import TranslateIcon from '@mui/icons-material/Translate';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -35,10 +35,10 @@ const PERSONAS = [
     color: '#4CAF50',
   },
   {
-    id: 'developer',
-    label: 'Developer',
-    icon: <CodeIcon fontSize="small" />,
-    color: '#9C27B0',
+    id: 'translator',
+    label: 'Translator',
+    icon: <TranslateIcon fontSize="small" />,
+    color: '#FF9800',
   },
 ];
 

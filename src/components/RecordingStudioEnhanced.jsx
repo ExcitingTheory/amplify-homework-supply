@@ -17,7 +17,6 @@ import {
     Tooltip,
     Slider,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 
 // Icons
 import RecordIcon from '@mui/icons-material/KeyboardVoice';
@@ -31,6 +30,7 @@ import GraphicEqIcon from '@mui/icons-material/GraphicEq';
 import FilterListIcon from '@mui/icons-material/FilterList';
 
 import AudioWaveformPlayer from './Editor3/components/AudioWaveformPlayer';
+import MicLevelIndicator from './Editor3/components/MicLevelIndicator';
 import { calculateWaveformData } from '../utils/calculateWaveformData';
 import { uploadStudentSubmission } from '../utils/userSubmissionStorage';
 import getCachedUrl from '../utils/getCachedUrl';
@@ -52,7 +52,6 @@ export default function RecordingStudioEnhanced({
     metadata = {},
 }) {
     const { t } = useTranslation('components');
-    const theme = useTheme();
     
     // Tracks state - each track can have multiple audio clips
     const [tracks, setTracks] = useState([
@@ -80,6 +79,7 @@ export default function RecordingStudioEnhanced({
     const [recording, setRecording] = useState(false);
     const [mediaRecorder, setMediaRecorder] = useState(null);
     const [mediaStream, setMediaStream] = useState(null);
+    const [recordingAnalyser, setRecordingAnalyser] = useState(null);
     
     // Playback state
     const [playing, setPlaying] = useState(false);
@@ -142,6 +142,16 @@ export default function RecordingStudioEnhanced({
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             setMediaStream(stream);
+
+            // Create AudioContext + AnalyserNode for MicLevelIndicator
+            const audioContext = new AudioContext();
+            audioContextRef.current = audioContext;
+            const source = audioContext.createMediaStreamSource(stream);
+            const analyser = audioContext.createAnalyser();
+            source.connect(analyser);
+            analyser.fftSize = 2048;
+            analyser.smoothingTimeConstant = 0.8;
+            setRecordingAnalyser(analyser);
             
             const recorder = new MediaRecorder(stream);
             setMediaRecorder(recorder);
@@ -176,6 +186,11 @@ export default function RecordingStudioEnhanced({
                 // Clean up
                 stream.getTracks().forEach(track => track.stop());
                 setMediaStream(null);
+                setRecordingAnalyser(null);
+                if (audioContextRef.current) {
+                    audioContextRef.current.close();
+                    audioContextRef.current = null;
+                }
             };
             
             recorder.start();
@@ -191,6 +206,11 @@ export default function RecordingStudioEnhanced({
         if (mediaRecorder && recording) {
             mediaRecorder.stop();
             setRecording(false);
+            setRecordingAnalyser(null);
+            if (audioContextRef.current) {
+                audioContextRef.current.close();
+                audioContextRef.current = null;
+            }
         }
     };
     
@@ -372,6 +392,11 @@ export default function RecordingStudioEnhanced({
                     <Typography variant="body2">
                         {recording ? t('recordingStudioEnhanced.recording') : t('recordingStudioEnhanced.clickToRecord')}
                     </Typography>
+                    {recording && (
+                        <Box sx={{ minWidth: 120, flexGrow: 1, maxWidth: 200 }}>
+                            <MicLevelIndicator analyser={recordingAnalyser} />
+                        </Box>
+                    )}
                     
                     <Box sx={{ flexGrow: 1 }} />
                     

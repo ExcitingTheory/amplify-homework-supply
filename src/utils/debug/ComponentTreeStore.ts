@@ -170,7 +170,9 @@ class ComponentTreeStore {
    */
   private notifyListeners(): void {
     const tree = this.getTree();
-    this.listeners.forEach(listener => listener(tree));
+    queueMicrotask(() => {
+      this.listeners.forEach(listener => listener(tree));
+    });
   }
 
   /**

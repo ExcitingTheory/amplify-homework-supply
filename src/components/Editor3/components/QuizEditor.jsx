@@ -104,10 +104,10 @@ const QuizEditor = ({
                 (payload) => {
                     const event = payload;
                     if (quizRef.current && quizRef.current.contains(event.target)) {
-                        // Let interactive form elements (Switch, Checkbox, Button, etc.) handle their own clicks
-                        const tag = event.target.tagName;
-                        const role = event.target.getAttribute('role');
-                        if (tag === 'INPUT' || tag === 'BUTTON' || tag === 'TEXTAREA' || role === 'checkbox' || role === 'switch') {
+                        // Let interactive form elements (Switch, Checkbox, Button, etc.) handle their own clicks.
+                        // Use closest() to walk up the DOM — MUI Switch renders <span> elements
+                        // (thumb, track) that don't have interactive tags/roles on the direct target.
+                        if (event.target.closest('input, button, textarea, [role="checkbox"], [role="switch"], [role="button"], label')) {
                             return false;
                         }
                         event.preventDefault();

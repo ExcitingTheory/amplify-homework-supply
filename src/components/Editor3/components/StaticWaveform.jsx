@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Box, CircularProgress } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { useColorScheme } from '@mui/material/styles';
 import { useTranslation } from 'next-i18next';
 import { hexToRgb } from '../../../utils/hexToRgb';
 import getCachedUrl from '../../../utils/getCachedUrl';
@@ -39,19 +39,29 @@ export default function StaticWaveform({
     waveformData: propWaveformData,
     width = 600, 
     height = 100,
-    backgroundColor = 'white',
+    backgroundColor,
     showLoading = true
 }) {
     const { t } = useTranslation('editor.shared');
     const canvasRef = useRef(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const theme = useTheme();
-    const mainColor = theme.palette.primary.main;
-    const rgbColor = hexToRgb(mainColor);
+    const { mode } = useColorScheme();
 
     useEffect(() => {
         if (!file && !propWaveformData) return;
+
+        // Read CSS variables for canvas (which can't use var())
+        const resolvedBg = backgroundColor
+            || (typeof document !== 'undefined'
+                ? getComputedStyle(document.documentElement).getPropertyValue('--mui-palette-background-paper').trim()
+                : '')
+            || '#ffffff';
+        const mainColor = (typeof document !== 'undefined'
+            ? getComputedStyle(document.documentElement).getPropertyValue('--mui-palette-primary-main').trim()
+            : '')
+            || '#556cd6';
+        const rgbColor = hexToRgb(mainColor);
 
         const drawWaveform = async () => {
             try {
@@ -67,7 +77,7 @@ export default function StaticWaveform({
                     normalizedData = JSON.parse(file.waveformData);
                 } else if (file) {
                     // Calculate from audio file
-                    const audioUrl = await getCachedUrl(file.path, 'protected', file.identityId);
+                    const audioUrl = await getCachedUrl(file.path);
                     const response = await fetch(audioUrl);
                     const arrayBuffer = await response.arrayBuffer();
                     normalizedData = await calculateWaveformData(arrayBuffer, width);
@@ -85,7 +95,7 @@ export default function StaticWaveform({
                 const ctx = canvas.getContext('2d');
                 
                 // Clear canvas
-                ctx.fillStyle = backgroundColor;
+                ctx.fillStyle = resolvedBg;
                 ctx.fillRect(0, 0, width, height);
                 
                 // Draw waveform
@@ -144,7 +154,7 @@ export default function StaticWaveform({
                         canvas.width = width;
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
-                        ctx.fillStyle = backgroundColor;
+                        ctx.fillStyle = resolvedBg;
                         ctx.fillRect(0, 0, width, height);
                         
                         // Draw simple placeholder bars
@@ -167,7 +177,7 @@ export default function StaticWaveform({
         };
 
         drawWaveform();
-    }, [file, propWaveformData, width, height, backgroundColor, rgbColor.r, rgbColor.g, rgbColor.b]);
+    }, [file, propWaveformData, width, height, backgroundColor, mode]);
 
     if (error) {
         return (
@@ -198,7 +208,8 @@ export default function StaticWaveform({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    backgroundColor: 'var(--mui-palette-background-paper)',
+                    opacity: 0.8,
                     zIndex: 1
                 }}>
                     <CircularProgress size={30} />
@@ -208,7 +219,7 @@ export default function StaticWaveform({
                 ref={canvasRef}
                 style={{
                     display: 'block',
-                    border: '1px solid #e0e0e0',
+                    border: '1px solid var(--mui-palette-divider)',
                     borderRadius: '4px'
                 }}
             />

@@ -13,7 +13,6 @@ import MicLevelIndicator from './Editor3/components/MicLevelIndicator';
 import { calculateWaveformData } from '../utils/calculateWaveformData';
 // import { SvgConverter } from './Editor2';
 import { Box, Typography, Card, CardContent } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 
 import { hexToRgb } from "../utils/hexToRgb";
 
@@ -31,7 +30,7 @@ function AudioRecordingCard({ file, index, identityId }) {
   
   React.useEffect(() => {
     if (file.path) {
-      getCachedUrl(file.path, 'protected', identityId)
+      getCachedUrl(file.path)
         .then(url => setAudioUrl(url))
         .catch(err => console.error('Error loading audio URL:', err));
     }
@@ -78,7 +77,7 @@ function AudioRecordingCard({ file, index, identityId }) {
   );
 }
 
-export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperations, requestDefinition, feedback, isCorrect}) {
+export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperations, requestDefinition, feedback, isCorrect, onRecordingComplete, embedded}) {
   // TODO: add a way to delete the recording
   // TODO: add a way to list multiple recordings
   // TODO: add a way to update the word with the recording,
@@ -106,13 +105,13 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
 
   const { audioFiles } = React.useContext(FilesContext);
 
-  const theme = useTheme();
-  const mainColor = theme.palette.primary.main;
+  const mainColor = typeof document !== 'undefined'
+    ? getComputedStyle(document.documentElement).getPropertyValue('--mui-palette-primary-main').trim() || '#556cd6'
+    : '#556cd6';
 
   console.log('FileManager.mainColor', mainColor);
 
-  const rgbColor = hexToRgb(mainColor); // Replace 'primary.main' with the color you want to convert
-  console.log('rgbColor, rgbColor'); // Output: "rgb(33, 150, 243)"
+  const rgbColor = hexToRgb(mainColor);
   const _r = rgbColor.r;
   const _g = rgbColor.g;
   const _b = rgbColor.b;
@@ -147,7 +146,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
 
 
   const lookupWord = (phrase || '') + (pronunciation || '');
-  const audioFile = audioFiles[lookupWord] ? audioFiles[lookupWord] : null;
+  const audioFile = audioFiles?.[lookupWord] ?? null;
 
   console.log('audioFile', audioFile);
 
@@ -156,6 +155,18 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
     async function uploadSignAndVerifyAudio() {
       if (!audioBlob) return;
       setError(null);
+      
+      // Embedded mode: pass blob back to parent instead of uploading
+      if (onRecordingComplete) {
+        try {
+          const waveform = await calculateWaveformData(audioBlob, 600);
+          onRecordingComplete(audioBlob, waveform);
+        } catch (err) {
+          setError('Error processing recording: ' + (err?.message || err));
+        }
+        return;
+      }
+      
       try {
         let gradeID = grade ? grade.id : null;
         if (!grade) {
@@ -199,7 +210,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
             identityId: grade.identityId || identityId,
           });
         }
-        const url = await getCachedUrl(uploadResult.path, 'private', identityId);
+        const url = await getCachedUrl(uploadResult.path);
         const { data, errors } = await client.queries.verifyAudioUrl({
           expected: requestDefinition ? definition : phrase,
           audioUrl: url,
@@ -494,7 +505,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
         </Box>
       )}
       {/* Display all existing audio recordings */}
-      {Object.keys(audioFiles).length > 0 && (
+      {!embedded && Object.keys(audioFiles).length > 0 && (
         <Box sx={{ mt: 3 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>{t('components:recordingStudio2.existingRecordings')}</Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -509,7 +520,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
           </Box>
         </Box>
       )}
-      {audioFile && (
+      {!embedded && audioFile && (
         <Box sx={{ mt: 2 }}>
           <Typography variant="caption" color="text.secondary">{t('components:recordingStudio2.staticWaveformPreview')}</Typography>
           <StaticWaveform
@@ -519,7 +530,7 @@ export function RecordingStudio2({ word, item, qk, setFeedback, setFileOperation
           />
         </Box>
       )}
-      {waveformData && audioBlob && (
+      {!embedded && waveformData && audioBlob && (
         <Box sx={{ mt: 2 }}>
           <Typography variant="caption" color="text.secondary">{t('components:recordingStudio2.recordedAudioWaveform')}</Typography>
           <StaticWaveform

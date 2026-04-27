@@ -38,6 +38,9 @@ Amplify.configure(amplifyOutputs);
 
 const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || '';
 
+// Skip performance tests when sandbox/credentials not available
+const describeMaybeSkip = TEST_PASSWORD ? describe : describe.skip;
+
 // Performance threshold constants (in milliseconds)
 const PERFORMANCE_THRESHOLDS = {
   GRADE_SUBMISSION: 1000,        // 1 second
@@ -146,7 +149,7 @@ async function createTestAssignment(instructorUsername: string, unitId: string, 
   return assignment;
 }
 
-describe('Concurrent Users Performance Tests', () => {
+describeMaybeSkip('Concurrent Users Performance Tests', () => {
   let testSection: any;
   let testUnit: any;
   let testAssignment: any;

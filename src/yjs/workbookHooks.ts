@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { WorkbookCollaborationProvider, WorkbookUser, WorkbookBlockData } from './WorkbookCollaborationProvider'
+import { WorkbookCollaborationProvider, WorkbookUser, WorkbookBlockData, CommentThread, HistoryEntry } from './WorkbookCollaborationProvider'
 
 export interface UseWorkbookCollaborationOptions {
   gradeId: string
@@ -521,4 +521,283 @@ export function useWorkbookStats(provider: WorkbookCollaborationProvider | null)
   }, [provider])
 
   return stats
+}
+
+// ============================================================================
+// Presence Hooks
+// ============================================================================
+
+const IDLE_TIMEOUT_MS = 60000 // 60 seconds
+
+export interface PresenceUser extends WorkbookUser {
+  clientId: number
+  lastInteraction?: number
+  isIdle: boolean
+}
+
+/**
+ * Hook for tracking all users editing a specific block.
+ *
+ * Returns all non-self users whose awareness cursor.blockId matches the given blockId.
+ * Includes all roles (not just tutors). Each user includes an `isIdle` flag based on
+ * whether `lastInteraction` is older than 60 seconds.
+ *
+ * @example
+ * ```tsx
+ * function BlockWithEditors({ blockId }) {
+ *   const editors = useBlockEditors(provider, blockId)
+ *
+ *   return (
+ *     <div>
+ *       {editors.map(editor => (
+ *         <Chip
+ *           key={editor.clientId}
+ *           label={`Being edited by ${editor.displayName}`}
+ *           sx={{ opacity: editor.isIdle ? 0.5 : 1 }}
+ *         />
+ *       ))}
+ *     </div>
+ *   )
+ * }
+ * ```
+ */
+export function useBlockEditors(
+  provider: WorkbookCollaborationProvider | null,
+  blockId: string,
+): PresenceUser[] {
+  const [editors, setEditors] = useState<PresenceUser[]>([])
+
+  useEffect(() => {
+    if (!provider) return
+
+    const updateEditors = () => {
+      const awareness = provider.getAwareness()
+      const now = Date.now()
+      const result: PresenceUser[] = []
+
+      awareness.getStates().forEach((state, clientId) => {
+        if (clientId === awareness.clientID) return // Skip self
+
+        const user = state.user as WorkbookUser | undefined
+        if (!user) return
+
+        // Only include users whose cursor is on this block
+        if (user.cursor?.blockId !== blockId) return
+
+        const lastInteraction = (state as any).lastInteraction as number | undefined
+        const isIdle = lastInteraction != null
+          ? (now - lastInteraction) > IDLE_TIMEOUT_MS
+          : false
+
+        result.push({
+          ...user,
+          clientId,
+          lastInteraction,
+          isIdle,
+        })
+      })
+
+      setEditors(result)
+    }
+
+    const unsubscribe = provider.onAwarenessChange(updateEditors)
+    updateEditors()
+
+    return () => {
+      unsubscribe()
+    }
+  }, [provider, blockId])
+
+  return editors
+}
+
+/**
+ * Hook that returns all connected users with presence metadata.
+ * Used by WorkbookPresenceBar for the full avatar row.
+ *
+ * @example
+ * ```tsx
+ * function WorkbookPresenceBar() {
+ *   const users = usePresenceUsers(provider)
+ *   return (
+ *     <AvatarGroup>
+ *       {users.map(u => (
+ *         <Avatar key={u.clientId} sx={{ opacity: u.isIdle ? 0.4 : 1 }}>
+ *           {u.displayName?.[0]}
+ *         </Avatar>
+ *       ))}
+ *     </AvatarGroup>
+ *   )
+ * }
+ * ```
+ */
+export function usePresenceUsers(
+  provider: WorkbookCollaborationProvider | null,
+): PresenceUser[] {
+  const [users, setUsers] = useState<PresenceUser[]>([])
+
+  useEffect(() => {
+    if (!provider) return
+
+    const updateUsers = () => {
+      const awareness = provider.getAwareness()
+      const now = Date.now()
+      const result: PresenceUser[] = []
+
+      awareness.getStates().forEach((state, clientId) => {
+        const user = state.user as WorkbookUser | undefined
+        if (!user) return
+
+        const lastInteraction = (state as any).lastInteraction as number | undefined
+        const isIdle = lastInteraction != null
+          ? (now - lastInteraction) > IDLE_TIMEOUT_MS
+          : false
+
+        result.push({
+          ...user,
+          clientId,
+          lastInteraction,
+          isIdle,
+        })
+      })
+
+      setUsers(result)
+    }
+
+    const unsubscribe = provider.onAwarenessChange(updateUsers)
+    updateUsers()
+
+    return () => {
+      unsubscribe()
+    }
+  }, [provider])
+
+  return users
+}
+
+// ============================================================================
+// Comment Hooks
+// ============================================================================
+
+/**
+ * Hook for real-time workbook comments on a specific block.
+ *
+ * Subscribes to the comments Y.Map and filters by blockId.
+ * Returns live comment threads and mutation functions.
+ *
+ * @example
+ * ```tsx
+ * function CommentSection({ blockId }) {
+ *   const { threads, addComment, replyToComment, resolveThread } =
+ *     useWorkbookComments(provider, blockId)
+ *
+ *   return (
+ *     <div>
+ *       {threads.map(thread => (
+ *         <CommentThread key={thread.id} thread={thread} />
+ *       ))}
+ *       <button onClick={() => addComment('Great work!')}>Add Comment</button>
+ *     </div>
+ *   )
+ * }
+ * ```
+ */
+export function useWorkbookComments(
+  provider: WorkbookCollaborationProvider | null,
+  blockId?: string,
+) {
+  const [threads, setThreads] = useState<CommentThread[]>([])
+
+  useEffect(() => {
+    if (!provider) return
+
+    const commentsMap = provider.getCommentsMap()
+
+    const updateThreads = () => {
+      setThreads(provider.getComments(blockId))
+    }
+
+    updateThreads()
+    commentsMap.observe(updateThreads)
+
+    return () => {
+      commentsMap.unobserve(updateThreads)
+    }
+  }, [provider, blockId])
+
+  const addComment = useCallback(
+    (text: string) => {
+      if (!provider || !blockId) return null
+      return provider.addComment(blockId, text)
+    },
+    [provider, blockId],
+  )
+
+  const replyToComment = useCallback(
+    (threadKey: string, text: string) => {
+      if (!provider) return
+      provider.replyToComment(threadKey, text)
+    },
+    [provider],
+  )
+
+  const resolveThread = useCallback(
+    (threadKey: string, resolved: boolean = true) => {
+      if (!provider) return
+      provider.resolveThread(threadKey, resolved)
+    },
+    [provider],
+  )
+
+  return { threads, addComment, replyToComment, resolveThread }
+}
+
+// ============================================================================
+// History Hooks
+// ============================================================================
+
+/**
+ * Hook for block-level change history.
+ *
+ * Subscribes to the history Y.Array for a specific block and returns
+ * entries in chronological order.
+ *
+ * @example
+ * ```tsx
+ * function BlockHistory({ blockId }) {
+ *   const { entries } = useBlockHistory(provider, blockId)
+ *   return (
+ *     <ul>
+ *       {entries.map((e, i) => (
+ *         <li key={i}>{e.displayName} changed {e.fieldChanged}</li>
+ *       ))}
+ *     </ul>
+ *   )
+ * }
+ * ```
+ */
+export function useBlockHistory(
+  provider: WorkbookCollaborationProvider | null,
+  blockId: string,
+) {
+  const [entries, setEntries] = useState<HistoryEntry[]>([])
+
+  useEffect(() => {
+    if (!provider) return
+
+    const historyArray = provider.getDoc().getArray<HistoryEntry>(`history-${blockId}`)
+
+    const updateEntries = () => {
+      setEntries(Array.from(historyArray))
+    }
+
+    updateEntries()
+    historyArray.observe(updateEntries)
+
+    return () => {
+      historyArray.unobserve(updateEntries)
+    }
+  }, [provider, blockId])
+
+  return { entries }
 }

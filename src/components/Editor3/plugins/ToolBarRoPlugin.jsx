@@ -25,6 +25,7 @@ import MuiAppBar from '@mui/material/AppBar';
 import { styled } from '@mui/material/styles';
 
 import TimerIcon from '@mui/icons-material/Timer';
+import { ConnectionStatus } from '../../Workbook';
 
 const drawerWidth = 400;
 
@@ -37,6 +38,9 @@ export const IS_APPLE = CAN_USE_DOM && /Mac|iPod|iPhone|iPad/.test(navigator.pla
 
 import { $isAtNodeEnd } from '@lexical/selection';
 import UnitContext from '../../../context/unitContext';
+import { useXP } from '../../../context/xpContext';
+import { LevelBadge } from '../../Gamification/LevelBadge';
+import { StreakIndicator } from '../../Gamification/StreakIndicator';
 
 /**
  * @param {number} countDown
@@ -197,6 +201,12 @@ export default function ToolBarRoPlugin({
         finishedQuestions,
         rubric,
     } = React.useContext(UnitContext);
+    const { level, xpLogs } = useXP();
+    // Derive current streak from XP logs (latest streak entry)
+    const currentStreak = React.useMemo(() => {
+        const streakLogs = xpLogs.filter(l => l.reason === 'STREAK_3DAY' || l.reason === 'STREAK_7DAY');
+        return streakLogs.length > 0 ? (streakLogs.length >= 2 ? 7 : 3) : 0;
+    }, [xpLogs]);
 
     const name = unit?.name;
     const description = unit?.description;
@@ -311,6 +321,9 @@ export default function ToolBarRoPlugin({
                             }}
                         >
                             <TimeLeft />
+                            <LevelBadge level={level} showProgress={false} size="small" />
+                            <StreakIndicator currentStreak={currentStreak} size="small" />
+                            <ConnectionStatus size={isScrolled ? "small" : "small"} showLabel={!isScrolled} />
                             <Chip 
                                 label={
                                     <Box component="span">

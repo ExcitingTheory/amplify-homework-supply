@@ -3,7 +3,7 @@
  * Emits events when users complete onboarding tasks
  */
 
-export type UserPersona = 'instructor' | 'learner' | 'developer' | 'translator';
+export type UserPersona = 'instructor' | 'learner' | 'translator';
 export type OnboardingMode = 'tutorial' | 'quiz';
 
 export interface OnboardingEvent {
@@ -32,13 +32,45 @@ class OnboardingEventEmitter {
   private completedTasks: Map<string, OnboardingEvent> = new Map();
   private currentPersona: UserPersona | null = null;
   private currentMode: OnboardingMode = 'tutorial';
+  private storageListenerAttached = false;
 
   /**
-   * Subscribe to onboarding events
+   * Subscribe to onboarding events.
+   * Also starts listening for cross-frame localStorage changes so that
+   * task completions from the preview iframe are picked up by the manager.
    */
   on(callback: (event: OnboardingEvent) => void): () => void {
     this.listeners.add(callback);
+    this.ensureStorageListener();
     return () => this.listeners.delete(callback);
+  }
+
+  /**
+   * Attach a storage event listener (once) so that when another frame
+   * writes to localStorage we reload state and notify listeners.
+   */
+  private ensureStorageListener(): void {
+    if (this.storageListenerAttached) return;
+    if (typeof window === 'undefined') return;
+    this.storageListenerAttached = true;
+
+    window.addEventListener('storage', (e: StorageEvent) => {
+      if (e.key !== 'storybook_onboarding_progress') return;
+
+      // Snapshot previous completed task keys
+      const previousKeys = new Set(this.completedTasks.keys());
+
+      // Reload state from localStorage
+      this.loadFromLocalStorage();
+
+      // Detect and emit newly completed tasks
+      for (const [key, event] of this.completedTasks.entries()) {
+        if (!previousKeys.has(key)) {
+          console.log('[OnboardingEmitter] Cross-frame task completion detected:', key);
+          this.listeners.forEach((cb) => cb(event));
+        }
+      }
+    });
   }
 
   /**

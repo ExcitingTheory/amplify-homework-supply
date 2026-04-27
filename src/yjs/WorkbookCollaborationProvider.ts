@@ -44,6 +44,36 @@ export interface WorkbookBlockData {
   }
 }
 
+export interface CommentReply {
+  id: string
+  author: string
+  authorRole: string
+  displayName?: string
+  text: string
+  createdAt: string
+}
+
+export interface CommentThread {
+  id: string
+  blockId: string
+  author: string
+  authorRole: string
+  displayName?: string
+  text: string
+  replies: CommentReply[]
+  resolved: boolean
+  createdAt: string
+}
+
+export interface HistoryEntry {
+  userId: string
+  displayName: string
+  timestamp: string
+  fieldChanged: string
+  oldValue: any
+  newValue: any
+}
+
 /**
  * Collaborative provider for student workbooks with tutor support
  * 
@@ -85,12 +115,14 @@ export class WorkbookCollaborationProvider extends YjsDocProvider {
   private user: WorkbookUser
   private workbookConfig: WorkbookCollaborationConfig
   private syncTimer: NodeJS.Timeout | null = null
+  private cursorDebounceTimer: NodeJS.Timeout | null = null
   private activeTutors: Map<number, WorkbookUser> = new Map()
   
   // Y.js structures for workbook data
   private workbookMap: Y.Map<any>
   private metadataMap: Y.Map<any>
   private feedbackMap: Y.Map<any>
+  private commentsMap: Y.Map<CommentThread>
 
   constructor(config: WorkbookCollaborationConfig) {
     // Create the document name from the grade ID
@@ -113,6 +145,7 @@ export class WorkbookCollaborationProvider extends YjsDocProvider {
     this.workbookMap = this.getMap('workbookData')
     this.metadataMap = this.getMap('metadata')
     this.feedbackMap = this.getMap('feedback')
+    this.commentsMap = this.getMap('comments') as Y.Map<CommentThread>
 
     // Set up awareness with user info
     this.initializeAwareness()
@@ -134,6 +167,7 @@ export class WorkbookCollaborationProvider extends YjsDocProvider {
     awareness.setLocalState({
       user: this.user,
       timestamp: Date.now(),
+      lastInteraction: Date.now(),
       gradeId: this.gradeId,
     })
   }
@@ -240,6 +274,18 @@ export class WorkbookCollaborationProvider extends YjsDocProvider {
       timestamp: new Date().toISOString(),
     }
     this.workbookMap.set(blockId, updatedData)
+
+    // Record history for each changed field
+    for (const key of Object.keys(data)) {
+      if (key === 'timestamp') continue
+      const oldVal = currentData[key]
+      const newVal = (data as any)[key]
+      if (oldVal !== newVal) {
+        this.recordHistory(blockId, key, oldVal, newVal)
+      }
+    }
+
+    this.touchLastInteraction()
   }
 
   /**
@@ -331,19 +377,42 @@ export class WorkbookCollaborationProvider extends YjsDocProvider {
    * Update current user's cursor position
    */
   updateCursor(blockId: string, position?: number): void {
+    // Debounce cursor updates by 300ms
+    if (this.cursorDebounceTimer) {
+      clearTimeout(this.cursorDebounceTimer)
+    }
+
+    this.cursorDebounceTimer = setTimeout(() => {
+      const awareness = this.getAwareness()
+      const currentState = awareness.getLocalState()
+
+      awareness.setLocalState({
+        ...currentState,
+        user: {
+          ...this.user,
+          cursor: {
+            blockId,
+            position,
+          },
+        },
+        lastInteraction: Date.now(),
+      })
+    }, 300)
+  }
+
+  /**
+   * Update the lastInteraction timestamp in awareness state.
+   * Called on user actions like block updates.
+   */
+  private touchLastInteraction(): void {
     const awareness = this.getAwareness()
     const currentState = awareness.getLocalState()
-
-    awareness.setLocalState({
-      ...currentState,
-      user: {
-        ...this.user,
-        cursor: {
-          blockId,
-          position,
-        },
-      },
-    })
+    if (currentState) {
+      awareness.setLocalState({
+        ...currentState,
+        lastInteraction: Date.now(),
+      })
+    }
   }
 
   /**
@@ -436,8 +505,129 @@ export class WorkbookCollaborationProvider extends YjsDocProvider {
     if (this.syncTimer) {
       clearTimeout(this.syncTimer)
     }
+    if (this.cursorDebounceTimer) {
+      clearTimeout(this.cursorDebounceTimer)
+    }
     this.activeTutors.clear()
     super.destroy()
+  }
+
+  // ========================================================================
+  // Comments
+  // ========================================================================
+
+  /**
+   * Add a new comment thread to a block.
+   */
+  addComment(blockId: string, text: string): CommentThread {
+    const thread: CommentThread = {
+      id: crypto.randomUUID(),
+      blockId,
+      author: this.user.username,
+      authorRole: this.user.role,
+      displayName: this.user.displayName,
+      text,
+      replies: [],
+      resolved: false,
+      createdAt: new Date().toISOString(),
+    }
+
+    this.commentsMap.set(`${blockId}-${thread.id}`, thread)
+    this.touchLastInteraction()
+    return thread
+  }
+
+  /**
+   * Reply to an existing comment thread.
+   */
+  replyToComment(threadKey: string, text: string): void {
+    const thread = this.commentsMap.get(threadKey)
+    if (!thread) return
+
+    const reply: CommentReply = {
+      id: crypto.randomUUID(),
+      author: this.user.username,
+      authorRole: this.user.role,
+      displayName: this.user.displayName,
+      text,
+      createdAt: new Date().toISOString(),
+    }
+
+    this.commentsMap.set(threadKey, {
+      ...thread,
+      replies: [...thread.replies, reply],
+    })
+    this.touchLastInteraction()
+  }
+
+  /**
+   * Resolve or unresolve a comment thread.
+   */
+  resolveThread(threadKey: string, resolved: boolean = true): void {
+    const thread = this.commentsMap.get(threadKey)
+    if (!thread) return
+
+    this.commentsMap.set(threadKey, { ...thread, resolved })
+  }
+
+  /**
+   * Get all comment threads, optionally filtered by blockId.
+   */
+  getComments(blockId?: string): CommentThread[] {
+    const threads: CommentThread[] = []
+    this.commentsMap.forEach((thread) => {
+      if (!blockId || thread.blockId === blockId) {
+        threads.push(thread)
+      }
+    })
+    return threads
+  }
+
+  /**
+   * Get the comments Y.Map for observation in hooks.
+   */
+  getCommentsMap(): Y.Map<CommentThread> {
+    return this.commentsMap
+  }
+
+  // ========================================================================
+  // Block-Level Change History
+  // ========================================================================
+
+  private static readonly MAX_HISTORY_ENTRIES = 50
+
+  /**
+   * Record a history entry for a block change.
+   * Call this when a block is updated with field-level changes.
+   */
+  recordHistory(blockId: string, fieldChanged: string, oldValue: any, newValue: any): void {
+    const historyArrayName = `history-${blockId}`
+    const historyArray = this.getDoc().getArray<HistoryEntry>(historyArrayName)
+
+    const entry: HistoryEntry = {
+      userId: this.user.username,
+      displayName: this.user.displayName || this.user.username,
+      timestamp: new Date().toISOString(),
+      fieldChanged,
+      oldValue,
+      newValue,
+    }
+
+    historyArray.push([entry])
+
+    // Trim to last N entries
+    if (historyArray.length > WorkbookCollaborationProvider.MAX_HISTORY_ENTRIES) {
+      const excess = historyArray.length - WorkbookCollaborationProvider.MAX_HISTORY_ENTRIES
+      historyArray.delete(0, excess)
+    }
+  }
+
+  /**
+   * Get history entries for a block.
+   */
+  getBlockHistory(blockId: string): HistoryEntry[] {
+    const historyArray = this.getDoc().getArray<HistoryEntry>(`history-${blockId}`)
+    return Array.from(historyArray)
   }
 }
 

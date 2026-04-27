@@ -160,6 +160,32 @@ const DictionaryProvider = ({ children }) => {
             return;
         }
 
+        // ── Offline fallback: load words from IndexedDB cache ─────────
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+            (async () => {
+                try {
+                    const { getAllRecords } = await import('../offline/OfflineDataStore');
+                    const cachedWords = await getAllRecords('words');
+                    if (cachedWords.length > 0) {
+                        const wordMap = {};
+                        const _wordMapId = {};
+                        cachedWords.forEach(item => {
+                            wordMap[item.phrase] = item;
+                            _wordMapId[item.id] = item;
+                        });
+                        setWords(wordMap);
+                        setFilteredWords(wordMap);
+                        setWordMapId(_wordMapId);
+                        console.log('[DictionaryContext] Loaded', cachedWords.length, 'words from offline cache');
+                    }
+                } catch (err) {
+                    console.warn('[DictionaryContext] Offline word cache load failed:', err);
+                }
+            })();
+            return;
+        }
+        // ── End offline fallback ──────────────────────────────────────
+
         const client = getAmplifyClient();
         let subscription;
 
@@ -207,6 +233,11 @@ const DictionaryProvider = ({ children }) => {
                 }
             },
             error: (error) => {
+                const msg = error?.message || error?.errors?.[0]?.message || error?.error?.errors?.[0]?.message || JSON.stringify(error);
+                if (msg.includes('DuplicatedOperationError')) {
+                    console.warn('[DictionaryContext] Word subscription: transient DuplicatedOperationError (safe to ignore)');
+                    return;
+                }
                 console.error('[DictionaryContext] Word subscription error:', error);
             }
         });
@@ -223,6 +254,24 @@ const DictionaryProvider = ({ children }) => {
         if (authLoading || !user) {
             return;
         }
+
+        // ── Offline fallback: load questions from IndexedDB cache ─────
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+            (async () => {
+                try {
+                    const { getAllRecords } = await import('../offline/OfflineDataStore');
+                    const cachedQuestions = await getAllRecords('questions');
+                    if (cachedQuestions.length > 0) {
+                        setQuestionBank(cachedQuestions);
+                        console.log('[DictionaryContext] Loaded', cachedQuestions.length, 'questions from offline cache');
+                    }
+                } catch (err) {
+                    console.warn('[DictionaryContext] Offline question cache load failed:', err);
+                }
+            })();
+            return;
+        }
+        // ── End offline fallback ──────────────────────────────────────
 
         const client = getAmplifyClient();
         let subscription;
@@ -246,6 +295,11 @@ const DictionaryProvider = ({ children }) => {
                 });
             },
             error: (error) => {
+                const msg = error?.message || error?.errors?.[0]?.message || error?.error?.errors?.[0]?.message || JSON.stringify(error);
+                if (msg.includes('DuplicatedOperationError')) {
+                    console.warn('[DictionaryContext] Question subscription: transient DuplicatedOperationError (safe to ignore)');
+                    return;
+                }
                 console.error('[DictionaryContext] Question subscription error:', error);
             }
         });

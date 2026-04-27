@@ -29,62 +29,19 @@ const config: StorybookConfig = {
   ],
   
   async viteFinal(config) {
-    // Add custom plugin to intercept YJS imports before alias resolution
-    if (!config.plugins) {
-      config.plugins = [];
-    }
+    // Vite plugin to intercept CollaborationPlugin wrapper imports before pre-bundling
+    const collabMockPath = path.resolve(__dirname, './__mocks__/CollaborationPlugin.js');
     
+    config.plugins = config.plugins || [];
     config.plugins.push({
-      name: 'mock-yjs-imports',
-      enforce: 'pre', // Run before other plugins
-      resolveId(source, importer) {
-        // Intercept any import that references yjs directory
-        const yjsPatterns = [
-          /\/yjs\//,
-          /^yjs\//,
-          /^\.\.\/yjs\//,
-          /^\.\.\/\.\.\/yjs\//,
-          /@\/yjs\//,
-        ];
-        
-        const isYjsImport = yjsPatterns.some(pattern => pattern.test(source));
-        
-        if (isYjsImport) {
-          const mockPath = path.resolve(__dirname, './__mocks__');
-          
-          console.log('[mock-yjs-imports] Intercepting:', source, 'from', importer);
-          
-          // Map YJS imports to mocks
-          if (source.includes('workbookHooks')) {
-            console.log('[mock-yjs-imports] -> workbookHooks.js');
-            return path.resolve(mockPath, 'workbookHooks.js');
-          }
-          if (source.includes('YjsProvider')) {
-            console.log('[mock-yjs-imports] -> YjsProvider.js');
-            return path.resolve(mockPath, 'YjsProvider.js');
-          }
-          if (source.includes('WorkbookCollaborationProvider')) {
-            console.log('[mock-yjs-imports] -> WorkbookCollaborationProvider.js');
-            return path.resolve(mockPath, 'WorkbookCollaborationProvider.js');
-          }
-          if (source.includes('/hooks') || source.endsWith('/hooks') || source.endsWith('yjs/hooks')) {
-            console.log('[mock-yjs-imports] -> yjs-hooks.js');
-            return path.resolve(mockPath, 'yjs-hooks.js');
-          }
-          if (source.includes('useYjsUnit')) {
-            console.log('[mock-yjs-imports] -> useYjsUnit.js');
-            return path.resolve(mockPath, 'useYjsUnit.js');
-          }
-          if (source.match(/yjs\/(index)?$/)) {
-            console.log('[mock-yjs-imports] -> yjs-index.js');
-            return path.resolve(mockPath, 'yjs-index.js');
-          }
-          
-          // Default: return yjs-index for bare yjs imports
-          console.log('[mock-yjs-imports] -> yjs-index.js (default)');
-          return path.resolve(mockPath, 'yjs-index.js');
+      name: 'mock-collaboration-plugin',
+      enforce: 'pre',
+      resolveId(source) {
+        // Only mock our wrapper — NOT @lexical/react packages (LexicalNestedComposer depends on them)
+        if (source.endsWith('/plugins/CollaborationPlugin') || source.endsWith('/plugins/CollaborationPlugin.tsx')) {
+          return collabMockPath;
         }
-        return null; // Let other plugins handle it
+        return null;
       },
     });
     
@@ -112,54 +69,14 @@ const config: StorybookConfig = {
       // Alias the absolute path to the production authContext file
       [path.resolve(__dirname, '../src/context/authContext.jsx')]: path.resolve(__dirname, './__mocks__/authContext.js'),
       [path.resolve(__dirname, '../src/context/authContext')]: path.resolve(__dirname, './__mocks__/authContext.js'),
-      // Mock YJS workbook hooks - now in src/yjs/
-      [path.resolve(__dirname, '../src/yjs/workbookHooks')]: path.resolve(__dirname, './__mocks__/workbookHooks.js'),
-      [path.resolve(__dirname, '../src/yjs/workbookHooks.ts')]: path.resolve(__dirname, './__mocks__/workbookHooks.js'),
-      '@/yjs/workbookHooks': path.resolve(__dirname, './__mocks__/workbookHooks.js'),
-      '@/yjs/workbookHooks.ts': path.resolve(__dirname, './__mocks__/workbookHooks.js'),
-      '../yjs/workbookHooks': path.resolve(__dirname, './__mocks__/workbookHooks.js'),
-      '../yjs/workbookHooks.ts': path.resolve(__dirname, './__mocks__/workbookHooks.js'),
-      // Mock YJS provider files
+      // YJS: mock YjsProvider and y-websocket to prevent WebSocket connection attempts in Storybook
       [path.resolve(__dirname, '../src/yjs/YjsProvider')]: path.resolve(__dirname, './__mocks__/YjsProvider.js'),
       [path.resolve(__dirname, '../src/yjs/YjsProvider.ts')]: path.resolve(__dirname, './__mocks__/YjsProvider.js'),
-      [path.resolve(__dirname, '../src/yjs/WorkbookCollaborationProvider')]: path.resolve(__dirname, './__mocks__/WorkbookCollaborationProvider.js'),
-      [path.resolve(__dirname, '../src/yjs/WorkbookCollaborationProvider.ts')]: path.resolve(__dirname, './__mocks__/WorkbookCollaborationProvider.js'),
-      [path.resolve(__dirname, '../src/yjs/hooks')]: path.resolve(__dirname, './__mocks__/yjs-hooks.js'),
-      [path.resolve(__dirname, '../src/yjs/hooks.ts')]: path.resolve(__dirname, './__mocks__/yjs-hooks.js'),
-      [path.resolve(__dirname, '../src/yjs')]: path.resolve(__dirname, './__mocks__/yjs-index.js'),
-      [path.resolve(__dirname, '../src/yjs/index')]: path.resolve(__dirname, './__mocks__/yjs-index.js'),
-      [path.resolve(__dirname, '../src/yjs/index.ts')]: path.resolve(__dirname, './__mocks__/yjs-index.js'),
-      // Mock entire YJS directory for Storybook (prevents loading real YJS dependencies)
-      'yjs/workbookHooks': path.resolve(__dirname, './__mocks__/workbookHooks.js'),
-      'yjs/workbookHooks.js': path.resolve(__dirname, './__mocks__/workbookHooks.js'),
-      'yjs/YjsProvider': path.resolve(__dirname, './__mocks__/YjsProvider.js'),
-      'yjs/WorkbookCollaborationProvider': path.resolve(__dirname, './__mocks__/WorkbookCollaborationProvider.js'),
-      'yjs/hooks': path.resolve(__dirname, './__mocks__/yjs-hooks.js'),
-      // Mock YJS hooks
-      '@/yjs/hooks': path.resolve(__dirname, './__mocks__/yjs-hooks.js'),
-      '@/yjs/hooks.ts': path.resolve(__dirname, './__mocks__/yjs-hooks.js'),
-      '../yjs/hooks': path.resolve(__dirname, './__mocks__/yjs-hooks.js'),
-      '../yjs/hooks.ts': path.resolve(__dirname, './__mocks__/yjs-hooks.js'),
-      '../../yjs/hooks': path.resolve(__dirname, './__mocks__/yjs-hooks.js'),
-      '../../yjs/hooks.ts': path.resolve(__dirname, './__mocks__/yjs-hooks.js'),
-      // Mock useYjsUnit hook
-      '@/hooks/useYjsUnit': path.resolve(__dirname, './__mocks__/useYjsUnit.js'),
-      '@/hooks/useYjsUnit.ts': path.resolve(__dirname, './__mocks__/useYjsUnit.js'),
-      '../hooks/useYjsUnit': path.resolve(__dirname, './__mocks__/useYjsUnit.js'),
-      '../hooks/useYjsUnit.ts': path.resolve(__dirname, './__mocks__/useYjsUnit.js'),
-      '../../hooks/useYjsUnit': path.resolve(__dirname, './__mocks__/useYjsUnit.js'),
-      '../../hooks/useYjsUnit.ts': path.resolve(__dirname, './__mocks__/useYjsUnit.js'),
-      // CollaborationPlugin uses real @lexical/yjs - no mock needed
-      // Mock YJS index (directory imports)
-      '@/yjs': path.resolve(__dirname, './__mocks__/yjs-index.js'),
-      '@/yjs/index': path.resolve(__dirname, './__mocks__/yjs-index.js'),
-      '@/yjs/index.ts': path.resolve(__dirname, './__mocks__/yjs-index.js'),
-      '../yjs': path.resolve(__dirname, './__mocks__/yjs-index.js'),
-      '../yjs/index': path.resolve(__dirname, './__mocks__/yjs-index.js'),
-      '../yjs/index.ts': path.resolve(__dirname, './__mocks__/yjs-index.js'),
-      '../../yjs': path.resolve(__dirname, './__mocks__/yjs-index.js'),
-      '../../yjs/index': path.resolve(__dirname, './__mocks__/yjs-index.js'),
-      '../../yjs/index.ts': path.resolve(__dirname, './__mocks__/yjs-index.js'),
+      'y-websocket': path.resolve(__dirname, './__mocks__/y-websocket.js'),
+      // Mock CollaborationPlugin wrapper to prevent Yjs sync errors during rapid test interactions
+      // NOTE: Do NOT mock @lexical/react packages — LexicalNestedComposer depends on them
+      [path.resolve(__dirname, '../src/components/Editor3/plugins/CollaborationPlugin')]: path.resolve(__dirname, './__mocks__/CollaborationPlugin.js'),
+      [path.resolve(__dirname, '../src/components/Editor3/plugins/CollaborationPlugin.tsx')]: path.resolve(__dirname, './__mocks__/CollaborationPlugin.js'),
       // Mock vector store modules for Storybook
       '../components/Editor3/components/FileManager2': path.resolve(__dirname, './__mocks__/FileManager2.js'),
       '../components/Editor3/components/FileManager2.jsx': path.resolve(__dirname, './__mocks__/FileManager2.js'),

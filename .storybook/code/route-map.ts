@@ -23,6 +23,8 @@ export const ROUTE_TO_STORY_MAP: Record<string, string> = {
   '/units': '?path=/story/📄-pages-application-pages--units',
   '/sections': '?path=/story/📄-pages-application-pages--sections',
   '/profile': '?path=/story/📄-pages-application-pages--profile',
+  '/profile/[username]': '?path=/story/📄-pages-application-pages--profile',
+  '/settings': '?path=/story/📄-pages-application-pages--settings',
   
   // Dynamic routes - will need ID substitution
   '/unit/[id]': '?path=/story/📄-pages-application-pages--unit-detail',

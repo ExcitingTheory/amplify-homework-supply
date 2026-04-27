@@ -73,13 +73,13 @@ export const Drawer = styled(MuiDrawer, {
 })<{ open?: boolean; drawerwidth?: number }>(({ theme, open, drawerwidth = DRAWER_WIDTH }) => ({
   width: open ? drawerwidth : '2.5rem',
   flexShrink: 0,
-  whiteSpace: 'nowrap',
   boxSizing: 'border-box',
   ...(open && {
     ...openedMixin(theme, drawerwidth),
     '& .MuiDrawer-paper': openedMixin(theme, drawerwidth),
   }),
   ...(!open && {
+    whiteSpace: 'nowrap',
     ...closedMixin(theme),
     '& .MuiDrawer-paper': closedMixin(theme),
   }),

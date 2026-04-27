@@ -2,18 +2,19 @@
 import React, { use } from 'react';
 import { useTranslation } from 'next-i18next';
 import { getAmplifyClient } from '../../../utils/amplifyClient';
-import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import {
+  Autocomplete,
+  Chip,
+  Divider,
   FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
+  FormControlLabel,
   FormHelperText,
-  Typography,
+  Switch,
+  Tooltip,
   Box,
-  Collapse,
   IconButton,
   ListItem,
   List,
@@ -22,34 +23,7 @@ import {
 } from '@mui/material';
 import SectionContext from '../../../context/sectionContext';
 import UnitContext from '../../../context/unitContext';
-
-import TimerIcon from '@mui/icons-material/Timer';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-
-const formatTime = (countDown) => {
-  /**
-   * @param {number} countDown
-   * @returns {number[]} [hours, minutes, seconds]
-   * 
-   * @example
-   * formatTime(1000) // [0, 0, 1]
-   * 
-   * @example
-   * formatTime(1000 * 60 * 60 * 24) // [24, 0, 0]
-   * 
-   * @description 
-   * Convert milliseconds to hours, minutes, seconds
-   * 
-   */
-
-  const hours = Math.floor(
-    (countDown % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-  );
-  const minutes = Math.floor((countDown % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((countDown % (1000 * 60)) / 1000);
-
-  return [hours, minutes, seconds];
-};
+import TimerEditor from './TimerEditor';
 
 
 
@@ -61,47 +35,43 @@ export default function AssignmentConfiguration() {
   } = React.useContext(SectionContext);
 
   const {
-    unit
+    unit,
   } = React.useContext(UnitContext);
 
-  const [section, setSection] = React.useState('');
+  const [selectedSections, setSelectedSections] = React.useState([]);
   const [dueDate, setDueDate] = React.useState('');
-  const [openTimerDialog, setOpenTimerDialog] = React.useState(false);
-  const [timer, setTimer] = React.useState(unit?.timeLimitSeconds || '');
+  const [retryEnabled, setRetryEnabled] = React.useState(unit?.retryEnabled || false);
+  const lastWrittenVersionRef = React.useRef(0);
 
 
   React.useEffect(() => {
-    setTimer(unit?.timeLimitSeconds || '');
-  }, [unit?.timeLimitSeconds]);
+    // Skip sync until context catches up to the version we wrote
+    if (unit?._version < lastWrittenVersionRef.current) return;
+    lastWrittenVersionRef.current = 0;
+    setRetryEnabled(unit?.retryEnabled || false);
+  }, [unit?.retryEnabled, unit?._version]);
 
-
-  const handleTimerChange = async (event) => {
-    const _timer = event.target.value;
-
-    console.log('_handleTimerChange.timer', timer);
-    if (_timer == timer) {
-      return;
-    }
-
-    setTimer(_timer);
-  };
-
-  const addTimer = async (event) => {
-    event.preventDefault()
-    // save model to db
-    console.log('content state', unit);
+  const handleRetryToggle = async (event) => {
+    const checked = event.target.checked;
+    setRetryEnabled(checked);
     try {
       const client = getAmplifyClient();
-      await client.models.Unit.update({
+      const { data, errors } = await client.models.Unit.update({
         id: unit.id,
-        timeLimitSeconds: parseInt(timer)
+        retryEnabled: checked,
+        _version: unit._version ?? 1,
       });
-    } catch (errors) {
-      console.error(errors)
+      if (errors?.length) {
+        console.error('[AssignmentConfiguration] retryEnabled update returned errors:', errors);
+        setRetryEnabled(!checked); // revert on error
+      } else if (data) {
+        lastWrittenVersionRef.current = data._version;
+      }
+    } catch (err) {
+      console.error('[AssignmentConfiguration] retryEnabled update threw:', err);
+      setRetryEnabled(!checked); // revert on error
     }
-
-    setOpenTimerDialog(false)
-  }
+  };
 
 
   const handleDueDateChange = async (event) => {
@@ -121,45 +91,61 @@ export default function AssignmentConfiguration() {
 
   };
 
-  const handleSectionChange = async (event) => {
-    const _section = event.target.value;
+  // Filter out sections that already have assignments
+  const allSections = React.useMemo(() => {
+    if (!sections?.length) return [];
+    return sections.filter(s => s != null && s.id != null);
+  }, [sections]);
 
-    console.log('_handleSectionChange.section', section);
-    if (_section == section) {
-      return;
-    }
+  const assignedSectionIds = React.useMemo(() => {
+    return new Set(assignments?.map(a => a.sectionID) || []);
+  }, [assignments]);
 
-    setSection(_section);
-  };
-
-  const addDueDate = async (event) => {
-    event.preventDefault();
-    // save model to db
-    console.log('add due date', dueDate);
-    console.log('to this section', section);
-    const assignment = {
-      unitID: unit.id,
-      sectionID: section,
-      learner: sectionMap[section].learner,
-      dueDate: dueDate
-    };
-
-    console.log('assignment', assignment);
+  const createAssignments = React.useCallback(async (sectionIds, dueDateISO) => {
+    if (!sectionIds?.length || !dueDateISO || !unit?.id) return;
 
     const client = getAmplifyClient();
-    await client.models.Assignment.create(assignment);
+    const learners = [...(unit.learners || [])];
+    let learnersChanged = false;
 
-    // add to the dynamic group list if it doesn't exist
-    const learners = unit.learners || [];
+    for (const sectionId of sectionIds) {
+      // Don't create duplicate assignment for same section
+      if (assignments?.some(a => a.sectionID === sectionId)) continue;
 
-    if (!learners.includes(sectionMap[section].learner)) {
-      learners.push(sectionMap[section].learner);
+      const assignment = {
+        unitID: unit.id,
+        sectionID: sectionId,
+        learner: sectionMap[sectionId]?.learner,
+        dueDate: dueDateISO
+      };
+
+      await client.models.Assignment.create(assignment);
+
+      // add to the dynamic group list if it doesn't exist
+      if (sectionMap[sectionId]?.learner && !learners.includes(sectionMap[sectionId].learner)) {
+        learners.push(sectionMap[sectionId].learner);
+        learnersChanged = true;
+      }
+    }
+
+    if (learnersChanged) {
       await client.models.Unit.update({
         id: unit.id,
         learners: learners
       });
     }
-  };
+
+    // Reset fields after successful save
+    setSelectedSections([]);
+    setDueDate('');
+  }, [unit?.id, unit?.learners, sectionMap, assignments]);
+
+  // Auto-save assignments when both fields are filled
+  React.useEffect(() => {
+    if (selectedSections.length > 0 && dueDate) {
+      createAssignments(selectedSections.map(s => s.id), dueDate);
+    }
+  }, [selectedSections, dueDate, createAssignments]);
 
   const deleteAssignment = async (assignment) => {
     console.log('deleteAssignment', assignment);
@@ -170,13 +156,6 @@ export default function AssignmentConfiguration() {
 
   
 
-
-  const [hours, minutes, seconds] = formatTime(unit?.timeLimitSeconds * 1000)
-  const timeString = [
-    hours.toString().padStart(2, '0'),
-    minutes.toString().padStart(2, '0'),
-    seconds.toString().padStart(2, '0')
-  ].join(':')
 
   return (
     <>
@@ -192,111 +171,54 @@ export default function AssignmentConfiguration() {
       >
         <Box
           sx={{
-            // maxWidth: '30rem',
             padding: '1rem',
+            width: '100%',
           }}
         >
         <h3
           style={{
             textWrap: 'wrap',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.25rem',
           }}>
           {t('assignmentConfiguration.addTimerQuestion')}
+          <Tooltip title={t('assignmentConfiguration.timerDescription')} arrow>
+            <HelpOutlineIcon fontSize="small" color="action" sx={{ cursor: 'pointer' }} />
+          </Tooltip>
         </h3>
-        <Typography
-          sx={{
-            textWrap: 'wrap',
-          }}
-        >
-          {t('assignmentConfiguration.timerDescription')}
-        </Typography>
 
-
-        {unit?.timeLimitSeconds > 0 &&
-          <Button
-            style={{
-              width: '100%',
-              margin: '1rem auto 1rem auto',
-              display: 'block',
-            }}
-            color='primary'
-            onClick={() => setOpenTimerDialog(true)}
-            variant='contained'
-            size='large'
-            startIcon={<TimerIcon />}>
-            {timeString}
-          </Button>
-        }
-        {!unit?.timeLimitSeconds > 0 &&
-          <Button
-          style={{
-            width: '100%',
-            margin: '1rem auto 1rem auto',
-            display: 'block',
-          }}
-            color='primary'
-            variant='contained'
-            title='Add Timer to Unit'
-            onClick={() => setOpenTimerDialog(true)}
-            startIcon={<TimerIcon />}>
-            {t('assignmentConfiguration.addTimerButton')}
-          </Button>
-        }
-
-        <Collapse in={openTimerDialog} >
-          <form onSubmit={addTimer}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              margin: '1rem',
-            }}
-          >
-              <TextField
-                autoFocus
-                id="outlined-timer"
-                label={t('assignmentConfiguration.timerLabel')}
-                title="Set timer in seconds"
-                type="number"
-                slotProps={{
-                  inputLabel: { shrink: true },
-                }}
-                value={timer}
-                onChange={handleTimerChange}
-                variant="outlined"
-              />
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <Button
-                sx={{
-                  margin: '1rem',
-                }}
-              
-              onClick={() => setOpenTimerDialog(false)}>{t('assignmentConfiguration.cancel')}</Button>
-              <Button
-                variant='contained'
-                title="Set Unit Timer"
-                type="submit"
-                color="primary"
-                autoFocus
-                >
-                {t('assignmentConfiguration.save')}
-              </Button>
-            </Box>
-          </form>
-        </Collapse>
+        <TimerEditor />
 
         </Box>
 
 
       </Box>
 
+      <Divider sx={{ my: 2 }} />
+
+      {/* Retry toggle */}
+      <Box sx={{ px: 2, py: 1 }}>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={retryEnabled}
+              onChange={handleRetryToggle}
+              color="primary"
+            />
+          }
+          label={
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              {t('assignmentConfiguration.retryEnabled', 'Allow students to retry after completing')}
+              <Tooltip title={t('assignmentConfiguration.retryEnabledDescription', 'When enabled, students see a "Try Again" button on the completion screen.')} arrow>
+                <HelpOutlineIcon fontSize="small" color="action" sx={{ cursor: 'pointer' }} />
+              </Tooltip>
+            </Box>
+          }
+        />
+      </Box>
+
+      <Divider sx={{ my: 2 }} />
 
       <Box
         sx={{
@@ -305,29 +227,26 @@ export default function AssignmentConfiguration() {
         data-tour="assignment-settings"
       >
 
-
-        <form onSubmit={addDueDate}>
           <h3
             style={{
               margin: '1rem 1rem 0rem 1rem',
               textWrap: 'wrap',
-            }}>{t('assignmentConfiguration.assignDueDateQuestion')}</h3>
-
-          <Typography sx={{
-            margin: '1rem',
-            textWrap: 'wrap'
-          }}>
-            {t('assignmentConfiguration.dueDateDescriptionLine1')}
-            {t('assignmentConfiguration.dueDateDescriptionLine2')}
-          </Typography>
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+            }}>
+            {t('assignmentConfiguration.assignDueDateQuestion')}
+            <Tooltip title={`${t('assignmentConfiguration.dueDateDescriptionLine1')} ${t('assignmentConfiguration.dueDateDescriptionLine2')}`} arrow>
+              <HelpOutlineIcon fontSize="small" color="action" sx={{ cursor: 'pointer' }} />
+            </Tooltip>
+          </h3>
           <TextField
             sx={{ margin: '1rem' }}
             id="datetime-local"
             data-tour="due-date-picker"
-            required
             label={t('assignmentConfiguration.dueDateLabel')}
             type="datetime-local"
-            defaultValue={dueDate}
+            value={dueDate ? new Date(dueDate).toISOString().slice(0, 16) : ''}
             slotProps={{
               inputLabel: { shrink: true },
             }}
@@ -337,68 +256,50 @@ export default function AssignmentConfiguration() {
           <br />
 
 
-          <FormControl sx={{ margin: '1rem' }}>
-            <InputLabel id="section-select-helper-label">{t('assignmentConfiguration.sectionLabel')}</InputLabel>
-            <Select
-              labelId="section-select-helper-label"
+          <FormControl sx={{ margin: '1rem', minWidth: 250 }}>
+            <Autocomplete
+              multiple
               id="section-select-helper"
               data-tour="unit-selector"
-              value={section}
-              label={t('assignmentConfiguration.sectionLabel')}
-              title="Select Section"
-              required
-              // variant='contained'
-              onClick={(e) => e.stopPropagation()}
-              onChange={handleSectionChange}
-            >
-
-              {sections?.length > 0 &&
-                sections.filter(s => s != null && s.id != null).map((_section, index) => {
-                  return (
-                    <MenuItem key={index} value={_section.id}
-                    >
-                      <div>
-                        <div style={{
-                          overflow: 'hidden',
-                          width: '100%',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}>{_section.name}:</div>
-                        <div style={{
-                          overflow: 'hidden',
-                          width: '100%',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}>{_section.description}</div>
-                      </div>
-
-                    </MenuItem>
-                  );
-                })}
-            </Select>
+              options={allSections}
+              value={selectedSections}
+              onChange={(event, newValue) => setSelectedSections(newValue)}
+              getOptionLabel={(option) => option.name || ''}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              getOptionDisabled={(option) => assignedSectionIds.has(option.id)}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                  <Chip
+                    label={option.name}
+                    size="small"
+                    {...getTagProps({ index })}
+                    key={option.id}
+                  />
+                ))
+              }
+              renderOption={(props, option) => (
+                <li {...props} key={option.id}>
+                  <Box>
+                    <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {option.name}
+                    </Box>
+                    <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.8rem', color: 'text.secondary' }}>
+                      {option.description}
+                    </Box>
+                  </Box>
+                </li>
+              )}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={t('assignmentConfiguration.sectionLabel')}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              )}
+            />
             <FormHelperText>{t('assignmentConfiguration.selectSectionHelper')}</FormHelperText>
           </FormControl>
-          {/* </SectionProvider> */}
 
-          <Box sx={{
-            margin: '1rem'
-          }}>
-            {/* <Button onClick={() => setOpenAssignmentDialog(false)}>Done</Button> */}
-            <Button type="submit" autoFocus
-              data-tour="create-assignment-button"
-              variant='contained'
-              title="Add due date to Unit"
-              color='primary'
-              style={{
-                width: '100%',
-                margin: '1rem auto 1rem auto',
-                display: 'block',
-              }}
-              startIcon={<CalendarMonthIcon />}
-            >
-              {t('assignmentConfiguration.addDueDateButton')}
-            </Button>
-          </Box>
           {
             /**
              * A list of sections that are already assigned to this unit
@@ -422,7 +323,6 @@ export default function AssignmentConfiguration() {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     margin: '0 0 1rem 0',
-                    // padding: '1rem',
                     border: '1px solid #ccc',
                     borderRadius: '5px',
                   }}>
@@ -444,7 +344,6 @@ export default function AssignmentConfiguration() {
               </List>          
             } 
           </div>
-        </form>
       </Box>
     </>
   );

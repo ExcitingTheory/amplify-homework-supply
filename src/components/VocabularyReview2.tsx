@@ -11,7 +11,7 @@
  * - Import state indicators
  */
 
-import React, { useState, useEffect, useContext, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useContext, useRef, useMemo } from 'react';
 import {
     Box,
     Paper,
@@ -38,7 +38,6 @@ import {
     Mic as MicIcon,
 } from '@mui/icons-material';
 import { getAmplifyClient } from '../utils/amplifyClient';
-import { ParsedContent, Document } from '../models';
 import {
     importVocabularyToUnit,
     updateVocabularyItem,
@@ -239,6 +238,7 @@ export function VocabularyCard({
 
     return (
         <ListItem
+            data-tour="word-card"
             sx={{
                 backgroundColor: isEvenRow ? 'background.paper' : 'action.hover',
                 flexDirection: 'column',
@@ -248,9 +248,9 @@ export function VocabularyCard({
                 borderBottom: '1px solid',
                 borderColor: 'divider',
                 overflow: 'hidden',
-                transition: 'all 0.2s ease',
+                transition: 'box-shadow 0.2s ease',
                 '&:hover': {
-                    backgroundColor: 'action.hover',
+                    backgroundColor: isEvenRow ? 'action.selected' : 'action.focus',
                     boxShadow: 1,
                 },
             }}
@@ -392,6 +392,7 @@ export function VocabularyCard({
                                     size="small"
                                     variant="outlined"
                                     color="secondary"
+                                    data-tour="play-audio"
                                     onClick={onOpenAudioStudio ? (e) => {
                                         e.stopPropagation();
                                         onOpenAudioStudio();
@@ -516,12 +517,12 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
     }, [vocabularyItems, searchTerm]);
 
     // Virtual scrolling setup
+    // estimateSize returns a stable collapsed-row height;
+    // measureElement's ResizeObserver handles actual sizing on expand/collapse
     const virtualizer = useVirtualizer({
         count: filteredVocabulary.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: useCallback((index: number) => {
-            return expandedItems.has(index) ? 300 : 60;
-        }, [expandedItems]),
+        estimateSize: () => 60,
         overscan: 5,
     });
 
@@ -624,9 +625,6 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
             newExpanded.add(index);
         }
         setExpandedItems(newExpanded);
-        
-        // Recalculate virtual items when expanding/collapsing
-        virtualizer.measure();
     };
 
     const toggleAll = () => {

@@ -26,6 +26,7 @@ export class YjsDocProvider {
   private indexeddb: IndexeddbPersistence | null = null
   private awareness: Awareness
   private config: Required<YjsProviderConfig>
+  private hasLoggedConnectionError = false
 
   private defaultConfig: Required<Omit<YjsProviderConfig, 'docName'>> = {
     wsUrl: typeof window !== 'undefined' 
@@ -45,8 +46,8 @@ export class YjsDocProvider {
     // Create standalone awareness (always available, even without WebSocket)
     this.awareness = new Awareness(this.ydoc)
 
-    // Set up IndexedDB persistence
-    if (this.config.persistence) {
+    // Set up IndexedDB persistence (only in browser environments)
+    if (this.config.persistence && typeof indexedDB !== 'undefined') {
       this.indexeddb = new IndexeddbPersistence(this.docName, this.ydoc)
     }
 
@@ -81,9 +82,14 @@ export class YjsDocProvider {
         console.log(`[YjsProvider] ${this.docName} connection status: ${status}`)
       })
 
-      // Handle errors
+      // Handle errors - log first occurrence, then debug to reduce spam
       this.wsProvider.on('connection-error', (error: Event) => {
-        console.error(`[YjsProvider] ${this.docName} connection error:`, error)
+        if (!this.hasLoggedConnectionError) {
+          this.hasLoggedConnectionError = true
+          console.warn(`[YjsProvider] ${this.docName} connection error (further retries logged as debug):`, error)
+        } else {
+          console.debug(`[YjsProvider] ${this.docName} connection retry failed`)
+        }
       })
     } catch (error) {
       console.error(`[YjsProvider] Failed to setup WebSocket for ${this.docName}:`, error)

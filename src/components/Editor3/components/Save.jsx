@@ -2,6 +2,7 @@
  * Manual Save component.
  * Provides a manual save button for users to force immediate save.
  * Also handles beforeunload to save when closing tab.
+ * Shows a spinner when any save is in-flight (via UnitContext.isSaving).
  * Note: Automatic debounced saving is handled by MyOnChangePlugin in index.js
  */
 import React from 'react';
@@ -13,28 +14,30 @@ import Button from '@mui/material/Button';
 import Portal from '@mui/material/Portal';
 import UnitContext from '../../../context/unitContext';
 import SaveIcon from '@mui/icons-material/Save';
+import CircularProgress from '@mui/material/CircularProgress';
 import Snackbar from '@mui/material/Snackbar';
 
 export function Save() {
-    const [isSaving, setIsSaving] = useState(false);
     const [saveMessage, setSaveMessage] = useState('');
 
     const {
         saveEditorContent,
         editorStateRef,
-        unit
+        unit,
+        isSaving,
     } = useContext(UnitContext);
 
-    // Save on page close/refresh as safety net
+    // Save on page close/refresh as safety net — fire-and-forget save without
+    // blocking navigation (no event.preventDefault) so the browser never shows
+    // a "leave page?" confirmation dialog.
     React.useEffect(() => {
-        const handleBeforeUnload = async (event) => {
+        const handleBeforeUnload = () => {
             const content = JSON.stringify(editorStateRef.current);
             const unitContent = JSON.stringify(unit?.data || {});
             
             if (content !== unitContent) {
                 console.log('[Save] Saving before unload');
-                await saveEditorContent();
-                event.preventDefault();
+                saveEditorContent();
             }
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
@@ -45,7 +48,6 @@ export function Save() {
 
     const handleManualSave = async (event) => {
         event.preventDefault();
-        setIsSaving(true);
         
         try {
             const response = await saveEditorContent();
@@ -59,10 +61,6 @@ export function Save() {
         } catch (error) {
             console.error('[Save] Manual save failed:', error);
             setSaveMessage('Save failed');
-        } finally {
-            setTimeout(() => {
-                setIsSaving(false);
-            }, 1000);
         }
     };
 
@@ -87,7 +85,7 @@ export function Save() {
                 onClick={handleManualSave}
                 title="Save now (automatic save happens 2 seconds after you stop typing)"
             >
-                <SaveIcon />
+                {isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
             </Button>
         </>
     );

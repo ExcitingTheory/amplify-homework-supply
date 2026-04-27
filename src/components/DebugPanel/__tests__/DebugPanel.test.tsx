@@ -55,7 +55,7 @@ describe('DebugPanel', () => {
     const onClose = vi.fn();
     render(<DebugPanel open={true} onClose={onClose} />);
     
-    const closeButton = screen.getByLabelText('Close debug panel');
+    const closeButton = screen.getByLabelText('actions.close');
     fireEvent.click(closeButton);
     
     expect(onClose).toHaveBeenCalled();

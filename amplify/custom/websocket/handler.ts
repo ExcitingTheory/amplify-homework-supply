@@ -14,15 +14,30 @@ interface WebSocketMessage {
   action: string;
   connectionId?: string;
   data?: any;
-  unitId?: string;
+  unitId?: string;  // Also used as roomId for review-* rooms
   userId?: string;
   updateCount?: number;
   isSnapshot?: boolean;
 }
 
+/**
+ * Identifies whether a document name is a peer review room.
+ */
+function isReviewRoom(docName: string): boolean {
+  return docName.startsWith('review-');
+}
+
+/**
+ * Extracts the room ID from a review document name.
+ * e.g., 'review-abc123' -> 'abc123'
+ */
+function extractRoomId(docName: string): string {
+  return docName.replace('review-', '');
+}
+
 interface ConnectionRecord {
   connectionId: string;
-  unitId: string;
+  unitId: string;  // Stores the document name (unitId or review-{roomId})
   userId: string;
   connectedAt: number;
   ttl: number; // TTL for auto-cleanup (24 hours from now)
@@ -138,6 +153,18 @@ async function handleMessage(
     return { statusCode: 400, body: 'Missing unitId' };
   }
 
+  // Determine document type
+  const isReview = isReviewRoom(unitId);
+
+  // For review rooms, validate that the user is authorized
+  if (isReview && action === 'sync') {
+    const authorized = await authorizeReviewAccess(unitId, userId);
+    if (!authorized) {
+      console.warn(`[Auth] Denied review room access for user ${userId} to ${unitId}`);
+      return { statusCode: 403, body: 'Not authorized for this review room' };
+    }
+  }
+
   switch (action) {
     case 'sync': {
       // Add this connection to DynamoDB (idempotent)
@@ -187,7 +214,8 @@ async function handleMessage(
       console.log(`[Sync] Broadcast to ${broadcastCount} clients (${failedConnections.length} stale removed)`);
 
       // Persist Yjs snapshot to Amplify Data every N updates or on full sync
-      if ((data?.isSnapshot || shouldPersist(data, message.updateCount)) && unitId) {
+      // Only persist for unit documents, NOT review rooms (review rooms use their own persistence)
+      if (!isReview && (data?.isSnapshot || shouldPersist(data, message.updateCount)) && unitId) {
         await persistToAmplifyData(unitId, data, userId);
       }
 
@@ -330,4 +358,59 @@ async function sendToConnection(connectionId: string, message: any): Promise<voi
   });
 
   await apiGatewayClient.send(command);
+}
+
+/**
+ * Authorize a user for a review room.
+ *
+ * Validates that the user is either:
+ * 1. The owner of the HomeworkRoom
+ * 2. Listed in invitedUserIds
+ * 3. An admin or instructor (via Cognito groups — handled by API Gateway authorizer)
+ *
+ * Uses the HOMEWORK_ROOM_TABLE_NAME env var to query HomeworkRoom by room ID.
+ */
+async function authorizeReviewAccess(docName: string, userId: string): Promise<boolean> {
+  const roomId = extractRoomId(docName);
+
+  try {
+    const result = await ddb.send(
+      new QueryCommand({
+        TableName: process.env.HOMEWORK_ROOM_TABLE_NAME!,
+        KeyConditionExpression: 'id = :id',
+        ExpressionAttributeValues: {
+          ':id': roomId,
+        },
+      })
+    );
+
+    const room = result.Items?.[0];
+    if (!room) {
+      console.warn(`[Auth] Review room ${roomId} not found`);
+      return false;
+    }
+
+    // Owner always has access
+    if (room.ownerId === userId || room.owner === userId) {
+      return true;
+    }
+
+    // Check if user is in the invited list
+    const invitedUserIds: string[] = room.invitedUserIds || [];
+    if (invitedUserIds.includes(userId)) {
+      return true;
+    }
+
+    // Room is closed — no new connections
+    if (room.status === 'REVIEW_COMPLETE') {
+      console.warn(`[Auth] Review room ${roomId} is closed`);
+      return false;
+    }
+
+    return false;
+  } catch (error) {
+    console.error(`[Auth] Error checking review room access:`, error);
+    // Fail closed — deny access on error
+    return false;
+  }
 }

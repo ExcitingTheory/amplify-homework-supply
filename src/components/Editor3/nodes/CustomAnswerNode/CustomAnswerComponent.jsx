@@ -4,17 +4,18 @@ import { getAmplifyClient } from '../../../../utils/amplifyClient';
 
 import { useEffect, useState, useRef } from 'react';
 
-import TextareaAutosize from '@mui/material/TextareaAutosize';
-
 import {
     Box,
     LinearProgress,
     Typography,
-    Button,
     ToggleButton,
     ToggleButtonGroup
 
 } from '@mui/material';
+
+import { createEmptyHistoryState } from '@lexical/react/LexicalHistoryPlugin';
+import PlainTextAnswerInput from '../../components/PlainTextAnswerInput';
+import AudioAutoSubmitWrapper from '../../components/AudioAutoSubmitWrapper';
 import dynamic from "next/dynamic";
 
 const SketchPad = dynamic(
@@ -27,6 +28,8 @@ import AudioWaveformPlayer from '../../components/AudioWaveformPlayer';
 
 import UnitContext from '../../../../context/unitContext';
 import DictionaryContext from '../../../../context/dictionaryContext';
+import { WorkbookBlockEnhancements } from '../../components/WorkbookBlockEnhancements';
+import { useVerifyContext } from '../../../../hooks/useVerifyContext';
 
 function LinearProgressWithLabel({ value }) {
     return (
@@ -59,12 +62,14 @@ export default function CustomAnswerComponent({
     const [answers, setAnswers] = useState({});
     const [progress, setProgress] = useState(0);
     const [feedback, setFeedback] = useState({});
+    const sharedHistoryState = useRef(createEmptyHistoryState());
 
     const [currentInputMethod, setCurrentInputMethod] = useState(allowedInput[0] || 'text');
     const [allowedInputMethods, setAllowedInputMethods] = useState(allowedInput || ['text', 'audio', 'writing']);
     const [currentPromptMethod, setCurrentPromptMethod] = useState(promptMethod[0] || 'text');
 
-    const { grade, saveGrade } = React.useContext(UnitContext);
+    const { grade, saveGrade, workbook } = React.useContext(UnitContext);
+    const { studentMemory, contentContext } = useVerifyContext();
     const {
         questionBank,
     } = React.useContext(DictionaryContext);
@@ -183,8 +188,11 @@ export default function CustomAnswerComponent({
         }
     }, [feedback, questionIDs, saveGrade, nodeKey, grade, inProgress]);
 
+    const blockGradeData = grade?.data?.[nodeKey];
+    const nailedIt = blockGradeData?.nailedIt === true;
+
     return (
-        // a list of questions having a prompt and an expected answer in a collection
+        <WorkbookBlockEnhancements blockId={nodeKey} nailedIt={nailedIt}>
         <div className={className}
             style={{
                 display: 'flex',
@@ -360,56 +368,25 @@ export default function CustomAnswerComponent({
                                 }}
                             >
 
-                            <TextareaAutosize
-                                minRows={3}
-                                data-testid="custom-answer-input"
-                                data-question-id={questionID}
-                                style={{
-                                    border: borderStyle,
-                                    color: feedback[questionID]?.answer === true? 'green' : feedback[questionID]?.answer === false? 'red' : 'black',
-                                    flexBasis: '80%',
-                                    maxWidth: '50rem',
-                                }}
-                                id={`${answer}-${questionID}`}
+                            <PlainTextAnswerInput
                                 value={answers[questionID] || ''}
-                                onChange={(e) => {
+                                onChange={(text) => {
                                     setAnswers({
                                         ...answers,
-                                        [questionID]: e.target.value,
+                                        [questionID]: text,
                                     });
                                 }}
-
-                                aria-label={t('customAnswerComponent.yourAnswer', { ns: 'editor' })}
-                                placeholder={t('customAnswerComponent.answerPlaceholder')}
-                                type="text"
-                                variant="standard"
-                            />
-                            {/** 
-                         * A button to submit the answer
-                        */}
-
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                data-testid="custom-answer-submit-button"
-                                data-question-id={questionID}
-                                style={{
-                                    marginLeft: '1rem',
-                                    minWidth: 'fit-content',
-                                }}
-
-                                onClick={async () => {
-                                    // call the api to verify the answer
+                                onAutoSubmit={async (text) => {
                                     try {
-
-                                        // verifyShortAnswer(expected: String!, answer: String!, prompt: String!, model: String): String @function(name: "openai-${env}")
                                         const client = getAmplifyClient();
 
                                         const response = await client.queries.verifyShortAnswer({
-                                            answer: answers[questionID],
+                                            answer: text,
                                             prompt: prompt,
                                             expected: answer,
                                             model: 'gpt-3.5-turbo',
+                                            studentMemory,
+                                            contentContext,
                                         });
 
                                         console.log('response', response)
@@ -420,6 +397,8 @@ export default function CustomAnswerComponent({
                                             ...feedback,
                                             [questionID]: data,
                                         });
+                                        // Broadcast to collaborators via Yjs
+                                        workbook?.setFeedback?.(nodeKey, { text: data?.reason || '', timestamp: Date.now() });
                                     } catch (error) {
                                         console.error(error);
                                         setFeedback({
@@ -427,13 +406,16 @@ export default function CustomAnswerComponent({
                                             [questionID]: t('customAnswerComponent.errorOccurred'),
                                         });
                                     }
-
-
-
                                 }}
-                            >
-                                {t('customAnswerComponent.submit')}
-                            </Button>
+                                historyState={sharedHistoryState.current}
+                                placeholder={t('customAnswerComponent.answerPlaceholder')}
+                                ariaLabel={t('customAnswerComponent.yourAnswer', { ns: 'editor' })}
+                                borderStyle={borderStyle}
+                                textColor={feedback[questionID]?.answer === true? 'green' : feedback[questionID]?.answer === false? 'red' : 'inherit'}
+                                testId="custom-answer-input"
+                                questionId={questionID}
+                                disabled={isCompleted}
+                            />
                             
                             </Box>
                             }
@@ -444,46 +426,54 @@ export default function CustomAnswerComponent({
                                     marginBottom: '1rem',
                                 }}
                             >
-                                <AudioWaveformPlayer
-                                    enableRecording={true}
-                                    gradeId={grade?.id}
-                                    nodeKey={`custom-answer-${questionID}`}
-                                    title={prompt || question?.prompt}
-                                    onRecordingComplete={async (audioFile, uploadResult) => {
-                                        const currentGradeData = grade?.data || {};
-                                        const audioNodeKey = `custom-answer-${questionID}`;
-                                        const updatedGradeData = {
-                                            ...currentGradeData,
-                                            [audioNodeKey]: {
-                                                ...currentGradeData[audioNodeKey],
-                                                audioFilePath: audioFile?.path || null,
-                                                audioFileId: audioFile?.id || null,
-                                                inputMethod: 'audio',
-                                            }
-                                        };
-                                        saveGrade(updatedGradeData);
-
-                                        // Verify the recorded audio
-                                        try {
-                                            const client = getAmplifyClient();
-                                            const audioUrl = audioFile?.path || uploadResult?.path;
-                                            if (audioUrl) {
-                                                const { data, errors } = await client.queries.verifyShortAnswer({
-                                                    answer: audioUrl,
-                                                    prompt: prompt,
-                                                    expected: answer,
-                                                    model: 'gpt-3.5-turbo',
-                                                });
-                                                if (!errors && data) {
-                                                    const feedbackData = JSON.parse(data);
-                                                    setFeedback(prev => ({ ...prev, [questionID]: feedbackData }));
+                                <AudioAutoSubmitWrapper>
+                                  {({ wrapOnRecordingComplete }) => (
+                                    <AudioWaveformPlayer
+                                        enableRecording={true}
+                                        gradeId={grade?.id}
+                                        nodeKey={`custom-answer-${questionID}`}
+                                        title={prompt || question?.prompt}
+                                        onRecordingComplete={wrapOnRecordingComplete(async (audioFile, uploadResult) => {
+                                            const currentGradeData = grade?.data || {};
+                                            const audioNodeKey = `custom-answer-${questionID}`;
+                                            const updatedGradeData = {
+                                                ...currentGradeData,
+                                                [audioNodeKey]: {
+                                                    ...currentGradeData[audioNodeKey],
+                                                    audioFilePath: audioFile?.path || null,
+                                                    audioFileId: audioFile?.id || null,
+                                                    inputMethod: 'audio',
                                                 }
+                                            };
+                                            saveGrade(updatedGradeData);
+
+                                            // Verify the recorded audio
+                                            try {
+                                                const client = getAmplifyClient();
+                                                const audioUrl = audioFile?.path || uploadResult?.path;
+                                                if (audioUrl) {
+                                                    const { data, errors } = await client.queries.verifyShortAnswer({
+                                                        answer: audioUrl,
+                                                        prompt: prompt,
+                                                        expected: answer,
+                                                        model: 'gpt-3.5-turbo',
+                                                        studentMemory,
+                                                        contentContext,
+                                                    });
+                                                    if (!errors && data) {
+                                                        const feedbackData = JSON.parse(data);
+                                                        setFeedback(prev => ({ ...prev, [questionID]: feedbackData }));
+                                                        // Broadcast to collaborators via Yjs
+                                                        workbook?.setFeedback?.(nodeKey, { text: feedbackData?.reason || '', timestamp: Date.now() });
+                                                    }
+                                                }
+                                            } catch (err) {
+                                                console.error('[CustomAnswerComponent] Audio verification error:', err);
                                             }
-                                        } catch (err) {
-                                            console.error('[CustomAnswerComponent] Audio verification error:', err);
-                                        }
-                                    }}
-                                />
+                                        })}
+                                    />
+                                  )}
+                                </AudioAutoSubmitWrapper>
                             </Box>
                             }
                             { currentInputMethod === 'writing' &&
@@ -504,6 +494,8 @@ export default function CustomAnswerComponent({
                                             ...feedback,
                                             [questionID]: data,
                                         });
+                                        // Broadcast to collaborators via Yjs
+                                        workbook?.setFeedback?.(nodeKey, { text: data?.reason || '', timestamp: Date.now() });
                                     }}
                                     feedback={feedback}
                                     question={prompt}
@@ -519,5 +511,6 @@ export default function CustomAnswerComponent({
             </ol>
 
         </div>
+        </WorkbookBlockEnhancements>
     );
 }

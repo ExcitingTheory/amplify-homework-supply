@@ -32,9 +32,13 @@ async function getOpenAI(): Promise<any> {
 
 
 export const handler: Handler = async (event: any, context: any) => {
-  const operationName = context?.['x-operation-name'] || event.info?.fieldName;
+  const operationName = event.info?.fieldName || event.fieldName;
   const args = event.arguments || {};
-  
+
+  if (!operationName) {
+    console.error('[AI Content Handler] No operation name found in event:', JSON.stringify(event, null, 2));
+    throw new Error('Unable to determine operation name from event');
+  }
 
   console.log(`[AI Content Handler] ${operationName}`, args);
 

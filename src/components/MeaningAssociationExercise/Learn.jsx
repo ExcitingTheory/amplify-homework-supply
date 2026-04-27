@@ -6,10 +6,13 @@ import {
   Grid, List,
   ListItem,
   Box,
-  Typography
+  Typography,
+  IconButton,
+  Button,
 } from '@mui/material';
-import { LinearProgressWithLabel, AnswerDropLearn } from '.';
-import { CompletionScreen } from './CompletionScreen';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { LinearProgressWithLabel, AnswerDropLearn, ResultDropLearn } from '.';
 import { DragBox } from './DragBox';
 import { shuffle } from './utils';
 
@@ -237,7 +240,7 @@ export const Learn = ({
     }
 
     savedGradeCopy[nodeKey]['learn'] = {
-      verifiedAnswers,
+      ...savedGradeCopy[nodeKey]['learn'],
       attemptedAnswers: _attemptedAnswers,
       attemptsCount: attempts,
       accuracy: verifiedAnswers.length / attempts,
@@ -266,119 +269,206 @@ export const Learn = ({
     setShowCompletion(false);
   };
 
-  const maxHeight = '15rem';
+  // Calculate min height based on card count: ~70px per drop target, minimum 300px
+  const dropZoneMinHeight = Math.max(300, easyAssignment.length * 70);
+
+  // Carousel scroll for small screens
+  const carouselRef = React.useRef(null);
+  const scrollCarousel = (direction) => {
+    if (carouselRef.current) {
+      const scrollAmount = 240;
+      carouselRef.current.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const accuracyPercent = Math.round(
+    (dropAnswerVisibility.length / (inProgress?.learn?.attemptsCount || 1)) * 100
+  );
 
   return (
     <Box sx={{ 
       position: 'relative', 
-      height: 'calc(100vh - var(--app-bar-height, 11rem))',
-      maxHeight: 'calc(100vh - var(--app-bar-height, 11rem))',
-      overflow: 'hidden',
+      flex: '1 1 auto',
+      minHeight: `${dropZoneMinHeight}px`,
+      overflow: 'auto',
       width: '100%',
       maxWidth: '100vw',
     }}>
       {showCompletion ? (
-        <CompletionScreen
-          levelName="Learn Mode"
-          accuracy={dropAnswerVisibility.length / (inProgress?.learn?.attemptsCount || 1)}
-          attempts={inProgress?.learn?.attemptsCount || 0}
-          onContinue={handleContinueFromCompletion}
-          onDismiss={handleDismissCompletion}
-          nextLevelName="Easy Mode"
-          isLastLevel={false}
-        />
+      /* Completed state: show all drop targets as a full list with pass/fail marks */
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', maxWidth: '100%', gap: 1, overflow: 'hidden' }}>
+        <Box sx={{ flexShrink: 0, width: '100%' }}>
+          <LinearProgressWithLabel value={100} />
+        </Box>
+        <Box sx={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, flexWrap: 'wrap', gap: 1 }}>
+          <Typography variant="body2" color="textSecondary">
+            Learn Mode Complete — {accuracyPercent}% accuracy
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button variant="outlined" size="small" onClick={handleDismissCompletion}>Back</Button>
+            <Button variant="contained" size="small" onClick={handleContinueFromCompletion}>Continue to Easy Mode</Button>
+          </Box>
+        </Box>
+        <Box sx={{ 
+          flex: '1 1 auto', 
+          minHeight: 0, 
+          overflowY: 'auto', 
+          overflowX: 'hidden',
+          width: '100%',
+        }}>
+          <List sx={{ padding: 0 }}>
+            {easyAssignment.map((listItem) => {
+              let _correctWord = typeof listItem === 'string' ? dictionary[listItem] : listItem;
+              const matchedWordId = droppedPairs[_correctWord?.id];
+              const matchedWord = matchedWordId ? dictionary[matchedWordId] : null;
+              // Determine pass/fail: passed if matched on first attempt
+              const attempts = loadAttemptedAnswers[_correctWord?.id] || [];
+              const passed = attempts.length > 0 && attempts[0] === _correctWord?.id;
+              return (
+                <ResultDropLearn
+                  key={_correctWord?.id}
+                  pronunciation={_correctWord?.pronunciation}
+                  definition={_correctWord?.definition}
+                  matchedWord={matchedWord || _correctWord}
+                  passed={passed}
+                  audioPaths={_correctWord?.audio}
+                  definitionAudioPaths={_correctWord?.definitionAudio}
+                />
+              );
+            })}
+          </List>
+        </Box>
+      </Box>
       ) : (
-      <Grid container direction="column" spacing={1} sx={{ overflow: 'hidden', height: '100%', width: '100%', maxWidth: '100%' }}>
-      <Grid item xs={12} sx={{ flexShrink: 0, width: '100%' }}>
-        <LinearProgressWithLabel value={percentComplete} />
-      </Grid>
-      <Grid item xs={12} container direction={{ xs: 'column', sm: 'row' }} spacing={1} wrap="nowrap" sx={{ overflow: 'hidden', flex: '1 1 auto', minHeight: 0, width: '100%', maxWidth: '100%' }}>
-      <Grid item xs={12} sm={4} md={4} lg={4} sx={{ minWidth: 0, flex: { xs: '1 1 auto', sm: '0 0 auto' }, height: { xs: 'auto', sm: '100%' }, maxWidth: { xs: '100%', sm: '33.333333%' }, order: { xs: 2, sm: 2 } }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 0,
-            height: { xs: 'auto', sm: '100%' },
-            maxHeight: { xs: 'none', sm: '100%' },
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            padding: 0.5,
-            width: '100%',
-            maxWidth: '100%',
-            alignContent: 'flex-start',
-            boxSizing: 'border-box',
-          }}
-        >
-          {easyVocab}
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', maxWidth: '100%', gap: 1, overflow: 'hidden' }}>
+        <Box sx={{ flexShrink: 0, width: '100%' }}>
+          <LinearProgressWithLabel value={percentComplete} />
         </Box>
-      </Grid>
-      <Grid item xs={12} sm={8} md={8} lg={8} sx={{ minWidth: 0, height: { xs: '120px', sm: '100%' }, maxHeight: { xs: '120px', sm: '100%' }, flexShrink: 0, maxWidth: { xs: '100%', sm: '66.666667%' }, order: { xs: 1, sm: 1 } }}>
-        <Box
-          sx={{
-            height: '100%',
-            maxHeight: '100%',
-            overflowY: { xs: 'hidden', sm: 'auto' },
-            overflowX: { xs: 'auto', sm: 'hidden' },
-            display: { xs: 'flex', sm: 'block' },
-            flexDirection: { xs: 'row', sm: 'column' },
-            width: { xs: '100%', sm: 'auto' },
-          }}
-        >
-          <List
-            sx={{
-              display: { xs: 'flex', sm: 'block' },
-              flexDirection: { xs: 'row', sm: 'column' },
-              padding: 0,
-              gap: { xs: 1, sm: 0 },
-              width: { xs: 'max-content', sm: 'auto' },
-            }}
-          >
-          {easyAssignment.map((listItem, id) => {
-            // console.log('SimpleList listItem', listItem)
-            let _correctWord = '';
-            if (typeof listItem === 'string') {
-              // console.log('SimpleList typeof _correctWord', _correctWord)
-              _correctWord = dictionary[listItem];
-            } else {
-              _correctWord = listItem;
-            }
-
-            const phrase = _correctWord?.phrase;
-            const definition = _correctWord?.definition;
-            const pronunciation = _correctWord?.pronunciation;
-            let audioFile = null;
-
-            //if there are more than one audio files, use a random one
-            if (_correctWord?.audio?.length > 1) {
-              const randomIndex = Math.floor(Math.random() * _correctWord?.audio?.length);
-              audioFile = _correctWord.audio[randomIndex];
-            } else if (_correctWord?.audio?.length === 1) {
-              audioFile = _correctWord?.audio[0];
-            }
-
-            // Check if this word has been matched
-            const matchedWordId = droppedPairs[_correctWord?.id];
-            const matchedWord = matchedWordId ? dictionary[matchedWordId] : null;
-
-            return <AnswerDropLearn 
-              key={_correctWord?.id}
-              id={_correctWord?.id}
-              correctAnswer={{ ..._correctWord, progressAssignment, sendFail, sendPass }}
-              pronunciation={pronunciation}
-              definition={definition}
-              phrase={phrase}
-              matchedWord={matchedWord}
-              isMatched={!!matchedWordId}
-            />;
-
-          })}
-
-        </List>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' }, 
+          flex: '1 1 auto', 
+          minHeight: 0, 
+          width: '100%', 
+          maxWidth: '100%', 
+          gap: 1,
+          overflow: 'hidden',
+        }}>
+          {/* Drop targets — carousel on mobile, scrollable list on desktop */}
+          <Box sx={{ 
+            minWidth: 0, 
+            flex: { xs: '0 0 auto', sm: '1 1 0' },
+            minHeight: { xs: 'auto', sm: `${dropZoneMinHeight}px` },
+            maxWidth: { xs: '100%', sm: '66.666667%' }, 
+            order: { xs: 1, sm: 1 },
+          }}>
+            {/* Mobile carousel wrapper with arrows */}
+            <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center', width: '100%' }}>
+              <IconButton size="small" onClick={() => scrollCarousel(-1)} sx={{ flexShrink: 0 }}>
+                <ChevronLeftIcon />
+              </IconButton>
+              <Box
+                ref={carouselRef}
+                sx={{
+                  flex: 1,
+                  overflowX: 'auto',
+                  overflowY: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'row',
+                  gap: 1,
+                  scrollSnapType: 'x mandatory',
+                  '&::-webkit-scrollbar': { display: 'none' },
+                  scrollbarWidth: 'none',
+                  py: 0.5,
+                }}
+              >
+                {easyAssignment.map((listItem) => {
+                  let _correctWord = typeof listItem === 'string' ? dictionary[listItem] : listItem;
+                  const matchedWordId = droppedPairs[_correctWord?.id];
+                  const matchedWord = matchedWordId ? dictionary[matchedWordId] : null;
+                  return (
+                    <Box key={_correctWord?.id} sx={{ scrollSnapAlign: 'start', flexShrink: 0 }}>
+                      <AnswerDropLearn 
+                        id={_correctWord?.id}
+                        correctAnswer={{ ..._correctWord, progressAssignment, sendFail, sendPass }}
+                        pronunciation={_correctWord?.pronunciation}
+                        definition={_correctWord?.definition}
+                        phrase={_correctWord?.phrase}
+                        matchedWord={matchedWord}
+                        isMatched={!!matchedWordId}
+                        audioPaths={_correctWord?.audio}
+                        definitionAudioPaths={_correctWord?.definitionAudio}
+                      />
+                    </Box>
+                  );
+                })}
+              </Box>
+              <IconButton size="small" onClick={() => scrollCarousel(1)} sx={{ flexShrink: 0 }}>
+                <ChevronRightIcon />
+              </IconButton>
+            </Box>
+            {/* Desktop list */}
+            <Box sx={{ 
+              display: { xs: 'none', sm: 'block' }, 
+              height: '100%',
+              minHeight: `${dropZoneMinHeight}px`,
+              overflowY: 'auto',
+              overflowX: 'hidden',
+            }}>
+              <List sx={{ padding: 0 }}>
+                {easyAssignment.map((listItem) => {
+                  let _correctWord = typeof listItem === 'string' ? dictionary[listItem] : listItem;
+                  const matchedWordId = droppedPairs[_correctWord?.id];
+                  const matchedWord = matchedWordId ? dictionary[matchedWordId] : null;
+                  return (
+                    <AnswerDropLearn 
+                      key={_correctWord?.id}
+                      id={_correctWord?.id}
+                      correctAnswer={{ ..._correctWord, progressAssignment, sendFail, sendPass }}
+                      pronunciation={_correctWord?.pronunciation}
+                      definition={_correctWord?.definition}
+                      phrase={_correctWord?.phrase}
+                      matchedWord={matchedWord}
+                      isMatched={!!matchedWordId}
+                      audioPaths={_correctWord?.audio}
+                      definitionAudioPaths={_correctWord?.definitionAudio}
+                    />
+                  );
+                })}
+              </List>
+            </Box>
+          </Box>
+          {/* Drag cards */}
+          <Box sx={{ 
+            minWidth: 0, 
+            flex: { xs: '1 1 auto', sm: '0 0 auto' },
+            maxWidth: { xs: '100%', sm: '33.333333%' }, 
+            order: { xs: 2, sm: 2 },
+          }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                flexDirection: 'row',
+                gap: 0,
+                height: { xs: 'auto', sm: '100%' },
+                minHeight: { xs: 'auto', sm: `${dropZoneMinHeight}px` },
+                maxHeight: { xs: 'none', sm: '100%' },
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                padding: 0.5,
+                width: '100%',
+                maxWidth: '100%',
+                alignContent: 'flex-start',
+                justifyContent: { xs: 'flex-start', sm: 'flex-start' },
+                boxSizing: 'border-box',
+              }}
+            >
+              {easyVocab}
+            </Box>
+          </Box>
         </Box>
-      </Grid>
-      </Grid>
-    </Grid>
+      </Box>
     )}
     </Box>
   );

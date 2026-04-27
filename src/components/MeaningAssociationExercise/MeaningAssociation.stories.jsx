@@ -349,7 +349,7 @@ export const LearnExercise = {
     expect(canvas.getByText('Please')).toBeInTheDocument();
     
     // Learn mode shows both phrases and definitions
-    expect(canvas.getByText('A greeting')).toBeInTheDocument();
+    expect(canvas.getAllByText('A greeting')[0]).toBeInTheDocument();
   },
 };
 

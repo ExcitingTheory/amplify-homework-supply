@@ -57,7 +57,7 @@ export const TranslationPanel: React.FC = () => {
   const handleSave = () => {
     if (selectedTranslation) {
       // TODO: Actually save to translation files
-      console.log('Saving translations:', translationValues);
+      console.debug('Saving translations:', translationValues);
       setHasChanges(false);
     }
   };

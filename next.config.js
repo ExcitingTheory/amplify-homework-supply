@@ -1,6 +1,16 @@
 const { i18n } = require('./next-i18next.config');
+const withSerwist = require('@serwist/next').default({
+  swSrc: 'src/sw.ts',
+  swDest: 'public/sw.js',
+  disable: process.env.NODE_ENV === 'development',
+  cacheOnNavigation: true,
+  register: true,
+  reloadOnOnline: true,
+  scope: '/',
+  swUrl: '/sw.js',
+});
 
-module.exports = {
+module.exports = withSerwist({
   reactStrictMode: true,
   transpilePackages: ['@mui/x-data-grid'],
   
@@ -32,4 +42,4 @@ module.exports = {
   // Turbopack config - PDF.js worker is copied via postinstall script
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack
   turbopack: {},
-};
+});

@@ -37,6 +37,23 @@ async function cleanup() {
   await signOut();
 }
 
+// Helper: delete with _version for versioned DynamoDB
+async function safeDelete(model: any, id: string) {
+  try {
+    const { data } = await model.get({ id });
+    if (!data) return { data: null, errors: undefined };
+    return model.delete({ id, _version: (data as any)._version });
+  } catch {
+    return { data: null, errors: undefined };
+  }
+}
+
+// Helper: update with _version for versioned DynamoDB
+async function safeUpdate(model: any, input: Record<string, any>) {
+  const { data } = await model.get({ id: input.id });
+  return model.update({ ...input, _version: (data as any)?._version });
+}
+
 describe('A. Authentication & Authorization Tests', () => {
   describe('A1. User Authentication', () => {
     afterEach(cleanup);
@@ -97,7 +114,7 @@ describe('A. Authentication & Authorization Tests', () => {
 
       // Cleanup
       if (data?.id) {
-        await client.models.Unit.delete({ id: data.id });
+        await safeDelete(client.models.Unit, data.id);
       }
     });
 
@@ -114,7 +131,7 @@ describe('A. Authentication & Authorization Tests', () => {
       expect(created).toBeDefined();
 
       // Update unit
-      const { data: updated, errors } = await client.models.Unit.update({
+      const { data: updated, errors } = await safeUpdate(client.models.Unit, {
         id: created!.id,
         name: 'Updated Name',
       });
@@ -123,7 +140,7 @@ describe('A. Authentication & Authorization Tests', () => {
       expect(updated?.name).toBe('Updated Name');
 
       // Cleanup
-      await client.models.Unit.delete({ id: created!.id });
+      await safeDelete(client.models.Unit, created!.id);
     });
 
     test('Learner can view published units', async () => {
@@ -148,7 +165,7 @@ describe('A. Authentication & Authorization Tests', () => {
 
       // Cleanup
       await signInAs('instructor1');
-      await client.models.Unit.delete({ id: created!.id });
+      await safeDelete(client.models.Unit, created!.id);
     });
 
     test('Admin has full access to all resources', async () => {
@@ -166,14 +183,14 @@ describe('A. Authentication & Authorization Tests', () => {
       const { data: read } = await client.models.Unit.get({ id: created!.id });
       expect(read).toBeDefined();
 
-      const { data: updated } = await client.models.Unit.update({
+      const { data: updated } = await safeUpdate(client.models.Unit, {
         id: created!.id,
         description: 'Admin modified',
       });
       expect(updated?.description).toBe('Admin modified');
 
       // Admin can delete
-      const { data: deleted } = await client.models.Unit.delete({ id: created!.id });
+      const { data: deleted } = await safeDelete(client.models.Unit, created!.id);
       expect(deleted).toBeDefined();
     });
   });
@@ -199,7 +216,7 @@ describe('A. Authentication & Authorization Tests', () => {
 
       // Cleanup
       if (data?.id) {
-        await client.models.File.delete({ id: data.id });
+        await safeDelete(client.models.File, data.id);
       }
     });
 
@@ -227,7 +244,7 @@ describe('A. Authentication & Authorization Tests', () => {
 
       // Cleanup
       await signInAs('instructor1');
-      await client.models.File.delete({ id: created!.id });
+      await safeDelete(client.models.File, created!.id);
     });
 
     test('Learner can upload to protected storage', async () => {
@@ -250,7 +267,7 @@ describe('A. Authentication & Authorization Tests', () => {
 
       // Cleanup
       if (data?.id) {
-        await client.models.File.delete({ id: data.id });
+        await safeDelete(client.models.File, data.id);
       }
     });
 
@@ -284,7 +301,7 @@ describe('A. Authentication & Authorization Tests', () => {
 
       // Cleanup
       await signInAs('instructor1');
-      await client.models.File.delete({ id: created!.id });
+      await safeDelete(client.models.File, created!.id);
     });
 
     test('Private files only accessible to owner', async () => {
@@ -310,7 +327,7 @@ describe('A. Authentication & Authorization Tests', () => {
 
       // Cleanup
       if (data?.id) {
-        await client.models.File.delete({ id: data.id });
+        await safeDelete(client.models.File, data.id);
       }
     });
   });
@@ -337,7 +354,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
 
       // Cleanup
       if (data?.id) {
-        await client.models.Unit.delete({ id: data.id });
+        await safeDelete(client.models.Unit, data.id);
       }
     });
 
@@ -359,7 +376,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       expect(data?.name).toBe('Read Test Unit');
 
       // Cleanup
-      await client.models.Unit.delete({ id: created!.id });
+      await safeDelete(client.models.Unit, created!.id);
     });
 
     test('List all units with pagination', async () => {
@@ -386,7 +403,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       // Cleanup
       for (const result of units) {
         if (result.data?.id) {
-          await client.models.Unit.delete({ id: result.data.id });
+          await safeDelete(client.models.Unit, result.data.id);
         }
       }
     });
@@ -412,7 +429,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
 
       // Update data field - must stringify JSON for AWSJSON type
       const updatedData = { content: 'updated', blocks: [{ type: 'paragraph' }] };
-      const { data: updated, errors } = await client.models.Unit.update({
+      const { data: updated, errors } = await safeUpdate(client.models.Unit, {
         id: created.id,
         data: JSON.stringify(updatedData),
       });
@@ -422,7 +439,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       expect(JSON.parse(updated?.data as string)).toEqual(updatedData);
 
       // Cleanup
-      await client.models.Unit.delete({ id: created.id });
+      await safeDelete(client.models.Unit, created.id);
     });
 
     test('Delete unit', async () => {
@@ -435,7 +452,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       });
 
       // Delete
-      const { data: deleted, errors } = await client.models.Unit.delete({ id: created!.id });
+      const { data: deleted, errors } = await safeDelete(client.models.Unit, created!.id);
 
       expect(errors).toBeUndefined();
       expect(deleted).toBeDefined();
@@ -497,8 +514,8 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
 
     afterEach(async () => {
       await signInAs('instructor1');
-      if (sectionId) await client.models.Section.delete({ id: sectionId });
-      if (unitId) await client.models.Unit.delete({ id: unitId });
+      if (sectionId) await safeDelete(client.models.Section, sectionId);
+      if (unitId) await safeDelete(client.models.Unit, unitId);
       await cleanup();
     });
 
@@ -521,7 +538,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
 
       // Cleanup
       if (data?.id) {
-        await client.models.Assignment.delete({ id: data.id });
+        await safeDelete(client.models.Assignment, data.id);
       }
     });
 
@@ -542,7 +559,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       const nextWeek = new Date();
       nextWeek.setDate(nextWeek.getDate() + 7);
 
-      const { data: updated, errors } = await client.models.Assignment.update({
+      const { data: updated, errors } = await safeUpdate(client.models.Assignment, {
         id: created!.id,
         dueDate: nextWeek.toISOString(),
       });
@@ -551,7 +568,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       expect(updated?.dueDate).toBe(nextWeek.toISOString());
 
       // Cleanup
-      await client.models.Assignment.delete({ id: created!.id });
+      await safeDelete(client.models.Assignment, created!.id);
     });
 
     test('Query assignments by section', async () => {
@@ -581,7 +598,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       // Cleanup
       for (const result of assignments) {
         if (result.data?.id) {
-          await client.models.Assignment.delete({ id: result.data.id });
+          await safeDelete(client.models.Assignment, result.data.id);
         }
       }
     });
@@ -608,7 +625,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
 
       // Cleanup
       await signInAs('instructor1');
-      await client.models.Assignment.delete({ id: assignment!.id });
+      await safeDelete(client.models.Assignment, assignment!.id);
     });
 
     test('Delete assignment', async () => {
@@ -619,9 +636,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
         learner: 'student1@example.com',
       });
 
-      const { data: deleted, errors } = await client.models.Assignment.delete({ 
-        id: created!.id 
-      });
+      const { data: deleted, errors } = await safeDelete(client.models.Assignment, created!.id);
 
       expect(errors).toBeUndefined();
       expect(deleted).toBeDefined();
@@ -646,7 +661,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
 
     afterEach(async () => {
       await signInAs('instructor1');
-      if (unitId) await client.models.Unit.delete({ id: unitId });
+      if (unitId) await safeDelete(client.models.Unit, unitId);
       await cleanup();
     });
 
@@ -667,7 +682,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
 
       // Cleanup
       if (data?.id) {
-        await client.models.Grade.delete({ id: data.id });
+        await safeDelete(client.models.Grade, data.id);
       }
     });
 
@@ -688,7 +703,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
         'block-1': { complete: true, accuracy: 100, userAnswer: 'correct answer' },
       };
 
-      const { data: updated, errors } = await client.models.Grade.update({
+      const { data: updated, errors } = await safeUpdate(client.models.Grade, {
         id: created!.id,
         percentComplete: 50,
         accuracy: 100,
@@ -701,7 +716,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       expect(JSON.parse(updated?.data as string)).toEqual(gradeData);
 
       // Cleanup
-      await client.models.Grade.delete({ id: created!.id });
+      await safeDelete(client.models.Grade, created!.id);
     });
 
     test('Calculate accuracy from rubric', async () => {
@@ -728,7 +743,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
 
       // Cleanup
       if (data?.id) {
-        await client.models.Grade.delete({ id: data.id });
+        await safeDelete(client.models.Grade, data.id);
       }
     });
 
@@ -745,7 +760,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       });
 
       // Mark as complete
-      const { data: completed, errors } = await client.models.Grade.update({
+      const { data: completed, errors } = await safeUpdate(client.models.Grade, {
         id: created!.id,
         percentComplete: 100,
         complete: true,
@@ -756,7 +771,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       expect(completed?.percentComplete).toBe(100);
 
       // Cleanup
-      await client.models.Grade.delete({ id: created!.id });
+      await safeDelete(client.models.Grade, created!.id);
     });
 
     test('Query grades by learner', async () => {
@@ -779,7 +794,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       expect(found).toBeDefined();
 
       // Cleanup
-      await client.models.Grade.delete({ id: grade!.id });
+      await safeDelete(client.models.Grade, grade!.id);
     });
 
     test('Instructor can view all grades for assignment', async () => {
@@ -818,10 +833,10 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       // Cleanup
       if (grade?.id) {
         await signInAs('student1');
-        await client.models.Grade.delete({ id: grade.id });
+        await safeDelete(client.models.Grade, grade.id);
       }
       await signInAs('instructor1');
-      await client.models.Section.delete({ id: section!.id });
+      await safeDelete(client.models.Section, section!.id);
     });
   });
 
@@ -847,7 +862,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
 
       // Cleanup
       if (data?.id) {
-        await client.models.Section.delete({ id: data.id });
+        await safeDelete(client.models.Section, data.id);
       }
     });
 
@@ -868,7 +883,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       // Cleanup
       for (const result of sections) {
         if (result.data?.id) {
-          await client.models.Section.delete({ id: result.data.id });
+          await safeDelete(client.models.Section, result.data.id);
         }
       }
     });
@@ -881,7 +896,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
         description: 'Original description',
       });
 
-      const { data: updated, errors } = await client.models.Section.update({
+      const { data: updated, errors } = await safeUpdate(client.models.Section, {
         id: created!.id,
         name: 'Updated Section Name',
         description: 'Updated description',
@@ -894,7 +909,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       expect(updated?.status).toBe('PUBLISHED');
 
       // Cleanup
-      await client.models.Section.delete({ id: created!.id });
+      await safeDelete(client.models.Section, created!.id);
     });
 
     test('Delete section', async () => {
@@ -904,9 +919,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
         status: 'DRAFT',
       });
 
-      const { data: deleted, errors } = await client.models.Section.delete({ 
-        id: created!.id 
-      });
+      const { data: deleted, errors } = await safeDelete(client.models.Section, created!.id);
 
       expect(errors).toBeUndefined();
       expect(deleted).toBeDefined();
@@ -938,7 +951,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
 
       // Cleanup
       if (data?.id) {
-        await client.models.Word.delete({ id: data.id });
+        await safeDelete(client.models.Word, data.id);
       }
     });
 
@@ -963,7 +976,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
 
       // Cleanup
       if (data?.id) {
-        await client.models.Question.delete({ id: data.id });
+        await safeDelete(client.models.Question, data.id);
       }
     });
 
@@ -993,9 +1006,9 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       expect(join?.wordID).toBe(word!.id);
 
       // Cleanup
-      if (join?.id) await client.models.UnitWord.delete({ id: join.id });
-      if (unit?.id) await client.models.Unit.delete({ id: unit.id });
-      if (word?.id) await client.models.Word.delete({ id: word.id });
+      if (join?.id) await safeDelete(client.models.UnitWord, join.id);
+      if (unit?.id) await safeDelete(client.models.Unit, unit.id);
+      if (word?.id) await safeDelete(client.models.Word, word.id);
     });
 
     test('Update word with audio files', async () => {
@@ -1006,7 +1019,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       });
 
       const waveformData = { peaks: [0.5, 0.8, 0.3] };
-      const { data: updated, errors } = await client.models.Word.update({
+      const { data: updated, errors } = await safeUpdate(client.models.Word, {
         id: word!.id,
         audio: ['public/audio/hello-1.mp3', 'public/audio/hello-2.mp3'],
         waveformData: JSON.stringify(waveformData),
@@ -1017,7 +1030,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       expect(JSON.parse(updated?.waveformData as string)).toEqual(waveformData);
 
       // Cleanup
-      await client.models.Word.delete({ id: word!.id });
+      await safeDelete(client.models.Word, word!.id);
     });
 
     test('Delete word', async () => {
@@ -1026,7 +1039,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
         definition: 'To be deleted',
       });
 
-      const { data: deleted, errors } = await client.models.Word.delete({ id: word!.id });
+      const { data: deleted, errors } = await safeDelete(client.models.Word, word!.id);
 
       expect(errors).toBeUndefined();
       expect(deleted).toBeDefined();
@@ -1049,7 +1062,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
 
       // Cleanup
       if (data?.id) {
-        await client.models.Question.delete({ id: data.id });
+        await safeDelete(client.models.Question, data.id);
       }
     });
 
@@ -1066,7 +1079,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
         { choice: '5', correct: false },
       ];
 
-      const { data: updated, errors } = await client.models.Question.update({
+      const { data: updated, errors } = await safeUpdate(client.models.Question, {
         id: question!.id,
         answer: 'Four (4)',
         choices: JSON.stringify(newChoices),
@@ -1077,7 +1090,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       expect(JSON.parse(updated?.choices as string)).toEqual(newChoices);
 
       // Cleanup
-      await client.models.Question.delete({ id: question!.id });
+      await safeDelete(client.models.Question, question!.id);
     });
 
     test('Delete question', async () => {
@@ -1086,9 +1099,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
         answer: 'Yes',
       });
 
-      const { data: deleted, errors } = await client.models.Question.delete({ 
-        id: question!.id 
-      });
+      const { data: deleted, errors } = await safeDelete(client.models.Question, question!.id);
 
       expect(errors).toBeUndefined();
       expect(deleted).toBeDefined();
@@ -1111,7 +1122,7 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       expect(file?.size).toBe(10485760);
 
       // Cleanup
-      await client.models.File.delete({ id: file!.id });
+      await safeDelete(client.models.File, file!.id);
     });
 
     test('Associate file with unit (UnitFile join)', async () => {
@@ -1141,9 +1152,9 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       expect(join?.fileID).toBe(file!.id);
 
       // Cleanup
-      await client.models.UnitFile.delete({ id: join!.id });
-      await client.models.Unit.delete({ id: unit!.id });
-      await client.models.File.delete({ id: file!.id });
+      await safeDelete(client.models.UnitFile, join!.id);
+      await safeDelete(client.models.Unit, unit!.id);
+      await safeDelete(client.models.File, file!.id);
     });
 
     test('Associate question with unit (QuestionUnit join)', async () => {
@@ -1167,9 +1178,9 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
       expect(join?.unitID).toBe(unit!.id);
 
       // Cleanup
-      await client.models.QuestionUnit.delete({ id: join!.id });
-      await client.models.Question.delete({ id: question!.id });
-      await client.models.Unit.delete({ id: unit!.id });
+      await safeDelete(client.models.QuestionUnit, join!.id);
+      await safeDelete(client.models.Question, question!.id);
+      await safeDelete(client.models.Unit, unit!.id);
     });
   });
 
@@ -1211,14 +1222,14 @@ describe('B. GraphQL API Tests (Gen 2)', () => {
         filter: { unitID: { eq: unitId } },
       });
       for (const join of joins) {
-        await client.models.UnitWord.delete({ id: join.id });
+        await safeDelete(client.models.UnitWord, join.id);
       }
 
       // Cleanup words and unit
       for (const wordId of wordIds) {
-        await client.models.Word.delete({ id: wordId });
+        await safeDelete(client.models.Word, wordId);
       }
-      if (unitId) await client.models.Unit.delete({ id: unitId });
+      if (unitId) await safeDelete(client.models.Unit, unitId);
       await cleanup();
     });
 

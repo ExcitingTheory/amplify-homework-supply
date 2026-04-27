@@ -237,4 +237,74 @@ export class GroupManager {
   private getLearnerGroupName(sectionId: string): string {
     return `section-${sectionId}-learners`;
   }
+
+  // ====================================================================
+  // Peer Review Groups
+  // ====================================================================
+
+  /**
+   * Create a Cognito group for peer review room participants.
+   * Group name: review-{roomId}-peers
+   */
+  async createPeerReviewGroup(roomId: string): Promise<void> {
+    const groupName = `review-${roomId}-peers`;
+
+    try {
+      await this.cognitoClient.send(new CreateGroupCommand({
+        GroupName: groupName,
+        UserPoolId: this.userPoolId,
+        Description: `Peer reviewers for room: ${roomId}`,
+        Precedence: 3,
+      }));
+      console.log(`[GroupManager] Created peer review group: ${groupName}`);
+    } catch (error: any) {
+      if (error.name === 'GroupExistsException') {
+        console.log(`[GroupManager] Peer review group already exists: ${groupName}`);
+        return;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Add a user to a peer review room's Cognito group.
+   */
+  async addToPeerReviewGroup(username: string, roomId: string): Promise<void> {
+    const groupName = `review-${roomId}-peers`;
+
+    try {
+      await this.cognitoClient.send(new AdminAddUserToGroupCommand({
+        GroupName: groupName,
+        UserPoolId: this.userPoolId,
+        Username: username,
+      }));
+      console.log(`[GroupManager] Added ${username} to ${groupName}`);
+    } catch (error: any) {
+      if (error.name === 'UserNotFoundException') {
+        console.error(`[GroupManager] User not found: ${username}`);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Remove a user from a peer review room's Cognito group.
+   */
+  async removeFromPeerReviewGroup(username: string, roomId: string): Promise<void> {
+    const groupName = `review-${roomId}-peers`;
+
+    try {
+      await this.cognitoClient.send(new AdminRemoveUserFromGroupCommand({
+        GroupName: groupName,
+        UserPoolId: this.userPoolId,
+        Username: username,
+      }));
+      console.log(`[GroupManager] Removed ${username} from ${groupName}`);
+    } catch (error: any) {
+      if (error.name === 'UserNotFoundException') {
+        console.error(`[GroupManager] User not found: ${username}`);
+      }
+      throw error;
+    }
+  }
 }

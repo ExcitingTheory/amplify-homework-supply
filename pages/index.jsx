@@ -28,6 +28,11 @@ import HighIcon from '@mui/icons-material/ArrowUpward';
 import StarIcon from '@mui/icons-material/Star';
 import { FilesProvider } from "../src/context/fileContext";
 import { useChatPageContext } from "../src/hooks/useChatPageContext";
+import { BadgeShelf } from '../src/components/Gamification/BadgeShelf';
+import { NailedItWall } from '../src/components/Gamification/NailedItWall';
+import { LevelBadge } from '../src/components/Gamification/LevelBadge';
+import { StreakIndicator } from '../src/components/Gamification/StreakIndicator';
+import { useXP } from '../src/context/xpContext';
 
 
 
@@ -53,7 +58,7 @@ function CardMediaComponent({ s3Key, identityId, level = 'protected', filter = n
 
     const asyncFunc = async () => {
       console.log('s3Key', s3Key, level, identityId)
-      const _url = await getCachedUrl(s3Key, level, identityId)
+      const _url = await getCachedUrl(s3Key)
       setUrl(_url);
     }
 
@@ -113,6 +118,25 @@ function Index({ signOut, user }) {
   const [myGradeMap, setMyGradeMap] = React.useState([])
   const [myGrades, setMyGrades] = React.useState([])
   const [myAssignmentNeedsGrading, setMyAssignmentNeedsGrading] = React.useState([])
+  const { totalXP, level, xpLogs } = useXP();
+  const [earnedBadges, setEarnedBadges] = React.useState([]);
+  const [nailedItBlocks, setNailedItBlocks] = React.useState([]);
+  const [currentStreak, setCurrentStreak] = React.useState(0);
+
+  // Fetch current streak from StudentStreak model
+  useEffect(() => {
+    if (!user?.username) return;
+    const client = getAmplifyClient();
+    if (!client?.models?.StudentStreak) return;
+    client.models.StudentStreak.list({
+      filter: { studentId: { eq: user.username } },
+    }).then(({ data }) => {
+      const streak = data?.filter(s => s != null)?.[0];
+      if (streak) setCurrentStreak(streak.currentStreak || 0);
+    }).catch((err) => {
+      console.warn('[Index] Error fetching streak:', err);
+    });
+  }, [user?.username]);
 
   // Register page context with global chat
   useChatPageContext({
@@ -291,6 +315,48 @@ function Index({ signOut, user }) {
     };
   }, [user?.username])
 
+  // Fetch earned badges and nailed-it blocks for dashboard
+  useEffect(() => {
+    const myUserId = getUserId(user);
+    if (!myUserId) return;
+    const client = getAmplifyClient();
+
+    const badgeSub = client.models.Badge?.observeQuery?.({
+      filter: { owner: { eq: myUserId } },
+    })?.subscribe?.({
+      next: ({ items }) => {
+        const valid = items.filter(i => i != null && i.id != null);
+        setEarnedBadges(valid.map(b => ({
+          badgeType: b.badgeType,
+          awardedAt: b.createdAt || b.awardedAt || new Date().toISOString(),
+          sourceId: b.sourceId || null,
+        })));
+      },
+      error: (err) => console.warn('[Index] Badge subscription error:', err),
+    });
+
+    const nailedItSub = client.models.NailedIt?.observeQuery?.({
+      filter: { owner: { eq: myUserId } },
+    })?.subscribe?.({
+      next: ({ items }) => {
+        const valid = items.filter(i => i != null && i.id != null);
+        setNailedItBlocks(valid.map(n => ({
+          id: n.id,
+          question: n.question || '',
+          nailedItReason: n.nailedItReason || '',
+          homeworkTitle: n.homeworkTitle || '',
+          createdAt: n.createdAt || new Date().toISOString(),
+        })));
+      },
+      error: (err) => console.warn('[Index] NailedIt subscription error:', err),
+    });
+
+    return () => {
+      badgeSub?.unsubscribe?.();
+      nailedItSub?.unsubscribe?.();
+    };
+  }, [user?.username]);
+
   console.log('Grades.grades', grades)
 
   return (
@@ -463,6 +529,7 @@ function Index({ signOut, user }) {
 
           {(assignments?.length > 0 && units && Object.values(myGradeMap).length > 0) &&
             <Box
+              data-tour="my-grades"
               style={{
                 padding: '1rem',
                 marginBottom: '3rem',
@@ -1106,6 +1173,7 @@ function Index({ signOut, user }) {
           }
 
         </Box>
+
       </Box>
     </>
   )

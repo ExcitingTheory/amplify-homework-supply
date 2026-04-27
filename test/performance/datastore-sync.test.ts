@@ -37,6 +37,9 @@ Amplify.configure(amplifyOutputs);
 
 const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || '';
 
+// Skip performance tests when sandbox/credentials not available
+const describeMaybeSkip = TEST_PASSWORD ? describe : describe.skip;
+
 // Performance threshold constants (in milliseconds)
 const PERFORMANCE_THRESHOLDS = {
   QUERY_RESPONSE: 200,        // 200ms for initial query
@@ -96,7 +99,7 @@ function getMemoryUsage() {
   return null;
 }
 
-describe('DataStore Subscription Performance Tests', () => {
+describeMaybeSkip('DataStore Subscription Performance Tests', () => {
   beforeAll(async () => {
     await signInAs('instructor1@example.com');
   }, 30000);

@@ -25,7 +25,7 @@ const shortcuts = [
 
 export function KeyboardShortcuts() {
   return (
-    <div className="keyboard-shortcuts">
+    <div className="keyboard-shortcuts" data-tour="shortcuts-page">
       <h1>Keyboard shortcuts</h1>
       <p>Storybook has many keyboard shortcuts to help you work faster.</p>
       

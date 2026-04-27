@@ -1,15 +1,14 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import UnitContext from '../../context/unitContext';
-import { Grid, Box } from '@mui/material';
-import { LinearProgressWithLabel, AnswerDrop } from '.';
-import { CompletionScreen } from './CompletionScreen';
+import { Grid, Box, IconButton, Button, Typography } from '@mui/material';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { LinearProgressWithLabel, AnswerDrop, ResultCard } from '.';
 
 import DictionaryContext from '../../context/dictionaryContext';
 import { shuffle } from './utils';
 import {DragBox} from './DragBox'
-
-import { Word } from '../../models';
 
 
 
@@ -264,7 +263,7 @@ export const Easy = ({
     // console.log('easy verifiedAnswers.length / length,', verifiedAnswers.length, totalWords)
     // console.log('easy currentQuestion+1 / length', currentQuestion + 1, totalWords)
     savedGradeCopy[nodeKey]['easy'] = {
-      verifiedAnswers,
+      ...savedGradeCopy[nodeKey]['easy'],
       attemptedAnswers: _attemptedAnswers,
       attemptsCount: attempts,
       accuracy: verifiedAnswers.length / attempts,
@@ -293,67 +292,164 @@ export const Easy = ({
     setShowCompletion(false);
   };
 
+  // Calculate min height based on drag card count: ~56px per row of cards (140px wide + margin),
+  // estimate ~3 cards per row in the sidebar. Minimum 300px.
+  const allCardRows = Math.ceil(shuffledDragOrder.length / 2);
+  const dropZoneMinHeight = Math.max(300, allCardRows * 56);
+
+  // Build result cards for completed state — check if word was matched on first try
+  const resultCards = shuffledDragOrder.map(word => {
+    const attempts = loadAttemptedAnswers[word?.id] || [];
+    // Passed if the first attempt was correct (word matched itself)
+    const passed = attempts.length > 0 && attempts[0] === word?.id;
+    return <ResultCard key={word?.id} phrase={word?.phrase} passed={passed} audioPaths={word?.audio} />;
+  });
+
+  const accuracyPercent = Math.round(
+    (verifiedAnswers.length / (inProgress?.easy?.attemptsCount || 1)) * 100
+  );
+
   return (
     <Box sx={{ 
       position: 'relative', 
-      height: 'calc(100vh - var(--app-bar-height, 11rem))',
-      maxHeight: 'calc(100vh - var(--app-bar-height, 11rem))',
-      overflow: 'hidden',
+      flex: '1 1 auto',
+      minHeight: `${dropZoneMinHeight}px`,
+      overflow: 'auto',
       width: '100%',
       maxWidth: '100vw',
     }}>
       {showCompletion ? (
-          <CompletionScreen
-            levelName="Easy Mode"
-            accuracy={verifiedAnswers.length / (inProgress?.easy?.attemptsCount || 1)}
-            attempts={inProgress?.easy?.attemptsCount || 0}
-            onContinue={handleContinueFromCompletion}
-            onDismiss={handleDismissCompletion}
-            nextLevelName="Hard Mode"
-            isLastLevel={false}
-          />
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', maxWidth: '100%', gap: 1, overflow: 'hidden' }}>
+        <Box sx={{ flexShrink: 0, width: '100%' }}>
+          <LinearProgressWithLabel value={100} />
+        </Box>
+        <Box sx={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1 }}>
+          <Typography variant="body2" color="textSecondary">
+            Easy Mode Complete — {accuracyPercent}% accuracy
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button variant="outlined" size="small" onClick={handleDismissCompletion}>Back</Button>
+            <Button variant="contained" size="small" onClick={handleContinueFromCompletion}>Continue to Hard Mode</Button>
+          </Box>
+        </Box>
+        <Box sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          flex: '1 1 auto',
+          minHeight: 0,
+          width: '100%',
+          maxWidth: '100%',
+          gap: 1,
+          overflow: 'hidden',
+        }}>
+          {/* Blank drop zone */}
+          <Box sx={{
+            minWidth: 0,
+            flex: { xs: '0 0 auto', sm: '1 1 0' },
+            minHeight: { xs: `${dropZoneMinHeight}px`, sm: `${dropZoneMinHeight}px` },
+            maxWidth: { xs: '100%', sm: '66.666667%' },
+          }}>
+            <Box sx={{
+              height: '100%',
+              minHeight: `${dropZoneMinHeight}px`,
+              display: 'flex',
+              borderRadius: '8px',
+              border: '1px dashed var(--mui-palette-divider)',
+              backgroundColor: 'var(--mui-palette-action-disabledBackground)',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <Typography variant="body2" color="textSecondary">Complete</Typography>
+            </Box>
+          </Box>
+          {/* Result cards with check/X */}
+          <Box sx={{
+            minWidth: 0,
+            flex: { xs: '1 1 auto', sm: '0 0 auto' },
+            maxWidth: { xs: '100%', sm: '33.333333%' },
+          }}>
+            <Box sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              flexDirection: 'row',
+              gap: 0,
+              height: { xs: 'auto', sm: '100%' },
+              minHeight: { xs: 'auto', sm: `${dropZoneMinHeight}px` },
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              padding: 0.5,
+              alignContent: 'flex-start',
+              justifyContent: 'flex-start',
+              width: '100%',
+              maxWidth: '100%',
+              boxSizing: 'border-box',
+            }}>
+              {resultCards}
+            </Box>
+          </Box>
+        </Box>
+      </Box>
       ) : (
-      <Grid container direction="column" spacing={1} sx={{ overflow: 'hidden', height: '100%', width: '100%', maxWidth: '100%' }}>
-      <Grid item xs={12} sx={{ flexShrink: 0, width: '100%' }}>
-        <LinearProgressWithLabel value={percentComplete} />
-      </Grid>
-      <Grid item xs={12} container direction={{ xs: 'column', sm: 'row' }} spacing={1} wrap="nowrap" sx={{ overflow: 'hidden', flex: '1 1 auto', minHeight: 0, width: '100%', maxWidth: '100%' }}>
-      <Grid item xs={12} sm={8} md={8} lg={8} sx={{ minWidth: 0, height: { xs: 'auto', sm: '100%' }, flexShrink: 0 }}>
-        <Box
-          sx={{
-            height: { xs: '200px', sm: '100%' },
-            maxHeight: { xs: '200px', sm: '100%' },
-            overflowY: 'hidden',
-            overflowX: 'auto',
-            display: 'flex',
-          }}
-        >
-          <AnswerDrop
-            correctAnswer={{ ...correctWord, progressAssignment, sendFail, sendPass }} />
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', maxWidth: '100%', gap: 1, overflow: 'hidden' }}>
+        <Box sx={{ flexShrink: 0, width: '100%' }}>
+          <LinearProgressWithLabel value={percentComplete} />
         </Box>
-      </Grid>
-      <Grid item xs={12} sm={4} md={4} lg={4} sx={{ minWidth: 0, flex: { xs: '1 1 auto', sm: '0 0 auto' }, height: { xs: 'auto', sm: '100%' }, maxWidth: { xs: '100%', sm: '33.333333%' } }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 0,
-            height: { xs: 'auto', sm: '100%' },
-            maxHeight: { xs: 'none', sm: '100%' },
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            padding: 0.5,
-            alignContent: 'flex-start',
-            width: '100%',
-            maxWidth: '100%',
-            boxSizing: 'border-box',
-          }}
-        >
-          {easyVocab}
+        <Box sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          flex: '1 1 auto',
+          minHeight: 0,
+          width: '100%',
+          maxWidth: '100%',
+          gap: 1,
+          overflow: 'hidden',
+        }}>
+          {/* Drop target */}
+          <Box sx={{
+            minWidth: 0,
+            flex: { xs: '0 0 auto', sm: '1 1 0' },
+            minHeight: { xs: `${dropZoneMinHeight}px`, sm: `${dropZoneMinHeight}px` },
+            maxWidth: { xs: '100%', sm: '66.666667%' },
+          }}>
+            <Box sx={{
+              height: '100%',
+              minHeight: `${dropZoneMinHeight}px`,
+              display: 'flex',
+            }}>
+              <AnswerDrop
+                correctAnswer={{ ...correctWord, progressAssignment, sendFail, sendPass }} />
+            </Box>
+          </Box>
+          {/* Drag cards */}
+          <Box sx={{
+            minWidth: 0,
+            flex: { xs: '1 1 auto', sm: '0 0 auto' },
+            maxWidth: { xs: '100%', sm: '33.333333%' },
+          }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                flexDirection: 'row',
+                gap: 0,
+                height: { xs: 'auto', sm: '100%' },
+                minHeight: { xs: 'auto', sm: `${dropZoneMinHeight}px` },
+                maxHeight: { xs: 'none', sm: '100%' },
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                padding: 0.5,
+                alignContent: 'flex-start',
+                justifyContent: { xs: 'flex-start', sm: 'flex-start' },
+                width: '100%',
+                maxWidth: '100%',
+                boxSizing: 'border-box',
+              }}
+            >
+              {easyVocab}
+            </Box>
+          </Box>
         </Box>
-      </Grid>
-      </Grid>
-    </Grid>
+      </Box>
     )}
     </Box>
   );

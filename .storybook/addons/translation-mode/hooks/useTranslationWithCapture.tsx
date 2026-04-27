@@ -34,7 +34,7 @@ export function useTranslationWithCapture(
       // Get the original translation
       const value = original.t(key, options);
 
-      console.log('[useTranslationWithCapture] t() called:', {
+      console.debug('[useTranslationWithCapture] t() called:', {
         key,
         namespace: primaryNamespace,
         mode,
@@ -45,11 +45,11 @@ export function useTranslationWithCapture(
       if (mode !== 'off') {
         const captureKey = `${primaryNamespace}:${key}`;
         
-        console.log('[useTranslationWithCapture] Mode is active, checking if already captured:', captureKey);
+        console.debug('[useTranslationWithCapture] Mode is active, checking if already captured:', captureKey);
         
         // Only capture if we haven't captured this key yet
         if (!capturedKeys.current.has(captureKey)) {
-          console.log('[useTranslationWithCapture] First time seeing this key, capturing...');
+          console.debug('[useTranslationWithCapture] First time seeing this key, capturing...');
           capturedKeys.current.add(captureKey);
           
           // Load metadata asynchronously (non-blocking)
@@ -65,7 +65,7 @@ export function useTranslationWithCapture(
               alternativeTerms: fullData.alternativeTerms,
             } : {};
 
-            console.log('[useTranslationWithCapture] Calling captureTranslation for:', key);
+            console.debug('[useTranslationWithCapture] Calling captureTranslation for:', key);
             captureTranslation({
               key,
               namespace: primaryNamespace,
@@ -75,7 +75,7 @@ export function useTranslationWithCapture(
             });
           });
         } else {
-          console.log('[useTranslationWithCapture] Already captured:', captureKey);
+          console.debug('[useTranslationWithCapture] Already captured:', captureKey);
         }
 
         // Check if we have a custom translation in context (user edited it)
@@ -87,7 +87,7 @@ export function useTranslationWithCapture(
 
         // In highlight or edit mode, wrap the text in TranslationOverlay for visual feedback
         if (mode === 'highlight' || mode === 'edit') {
-          console.log('[useTranslationWithCapture] Wrapping in TranslationOverlay:', key);
+          console.debug('[useTranslationWithCapture] Wrapping in TranslationOverlay:', key);
           const element = React.createElement(
             TranslationOverlay,
             {

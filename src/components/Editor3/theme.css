@@ -12,6 +12,7 @@
     --editor-drag-hover: #efefef;
     --editor-drag-target: #0099ff;
     --editor-drag-target-glow: rgba(0, 153, 255, 0.6);
+    --editor-drag-icon: #222222;
 }
 
 [data-mui-color-scheme="dark"] {
@@ -19,6 +20,7 @@
     --editor-drag-hover: #333333;
     --editor-drag-target: #4db8ff;
     --editor-drag-target-glow: rgba(77, 184, 255, 0.6);
+    --editor-drag-icon: #cccccc;
 }
 
 .editor-paragraph {
@@ -153,10 +155,15 @@ p {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: url(./images/draggable-block-menu.svg);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 16px 16px;
+    -webkit-mask-image: url(./images/draggable-block-menu.svg);
+    mask-image: url(./images/draggable-block-menu.svg);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: 16px 16px;
+    mask-size: 16px 16px;
+    background-color: var(--editor-drag-icon);
   }
   
   .draggable-block-menu .icon {

@@ -7,12 +7,34 @@
 
 import { getAmplifyClient } from './amplifyClient';
 import { fetchAuthSession } from 'aws-amplify/auth';
-import { 
-  AIFeedback,
-  AiFeedbackType, 
-  AiFeedbackReason, 
-  AiContentType 
-} from '../models';
+
+const AiFeedbackType = {
+  POSITIVE: 'POSITIVE',
+  NEGATIVE: 'NEGATIVE',
+} as const;
+
+const AiFeedbackReason = {
+  INCORRECT: 'INCORRECT',
+  INCOMPLETE: 'INCOMPLETE',
+  INAPPROPRIATE: 'INAPPROPRIATE',
+  NOT_HELPFUL: 'NOT_HELPFUL',
+  IRRELEVANT: 'IRRELEVANT',
+  POOR_QUALITY: 'POOR_QUALITY',
+  OTHER: 'OTHER',
+} as const;
+
+const AiContentType = {
+  CHAT_MESSAGE: 'CHAT_MESSAGE',
+  CONTENT_COMPLETION: 'CONTENT_COMPLETION',
+  AUDIO_GENERATION: 'AUDIO_GENERATION',
+  IMAGE_GENERATION: 'IMAGE_GENERATION',
+  DOCUMENT_ANALYSIS: 'DOCUMENT_ANALYSIS',
+  VOCABULARY_EXTRACTION: 'VOCABULARY_EXTRACTION',
+  TRANSCRIPTION: 'TRANSCRIPTION',
+  IMAGE_DESCRIPTION: 'IMAGE_DESCRIPTION',
+  GRADING_FEEDBACK: 'GRADING_FEEDBACK',
+  BLOCK_SUGGESTION: 'BLOCK_SUGGESTION',
+} as const;
 
 interface CreateFeedbackParams {
   contentType: keyof typeof AiContentType;

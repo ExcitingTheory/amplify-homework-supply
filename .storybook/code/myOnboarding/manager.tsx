@@ -128,7 +128,6 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
     const configs = {
       instructor: { label: 'Instructor', icon: '👨‍🏫', color: '#2196F3' },
       learner: { label: 'Learner', icon: '🎓', color: '#4CAF50' },
-      developer: { label: 'Developer', icon: '💻', color: '#9C27B0' },
       translator: { label: 'Translator', icon: '🌐', color: '#FF9800' },
     };
     return configs[p];
@@ -150,14 +149,6 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-        </svg>
-      );
-    }
-    if (type === 'developer') {
-      return (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="16 18 22 12 16 6"></polyline>
-          <polyline points="8 6 2 12 8 18"></polyline>
         </svg>
       );
     }
@@ -204,7 +195,6 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
               {[
                 { id: 'instructor' as UserPersona, label: 'Instructor', color: '#2196F3' },
                 { id: 'learner' as UserPersona, label: 'Learner', color: '#4CAF50' },
-                { id: 'developer' as UserPersona, label: 'Developer', color: '#9C27B0' },
                 { id: 'translator' as UserPersona, label: 'Translator', color: '#FF9800' },
               ].map((p) => (
                 <div
@@ -347,7 +337,7 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
                     transition: 'background-color 0.2s ease'
                   }}
                   onClick={() => {
-                    console.log('[Onboarding] Task clicked in sidebar:', task.id);
+                    console.debug('[Onboarding] Task clicked in sidebar:', task.id);
                     api.togglePanel(true);
                     api.setSelectedPanel(PANEL_ID);
                   }}
@@ -412,13 +402,13 @@ const SimpleSummaryWidget: React.FC<{ api: any }> = ({ api }) => {
             fontWeight: 600
           }}
           onClick={() => {
-            console.log('[Onboarding] View All Tasks clicked');
+            console.debug('[Onboarding] View All Tasks clicked');
             
             // First open the panel (true = force open), then select our tab
             // This is the working pattern from OnboardingSummary.tsx
             api.togglePanel(true);
             api.setSelectedPanel(PANEL_ID);
-            console.log('[Onboarding] Panel opened and tab selected:', PANEL_ID);
+            console.debug('[Onboarding] Panel opened and tab selected:', PANEL_ID);
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = hoverBg;
@@ -460,12 +450,12 @@ const injectIntoSidebar = (api: any) => {
     return;
   }
   
-  console.log('[Onboarding] Found sidebar:', sidebar.className, sidebar.id);
+  console.debug('[Onboarding] Found sidebar:', sidebar.className, sidebar.id);
   const children = Array.from(sidebar.children);
-  console.log('[Onboarding] Sidebar has', children.length, 'children:');
+  console.debug('[Onboarding] Sidebar has', children.length, 'children:');
   children.forEach((child, index) => {
     const elem = child as HTMLElement;
-    console.log(`  Child ${index}:`, {
+    console.debug(`  Child ${index}:`, {
       tag: elem.tagName,
       class: elem.className,
       id: elem.id,
@@ -477,7 +467,7 @@ const injectIntoSidebar = (api: any) => {
     if (elem.children.length > 0) {
       Array.from(elem.children).forEach((grandchild, gIndex) => {
         const gElem = grandchild as HTMLElement;
-        console.log(`    Grandchild ${index}-${gIndex}:`, {
+        console.debug(`    Grandchild ${index}-${gIndex}:`, {
           tag: gElem.tagName,
           class: gElem.className,
           id: gElem.id,
@@ -500,31 +490,31 @@ const injectIntoSidebar = (api: any) => {
     }) as HTMLElement;
     
     if (mainContainer) {
-      console.log('[Onboarding] Found main container with', mainContainer.children.length, 'children');
+      console.debug('[Onboarding] Found main container with', mainContainer.children.length, 'children');
       
       // The tree is nested deeper - find its actual parent container
       const treeElement = mainContainer.querySelector('#storybook-explorer-tree');
       
       if (treeElement) {
         const treeParent = treeElement.parentElement;
-        console.log('[Onboarding] Tree parent:', treeParent?.tagName, treeParent?.className);
+        console.debug('[Onboarding] Tree parent:', treeParent?.tagName, treeParent?.className);
         
         if (treeParent) {
           // Insert before the tree inside its actual parent
           treeParent.insertBefore(container, treeElement);
-          console.log('[Onboarding] Inserted before tree in its parent container');
+          console.debug('[Onboarding] Inserted before tree in its parent container');
         } else {
           mainContainer.appendChild(container);
-          console.log('[Onboarding] Appended to main container (no tree parent)');
+          console.debug('[Onboarding] Appended to main container (no tree parent)');
         }
       } else {
-        console.log('[Onboarding] Tree not found, appending to main container');
+        console.debug('[Onboarding] Tree not found, appending to main container');
         mainContainer.appendChild(container);
       }
     } else {
       // Fallback: append to sidebar
       sidebar.appendChild(container);
-      console.log('[Onboarding] Appended to sidebar (main container not found)');
+      console.debug('[Onboarding] Appended to sidebar (main container not found)');
     }
   }
   
@@ -540,12 +530,12 @@ const injectIntoSidebar = (api: any) => {
       <SimpleSummaryWidget api={api} />
     </ThemeProvider>
   );
-  console.log('[Onboarding] Summary widget rendered');
+  console.debug('[Onboarding] Summary widget rendered');
 };
 
 // Register the onboarding addon
 addons.register(ADDON_ID, (api) => {
-  console.log('[Storybook] Custom onboarding addon registered');
+  console.debug('[Storybook] Custom onboarding addon registered');
   
   // Add as a panel so it appears in the addon panel tabs
   addons.add(PANEL_ID, {
@@ -563,7 +553,7 @@ addons.register(ADDON_ID, (api) => {
   
   // Helper to open the panel - uses same proven pattern as "View All Tasks" button
   const openOnboardingPanel = () => {
-    console.log('[Onboarding] Opening onboarding panel...');
+    console.debug('[Onboarding] Opening onboarding panel...');
     
     // Check current panel visibility state
     const isPanelOpen = api.getQueryParam('panel') !== null || 
@@ -594,7 +584,7 @@ addons.register(ADDON_ID, (api) => {
   // Handle story changes
   const handleStoryChange = (storyId: string) => {
     if (storyId === WELCOME_STORY_ID && panelOpenedForStory !== storyId) {
-      console.log('[Onboarding] Welcome story detected, opening panel');
+      console.debug('[Onboarding] Welcome story detected, opening panel');
       panelOpenedForStory = storyId;
       openOnboardingPanel();
     }
@@ -616,7 +606,7 @@ addons.register(ADDON_ID, (api) => {
         : task.completionCriteria.quizStoryId;
       
       if (expectedStoryId && expectedStoryId === storyId) {
-        console.log(`[Onboarding] Story ${storyId} matches task ${task.id} (${mode} mode) — emitting task-started`);
+        console.debug(`[Onboarding] Story ${storyId} matches task ${task.id} (${mode} mode) — emitting task-started`);
         emitter.emit({
           type: 'task-started',
           taskId: task.id,
@@ -640,7 +630,7 @@ addons.register(ADDON_ID, (api) => {
     if (logo && search) {
       injectIntoSidebar(api);
     } else {
-      console.log('[Onboarding] Waiting for sidebar to be fully ready...');
+      console.debug('[Onboarding] Waiting for sidebar to be fully ready...');
       setTimeout(tryInject, 200);
     }
   };

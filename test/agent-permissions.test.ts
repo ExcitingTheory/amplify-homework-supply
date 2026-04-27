@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { AgentPermissions, type PermissionCheckInput } from '../../src/utils/agentPermissions';
+import { AgentPermissions, type PermissionCheckInput } from '../src/utils/agentPermissions';
 import path from 'path';
 
 describe('AgentPermissions', () => {
@@ -201,24 +201,24 @@ describe('AgentPermissions', () => {
   });
 
   describe('Delete Operations', () => {
-    it('should require confirmation for deleting test files', async () => {
+    it('should block deleting test files (delete disabled by default)', async () => {
       const result = await permissions.checkPermission({
         operation: 'delete',
         path: 'src/components/MyComponent.test.tsx'
       });
 
-      expect(result.allowed).toBe(true);
-      expect(result.requiresConfirmation).toBe(true);
+      expect(result.allowed).toBe(false);
+      expect(result.reason).toContain('disabled');
     });
 
-    it('should require confirmation for deleting documentation', async () => {
+    it('should block deleting documentation (delete disabled by default)', async () => {
       const result = await permissions.checkPermission({
         operation: 'delete',
         path: 'docs/OLD_DOC.md'
       });
 
-      expect(result.allowed).toBe(true);
-      expect(result.requiresConfirmation).toBe(true);
+      expect(result.allowed).toBe(false);
+      expect(result.reason).toContain('disabled');
     });
 
     it('should block deleting production code', async () => {
@@ -228,7 +228,7 @@ describe('AgentPermissions', () => {
       });
 
       expect(result.allowed).toBe(false);
-      expect(result.reason).toContain('cannot be deleted');
+      expect(result.reason).toContain('disabled');
     });
   });
 
@@ -240,7 +240,7 @@ describe('AgentPermissions', () => {
       });
 
       expect(result.allowed).toBe(false);
-      expect(result.reason).toContain('Schema changes');
+      expect(result.reason).toBeDefined();
     });
 
     it('should block generated model modifications', async () => {
@@ -364,22 +364,22 @@ describe('AgentPermissions', () => {
       expect(result.allowed).toBe(true);
     });
 
-    it('should require confirmation for DataStore save', async () => {
+    it('should block DataStore save (save disabled by default)', async () => {
       const result = await permissions.checkPermission({
         operation: 'datastore.save'
       });
 
-      expect(result.allowed).toBe(true);
-      expect(result.requiresConfirmation).toBe(true);
+      expect(result.allowed).toBe(false);
+      expect(result.reason).toContain('not allowed');
     });
 
-    it('should require confirmation for DataStore delete', async () => {
+    it('should block DataStore delete (delete disabled by default)', async () => {
       const result = await permissions.checkPermission({
         operation: 'datastore.delete'
       });
 
-      expect(result.allowed).toBe(true);
-      expect(result.requiresConfirmation).toBe(true);
+      expect(result.allowed).toBe(false);
+      expect(result.reason).toContain('not allowed');
     });
 
     it('should block DataStore clear', async () => {

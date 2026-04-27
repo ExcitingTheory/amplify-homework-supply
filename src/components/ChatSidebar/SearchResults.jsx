@@ -28,7 +28,6 @@ import {
     Article as UnitIcon,
 } from '@mui/icons-material';
 import { getAmplifyClient } from '../../utils/amplifyClient';
-import { Unit, UnitWord, QuestionUnit } from '../../models';
 
 /**
  * Highlight search terms in text

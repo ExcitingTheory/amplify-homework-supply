@@ -11,8 +11,6 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { getAmplifyClient } from '../utils/amplifyClient';
 import AuthContext from './authContext';
 
-const client = getAmplifyClient();
-
 /**
  * Chat Context interface
  */
@@ -73,6 +71,9 @@ export function useChatContext() {
 export function ChatContextProvider({ children }) {
     // Get auth state
     const { user, isLoading: authLoading } = useContext(AuthContext);
+    
+    // Lazy client initialization - must be inside component to ensure Amplify.configure() has run
+    const client = useMemo(() => getAmplifyClient(), []);
     
     // Chat session state
     const [assistantChat, setAssistantChat] = useState(null);
@@ -203,6 +204,11 @@ export function ChatContextProvider({ children }) {
                     }
                 },
                 error: (error) => {
+                    const msg = error?.message || error?.errors?.[0]?.message || JSON.stringify(error);
+                    if (msg.includes('DuplicatedOperationError')) {
+                        console.warn('[ChatContext] AssistantChat subscription: transient DuplicatedOperationError (safe to ignore)');
+                        return;
+                    }
                     console.error('[ChatContext] AssistantChat subscription error:', error);
                 }
             });

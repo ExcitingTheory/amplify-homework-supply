@@ -77,7 +77,10 @@ const theme = {
   rtl: 'LanguageEditorTheme__rtl',
   table: 'LanguageEditorTheme__table',
   tableAddColumns: 'LanguageEditorTheme__tableAddColumns',
+  tableAddColumnsVisible: 'LanguageEditorTheme__tableAddColumnsVisible',
   tableAddRows: 'LanguageEditorTheme__tableAddRows',
+  tableAddRowsVisible: 'LanguageEditorTheme__tableAddRowsVisible',
+  tableWrapper: 'LanguageEditorTheme__tableWrapper',
   tableCell: 'LanguageEditorTheme__tableCell',
   tableCellActionButton: 'LanguageEditorTheme__tableCellActionButton',
   tableCellActionButtonContainer:

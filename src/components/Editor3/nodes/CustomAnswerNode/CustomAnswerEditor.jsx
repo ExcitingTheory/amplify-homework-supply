@@ -404,7 +404,7 @@ export default React.memo(function CustomAnswerEditor({
 
         if (path) {
             console.log('s3Key', path, identityId)
-            const _presignedUrl = await getCachedUrl(path, 'protected', identityId)
+            const _presignedUrl = await getCachedUrl(path)
             console.log('_presignedUrl', _presignedUrl);
             setPresignedUrl(_presignedUrl);
 

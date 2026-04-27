@@ -26,7 +26,6 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CircleIcon from '@mui/icons-material/Circle';
 import PersonIcon from '@mui/icons-material/Person';
 import SchoolIcon from '@mui/icons-material/School';
-import CodeIcon from '@mui/icons-material/Code';
 import TranslateIcon from '@mui/icons-material/Translate';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LaunchIcon from '@mui/icons-material/Launch';
@@ -118,12 +117,6 @@ const PERSONAS: PersonaOption[] = [
     color: '#4CAF50',
   },
   {
-    id: 'developer',
-    label: 'Developer',
-    icon: <CodeIcon />,
-    color: '#9C27B0',
-  },
-  {
     id: 'translator',
     label: 'Translator',
     icon: <TranslateIcon />,
@@ -172,11 +165,11 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
       try {
         if (api.store?.readyPromise) {
           await api.store.readyPromise;
-          console.log('[OnboardingPanel] Storybook store is ready');
+          console.debug('[OnboardingPanel] Storybook store is ready');
           setApiReady(true);
         } else if (api.selectStory) {
           // API exists but no readyPromise, assume it's ready
-          console.log('[OnboardingPanel] API available without readyPromise');
+          console.debug('[OnboardingPanel] API available without readyPromise');
           setApiReady(true);
         }
       } catch (error) {
@@ -189,7 +182,7 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   }, [api]);
 
   useEffect(() => {
-    console.log('[OnboardingPanel] Panel mounted - select a persona to begin');
+    console.debug('[OnboardingPanel] Panel mounted - select a persona to begin');
     
     // Load initial state
     const persona = emitter.getPersona();
@@ -261,21 +254,17 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     
     // Use mode-specific story ID if available
     if (mode === 'tutorial' && tutorialStoryId) {
-      console.log('✅ Using tutorialStoryId:', tutorialStoryId);
       return tutorialStoryId;
     }
     if (mode === 'quiz' && quizStoryId) {
-      console.log('✅ Using quizStoryId:', quizStoryId);
       return quizStoryId;
     }
     
     // Fall back to legacy single storyId
     if (storyId) {
-      console.log('ℹ️ Using fallback storyId:', storyId, 'for mode:', mode);
       return storyId;
     }
     
-    console.warn('⚠️ No story ID available for task:', task.id, 'in mode:', mode);
     return null;
   };
 
@@ -288,16 +277,16 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
   };
 
   const handleNavigateToStory = (storyId: string) => {
-    console.log('🚀 Navigating to story:', storyId);
-    console.log('🔧 API available:', !!api?.selectStory);
-    console.log('✅ API ready:', apiReady);
-    console.log('🌍 Window parent:', window.parent);
+    console.debug('🚀 Navigating to story:', storyId);
+    console.debug('🔧 API available:', !!api?.selectStory);
+    console.debug('✅ API ready:', apiReady);
+    console.debug('🌍 Window parent:', window.parent);
     
     // Only use API if it's ready
     if (api?.selectStory && apiReady) {
       // Use Storybook API if available and ready
       try {
-        console.log('📍 Using Storybook API to navigate');
+        console.debug('📍 Using Storybook API to navigate');
         api.selectStory(storyId);
         return; // Success, exit early
       } catch (error) {
@@ -307,9 +296,9 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
     }
     
     // Fallback to URL navigation if API not ready or failed
-    console.log('🌐 Using window.parent.location.href');
+    console.debug('🌐 Using window.parent.location.href');
     const url = `/?path=/story/${encodeURIComponent(storyId)}`;
-    console.log('🔗 URL:', url);
+    console.debug('🔗 URL:', url);
     
     try {
       if (window.parent && window.parent !== window) {
@@ -382,30 +371,30 @@ const OnboardingPanel: React.FC<{ api?: any }> = ({ api }) => {
    * Handle clicking on a task to start spotlight tour
    */
   const handleTaskClick = (task: OnboardingTaskWithCriteria) => {
-    console.log('🎯 Task clicked:', task.id, task.title);
-    console.log('🔍 Current mode:', mode);
+    console.debug('🎯 Task clicked:', task.id, task.title);
+    console.debug('🔍 Current mode:', mode);
     
     // Don't start spotlight for already completed tasks in quiz mode
     if (mode === 'quiz' && completedTasks.has(task.id)) {
-      console.log('⏭️ Task already completed in quiz mode, skipping');
+      console.debug('⏭️ Task already completed in quiz mode, skipping');
       return;
     }
 
     // Both modes: Show spotlight tour with mode-appropriate steps
-    console.log(`✨ ${mode === 'tutorial' ? 'Tutorial' : 'Quiz'} mode: Starting spotlight tour...`);
+    console.debug(`✨ ${mode === 'tutorial' ? 'Tutorial' : 'Quiz'} mode: Starting spotlight tour...`);
     setActiveTask(task);
     const steps = generateSpotlightSteps(task);
-    console.log('📋 Generated steps:', steps.length, 'steps for', mode, 'mode');
+    console.debug('📋 Generated steps:', steps.length, 'steps for', mode, 'mode');
     setSpotlightSteps(steps);
     setSpotlightCurrentStep(0);
     setSpotlightOpen(true);
     
     // Get the correct story ID based on the current mode
     const storyId = getStoryIdForMode(task);
-    console.log('📍 Story ID for', mode, 'mode:', storyId);
+    console.debug('📍 Story ID for', mode, 'mode:', storyId);
     
     if (storyId) {
-      console.log('🚀 Navigating to', mode, 'story:', storyId);
+      console.debug('🚀 Navigating to', mode, 'story:', storyId);
       handleNavigateToStory(storyId);
     } else {
       console.warn('⚠️ No story ID found for', mode, 'mode task:', task.id);

@@ -439,7 +439,7 @@ export const TranslationPanelWrapper: React.FC<{ api: any; active: boolean }> = 
       tone?: string;
       alternativeTerms?: string[];
     }) => {
-      console.log('[TranslationPanel] Received select event:', data.namespace, data.key);
+      console.debug('[TranslationPanel] Received select event:', data.namespace, data.key);
       const fullKey = `${data.namespace}:${data.key}`;
 
       // Ensure this key exists in allTranslations so KeyList can render it
@@ -492,7 +492,7 @@ export const TranslationPanelWrapper: React.FC<{ api: any; active: boolean }> = 
     };
 
     const handleUpdateAll = (entries: [string, Translation][]) => {
-      console.log('[TranslationPanel] Received update-all, entries:', Array.isArray(entries) ? entries.length : 'not array');
+      console.debug('[TranslationPanel] Received update-all, entries:', Array.isArray(entries) ? entries.length : 'not array');
       if (Array.isArray(entries)) {
         const map = new Map<string, Translation>();
         entries.forEach(([key, value]) => map.set(key, value));
@@ -504,7 +504,7 @@ export const TranslationPanelWrapper: React.FC<{ api: any; active: boolean }> = 
     const unsub2 = api.on('translation-mode/update-all', handleUpdateAll);
 
     // Request current translations from the preview on mount
-    console.log('[TranslationPanel] Requesting translations from preview...');
+    console.debug('[TranslationPanel] Requesting translations from preview...');
     api.emit('translation-mode/request-all');
 
     return () => {

@@ -51,7 +51,7 @@ function TimerWrappedEditor() {
 
   console.log('TimerWrappedEditor.grade', grade)
 
-  const timerStarted = grade?.createdAt
+  const timerStarted = grade?.timerStarted
 
   return (<>
 

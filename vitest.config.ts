@@ -50,6 +50,10 @@ export default defineConfig({
             '.next',
             'out',
             'build',
+            'test/performance/**',
+            'test/integration/api.test.ts',
+            'test/integration/lambda.test.ts',
+            'test/storybook/**',
           ],
         },
         resolve: {
@@ -85,6 +89,7 @@ export default defineConfig({
           }),
           storybookTest({
             configDir: storybookConfigDir,
+            storybookScript: 'npx storybook dev --ci --port 6006',
           }),
         ],
         test: {
@@ -98,7 +103,6 @@ export default defineConfig({
             provider: playwright(),
             instances: [{ browser: 'chromium' }],
             fileParallelism: false, // Disable parallel execution to avoid cache conflicts
-            isolate: false, // Reuse browser context to avoid module cache invalidation
           },
           // Use relative path for setupFiles so Vite can serve it in browser mode
           setupFiles: ['.storybook/vitest.setup.ts'],
@@ -122,6 +126,10 @@ export default defineConfig({
           alias: {
             '@': path.resolve(__dirname, './src'),
             '@storybook/__mocks__': path.resolve(storybookConfigDir, './__mocks__'),
+            // Mock CollaborationPlugin wrapper to avoid "splice: could not find collab element node" errors
+            // NOTE: Do NOT mock @lexical/react packages — LexicalNestedComposer depends on them
+            [path.resolve(__dirname, 'src/components/Editor3/plugins/CollaborationPlugin')]: path.resolve(storybookConfigDir, './__mocks__/CollaborationPlugin.js'),
+            [path.resolve(__dirname, 'src/components/Editor3/plugins/CollaborationPlugin.tsx')]: path.resolve(storybookConfigDir, './__mocks__/CollaborationPlugin.js'),
             // Workaround for Lexical packages that don't have "." export
             '@lexical/react$': '@lexical/react/LexicalComposer',
           },

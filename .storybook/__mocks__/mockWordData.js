@@ -1,11 +1,10 @@
 /**
  * Mock Word Data for Storybook - Dictionary Editor & Semantic Search
  * 
- * Comprehensive mock Word (vocabulary) records with embedded audio data URIs
+ * Comprehensive mock Word (vocabulary) records with audio file references
  * and realistic embeddings for semantic search testing.
  */
 
-import { MOCK_MEDIA } from './mockMediaData';
 import { generateMockEmbedding } from './mockEmbeddingUtils';
 
 /**

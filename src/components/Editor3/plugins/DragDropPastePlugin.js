@@ -48,6 +48,8 @@ export const ACCEPTABLE_FILE_TYPES = [
     'text/plain',
     'text/markdown',
     'text/csv',
+    'text/x-fountain',
+    'text/x-gift',
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/zip',
@@ -58,7 +60,6 @@ export const ACCEPTABLE_FILE_TYPES = [
     'application/x-bzip2',
     'application/gzip',
     'application/x-xz',
-    'application/x-msdownload',
     'application/vnd.ms-excel',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     'application/vnd.ms-powerpoint',
@@ -67,6 +68,9 @@ export const ACCEPTABLE_FILE_TYPES = [
     'application/vnd.oasis.opendocument.text',
     'application/vnd.oasis.opendocument.spreadsheet',
     'application/vnd.oasis.opendocument.presentation',
+    'application/epub+zip',
+    'application/x-imscc+zip',
+    'application/x-qti+xml',
 ];
 
 export const ANY_ACCEPTABLE_TYPES = [

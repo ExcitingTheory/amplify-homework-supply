@@ -40,7 +40,7 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
 
   // Debug logging for mode changes
   useEffect(() => {
-    console.log(`[TranslationOverlay] Mode changed to: ${mode} for key: ${tKey}`);
+    console.debug(`[TranslationOverlay] Mode changed to: ${mode} for key: ${tKey}`);
   }, [mode, tKey]);
 
   // Capture this translation on mount with full metadata - only once
@@ -158,7 +158,7 @@ export const TranslationOverlay: React.FC<TranslationOverlayProps> = ({
   const handleClick = (e: React.MouseEvent) => {
     // Allow normal click-through when holding Shift or Cmd/Ctrl
     if (e.shiftKey || e.metaKey || e.ctrlKey) {
-      console.log('[TranslationOverlay] Modifier key held, allowing click-through');
+      console.debug('[TranslationOverlay] Modifier key held, allowing click-through');
       return; // Don't stop propagation, let the click pass through
     }
     

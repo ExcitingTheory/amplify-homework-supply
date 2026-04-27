@@ -240,7 +240,7 @@ const result = await uploadData({
 }).result;
 ```
 
-**Cached URLs**: Use `getCachedUrl(key, level)` utility to avoid repeated S3 calls.
+**Cached URLs**: Use `getCachedUrl(filePath)` utility to avoid repeated S3 calls. Pass the full Gen 2 path (e.g., `'protected/{identityId}/files/doc.pdf'`).
 
 ## Common Pitfalls
 

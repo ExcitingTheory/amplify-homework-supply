@@ -47,7 +47,7 @@ function CardMediaComponent({ s3Key, identityId, level = 'protected' }) {
     React.useEffect(() => {
   
       const asyncFunc = async () => {
-        const _url = await getCachedUrl(s3Key, level, identityId)
+        const _url = await getCachedUrl(s3Key)
         setUrl(_url);
       }
   
@@ -460,9 +460,9 @@ function Sections({ user }) {
                                                             fontFamily: 'monospace',
                                                             fontSize: '0.875rem',
                                                             fontWeight: 600,
-                                                            backgroundColor: 'grey.100',
+                                                            backgroundColor: 'action.selected',
                                                             border: '1px solid',
-                                                            borderColor: 'grey.300',
+                                                            borderColor: 'divider',
                                                         }}
                                                     />
                                                 </Box>

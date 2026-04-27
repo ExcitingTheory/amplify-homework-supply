@@ -33,6 +33,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: 'Set Up Your First Class',
     description: 'Create a new class section for your students',
     instructions: [
+      'Explore the Storybook sidebar to find features by category',
+      'Use Canvas for interactive previews, Docs for instructions',
       'Navigate to the Sections page',
       'Open the Create Section form',
       'Enter a class name (e.g., "Japanese 101")',
@@ -86,7 +88,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       'Save the unit',
     ],
     completionCriteria: {
-      tutorialStoryId: '📚-creating-lessons-editor--empty-editor-custom-blocks', // Tutorial: Editor with custom blocks menu visible
+      tutorialStoryId: '📚-creating-lessons-editor--kitchen-sink', // Tutorial: Kitchen sink editor with all block types
       quizStoryId: '📄-pages-application-pages--unit-detail', // Quiz: Actual editor page
       requiredActions: ['onSave', 'onUpdate'], // Saving editor content
     },
@@ -173,7 +175,6 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       'Describe what you want to create',
       'Review AI suggestions',
       'Insert the suggested content into the editor',
-      'Customize as needed',
       'Save your unit',
     ],
     persona: 'instructor',
@@ -192,14 +193,11 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     description: 'Learn keyboard shortcuts for faster content creation',
     instructions: [
       'Open Help → Keyboard Shortcuts in Storybook',
-      'Review the most useful shortcuts for content creation',
       'Navigate to "Keyboard Shortcuts Demo" story',
       'Watch the automated demonstration',
       'Try basic shortcuts: Bold (⌘B), Italic (⌘I), Underline (⌘U)',
       'Practice block types: Headings (⌘⇧1-3), Lists (⌘⇧7-8)',
-      'Learn alignment: Left (⌘⇧L), Center (⌘⇧E), Right (⌘⇧R)',
       'Use Undo (⌘Z) and Redo (⌘⇧Z) regularly',
-      'Keep the Help page open for quick reference',
     ],
     persona: 'instructor',
     category: 'Skills',
@@ -218,6 +216,8 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: 'Join Your First Class',
     description: 'Connect to your instructor\'s class section',
     instructions: [
+      'Explore the Storybook sidebar to find features by topic',
+      'Use Canvas for live previews, Docs for written guides',
       'Get the join code from your instructor',
       'Go to the Sections page',
       'Open the Join Section form',
@@ -230,9 +230,9 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     order: 1,
     estimatedTime: 120,
     completionCriteria: {
-      tutorialStoryId: '📚-creating-lessons-main-toolbar--full-toolbar', // Tutorial: MainToolbar has the join section dialog
+      tutorialStoryId: '�-pages-application-pages--sections', // Tutorial: Sections page with join section dialog
       quizStoryId: '📄-pages-application-pages--sections', // Quiz: Navigate to sections page
-      requiredActions: ['onClick', 'onSubmit'], // Join action
+      requiredActions: ['onSubmit'], // Form submission of join code
     },
   },
   {
@@ -270,7 +270,7 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       'Review your score',
     ],
     completionCriteria: {
-      tutorialStoryId: '📚-creating-lessons-workbook--workbook-with-content', // Tutorial: Workbook with actual content to learn from
+      tutorialStoryId: '📚-creating-lessons-workbook--kitchen-sink', // Tutorial: Kitchen sink workbook with all block types
       quizStoryId: '📄-pages-application-pages--workbook', // Quiz: Actual workbook page
       requiredActions: ['onSubmit'], // Submitting work
     },
@@ -289,14 +289,13 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       'Review your accuracy score',
       'Read any instructor comments',
       'Check correct answers for mistakes',
-      'Retake if assignment allows',
     ],
     persona: 'learner',
     category: 'Progress',
     order: 4,
     estimatedTime: 240,
     completionCriteria: {
-      tutorialStoryId: '📚-creating-lessons-workbook--workbook-with-content', // Tutorial: Workbook showing feedback
+      tutorialStoryId: '�-pages-application-pages--section-detail', // Tutorial: Section detail page (has grades tab and feedback)
       quizStoryId: '📄-pages-application-pages--section-detail', // Quiz: Section detail page (has grades tab)
       requiredActions: ['onClick'], // Clicking to view grade details
     },
@@ -307,7 +306,6 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     description: 'Use the dictionary to study words',
     instructions: [
       'Access the Dictionary or Unit vocabulary',
-      'Browse vocabulary words',
       'Listen to audio pronunciation',
       'View definitions and examples',
       'Use practice questions if available',
@@ -332,7 +330,6 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
       'Ask a question (e.g., "How do I say hello?")',
       'Read the AI response',
       'Ask follow-up questions',
-      'Copy translations or examples',
       'Continue learning',
     ],
     persona: 'learner',
@@ -350,20 +347,16 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: 'Learn Helpful Shortcuts',
     description: 'Speed up your work with keyboard shortcuts',
     instructions: [
-      'Learn Undo shortcut: ⌘Z (Mac) or Ctrl+Z (Windows)',
-      'Practice selecting text and using ⌘A to select all',
-      'Use arrow keys to navigate between questions',
-      'Try Tab to accept AI suggestions',
-      'Use Enter to submit answers in text fields',
-      'Practice Escape to close dialogs',
-      'These shortcuts work across the entire app!',
+      'Review the list of essential keyboard shortcuts',
+      'Practice shortcuts like Undo (⌘Z), Select All (⌘A), and Tab',
+      'Use these shortcuts across the entire app!',
     ],
     persona: 'learner',
     category: 'Skills',
     order: 7,
     estimatedTime: 180,
     completionCriteria: {
-      tutorialStoryId: '📚-creating-lessons-workbook--workbook-with-content', // Tutorial: Workbook for practicing shortcuts
+      tutorialStoryId: '📚-creating-lessons-workbook--kitchen-sink', // Tutorial: Kitchen sink workbook for practicing shortcuts
       quizStoryId: '📄-pages-application-pages--workbook', // Quiz: Actual workbook page
       requiredActions: ['onClick', 'onSubmit'], // Practicing shortcuts in workbook
       customCheck: () => {
@@ -374,169 +367,6 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     },
   },
 
-  // ============ DEVELOPER TASKS ============
-  {
-    id: 'developer-explore-components',
-    title: 'Explore Component Documentation',
-    description: 'Understand the component library',
-    instructions: [
-      'Browse the Storybook sidebar',
-      'Visit the "Technical Overview" page',
-      'Read component documentation',
-      'Explore the different categories',
-      'Examine the tech stack',
-      'Review architecture patterns',
-    ],
-    persona: 'developer',
-    category: 'Onboarding',
-    order: 1,
-    estimatedTime: 600,
-  },
-  {
-    id: 'developer-understand-editor',
-    title: 'Understand the Editor System',
-    description: 'Learn about the Lexical-based editor',
-    instructions: [
-      'Read "Editor" section in Storybook',
-      'View the Editor component stories',
-      'Understand custom nodes (Quiz, Answer, etc.)',
-      'Review the toolbar functionality',
-      'Check Editor3 plugin architecture',
-      'View source code examples',
-    ],
-    persona: 'developer',
-    category: 'Architecture',
-    order: 2,
-    estimatedTime: 900,
-  },
-  {
-    id: 'developer-explore-datastore',
-    title: 'Learn DataStore Patterns',
-    description: 'Understand AWS Amplify DataStore usage',
-    instructions: [
-      'Read "API Documentation" in docs',
-      'Check "DATASTORE_OPTIMIZATION_CHANGES.md"',
-      'Understand subscription patterns',
-      'Review context usage (UnitContext, etc.)',
-      'Study lazy loading patterns',
-      'Check DataStore.copyOf patterns',
-    ],
-    persona: 'developer',
-    category: 'Architecture',
-    order: 3,
-    estimatedTime: 900,
-  },
-  {
-    id: 'developer-understand-ai-integration',
-    title: 'Review AI Integration',
-    description: 'Learn how OpenAI is integrated',
-    instructions: [
-      'Read "CHATBOT_TOOLS.md" in docs',
-      'Review pages/api/chat.js implementation',
-      'Understand Vercel AI SDK usage',
-      'Check streaming implementation',
-      'Review Lambda function patterns',
-      'Study tool calling mechanisms',
-    ],
-    persona: 'developer',
-    category: 'AI Features',
-    order: 4,
-    estimatedTime: 900,
-  },
-  {
-    id: 'developer-setup-dev-environment',
-    title: 'Set Up Development Environment',
-    description: 'Get the project running locally',
-    instructions: [
-      'Clone the repository',
-      'Install dependencies with npm install',
-      'Configure AWS Amplify credentials',
-      'Run "npm run dev" for Next.js',
-      'Run "npm run storybook" in another terminal',
-      'Verify both are working',
-    ],
-    persona: 'developer',
-    category: 'Onboarding',
-    order: 5,
-    estimatedTime: 900,
-  },
-  {
-    id: 'developer-explore-file-structure',
-    title: 'Explore Project Structure',
-    description: 'Understand how the codebase is organized',
-    instructions: [
-      'Review pages/ directory (Next.js routes)',
-      'Explore src/components/ (React components)',
-      'Check src/context/ (Context providers)',
-      'Review src/utils/ (Helper functions)',
-      'Understand amplify/backend/ structure',
-      'Study .storybook/ customizations',
-    ],
-    persona: 'developer',
-    category: 'Codebase',
-    order: 6,
-    estimatedTime: 600,
-  },
-  {
-    id: 'developer-run-tests',
-    title: 'Run Tests and Linting',
-    description: 'Verify code quality and test suite',
-    instructions: [
-      'Run "npm run lint" to check code style',
-      'Run "npm run vitest" for unit tests',
-      'Run "npm run cypress:open" for E2E tests',
-      'Review any failures',
-      'Fix issues according to error messages',
-      'Verify all tests pass',
-    ],
-    persona: 'developer',
-    category: 'Development',
-    order: 7,
-    estimatedTime: 600,
-  },
-  {
-    id: 'developer-customize-storybook',
-    title: 'Customize Storybook Setup',
-    description: 'Learn the Storybook configuration',
-    instructions: [
-      'Review .storybook/main.ts configuration',
-      'Check .storybook/preview.jsx settings',
-      'Understand mock setup in __mocks__/',
-      'Review story file patterns',
-      'Study addon registration',
-      'Understand webpack aliases',
-    ],
-    persona: 'developer',
-    category: 'Development',
-    order: 8,
-    estimatedTime: 480,
-  },
-  {
-    id: 'developer-keyboard-shortcuts-demo',
-    title: 'Learn Keyboard Shortcuts',
-    description: 'Watch automated demo of all editor shortcuts',
-    instructions: [
-      'Navigate to Help → Keyboard Shortcuts in Storybook',
-      'Review the comprehensive shortcuts reference',
-      'Go to Editor stories and find "Keyboard Shortcuts Demo"',
-      'Watch the automated playthrough',
-      'Observe text formatting shortcuts (Bold, Italic, etc.)',
-      'See block type shortcuts (Headings, Lists, etc.)',
-      'Learn alignment and navigation shortcuts',
-      'Try the shortcuts yourself in the Editor',
-      'Bookmark the Help page for quick reference',
-    ],
-    completionCriteria: {
-      tutorialStoryId: '📚-creating-lessons-editor--empty-editor-text-formatting', // Tutorial: Simple editor (no keyboard demo actions)
-      quizStoryId: '📄-pages-application-pages--unit-detail', // Quiz: Actual editor page
-      requiredActions: ['onClick', 'onSave'], // Interacting with editor shortcuts
-    },
-    persona: 'developer',
-    category: 'Learning',
-    order: 9,
-    estimatedTime: 360,
-  },
-
   // ============ SECRET/HIDDEN TASKS (Extra Credit) ============
   {
     id: 'secret-keyboard-master',
@@ -544,15 +374,11 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     description: '🏆 Complete the interactive keyboard shortcut training to unlock this achievement!',
     instructions: [
       '🎯 Navigate to Help → Keyboard Shortcuts',
-      '🎮 Activate the Interactive Training Mode',
-      '⌨️ Practice each keyboard shortcut by pressing the key combinations',
-      '🌟 Earn achievements as you complete shortcuts',
-      '📊 Track your progress across all categories',
-      '🎊 Complete all 20 shortcuts to become a Keyboard Master',
-      '👑 Unlock the ultimate "Keyboard Master" achievement',
-      '🚀 Boost your productivity by 10x with these shortcuts!',
+      '🎮 Activate the Interactive Training Mode and practice all key combinations',
+      '🌟 Earn achievements and track progress across all categories',
+      '👑 Complete all 20 shortcuts to become a Keyboard Master!',
     ],
-    persona: 'developer',
+    persona: 'all',
     category: '🎁 Extra Credit',
     order: 100,
     estimatedTime: 600,
@@ -579,12 +405,10 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     description: 'Complete the keyboard training in under 5 minutes',
     instructions: [
       'Master all keyboard shortcuts as fast as possible',
-      'Use the Interactive Training Mode in Help → Keyboard Shortcuts',
-      'Complete all 20 shortcuts',
-      'Aim for speed and accuracy',
-      'Prove you are a true efficiency expert!',
+      'Race against the clock — complete all 20 shortcuts',
+      'Aim for speed and accuracy to prove you are a true efficiency expert!',
     ],
-    persona: 'developer',
+    persona: 'all',
     category: '🎁 Extra Credit',
     order: 101,
     estimatedTime: 300,
@@ -612,12 +436,10 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     description: 'Unlock all individual shortcut achievements',
     instructions: [
       'Complete shortcuts that have achievement badges',
-      'These include: Bold Beginner, Italic Expert, Format Master',
-      'Heading Hero, List Legend, Code Ninja',
-      'Alignment Ace, Time Traveler',
-      'Collect them all to prove your mastery!',
+      'Collect Bold Beginner, Italic Expert, Format Master, Heading Hero, List Legend, Code Ninja, Alignment Ace, and Time Traveler',
+      'Earn every badge to prove your mastery!',
     ],
-    persona: 'developer',
+    persona: 'all',
     category: '🎁 Extra Credit',
     order: 102,
     estimatedTime: 420,
@@ -648,18 +470,16 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: '📢 SECRET: Shortcut Evangelist',
     description: 'Use shortcuts in your daily workflow',
     instructions: [
-      'Apply what you learned in the training',
-      'Use keyboard shortcuts while creating content',
-      'Teach others about the shortcuts you learned',
-      'Share the Help → Keyboard Shortcuts page with colleagues',
+      'Apply what you learned — use shortcuts while creating content',
+      'Share shortcuts with colleagues and teach others',
       'Spread the gospel of productivity!',
     ],
-    persona: 'instructor',
+    persona: 'all',
     category: '🎁 Extra Credit',
     order: 103,
     estimatedTime: 1800,
     completionCriteria: {
-      tutorialStoryId: '📚-creating-lessons-editor--empty-editor-text-formatting',
+      tutorialStoryId: '📚-creating-lessons-editor--kitchen-sink',
       quizStoryId: '📄-pages-application-pages--unit-detail',
       requiredActions: ['onSave', 'onUpdate'], // Using shortcuts while creating real content
     },
@@ -671,12 +491,13 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: 'Try the Language Switcher',
     description: 'Preview how UI text appears in each supported language',
     instructions: [
+      'Explore the Storybook sidebar to find translatable components',
+      'Use Canvas to preview translations, Docs for locale conventions',
       'Find the 🌐 Globe icon in the Storybook top toolbar',
       'Click it to open the language selector dropdown',
-      'Switch to Japanese (ja) and observe how button labels, headings, and form fields change',
-      'Switch to Spanish (es) and compare the text length differences',
+      'Switch between languages (ja, es, en) and observe how text changes',
+      'Notice any text that did NOT change — missing keys are highlighted',
       'Return to English (en) — this is the source locale',
-      'Notice any text that did NOT change — the panel highlights missing keys per language',
     ],
     persona: 'translator',
     category: 'Getting Started',
@@ -715,11 +536,10 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: 'Understand Locale File Structure',
     description: 'Learn where JSON locale files live and how namespaces map to components',
     instructions: [
-      'Locale files are in public/locales/{lang}/ (e.g., public/locales/en/, public/locales/ja/)',
-      'Each namespace is a separate JSON file: common.json, editor.json, auth.json, etc.',
-      'Keys inside are nested objects — e.g., common.buttons.save → { "buttons": { "save": "Save" } }',
+      'Locale files are in public/locales/{lang}/ — each namespace is a JSON file',
+      'Keys are nested objects (e.g., common.buttons.save)',
       'English (en) is the source of truth — all other locales mirror its key structure',
-      'Open the "Editor Namespace" story to see how editor.json keys appear in the panel',
+      'Open the "Editor Namespace" story to see how keys appear in the panel',
       'Compare a key like editor.toolbar.bold across en and ja to see the mapping',
     ],
     persona: 'translator',
@@ -738,12 +558,11 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     description: 'See exactly which components use each translation key and why',
     instructions: [
       'Open the "Auth Namespace" story — it shows login/signup translations',
-      'Open the Translations panel and click any translation row to expand it',
-      'Read the "Context" field — it describes when and why users see this text',
-      'Check "Component Location" — the file path of the React component using this key',
-      'Review "User Type" — who sees this text (learners, instructors, all)',
-      'Check "Tone" — formal, casual, or technical — this affects translation style',
+      'Click any translation row to expand its metadata',
+      'Read Context, Component Location, and User Type fields',
+      'Check Tone (formal, casual, technical) — this affects translation style',
       'Use these metadata fields to make context-aware translation decisions',
+      'Try several rows to see how context varies across components',
     ],
     persona: 'translator',
     category: 'Translation Workflow',
@@ -760,13 +579,12 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: 'Test RTL Language Support',
     description: 'Verify that right-to-left languages render correctly across components',
     instructions: [
-      'Switch to a RTL language using the language selector (Arabic or Hebrew if available)',
-      'Check that the overall page layout mirrors — sidebar on the right, content flows right-to-left',
-      'Verify text alignment: paragraphs should be right-aligned',
-      'Check that icons and directional buttons (arrows, chevrons) flip correctly',
-      'Look for layout breakage: overlapping text, misaligned buttons, clipped content',
+      'Switch to a RTL language using the language selector',
+      'Check layout mirrors: sidebar right, content right-to-left, text right-aligned',
+      'Verify icons and directional buttons flip correctly',
+      'Look for breakage: overlapping text, misaligned buttons, clipped content',
       'Navigate to 2-3 different component stories to test across the UI',
-      'Note any issues found — these need CSS logical properties (start/end vs left/right)',
+      'Note issues — these need CSS logical properties (start/end vs left/right)',
     ],
     persona: 'translator',
     category: '🎁 Extra Credit',
@@ -783,12 +601,10 @@ export const ONBOARDING_TASKS: OnboardingTaskWithCriteria[] = [
     title: 'Review Pluralization Rules',
     description: 'Verify that count-dependent translations handle plural forms correctly per locale',
     instructions: [
-      'Find translation keys that contain {{count}} — these use i18next pluralization',
-      'English uses two forms: "key" (singular) and "key_other" (plural)',
-      'Japanese typically uses one form (no grammatical plural)',
-      'Arabic needs up to 6 plural forms: zero, one, two, few, many, other',
-      'In the Translations panel, look for keys ending in _one, _other, _few, etc.',
-      'Test with count values: 0, 1, 2, 5, 11, 100 to verify correct form selection',
+      'Find translation keys containing {{count}} — these use i18next pluralization',
+      'Understand locale plural rules (English: 2 forms, Japanese: 1, Arabic: up to 6)',
+      'Look for keys ending in _one, _other, _few in the Translations panel',
+      'Test with count values 0, 1, 2, 5, 11, 100 to verify correct form selection',
       'Check i18next docs for the plural rules of each target language',
     ],
     persona: 'translator',

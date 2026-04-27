@@ -255,6 +255,37 @@ const FilesProvider = ({ children }) => {
       return;
     }
 
+    // ── Offline fallback: load files from IndexedDB cache ─────────────
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      filesFetchedRef.current = true;
+      (async () => {
+        try {
+          const { getAllRecords } = await import('../offline/OfflineDataStore');
+          const cachedFiles = await getAllRecords('files');
+          if (cachedFiles.length > 0) {
+            const _playlistFiltered = {};
+            const _pdfsFiltered = {};
+            cachedFiles.forEach(f => {
+              if (f.contentType && ACCEPTABLE_PLAYLIST_TYPES.includes(f.contentType)) {
+                _playlistFiltered[f.id] = f;
+              }
+              if (f.contentType === 'application/pdf') {
+                _pdfsFiltered[f.id] = f;
+              }
+            });
+            setMyFiles(cachedFiles);
+            setMyPlaylistFiles(_playlistFiltered);
+            setMyPdfs(_pdfsFiltered);
+            console.log('[FilesContext] Loaded', cachedFiles.length, 'files from offline cache');
+          }
+        } catch (err) {
+          console.warn('[FilesContext] Offline file cache load failed:', err);
+        }
+      })();
+      return;
+    }
+    // ── End offline fallback ──────────────────────────────────────────
+
     async function fetchFiles() {
       console.log('[FilesContext] fetchFiles called');
       try {
@@ -338,6 +369,11 @@ const FilesProvider = ({ children }) => {
             });
           },
           error: (error) => {
+            const msg = error?.message || error?.errors?.[0]?.message || error?.error?.errors?.[0]?.message || JSON.stringify(error);
+            if (msg.includes('DuplicatedOperationError')) {
+              console.warn('[FilesContext] File subscription: transient DuplicatedOperationError (safe to ignore)');
+              return;
+            }
             console.error('[FilesContext] File subscription error:', error);
           }
         });
@@ -415,6 +451,11 @@ const FilesProvider = ({ children }) => {
       });
     },
       error: (error) => {
+        const msg = error?.message || error?.errors?.[0]?.message || error?.error?.errors?.[0]?.message || JSON.stringify(error);
+        if (msg.includes('DuplicatedOperationError')) {
+          console.warn('[FilesContext] Document subscription: transient DuplicatedOperationError (safe to ignore)');
+          return;
+        }
         console.error('[FilesContext] Document subscription error:', error);
       }
     });

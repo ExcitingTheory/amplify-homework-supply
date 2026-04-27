@@ -17,6 +17,13 @@
 
 // Import page components lazily to avoid breaking Vitest browser mode
 import React from 'react';
+import { Box, CircularProgress } from '@mui/material';
+
+const PageLoadingFallback = () => (
+  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+    <CircularProgress />
+  </Box>
+);
 
 // Lazy load page components
 const IndexPage = React.lazy(() => import('../../pages/index.jsx'));
@@ -116,7 +123,7 @@ export const Index = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<div>Loading...</div>}>
+    <React.Suspense fallback={<PageLoadingFallback />}>
       <IndexPage
         user={{
           username: 'student-alice-sub',
@@ -160,7 +167,7 @@ export const Profile = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<div>Loading...</div>}>
+    <React.Suspense fallback={<PageLoadingFallback />}>
       <ProfilePage />
     </React.Suspense>
   ),
@@ -194,7 +201,7 @@ export const Sections = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<div>Loading...</div>}>
+    <React.Suspense fallback={<PageLoadingFallback />}>
       <SectionsPage />
     </React.Suspense>
   ),
@@ -229,7 +236,7 @@ export const Units = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<div>Loading...</div>}>
+    <React.Suspense fallback={<PageLoadingFallback />}>
       <UnitsPage />
     </React.Suspense>
   ),
@@ -278,7 +285,7 @@ export const SectionDetail = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<div>Loading...</div>}>
+    <React.Suspense fallback={<PageLoadingFallback />}>
       <SectionDetailPage
         user={{
           username: 'teacher-1',
@@ -327,7 +334,7 @@ export const SectionDetailStudent = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<div>Loading...</div>}>
+    <React.Suspense fallback={<PageLoadingFallback />}>
       <SectionDetailPage
         user={{
           username: 'student-alice-sub',
@@ -374,7 +381,7 @@ export const UnitDetail = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<div>Loading...</div>}>
+    <React.Suspense fallback={<PageLoadingFallback />}>
       <UnitDetailPage />
     </React.Suspense>
   ),
@@ -414,7 +421,7 @@ export const Workbook = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<div>Loading...</div>}>
+    <React.Suspense fallback={<PageLoadingFallback />}>
       <WorkbookPage />
     </React.Suspense>
   ),
@@ -449,7 +456,7 @@ export const IndexNoSections = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<div>Loading...</div>}>
+    <React.Suspense fallback={<PageLoadingFallback />}>
       <IndexPage
         user={{ username: 'new-student', attributes: { sub: 'new-student', email: 'new.student@example.com' } }}
         signOut={() => console.log('Sign out')}
@@ -483,7 +490,7 @@ export const UnitsEmptyState = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<div>Loading...</div>}>
+    <React.Suspense fallback={<PageLoadingFallback />}>
       <UnitsPage />
     </React.Suspense>
   ),
@@ -514,7 +521,7 @@ export const SectionsEmptyState = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<div>Loading...</div>}>
+    <React.Suspense fallback={<PageLoadingFallback />}>
       <SectionsPage />
     </React.Suspense>
   ),
@@ -544,7 +551,7 @@ export const ProfilePasswordChange = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<div>Loading...</div>}>
+    <React.Suspense fallback={<PageLoadingFallback />}>
       <ProfilePage />
     </React.Suspense>
   ),
@@ -575,7 +582,7 @@ export const WorkbookTimedExercise = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<div>Loading...</div>}>
+    <React.Suspense fallback={<PageLoadingFallback />}>
       <WorkbookPage />
     </React.Suspense>
   ),
@@ -610,7 +617,7 @@ export const IndexAssignments = {
     },
   ],
   render: () => (
-    <React.Suspense fallback={<div>Loading...</div>}>
+    <React.Suspense fallback={<PageLoadingFallback />}>
       <IndexPage
         user={{
           username: 'student-alice-sub',

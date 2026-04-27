@@ -1,4 +1,5 @@
 import React, { lazy, Suspense, useEffect, useRef } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 const MediaPlayerComponent = lazy(() => import('./MediaPlayerComponent'));
 
 function LazyMediaPlayerOnScroll({
@@ -34,7 +35,7 @@ function LazyMediaPlayerOnScroll({
 
   return (
     <div ref={ref}>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<CircularProgress size={24} />}>
         <MediaPlayerComponent
             className={className}
             format={format}

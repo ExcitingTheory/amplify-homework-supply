@@ -1,0 +1,79 @@
+- generic [ref=e3]:
+  - banner "Storybook" [ref=e6]:
+    - heading "Storybook" [level=1] [ref=e7]
+    - img
+    - generic [ref=e11]:
+      - generic [ref=e13]:
+        - link "Skip to content" [ref=e14] [cursor=pointer]:
+          - /url: "#storybook-preview-wrapper"
+        - link "Storybook" [ref=e16] [cursor=pointer]:
+          - /url: ./
+          - img "Storybook" [ref=e17]
+        - switch "Settings" [ref=e22] [cursor=pointer]:
+          - img [ref=e23]
+      - generic [ref=e26]: Search for components
+      - search [ref=e27]:
+        - combobox "Search for components" [ref=e28]:
+          - generic:
+            - img
+          - searchbox "Search for components" [ref=e29]
+          - code:
+            - generic: ⌘
+            - text: K
+        - button "Create a new story" [ref=e30] [cursor=pointer]:
+          - img [ref=e31]
+      - navigation "Stories" [ref=e34]:
+        - heading "Stories" [level=2] [ref=e35]
+  - generic [ref=e56]:
+    - region "Toolbar" [ref=e57]:
+      - heading "Toolbar" [level=2] [ref=e58]
+      - toolbar [ref=e59]:
+        - generic [ref=e60]:
+          - button "Reload story" [ref=e61] [cursor=pointer]:
+            - img [ref=e62]
+          - switch "Measure tool" [ref=e64] [cursor=pointer]:
+            - img [ref=e65]
+          - switch "Outline tool" [ref=e68] [cursor=pointer]:
+            - img [ref=e69]
+          - button "Viewport size" [ref=e71] [cursor=pointer]:
+            - img [ref=e72]
+          - button "Vision filter" [ref=e76] [cursor=pointer]:
+            - img [ref=e77]
+        - generic [ref=e81]:
+          - switch "Change zoom level" [ref=e82] [cursor=pointer]: 100%
+          - button "Enter full screen" [ref=e83] [cursor=pointer]:
+            - img [ref=e84]
+          - button "Share" [ref=e86] [cursor=pointer]:
+            - img [ref=e87]
+    - main "Main preview area" [ref=e90]:
+      - heading "Main preview area" [level=2] [ref=e91]
+      - generic [ref=e92]:
+        - progressbar "Content is loading..." [ref=e94]
+        - generic [ref=e95]:
+          - link "Skip to sidebar" [ref=e96] [cursor=pointer]:
+            - /url: "#📚-creating-lessons-workbook--workbook-with-progress"
+          - iframe [ref=e100]:
+            
+  - region "Addon panel" [ref=e103]:
+    - heading "Addon panel" [level=2] [ref=e104]
+    - generic [ref=e105]:
+      - generic [ref=e106]:
+        - generic [ref=e107]:
+          - button "Move addon panel to right" [ref=e108] [cursor=pointer]:
+            - img [ref=e109]
+          - button "Hide addon panel" [ref=e112] [cursor=pointer]:
+            - img [ref=e113]
+        - tablist "Available addons" [ref=e118]:
+          - tab "Controls" [selected] [ref=e119] [cursor=pointer]:
+            - generic [ref=e121]: Controls
+          - tab "Actions" [ref=e122] [cursor=pointer]:
+            - generic [ref=e124]: Actions
+          - tab "Interactions" [ref=e125] [cursor=pointer]:
+            - generic [ref=e127]: Interactions
+          - tab "Visual tests" [ref=e128] [cursor=pointer]
+          - tab "Accessibility" [ref=e129] [cursor=pointer]:
+            - generic [ref=e131]: Accessibility
+          - tab "Code" [ref=e132] [cursor=pointer]
+          - tab "Translations" [ref=e133] [cursor=pointer]
+          - tab "Onboarding" [ref=e134] [cursor=pointer]
+      - tabpanel "Controls" [ref=e135]

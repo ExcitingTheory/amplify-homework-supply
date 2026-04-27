@@ -19,10 +19,13 @@ import MainToolbar from '../src/components/MainToolbar'
 import MyAuth from "../src/components/authenticator";
 import IconEdit from "@mui/icons-material/Edit";
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 
 import getCachedUrl from '../src/utils/getCachedUrl'
 import { useChatPageContext } from '../src/hooks/useChatPageContext'
 import AuthContext from '../src/context/authContext'
+import { BadgeShelf } from '../src/components/Gamification/BadgeShelf'
+import { PracticeDrillConfigPopup, PracticeDrillDialog } from '../src/components/PracticeDrill'
 
 import { fetchAuthSession } from 'aws-amplify/auth'
 
@@ -35,7 +38,7 @@ function CardMediaComponent({ s3Key, identityId, level = 'protected' }) {
         if (!s3Key) return
 
         const fetchUrl = async () => {
-            const _url = await getCachedUrl(s3Key, level, identityId)
+            const _url = await getCachedUrl(s3Key)
             setUrl(_url);
         }
 
@@ -91,6 +94,60 @@ function Units() {
 
     const [work, setIsWorking] = useState(false)
     const router = useRouter()
+    const [earnedBadges, setEarnedBadges] = useState([])
+
+    // Practice drill state
+    const [practiceConfigOpen, setPracticeConfigOpen] = useState(false)
+    const [practiceDrillOpen, setPracticeDrillOpen] = useState(false)
+    const [practiceUnit, setPracticeUnit] = useState(null)
+    const [drillConfig, setDrillConfig] = useState(null)
+
+    const handleOpenPractice = (unit) => {
+        setPracticeUnit(unit)
+        setPracticeConfigOpen(true)
+    }
+
+    const handleStartDrill = (config) => {
+        setDrillConfig(config)
+        setPracticeConfigOpen(false)
+        setPracticeDrillOpen(true)
+    }
+
+    const handleCloseDrill = () => {
+        setPracticeDrillOpen(false)
+        setDrillConfig(null)
+        setPracticeUnit(null)
+    }
+
+    // Fetch earned badges
+    useEffect(() => {
+        if (authLoading || !user) return;
+        const client = getAmplifyClient();
+        if (!client?.models?.StudentBadge) return;
+        const sub = client.models.StudentBadge.observeQuery().subscribe({
+            next: ({ items }) => {
+                const valid = (items || []).filter(b => b != null && b.id != null);
+                setEarnedBadges(valid.map(b => ({
+                    badgeType: b.badgeType,
+                    awardedAt: b.awardedAt || b.createdAt,
+                    sourceId: b.sourceId || null,
+                })));
+            },
+            error: (err) => console.warn('[Units] Badge subscription error:', err),
+        });
+        return () => sub.unsubscribe();
+    }, [authLoading, user]);
+
+    // Group badges by sourceId (unit ID) for per-card display
+    const badgesByUnit = React.useMemo(() => {
+        const map = {};
+        earnedBadges.forEach(b => {
+            if (!b.sourceId) return;
+            if (!map[b.sourceId]) map[b.sourceId] = [];
+            map[b.sourceId].push(b);
+        });
+        return map;
+    }, [earnedBadges]);
 
     // Register page context with global chat
     // Combine all units for chat context
@@ -121,7 +178,7 @@ function Units() {
         async function fetchUnits() {
             try {
                 const { data: items, errors } = await client.models.Unit.list();
-                if (errors) {
+                if (errors?.length) {
                     console.error('[Units] Unit fetch errors:', errors);
                 }
                 
@@ -232,7 +289,7 @@ function Units() {
                 identityId
             });
             
-            if (response.errors) {
+            if (response.errors?.length > 0) {
                 console.error('Error creating unit:', response.errors);
                 throw new Error(response.errors[0].message);
             }
@@ -304,8 +361,6 @@ function Units() {
                         margin: '1rem auto',
                     }}
                 >
-
-
                     {(publishedUnits.length == 0) &&
                         //embed url to create a new section
                         <Card
@@ -403,8 +458,13 @@ function Units() {
                                                     <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                                                         {unit.description || ''}
                                                     </Typography>
+                                                    {badgesByUnit[unit.id]?.length > 0 && (
+                                                        <Box sx={{ mt: 1 }}>
+                                                            <BadgeShelf earnedBadges={badgesByUnit[unit.id]} columns={Math.min(badgesByUnit[unit.id].length, 5)} earnedOnly />
+                                                        </Box>
+                                                    )}
                                                 </CardContent>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5 }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5, flexWrap: 'wrap', gap: 1 }}>
                                                     <Button
                                                         variant="outlined"
                                                         href={`/workbook/${unit.id}`}
@@ -415,7 +475,6 @@ function Units() {
                                                             fontWeight: 600,
                                                             px: 3,
                                                             py: 1,
-                                                            mr: 1,
                                                             borderRadius: 2,
                                                             boxShadow: 2,
                                                             color: 'text.primary',
@@ -428,6 +487,29 @@ function Units() {
                                                         }}
                                                     >
                                                         {t('units.viewWorkbook')}
+                                                    </Button>
+                                                    <Button
+                                                        variant="outlined"
+                                                        disabled={work}
+                                                        onClick={() => handleOpenPractice(unit)}
+                                                        startIcon={<FitnessCenterIcon />}
+                                                        sx={{
+                                                            textTransform: 'none',
+                                                            fontWeight: 600,
+                                                            px: 3,
+                                                            py: 1,
+                                                            borderRadius: 2,
+                                                            boxShadow: 2,
+                                                            color: 'text.primary',
+                                                            borderColor: 'text.primary',
+                                                            '&:hover': {
+                                                                boxShadow: 4,
+                                                                borderColor: 'text.primary',
+                                                                backgroundColor: 'action.hover',
+                                                            },
+                                                        }}
+                                                    >
+                                                        {t('units.practice', 'Practice')}
                                                     </Button>
                                                     <Button
                                                         variant="outlined"
@@ -516,6 +598,11 @@ function Units() {
                                                     <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                                                         {unit.description || ''}
                                                     </Typography>
+                                                    {badgesByUnit[unit.id]?.length > 0 && (
+                                                        <Box sx={{ mt: 1 }}>
+                                                            <BadgeShelf earnedBadges={badgesByUnit[unit.id]} columns={Math.min(badgesByUnit[unit.id].length, 5)} earnedOnly />
+                                                        </Box>
+                                                    )}
                                                 </CardContent>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5 }}>
                                                     <Button
@@ -626,6 +713,11 @@ function Units() {
                                                     <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 1.6 }}>
                                                         {unit.description || ''}
                                                     </Typography>
+                                                    {badgesByUnit[unit.id]?.length > 0 && (
+                                                        <Box sx={{ mt: 1 }}>
+                                                            <BadgeShelf earnedBadges={badgesByUnit[unit.id]} columns={Math.min(badgesByUnit[unit.id].length, 5)} earnedOnly />
+                                                        </Box>
+                                                    )}
                                                 </CardContent>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', pl: 2, pb: 1.5 }}>
                                                     <Button
@@ -699,7 +791,34 @@ function Units() {
 
 
                 </Box>
-            </Box></>)
+            </Box>
+
+            {/* Practice Drill Config Popup */}
+            {practiceUnit && (
+                <PracticeDrillConfigPopup
+                    open={practiceConfigOpen}
+                    onClose={() => { setPracticeConfigOpen(false); setPracticeUnit(null); }}
+                    onStart={handleStartDrill}
+                    unitId={practiceUnit.id}
+                    unitName={practiceUnit.name || ''}
+                    vocabularyCount={0}
+                    questionCount={0}
+                    textBlockCount={0}
+                    documentCount={0}
+                />
+            )}
+
+            {/* Practice Drill Dialog */}
+            {drillConfig && practiceUnit && (
+                <PracticeDrillDialog
+                    open={practiceDrillOpen}
+                    onClose={handleCloseDrill}
+                    unitId={practiceUnit.id}
+                    unitName={practiceUnit.name || ''}
+                    config={drillConfig}
+                />
+            )}
+        </>)
 }
 
 

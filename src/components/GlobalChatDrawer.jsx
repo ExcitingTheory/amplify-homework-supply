@@ -10,15 +10,9 @@
 import React, { useContext } from 'react';
 import {
     Drawer,
-    IconButton,
     Box,
-    Typography,
-    Toolbar,
-    Divider,
-    useTheme,
     useMediaQuery,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'next-i18next';
 import ChatContext from '../context/chatContext';
 import ChatSidebar from './ChatSidebar';
@@ -33,13 +27,11 @@ import ChatSidebar from './ChatSidebar';
  * @returns {JSX.Element}
  */
 export function GlobalChatDrawer({ width = 450 }) {
-    const { t, ready } = useTranslation('components');
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const { t } = useTranslation('components');
+    // noSsr: true ensures the initial client render matches SSR (both return false),
+    // then re-renders with the actual value after mount — avoiding hydration mismatch.
+    const isMobile = useMediaQuery('(max-width:599.95px)', { noSsr: true });
     const { isChatOpen, setIsChatOpen } = useContext(ChatContext);
-    
-    // Don't render until translations are ready to prevent hydration errors
-    if (!ready) return null;
     
     const handleClose = () => {
         console.log('[GlobalChatDrawer] Closing chat');
@@ -72,33 +64,8 @@ export function GlobalChatDrawer({ width = 450 }) {
                 keepMounted: true, // Better mobile performance
             }}
             data-testid="global-chat-drawer"
+            data-tour="chat-sidebar"
         >
-            {/* Header */}
-            <Toolbar
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    px: 2,
-                    minHeight: 56,
-                }}
-            >
-                <Typography variant="h6" component="div">
-                    {t('chat.aiAssistant')}
-                </Typography>
-                <IconButton
-                    edge="end"
-                    color="inherit"
-                    onClick={handleClose}
-                    aria-label={t('chat.close')}
-                    data-testid="chat-close-button"
-                >
-                    <CloseIcon />
-                </IconButton>
-            </Toolbar>
-            
-            <Divider />
-            
             {/* Chat Content */}
             <Box
                 sx={{
@@ -108,7 +75,7 @@ export function GlobalChatDrawer({ width = 450 }) {
                     flexDirection: 'column',
                 }}
             >
-                <ChatSidebar />
+                <ChatSidebar onClose={handleClose} />
             </Box>
         </Drawer>
     );

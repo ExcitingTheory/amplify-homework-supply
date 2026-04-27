@@ -47,7 +47,6 @@ import {
   TextField,
   Tooltip,
   Typography,
-  useTheme,
 } from '@mui/material';
 import {
   DeleteOutline as DeleteIcon,
@@ -900,7 +899,6 @@ export function QuestionEditor2() {
   const [newQuestionFormOpen, setNewQuestionFormOpen] = React.useState(false);
   const [fileOperations, setFileOperations] = React.useState([]);
 
-  const theme = useTheme();
   const { questionBank } = React.useContext(DictionaryContext);
   const { audioFiles, refreshAudioFiles, session } = React.useContext(FilesContext);
   const { identityId } = session || {};

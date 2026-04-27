@@ -19,6 +19,7 @@ import {
 } from 'lexical';
 import { BlockWithAlignableContents } from '@lexical/react/LexicalBlockWithAlignableContents';
 import React, { lazy, Suspense, useContext } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useEffect } from 'react';
 import { getAmplifyClient } from '../../../utils/amplifyClient';
 // Type import removed - not needed in runtime JS
@@ -200,7 +201,7 @@ export class PlaylistNode extends DecoratorNode {
                 // alignable={false}
                 // alignableContents={false}
             >
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<CircularProgress size={24} />}>
             <MediaPlayerComponent
                 className={className}
                 format={this.__format}

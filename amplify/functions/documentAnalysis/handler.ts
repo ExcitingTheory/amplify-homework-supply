@@ -89,6 +89,7 @@ const UPDATE_DOCUMENT = /* GraphQL */ `
       id
       status
       extractedText
+      sourceFormat
     }
   }
 `;
@@ -336,35 +337,19 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
     console.log('[Analyze Document] Document.s3Key for reference:', document.s3Key);
     
     console.log('[Analyze Document] Extracting text from:', s3Key);
-    let text = '';
-    let pages: any[] = [];
-    let pageCount = 0;
     
-    const { extractPdfText, extractTextFromBuffer } = await import('./textExtraction.js');
+    const { extractByFormat } = await import('./formatRegistry.js');
+    const extraction = await extractByFormat(s3Key);
     
-    if (s3Key.toLowerCase().endsWith('.pdf')) {
-      const result = await extractPdfText(s3Key);
-      pages = result.pages;
-      pageCount = result.pageCount;
-      text = pages.map(p => p.text).join('\n\n');
-    } else if (s3Key.toLowerCase().endsWith('.txt')) {
-      const buffer = await getS3Object(s3Key);
-      text = buffer.toString('utf-8');
-      pageCount = Math.ceil(text.length / 2000);
-    } else if (s3Key.toLowerCase().endsWith('.docx')) {
-      text = await extractTextFromBuffer(s3Key, 'docx');
-      pageCount = Math.ceil(text.length / 2000);
-    } else if (s3Key.toLowerCase().endsWith('.csv')) {
-      const buffer = await getS3Object(s3Key);
-      text = buffer.toString('utf-8');
-      pageCount = Math.ceil(text.length / 2000);
-    } else {
-      throw new Error(`Unsupported file type: ${s3Key}`);
-    }
+    const text = extraction.text;
+    const pages = extraction.pages;
+    const pageCount = extraction.pageCount;
+    const sourceFormat = extraction.sourceFormat;
+    const directContent = extraction.directContent;
     
-    console.log(`[Analyze Document] Extracted ${text.length} characters from ${pageCount} pages`);
+    console.log(`[Analyze Document] Extracted ${text.length} characters from ${pageCount} pages (format: ${sourceFormat})`);
     
-    // Update document with extracted text
+    // Update document with extracted text and source format
     const analyzingUpdate = await client.graphql({
       query: UPDATE_DOCUMENT,
       variables: {
@@ -372,6 +357,7 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
           id: document.id,
           extractedText: text,
           pageCount,
+          sourceFormat,
           status: 'analyzing',
         },
       },
@@ -387,26 +373,37 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
       // Page-by-page analysis for PDFs
       parsedContent = await analyzePages(openai, pages, fileID, documentID);
     } else {
+      // Build format-aware system prompt
+      const systemPrompt = buildAnalysisPrompt(sourceFormat, directContent);
+      
       // Single-pass analysis for other file types
       const completion = await openai.chat.completions.create({
         model: 'gpt-4o',
         messages: [
-          {
-            role: 'system',
-            content: `Extract vocabulary, summaries, objectives, concepts, and generate questions from educational text. Return JSON: {
-  vocabularyJSON: [{word, definition, context, page}],
-  summariesJSON: [{title, content, page_range}],
-  objectivesJSON: [{objective, bloom_level}],
-  conceptsJSON: [{concept, description, related_vocabulary}],
-  questionsJSON: [{prompt, answer, hint, difficulty, questionType}]
-}`,
-          },
+          { role: 'system', content: systemPrompt },
           { role: 'user', content: `Extract from:\n\n${text.substring(0, 100000)}` }
         ],
         response_format: { type: 'json_object' },
       });
       
       parsedContent = JSON.parse(completion.choices[0]?.message?.content || '{}');
+    }
+    
+    // Merge direct content from format extractors (QTI, GIFT, IMS CC, SCORM, EPUB)
+    // Direct content takes priority over GPT-generated content for the same field
+    if (directContent) {
+      if (directContent.questionsJSON && directContent.questionsJSON.length > 0) {
+        parsedContent.questionsJSON = directContent.questionsJSON;
+      }
+      if (directContent.vocabularyJSON && directContent.vocabularyJSON.length > 0) {
+        parsedContent.vocabularyJSON = directContent.vocabularyJSON;
+      }
+      if (directContent.objectivesJSON && directContent.objectivesJSON.length > 0) {
+        parsedContent.objectivesJSON = directContent.objectivesJSON;
+      }
+      if (directContent.summariesJSON && directContent.summariesJSON.length > 0) {
+        parsedContent.summariesJSON = directContent.summariesJSON;
+      }
     }
     
     console.log('[Analyze Document] Creating ParsedContent record...');
@@ -481,6 +478,66 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
       message: errorMessage,
     };
   }
+}
+
+/**
+ * Build a format-aware system prompt for GPT-4o analysis.
+ * Adjusts instructions based on the source format and whether direct content was extracted.
+ */
+function buildAnalysisPrompt(
+  sourceFormat: string,
+  directContent?: {
+    questionsJSON?: unknown[];
+    vocabularyJSON?: unknown[];
+    objectivesJSON?: unknown[];
+    summariesJSON?: unknown[];
+  }
+): string {
+  const baseInstruction = `Extract vocabulary, summaries, objectives, concepts, and generate questions from educational text. Return JSON: {
+  vocabularyJSON: [{word, definition, context, page}],
+  summariesJSON: [{title, content, page_range}],
+  objectivesJSON: [{objective, bloom_level}],
+  conceptsJSON: [{concept, description, related_vocabulary}],
+  questionsJSON: [{prompt, answer, hint, difficulty, questionType}]
+}`;
+
+  const formatHints: Record<string, string> = {
+    'gift': 'This is a Moodle GIFT format file containing quiz questions. Questions have already been structurally extracted. Focus on extracting vocabulary, concepts, and learning objectives from the question text. For bloom_level, infer from question complexity (recall=remember, application=apply, analysis=analyze).',
+    'qti-2.1': 'This is a QTI 2.1 assessment file. Questions have already been structurally extracted. Focus on identifying vocabulary terms, key concepts, and learning objectives from the question prompts and answer options.',
+    'qti-3.0': 'This is a QTI 3.0 assessment file. Questions have already been structurally extracted. Focus on identifying vocabulary terms, key concepts, and learning objectives from the question prompts and answer options.',
+    'scorm-1.2': 'This is content extracted from a SCORM 1.2 learning package. It may contain lesson content mixed with navigation text. Focus on the educational substance. Course objectives may already be extracted from the manifest.',
+    'scorm-2004': 'This is content extracted from a SCORM 2004 learning package. It may contain lesson content mixed with navigation text. Focus on the educational substance. Course objectives may already be extracted from the manifest.',
+    'imscc-1.1': 'This is content from an IMS Common Cartridge package (v1.1). Assessment questions may already be extracted. Focus on vocabulary, concepts, and summaries from the web content.',
+    'imscc-1.2': 'This is content from an IMS Common Cartridge package (v1.2). Assessment questions may already be extracted. Focus on vocabulary, concepts, and summaries from the web content.',
+    'imscc-1.3': 'This is content from an IMS Common Cartridge package (v1.3). Assessment questions may already be extracted. Focus on vocabulary, concepts, and summaries from the web content.',
+    'epub-2': 'This is text from an EPUB ebook with chapters in reading order. Treat each section as a coherent lesson. Extract vocabulary with chapter context and generate questions that test comprehension of each chapter.',
+    'epub-3': 'This is text from an EPUB 3 ebook with chapters in reading order. Treat each section as a coherent lesson. Extract vocabulary with chapter context and generate questions that test comprehension of each chapter.',
+    'csv': 'This is tabular data from a CSV file. If the data appears to be a vocabulary list, prioritize extracting vocabulary definitions. If it contains questions and answers, prioritize those. Look for patterns in column structure.',
+    'xls': 'This is tabular data from a spreadsheet. Each sheet may contain different types of educational content (vocabulary lists, question banks, data tables). Analyze each sheet contextually.',
+    'xlsx': 'This is tabular data from a spreadsheet. Each sheet may contain different types of educational content (vocabulary lists, question banks, data tables). Analyze each sheet contextually.',
+  };
+
+  const parts = [baseInstruction];
+
+  const hint = formatHints[sourceFormat];
+  if (hint) {
+    parts.push(`\nFormat context: ${hint}`);
+  }
+
+  // Tell GPT which fields are already covered by direct extraction
+  if (directContent) {
+    const coveredFields: string[] = [];
+    if (directContent.questionsJSON?.length) coveredFields.push('questionsJSON');
+    if (directContent.vocabularyJSON?.length) coveredFields.push('vocabularyJSON');
+    if (directContent.objectivesJSON?.length) coveredFields.push('objectivesJSON');
+    if (directContent.summariesJSON?.length) coveredFields.push('summariesJSON');
+    
+    if (coveredFields.length > 0) {
+      parts.push(`\nNote: The following fields have already been extracted structurally and will be used directly: ${coveredFields.join(', ')}. You can still generate these fields, but focus your effort on the remaining fields. For already-extracted question fields, you may add bloom_level and hint enrichments.`);
+    }
+  }
+
+  return parts.join('');
 }
 
 async function handleCancelDocumentAnalysis(args: any): Promise<any> {

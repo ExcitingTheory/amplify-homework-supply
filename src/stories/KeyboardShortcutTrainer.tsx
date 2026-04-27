@@ -230,7 +230,7 @@ export const KeyboardShortcutTrainer: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
+    <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }} data-tour="shortcuts-demo">
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

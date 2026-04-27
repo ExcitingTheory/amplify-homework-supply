@@ -16,7 +16,6 @@ import {
   Paper,
   Button,
   Link,
-  useTheme,
 } from '@mui/material';
 import SchoolIcon from '@mui/icons-material/School';
 import PersonIcon from '@mui/icons-material/Person';
@@ -63,9 +62,6 @@ type Story = StoryObj;
  */
 export const Welcome: Story = {
   render: () => {
-    const theme = useTheme();
-    const isDark = theme.palette.mode === 'dark';
-
     return (
       <Box
         sx={{
@@ -102,9 +98,9 @@ export const Welcome: Story = {
             sx={{ 
               p: 4, 
               mb: 4, 
-              bgcolor: isDark ? 'rgba(33, 150, 243, 0.15)' : 'rgba(33, 150, 243, 0.1)', 
+              bgcolor: 'rgba(33, 150, 243, 0.1)', 
               border: '1px solid',
-              borderColor: isDark ? 'rgba(33, 150, 243, 0.4)' : 'rgba(33, 150, 243, 0.3)',
+              borderColor: 'rgba(33, 150, 243, 0.3)',
             }}
           >
             <Typography variant="h5" sx={{ color: 'text.primary', mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>

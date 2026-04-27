@@ -86,6 +86,8 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   mode = 'tutorial',
 }) => {
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const [iframeRect, setIframeRect] = useState<DOMRect | null>(null);
+  const [scrimContainer, setScrimContainer] = useState<HTMLElement | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
@@ -95,6 +97,22 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   const tooltipRef = useRef<HTMLDivElement>(null);
   const targetClickCleanupRef = useRef<(() => void) | null>(null);
   const currentStep = steps[currentStepIndex];
+
+  /** Measures the preview iframe and stores its rect + parent container in state */
+  const updateIframeRect = useCallback(() => {
+    const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
+    if (iframe) {
+      setIframeRect(iframe.getBoundingClientRect());
+      // Use the iframe's parent as the scrim container so stacking stays within the preview area
+      if (iframe.parentElement) {
+        // Ensure the parent is a positioning context for the absolute scrim
+        if (getComputedStyle(iframe.parentElement).position === 'static') {
+          iframe.parentElement.style.position = 'relative';
+        }
+        setScrimContainer(iframe.parentElement);
+      }
+    }
+  }, []);
 
   // Reset drag offset when step changes
   useEffect(() => {
@@ -170,45 +188,64 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
       // Determine which document to search based on targetFrame
       const iframe = document.querySelector('#storybook-preview-iframe') as HTMLIFrameElement;
       let targetDoc: Document;
-      let targetElement: Element | null;
+      let targetElement: Element | null = null;
       let isManagerFrame = false;
 
-      if (currentStep.targetFrame === 'manager') {
-        // Search in the manager (parent) document
-        targetDoc = document;
-        targetElement = document.querySelector(currentStep.targetSelector);
-        isManagerFrame = true;
-      } else {
-        // Default: search in the preview iframe
-        targetDoc = iframe?.contentDocument || document;
-        targetElement = targetDoc.querySelector(currentStep.targetSelector);
-        isManagerFrame = !iframe?.contentDocument;
+      try {
+        if (currentStep.targetFrame === 'manager') {
+          // Search in the manager (parent) document
+          targetDoc = document;
+          targetElement = document.querySelector(currentStep.targetSelector);
+          isManagerFrame = true;
+        } else {
+          // Default: search in the preview iframe
+          targetDoc = iframe?.contentDocument || document;
+          targetElement = targetDoc.querySelector(currentStep.targetSelector);
+          isManagerFrame = !iframe?.contentDocument;
+        }
+      } catch (e) {
+        // Invalid CSS selector (e.g. Playwright-style :has-text()) — fall back to first selector
+        const firstSelector = currentStep.targetSelector.split(',')[0].trim();
+        console.debug('[SpotlightOverlay] Invalid selector, trying first part:', firstSelector);
+        try {
+          if (currentStep.targetFrame === 'manager') {
+            targetElement = document.querySelector(firstSelector);
+            isManagerFrame = true;
+          } else {
+            const doc = iframe?.contentDocument || document;
+            targetElement = doc.querySelector(firstSelector);
+            isManagerFrame = !iframe?.contentDocument;
+          }
+        } catch {
+          // Still invalid — give up gracefully
+          console.debug('[SpotlightOverlay] All selectors invalid, centering');
+        }
       }
 
-      console.log('[SpotlightOverlay] Looking for selector:', currentStep.targetSelector, 'in', isManagerFrame ? 'manager' : 'preview');
-      console.log('[SpotlightOverlay] Element found:', !!targetElement);
+      console.debug('[SpotlightOverlay] Looking for selector:', currentStep.targetSelector, 'in', isManagerFrame ? 'manager' : 'preview');
+      console.debug('[SpotlightOverlay] Element found:', !!targetElement);
 
       if (targetElement) {
         const rect = targetElement.getBoundingClientRect();
         
         // Adjust for iframe offset only if element is in the preview iframe
         if (iframe && !isManagerFrame) {
-          const iframeRect = iframe.getBoundingClientRect();
+          const ifrRect = iframe.getBoundingClientRect();
           setTargetRect(new DOMRect(
-            rect.left + iframeRect.left,
-            rect.top + iframeRect.top,
+            rect.left + ifrRect.left,
+            rect.top + ifrRect.top,
             rect.width,
             rect.height
           ));
-          console.log('[SpotlightOverlay] Target rect (iframe-adjusted):', {
-            left: rect.left + iframeRect.left,
-            top: rect.top + iframeRect.top,
+          console.debug('[SpotlightOverlay] Target rect (iframe-adjusted):', {
+            left: rect.left + ifrRect.left,
+            top: rect.top + ifrRect.top,
             width: rect.width,
             height: rect.height
           });
         } else {
           setTargetRect(rect);
-          console.log('[SpotlightOverlay] Target rect (manager):', {
+          console.debug('[SpotlightOverlay] Target rect (manager):', {
             left: rect.left,
             top: rect.top,
             width: rect.width,
@@ -234,17 +271,17 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
         }
       } else {
         // Element not found - use center of screen
-        console.warn('[SpotlightOverlay] Target element not found, using center position');
+        console.debug('[SpotlightOverlay] Target element not found, using center position');
         setTargetRect(null);
       }
     } else if (currentStep.targetPosition) {
       // Use manual position
       const { top, left, width, height } = currentStep.targetPosition;
       setTargetRect(new DOMRect(left, top, width, height));
-      console.log('[SpotlightOverlay] Using manual position:', currentStep.targetPosition);
+      console.debug('[SpotlightOverlay] Using manual position:', currentStep.targetPosition);
     } else {
       // No target - center of screen
-      console.log('[SpotlightOverlay] No target selector or position, centering');
+      console.debug('[SpotlightOverlay] No target selector or position, centering');
       setTargetRect(null);
     }
   };
@@ -327,10 +364,12 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
     if (!isOpen) return;
 
     // Initial update
+    updateIframeRect();
     updateTargetPosition();
     calculateTooltipPosition();
 
     const handleUpdate = () => {
+      updateIframeRect();
       updateTargetPosition();
       calculateTooltipPosition();
     };
@@ -380,7 +419,7 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
     
     retryIntervals.forEach(delay => {
       const timeout = setTimeout(() => {
-        console.log('[SpotlightOverlay] ⏱️ Retry attempt after', delay, 'ms');
+        console.debug('[SpotlightOverlay] ⏱️ Retry attempt after', delay, 'ms');
         updateTargetPosition();
         calculateTooltipPosition();
       }, delay);
@@ -438,21 +477,23 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
   const isLastStep = currentStep.isLast || currentStepIndex === steps.length - 1;
 
   return (
-    <Portal>
-      {/* Overlay with spotlight cutout */}
-      <Box
-        ref={overlayRef}
-        data-testid="spotlight-overlay"
-        sx={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 9999,
-          pointerEvents: 'none',
-        }}
-      >
+    <>
+      {/* Scrim + spotlight cutout — rendered inside the iframe's parent so it stays UNDER the addon panel */}
+      {scrimContainer && (
+        <Portal container={scrimContainer}>
+          <Box
+            ref={overlayRef}
+            data-testid="spotlight-overlay"
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }}
+          >
         {/* SVG mask for spotlight effect */}
         <svg
           style={{
@@ -469,7 +510,17 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
               {/* White background - visible area */}
               <rect x="0" y="0" width="100%" height="100%" fill="white" />
               {/* Black spotlight - transparent area */}
-              {targetRect && (
+              {targetRect && iframeRect && (
+                <rect
+                  x={targetRect.left - 8 - iframeRect.left}
+                  y={targetRect.top - 8 - iframeRect.top}
+                  width={targetRect.width + 16}
+                  height={targetRect.height + 16}
+                  rx="8"
+                  fill="black"
+                />
+              )}
+              {targetRect && !iframeRect && (
                 <rect
                   x={targetRect.left - 8}
                   y={targetRect.top - 8}
@@ -497,8 +548,8 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
           <Box
             sx={{
               position: 'absolute',
-              top: targetRect.top - 8,
-              left: targetRect.left - 8,
+              top: (targetRect.top - 8) - (iframeRect?.top ?? 0),
+              left: (targetRect.left - 8) - (iframeRect?.left ?? 0),
               width: targetRect.width + 16,
               height: targetRect.height + 16,
               border: '3px solid',
@@ -524,27 +575,31 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
             }}
           />
         )}
+      </Box>
+        </Portal>
+      )}
 
-        {/* Tooltip/Coachmark */}
-        <Card
-          ref={tooltipRef}
-          sx={{
-            position: 'absolute',
-            top: tooltipPosition.top,
-            left: tooltipPosition.left,
-            transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)`,
-            willChange: isDraggingRef.current ? 'transform' : 'auto',
-            width: 320,
-            maxWidth: 'calc(100vw - 20px)',
-            maxHeight: 'calc(100vh - 20px)',
-            overflow: 'auto',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-            borderLeft: '4px solid',
-            borderColor: mode === 'tutorial' ? '#4CAF50' : '#2196F3',
-            zIndex: 10000,
-            pointerEvents: 'auto',
-          }}
-        >
+      {/* Tooltip/Coachmark — separate Portal to body, above everything */}
+      <Portal>
+      <Card
+        ref={tooltipRef}
+        sx={{
+          position: 'fixed',
+          top: tooltipPosition.top,
+          left: tooltipPosition.left,
+          transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)`,
+          willChange: isDraggingRef.current ? 'transform' : 'auto',
+          width: 320,
+          maxWidth: 'calc(100vw - 20px)',
+          maxHeight: 'calc(100vh - 20px)',
+          overflow: 'auto',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+          borderLeft: '4px solid',
+          borderColor: mode === 'tutorial' ? '#4CAF50' : '#2196F3',
+          zIndex: 10000,
+          pointerEvents: 'auto',
+        }}
+      >
             <CardContent>
               {/* Header – drag handle */}
               <Box
@@ -654,13 +709,13 @@ export const SpotlightOverlay: React.FC<SpotlightOverlayProps> = ({
                     },
                   }}
                 >
-                  {isLastStep ? 'Complete' : 'Next'}
+                  {isLastStep ? 'Done' : 'Next'}
                 </Button>
               </Stack>
             </CardContent>
           </Card>
-      </Box>
-    </Portal>
+      </Portal>
+    </>
   );
 };
 

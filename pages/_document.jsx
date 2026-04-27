@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import createEmotionServer from '@emotion/server/create-instance';
-import { getInitColorSchemeScript } from '@mui/material/styles';
+import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
 import theme from '../src/theme';
 import createEmotionCache from '../src/createEmotionCache';
 
@@ -12,6 +12,7 @@ export default class MyDocument extends Document {
         <Head>
           {/* PWA primary color */}
           <meta name="theme-color" content={theme.palette.primary.main} />
+          <link rel="manifest" href="/manifest.json" />
           <link rel="shortcut icon" href="/static/favicon.ico" />
           {/* Prevent FOUC: apply background color before CSS variables resolve */}
           <style dangerouslySetInnerHTML={{ __html: `
@@ -24,7 +25,7 @@ export default class MyDocument extends Document {
           {this.props.emotionStyleTags}
         </Head>
         <body>
-          {getInitColorSchemeScript({ defaultMode: 'system', attribute: 'data-mui-color-scheme' })}
+          <InitColorSchemeScript defaultMode="system" attribute="data-mui-color-scheme" />
           <Main />
           <NextScript />
         </body>

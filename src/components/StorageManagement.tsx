@@ -1,0 +1,237 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  IconButton,
+  Button,
+  Divider,
+  Switch,
+  Alert,
+  Chip,
+  Stack,
+} from '@mui/material';
+import {
+  Delete,
+  CloudDownload,
+  Storage,
+  SmartToy,
+  CheckCircle,
+} from '@mui/icons-material';
+
+/**
+ * Storage management panel for the Settings page.
+ * Shows offline storage usage, cached assignments, and AI model controls.
+ */
+export default function StorageManagement() {
+  const [storageBudget, setStorageBudget] = useState({ used: 0, quota: 0, percentUsed: 0 });
+  const [models, setModels] = useState<Array<{
+    id: string;
+    name: string;
+    sizeBytes: number;
+    backend: string;
+    ready: boolean;
+  }>>([]);
+  const [prefetchStatuses, setPrefetchStatuses] = useState<Array<{
+    unitId: string;
+    status: string;
+    progress: number;
+    lastUpdated: number;
+  }>>([]);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+
+  const refresh = useCallback(async () => {
+    try {
+      const { getStorageBudget, getAvailableModels } = await import('../offline/ModelManager');
+      const { getAllPrefetchStatuses } = await import('../offline/OfflineDataStore');
+
+      const [budget, modelList, statuses] = await Promise.all([
+        getStorageBudget(),
+        getAvailableModels(),
+        getAllPrefetchStatuses(),
+      ]);
+
+      setStorageBudget(budget);
+      setModels(modelList);
+      setPrefetchStatuses(statuses);
+    } catch {
+      // Modules not loaded
+    }
+  }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  const handleDownloadModel = useCallback(async () => {
+    setDownloading(true);
+    setDownloadProgress(0);
+    try {
+      const { downloadWebLLMModel } = await import('../offline/ModelManager');
+      await downloadWebLLMModel((p) => setDownloadProgress(p));
+      await refresh();
+    } catch (err) {
+      console.error('Model download failed:', err);
+    } finally {
+      setDownloading(false);
+    }
+  }, [refresh]);
+
+  const handleDeleteModel = useCallback(async () => {
+    try {
+      const { deleteWebLLMModel } = await import('../offline/ModelManager');
+      await deleteWebLLMModel();
+      await refresh();
+    } catch (err) {
+      console.error('Model deletion failed:', err);
+    }
+  }, [refresh]);
+
+  const handleClearUnitCache = useCallback(async (unitId: string) => {
+    try {
+      const { clearUnitCache } = await import('../offline/OfflineDataStore');
+      await clearUnitCache(unitId);
+      await refresh();
+    } catch (err) {
+      console.error('Cache clear failed:', err);
+    }
+  }, [refresh]);
+
+  const formatBytes = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${units[i]}`;
+  };
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* Storage overview */}
+      <Card>
+        <CardContent>
+          <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+            <Storage color="primary" />
+            <Typography variant="h6">Offline Storage</Typography>
+          </Stack>
+          <LinearProgress
+            variant="determinate"
+            value={storageBudget.percentUsed}
+            sx={{ height: 8, borderRadius: 4, mb: 1 }}
+          />
+          <Typography variant="body2" color="text.secondary">
+            {formatBytes(storageBudget.used)} of {formatBytes(storageBudget.quota)} used
+            ({storageBudget.percentUsed}%)
+          </Typography>
+          {storageBudget.percentUsed > 80 && (
+            <Alert severity="warning" sx={{ mt: 1 }}>
+              Storage is getting full. Consider removing cached assignments or
+              the AI model to free space.
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* AI Model management */}
+      <Card>
+        <CardContent>
+          <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+            <SmartToy color="primary" />
+            <Typography variant="h6">AI Model for Offline Use</Typography>
+          </Stack>
+          <List dense>
+            {models.map((model) => (
+              <ListItem key={model.id}>
+                <ListItemText
+                  primary={model.name}
+                  secondary={
+                    model.sizeBytes > 0
+                      ? `${formatBytes(model.sizeBytes)} · ${model.ready ? 'Downloaded' : 'Not downloaded'}`
+                      : 'Pre-installed — no download needed'
+                  }
+                />
+                <ListItemSecondaryAction>
+                  {model.backend === 'chrome-ai' ? (
+                    <Chip
+                      icon={<CheckCircle />}
+                      label="Built-in"
+                      color="success"
+                      size="small"
+                    />
+                  ) : model.ready ? (
+                    <IconButton
+                      edge="end"
+                      onClick={handleDeleteModel}
+                      title="Remove model"
+                    >
+                      <Delete />
+                    </IconButton>
+                  ) : (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<CloudDownload />}
+                      onClick={handleDownloadModel}
+                      disabled={downloading}
+                    >
+                      Download
+                    </Button>
+                  )}
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))}
+          </List>
+          {downloading && (
+            <Box sx={{ mt: 1 }}>
+              <LinearProgress variant="determinate" value={downloadProgress} />
+              <Typography variant="caption" color="text.secondary">
+                Downloading AI model... {downloadProgress}%
+              </Typography>
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Cached assignments */}
+      <Card>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            Cached Assignments
+          </Typography>
+          {prefetchStatuses.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              No assignments cached for offline use yet. Open an assignment to
+              cache it automatically.
+            </Typography>
+          ) : (
+            <List dense>
+              {prefetchStatuses.map((status) => (
+                <ListItem key={status.unitId}>
+                  <ListItemText
+                    primary={`Unit: ${status.unitId.slice(0, 8)}...`}
+                    secondary={`${status.status} · Last updated ${new Date(status.lastUpdated).toLocaleDateString()}`}
+                  />
+                  <ListItemSecondaryAction>
+                    <IconButton
+                      edge="end"
+                      onClick={() => handleClearUnitCache(status.unitId)}
+                      title="Remove offline data"
+                    >
+                      <Delete />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </CardContent>
+      </Card>
+    </Box>
+  );
+}

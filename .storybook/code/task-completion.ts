@@ -69,9 +69,17 @@ export function initializeTaskCompletion(): () => void {
     }
   });
   
+  // Monitor clicks and form submissions on data-tour elements inside the preview.
+  // Internal component handlers don't go through the Storybook action tracker,
+  // so we bridge them here by emitting action-performed events.
+  const cleanupDomListeners = initializeDomActionListeners();
+  
   console.log('[Task Completion] Auto-completion detector initialized');
   
-  return unsubscribe;
+  return () => {
+    unsubscribe();
+    cleanupDomListeners();
+  };
 }
 
 /**
@@ -140,6 +148,88 @@ function checkCompletionCriteria(
   }
   
   return false;
+}
+
+/**
+ * Get the current story ID from the preview iframe URL.
+ */
+function getCurrentStoryId(): string {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('id') || 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
+
+/**
+ * Monitor clicks and form submissions on elements with data-tour attributes.
+ * Emits action-performed events so the task completion detector can match them.
+ */
+function initializeDomActionListeners(): () => void {
+  const emitter = getOnboardingEmitter();
+
+  const handleClick = (e: Event) => {
+    const target = e.target as HTMLElement;
+    if (!target) return;
+
+    // Walk up the DOM to find a data-tour element
+    const tourEl = target.closest('[data-tour]');
+    if (!tourEl) return;
+
+    const persona = emitter.getPersona();
+    if (!persona) return;
+
+    const storyId = getCurrentStoryId();
+    const tourId = tourEl.getAttribute('data-tour');
+
+    console.log('[Task Completion] DOM click on data-tour element:', tourId, 'storyId:', storyId);
+
+    emitter.emit({
+      type: 'action-performed',
+      actionName: 'onClick',
+      storyId,
+      persona,
+      timestamp: Date.now(),
+      metadata: { tourElement: tourId, source: 'dom-listener' },
+    } as any);
+  };
+
+  const handleSubmit = (e: Event) => {
+    const form = e.target as HTMLFormElement;
+    if (!form) return;
+
+    // Check if the form or any ancestor has data-tour
+    const tourEl = form.closest('[data-tour]') || form.querySelector('[data-tour]');
+    if (!tourEl) return;
+
+    const persona = emitter.getPersona();
+    if (!persona) return;
+
+    const storyId = getCurrentStoryId();
+    const tourId = tourEl.getAttribute('data-tour');
+
+    console.log('[Task Completion] DOM submit on data-tour element:', tourId, 'storyId:', storyId);
+
+    emitter.emit({
+      type: 'action-performed',
+      actionName: 'onSubmit',
+      storyId,
+      persona,
+      timestamp: Date.now(),
+      metadata: { tourElement: tourId, source: 'dom-listener' },
+    } as any);
+  };
+
+  document.addEventListener('click', handleClick, true);
+  document.addEventListener('submit', handleSubmit, true);
+
+  console.log('[Task Completion] DOM action listeners initialized');
+
+  return () => {
+    document.removeEventListener('click', handleClick, true);
+    document.removeEventListener('submit', handleSubmit, true);
+  };
 }
 
 /**

@@ -39,7 +39,6 @@ import {
   AI_SUGGESTION_UUID 
 } from '../components/AIContentSuggestionNode';
 import UnitContext from '../../../context/unitContext';
-import { AIFeedback, AiFeedbackType, AiContentType } from '../../../models';
 
 import { fetchAuthSession } from 'aws-amplify/auth';
 

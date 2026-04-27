@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import { Box, Button, Typography, Paper, LinearProgress } from '@mui/material';
+import { Box, Button, Typography, LinearProgress } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const AUTO_ADVANCE_DELAY = 5000; // 5 seconds
@@ -18,24 +18,15 @@ const containerStyle = {
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: 'background.paper',
-  padding: 2,
+  padding: { xs: 2, sm: 3 },
   height: '100%',
   width: '100%',
   overflow: 'auto',
   boxSizing: 'border-box',
-};
-
-const paperStyle = {
-  padding: 4,
-  paddingBottom: 5,
-  textAlign: 'center',
-  maxWidth: '500px',
-  width: '100%',
-  backgroundColor: 'grey.100',
-  maxHeight: '100%',
-  overflowY: 'auto',
-  boxSizing: 'border-box',
+  borderRadius: '8px',
+  border: '1px solid',
+  borderColor: 'divider',
+  backgroundColor: 'background.default',
 };
 
 export const CompletionScreen = ({
@@ -103,11 +94,7 @@ export const CompletionScreen = ({
 
   return (
     <Box sx={containerStyle}>
-      <Paper elevation={3} sx={{
-        ...paperStyle,
-        padding: { xs: 2, sm: 4 },
-        paddingBottom: { xs: 3, sm: 5 },
-      }}>
+      <Box sx={{ textAlign: 'center', maxWidth: '500px', width: '100%' }}>
         <CheckCircleIcon sx={{
           fontSize: { xs: '3rem', sm: '4rem' },
           color: 'success.main',
@@ -230,7 +217,7 @@ export const CompletionScreen = ({
             Cancel auto-advance
           </Button>
         )}
-      </Paper>
+      </Box>
     </Box>
   );
 };

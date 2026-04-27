@@ -669,14 +669,16 @@ const UnitTitleDescriptionEditor = ({ isScrolled = false }) => {
             alignItems: isScrolled ? 'center' : 'flex-start',
             width: '100%',
             transition: 'all 0.3s ease',
-            gap: isScrolled ? 2 : 0,
+            gap: isScrolled ? 1 : 0,
             overflow: 'hidden',
+            pr: isScrolled ? 2 : 0,
         }}>
             <Head>
                 <title>{name}</title>
             </Head>
             <Box sx={{
-                flexGrow: 1,
+                flex: isScrolled ? '0 1 auto' : '1 0 auto',
+                maxWidth: isScrolled ? '50%' : '100%',
                 px: 2,
                 py: isScrolled ? 0.25 : 0.5,
                 minHeight: isScrolled ? '2rem' : '2.5rem',
@@ -728,20 +730,41 @@ const UnitTitleDescriptionEditor = ({ isScrolled = false }) => {
                             event.preventDefault()
                             await saveName(newName || t('toolBarPlugin.untitledUnit'))
                             setEditName(false)
-                            // console.log('name saved', name)
                         }}
                     />
                 }
             </Box>
 
-            {!isScrolled && (
-            <Box sx={{ flexGrow: 1, px: 2, py: 0.5, minHeight: '2rem', display: 'flex', alignItems: 'center', transition: 'opacity 0.3s ease' }}>
+            <Box sx={{
+                flex: isScrolled ? '1 1 auto' : '1 0 auto',
+                px: isScrolled ? 0 : 2,
+                py: isScrolled ? 0 : 0.5,
+                minHeight: isScrolled ? 'auto' : '2rem',
+                display: 'flex',
+                alignItems: 'center',
+                minWidth: 0,
+                overflow: 'hidden',
+                transition: 'all 0.3s ease',
+            }}>
                 {!editDescription &&
-                    <Typography variant="body2" component="div" sx={{ flexGrow: 1, lineHeight: '1.5rem', borderBottom: '1px solid transparent', pb: '2px' }} onClick={(event) => {
-                        // event.preventDefault()
-                        setEditDescription(true)
-                    }}>
-                        {newDescription || t('toolBarPlugin.addDescription')}
+                    <Typography
+                        variant={isScrolled ? 'caption' : 'body2'}
+                        component="div"
+                        sx={{
+                            flexGrow: 1,
+                            lineHeight: '1.5rem',
+                            borderBottom: '1px solid transparent',
+                            pb: isScrolled ? 0 : '2px',
+                            color: 'text.secondary',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                        }}
+                        onClick={(event) => {
+                            setEditDescription(true)
+                        }}
+                    >
+                        {isScrolled ? `— ${newDescription || t('toolBarPlugin.addDescription')}` : (newDescription || t('toolBarPlugin.addDescription'))}
                     </Typography>
                 }
                 {editDescription &&
@@ -749,12 +772,11 @@ const UnitTitleDescriptionEditor = ({ isScrolled = false }) => {
                         size='small'
                         variant='standard'
                         fullWidth
-                        // label={`Answer ${index + 1}`}
                         value={newDescription || ''}
                         placeholder={t('toolBarPlugin.addDescription')}
                         onChange={(event) => { onDescriptionChange(event) }}
                         InputProps={{
-                            sx: { fontSize: '0.875rem' }
+                            sx: { fontSize: isScrolled ? '0.75rem' : '0.875rem' }
                         }}
                         inputRef={(input) => {
                             if (input != null) {
@@ -765,12 +787,10 @@ const UnitTitleDescriptionEditor = ({ isScrolled = false }) => {
                             event.preventDefault()
                             await saveDescription(newDescription || t('toolBarPlugin.addDescription'))
                             setEditDescription(false)
-                            // console.log('description saved', description)
                         }}
                     />
                 }
             </Box>
-            )}
         </Box>
     )
 }
@@ -1973,33 +1993,19 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
         }
     }, [checkToolbarOverflow]);
 
-    // Throttle function to limit observer frequency
-    const throttle = useCallback((func, limit) => {
-        let inThrottle;
-        return function() {
-            const args = arguments;
-            const context = this;
-            if (!inThrottle) {
-                func.apply(context, args);
-                inThrottle = true;
-                setTimeout(() => inThrottle = false, limit);
-            }
-        }
-    }, []);
-
-    // Throttled height update function
-    const updateAppBarHeight = useCallback(throttle((firstHeight, secondHeight = 56) => {
+    // Height update function — runs synchronously in ResizeObserver (already batched per frame)
+    const updateAppBarHeight = useCallback((firstHeight, secondHeight = 56) => {
         setFirstAppBarHeight(firstHeight);
         const total = firstHeight + secondHeight;
         setTotalAppBarHeight(total);
         // Update CSS custom property for vertical tabs positioning
         document.documentElement.style.setProperty('--app-bar-height', `${total}px`);
-    }, 100), [throttle]);
+    }, []);
 
-    // Calculate total height from both AppBars
+    // Calculate total height from both AppBars (use getBoundingClientRect for sub-pixel accuracy)
     const calculateTotalHeight = useCallback(() => {
-        const firstHeight = firstAppBarRef.current?.offsetHeight || 120;
-        const secondHeight = secondAppBarRef.current?.offsetHeight || 56;
+        const firstHeight = firstAppBarRef.current?.getBoundingClientRect().height || 120;
+        const secondHeight = secondAppBarRef.current?.getBoundingClientRect().height || 56;
         updateAppBarHeight(firstHeight, secondHeight);
     }, [updateAppBarHeight]);
 
@@ -2022,10 +2028,9 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
             });
         }
         
-        // Observe both AppBars height changes with throttling
-        const resizeObserver = new ResizeObserver((entries) => {
-            // Debounce multiple resize events
-            setTimeout(calculateTotalHeight, 50);
+        // Observe both AppBars height changes
+        const resizeObserver = new ResizeObserver(() => {
+            calculateTotalHeight();
         });
         
         if (firstAppBarRef.current) {
@@ -2479,64 +2484,72 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
         <>
             <style global jsx>{`
             .editor-toolbar button {
-                min-width: 2.5rem;
-                padding: 0.2rem 0.5rem;
-                margin: 0 0.1rem;
+                min-width: 2rem;
+                padding: 0.2rem 0.25rem;
+                margin: 0;
                 font-size: 0.875rem;
                 white-space: nowrap;
             }
 
             .editor-toolbar button .text {
-                margin-left: 0.25rem;
+                margin-left: 0.15rem;
             }
 
             .editor-toolbar button:has(.text) {
                 min-width: auto;
-                padding: 0.25rem 0.75rem;
+                padding: 0.2rem 0.5rem;
             }
 
             .editor-toolbar button.active {
-                background-color: #e0e0e0;
+                background-color: var(--mui-palette-action-selected, #e0e0e0);
             }
             `}</style>
             <div ref={ref}>
-            <AppBar
-                ref={firstAppBarRef}
-                position="fixed"
-                color="default"
+            <Box
                 sx={{
-                    overflowX: 'visible',
-                    overflowY: 'visible',
-                    boxShadow: 'none',
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
                     zIndex: (theme) => theme.zIndex.drawer + 2,
                     backgroundColor: 'custom.glassNavbar',
                     backdropFilter: 'blur(7px)',
                     display: 'flex',
                     flexDirection: 'column',
+                }}
+            >
+            <AppBar
+                ref={firstAppBarRef}
+                position="static"
+                color="default"
+                sx={{
+                    overflowX: 'visible',
+                    overflowY: 'visible',
+                    boxShadow: 'none',
+                    backgroundColor: 'transparent',
+                    display: 'flex',
+                    flexDirection: 'column',
                     minHeight: 'auto',
                 }}
             >
-                <MainToolbar />
-                <UnitTitleDescriptionEditor isScrolled={isScrolled} />
+                <MainToolbar>
+                    {isScrolled && <UnitTitleDescriptionEditor isScrolled />}
+                </MainToolbar>
+                {!isScrolled && <UnitTitleDescriptionEditor />}
             </AppBar>
             <AppBar
                 ref={secondAppBarRef}
-                position="fixed"
+                position="static"
                 color="default"
                 data-tour="editor-toolbar"
                 sx={{
                     overflowX: 'visible',
                     boxShadow: 'none',
-                    zIndex: (theme) => theme.zIndex.drawer + 1,
-                    top: firstAppBarHeight > 0 ? `${firstAppBarHeight}px` : 'auto',
-                    opacity: firstAppBarHeight > 0 ? 1 : 0,
-                    transition: 'opacity 0.1s ease-in-out',
+                    backgroundColor: 'transparent',
                     paddingTop: '0.25rem',
                     borderBottom: 1,
                     borderColor: 'divider',
                     paddingBottom: '0.25rem',
-                    backgroundColor: 'custom.glassNavbar',
-                    backdropFilter: 'blur(7px)',
                 }}
             >
                 {/* Left scroll arrow */}
@@ -2774,6 +2787,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin({
                     </Button>
                 )}
             </AppBar>
+            </Box>
 
         {/*
 

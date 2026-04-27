@@ -53,6 +53,7 @@ const mockFilesContext = {
     username: 'demo-user',
   },
   files: [],
+  audioFiles: {},
   uploadFile: async (file) => {
     console.log('Mock upload:', file.name);
     return {
@@ -397,9 +398,9 @@ export const CoffeeShopDialogue = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     
-    // Wait for script to load
+    // Wait for script to load - use heading role to avoid matching Lexical editor text
     await waitFor(() => {
-      expect(canvas.getByText(/Coffee Shop Conversation/i)).toBeInTheDocument();
+      expect(canvas.getByRole('heading', { name: /Coffee Shop Conversation/i })).toBeInTheDocument();
     }, { timeout: 5000 });
     
     // Verify dialogue lines are visible
@@ -453,7 +454,7 @@ export const JapaneseVocabularyWord = {
     
     // Wait for locked tracks to render with lock icons
     await waitFor(() => {
-      expect(canvas.getByText(/Japanese Greetings/i)).toBeInTheDocument();
+      expect(canvas.getAllByText(/Japanese Greetings/i)[0]).toBeInTheDocument();
     }, { timeout: 5000 });
     
     // Verify locked track indicators are visible
@@ -568,23 +569,24 @@ export const ComparingMultipleTakes = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     
-    // Wait for script with takes to load
-    await waitFor(() => {
-      expect(canvas.getAllByText(/It was a dark and stormy night/i)[0]).toBeInTheDocument();
+    // Wait for timeline cards to render, then click the first dialogue card
+    // TimelineCard uses role="button" with aria-label="Speaker: text"
+    const firstCard = await waitFor(() => {
+      const card = canvas.getByRole('button', { name: /Narrator:.*It was a dark and stormy night/i });
+      expect(card).toBeInTheDocument();
+      return card;
     }, { timeout: 5000 });
     
-    // Click the first dialogue line to select it and show takes panel
-    const firstLine = canvas.getAllByText(/It was a dark and stormy night/i)[0];
-    await userEvent.click(firstLine);
+    // Click the timeline card to select it and show takes panel
+    await userEvent.click(firstCard);
     
     // Verify multiple takes are visible (TTS and human) in the properties panel
     await waitFor(() => {
       const ttsLabels = canvas.getAllByText(/tts/i);
       expect(ttsLabels.length).toBeGreaterThan(0);
+      const humanLabels = canvas.getAllByText(/human/i);
+      expect(humanLabels.length).toBeGreaterThan(0);
     }, { timeout: 5000 });
-    
-    const humanLabels = canvas.getAllByText(/human/i);
-    expect(humanLabels.length).toBeGreaterThan(0);
   },
   parameters: {
     docs: {
@@ -639,7 +641,7 @@ export const PreviewMode = {
     
     // Wait for read-only mode to render
     await waitFor(() => {
-      expect(canvas.getByText(/Recording Practice Session/i)).toBeInTheDocument();
+      expect(canvas.getAllByText(/Recording Practice Session/i)[0]).toBeInTheDocument();
     }, { timeout: 5000 });
     
     // Verify edit controls are disabled

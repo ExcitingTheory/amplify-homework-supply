@@ -49,6 +49,7 @@ import {
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import MainToolbar from '../../src/components/MainToolbar'
+import PrefetchBadge from '../../src/components/PrefetchBadge'
 
 import MyAuth from "../../src/components/authenticator";
 
@@ -57,6 +58,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import getCachedUrl from "../../src/utils/getCachedUrl";
 import FilesContext from "../../src/context/fileContext";
 import { useChatPageContext } from '../../src/hooks/useChatPageContext';
+import { CompletionGrid } from '../../src/components/Leaderboard/CompletionGrid';
+import { LeaderboardTable } from '../../src/components/Leaderboard/LeaderboardTable';
 
 // import { fetchAuthSession } from '@aws-amplify/auth';
 
@@ -69,7 +72,7 @@ function FeaturedImage({ style, s3Key, identityId }) {
 
     const asyncFunc = async () => {
       
-      const _url = await getCachedUrl(s3Key, 'protected', identityId);
+      const _url = await getCachedUrl(s3Key);
       setUrl(_url);
     }
 
@@ -91,7 +94,7 @@ function CardMediaComponent({ s3Key, identityId, level = 'protected' }) {
   React.useEffect(() => {
 
     const asyncFunc = async () => {
-      const _url = await getCachedUrl(s3Key, level, identityId)
+      const _url = await getCachedUrl(s3Key)
       setUrl(_url);
     }
 
@@ -165,11 +168,14 @@ function SectionDetail({ user, signOut }) {
   const [selectedCurveAssignments, setSelectedCurveAssignments] = React.useState(new Set());
   const [showFutureAssignments, setShowFutureAssignments] = React.useState(false);
   const [showDraftAssignments, setShowDraftAssignments] = React.useState(false);
+  const [clientNow, setClientNow] = React.useState(null);
+  const [leaderboardEnabledLocal, setLeaderboardEnabledLocal] = React.useState(true);
   const [gradeOverrideOpen, setGradeOverrideOpen] = React.useState(false);
   const [overrideData, setOverrideData] = React.useState({ student: null, assignment: null, currentGrade: null });
   const [overrideScore, setOverrideScore] = React.useState('');
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [viewAsStudent, setViewAsStudent] = React.useState(false);
+  const [leaderboardEntries, setLeaderboardEntries] = React.useState([]);
 
   const { id } = router.query
 
@@ -183,6 +189,11 @@ function SectionDetail({ user, signOut }) {
   useChatPageContext({
     sections: section ? [section] : [],
   });
+
+  // Set client-side date after hydration to avoid SSR mismatch
+  React.useEffect(() => {
+    setClientNow(new Date());
+  }, []);
 
   // Fetch current user on mount
   useEffect(() => {
@@ -448,6 +459,9 @@ function SectionDetail({ user, signOut }) {
           if (sectionData.curveMethod) {
             setCurveMethod(sectionData.curveMethod);
           }
+          if (sectionData.leaderboardEnabled !== undefined) {
+            setLeaderboardEnabledLocal(sectionData.leaderboardEnabled);
+          }
           if (sectionData.curveAssignments) {
             setSelectedCurveAssignments(new Set(sectionData.curveAssignments));
           }
@@ -671,6 +685,40 @@ function SectionDetail({ user, signOut }) {
 
   }, [section?.code])
 
+  // Fetch leaderboard entries for this section
+  useEffect(() => {
+    if (!id) return
+    const client = getAmplifyClient()
+
+    // Trigger a leaderboard rebuild on page load (fire-and-forget)
+    client.mutations?.rebuildLeaderboard?.({ cohortId: id })
+      ?.catch?.((err) => console.warn('[SectionDetail] rebuildLeaderboard:', err))
+
+    const subscription = client.models.LeaderboardEntry.observeQuery({
+      filter: { cohortId: { eq: id } },
+    }).subscribe({
+      next: ({ items }) => {
+        const valid = items.filter(item => item != null && item.id != null)
+        setLeaderboardEntries(valid.map(e => ({
+          studentId: e.studentId,
+          studentName: e.studentName || e.studentId,
+          avatarColor: e.avatarColor || '#6366f1',
+          totalXP: e.totalXP || 0,
+          level: e.level || 1,
+          currentStreak: e.currentStreak || 0,
+        })))
+      },
+      error: (error) => {
+        if (error?.message?.includes('exceeds maximum value limit')) {
+          console.warn('[SectionDetail] Leaderboard filter limit — using client filtering')
+          return
+        }
+        console.error('[SectionDetail] Leaderboard subscription error:', error)
+      },
+    })
+    return () => subscription.unsubscribe()
+  }, [id])
+
   console.log('section students', sectionStudents)
   console.log('section', section)
   console.log('sectionAssignments', sectionAssignments)
@@ -681,7 +729,7 @@ function SectionDetail({ user, signOut }) {
 
   // Filter assignments based on visibility settings
   const visibleAssignments = React.useMemo(() => {
-    const now = new Date();
+    if (!clientNow) return sectionAssignments;
     return sectionAssignments.filter(assignment => {
       // Students cannot see draft assignments
       if (assignment.status === 'DRAFT') {
@@ -692,14 +740,14 @@ function SectionDetail({ user, signOut }) {
       // Only apply this filter for instructors who have the toggle
       if (assignment.dueDate) {
         const dueDate = new Date(assignment.dueDate);
-        if (dueDate > now) {
+        if (dueDate > clientNow) {
           return isOwner && showFutureAssignments;
         }
       }
       
       return true;
     });
-  }, [sectionAssignments, showFutureAssignments, showDraftAssignments, isOwner]);
+  }, [sectionAssignments, showFutureAssignments, showDraftAssignments, isOwner, clientNow]);
 
   const totalAssignments = sectionAssignments.length;
   const visibleAssignmentsCount = visibleAssignments.length;
@@ -894,6 +942,7 @@ function SectionDetail({ user, signOut }) {
 
 
       <Card
+        data-tour="section-card"
         elevation={2}
         sx={{
           width: '90vw',
@@ -964,7 +1013,7 @@ function SectionDetail({ user, signOut }) {
 
 
               style={{
-                color: '#000',
+                color: 'inherit',
                 fontSize: '2rem',
                 fontWeight: 'bold',
                 textAlign: 'center',
@@ -974,7 +1023,7 @@ function SectionDetail({ user, signOut }) {
                 width: '100%',
                 height: '100%',
                 zIndex: 100,
-                backgroundColor: 'rgb(255, 255, 255, 0.5)',
+                backgroundColor: 'var(--mui-palette-action-disabledBackground, rgba(0,0,0,0.12))',
                 backdropFilter: 'blur(3px)',
                 verticalAlign: 'middle',
                 display: 'flex',
@@ -1008,8 +1057,8 @@ function SectionDetail({ user, signOut }) {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                color: '#333',
-                backgroundColor: 'rgba(255, 255, 255, 0)'
+                color: 'inherit',
+                backgroundColor: 'transparent'
 
               }}
             />
@@ -1027,7 +1076,8 @@ function SectionDetail({ user, signOut }) {
                 padding: '1rem',
                 // height: '100%',
                 // width: '100%',
-                border: '1px dashed #666',
+                border: '1px dashed currentColor',
+                opacity: 0.5,
               }}
             >
               <Typography
@@ -1063,7 +1113,7 @@ function SectionDetail({ user, signOut }) {
               </Typography>
 
               <Typography gutterBottom variant="h5" component="div">
-                {t('sectionDetail.joinCode')} <Box component="code" data-tour="join-code" sx={{ fontFamily: 'monospace', fontWeight: 600, backgroundColor: 'grey.100', px: 1, py: 0.5, borderRadius: 1 }}>{section?.code}</Box>
+                {t('sectionDetail.joinCode')} <Box component="code" data-tour="join-code" sx={{ fontFamily: 'monospace', fontWeight: 600, backgroundColor: 'action.hover', px: 1, py: 0.5, borderRadius: 1 }}>{section?.code}</Box>
               </Typography>
 
               <Typography variant="body2" color="text.secondary">
@@ -1217,6 +1267,31 @@ function SectionDetail({ user, signOut }) {
                     <MenuItem value="linear-adjustment">{t('sectionDetail.linearAdjustmentMethod')}</MenuItem>
                   </Select>
                 </FormControl>
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={leaderboardEnabledLocal}
+                      onChange={async (e) => {
+                        const checked = e.target.checked;
+                        setLeaderboardEnabledLocal(checked);
+                        try {
+                          const client = getAmplifyClient();
+                          await client.models.Section.update({
+                            id: section.id,
+                            leaderboardEnabled: checked,
+                          });
+                        } catch (err) {
+                          console.error('Error updating leaderboardEnabled:', err);
+                          setLeaderboardEnabledLocal(!checked);
+                        }
+                      }}
+                      color="primary"
+                      size="small"
+                    />
+                  }
+                  label={t('sectionDetail.leaderboardEnabled', 'Show Leaderboard')}
+                />
               </Box>
             )}
           </Box>
@@ -1294,7 +1369,7 @@ function SectionDetail({ user, signOut }) {
               <TableBody>
                 {visibleAssignments.map((assignment) => {
                   const isDraft = assignment.status === 'DRAFT';
-                  const isFuture = assignment.dueDate && new Date(assignment.dueDate) > new Date();
+                  const isFuture = clientNow && assignment.dueDate && new Date(assignment.dueDate) > clientNow;
                   const canHaveGrades = !isDraft && !isFuture;
                   
                   const studentId = currentUser?.username;
@@ -1310,20 +1385,25 @@ function SectionDetail({ user, signOut }) {
                       sx={{
                         cursor: 'pointer',
                         backgroundColor: selectedRow === assignment.id ? 'action.selected' : 'transparent',
-                        '&:nth-of-type(odd)': { backgroundColor: selectedRow === assignment.id ? 'action.selected' : 'grey.100' },
-                        '&:hover': { backgroundColor: selectedRow === assignment.id ? 'action.selected' : 'grey.100' },
+                        '&:nth-of-type(odd)': { backgroundColor: selectedRow === assignment.id ? 'action.selected' : 'action.hover' },
+                        '&:hover': { backgroundColor: selectedRow === assignment.id ? 'action.selected' : 'action.hover' },
                         '& td': { backgroundColor: 'inherit' },
                         transition: 'background-color 0.2s ease',
                       }}
                     >
-                      <TableCell>{units[assignment.unitID]?.name}</TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {units[assignment.unitID]?.name}
+                          <PrefetchBadge unitId={assignment.unitID} />
+                        </Box>
+                      </TableCell>
                       <TableCell align="right">{grade}</TableCell>
                     </TableRow>
                   );
                 })}
                 
                 {/* Total Row */}
-                <TableRow sx={{ backgroundColor: 'grey.100', '& td': { backgroundColor: 'inherit' } }}>
+                <TableRow sx={{ backgroundColor: 'action.hover', '& td': { backgroundColor: 'inherit' } }}>
                   <TableCell sx={{ fontWeight: 'bold' }}>{t('sectionDetail.totalAverage')}</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 'bold' }}>
                     {(() => {
@@ -1332,7 +1412,7 @@ function SectionDetail({ user, signOut }) {
                       
                       visibleAssignments.forEach((assignment) => {
                         const isDraft = assignment.status === 'DRAFT';
-                        const isFuture = assignment.dueDate && new Date(assignment.dueDate) > new Date();
+                        const isFuture = clientNow && assignment.dueDate && new Date(assignment.dueDate) > clientNow;
                         const canHaveGrades = !isDraft && !isFuture;
                         
                         if (canHaveGrades) {
@@ -1376,12 +1456,13 @@ function SectionDetail({ user, signOut }) {
                   minWidth: 150,
                   boxSizing: 'border-box',
                   boxShadow: '2px 0 4px rgba(0,0,0,0.1)',
-                  borderRight: '2px solid #e0e0e0',
+                  borderRight: 2,
+                  borderRightColor: 'divider',
                 }}>{t('sectionDetail.learnerHeader')}</TableCell>
                 {visibleAssignments.map((assignment) => {
                   const unitName = units[assignment.unitID]?.name;
                   const isDraft = assignment.status === 'DRAFT';
-                  const isFuture = assignment.dueDate && new Date(assignment.dueDate) > new Date();
+                  const isFuture = clientNow && assignment.dueDate && new Date(assignment.dueDate) > clientNow;
                   
                   return (
                     <TableCell align="right" key={assignment.id}>
@@ -1395,7 +1476,7 @@ function SectionDetail({ user, signOut }) {
                     </TableCell>
                   )
                 })}
-                <TableCell align="right" sx={{ fontWeight: 'bold', backgroundColor: 'grey.100' }}>
+                <TableCell align="right" sx={{ fontWeight: 'bold', backgroundColor: 'action.hover' }}>
                   Total (Completion)
                 </TableCell>
               </TableRow>
@@ -1410,7 +1491,7 @@ function SectionDetail({ user, signOut }) {
                 visibleAssignments.forEach((assignment) => {
                   // Only count grades for published, non-future assignments
                   const isDraft = assignment.status === 'DRAFT';
-                  const isFuture = assignment.dueDate && new Date(assignment.dueDate) > new Date();
+                  const isFuture = clientNow && assignment.dueDate && new Date(assignment.dueDate) > clientNow;
                   const canHaveGrades = !isDraft && !isFuture;
                   
                   if (canHaveGrades) {
@@ -1440,8 +1521,8 @@ function SectionDetail({ user, signOut }) {
                       '&:last-child td, &:last-child th': { borderBottom: 0 },
                       cursor: 'pointer',
                       backgroundColor: selectedRow === student.id ? 'action.selected' : 'background.paper',
-                      '&:nth-of-type(odd)': { backgroundColor: selectedRow === student.id ? 'action.selected' : 'grey.100' },
-                      '&:hover': { backgroundColor: selectedRow === student.id ? 'action.selected' : 'grey.100' },
+                      '&:nth-of-type(odd)': { backgroundColor: selectedRow === student.id ? 'action.selected' : 'action.hover' },
+                      '&:hover': { backgroundColor: selectedRow === student.id ? 'action.selected' : 'action.hover' },
                       '& td, & th': { backgroundColor: 'inherit' },
                       transition: 'background-color 0.2s ease',
                     }}
@@ -1470,7 +1551,7 @@ function SectionDetail({ user, signOut }) {
 
                       // Future and draft assignments cannot have grades yet
                       const isDraft = assignment.status === 'DRAFT';
-                      const isFuture = assignment.dueDate && new Date(assignment.dueDate) > new Date();
+                      const isFuture = clientNow && assignment.dueDate && new Date(assignment.dueDate) > clientNow;
                       const canHaveGrades = !isDraft && !isFuture;
 
                       console.log('gradeMap[student.id]?.[assignment.unitID]', gradeMap[student.id]?.[assignment.unitID])
@@ -1521,8 +1602,8 @@ function SectionDetail({ user, signOut }) {
                       align="right" 
                       sx={{ 
                         fontWeight: 'bold', 
-                        backgroundColor: 'grey.100',
-                        color: completionPercentage === 100 ? 'success.dark' : 'text.secondary'
+                        backgroundColor: 'action.hover',
+                        color: completionPercentage === 100 ? 'success.main' : 'text.secondary'
                       }}
                     >
                       {completedAssignments > 0 ? `${displayAverage}%` : '-'} ({completionPercentage}%)
@@ -1535,6 +1616,50 @@ function SectionDetail({ user, signOut }) {
         </TableContainer>
         )}
       </Box>
+
+      {/* Completion Grid — shows assignment completion status per student */}
+      {sectionAssignments && Object.keys(sectionStudents).length > 0 && (
+        <Box sx={{ p: 2, mx: 'auto', maxWidth: '80rem', mt: 2 }}>
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            {t('sectionDetail.completionGrid', 'Completion Overview')}
+          </Typography>
+          <CompletionGrid
+            assignments={sectionAssignments.map(a => ({
+              id: a.id || a.unitID,
+              title: units[a.unitID]?.name || a.unitID,
+            }))}
+            students={Object.values(sectionStudents).map(student => ({
+              studentId: student.id,
+              studentName: student.name || student.email || student.id,
+              assignments: sectionAssignments.reduce((acc, assignment) => {
+                const grade = gradeMap[student.id]?.[assignment.unitID];
+                if (grade?.highest?.accuracy !== undefined) {
+                  acc[assignment.id || assignment.unitID] = 'completed';
+                } else if (grade) {
+                  acc[assignment.id || assignment.unitID] = 'in_progress';
+                } else {
+                  acc[assignment.id || assignment.unitID] = 'not_started';
+                }
+                return acc;
+              }, {}),
+            }))}
+            currentStudentId={currentUser?.username || ''}
+          />
+        </Box>
+      )}
+
+      {/* Leaderboard — XP-based ranking per section (shows when data is available) */}
+      {leaderboardEntries.length > 0 && (
+        <Box sx={{ p: 2, mx: 'auto', maxWidth: '80rem', mt: 2 }}>
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            {t('sectionDetail.leaderboard', 'Leaderboard')}
+          </Typography>
+          <LeaderboardTable
+            entries={leaderboardEntries}
+            currentStudentId={currentUser?.username || ''}
+          />
+        </Box>
+      )}
 
       {!sectionAssignments &&
         <div>{t('sectionDetail.loading')}</div>
@@ -1577,7 +1702,7 @@ function SectionDetail({ user, signOut }) {
               const unitUrl = `/unit/${assignment.unitID}`
 
               return (
-                <>
+                <React.Fragment key={assignment.id || assignment.unitID}>
 
                   <Card
                     data-tour="assignment-card"
@@ -1642,7 +1767,7 @@ function SectionDetail({ user, signOut }) {
                   </Card>
 
 
-                </>
+                </React.Fragment>
 
 
               )

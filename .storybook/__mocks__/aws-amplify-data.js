@@ -27,6 +27,8 @@ const dataStores = {
   AssistantChat: new Map(),
   AssistantChatFile: new Map(),
   Settings: new Map(),
+  PracticeSession: new Map(),
+  StudentXPLog: new Map(),
 };
 
 /**
@@ -51,6 +53,8 @@ const activeSubscriptions = {
   AssistantChat: [],
   AssistantChatFile: [],
   Settings: [],
+  PracticeSession: [],
+  StudentXPLog: [],
 };
 
 /**
@@ -311,6 +315,8 @@ const mutationSubscriptions = {
   AssistantChat: { onCreate: [], onUpdate: [], onDelete: [] },
   AssistantChatFile: { onCreate: [], onUpdate: [], onDelete: [] },
   Settings: { onCreate: [], onUpdate: [], onDelete: [] },
+  PracticeSession: { onCreate: [], onUpdate: [], onDelete: [] },
+  StudentXPLog: { onCreate: [], onUpdate: [], onDelete: [] },
 };
 
 /**
@@ -564,6 +570,8 @@ const mockClient = {
     AssistantChat: createMockModel('AssistantChat'),
     AssistantChatFile: createMockModel('AssistantChatFile'),
     Settings: createMockModel('Settings'),
+    PracticeSession: createMockModel('PracticeSession'),
+    StudentXPLog: createMockModel('StudentXPLog'),
   },
 
   // Mock mutations for custom server-side operations
@@ -600,6 +608,25 @@ const mockClient = {
         },
         errors: null,
       };
+    },
+    generatePracticeDrill: async (input) => {
+      console.log('[Mock Data] generatePracticeDrill() called with:', input);
+      const mockBlocks = [
+        {
+          type: 'multiple-choice',
+          instruction: 'Choose the correct answer',
+          sourceItemId: 'mock-word-1',
+          sourceType: 'word',
+          expectedAnswer: 'Example answer',
+          choices: [
+            { choice: 'Example answer', correct: true },
+            { choice: 'Wrong answer A', correct: false },
+            { choice: 'Wrong answer B', correct: false },
+            { choice: 'Wrong answer C', correct: false },
+          ],
+        },
+      ];
+      return { data: JSON.stringify({ blocks: mockBlocks }), errors: null };
     },
   },
 
@@ -643,7 +670,7 @@ const mockClient = {
     },
     listSectionStudents: async (input) => {
       console.log('[Mock Data] queries.listSectionStudents() called with:', input);
-      return { data: JSON.stringify([]), errors: null };
+      return { data: [], errors: null };
     },
   },
 

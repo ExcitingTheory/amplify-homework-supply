@@ -18,7 +18,7 @@ function FeaturedImage({ style, s3Key, identityId }) {
 
     const asyncFunc = async () => {
 
-      const _url = await getCachedUrl(s3Key, 'protected', identityId)
+      const _url = await getCachedUrl(s3Key)
 
       setUrl(_url);
     }

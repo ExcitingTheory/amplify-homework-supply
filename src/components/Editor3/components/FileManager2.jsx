@@ -79,9 +79,6 @@ import {
     loadEmbeddingsFromS3
 } from '../../../utils/vectorStoreDB';
 import * as EmbeddingWorker from '../../../utils/embeddingWorkerManager';
-
-import { FileProtectionLevels } from '../../../models';
-import { File as FileModel, Document, Settings, ParsedContent } from '../../../models';
 import {
     ACCEPTABLE_AUDIO_TYPES,
     ACCEPTABLE_FILE_TYPES,
@@ -105,13 +102,12 @@ import { createEmptyHistoryState } from "@lexical/react/LexicalHistoryPlugin";
 
 // FileMetadata node imports
 import { $createFileMetadataNode } from "../nodes/FileMetadataNode";
-
-import { UnitFile } from '../../../models';
 import UnitContext from '../../../context/unitContext';
 import { FileManagerProvider, useFileManager } from './FileManagerContext';
 import { useTabContext } from '../../../context/tabContext';
 import getCachedUrl from "../../../utils/getCachedUrl";
 import AudioWaveformPlayer from './AudioWaveformPlayer';
+import StaticWaveform from './StaticWaveform';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -132,12 +128,14 @@ import TableChartIcon from '@mui/icons-material/TableChart';
 
 import TextareaAutosize from '@mui/material/TextareaAutosize';
 
-import { useTheme } from '@mui/material/styles';
+import MicIcon from '@mui/icons-material/Mic';
+import TheaterComedyIcon from '@mui/icons-material/TheaterComedy';
 
 import { hexToRgb } from "../../../utils/hexToRgb";
 import { ImageGeneratorButton, AudioGeneratorButton } from './EnhancedGenerators';
 import { SuggestedVocabulary, SuggestedQuestions } from './SuggestedContent';
-import RecordingStudio3 from "../../RecordingStudio3";
+import RecordingStudio3Modal from "../../RecordingStudio3Modal";
+import { createConversationPreset } from "../../../utils/recordingStudioPresets";
 
 // Utility functions for hybrid search
 const debounce = (func, wait) => {
@@ -919,7 +917,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
     console.log('ExpandedFileContent render', { file, parsedContent });
 
     return (
-        <Box sx={{ p: 2, backgroundColor: 'action.hover', borderRadius: 1, mt: 1 }}>
+        <Box sx={{ p: 2 }}>
             {/* Audio/Image Metadata */}
             {metadata && (
                 <Box>
@@ -951,7 +949,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
 
             {/* Document Parsed Content */}
             {isDocument && parsedContent && (
-                <Box sx={{ position: 'relative', zIndex: 1 }}>
+                <Box sx={{ position: 'relative', zIndex: 1, mx: -2 }}>
                     <Tabs
                         value={activeTab}
                         scrollButtons="auto"
@@ -961,39 +959,50 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
                             position: 'relative',
                             zIndex: 2,
                             backgroundColor: 'background.paper',
-                            borderRadius: '4px 4px 0 0'
+                            borderBottom: 1,
+                            borderColor: 'divider',
                         }}
                     >
-                        <Tab
-                            icon={<MenuBookIcon />}
-                            label={`(${parsedContent.vocabularyJSON.length})`}
-                            iconPosition="start"
-                        />
-                        <Tab
-                            icon={<QuizIcon />}
-                            label={`(${parsedContent.questionsJSON.length})`}
-                            iconPosition="start"
-                        />
-                        <Tab
-                            icon={<SummarizeIcon />}
-                            label={`(${parsedContent.summariesJSON.length})`}
-                            iconPosition="start"
-                        />
-                        <Tab
-                            icon={<FlagIcon />}
-                            label={`(${parsedContent.objectivesJSON.length})`}
-                            iconPosition="start"
-                        />
-                        <Tab
-                            icon={<LightbulbIcon />}
-                            label={`(${parsedContent.conceptsJSON.length})`}
-                            iconPosition="start"
-                        />
+                        <Tooltip title={t('fileMetadataComponent.vocabulary', 'Vocabulary')} arrow>
+                            <Tab
+                                icon={<MenuBookIcon />}
+                                label={`(${parsedContent.vocabularyJSON.length})`}
+                                iconPosition="start"
+                            />
+                        </Tooltip>
+                        <Tooltip title={t('fileMetadataComponent.questions', 'Questions')} arrow>
+                            <Tab
+                                icon={<QuizIcon />}
+                                label={`(${parsedContent.questionsJSON.length})`}
+                                iconPosition="start"
+                            />
+                        </Tooltip>
+                        <Tooltip title={t('fileMetadataComponent.summaries', 'Summaries')} arrow>
+                            <Tab
+                                icon={<SummarizeIcon />}
+                                label={`(${parsedContent.summariesJSON.length})`}
+                                iconPosition="start"
+                            />
+                        </Tooltip>
+                        <Tooltip title={t('fileMetadataComponent.objectives', 'Objectives')} arrow>
+                            <Tab
+                                icon={<FlagIcon />}
+                                label={`(${parsedContent.objectivesJSON.length})`}
+                                iconPosition="start"
+                            />
+                        </Tooltip>
+                        <Tooltip title={t('fileMetadataComponent.concepts', 'Concepts')} arrow>
+                            <Tab
+                                icon={<LightbulbIcon />}
+                                label={`(${parsedContent.conceptsJSON.length})`}
+                                iconPosition="start"
+                            />
+                        </Tooltip>
                     </Tabs>
 
                     {/* Vocabulary Tab with SuggestedVocabulary */}
                     {activeTab === 0 && (
-                        <Box sx={{ mt: 2 }}>
+                        <Box sx={{ pt: 2, px: 2 }}>
                             {parsedContent.vocabularyJSON.length > 0 ? (
                                 <>
                                     <Alert severity="info" sx={{ mb: 2 }}>
@@ -1019,7 +1028,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
 
                     {/* Questions Tab with SuggestedQuestions */}
                     {activeTab === 1 && (
-                        <Box sx={{ mt: 2 }}>
+                        <Box sx={{ pt: 2, px: 2 }}>
                             {parsedContent.questionsJSON.length > 0 ? (
                                 <>
                                     <Alert severity="info" sx={{ mb: 2 }}>
@@ -1045,7 +1054,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
 
                     {/* Summaries Tab */}
                     {activeTab === 2 && (
-                        <Box sx={{ mt: 2 }}>
+                        <Box sx={{ pt: 2, px: 2 }}>
                             {parsedContent.summariesJSON.length > 0 ? (
                                 parsedContent.summariesJSON.map((item, index) => (
                                     <Box
@@ -1086,7 +1095,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
 
                     {/* Objectives Tab */}
                     {activeTab === 3 && (
-                        <Box sx={{ mt: 2 }}>
+                        <Box sx={{ pt: 2, px: 2 }}>
                             {parsedContent.objectivesJSON.length > 0 ? (
                                 parsedContent.objectivesJSON.map((item, index) => (
                                     <Box
@@ -1124,7 +1133,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
 
                     {/* Concepts Tab */}
                     {activeTab === 4 && (
-                        <Box sx={{ mt: 2 }}>
+                        <Box sx={{ pt: 2, px: 2 }}>
                             {parsedContent.conceptsJSON.length > 0 ? (
                                 parsedContent.conceptsJSON.map((item, index) => (
                                     <Box
@@ -1168,7 +1177,32 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({ file, pars
             )}
 
             {/* No content available */}
-            {!metadata && !parsedContent && (
+            {!metadata && !parsedContent && !isDocument && (
+                <Box>
+                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        {t('fileManager2.expandedContent.fileInfoHeading', 'File Info')}
+                    </Typography>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 1, alignItems: 'baseline' }}>
+                        <Typography variant="body2" color="text.secondary">{t('fileMetadataComponent.type', 'Type:')}</Typography>
+                        <Typography variant="body2">{file.mimeType || t('fileMetadataComponent.unknown', 'Unknown')}</Typography>
+                        <Typography variant="body2" color="text.secondary">{t('fileMetadataComponent.path', 'Path:')}</Typography>
+                        <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>{file.path}</Typography>
+                        {file.size != null && (
+                            <>
+                                <Typography variant="body2" color="text.secondary">{t('fileManager2.expandedContent.sizeLabel', 'Size:')}</Typography>
+                                <Typography variant="body2">{(file.size / 1024).toFixed(1)} KB</Typography>
+                            </>
+                        )}
+                        {file.duration != null && (
+                            <>
+                                <Typography variant="body2" color="text.secondary">{t('fileManager2.expandedContent.durationLabel', 'Duration:')}</Typography>
+                                <Typography variant="body2">{file.duration}s</Typography>
+                            </>
+                        )}
+                    </Box>
+                </Box>
+            )}
+            {!metadata && !parsedContent && isDocument && (
                 <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
                     {t('fileManager2.expandedContent.noContentAvailable')}
                 </Typography>
@@ -1368,7 +1402,7 @@ function NewImageFileForm({ open, toggleNewImageFileForm }) {
                         <img
                             // onClick={doNothing}
                             style={{
-                                backgroundColor: '#ffffff !important',
+                                backgroundColor: 'background.paper',
                                 width: '100%',
                                 margin: '1rem auto'
                             }}
@@ -1490,13 +1524,13 @@ function NewAudioFileForm({ open, toggleNewAudioFileForm }) {
     const analyserRef = React.useRef(null);
     const fileInput = React.createRef(null);
 
-    const theme = useTheme();
-    const mainColor = theme.palette.primary.main;
+    const mainColor = typeof document !== 'undefined'
+        ? getComputedStyle(document.documentElement).getPropertyValue('--mui-palette-primary-main').trim() || '#556cd6'
+        : '#556cd6';
 
     console.log('FileManager.mainColor', mainColor);
 
-    const rgbColor = hexToRgb(mainColor); // Replace 'primary.main' with the color you want to convert
-    console.log('rgbColor, rgbColor'); // Output: "rgb(33, 150, 243)"
+    const rgbColor = hexToRgb(mainColor);
     const _r = rgbColor.r;
     const _g = rgbColor.g;
     const _b = rgbColor.b;
@@ -1860,17 +1894,19 @@ const FileTypeSubheader = React.memo(function FileTypeSubheader({ label, fileTyp
                 height: '100%',
                 minHeight: 36,
                 px: 2,
-                bgcolor: 'grey.100',
+                pl: 0.625,
+                bgcolor: 'action.hover',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
                 borderBottom: '1px solid',
+                borderLeft: '3px solid transparent',
                 borderColor: 'divider',
                 flexShrink: 0,
                 cursor: 'pointer',
                 userSelect: 'none',
                 '&:hover': {
-                    bgcolor: 'grey.200'
+                    bgcolor: 'action.focus'
                 }
             }}>
             <ExpandMoreIcon sx={{
@@ -1898,6 +1934,21 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentSt
     const [imageUrl, setImageUrl] = React.useState(null);
     const [audioUrl, setAudioUrl] = React.useState(null);
     const [videoUrl, setVideoUrl] = React.useState(null);
+    const audioContainerRef = React.useRef(null);
+    const [audioWidth, setAudioWidth] = React.useState(400);
+
+    // Measure audio container width
+    React.useEffect(() => {
+        if (!file.mimeType?.startsWith('audio/') || !audioContainerRef.current) return;
+        const observer = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                const w = Math.floor(entry.contentRect.width);
+                if (w > 0) setAudioWidth(w);
+            }
+        });
+        observer.observe(audioContainerRef.current);
+        return () => observer.disconnect();
+    }, [file.mimeType]);
 
     // Load signed URLs for media files
     React.useEffect(() => {
@@ -2026,7 +2077,7 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentSt
                     width: '100%',
                     minHeight: '200px',
                     mb: 2,
-                    bgcolor: 'grey.100',
+                    bgcolor: 'action.hover',
                     borderRadius: 1,
                     display: 'flex',
                     alignItems: 'center',
@@ -2043,9 +2094,10 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentSt
                             src={imageUrl}
                             alt={file.name}
                             sx={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover'
+                                maxWidth: '100%',
+                                maxHeight: 300,
+                                objectFit: 'cover',
+                                borderRadius: 1
                             }}
                             onError={(e) => {
                                 e.target.style.display = 'none';
@@ -2055,19 +2107,27 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentSt
                         <CircularProgress />
                     )
                 ) : file.mimeType?.startsWith('audio/') ? (
-                    file.waveformData ? (
-                        <AudioWaveformPlayer
-                            audioUrl={audioUrl}
-                            waveformData={JSON.parse(file.waveformData)}
-                            width={300}
-                            height={100}
-                            title={file.name}
-                            showDuration={true}
-                        />
+                    audioUrl ? (
+                        <Box ref={audioContainerRef} sx={{ width: '100%', overflow: 'hidden' }}>
+                            <AudioWaveformPlayer
+                                audioUrl={audioUrl}
+                                file={file}
+                                waveformData={file.waveformData ? JSON.parse(file.waveformData) : undefined}
+                                width={Math.max(audioWidth - 36, 100)}
+                                height={80}
+                                title={file.name}
+                                showDuration={true}
+                            />
+                        </Box>
                     ) : (
-                        <Box sx={{ textAlign: 'center', color: 'action.disabled', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                            <AudioFileIcon sx={{ fontSize: '64px' }} />
-                            <Typography variant="caption">{t('fileManager2.fileDetails.noWaveformAvailable')}</Typography>
+                        <Box ref={audioContainerRef} sx={{ width: '100%', overflow: 'hidden' }}>
+                            <StaticWaveform
+                                file={file}
+                                waveformData={file.waveformData ? JSON.parse(file.waveformData) : undefined}
+                                width={Math.max(audioWidth - 2, 100)}
+                                height={80}
+                                backgroundColor="transparent"
+                            />
                         </Box>
                     )
                 ) : file.mimeType?.startsWith('video/') ? (
@@ -2126,19 +2186,19 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentSt
                         </Tooltip>
                     )}
                     <Tooltip title={t('fileManager2.fileDetails.downloadTooltip')}>
-                        <IconButton size="small" onClick={() => handleMenuAction('download')}>
+                        <IconButton size="small" onClick={() => handleMenuAction('download')} aria-label={t('fileManager2.fileDetails.downloadTooltip')}>
                             <DownloadIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
                     {(isAnalyzableDocument(file.mimeType) || file.documentID) && (
                         <Tooltip title={t('fileManager2.fileDetails.reAnalyzeTooltip')}>
-                            <IconButton size="small" onClick={() => handleMenuAction('re-analyze')}>
+                            <IconButton size="small" onClick={() => handleMenuAction('re-analyze')} aria-label={t('fileManager2.fileDetails.reAnalyzeTooltip')}>
                                 <RefreshIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
                     )}
                     <Tooltip title={t('fileManager2.fileDetails.deleteTooltip')}>
-                        <IconButton size="small" onClick={() => handleMenuAction('delete')} sx={{ color: 'error.main' }}>
+                        <IconButton size="small" onClick={() => handleMenuAction('delete')} sx={{ color: 'error.main' }} aria-label={t('fileManager2.fileDetails.deleteTooltip')}>
                             <DeleteIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
@@ -2152,7 +2212,7 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({ file, documentSt
 // FileRowComponent - Renders individual file rows based on file type
 // =============================================================================
 
-const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, index, isSelected, allFiles, selectedItems, setSelectedItems }) {
+const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, index, isSelected, allFiles, selectedItems, setSelectedItems, search }) {
     const [isEditing, setIsEditing] = React.useState(false);
     const [editedName, setEditedName] = React.useState(file.name);
     const [isSaving, setIsSaving] = React.useState(false);
@@ -2309,20 +2369,20 @@ const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, 
         <Box
             onClick={handleRowClick}
             sx={{
-                backgroundColor: isSelected ? 'action.selected' : isEvenRow ? 'grey.100' : 'background.paper',
+                backgroundColor: isSelected ? 'action.selected' : isEvenRow ? 'action.hover' : 'background.paper',
                 borderBottom: '1px solid',
                 borderColor: 'divider',
-                borderLeft: isSelected ? '3px solid' : '3px solid transparent',
+                borderLeft: '3px solid',
                 borderLeftColor: isSelected ? 'primary.main' : 'transparent',
                 transition: 'all 0.2s ease',
                 cursor: isEditing ? 'text' : 'pointer',
                 p: 1,
-                pl: isSelected ? 0.625 : 1, // Adjust padding to account for border
+                pl: 0.625, // Consistent left padding with 3px border
                 display: 'flex',
                 alignItems: 'center',
                 gap: 0.75,
                 '&:hover': {
-                    backgroundColor: isSelected ? 'action.selected' : 'action.hover'
+                    backgroundColor: isSelected ? 'action.selected' : 'action.focus'
                 }
             }}>
             {/* Selection Checkbox */}
@@ -2341,6 +2401,7 @@ const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, 
                 {fileType === 'audio' && <AudioFileIcon sx={{ fontSize: '20px', color: isSelected ? 'primary.main' : 'inherit', transition: 'color 0.2s' }} />}
                 {fileType === 'documents' && <PictureAsPdfIcon sx={{ fontSize: '20px', color: isSelected ? 'primary.main' : 'inherit', transition: 'color 0.2s' }} />}
                 {fileType === 'video' && <ArticleIcon sx={{ fontSize: '20px', color: isSelected ? 'primary.main' : 'inherit', transition: 'color 0.2s' }} />}
+                {fileType === 'scripts' && <TheaterComedyIcon sx={{ fontSize: '20px', color: isSelected ? 'primary.main' : 'inherit', transition: 'color 0.2s' }} />}
                 {fileType === 'other' && <DescriptionIcon sx={{ fontSize: '20px', color: isSelected ? 'primary.main' : 'inherit', transition: 'color 0.2s' }} />}
             </Box>
 
@@ -2363,7 +2424,7 @@ const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, 
                         onClick={handleFileNameClick}
                         sx={typographySx}
                     >
-                        {file.name}
+                        {search ? highlightMatches(file.name, search) : file.name}
                     </Typography>
                 )}
             </Box>
@@ -2375,7 +2436,8 @@ const FileRowComponent = React.memo(function FileRowComponent({ file, fileType, 
         prevProps.file.id === nextProps.file.id &&
         prevProps.fileType === nextProps.fileType &&
         prevProps.index === nextProps.index &&
-        prevProps.isSelected === nextProps.isSelected
+        prevProps.isSelected === nextProps.isSelected &&
+        prevProps.search === nextProps.search
         // Don't compare allFiles, selectedItems, or setSelectedItems to avoid re-renders on scroll
     );
 });
@@ -2579,13 +2641,38 @@ async function deleteFileCompletely(file) {
 
 /**
  * Component to handle selected file view with parsedContent
- * Note: parsedContent is eagerly loaded via selectionSet in fileContext.jsx,
- * so it's a direct array property, not a lazy-loaded function
+ * parsedContent is lazy-loaded via Amplify Gen 2 hasMany relationship
  */
 function SelectedFileView({ selectedFile, documentStatus, search, editor }) {
-    // Access eagerly-loaded parsedContent (loaded via selectionSet in fileContext)
-    // It's already an array, not a function that returns Promise<{data: Array}>
-    const parsedContent = selectedFile.parsedContent?.[0] || null;
+    const [parsedContent, setParsedContent] = React.useState(null);
+
+    React.useEffect(() => {
+        let cancelled = false;
+        setParsedContent(null);
+
+        const loadParsedContent = async () => {
+            try {
+                if (typeof selectedFile.parsedContent === 'function') {
+                    const result = await selectedFile.parsedContent();
+                    if (!cancelled) {
+                        setParsedContent(result?.data?.[0] || null);
+                    }
+                } else if (Array.isArray(selectedFile.parsedContent)) {
+                    if (!cancelled) {
+                        setParsedContent(selectedFile.parsedContent[0] || null);
+                    }
+                }
+            } catch (err) {
+                console.error('[SelectedFileView] Failed to load parsedContent:', err);
+            }
+        };
+
+        if (selectedFile?.id) {
+            loadParsedContent();
+        }
+
+        return () => { cancelled = true; };
+    }, [selectedFile?.id, selectedFile?._version]);
 
     return (
         <>
@@ -2594,8 +2681,12 @@ function SelectedFileView({ selectedFile, documentStatus, search, editor }) {
                 documentStatus={documentStatus}
                 editor={editor}
             />
+            {/* Metadata Editor */}
+            <MetadataEditor
+                file={selectedFile}
+            />
             {/* File Content */}
-            <Box sx={{ flex: 1, overflow: 'auto' }}>
+            <Box sx={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
                 <ExpandedFileContent
                     file={selectedFile}
                     parsedContent={parsedContent}
@@ -2627,6 +2718,50 @@ function SelectedFileDetailsPanel({ selectedItems, files, documentStatuses, sear
                 <Typography variant="body2">
                     {t('fileManager2.selectedFileDetails.emptyState')}
                 </Typography>
+            </Box>
+        );
+    }
+
+    // Multi-select summary
+    if (selectedItems.size > 1) {
+        const selectedFiles = files.filter(f => selectedItems.has(f.id));
+        const totalSize = selectedFiles.reduce((sum, f) => sum + (f.size || 0), 0);
+        const byType = {};
+        selectedFiles.forEach(f => {
+            const type = f.mimeType?.split('/')[0] || 'other';
+            byType[type] = (byType[type] || 0) + 1;
+        });
+
+        return (
+            <Box sx={{ p: 2, overflow: 'auto', flex: 1 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                    {t('fileManager2.selectedFileDetails.multiSelectHeading', {
+                        count: selectedItems.size,
+                        defaultValue: '{{count}} files selected'
+                    })}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    {t('fileManager2.selectedFileDetails.totalSize', {
+                        size: (totalSize / 1024).toFixed(1),
+                        defaultValue: 'Total size: {{size}} KB'
+                    })}
+                </Typography>
+                {Object.entries(byType).map(([type, count]) => (
+                    <Chip
+                        key={type}
+                        label={`${type}: ${count}`}
+                        size="small"
+                        variant="outlined"
+                        sx={{ mr: 0.5, mb: 0.5 }}
+                    />
+                ))}
+                <Box component="ul" sx={{ mt: 2, pl: 2, m: 0 }}>
+                    {selectedFiles.map(f => (
+                        <Typography component="li" variant="body2" key={f.id} sx={{ py: 0.25 }}>
+                            {f.name}
+                        </Typography>
+                    ))}
+                </Box>
             </Box>
         );
     }
@@ -2666,6 +2801,14 @@ export default function FileManager2() {
     const [searchMode, setSearchMode] = React.useState('hybrid'); // 'keyword', 'semantic', 'hybrid'
     const [searching, setSearching] = React.useState(false);
     const [selectedItems, setSelectedItems] = React.useState(new Set());
+
+    const { files, documents, session } = React.useContext(FilesContext);
+    const { identityId } = session || {};
+    const { unit } = React.useContext(UnitContext);
+
+    // RecordingStudio3 modal state (hoisted for handleStudioSave callback)
+    const [studioOpen, setStudioOpen] = React.useState(false);
+    const [studioScriptFile, setStudioScriptFile] = React.useState(null);
 
 
 
@@ -2804,6 +2947,123 @@ export default function FileManager2() {
         });
     };
 
+    // --- RecordingStudio3 handlers ---
+
+    /**
+     * Open RS3 with a new conversation preset, or re-open an existing script file.
+     * @param {Object|null} scriptFile - Existing File record with mimeType text/x-fountain, or null for new
+     */
+    const handleOpenStudio = React.useCallback((scriptFile = null) => {
+        setStudioScriptFile(scriptFile);
+        setStudioOpen(true);
+    }, []);
+
+    /**
+     * RS3Modal onSave handler — creates File records for audio takes and
+     * persists the script as a text/x-fountain File record.
+     */
+    const handleStudioSave = React.useCallback(async (payload) => {
+        const { audioFiles, scriptData } = payload;
+        console.log('[FileManager2] RS3 save payload:', { audioCount: audioFiles?.length, scriptData: !!scriptData });
+
+        const client = getAmplifyClient();
+        const createdFileIds = [];
+
+        // 1. Create File model records for each audio take with an audioPath
+        if (audioFiles?.length > 0) {
+            for (const audioFile of audioFiles) {
+                if (!audioFile.audioPath) continue;
+
+                try {
+                    const { data: newFile, errors } = await client.models.File.create({
+                        path: audioFile.audioPath,
+                        owner: session?.username,
+                        identityId,
+                        name: `${audioFile.speakerName || 'audio'} - ${(audioFile.text || '').slice(0, 40)}.mp3`,
+                        mimeType: 'audio/mpeg',
+                        level: 'PROTECTED',
+                        waveformData: audioFile.waveformData ? JSON.stringify(audioFile.waveformData) : null,
+                    });
+
+                    if (errors?.length > 0 || !newFile) {
+                        console.error('[FileManager2] Error creating audio File record:', errors);
+                        continue;
+                    }
+
+                    createdFileIds.push(newFile.id);
+                    console.log('[FileManager2] Created audio File record:', newFile.id);
+                } catch (error) {
+                    console.error('[FileManager2] Error creating audio File record:', error);
+                }
+            }
+        }
+
+        // 2. Persist the script as a text/x-fountain File record for re-opening
+        if (scriptData) {
+            try {
+                const scriptTitle = scriptData.metadata?.title || 'Conversation';
+                const scriptContent = JSON.stringify(scriptData);
+                const scriptBlob = new Blob([scriptContent], { type: 'text/x-fountain' });
+                const scriptFileName = `${scriptTitle.replace(/[^a-zA-Z0-9]/g, '_')}.fountain`;
+                const s3Path = `protected/${identityId}/scripts/${scriptFileName}`;
+
+                // Upload script content to S3
+                const { uploadData } = await import('aws-amplify/storage');
+                await uploadData({
+                    path: s3Path,
+                    data: scriptBlob,
+                    options: { contentType: 'text/x-fountain' },
+                }).result;
+
+                // Create or update File record for the script
+                if (studioScriptFile) {
+                    // Update existing script file
+                    await client.models.File.update({
+                        id: studioScriptFile.id,
+                        path: s3Path,
+                        name: scriptFileName,
+                        metadata: JSON.stringify({
+                            voiceAssignments: Object.fromEntries(
+                                Object.entries(scriptData.speakers || {}).map(([id, s]) => [id, s.voice])
+                            ),
+                        }),
+                    });
+                    console.log('[FileManager2] Updated script File record:', studioScriptFile.id);
+                } else {
+                    // Create new script file
+                    const { data: scriptFile, errors } = await client.models.File.create({
+                        path: s3Path,
+                        owner: session?.username,
+                        identityId,
+                        name: scriptFileName,
+                        mimeType: 'text/x-fountain',
+                        level: 'PROTECTED',
+                        size: scriptBlob.size,
+                        metadata: JSON.stringify({
+                            voiceAssignments: Object.fromEntries(
+                                Object.entries(scriptData.speakers || {}).map(([id, s]) => [id, s.voice])
+                            ),
+                        }),
+                    });
+
+                    if (errors?.length > 0 || !scriptFile) {
+                        console.error('[FileManager2] Error creating script File record:', errors);
+                    } else {
+                        console.log('[FileManager2] Created script File record:', scriptFile.id);
+                    }
+                }
+            } catch (error) {
+                console.error('[FileManager2] Error persisting script:', error);
+            }
+        }
+
+        // 3. Insert audio files into editor via INSERT_PLAYLIST_COMMAND
+        if (createdFileIds.length > 0 && editor) {
+            editor.dispatchCommand(INSERT_PLAYLIST_COMMAND, createdFileIds);
+            console.log('[FileManager2] Dispatched INSERT_PLAYLIST_COMMAND with', createdFileIds.length, 'files');
+        }
+    }, [identityId, session, editor, studioScriptFile]);
+
     // // Expand/Collapse handlers
     // const handleExpandAll = () => {
     //     const allFileIds = new Set(files.map(f => f.id));
@@ -2890,8 +3150,6 @@ export default function FileManager2() {
         return Math.round(totalProgress / fileOperations.length);
     }, [fileOperations]);
     const [newImageFileFormOpen, setNewImageFileFormOpen] = React.useState(false);
-    const [newAudioFileFormOpen, setNewAudioFileFormOpen] = React.useState(false);
-    const [newVideoFileFormOpen, setNewVideoFileFormOpen] = React.useState(false);
 
     // Load generator tab from localStorage, default to 'all'
     const [generator, setGenerator] = React.useState(() => {
@@ -2912,15 +3170,11 @@ export default function FileManager2() {
     const [selectedDocument, setSelectedDocument] = React.useState(null);
     const [suggestionTab, setSuggestionTab] = React.useState(0);
 
-    const { files, documents, session } = React.useContext(FilesContext);
-
     // Debug: log files received
     React.useEffect(() => {
         console.log('[FileManager2] Files received from context:', files?.length || 0, files);
     }, [files]);
     const documentStatuses = documents || {};
-    const { identityId } = session || {};
-    const { unit } = React.useContext(UnitContext);
 
     // Enhanced text search function
     const performSimpleTextSearch = React.useCallback((query) => {
@@ -3122,10 +3376,10 @@ export default function FileManager2() {
     // Helper function to organize files by protection level
     const organizeFilesByProtectionLevel = (files) => {
         const organized = {
-            'PRIVATE': { images: [], audio: [], documents: [], video: [], other: [] },
-            'PUBLIC': { images: [], audio: [], documents: [], video: [], other: [] },
-            'PROTECTED': { images: [], audio: [], documents: [], video: [], other: [] },
-            'UNSET': { images: [], audio: [], documents: [], video: [], other: [] }
+            'PRIVATE': { images: [], audio: [], documents: [], video: [], scripts: [], other: [] },
+            'PUBLIC': { images: [], audio: [], documents: [], video: [], scripts: [], other: [] },
+            'PROTECTED': { images: [], audio: [], documents: [], video: [], scripts: [], other: [] },
+            'UNSET': { images: [], audio: [], documents: [], video: [], scripts: [], other: [] }
         };
 
         files.forEach(file => {
@@ -3135,7 +3389,7 @@ export default function FileManager2() {
 
             // Make sure the level exists in organized
             if (!organized[level]) {
-                organized[level] = { images: [], audio: [], documents: [], video: [], other: [] };
+                organized[level] = { images: [], audio: [], documents: [], video: [], scripts: [], other: [] };
             }
 
             if (mimeType.includes('image')) {
@@ -3144,6 +3398,8 @@ export default function FileManager2() {
                 organized[level].audio.push(file);
             } else if (mimeType.includes('video')) {
                 organized[level].video.push(file);
+            } else if (mimeType === 'text/x-fountain') {
+                organized[level].scripts.push(file);
             } else if (
                 mimeType === 'application/pdf' ||
                 mimeType === 'text/plain' ||
@@ -3193,8 +3449,8 @@ export default function FileManager2() {
             // If collapsed, skip rendering files
             if (isCollapsed) return;
 
-            // For each file type (images, audio, documents, video, other)
-            ['images', 'audio', 'documents', 'video', 'other'].forEach(fileType => {
+            // For each file type (images, audio, documents, video, scripts, other)
+            ['images', 'audio', 'documents', 'video', 'scripts', 'other'].forEach(fileType => {
                 const fileTypeFiles = filesByType[fileType] || [];
 
                 if (fileTypeFiles.length > 0) {
@@ -3717,8 +3973,19 @@ export default function FileManager2() {
                                 }}
                                 color="primary"
                                 size="small"
+                                aria-label={t('fileManager2.toolbar.uploadTooltip')}
                             >
                                 <UploadFile fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+
+                        <Tooltip title={t('fileManager2.toolbar.recordConversation', 'Record Conversation')}>
+                            <IconButton
+                                onClick={() => handleOpenStudio()}
+                                size="small"
+                                aria-label={t('fileManager2.toolbar.recordConversation', 'Record Conversation')}
+                            >
+                                <MicIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
 
@@ -3730,6 +3997,7 @@ export default function FileManager2() {
                                     }
                                     size="small"
                                     disabled={selectedItems.size === 0}
+                                    aria-label={t('fileManager2.toolbar.actionsTooltip')}
                                 >
                                     <MoreVertIcon />
                                 </IconButton>
@@ -3880,7 +4148,7 @@ export default function FileManager2() {
                                     flexDirection: 'column',
                                     minWidth: 0,
                                     scrollbarWidth: 'thin',
-                                    scrollbarColor: 'rgba(0,0,0,0.3) transparent',
+                                    scrollbarColor: (theme) => `${theme.palette.action.disabled} transparent`,
                                     '&::-webkit-scrollbar': {
                                         width: '8px',
                                     },
@@ -3888,10 +4156,10 @@ export default function FileManager2() {
                                         background: 'transparent',
                                     },
                                     '&::-webkit-scrollbar-thumb': {
-                                        background: 'rgba(0,0,0,0.2)',
+                                        background: (theme) => theme.palette.action.disabled,
                                         borderRadius: '4px',
                                         '&:hover': {
-                                            background: 'rgba(0,0,0,0.3)',
+                                            background: (theme) => theme.palette.action.active,
                                         }
                                     }
                                 }}
@@ -3930,9 +4198,13 @@ export default function FileManager2() {
                                                             }}
                                                             sx={{
                                                                 px: 2,
+                                                                pl: 0.625,
                                                                 py: 1.5,
-                                                                bgcolor: 'primary.50',
+                                                                bgcolor: (theme) => theme.vars
+                                                                    ? `rgba(${theme.vars.palette.primary.mainChannel} / 0.08)`
+                                                                    : theme.palette.action.hover,
                                                                 borderBottom: '1px solid',
+                                                                borderLeft: '3px solid transparent',
                                                                 borderColor: 'divider',
                                                                 fontWeight: 600,
                                                                 fontSize: '0.95rem',
@@ -3943,7 +4215,9 @@ export default function FileManager2() {
                                                                 cursor: 'pointer',
                                                                 transition: 'all 0.2s ease',
                                                                 '&:hover': {
-                                                                    bgcolor: 'primary.100'
+                                                                    bgcolor: (theme) => theme.vars
+                                                                        ? `rgba(${theme.vars.palette.primary.mainChannel} / 0.14)`
+                                                                        : theme.palette.action.focus
                                                                 }
                                                             }}
                                                         >
@@ -3981,6 +4255,7 @@ export default function FileManager2() {
                                                             allFiles={filteredFiles}
                                                             selectedItems={selectedItems}
                                                             setSelectedItems={setSelectedItems}
+                                                            search={search}
                                                         />
                                                     )}
                                                 </div>
@@ -3995,8 +4270,7 @@ export default function FileManager2() {
                                 flex: '0 0 65%',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                overflow: 'auto',
-                                overflowX: 'hidden',
+                                overflow: 'hidden',
                                 bgcolor: 'background.paper',
                                 minWidth: 0
                             }}
@@ -4036,8 +4310,9 @@ export default function FileManager2() {
                             id="file-upload-input"
                             type="file"
                             multiple
-                            accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.txt,.md,.csv,.xls,.xlsx,.ppt,.pptx"
+                            accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.txt,.md,.csv,.xls,.xlsx,.ppt,.pptx,.fountain,.odt,.ods,.odp,.imscc,.epub,.gift,.qti.xml"
                             hidden
+                            aria-label={t('fileManager2.toolbar.uploadTooltip')}
                             onChange={(e) => {
                                 const files = Array.from(e.target.files || []);
                                 console.log('[FileManager2] Files selected:', files.length, files.map(f => f.name));
@@ -4124,6 +4399,21 @@ export default function FileManager2() {
                             </Alert>
                         </Snackbar>
                     </Portal>
+
+                    {/* RecordingStudio3 Modal */}
+                    <RecordingStudio3Modal
+                        open={studioOpen}
+                        onClose={() => {
+                            setStudioOpen(false);
+                            setStudioScriptFile(null);
+                        }}
+                        onSave={handleStudioSave}
+                        title={unit?.name ? `${t('fileManager2.toolbar.recordConversation', 'Record Conversation')}: ${unit.name}` : t('fileManager2.toolbar.recordConversation', 'Record Conversation')}
+                        preset="conversation"
+                        scriptData={createConversationPreset(unit?.name).scriptData}
+                        lockedTracks={[]}
+                        identityId={identityId}
+                    />
                 </Box>
             </FileManagerProvider>
         </VectorStoreContext.Provider>

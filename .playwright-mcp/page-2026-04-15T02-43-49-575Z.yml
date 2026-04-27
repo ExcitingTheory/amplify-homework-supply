@@ -1,0 +1,256 @@
+- generic [ref=e3]:
+  - banner "Storybook" [ref=e6]:
+    - heading "Storybook" [level=1] [ref=e7]
+    - img
+    - generic [ref=e10]:
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - generic [ref=e13]:
+            - link "Skip to content" [ref=e14] [cursor=pointer]:
+              - /url: "#storybook-preview-wrapper"
+            - link "Storybook" [ref=e16] [cursor=pointer]:
+              - /url: ./
+              - img "Storybook" [ref=e17]
+            - switch "Settings" [ref=e22] [cursor=pointer]:
+              - img [ref=e23]
+          - generic [ref=e28]:
+            - generic [ref=e30] [cursor=pointer]:
+              - button "Open onboarding guide" [ref=e34]:
+                - img [ref=e36]
+                - strong [ref=e38]: Level up
+              - generic [ref=e39]:
+                - button "Collapse onboarding checklist" [expanded] [ref=e40]:
+                  - img [ref=e41]
+                - button "69% completed" [ref=e43]:
+                  - generic [ref=e44]:
+                    - img [ref=e45]
+                    - img [ref=e47]
+                  - generic [ref=e50]: 69%
+            - list [ref=e52]
+        - generic [ref=e53]: Search for components
+        - search [ref=e54]:
+          - combobox "Search for components" [ref=e55]:
+            - generic:
+              - img
+            - searchbox "Search for components" [ref=e56]
+            - code:
+              - generic: ⌘
+              - text: K
+            - button "Tag filters" [ref=e58] [cursor=pointer]:
+              - img [ref=e59]
+          - button "Create a new story" [ref=e61] [cursor=pointer]:
+            - img [ref=e62]
+        - navigation "Stories" [ref=e65]:
+          - heading "Stories" [level=2] [ref=e66]
+          - generic [ref=e68]:
+            - button "Getting Started" [ref=e70] [cursor=pointer]:
+              - generic [ref=e71]:
+                - img [ref=e73]
+                - img [ref=e75]
+              - text: Getting Started
+            - button "📚 Creating Lessons" [expanded] [ref=e78] [cursor=pointer]:
+              - generic [ref=e79]:
+                - img [ref=e81]
+                - img [ref=e83]
+              - text: 📚 Creating Lessons
+            - button "Editor" [ref=e86] [cursor=pointer]:
+              - generic [ref=e87]:
+                - img [ref=e89]
+                - img [ref=e91]
+              - text: Editor
+            - button "Workbook" [expanded] [ref=e94] [cursor=pointer]:
+              - generic [ref=e95]:
+                - img [ref=e97]
+                - img [ref=e99]
+              - text: Workbook
+            - link "Docs" [ref=e102] [cursor=pointer]:
+              - /url: /?path=/docs/📚-creating-lessons-workbook--docs
+              - img [ref=e104]
+              - text: Docs
+            - link "Empty Workbook" [ref=e107] [cursor=pointer]:
+              - /url: /?path=/story/📚-creating-lessons-workbook--empty-workbook
+              - img [ref=e109]
+              - text: Empty Workbook
+            - link "Workbook With Content" [ref=e112] [cursor=pointer]:
+              - /url: /?path=/story/📚-creating-lessons-workbook--workbook-with-content
+              - img [ref=e114]
+              - text: Workbook With Content
+            - generic [ref=e116]:
+              - link "Workbook With Progress" [ref=e117] [cursor=pointer]:
+                - /url: /?path=/story/📚-creating-lessons-workbook--workbook-with-progress
+                - img [ref=e119]
+                - text: Workbook With Progress
+              - link "Skip to content" [ref=e121] [cursor=pointer]:
+                - /url: "#storybook-preview-wrapper"
+            - link "Kitchen Sink" [ref=e123] [cursor=pointer]:
+              - /url: /?path=/story/📚-creating-lessons-workbook--kitchen-sink
+              - img [ref=e125]
+              - text: Kitchen Sink
+            - link "Data Plugin Demo" [ref=e128] [cursor=pointer]:
+              - /url: /?path=/story/📚-creating-lessons-workbook--data-plugin-demo
+              - img [ref=e130]
+              - text: Data Plugin Demo
+            - button "Editor Components" [ref=e133] [cursor=pointer]:
+              - generic [ref=e134]:
+                - img [ref=e136]
+                - img [ref=e138]
+              - text: Editor Components
+            - button "Metadata Editor" [ref=e141] [cursor=pointer]:
+              - generic [ref=e142]:
+                - img [ref=e144]
+                - img [ref=e146]
+              - text: Metadata Editor
+            - button "Main Toolbar" [ref=e149] [cursor=pointer]:
+              - generic [ref=e150]:
+                - img [ref=e152]
+                - img [ref=e154]
+              - text: Main Toolbar
+            - button "🎙️ Recording Audio" [ref=e157] [cursor=pointer]:
+              - generic [ref=e158]:
+                - img [ref=e160]
+                - img [ref=e162]
+              - text: 🎙️ Recording Audio
+            - button "📁 Managing Content" [ref=e165] [cursor=pointer]:
+              - generic [ref=e166]:
+                - img [ref=e168]
+                - img [ref=e170]
+              - text: 📁 Managing Content
+            - button "📄 Pages" [ref=e173] [cursor=pointer]:
+              - generic [ref=e174]:
+                - img [ref=e176]
+                - img [ref=e178]
+              - text: 📄 Pages
+            - button "🧩 Components" [ref=e181] [cursor=pointer]:
+              - generic [ref=e182]:
+                - img [ref=e184]
+                - img [ref=e186]
+              - text: 🧩 Components
+            - button "🔌 Editor Plugins" [ref=e189] [cursor=pointer]:
+              - generic [ref=e190]:
+                - img [ref=e192]
+                - img [ref=e194]
+              - text: 🔌 Editor Plugins
+            - button "💬 AI Assistant" [ref=e197] [cursor=pointer]:
+              - generic [ref=e198]:
+                - img [ref=e200]
+                - img [ref=e202]
+              - text: 💬 AI Assistant
+            - button "Components" [ref=e205] [cursor=pointer]:
+              - generic [ref=e206]:
+                - img [ref=e208]
+                - img [ref=e210]
+              - text: Components
+            - button "Example" [ref=e213] [cursor=pointer]:
+              - generic [ref=e214]:
+                - img [ref=e216]
+                - img [ref=e218]
+              - text: Example
+            - button "Help" [ref=e221] [cursor=pointer]:
+              - generic [ref=e222]:
+                - img [ref=e224]
+                - img [ref=e226]
+              - text: Help
+            - button "Onboarding" [ref=e229] [cursor=pointer]:
+              - generic [ref=e230]:
+                - img [ref=e232]
+                - img [ref=e234]
+              - text: Onboarding
+            - button "Translation Mode" [ref=e237] [cursor=pointer]:
+              - generic [ref=e238]:
+                - img [ref=e240]
+                - img [ref=e242]
+              - text: Translation Mode
+      - region "Component tests" [ref=e245]:
+        - generic [ref=e246]:
+          - heading "Component tests" [level=2] [ref=e247]
+          - generic [ref=e248] [cursor=pointer]:
+            - button "Run tests" [ref=e252]:
+              - img [ref=e254]
+              - text: Run tests
+            - button "Expand testing module" [ref=e258]:
+              - img [ref=e259]
+          - generic [ref=e261]:
+            - generic [ref=e264]:
+              - generic [ref=e265]: Visual tests
+              - generic [ref=e267]: Login required
+            - generic [ref=e269]:
+              - generic [ref=e270]:
+                - generic [ref=e271]:
+                  - generic [ref=e272]: Run component tests
+                  - generic [ref=e273]: Not run
+                - generic [ref=e274]:
+                  - switch "Watch mode" [ref=e275] [cursor=pointer]:
+                    - img [ref=e276]
+                  - button "Start test run" [ref=e279] [cursor=pointer]:
+                    - img [ref=e280]
+              - list [ref=e282]:
+                - listitem [ref=e283]:
+                  - generic [ref=e284]:
+                    - checkbox "Interactions" [checked] [disabled] [ref=e286]
+                    - generic [ref=e287]: Interactions
+                  - button "Run tests to see results" [disabled] [ref=e288]
+                - listitem [ref=e290]:
+                  - generic [ref=e291] [cursor=pointer]:
+                    - checkbox "Coverage" [ref=e293]
+                    - generic [ref=e294]: Coverage
+                  - button "Coverage unavailable, run tests first" [disabled] [ref=e295]
+                - listitem [ref=e297]:
+                  - generic [ref=e298] [cursor=pointer]:
+                    - checkbox "Accessibility" [ref=e300]
+                    - generic [ref=e301]: Accessibility
+                  - button "Run tests to see accessibility results" [disabled] [ref=e302]
+  - generic [ref=e305]:
+    - region "Toolbar" [ref=e306]:
+      - heading "Toolbar" [level=2] [ref=e307]
+      - toolbar [ref=e308]:
+        - generic [ref=e309]:
+          - button "Reload story" [ref=e310] [cursor=pointer]:
+            - img [ref=e311]
+          - switch "Measure tool" [ref=e313] [cursor=pointer]:
+            - img [ref=e314]
+          - switch "Outline tool" [ref=e317] [cursor=pointer]:
+            - img [ref=e318]
+          - button "Viewport size" [ref=e320] [cursor=pointer]:
+            - img [ref=e321]
+          - button "Vision filter" [ref=e325] [cursor=pointer]:
+            - img [ref=e326]
+        - generic [ref=e330]:
+          - switch "Change zoom level" [ref=e331] [cursor=pointer]: 100%
+          - button "Enter full screen" [ref=e332] [cursor=pointer]:
+            - img [ref=e333]
+          - button "Share" [ref=e335] [cursor=pointer]:
+            - img [ref=e336]
+          - button "Open in editor" [ref=e339] [cursor=pointer]:
+            - img [ref=e340]
+    - main "Main preview area" [ref=e343]:
+      - heading "Main preview area" [level=2] [ref=e344]
+      - generic [ref=e345]:
+        - progressbar "Content is loading..." [ref=e347]
+        - generic [ref=e348]:
+          - link "Skip to sidebar" [ref=e349] [cursor=pointer]:
+            - /url: "#📚-creating-lessons-workbook--workbook-with-progress"
+          - iframe [ref=e353]:
+            
+  - region "Addon panel" [ref=e356]:
+    - heading "Addon panel" [level=2] [ref=e357]
+    - generic [ref=e358]:
+      - generic [ref=e359]:
+        - generic [ref=e360]:
+          - button "Move addon panel to right" [ref=e361] [cursor=pointer]:
+            - img [ref=e362]
+          - button "Hide addon panel" [ref=e365] [cursor=pointer]:
+            - img [ref=e366]
+        - tablist "Available addons" [ref=e371]:
+          - tab "Controls" [selected] [ref=e372] [cursor=pointer]:
+            - generic [ref=e374]: Controls
+          - tab "Actions" [ref=e375] [cursor=pointer]:
+            - generic [ref=e377]: Actions
+          - tab "Interactions" [ref=e378] [cursor=pointer]:
+            - generic [ref=e380]: Interactions
+          - tab "Visual tests" [ref=e381] [cursor=pointer]
+          - tab "Accessibility" [ref=e382] [cursor=pointer]:
+            - generic [ref=e384]: Accessibility
+          - tab "Code" [ref=e385] [cursor=pointer]
+          - tab "Translations" [ref=e386] [cursor=pointer]
+          - tab "Onboarding" [ref=e387] [cursor=pointer]
+      - tabpanel "Controls" [ref=e388]

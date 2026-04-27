@@ -398,5 +398,30 @@
       "assignment": "assignment",
       "grade": "grade"
     }
+  },
+  "practiceDrill": {
+    "config": {
+      "title": "Practice: {{unitName}}",
+      "subtitle": "Choose what to practice:",
+      "vocabulary": "Vocabulary",
+      "vocabularyDesc": "Words, definitions, matching",
+      "questions": "Questions",
+      "questionsDesc": "From the question bank",
+      "text": "Text Content",
+      "textDesc": "From lesson text and graded blocks",
+      "documents": "Documents",
+      "documentsDesc": "From uploaded PDFs and parsed content",
+      "coverage": "Coverage: {{covered}}/{{total}} items practiced ({{percent}}%)",
+      "questionCount": "Number of questions",
+      "drillType": "Drill type",
+      "mixed": "Mixed",
+      "vocabularyType": "Vocabulary",
+      "comprehension": "Comprehension",
+      "review": "Review mistakes",
+      "noSourcesWarning": "Enable at least one content source to start practicing.",
+      "cancel": "Cancel",
+      "start": "Start Practice",
+      "generating": "Generating..."
+    }
   }
 }

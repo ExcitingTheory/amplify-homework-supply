@@ -4,9 +4,47 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+// Mock AWS SDK modules that hang on import in test environment
+vi.mock('@aws-sdk/client-cloudformation', () => ({
+  CloudFormationClient: vi.fn().mockImplementation(() => ({
+    send: vi.fn().mockResolvedValue({ Stacks: [] }),
+  })),
+  DescribeStacksCommand: vi.fn(),
+}));
+
+vi.mock('@aws-sdk/credential-providers', () => ({
+  fromEnv: vi.fn(() => vi.fn().mockResolvedValue({
+    accessKeyId: 'test',
+    secretAccessKey: 'test',
+  })),
+}));
+
+// Mock Cognito client used by GroupManager
+vi.mock('@aws-sdk/client-cognito-identity-provider', () => ({
+  CognitoIdentityProviderClient: vi.fn().mockImplementation(() => ({
+    send: vi.fn().mockResolvedValue({}),
+  })),
+  AdminAddUserToGroupCommand: vi.fn(),
+  AdminRemoveUserFromGroupCommand: vi.fn(),
+  CreateGroupCommand: vi.fn(),
+  DeleteGroupCommand: vi.fn(),
+  ListUsersInGroupCommand: vi.fn(),
+}));
+
+vi.mock('aws-amplify', () => ({
+  Amplify: { configure: vi.fn() },
+}));
+
+vi.mock('aws-amplify/data', () => ({
+  generateClient: vi.fn(() => ({
+    graphql: vi.fn(),
+  })),
+}));
+
 describe('section handler integration tests', () => {
   beforeEach(() => {
     process.env.API_ENDPOINT = 'http://localhost:8080/graphql';
+    process.env.USER_POOL_ID = 'test-user-pool-id';
     vi.resetModules();
   });
 

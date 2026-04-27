@@ -33,11 +33,18 @@ export function DebugPanelProvider({
 }: DebugPanelProviderProps) {
   const { isOpen, close } = useDebugPanel();
 
-  // Enable debug panel if:
-  // 1. Explicitly enabled via prop
-  // 2. In development mode
-  // 3. Debug mode is enabled in localStorage (production)
-  const shouldEnable = enabled ?? (process.env.NODE_ENV === 'development' || isDebugModeEnabled());
+  // Defer localStorage check to after mount to avoid SSR/client hydration mismatch.
+  // On the server, isDebugModeEnabled() always returns false (no window), but on the
+  // client it may return true — changing the render tree and causing a hydration error.
+  const [shouldEnable, setShouldEnable] = React.useState(
+    enabled ?? process.env.NODE_ENV === 'development'
+  );
+
+  React.useEffect(() => {
+    if (enabled == null && process.env.NODE_ENV !== 'development') {
+      setShouldEnable(isDebugModeEnabled());
+    }
+  }, [enabled]);
 
   if (!shouldEnable) {
     return <>{children}</>;

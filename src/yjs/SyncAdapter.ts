@@ -1,16 +1,16 @@
 /**
- * SyncAdapter - Converts Yjs updates to GraphQL mutations
+ * SyncAdapter - Converts Yjs updates to Amplify Data Client mutations
  * 
- * Bridges Yjs CRDT state with Amplify GraphQL API for persistence
+ * Bridges Yjs CRDT state with Amplify GraphQL API for persistence.
+ * Uses the Amplify Gen 2 typed client for all DynamoDB operations.
  */
 
 import * as Y from 'yjs'
-import { GraphQLClient } from 'graphql-request'
+import { getAmplifyClient, type AmplifyClient } from '../utils/amplifyClient'
 
 export interface SyncAdapterConfig {
-  apiEndpoint: string
-  apiKey?: string
-  authToken?: string
+  /** Optional pre-configured client (for testing). Falls back to singleton. */
+  client?: AmplifyClient
 }
 
 export interface DocumentSnapshot {
@@ -22,82 +22,104 @@ export interface DocumentSnapshot {
 }
 
 export class SyncAdapter {
-  private client: GraphQLClient
-  private snapshots: Map<string, DocumentSnapshot> = new Map()
+  private client: AmplifyClient
+  private throttleTimers: Map<string, ReturnType<typeof setTimeout>> = new Map()
+  private static THROTTLE_MS = 5000 // 5s debounce for persistence
 
-  constructor(config: SyncAdapterConfig) {
-    const headers: Record<string, string> = {}
-
-    if (config.apiKey) {
-      headers['x-api-key'] = config.apiKey
-    }
-    if (config.authToken) {
-      headers['Authorization'] = `Bearer ${config.authToken}`
-    }
-
-    this.client = new GraphQLClient(config.apiEndpoint, { headers })
+  constructor(config?: SyncAdapterConfig) {
+    this.client = config?.client ?? getAmplifyClient()
   }
 
   /**
-   * Save Y.Doc snapshot to GraphQL backend
+   * Save Y.Doc snapshot — encodes Yjs state and stores as base64
+   * in the appropriate model based on docName prefix.
    */
   async saveSnapshot(docName: string, ydoc: Y.Doc, docId: string): Promise<void> {
     try {
-      const state = Y.encodeStateAsUpdate(ydoc)
-      const stateBase64 = Buffer.from(state).toString('base64')
-
-      const snapshot: DocumentSnapshot = {
-        id: docId,
-        docName,
-        snapshot: stateBase64,
-        version: 1,
-        updatedAt: new Date().toISOString(),
+      if (docName.startsWith('workbook-')) {
+        await this.syncWorkbook(docId, ydoc)
+        await this.saveComments(docId, ydoc)
+      } else if (docName.startsWith('unit-')) {
+        await this.syncUnit(docId, ydoc)
+      } else if (docName.startsWith('chat-')) {
+        await this.syncChat(docId, ydoc)
+      } else {
+        console.log(`[SyncAdapter] Unknown doc prefix for ${docName}, skipping persist`)
       }
-
-      // This would be replaced with actual Amplify GraphQL mutation
-      // For now, just log and store locally
-      console.log(`[SyncAdapter] Saving snapshot for ${docName}`)
-      this.snapshots.set(docName, snapshot)
     } catch (error) {
-      console.error(`[SyncAdapter] Error saving snapshot:`, error)
+      console.error(`[SyncAdapter] Error saving snapshot for ${docName}:`, error)
       throw error
     }
   }
 
   /**
-   * Load Y.Doc from GraphQL backend
+   * Load Y.Doc from the appropriate model. Returns encoded state or null.
    */
-  async loadSnapshot(docName: string): Promise<Uint8Array | null> {
+  async loadSnapshot(docName: string, docId: string): Promise<string | null> {
     try {
-      const snapshot = this.snapshots.get(docName)
-      if (!snapshot) {
-        return null
+      if (docName.startsWith('workbook-')) {
+        const { data } = await this.client.models.Grade.get({ id: docId })
+        return data?.data ? JSON.stringify(data.data) : null
       }
-
-      const state = Buffer.from(snapshot.snapshot, 'base64')
-      return new Uint8Array(state)
+      if (docName.startsWith('unit-')) {
+        const { data } = await this.client.models.Unit.get({ id: docId })
+        return data?.data ? (typeof data.data === 'string' ? data.data : JSON.stringify(data.data)) : null
+      }
+      return null
     } catch (error) {
-      console.error(`[SyncAdapter] Error loading snapshot:`, error)
+      console.error(`[SyncAdapter] Error loading snapshot for ${docName}:`, error)
       throw error
     }
   }
 
   /**
-   * Sync Unit document
+   * Throttled save — debounces rapid Yjs updates into a single write.
+   */
+  saveThrottled(docName: string, ydoc: Y.Doc, docId: string): void {
+    const existing = this.throttleTimers.get(docName)
+    if (existing) clearTimeout(existing)
+
+    const timer = setTimeout(() => {
+      this.saveSnapshot(docName, ydoc, docId).catch((err) =>
+        console.error(`[SyncAdapter] Throttled save failed for ${docName}:`, err)
+      )
+      this.throttleTimers.delete(docName)
+    }, SyncAdapter.THROTTLE_MS)
+
+    this.throttleTimers.set(docName, timer)
+  }
+
+  /**
+   * Cancel all pending throttled saves (for cleanup).
+   */
+  destroy(): void {
+    for (const timer of this.throttleTimers.values()) {
+      clearTimeout(timer)
+    }
+    this.throttleTimers.clear()
+  }
+
+  /**
+   * Sync Unit document — persists Lexical editor content to Unit.data
    */
   async syncUnit(unitId: string, ydoc: Y.Doc): Promise<void> {
     try {
-      const metadata = ydoc.getMap('metadata')
       const editorContent = ydoc.getText('editorContent').toString()
 
-      // Extract snapshot
-      const state = Y.encodeStateAsUpdate(ydoc)
-      const stateBase64 = Buffer.from(state).toString('base64')
+      // Fetch current _version for optimistic locking
+      const { data: existing } = await this.client.models.Unit.get({ id: unitId })
+      if (!existing) {
+        console.warn(`[SyncAdapter] Unit ${unitId} not found, skipping sync`)
+        return
+      }
 
-      // Would call: updateUnit(id, { data: editorContent, yjsSnapshot: stateBase64 })
-      console.log(`[SyncAdapter] Syncing Unit ${unitId}`)
-      console.log(`  - Editor content length: ${editorContent.length}`)
-      console.log(`  - Snapshot size: ${stateBase64.length}`)
+      await this.client.models.Unit.update({
+        id: unitId,
+        data: editorContent,
+        _version: existing._version,
+      })
+
+      console.log(`[SyncAdapter] Synced Unit ${unitId} (${editorContent.length} chars)`)
     } catch (error) {
       console.error(`[SyncAdapter] Error syncing Unit:`, error)
       throw error
@@ -105,14 +127,13 @@ export class SyncAdapter {
   }
 
   /**
-   * Sync Grade document
+   * Sync Grade document — persists block responses and feedback
    */
   async syncGrade(gradeId: string, ydoc: Y.Doc): Promise<void> {
     try {
       const gradeData = ydoc.getMap('data')
       const feedback = ydoc.getMap('feedback')
 
-      // Convert Y.Map to plain objects
       const gradeObject: Record<string, any> = {}
       gradeData.forEach((value, key) => {
         gradeObject[key] = value
@@ -123,10 +144,20 @@ export class SyncAdapter {
         feedbackObject[key] = value
       })
 
-      // Would call: updateGrade(id, { data: JSON.stringify(gradeObject), feedback: JSON.stringify(feedbackObject) })
-      console.log(`[SyncAdapter] Syncing Grade ${gradeId}`)
-      console.log(`  - Grade data keys: ${Object.keys(gradeObject).length}`)
-      console.log(`  - Feedback keys: ${Object.keys(feedbackObject).length}`)
+      const { data: existing } = await this.client.models.Grade.get({ id: gradeId })
+      if (!existing) {
+        console.warn(`[SyncAdapter] Grade ${gradeId} not found, skipping sync`)
+        return
+      }
+
+      await this.client.models.Grade.update({
+        id: gradeId,
+        data: JSON.stringify(gradeObject),
+        feedback: JSON.stringify(feedbackObject),
+        _version: existing._version,
+      })
+
+      console.log(`[SyncAdapter] Synced Grade ${gradeId} (${Object.keys(gradeObject).length} blocks)`)
     } catch (error) {
       console.error(`[SyncAdapter] Error syncing Grade:`, error)
       throw error
@@ -134,16 +165,26 @@ export class SyncAdapter {
   }
 
   /**
-   * Sync Chat document
+   * Sync Chat document — persists chat messages to AssistantChat model
    */
   async syncChat(chatId: string, ydoc: Y.Doc): Promise<void> {
     try {
       const messages = ydoc.getArray('chatMessages')
       const messageArray = Array.from(messages)
 
-      // Would call: updateAssistantChat(id, { messages: JSON.stringify(messageArray) })
-      console.log(`[SyncAdapter] Syncing Chat ${chatId}`)
-      console.log(`  - Messages: ${messageArray.length}`)
+      const { data: existing } = await this.client.models.AssistantChat.get({ id: chatId })
+      if (!existing) {
+        console.warn(`[SyncAdapter] AssistantChat ${chatId} not found, skipping sync`)
+        return
+      }
+
+      await this.client.models.AssistantChat.update({
+        id: chatId,
+        messages: JSON.stringify(messageArray),
+        _version: existing._version,
+      })
+
+      console.log(`[SyncAdapter] Synced Chat ${chatId} (${messageArray.length} messages)`)
     } catch (error) {
       console.error(`[SyncAdapter] Error syncing Chat:`, error)
       throw error
@@ -162,9 +203,19 @@ export class SyncAdapter {
         questions[key] = value
       })
 
-      // Would call: updateQuestion(id, { data: JSON.stringify(questions) })
-      console.log(`[SyncAdapter] Syncing Question ${questionId}`)
-      console.log(`  - Questions: ${Object.keys(questions).length}`)
+      const { data: existing } = await this.client.models.Question.get({ id: questionId })
+      if (!existing) {
+        console.warn(`[SyncAdapter] Question ${questionId} not found, skipping sync`)
+        return
+      }
+
+      await this.client.models.Question.update({
+        id: questionId,
+        data: JSON.stringify(questions),
+        _version: existing._version,
+      })
+
+      console.log(`[SyncAdapter] Synced Question ${questionId} (${Object.keys(questions).length} entries)`)
     } catch (error) {
       console.error(`[SyncAdapter] Error syncing Question:`, error)
       throw error
@@ -177,21 +228,32 @@ export class SyncAdapter {
   async syncParsedContent(contentId: string, ydoc: Y.Doc): Promise<void> {
     try {
       const parsedData = ydoc.getMap('parsedContent')
-      const status = parsedData.get('status') || 'pending'
-      const progress = parsedData.get('progress') || '0%'
+      const status = (parsedData.get('status') as string) || 'pending'
+      const progress = (parsedData.get('progress') as string) || '0%'
 
       const vocabulary = parsedData.get('vocabularyJSON') || []
       const summaries = parsedData.get('summariesJSON') || []
       const concepts = parsedData.get('conceptsJSON') || []
       const questions = parsedData.get('questionsJSON') || []
 
-      // Would call: updateParsedContent(id, { status, progress, vocabularyJSON, summariesJSON, ... })
-      console.log(`[SyncAdapter] Syncing ParsedContent ${contentId}`)
-      console.log(`  - Status: ${status} (${progress})`)
-      console.log(`  - Vocabulary: ${(vocabulary as any[]).length || 0}`)
-      console.log(`  - Summaries: ${(summaries as any[]).length || 0}`)
-      console.log(`  - Concepts: ${(concepts as any[]).length || 0}`)
-      console.log(`  - Questions: ${(questions as any[]).length || 0}`)
+      const { data: existing } = await this.client.models.ParsedContent.get({ id: contentId })
+      if (!existing) {
+        console.warn(`[SyncAdapter] ParsedContent ${contentId} not found, skipping sync`)
+        return
+      }
+
+      await this.client.models.ParsedContent.update({
+        id: contentId,
+        status,
+        progress,
+        vocabularyJSON: JSON.stringify(vocabulary),
+        summariesJSON: JSON.stringify(summaries),
+        conceptsJSON: JSON.stringify(concepts),
+        questionsJSON: JSON.stringify(questions),
+        _version: existing._version,
+      })
+
+      console.log(`[SyncAdapter] Synced ParsedContent ${contentId} (${status})`)
     } catch (error) {
       console.error(`[SyncAdapter] Error syncing ParsedContent:`, error)
       throw error
@@ -199,18 +261,14 @@ export class SyncAdapter {
   }
 
   /**
-   * Sync Workbook (Grade) document for collaborative student-tutor editing
-   * 
-   * This syncs the collaborative workbook data back to the Grade model.
-   * The workbook uses Y.js for real-time collaboration between students and tutors.
+   * Sync Workbook (Grade) document for collaborative student-tutor editing.
+   * Calculates completion/accuracy from block data and persists to Grade model.
    */
   async syncWorkbook(gradeId: string, ydoc: Y.Doc): Promise<void> {
     try {
       const workbookData = ydoc.getMap('workbookData')
       const feedbackData = ydoc.getMap('feedback')
-      const metadataData = ydoc.getMap('metadata')
 
-      // Convert Y.Maps to plain objects
       const workbookObject: Record<string, any> = {}
       workbookData.forEach((value, key) => {
         workbookObject[key] = value
@@ -219,11 +277,6 @@ export class SyncAdapter {
       const feedbackObject: Record<string, any> = {}
       feedbackData.forEach((value, key) => {
         feedbackObject[key] = value
-      })
-
-      const metadataObject: Record<string, any> = {}
-      metadataData.forEach((value, key) => {
-        metadataObject[key] = value
       })
 
       // Calculate completion and accuracy
@@ -241,20 +294,23 @@ export class SyncAdapter {
         ? Math.round(accuracies.reduce((sum, acc) => sum + acc, 0) / accuracies.length)
         : 0
 
-      // Would call: updateGrade(id, { 
-      //   data: JSON.stringify(workbookObject), 
-      //   feedback: JSON.stringify(feedbackObject),
-      //   percentComplete,
-      //   accuracy,
-      //   complete: percentComplete === 100
-      // })
-      console.log(`[SyncAdapter] Syncing Workbook (Grade) ${gradeId}`)
-      console.log(`  - Total blocks: ${blockIds.length}`)
-      console.log(`  - Completed blocks: ${completedBlocks.length}`)
-      console.log(`  - Completion: ${percentComplete}%`)
-      console.log(`  - Accuracy: ${accuracy}%`)
-      console.log(`  - Feedback entries: ${Object.keys(feedbackObject).length}`)
-      console.log(`  - Metadata entries: ${Object.keys(metadataObject).length}`)
+      const { data: existing } = await this.client.models.Grade.get({ id: gradeId })
+      if (!existing) {
+        console.warn(`[SyncAdapter] Grade ${gradeId} not found, skipping workbook sync`)
+        return
+      }
+
+      await this.client.models.Grade.update({
+        id: gradeId,
+        data: JSON.stringify(workbookObject),
+        feedback: JSON.stringify(feedbackObject),
+        percentComplete,
+        accuracy,
+        complete: percentComplete === 100,
+        _version: existing._version,
+      })
+
+      console.log(`[SyncAdapter] Synced Workbook ${gradeId} (${completedBlocks.length}/${blockIds.length} blocks, ${accuracy}% accuracy)`)
     } catch (error) {
       console.error(`[SyncAdapter] Error syncing Workbook:`, error)
       throw error
@@ -262,25 +318,34 @@ export class SyncAdapter {
   }
 
   /**
-   * Load workbook data from Grade into Y.Doc
-   * 
-   * This initializes a collaborative workbook session from existing Grade data
+   * Load workbook data from Grade into Y.Doc.
+   * Initializes a collaborative workbook session from existing Grade data.
    */
-  async loadWorkbook(gradeId: string, gradeDataJson: string, ydoc: Y.Doc): Promise<void> {
+  async loadWorkbook(gradeId: string, ydoc: Y.Doc): Promise<void> {
     try {
-      const workbookData = ydoc.getMap('workbookData')
-      
-      if (!gradeDataJson) {
+      const { data: grade } = await this.client.models.Grade.get({ id: gradeId })
+      if (!grade?.data) {
         console.log(`[SyncAdapter] No existing data for workbook ${gradeId}`)
         return
       }
 
+      const gradeDataJson = typeof grade.data === 'string' ? grade.data : JSON.stringify(grade.data)
       const gradeData = JSON.parse(gradeDataJson)
       
-      // Populate Y.Map with grade data
+      const workbookData = ydoc.getMap('workbookData')
       Object.entries(gradeData).forEach(([blockId, blockData]) => {
         workbookData.set(blockId, blockData)
       })
+
+      // Load feedback if available
+      if (grade.feedback) {
+        const feedbackJson = typeof grade.feedback === 'string' ? grade.feedback : JSON.stringify(grade.feedback)
+        const feedbackData = JSON.parse(feedbackJson)
+        const feedbackMap = ydoc.getMap('feedback')
+        Object.entries(feedbackData).forEach(([blockId, fb]) => {
+          feedbackMap.set(blockId, fb)
+        })
+      }
 
       console.log(`[SyncAdapter] Loaded ${Object.keys(gradeData).length} blocks into workbook ${gradeId}`)
     } catch (error) {
@@ -290,17 +355,94 @@ export class SyncAdapter {
   }
 
   /**
-   * Get snapshot metadata
+   * Save comment threads from Yjs commentsMap to DynamoDB WorkbookComment model.
+   * Creates or updates WorkbookComment records for each thread.
    */
-  getSnapshotInfo(docName: string): Record<string, any> | null {
-    const snapshot = this.snapshots.get(docName)
-    if (!snapshot) return null
+  async saveComments(gradeId: string, ydoc: Y.Doc): Promise<void> {
+    try {
+      const commentsMap = ydoc.getMap('comments')
+      const threads: Record<string, any> = {}
+      commentsMap.forEach((value, key) => {
+        threads[key] = value
+      })
 
-    return {
-      docName: snapshot.docName,
-      size: snapshot.snapshot.length,
-      version: snapshot.version,
-      updatedAt: snapshot.updatedAt,
+      if (Object.keys(threads).length === 0) {
+        console.log(`[SyncAdapter] No comments to save for ${gradeId}`)
+        return
+      }
+
+      // Load existing comments to determine creates vs updates
+      const { data: existingResult } = await this.client.models.WorkbookComment.listWorkbookCommentByGradeBlockId({
+        gradeId,
+      })
+      const existingByThread = new Map<string, any>(
+        (existingResult ?? []).map((c: any) => [c.threadId, c])
+      )
+
+      for (const [key, thread] of Object.entries(threads)) {
+        const threadData = thread as any
+        const existing = existingByThread.get(threadData.id || key)
+
+        if (existing) {
+          await this.client.models.WorkbookComment.update({
+            id: existing.id,
+            content: threadData.content || threadData.text || '',
+            resolved: threadData.resolved ?? false,
+            replies: threadData.replies ? JSON.stringify(threadData.replies) : null,
+            _version: existing._version,
+          })
+        } else {
+          await this.client.models.WorkbookComment.create({
+            gradeId,
+            blockId: threadData.blockId || key.split('-')[0] || 'unknown',
+            threadId: threadData.id || key,
+            content: threadData.content || threadData.text || '',
+            resolved: threadData.resolved ?? false,
+            replies: threadData.replies ? JSON.stringify(threadData.replies) : null,
+          })
+        }
+      }
+
+      console.log(`[SyncAdapter] Saved ${Object.keys(threads).length} comment threads for ${gradeId}`)
+    } catch (error) {
+      console.error(`[SyncAdapter] Error saving comments:`, error)
+      throw error
+    }
+  }
+
+  /**
+   * Load comments from DynamoDB into Yjs commentsMap.
+   * Hydrates a collaborative session with persisted comment threads.
+   */
+  async loadComments(gradeId: string, ydoc: Y.Doc): Promise<void> {
+    try {
+      const { data: comments } = await this.client.models.WorkbookComment.listWorkbookCommentByGradeBlockId({
+        gradeId,
+      })
+
+      if (!comments || comments.length === 0) {
+        console.log(`[SyncAdapter] No persisted comments for ${gradeId}`)
+        return
+      }
+
+      const commentsMap = ydoc.getMap('comments')
+      for (const comment of comments) {
+        if (!comment || comment._deleted) continue
+        const key = `${comment.blockId}-${comment.threadId}`
+        commentsMap.set(key, {
+          id: comment.threadId,
+          blockId: comment.blockId,
+          content: comment.content,
+          resolved: comment.resolved ?? false,
+          replies: comment.replies ? JSON.parse(typeof comment.replies === 'string' ? comment.replies : JSON.stringify(comment.replies)) : [],
+          createdAt: comment.createdAt,
+        })
+      }
+
+      console.log(`[SyncAdapter] Loaded ${comments.length} comments into workbook ${gradeId}`)
+    } catch (error) {
+      console.error(`[SyncAdapter] Error loading comments:`, error)
+      throw error
     }
   }
 }

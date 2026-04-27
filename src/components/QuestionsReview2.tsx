@@ -11,7 +11,7 @@
  * - Import state indicators
  */
 
-import React, { useState, useEffect, useContext, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useContext, useRef, useMemo } from 'react';
 import {
     Box,
     Paper,
@@ -39,7 +39,6 @@ import {
     QuestionAnswer as QuestionIcon,
 } from '@mui/icons-material';
 import { getAmplifyClient } from '../utils/amplifyClient';
-import { ParsedContent, Document } from '../models';
 import DictionaryContext from '../context/dictionaryContext';
 
 // Placeholder functions until utils are created
@@ -167,6 +166,7 @@ function NestedQuestionField({
                         contentEditable={
                             <ContentEditable
                                 contentEditable={true}
+                                aria-label={label || placeholder || field}
                                 style={{
                                     minHeight: multiline ? '80px' : '24px',
                                     padding: multiline ? '8px' : '4px 8px',
@@ -250,9 +250,9 @@ export function QuestionCard({
                 margin: 0,
                 borderBottom: '1px solid',
                 borderColor: 'divider',
-                transition: 'all 0.2s ease',
+                transition: 'box-shadow 0.2s ease',
                 '&:hover': {
-                    backgroundColor: 'action.hover',
+                    backgroundColor: isEvenRow ? 'action.selected' : 'action.focus',
                     boxShadow: 1,
                 },
             }}
@@ -283,6 +283,7 @@ export function QuestionCard({
                             onChange={() => onToggleSelect(index)}
                             sx={{ p: 0.5 }}
                             className="MuiCheckbox-root"
+                            inputProps={{ 'aria-label': t('questionsReview.selectQuestion', { index: index + 1 }) } as any}
                         />
                     )}
                     <IconButton
@@ -292,6 +293,7 @@ export function QuestionCard({
                             onToggleExpand(index);
                         }}
                         sx={{ p: 0.5 }}
+                        aria-label={isExpanded ? t('questionsReview.collapse') : t('questionsReview.expand')}
                     >
                         {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
                     </IconButton>
@@ -440,12 +442,12 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
     }, [questionItems, searchTerm]);
 
     // Virtual scrolling setup
+    // estimateSize returns a stable collapsed-row height;
+    // measureElement's ResizeObserver handles actual sizing on expand/collapse
     const virtualizer = useVirtualizer({
         count: filteredQuestions.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: useCallback((index: number) => {
-            return expandedItems.has(index) ? 400 : 60;
-        }, [expandedItems]),
+        estimateSize: () => 60,
         overscan: 5,
     });
 
@@ -569,9 +571,6 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
             newExpanded.add(index);
         }
         setExpandedItems(newExpanded);
-        
-        // Recalculate virtual items when expanding/collapsing
-        virtualizer.measure();
     };
 
     const toggleAll = () => {

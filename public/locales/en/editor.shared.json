@@ -75,6 +75,10 @@
     "hoverToStartDrawing": "Hover to start drawing",
     "submittingInSeconds": "Submitting drawing for grading in {{countdown}} seconds..."
   },
+  "autoSubmit": {
+    "cancelSubmission": "Cancel",
+    "submittingInSeconds": "Submitting answer in {{countdown}} seconds..."
+  },
   "unitEmbedding": {
     "allSectionsComplete": "All sections complete!",
     "cached": "Cached",

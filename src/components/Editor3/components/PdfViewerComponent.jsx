@@ -40,8 +40,8 @@ import {
 } from '@mui/icons-material';
 import getCachedUrl from '../../../utils/getCachedUrl';
 
-// Configure PDF.js worker from local public directory
-if (typeof window !== 'undefined') {
+// Configure PDF.js worker from local public directory (skip if already configured by Storybook)
+if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
   pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 }
 
@@ -232,7 +232,7 @@ export default function PdfViewerComponent({
                 setLoading(true);
                 setError(null);
                 
-                const url = await getCachedUrl(path, 'protected', identityId);
+                const url = await getCachedUrl(path);
                 
                 setPdfUrl(url);
             } catch (err) {
@@ -327,7 +327,7 @@ export default function PdfViewerComponent({
                     alignItems: 'center', 
                     justifyContent: 'space-between',
                     p: 1,
-                    bgcolor: 'grey.100',
+                    bgcolor: 'action.hover',
                     borderBottom: '1px solid',
                     borderColor: 'divider',
                 }}
@@ -418,6 +418,9 @@ export default function PdfViewerComponent({
                     minHeight: 400,
                     maxHeight: 800,
                     overflow: 'auto',
+                    '& .react-pdf__Document': {
+                        minHeight: 400,
+                    },
                 }}
             >
                 {pdfUrl ? (
@@ -425,6 +428,11 @@ export default function PdfViewerComponent({
                         file={pdfUrl}
                         onLoadSuccess={onDocumentLoadSuccess}
                         onLoadError={onDocumentLoadError}
+                        options={{
+                            cMapUrl: '/cmaps/',
+                            cMapPacked: true,
+                            standardFontDataUrl: '/standard_fonts/',
+                        }}
                         loading={
                             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 4 }}>
                                 <CircularProgress />
@@ -453,6 +461,7 @@ export default function PdfViewerComponent({
                                 pageNumber={currentPage}
                                 width={pageWidth}
                                 scale={scale}
+                                customTextRenderer={({ str }) => str}
                             />
                         </Box>
                     </Document>

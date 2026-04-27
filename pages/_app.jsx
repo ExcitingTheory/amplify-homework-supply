@@ -20,8 +20,10 @@ import { AuthProvider } from '../src/context/authContext';
 import { SettingsProvider } from '../src/context/settingsContext';
 import { TourProvider } from '../src/context/tourContext';
 import { ChatContextProvider } from '../src/context/chatContext';
+import { XPProviderWrapper } from '../src/context/xpProviderWrapper';
 import GlobalChatButton from '../src/components/GlobalChatButton';
 import GlobalChatDrawer from '../src/components/GlobalChatDrawer';
+import OfflineBanner from '../src/components/OfflineBanner';
 import { useGlobalChatShortcut } from '../src/hooks/useGlobalChatShortcut';
 
 // Configure Amplify Gen 2 with existing REST API resources
@@ -121,12 +123,16 @@ function MyApp(props) {
           <AuthProvider>
             <SettingsProvider>
               <ChatContextProvider>
-                <TourProvider>
-                  <Component {...pageProps} />
-                  {/* Global Chat UI - available on all pages except Workbook and Unit */}
-                  <GlobalChatButton show={!hideChatButton} />
-                  <GlobalChatDrawer />
-                </TourProvider>
+                <XPProviderWrapper>
+                  <TourProvider>
+                    <Component {...pageProps} />
+                    {/* Global Chat UI - available on all pages except Workbook and Unit */}
+                    <GlobalChatButton show={!hideChatButton} />
+                    <GlobalChatDrawer />
+                    {/* Offline status banner */}
+                    <OfflineBanner />
+                  </TourProvider>
+                </XPProviderWrapper>
               </ChatContextProvider>
             </SettingsProvider>
           </AuthProvider>

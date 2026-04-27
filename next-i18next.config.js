@@ -13,10 +13,8 @@ module.exports = {
     locales: ['en', 'es', 'fr', 'de', 'ja', 'zh'],
   },
   
-  // Load translation files from public/locales
-  localePath: typeof window === 'undefined' 
-    ? require('path').resolve('./public/locales')
-    : '/locales',
+  // Load translation files from public/locales (server-side only)
+  localePath: require('path').resolve('./public/locales'),
   
   // Namespace configuration
   ns: [
@@ -49,19 +47,9 @@ module.exports = {
     escapeValue: false, // React already escapes values
   },
   
-  // Development settings
-  debug: process.env.NODE_ENV === 'development',
-  saveMissing: process.env.NODE_ENV === 'development', // Track missing keys in dev
-  
   // Fallback language
   fallbackLng: 'en',
   
   // Load translations on server-side
   serializeConfig: false,
-  
-  // Use locale detection in browser
-  detection: {
-    order: ['cookie', 'localStorage', 'navigator'],
-    caches: ['cookie'],
-  },
 };

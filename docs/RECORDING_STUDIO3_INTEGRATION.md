@@ -2,20 +2,96 @@
 
 ## Overview
 
-Replace `RecordingStudioEnhanced` with `RecordingStudio3` in two workflows—**Dictionary** (vocab word audio) and **Editor** (conversation content)—using preset factories to auto-configure script data based on context.
+Wire `RecordingStudio3` into **instructor** workflows—**Dictionary** (vocab word audio) and **Editor** (conversation content)—using preset factories to auto-configure script data based on context.
+
+**Important**: `RecordingStudioEnhanced` is the **end-user (student/learner)** recording surface and is **not being replaced**. `RecordingStudio3` is the **instructor** tool for scripted, multi-speaker dialogue recording and TTS generation. They serve different audiences.
 
 ## Current State
 
-| Component                      | Location                                                   | Status                                                       |
-| ------------------------------ | ---------------------------------------------------------- | ------------------------------------------------------------ | --- | ----------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------- |
-| `RecordingStudio3`             | `src/components/RecordingStudio3.jsx`                      | Built, has stories, not wired into any live workflow         |
-| `RecordingStudioEnhanced`      | `src/components/RecordingStudioEnhanced.jsx`               | Used in DictionaryEditor2 and EnhancedGenerators (partially) |
-| `RecordingStudio2`             | `src/components/RecordingStudio2.jsx`                      | Used in AnswerComponent for student audio input              |
-| `MicLevelIndicator`            | `src/components/Editor3/components/MicLevelIndicator.jsx`  | Only used in RS2                                             |
-| FileManager2 RS3 import        | `src/components/Editor3/components/FileManager2.jsx:140`   | Dead import, never rendered                                  |
-| EnhancedGenerators RS Enhanced | `src/components/Editor3/components/EnhancedGenerators.jsx` | Opens RS Enhanced but `onSave` is not wired—dead branch      |     | `RecordingStudio3Modal` | `src/components/RecordingStudio3Modal.jsx` | **NEW** — Fullscreen modal wrapper with confirmation preview and preset-aware save |
+| Component | Location | Audience | Status |
+|-----------|----------|----------|--------|
+| `RecordingStudio3` | `src/components/RecordingStudio3.jsx` | **Instructors** | Built, has stories, not wired into any live workflow |
+| `RecordingStudioEnhanced` | `src/components/RecordingStudioEnhanced.jsx` | **End users (students/learners)** | Used in DictionaryEditor2 and EnhancedGenerators (partially) |
+| `RecordingStudio2` | `src/components/RecordingStudio2.jsx` | **End users (students/learners)** | Used in AnswerComponent for student audio input |
+| `MicLevelIndicator` | `src/components/Editor3/components/MicLevelIndicator.jsx` | — | Only used in RS2 |
+| FileManager2 RS3 import | `src/components/Editor3/components/FileManager2.jsx:140` | — | Dead import, never rendered |
+| EnhancedGenerators RS Enhanced | `src/components/Editor3/components/EnhancedGenerators.jsx` | — | Opens RS Enhanced but `onSave` is not wired—dead branch |
 
 ## Architecture
+
+### Script File Type: `text/x-fountain`
+
+Scripts are stored as **File** records with MIME type `text/x-fountain` using the industry-standard [Fountain screenplay format](https://fountain.io/syntax). The file content is **plain text** — no JSON envelope.
+
+**Fountain syntax mapping:**
+
+| Screenplay element | Fountain syntax | Example |
+|-------------------|----------------|----------|
+| Scene heading | Auto-detected `INT.`/`EXT.` prefix (or force with `.`) | `INT. COFFEE SHOP - MORNING` |
+| Character | ALL CAPS line before dialogue | `NARRATOR` |
+| Parenthetical | `(text)` on its own line after character | `(warm, inviting)` |
+| Dialogue | Plain text after character/parenthetical | `Welcome to our lesson on greetings.` |
+| Action/description | Plain paragraph | `Akiko bows slightly.` |
+| Direction notes | `[[double brackets]]` (Fountain notes) | `[[Pause 2s. Formal register. Emphasize third syllable.]]` |
+| Scene break | `===` | `===` |
+| Transition | `CUT TO:` or `> FADE OUT` | `CUT TO:` |
+| Title page | `Key: Value` pairs at top of file | `Title: Japanese Greetings` |
+
+**Example `.fountain` file:**
+
+```fountain
+Title: Japanese Greetings Lesson
+Author: Instructor
+Date: 2026-04-17
+
+INT. COFFEE SHOP - MORNING
+
+NARRATOR
+(warm, inviting)
+Welcome to our lesson on Japanese greetings.
+[[Slower pace. Clear enunciation.]]
+
+AKIKO
+(cheerful, native speaker)
+こんにちは！ はじめまして。
+[[Bow slightly. Formal register. Pause 1s after each phrase.]]
+
+NARRATOR
+That means "Hello! Nice to meet you."
+[[Emphasize the English translation.]]
+
+===
+
+INT. COFFEE SHOP - LATER
+
+AKIKO
+(casual, friendly)
+コーヒーをください。
+[[Gesture toward menu. Relaxed tone.]]
+```
+
+**File storage pattern:**
+
+| Field | Value |
+|-------|-------|
+| `mimeType` | `text/x-fountain` |
+| `path` | `public/scripts/{fileId}.fountain` |
+| `name` | `{title}.fountain` |
+| `level` | `PUBLIC` (instructor-created content) |
+
+**Why standard Fountain:**
+- Industry-standard format — parsers exist on npm (`fountain-js`)
+- Interoperable with Final Draft, Highland, WriterSolo, etc.
+- `[[notes]]` are a native Fountain concept — perfect for AI/voice direction
+- Plain text is diffable, versionable, and human-readable
+- No custom format to maintain
+
+**Derived data (not stored in the file):**
+- `scriptData` (RS3 format) is parsed from Fountain at load time via `parseFountainToScriptData()`
+- `promptHistory` is stored on the `File` model's `metadata` JSON field if needed for AI continuation
+- TTS voice assignments are stored on the `File` model's `metadata` JSON field (Fountain has no voice concept)
+
+**FileManager2 integration:** Script files appear under a new **"Scripts"** category alongside images, audio, documents, and video. They are openable in the ScreenplayEditor + RS3 horizontal timeline view.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -51,30 +127,30 @@ Shared fullscreen modal wrapper that hosts RecordingStudio3 in both workflows.
 
 **RS3 has NO internal save/close UI** — it is purely reactive (`onScriptChange` fires on every mutation). The modal adds:
 
-| Feature              | Implementation                                                                   |
-| -------------------- | -------------------------------------------------------------------------------- |
-| Fullscreen Dialog    | MUI `Dialog fullScreen` with `Slide` transition                                  |
-| AppBar title bar     | Close (X), title, recording indicator chip, "Done" button                        |
-| Confirmation preview | Summary of speakers, takes per line, missing-audio warnings                      |
-| Save flow            | "Done" → preview → "Confirm & Save" → `onSave(payload)` → close                  |
-| Cancel guard         | `window.confirm` if `hasChanges` is true                                         |
-| Preset-aware save    | `buildSavePayload(scriptData, preset)` maps takes to Word fields or File records |
+| Feature | Implementation |
+|---------|----------------|
+| Fullscreen Dialog | MUI `Dialog fullScreen` with `Slide` transition |
+| AppBar title bar | Close (X), title, recording indicator chip, "Done" button |
+| Confirmation preview | Summary of speakers, takes per line, missing-audio warnings |
+| Save flow | "Done" → preview → "Confirm & Save" → `onSave(payload)` → close |
+| Cancel guard | `window.confirm` if `hasChanges` is true |
+| Preset-aware save | `buildSavePayload(scriptData, preset)` maps takes to Word fields or File records |
 
 **Props:**
 
 ```typescript
 interface RecordingStudio3ModalProps {
-  open: boolean; // Dialog visibility
-  onClose: () => void; // Called on cancel or after save
-  onSave: (payload: SavePayload) => Promise<void>; // Called after confirm
-  title: string; // AppBar title
-  preset: "word" | "conversation" | "question"; // Determines save mapping
-  scriptData: ScriptData; // From preset factory
-  lockedTracks?: string[]; // Passed through to RS3
-  gradeId?: string; // For S3 uploads
-  nodeKey?: string; // File org key
-  identityId?: object; // User identity
-  readOnly?: boolean; // Disable editing
+  open: boolean;                          // Dialog visibility
+  onClose: () => void;                    // Called on cancel or after save
+  onSave: (payload: SavePayload) => Promise<void>;  // Called after confirm
+  title: string;                          // AppBar title
+  preset: 'word' | 'conversation' | 'question';     // Determines save mapping
+  scriptData: ScriptData;                 // From preset factory
+  lockedTracks?: string[];                // Passed through to RS3
+  gradeId?: string;                       // For S3 uploads
+  nodeKey?: string;                       // File org key
+  identityId?: object;                    // User identity
+  readOnly?: boolean;                     // Disable editing
 }
 ```
 
@@ -176,58 +252,36 @@ Generates a two-track script from a Question model object.
 
 **File**: `src/components/DictionaryEditor2.jsx` (edit)
 
-Replace `RecordingStudioEnhanced` with `RecordingStudio3Modal` in `WordDecoratorComponent`.
+Replace `RecordingStudioEnhanced` with `RecordingStudio3` in `WordDecoratorComponent`.
 
 ### Changes
 
-1. **Imports**: Replace `RecordingStudioEnhanced` import with `RecordingStudio3Modal` + `createWordPreset`
+1. **Imports**: Replace `RecordingStudioEnhanced` import with `RecordingStudio3` + `createWordPreset`
 2. **Preset computation**: In `WordDecoratorComponent`, compute the preset from the word data:
    ```js
    const preset = createWordPreset({ phrase, pronunciation, definition });
    ```
-3. **Replace Dialog + RecordingStudioEnhanced** with a single `RecordingStudio3Modal`:
+3. **Dialog content**: Replace `<RecordingStudioEnhanced onSave={...} onCancel={...} />` with:
    ```jsx
-   <RecordingStudio3Modal
-     open={recordingDialogOpen}
-     onClose={() => setRecordingDialogOpen(false)}
-     onSave={handleStudioSave}
-     title={`${t("dictionaryEditor.audioStudioTitle")} - ${phrase}`}
-     preset="word"
+   <RecordingStudio3
      scriptData={preset.scriptData}
      lockedTracks={preset.lockedTracks}
      identityId={identityId}
+     onUpdateData={handleStudioUpdate}
    />
    ```
-   No wrapping `<Dialog>` needed — the modal manages its own fullscreen Dialog.
-4. **Save handler** (`handleStudioSave`): Receives the typed payload from the modal:
-
-   ```js
-   const handleStudioSave = async (payload) => {
-     // payload.type === 'word'
-     // payload.phraseAudio → [{ audioPath, waveformData }]
-     // payload.definitionAudio → [{ audioPath, waveformData }]
-     // payload.scriptData → full script for re-opening
-
-     const audioPaths = payload.phraseAudio.map((a) => a.audioPath);
-     const defPaths = payload.definitionAudio.map((a) => a.audioPath);
-     const newAudio = deduplicateUrls([...audioUrls, ...audioPaths]);
-     const newDefAudio = deduplicateUrls([...defAudioUrls, ...defPaths]);
-
-     await onUpdate(
-       wordId,
-       {
-         audio: newAudio,
-         definitionAudio: newDefAudio,
-         waveformData: payload.phraseAudio[0]?.waveformData,
-         definitionWaveformData: payload.definitionAudio[0]?.waveformData,
-         scriptData: JSON.stringify(payload.scriptData),
-       },
-       version,
-     );
-   };
-   ```
-
-5. Remove the old `<Dialog>` + `<DialogTitle>` + `<DialogContent>` wrapper entirely
+4. **Save handler** (`handleStudioUpdate`): On `TAKE_ADDED` events:
+   - `phrase_track` takes → append `audioPath` to `Word.audio[]`
+   - `definition_track` takes → append `audioPath` to `Word.definitionAudio[]`
+   - Extract `waveformData` from takes → `Word.waveformData` / `Word.definitionWaveformData`
+5. **Save & Close** action:
+   - Shows a **confirmation preview** summarizing takes per track before saving
+   - Collects active takes from `phrase_track` dialogue → uploads/maps to `Word.audio`
+   - Collects active takes from `definition_track` dialogue → maps to `Word.definitionAudio`
+   - Stores `waveformData` from takes → `Word.waveformData` / `Word.definitionWaveformData`
+   - **Persists full `scriptData` JSON** to a new field on the Word model (e.g., `Word.scriptData`) for re-opening
+   - Calls `onUpdate(wordId, { audio, definitionAudio, waveformData, definitionWaveformData, scriptData }, version)`
+6. **Dialog sizing**: Use `fullScreen` Dialog — RS3's two-panel layout needs the full viewport
 
 ### Acceptance Criteria
 
@@ -244,78 +298,53 @@ Replace `RecordingStudioEnhanced` with `RecordingStudio3Modal` in `WordDecorator
 
 **File**: `src/components/Editor3/components/FileManager2.jsx` (edit)
 
-Wire `RecordingStudio3Modal` into a working conversation recording flow, replacing the dead RS3 import.
+Wire the existing dead `RecordingStudio3` import into a working conversation recording flow.
 
 ### Changes
 
-1. **Imports**: Replace dead `RecordingStudio3` import with `RecordingStudio3Modal` + `createConversationPreset`
-2. **State**: Add `const [studioOpen, setStudioOpen] = useState(false)` in FileManager2
-3. **Toolbar button**: Add "Record Conversation" button near the existing audio section:
+1. **State**: Add `const [studioOpen, setStudioOpen] = useState(false)` in FileManager2
+2. **Toolbar button**: Add "Record Conversation" button near the existing audio section:
    ```jsx
    <Button startIcon={<MicIcon />} onClick={() => setStudioOpen(true)}>
      Record Conversation
    </Button>
    ```
-4. **Render the modal** (no wrapping Dialog needed):
+3. **Fullscreen Dialog**: Render RS3 in a fullscreen MUI Dialog:
    ```jsx
-   <RecordingStudio3Modal
-     open={studioOpen}
-     onClose={() => setStudioOpen(false)}
-     onSave={handleConversationSave}
-     title={`Record Conversation — ${unit?.name || ""}`}
-     preset="conversation"
-     scriptData={createConversationPreset(unit?.name)}
-     lockedTracks={[]}
-     gradeId={currentGrade?.id}
-     nodeKey={nodeKey}
-     identityId={identityId}
-   />
+   <Dialog open={studioOpen} onClose={() => setStudioOpen(false)} fullScreen>
+     <DialogTitle>
+       Record Conversation
+       <IconButton onClick={() => setStudioOpen(false)}><CloseIcon /></IconButton>
+     </DialogTitle>
+     <DialogContent sx={{ p: 0 }}>
+       <RecordingStudio3
+         scriptData={createConversationPreset(unit?.name)}
+         lockedTracks={[]}
+         gradeId={currentGrade?.id}
+         nodeKey={nodeKey}
+         identityId={identityId}
+         onUpdateData={handleConversationUpdate}
+       />
+     </DialogContent>
+   </Dialog>
    ```
-5. **Save handler** (`handleConversationSave`): Receives the typed payload:
-
-   ```js
-   const handleConversationSave = async (payload) => {
-     // payload.type === 'conversation'
-     // payload.audioFiles → [{ audioPath, waveformData, speakerName, text, type }]
-     // payload.scriptData → full script JSON
-
-     // 1. Create File records for each audio take
-     const fileIds = [];
-     for (const audio of payload.audioFiles) {
-       const file = await client.models.File.create({
-         name: `${audio.speakerName} - ${audio.text.slice(0, 30)}`,
-         path: audio.audioPath,
-         type: "audio/mpeg",
-         waveformData: JSON.stringify(audio.waveformData),
-       });
-       fileIds.push(file.data.id);
-     }
-
-     // 2. Save scriptData as a JSON File record for re-editing
-     const scriptFile = await client.models.File.create({
-       name: `${unit?.name || "Conversation"} - Script`,
-       type: "application/json",
-       data: JSON.stringify(payload.scriptData),
-     });
-
-     // 3. Insert audio files into editor
-     if (fileIds.length > 0) {
-       editor.dispatchCommand(INSERT_PLAYLIST_COMMAND, fileIds);
-     }
-   };
-   ```
-
-6. **Confirmation preview**: Handled by `RecordingStudio3Modal` internally — shows summary before `onSave` fires
+4. **On close / "Done"**: For each dialogue line with an active take that has `audioPath`:
+   - Create a `File` model record (type `audio/mpeg`, path from take)
+   - Create `UnitFile` join record
+   - Dispatch `INSERT_PLAYLIST_COMMAND` with collected file IDs to embed in editor
+5. **Persist script**: Store the Fountain screenplay as a `File` record (`text/x-fountain`, linked via `UnitFile`) so the conversation can be re-opened for further editing. Voice assignments and prompt history stored in the File's `metadata` JSON field.
+6. **Confirmation preview**: On "Done", show a confirmation dialog summarizing recorded takes, speakers, and audio files before inserting into editor
 
 ### Acceptance Criteria
 
 - [ ] "Record Conversation" button visible in FileManager2 toolbar
-- [ ] RS3Modal opens fullscreen with empty conversation preset (no locked tracks)
+- [ ] RS3 opens with empty conversation preset (no locked tracks)
 - [ ] Users can add speakers, dialogue lines, record/generate TTS
-- [ ] "Done" opens confirmation preview with per-line take summary
-- [ ] Confirming save creates File records and inserts playlist into editor
-- [ ] Script data persisted as File record (`application/json`) for re-editing
-- [ ] Cancel with unsaved changes shows warning before closing
+- [ ] On close, audio takes are saved as File model records
+- [ ] Audio is insertable into editor via playlist command
+- [ ] Script data persisted as File record (`text/x-fountain`) for re-editing
+- [ ] Confirmation preview shown before inserting/saving
+- [ ] RS3 opens in fullscreen Dialog with proper close/done actions
 
 ---
 
@@ -353,25 +382,22 @@ Step A (preset factory) ──► Step B (tests)
 
 Steps A and B can be done first without touching any existing components. Steps C–E depend on A. Step F depends on D+E. Step G is independent and can be done anytime.
 
-**RS3Modal** is already created as a scaffolded component at `src/components/RecordingStudio3Modal.jsx` with the fullscreen Dialog, confirmation preview, and save payload builders. It needs the preset factory (Step A) and integration wiring (Steps D+E) to be functional.
-
 ---
 
 ## Decisions (Finalized)
 
-| #   | Question                                                                | Decision                                                                                                                                                                                                    |
-| --- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Should full `scriptData` JSON be persisted?                             | **Yes.** Save the entire script to the **Word model** (dictionary preset) or as a **File record** (`application/json`) for editor conversations. Enables re-opening and continuing edits.                   |
-| 2   | When closing RS3 from the editor, auto-insert audio or let user choose? | **Show a confirmation with preview.** Display a summary of recorded takes/files before inserting into the editor or saving to the Word model.                                                               |
-| 3   | Should RS3 replace `RecordingStudioEnhanced`?                           | **Yes for instructor workflows only.** RS3 replaces Enhanced in DictionaryEditor2 and FileManager2. **Do NOT use RS3 for student inputs** — keep RS2 in the workbook AnswerComponent for student recording. |
-| 4   | Should `MicLevelIndicator` be added to RS3?                             | **Yes.** Add to the RS3 recording UI during active recording.                                                                                                                                               |
+| # | Question | Decision |
+|---|----------|----------|
+| 1 | Should full `scriptData` JSON be persisted? | **No — store Fountain plain text.** The `.fountain` file is the source of truth. `scriptData` is derived at load time via `parseFountainToScriptData()`. Voice assignments and prompt history go in the File model's `metadata` JSON field. For dictionary presets, also save to the **Word model** `scriptData` field. |
+| 2 | When closing RS3 from the editor, auto-insert audio or let user choose? | **Show a confirmation with preview.** Display a summary of recorded takes/files before inserting into the editor or saving to the Word model. |
+| 3 | Should RS3 replace `RecordingStudioEnhanced`? | **No.** `RecordingStudioEnhanced` is the **end-user (student/learner)** recording surface and remains as-is. RS3 is the **instructor** tool for scripted, multi-speaker dialogue recording. RS2 stays in the workbook AnswerComponent for student recording. |
+| 4 | Should `MicLevelIndicator` be added to RS3? | **Yes.** Add to the RS3 recording UI during active recording. |
 
 ## UI Orientation Decision
 
 **Chosen: Fullscreen Dialog** (opened from FileManager2 toolbar or DictionaryEditor2 card action)
 
 Rationale:
-
 - RS3 has an internal two-panel layout (350px Script Panel + flex Recording Panel) that needs ~800px+ to be usable
 - The editor's left/right drawers max at ~600-700px when manually resized — too narrow for RS3's layout
 - Follows the existing `EnhancedGenerators` → `RecordingStudioEnhanced` fullscreen precedent
@@ -381,7 +407,6 @@ Rationale:
 - On mobile, fullscreen is the only viable option anyway
 
 Alternative considered but rejected:
-
 - **Left drawer tab**: drawer width is too constrained for RS3's two-panel layout, even when resized
 - **Right drawer tab**: already occupied by ChatSidebar; RS3 is a focused task, not an ambient tool
 - **Persistent side panel**: RS3 is a session-based tool (open → record → save → close), not something users leave open while editing

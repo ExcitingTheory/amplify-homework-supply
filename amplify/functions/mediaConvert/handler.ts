@@ -420,7 +420,32 @@ export const handler: Handler = async (event, context) => {
     return handleEventBridge(event);
   }
 
-  // 2. S3 upload event
+  // 2. EventBridge S3 Object Created event (used instead of S3 notifications to avoid circular deps)
+  if (event.source === 'aws.s3' && event['detail-type'] === 'Object Created') {
+    const key = event.detail?.object?.key;
+    if (!key) {
+      console.warn('[MediaConvert] EventBridge S3 event missing object key');
+      return;
+    }
+    // Check file extension
+    const videoExtensions = ['.mp4', '.mov', '.webm', '.avi', '.mkv'];
+    if (!videoExtensions.some(ext => key.toLowerCase().endsWith(ext))) {
+      console.log(`[MediaConvert] Skipping non-video file: ${key}`);
+      return;
+    }
+    // Convert to S3 notification format and reuse existing handler
+    const syntheticEvent = {
+      Records: [{
+        s3: {
+          bucket: { name: event.detail.bucket.name },
+          object: { key },
+        },
+      }],
+    };
+    return handleS3Event(syntheticEvent);
+  }
+
+  // 3. S3 upload event (legacy S3 notification format)
   if (event.Records && event.Records[0]?.s3) {
     return handleS3Event(event);
   }

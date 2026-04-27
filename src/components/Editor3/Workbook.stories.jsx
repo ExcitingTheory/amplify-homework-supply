@@ -20,15 +20,7 @@ async function computeRealWaveform(audioUrl, samples = 600) {
   }
 }
 
-// Lazy load Workbook component to avoid breaking Vitest browser mode
-const WorkbookLazy = React.lazy(() => import('./index').then(m => ({ default: m.Workbook })));
-
-// Wrapper component for Workbook with Suspense
-const Workbook = (props) => (
-  <React.Suspense fallback={<div>Loading Workbook...</div>}>
-    <WorkbookLazy {...props} />
-  </React.Suspense>
-);
+import { Workbook } from './index';
 
 export default {
   title: '📚 Creating Lessons/Workbook',

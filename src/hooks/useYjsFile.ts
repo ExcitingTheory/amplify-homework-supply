@@ -109,9 +109,14 @@ export function useYjsFile(config: UseYjsFileConfig): UseYjsFileReturn {
           // Only initialize if empty (first time)
           if (ymap.size === 0) {
             Object.entries(data).forEach(([key, value]) => {
-              // Skip internal fields and relationships
+              // Skip internal fields, relationships, and timestamps
               if (!key.startsWith('_') && !key.includes('ID') && key !== 'createdAt' && key !== 'updatedAt') {
-                ymap.set(key, value);
+                // Only set primitive types that Yjs Y.Map supports (string, number, boolean, null)
+                // Skip functions, objects (lazy-loaded relationships), and undefined
+                const type = typeof value;
+                if (value === null || type === 'string' || type === 'number' || type === 'boolean') {
+                  ymap.set(key, value);
+                }
               }
             });
             console.log(`[useYjsFile] Initialized Yjs metadata for file ${fileId}`);

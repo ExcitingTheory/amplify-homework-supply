@@ -32,14 +32,41 @@ export function isAnalyzableDocument(mimeType) {
         'text/plain',
         'text/markdown',
         'text/csv',
+        'text/x-gift',
         'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'application/vnd.ms-excel',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'application/vnd.ms-powerpoint',
         'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/vnd.oasis.opendocument.text',
+        'application/vnd.oasis.opendocument.spreadsheet',
+        'application/vnd.oasis.opendocument.presentation',
+        'application/epub+zip',
+        'application/x-imscc+zip',
+        'application/x-qti+xml',
+        'application/zip', // ZIP files analyzed by Lambda (SCORM/IMS CC/EPUB detection)
     ];
     return analyzableTypes.includes(mimeType);
+}
+
+/**
+ * Detect correct MIME type from filename when the browser reports a generic type.
+ * Browsers cannot detect .imscc, .gift, .epub by content — they report generic MIME types.
+ * @param {File} file - The file object
+ * @returns {string} Corrected MIME type
+ */
+export function detectMimeType(file) {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    const overrides = {
+        'imscc': 'application/x-imscc+zip',
+        'epub': 'application/epub+zip',
+        'gift': 'text/x-gift',
+        'odt': 'application/vnd.oasis.opendocument.text',
+        'ods': 'application/vnd.oasis.opendocument.spreadsheet',
+        'odp': 'application/vnd.oasis.opendocument.presentation',
+    };
+    return overrides[ext] || file.type;
 }
 
 /**
@@ -113,6 +140,9 @@ async function triggerEmbeddingsGeneration(fileID) {
 export async function uploadFile(file, identityId, unitId = null, onProgress = null) {
     let subfolder;
 
+    // Correct MIME type from filename for formats browsers can't detect
+    const correctedMimeType = detectMimeType(file);
+    
     // Get current user for owner field
     const { username: owner } = await getCurrentUser();
     
@@ -124,7 +154,7 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
     } else if (isMimeType(file, ACCEPTABLE_FILE_TYPES)) {
         subfolder = 'files';
     } else {
-        throw new Error(`Unsupported file type: ${file.type}`);
+        throw new Error(`Unsupported file type: ${correctedMimeType}`);
     }
 
     // Gen 2 API requires full path with protection level prefix
@@ -136,7 +166,7 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
         path: s3Path,
         data: file,
         options: {
-            contentType: file.type,
+            contentType: correctedMimeType,
             onProgress(progress) {
                 console.log(`Uploaded: ${progress.transferredBytes}/${progress.totalBytes}`);
                 if (onProgress) {
@@ -170,7 +200,7 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
         identityId,
         name: file.name,
         size: file.size,
-        mimeType: file.type,
+        mimeType: correctedMimeType,
         level: 'PROTECTED',
     };
 
@@ -180,14 +210,14 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
 
     // If analyzable document type, create Document record first (so we have an ID for the File)
     let documentModel = null;
-    if (isAnalyzableDocument(file.type)) {
+    if (isAnalyzableDocument(correctedMimeType)) {
         const amplifyClient = getAmplifyClient();
         // Create document without unit relationship first
         const documentData = {
             filename: file.name,
             s3Key: uploadResult.path,  // Use the full S3 path from upload
             status: 'uploaded',
-            mimeType: file.type,
+            mimeType: correctedMimeType,
             fileSize: file.size,
             owner,
             identityId,
@@ -202,7 +232,7 @@ export async function uploadFile(file, identityId, unitId = null, onProgress = n
         }
         
         documentModel = newDocument;
-        console.log('Created Document record for', file.type, ':', documentModel);
+        console.log('Created Document record for', correctedMimeType, ':', documentModel);
     }
 
     // Create File record, linking to Document if PDF
@@ -359,8 +389,9 @@ export async function cancelPDFAnalysis(fileId) {
  * @returns {Promise<{fileModel: FileModel, documentModel: Document, analysisResult?: Object}>}
  */
 export async function uploadAndAnalyzePDF(file, identityId, unitId, autoAnalyze = true, onProgress = null) {
-    if (!isAnalyzableDocument(file.type)) {
-        throw new Error(`File type ${file.type} is not analyzable. Supported types: PDF, Word, Excel, PowerPoint, text, markdown, CSV`);
+    const correctedType = detectMimeType(file);
+    if (!isAnalyzableDocument(correctedType)) {
+        throw new Error(`File type ${correctedType} is not analyzable. Supported types: PDF, Word, Excel, PowerPoint, text, markdown, CSV, ODF, EPUB, SCORM, IMS CC, QTI, GIFT`);
     }
 
     // Upload the file

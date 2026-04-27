@@ -123,7 +123,8 @@ function requireAuth(event: any) {
 export const handler: Handler = async (event: any, context: any) => {
   // Extract which operation is being called from the AppSync context
   // In Gen 2, AppSync passes fieldName via event.info.fieldName
-  const operationName = event.info?.fieldName || event.fieldName;
+  // For async self-invocations (e.g., generateImageFileAsync), the operation is in event.operation
+  const operationName = event.info?.fieldName || event.fieldName || event.operation;
   
   if (!operationName) {
     console.error('[OpenAI Handler] No operation name found in event:', JSON.stringify(event, null, 2));
@@ -133,7 +134,22 @@ export const handler: Handler = async (event: any, context: any) => {
   console.log(`[OpenAI Handler] ${operationName}`, event.arguments);
 
   try {
-    // Require authentication for all operations
+    // Async self-invocations don't have user identity — they run as internal Lambda calls
+    const isAsyncSelfInvoke = operationName.endsWith('Async') && event.operation;
+
+    if (isAsyncSelfInvoke) {
+      // Internal async operations — args come directly from the event payload
+      switch (operationName) {
+        case 'generateAudioFileAsync':
+          return await handleGenerateAudioFileAsync(event);
+        case 'generateImageFileAsync':
+          return await handleGenerateImageFileAsync(event);
+        default:
+          throw new Error(`Unknown async operation: ${operationName}`);
+      }
+    }
+
+    // Require authentication for all user-facing operations
     const { userId, username, identityId } = requireAuth(event);
     const userPoolId = process.env.USER_POOL_ID;
     const args = event.arguments || {};
@@ -472,16 +488,49 @@ async function handleGenerateImageFileAsync(args: any): Promise<void> {
 // QUERY HANDLERS
 // ============================================================================
 
+/**
+ * Build a personalized system message from student memory and content context.
+ * When content references are available, the AI can link feedback to specific
+ * pages or sections in uploaded documents or unit materials.
+ */
+function buildVerifySystemMessage(args: { studentMemory?: string; contentContext?: string }): string | null {
+  const { studentMemory, contentContext } = args;
+  if (!studentMemory && !contentContext) return null;
+
+  let system = 'You are a skilled, encouraging tutor on an elearning platform.\n';
+  system += 'Provide specific, actionable feedback. Be concise and warm.\n';
+
+  if (studentMemory) {
+    system += '\n## Student Memory\n';
+    system += studentMemory + '\n';
+    system += 'Reference the student\'s history only when directly relevant (e.g., if they\'re repeating a known mistake).\n';
+    system += 'Acknowledge genuine improvement explicitly.\n';
+  }
+
+  if (contentContext) {
+    system += '\n## Available Course Content\n';
+    system += contentContext + '\n';
+    system += 'When relevant, reference specific pages, sections, or documents the student can review. ';
+    system += 'Use the format: "See [Document Title], page X" or "Review the section on [Topic] in [Document Title]".\n';
+  }
+
+  return system;
+}
+
 async function handleVerifyDefinition(args: any): Promise<string> {
   const { phrase, expected, definition, model = 'gpt-4o' } = args;
   const openai = await getOpenAI();
+  const systemMsg = buildVerifySystemMessage(args);
   
   try {
     const prompt = `Given a phrase: "${phrase}"\nExpected definition: "${expected}"\nUser provided definition: "${definition}"\n\nIs the user's definition accurate and helpful? Respond with JSON: { "accurate": boolean, "feedback": string, "score": 0-100 }`;
+    const messages: any[] = [];
+    if (systemMsg) messages.push({ role: 'system', content: systemMsg });
+    messages.push({ role: 'user', content: prompt });
     
     const response = await openai.chat.completions.create({
       model,
-      messages: [{ role: 'user', content: prompt }],
+      messages,
       temperature: 0.3,
     });
     
@@ -495,13 +544,17 @@ async function handleVerifyDefinition(args: any): Promise<string> {
 async function handleVerifyWord(args: any): Promise<string> {
   const { word, expected, definition, model = 'gpt-4o' } = args;
   const openai = await getOpenAI();
+  const systemMsg = buildVerifySystemMessage(args);
   
   try {
     const prompt = `Word: "${word}"\nExpected definition: "${expected}"\nUser provided definition: "${definition}"\n\nDoes the user understand this word? Respond with JSON: { "understands": boolean, "feedback": string, "score": 0-100 }`;
+    const messages: any[] = [];
+    if (systemMsg) messages.push({ role: 'system', content: systemMsg });
+    messages.push({ role: 'user', content: prompt });
     
     const response = await openai.chat.completions.create({
       model,
-      messages: [{ role: 'user', content: prompt }],
+      messages,
       temperature: 0.3,
     });
     
@@ -515,13 +568,17 @@ async function handleVerifyWord(args: any): Promise<string> {
 async function handleVerifyShortAnswer(args: any): Promise<string> {
   const { expected, answer, prompt, model = 'gpt-4o' } = args;
   const openai = await getOpenAI();
+  const systemMsg = buildVerifySystemMessage(args);
   
   try {
     const gradePrompt = `Question: "${prompt}"\nExpected answer: "${expected}"\nUser answer: "${answer}"\n\nGrade this answer. Respond with JSON: { "correct": boolean, "score": 0-100, "feedback": string }`;
+    const messages: any[] = [];
+    if (systemMsg) messages.push({ role: 'system', content: systemMsg });
+    messages.push({ role: 'user', content: gradePrompt });
     
     const response = await openai.chat.completions.create({
       model,
-      messages: [{ role: 'user', content: gradePrompt }],
+      messages,
       temperature: 0.3,
     });
     
@@ -558,6 +615,7 @@ async function handleTranscribe(args: any): Promise<string> {
 async function handleVerifyAudio(args: any): Promise<string> {
   const { expected, audio, model = 'whisper-1', chatModel = 'gpt-4o' } = args;
   const openai = await getOpenAI();
+  const systemMsg = buildVerifySystemMessage(args);
   
   try {
     // Transcribe first
@@ -571,10 +629,13 @@ async function handleVerifyAudio(args: any): Promise<string> {
     
     // Then verify
     const verifyPrompt = `Expected answer: "${expected}"\nTranscribed answer: "${transcriptionResponse.text}"\n\nAre these equivalent? Respond with JSON: { "correct": boolean, "score": 0-100, "feedback": string }`;
+    const messages: any[] = [];
+    if (systemMsg) messages.push({ role: 'system', content: systemMsg });
+    messages.push({ role: 'user', content: verifyPrompt });
     
     const response = await openai.chat.completions.create({
       model: chatModel,
-      messages: [{ role: 'user', content: verifyPrompt }],
+      messages,
       temperature: 0.3,
     });
     
@@ -588,6 +649,7 @@ async function handleVerifyAudio(args: any): Promise<string> {
 async function handleVerifyAudioUrl(args: any): Promise<string> {
   const { expected, audioUrl, model = 'whisper-1', chatModel = 'gpt-4o' } = args;
   const openai = await getOpenAI();
+  const systemMsg = buildVerifySystemMessage(args);
   
   try {
     // Fetch audio from S3 URL
@@ -603,10 +665,13 @@ async function handleVerifyAudioUrl(args: any): Promise<string> {
     
     // Verify
     const verifyPrompt = `Expected answer: "${expected}"\nTranscribed answer: "${transcriptionResponse.text}"\n\nAre these equivalent? Respond with JSON: { "correct": boolean, "score": 0-100, "feedback": string }`;
+    const messages: any[] = [];
+    if (systemMsg) messages.push({ role: 'system', content: systemMsg });
+    messages.push({ role: 'user', content: verifyPrompt });
     
     const verifyResponse = await openai.chat.completions.create({
       model: chatModel,
-      messages: [{ role: 'user', content: verifyPrompt }],
+      messages,
       temperature: 0.3,
     });
     
@@ -701,25 +766,28 @@ async function handleProcessImageUrl(args: any): Promise<string> {
 async function handleVerifyImage(args: any): Promise<string> {
   const { expected, image, model = 'gpt-4o' } = args;
   const openai = await getOpenAI();
+  const systemMsg = buildVerifySystemMessage(args);
   
   try {
-    const response = await openai.chat.completions.create({
-      model,
-      messages: [
+    const messages: any[] = [];
+    if (systemMsg) messages.push({ role: 'system', content: systemMsg });
+    messages.push({
+      role: 'user',
+      content: [
         {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: `Expected: "${expected}"\n\nAnalyze this image. Does it match the expected description? Respond with JSON: { "matches": boolean, "score": 0-100, "feedback": string }`,
-            },
-            {
-              type: 'image_url',
-              image_url: { url: `data:image/jpeg;base64,${image}` },
-            },
-          ],
+          type: 'text',
+          text: `Expected: "${expected}"\n\nAnalyze this image. Does it match the expected description? Respond with JSON: { "matches": boolean, "score": 0-100, "feedback": string }`,
+        },
+        {
+          type: 'image_url',
+          image_url: { url: `data:image/jpeg;base64,${image}` },
         },
       ],
+    });
+    
+    const response = await openai.chat.completions.create({
+      model,
+      messages,
       temperature: 0.3,
     });
     
@@ -733,25 +801,28 @@ async function handleVerifyImage(args: any): Promise<string> {
 async function handleVerifyImageUrl(args: any): Promise<string> {
   const { expected, imageUrl, model = 'gpt-4o' } = args;
   const openai = await getOpenAI();
+  const systemMsg = buildVerifySystemMessage(args);
   
   try {
-    const response = await openai.chat.completions.create({
-      model,
-      messages: [
+    const messages: any[] = [];
+    if (systemMsg) messages.push({ role: 'system', content: systemMsg });
+    messages.push({
+      role: 'user',
+      content: [
         {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: `Expected: "${expected}"\n\nAnalyze this image. Does it match the expected description? Respond with JSON: { "matches": boolean, "score": 0-100, "feedback": string }`,
-            },
-            {
-              type: 'image_url',
-              image_url: { url: imageUrl },
-            },
-          ],
+          type: 'text',
+          text: `Expected: "${expected}"\n\nAnalyze this image. Does it match the expected description? Respond with JSON: { "matches": boolean, "score": 0-100, "feedback": string }`,
+        },
+        {
+          type: 'image_url',
+          image_url: { url: imageUrl },
         },
       ],
+    });
+    
+    const response = await openai.chat.completions.create({
+      model,
+      messages,
       temperature: 0.3,
     });
     

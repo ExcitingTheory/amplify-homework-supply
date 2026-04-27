@@ -17,7 +17,7 @@ vi.mock('../utils/amplifyClient', () => ({
   getAmplifyClient: () => mockGetAmplifyClient(),
 }));
 
-vi.mock('../../yjs/hooks', () => ({
+vi.mock('../yjs/hooks', () => ({
   useYjsProvider: (config: any) => mockUseYjsProvider(config),
 }));
 
@@ -365,7 +365,7 @@ describe('useYjsUnit Hook', () => {
       });
 
       const callArgs = mockClient.models.Unit.update.mock.calls[0][0];
-      expect(callArgs.updatedAt).toBeDefined(); // Timestamp should be set
+      expect(callArgs._version).toBeDefined(); // Version should be set for optimistic locking
     });
   });
 
@@ -383,7 +383,7 @@ describe('useYjsUnit Hook', () => {
         act(async () => {
           await result.current.forceSave();
         })
-      ).rejects.toThrow('version');
+      ).rejects.toThrow('ConditionalCheck');
     });
 
     it('should reload from DataStore on conflict', async () => {

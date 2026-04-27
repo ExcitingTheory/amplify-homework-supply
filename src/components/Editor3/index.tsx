@@ -5,7 +5,6 @@
 import * as React from 'react';
 import { useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
-import { useTheme } from '@mui/material/styles';
 import { Box } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -70,6 +69,8 @@ import CustomAnswerPlugin from './plugins/CustomAnswerPlugin';
 import BlockSuggestionPlugin from './plugins/BlockSuggestionPlugin';
 import AIContentCompletionPlugin from './plugins/AIContentCompletionPlugin';
 import DraggableBlockPlugin from './plugins/DraggableBlockPlugin';
+import TableHoverActionsPlugin from './plugins/TableHoverActionsPlugin';
+import TableActionMenuPlugin from './plugins/TableActionMenuPlugin';
 import YjsCollaborationPlugin from './plugins/CollaborationPlugin';
 import { useChatPageContext } from '../../hooks/useChatPageContext';
 
@@ -138,7 +139,7 @@ export default function Editor(): JSX.Element {
   const { unit, session, editorRef, files, dictionary, questionBank } = useContext(UnitContext);
   const { sections } = useContext(SectionContext);
   const vectorStoreContext = useContext(VectorStoreContext);
-  const theme = useTheme();
+  const direction = typeof document !== 'undefined' ? (document.documentElement.dir || 'ltr') : 'ltr';
 
   // Register page context with global chat
   useChatPageContext({
@@ -258,7 +259,13 @@ export default function Editor(): JSX.Element {
     if (node) {
       const handleScroll = (event: Event): void => {
         const target = event.target as HTMLElement;
-        setIsScrolled(target.scrollTop > 50);
+        const scrollTop = target.scrollTop;
+        // Hysteresis: collapse at 50px, expand back only below 10px to prevent oscillation
+        setIsScrolled((prev) => {
+          if (!prev && scrollTop > 50) return true;
+          if (prev && scrollTop < 10) return false;
+          return prev;
+        });
       };
       node.addEventListener('scroll', handleScroll);
       scrollListenerRef.current = () => node.removeEventListener('scroll', handleScroll);
@@ -383,7 +390,14 @@ export default function Editor(): JSX.Element {
       }
 
       // Get the current state as JSON string for comparison
-      const newStateJSON = JSON.stringify(editorState.toJSON());
+      let newStateJSON: string;
+      try {
+        newStateJSON = JSON.stringify(editorState.toJSON());
+      } catch (err) {
+        // Lexical can throw during toJSON() if nodes are null mid-update
+        console.warn('[Editor onChange] Skipping save - toJSON() failed:', err);
+        return;
+      }
       const currentStateJSON = JSON.stringify(editorStateRef.current);
 
       // Skip if the state hasn't actually changed
@@ -488,6 +502,8 @@ export default function Editor(): JSX.Element {
                     />
 
                     <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+                    <TableActionMenuPlugin anchorElem={floatingAnchorElem} />
+                    <TableHoverActionsPlugin anchorElem={floatingAnchorElem} />
                   </>
                 )}
 
@@ -516,11 +532,13 @@ export default function Editor(): JSX.Element {
                   >
                     <DrawerHeader
                       style={{
-                        height: 'var(--app-bar-height, 11rem)',
+                        minHeight: 'var(--app-bar-height, 11rem)',
+                        flexShrink: 0,
+                        transition: 'min-height 0.3s ease',
                       }}
                     >
                       <IconButton onClick={handleDrawerLeftClose}>
-                        {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                        {direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
                       </IconButton>
                     </DrawerHeader>
                     <TabsVerticalLeft
@@ -550,8 +568,9 @@ export default function Editor(): JSX.Element {
                   >
                     <DrawerHeader
                       style={{
-                        height: 'var(--app-bar-height, 11rem)',
+                        minHeight: 'var(--app-bar-height, 11rem)',
                         flexShrink: 0,
+                        transition: 'min-height 0.3s ease',
                       }}
                     />
                     <div
@@ -572,6 +591,11 @@ export default function Editor(): JSX.Element {
                           paddingLeft: '1.5rem',
                         }}
                       >
+                        <div
+                          ref={cursorsContainerRef}
+                          className="collaboration-cursors-container"
+                          style={{ position: 'relative' }}
+                        >
                         <RichTextPlugin
                           contentEditable={
                             <ContentEditable
@@ -595,6 +619,7 @@ export default function Editor(): JSX.Element {
                           ErrorBoundary={LexicalErrorBoundary}
                         />
                         <MyOnChangePlugin onChange={onChange} />
+                        </div>
                       </div>
                     </div>
                   </Box>
@@ -614,12 +639,14 @@ export default function Editor(): JSX.Element {
                   >
                     <DrawerHeader
                       style={{
-                        height: 'var(--app-bar-height, 11rem)',
+                        minHeight: 'var(--app-bar-height, 11rem)',
+                        flexShrink: 0,
                         justifyContent: 'flex-start',
+                        transition: 'min-height 0.3s ease',
                       }}
                     >
                       <IconButton onClick={handleDrawerRightClose}>
-                        {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                        {direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
                       </IconButton>
                     </DrawerHeader>
                     <TabsVerticalRight

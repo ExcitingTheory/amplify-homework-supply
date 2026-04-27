@@ -132,11 +132,14 @@ describe('ComponentTreeStore', () => {
   });
 
   describe('subscribe', () => {
-    it('should call subscriber on component registration', () => {
+    it('should call subscriber on component registration', async () => {
       const subscriber = vi.fn();
       store.subscribe(subscriber);
       
       store.register('Component', {}, {});
+      
+      // Flush queueMicrotask
+      await new Promise(resolve => queueMicrotask(resolve));
       
       expect(subscriber).toHaveBeenCalledTimes(1);
       expect(subscriber).toHaveBeenCalledWith(expect.arrayContaining([
@@ -144,7 +147,7 @@ describe('ComponentTreeStore', () => {
       ]));
     });
 
-    it('should call subscriber on component unregistration', () => {
+    it('should call subscriber on component unregistration', async () => {
       const id = store.register('Component', {}, {});
       
       const subscriber = vi.fn();
@@ -152,22 +155,31 @@ describe('ComponentTreeStore', () => {
       
       store.unregister(id);
       
+      // Flush queueMicrotask
+      await new Promise(resolve => queueMicrotask(resolve));
+      
       expect(subscriber).toHaveBeenCalledWith([]);
     });
 
-    it('should call subscriber on component re-render', () => {
+    it('should call subscriber on component re-render', async () => {
       const subscriber = vi.fn();
       const id = store.register('Component', {}, { count: 0 });
       
       store.subscribe(subscriber);
-      subscriber.mockClear(); // Clear initial call
+      
+      // Flush microtask from register
+      await new Promise(resolve => queueMicrotask(resolve));
+      subscriber.mockClear();
       
       store.register('Component', {}, { count: 1 }, id);
+      
+      // Flush queueMicrotask
+      await new Promise(resolve => queueMicrotask(resolve));
       
       expect(subscriber).toHaveBeenCalledTimes(1);
     });
 
-    it('should support multiple subscribers', () => {
+    it('should support multiple subscribers', async () => {
       const subscriber1 = vi.fn();
       const subscriber2 = vi.fn();
       
@@ -176,21 +188,30 @@ describe('ComponentTreeStore', () => {
       
       store.register('Component', {}, {});
       
+      // Flush queueMicrotask
+      await new Promise(resolve => queueMicrotask(resolve));
+      
       expect(subscriber1).toHaveBeenCalledTimes(1);
       expect(subscriber2).toHaveBeenCalledTimes(1);
     });
 
-    it('should return unsubscribe function', () => {
+    it('should return unsubscribe function', async () => {
       const subscriber = vi.fn();
       const unsubscribe = store.subscribe(subscriber);
       
       store.register('Component1', {}, {});
+      
+      // Flush queueMicrotask
+      await new Promise(resolve => queueMicrotask(resolve));
       expect(subscriber).toHaveBeenCalledTimes(1);
       
       unsubscribe();
       subscriber.mockClear();
       
       store.register('Component2', {}, {});
+      
+      // Flush queueMicrotask
+      await new Promise(resolve => queueMicrotask(resolve));
       expect(subscriber).not.toHaveBeenCalled();
     });
   });
@@ -256,13 +277,16 @@ describe('ComponentTreeStore', () => {
       expect(store.getTree()).toHaveLength(0);
     });
 
-    it('should notify subscribers after clearing', () => {
+    it('should notify subscribers after clearing', async () => {
       store.register('Component', {}, {});
       
       const subscriber = vi.fn();
       store.subscribe(subscriber);
       
       store.clear();
+      
+      // Flush queueMicrotask
+      await new Promise(resolve => queueMicrotask(resolve));
       
       expect(subscriber).toHaveBeenCalledWith([]);
     });

@@ -52,9 +52,17 @@ if (typeof window !== 'undefined') {
 }
 
 import React from 'react';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider, useColorScheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { fn } from 'storybook/test';
+
+// PDF.js worker configuration removed from preview.jsx — it was eagerly
+// pulling 36MB of pdfjs-dist into every story's bundle. Components that
+// use react-pdf (PdfThumbnail, PdfViewerComponent) already configure
+// the worker with their own guard: `if (!pdfjs.GlobalWorkerOptions.workerSrc)`.
 import { useGlobals } from 'storybook/preview-api';
 import '../src/components/Editor3/theme.css';
 import '../src/components/Editor3/components/LanguageEditorTheme.css';
@@ -76,6 +84,7 @@ import { SectionProvider } from '../src/context/sectionContext';
 import { UnitProvider } from '../src/context/unitContext';
 import { AudioPlayerProvider } from '../src/components/Editor3/context/AudioPlayerContext';
 import { ChatContextProvider } from '../src/context/chatContext';
+import { SettingsProvider } from '../src/context/settingsContext';
 
 // Import mock helpers
 import { clearMockData, initializeMockData } from './__mocks__/aws-amplify-data';
@@ -94,6 +103,98 @@ import DocsPageWithPanel from './components/DocsPageWithPanel';
 
 // Import i18n for Storybook
 import i18n from './i18next';
+
+/**
+ * Synchronizes MUI's internal color scheme mode with the Storybook toolbar selection.
+ * Must be rendered inside ThemeProvider. Prevents child components'
+ * useColorScheme/useColorMode calls from overriding the Storybook-selected scheme.
+ */
+function ColorSchemeSynchronizer({ scheme }) {
+  const { setMode } = useColorScheme();
+  React.useEffect(() => {
+    setMode(scheme);
+  }, [scheme, setMode]);
+  return null;
+}
+
+/** Loading screen shown while a story's component tree mounts */
+function StoryLoadingFallback({ title, component }) {
+  const displayName = component || title?.split('/').pop() || 'Story';
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 240,
+        gap: 2,
+        p: 4,
+      }}
+    >
+      <CircularProgress size={44} thickness={4} />
+      <Typography variant="body2" color="text.secondary">
+        Loading {displayName}…
+      </Typography>
+    </Box>
+  );
+}
+
+/**
+ * Deferred rendering wrapper — shows loading fallback on first frame,
+ * then renders the actual story on the next animation frame.
+ * Keeps the fallback visible as an overlay until the children are committed to the DOM,
+ * preventing a blank gap between the fallback disappearing and the story rendering.
+ */
+function DeferredStory({ children, title, component }) {
+  const [renderChildren, setRenderChildren] = React.useState(false);
+  const [showFallback, setShowFallback] = React.useState(true);
+
+  // Start rendering children after the loading fallback has painted
+  React.useEffect(() => {
+    let raf2;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setRenderChildren(true));
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2) cancelAnimationFrame(raf2);
+    };
+  }, []);
+
+  // Once children are committed to the DOM, hide the fallback overlay after next paint
+  const onChildrenMount = React.useCallback((node) => {
+    if (node) {
+      requestAnimationFrame(() => setShowFallback(false));
+    }
+  }, []);
+
+  if (!renderChildren) {
+    return <StoryLoadingFallback title={title} component={component} />;
+  }
+
+  return (
+    <div style={{ position: 'relative', minHeight: showFallback ? 240 : undefined }}>
+      {showFallback && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 10,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'var(--mui-palette-background-default, #fafafa)',
+        }}>
+          <StoryLoadingFallback title={title} component={component} />
+        </div>
+      )}
+      <div ref={onChildrenMount}>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 // Mock fetch for /api/chat endpoint
 const originalFetch = globalThis.fetch;
@@ -293,15 +394,8 @@ const preview = {
       },
     },
 
-    // Background options for testing
-    backgrounds: {
-      default: 'light',
-      values: [
-        { name: 'light', value: '#ffffff' },
-        { name: 'dark', value: '#333333' },
-        { name: 'gray', value: '#f5f5f5' },
-      ],
-    },
+    // Background managed by CSS variables via colorScheme toolbar — no hardcoded backgrounds
+    backgrounds: { disable: true },
 
     a11y: {
       // 'todo' - show a11y violations in the test UI only
@@ -312,6 +406,16 @@ const preview = {
   },
   tags: ['autodocs'],
   decorators: [
+    // Deferred rendering — shows loading screen while heavy component trees mount
+    (Story, context) => (
+      <DeferredStory
+        key={context.id}
+        title={context.title}
+        component={context.component?.name}
+      >
+        <Story />
+      </DeferredStory>
+    ),
     withTranslationMode,
     // Action tracking decorator - wraps actions with onboarding event tracking
     (Story, context) => {
@@ -402,36 +506,42 @@ const preview = {
       const [globals] = useGlobals();
       const colorScheme = globals?.colorScheme || 'light';
       
-      // Resolve 'system' to actual OS preference
-      const [resolvedScheme, setResolvedScheme] = React.useState(() => {
+      // Resolve 'system' to actual OS preference — computed synchronously to avoid flash
+      const resolvedFromPref = React.useMemo(() => {
         if (colorScheme !== 'system') return colorScheme;
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      });
+        return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }, [colorScheme]);
+      
+      const [resolvedScheme, setResolvedScheme] = React.useState(resolvedFromPref);
+      
+      // Keep resolvedScheme in sync when colorScheme or system pref changes
+      React.useEffect(() => {
+        setResolvedScheme(resolvedFromPref);
+      }, [resolvedFromPref]);
       
       React.useEffect(() => {
-        if (colorScheme !== 'system') {
-          setResolvedScheme(colorScheme);
-          return;
-        }
+        if (colorScheme !== 'system') return;
         const mql = window.matchMedia('(prefers-color-scheme: dark)');
-        setResolvedScheme(mql.matches ? 'dark' : 'light');
         const handler = (e) => setResolvedScheme(e.matches ? 'dark' : 'light');
         mql.addEventListener('change', handler);
         return () => mql.removeEventListener('change', handler);
       }, [colorScheme]);
       
-      // Apply color scheme attribute so CSS variables resolve correctly
-      React.useEffect(() => {
-        document.documentElement.setAttribute('data-mui-color-scheme', resolvedScheme);
-      }, [resolvedScheme]);
+      // Apply color scheme attribute synchronously during render to prevent FOUC.
+      // useEffect runs after paint, causing a flash of wrong colors on navigation.
+      const schemeToApply = colorScheme === 'system' ? resolvedScheme : resolvedFromPref;
+      if (typeof document !== 'undefined') {
+        document.documentElement.setAttribute('data-mui-color-scheme', schemeToApply);
+      }
       
       return (
         <RouterContext.Provider value={mockRouter}>
           <ThemeProvider theme={theme}>
+            <ColorSchemeSynchronizer scheme={schemeToApply} />
             <CssBaseline />
             <div 
               className="storybook-wrapper"
-              data-mui-color-scheme={resolvedScheme}
+              data-mui-color-scheme={schemeToApply}
               style={{
                 height: isFullscreen ? '100vh' : 'auto',
                 width: '100%',
@@ -446,6 +556,7 @@ const preview = {
               }}
             >
               <AuthProvider {...authProps}>
+                <SettingsProvider>
                 <ChatContextProvider>
                 <AudioPlayerProvider>
                   <FilesProvider>
@@ -495,6 +606,7 @@ const preview = {
                   </FilesProvider>
                 </AudioPlayerProvider>
                 </ChatContextProvider>
+                </SettingsProvider>
               </AuthProvider>
             </div>
           </ThemeProvider>

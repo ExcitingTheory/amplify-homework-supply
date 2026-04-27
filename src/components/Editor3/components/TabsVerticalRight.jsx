@@ -166,6 +166,7 @@ export default function TabsVerticalRight({
         borderLeft: '1px solid',
         borderColor: 'divider',
         position: 'relative',
+        overflow: 'hidden',
       }}
     >
       <div
@@ -318,11 +319,11 @@ export default function TabsVerticalRight({
       </Box>
       <Tabs
         orientation="vertical"
-        variant="standard"
+        variant="scrollable"
+        scrollButtons="auto"
         value={value}
         aria-label={t('tabsVerticalRight.gradesTab', { ns: 'editor.authoring' })}
         sx={{
-          overflowY: 'hidden',
           minWidth: '2.5rem',
           maxWidth: '2.5rem',
           order: 2,
@@ -344,7 +345,13 @@ export default function TabsVerticalRight({
           '& .MuiTabs-indicator': {
             left: 0,
             right: 'auto',
-          }
+          },
+          '& .MuiTabScrollButton-root': {
+            width: '2.5rem',
+            '&.Mui-disabled': {
+              opacity: 0.3,
+            },
+          },
         }}
       >
 
@@ -365,7 +372,7 @@ export default function TabsVerticalRight({
         <Tab
           value={8}
           onClick={() => handleTabClick(8)}
-          label={<GradeIcon />} {...a11yProps(t('tabsVerticalRight.gradesTab'))} />
+          label={<GradeIcon />} {...a11yProps(t('tabsVerticalRight.gradesTab'))} data-tour="grades-tab" />
         <Tab
           value={9}
           onClick={() => handleTabClick(9)}

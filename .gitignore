@@ -72,6 +72,8 @@ amplifytools.xcconfig
 
 # generated files
 /public/pdf.worker.min.mjs
+/public/cmaps/
+/public/standard_fonts/
 
 # misc
 .DS_Store

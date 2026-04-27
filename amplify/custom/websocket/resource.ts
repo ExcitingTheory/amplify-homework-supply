@@ -11,6 +11,7 @@ import { IFunction } from 'aws-cdk-lib/aws-lambda';
 
 export interface WebSocketApiProps {
   unitTable: ITable;
+  homeworkRoomTable: ITable;
   websocketLambda: IFunction;
 }
 
@@ -37,7 +38,7 @@ export class WebSocketApiConstruct extends Construct {
   constructor(scope: Construct, id: string, props: WebSocketApiProps) {
     super(scope, id);
 
-    const { unitTable, websocketLambda } = props;
+    const { unitTable, homeworkRoomTable, websocketLambda } = props;
 
     // DynamoDB table for WebSocket connections
     // Tracks which connections are editing which units
@@ -67,6 +68,9 @@ export class WebSocketApiConstruct extends Construct {
 
     // Grant Lambda access to Amplify Data for persisting Yjs snapshots
     unitTable.grantReadWriteData(websocketLambda);
+
+    // Grant Lambda read access to HomeworkRoom for review room authorization
+    homeworkRoomTable.grantReadData(websocketLambda);
 
     // WebSocket API
     this.api = new WebSocketApi(this, 'CollaborationWebSocketApi', {

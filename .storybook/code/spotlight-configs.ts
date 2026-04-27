@@ -66,6 +66,27 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
     taskId: 'instructor-setup-class',
     tutorialSteps: [
       {
+        id: 'storybook-welcome',
+        title: 'Welcome to Storybook',
+        description: 'This is your interactive training environment. The sidebar on the left organizes all the features you\'ll learn. Each story shows a working preview of a feature.',
+        targetSelector: '#storybook-explorer-tree',
+        targetFrame: 'manager',
+        tooltipPosition: 'right',
+        actions: [
+          'Browse stories by category in the sidebar',
+          'Click a story to see it in the Canvas',
+          'Use the Docs tab for detailed instructions',
+        ],
+      },
+      {
+        id: 'storybook-canvas',
+        title: 'Canvas & Docs',
+        description: 'The Canvas tab shows a live, interactive preview. The Docs tab provides step-by-step instructions and context for each feature.',
+        targetSelector: 'button[id$="-tab-canvas"]',
+        targetFrame: 'manager',
+        tooltipPosition: 'bottom',
+      },
+      {
         id: 'intro',
         title: 'Set Up Your First Class',
         description: 'Learn how to create a class section where students can join and access assignments.',
@@ -93,7 +114,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         id: 'create-button',
         title: 'Create Section Button',
         description: 'Use this to start creating a new class section.',
-        targetSelector: '[data-tour="create-section-button"], button:has-text("Create Section"), button:has-text("New Section")',
+        targetSelector: '[data-tour="create-section-button"]',
         tooltipPosition: 'bottom',
       },
       {
@@ -178,15 +199,14 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         id: 'create-button',
         title: 'Create Unit Button',
         description: 'Start building new learning content.',
-        targetSelector: '[data-tour="create-unit-button"], button:has-text("Create Unit"), button:has-text("New Unit")',
+        targetSelector: '[data-tour="create-unit-button"]',
         tooltipPosition: 'bottom',
       },
       {
         id: 'editor',
         title: 'The Editor',
-        description: 'Type "/" for commands, or use the toolbar to format content.',
-        targetSelector: '[data-tour="editor"], [class*="ContentEditable"]',
-        tooltipPosition: 'top',
+        description: 'After creating a unit, you\'ll see the rich text editor. Type "/" for commands, or use the toolbar to format content.',
+        tooltipPosition: 'center',
         actions: [
           'Type your lesson content',
           'Add headings, lists, and formatting',
@@ -195,18 +215,10 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         ],
       },
       {
-        id: 'toolbar',
-        title: 'Editor Toolbar',
-        description: 'Quick access to formatting and content tools.',
-        targetSelector: '[data-tour="editor-toolbar"], [class*="toolbar"]',
-        tooltipPosition: 'bottom',
-      },
-      {
         id: 'save',
         title: 'Save Your Work',
-        description: 'Don\'t forget to save your unit!',
-        targetSelector: '[data-tour="save-button"], button:has-text("Save")',
-        tooltipPosition: 'left',
+        description: 'Use the save button or Ctrl+S to save your unit content.',
+        tooltipPosition: 'center',
       },
       {
         id: 'complete',
@@ -288,6 +300,12 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         tooltipPosition: 'left',
       },
       {
+        id: 'save',
+        title: 'Save the Unit',
+        description: 'Save your changes to publish the quiz block.',
+        tooltipPosition: 'top',
+      },
+      {
         id: 'complete',
         title: 'Quiz Added! ✅',
         description: 'Students will now answer this question when completing the unit.',
@@ -325,14 +343,14 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         id: 'dictionary-editor',
         title: 'Dictionary Editor',
         description: 'Manage all vocabulary across your units.',
-        targetSelector: '[data-tour="dictionary-editor"]',
+        targetSelector: '[data-tour="dictionary"]',
         tooltipPosition: 'bottom',
       },
       {
         id: 'add-word',
         title: 'Add Word Button',
         description: 'Create a new vocabulary entry.',
-        targetSelector: '[data-tour="add-word-button"], button:has-text("Add Word")',
+        targetSelector: '[data-tour="add-word-button"]',
         tooltipPosition: 'bottom',
       },
       {
@@ -354,6 +372,12 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         title: 'Audio Pronunciation',
         description: 'Help students learn correct pronunciation.',
         targetSelector: '[data-tour="audio-upload"], input[type="file"]',
+        tooltipPosition: 'left',
+      },
+      {
+        id: 'link-unit',
+        title: 'Link to a Unit',
+        description: 'Associate this word with a unit so students can find it in context.',
         tooltipPosition: 'left',
       },
       {
@@ -400,7 +424,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         id: 'create-assignment',
         title: 'Create Assignment',
         description: 'Configure and save the assignment.',
-        targetSelector: '[data-tour="create-assignment-button"], button:has-text("Create Assignment")',
+        targetSelector: '[data-tour="create-assignment-button"]',
         tooltipPosition: 'bottom',
       },
       {
@@ -472,7 +496,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         id: 'grades-tab',
         title: 'Grades Tab',
         description: 'All student submissions are here.',
-        targetSelector: '[data-tour="grades-tab"], button:has-text("Grades"), [role="tab"]:has-text("Grades")',
+        targetSelector: '[data-tour="grades-tab"]',
         tooltipPosition: 'bottom',
       },
       {
@@ -499,6 +523,12 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
           'Leave comments for the student',
           'Adjust scores if needed',
         ],
+      },
+      {
+        id: 'feedback',
+        title: 'Leave Feedback',
+        description: 'Add a comment for the student to help them improve.',
+        tooltipPosition: 'left',
       },
       {
         id: 'complete',
@@ -570,7 +600,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         id: 'insert-button',
         title: 'Insert Content',
         description: 'Add AI suggestions directly to your lesson.',
-        targetSelector: '[data-tour="insert-button"], button:has-text("Insert")',
+        targetSelector: '[data-tour="insert-button"]',
         tooltipPosition: 'top',
       },
       {
@@ -694,6 +724,27 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
     taskId: 'learner-join-class',
     tutorialSteps: [
       {
+        id: 'storybook-welcome',
+        title: 'Welcome to Storybook',
+        description: 'This is where you\'ll practice using the platform. The sidebar on the left has all the features organized by topic. Each story lets you try things out safely.',
+        targetSelector: '#storybook-explorer-tree',
+        targetFrame: 'manager',
+        tooltipPosition: 'right',
+        actions: [
+          'Browse stories by category in the sidebar',
+          'Click a story to see it in the Canvas',
+          'Follow along with the guided tutorials',
+        ],
+      },
+      {
+        id: 'storybook-canvas',
+        title: 'Canvas & Docs',
+        description: 'The Canvas tab shows a live, interactive preview you can click and explore. The Docs tab has written instructions.',
+        targetSelector: 'button[id$="-tab-canvas"]',
+        targetFrame: 'manager',
+        tooltipPosition: 'bottom',
+      },
+      {
         id: 'intro',
         title: 'Join Your Class',
         description: 'Use your instructor\'s join code to enroll in their section.',
@@ -702,16 +753,18 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: 'join-button',
         title: 'Join Section Button',
-        description: 'Use this to open the join dialog.',
+        description: 'Click this button to open the join dialog.',
         targetSelector: '[data-tour="join-section-button"]',
         tooltipPosition: 'bottom',
+        interactable: true,
       },
       {
         id: 'join-dialog',
         title: 'Join Section Dialog',
-        description: 'This dialog lets you join an instructor\'s class.',
+        description: 'This dialog lets you join an instructor\'s class. Fill in the code and submit.',
         targetSelector: '[data-tour="join-section-dialog"]',
         tooltipPosition: 'right',
+        interactable: true,
       },
       {
         id: 'join-code-input',
@@ -719,6 +772,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         description: 'Type the code your instructor gave you. In this demo, use DEMO-2026.',
         targetSelector: '[data-tour="join-code-input"]',
         tooltipPosition: 'top',
+        interactable: true,
       },
       {
         id: 'confirm',
@@ -726,6 +780,7 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
         description: 'Submit your join code to enroll in the class.',
         targetSelector: '[data-tour="join-section-dialog"] button[type="submit"]',
         tooltipPosition: 'top',
+        interactable: true,
       },
       {
         id: 'complete',
@@ -770,16 +825,16 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       },
       {
         id: 'assignments-tab',
-        title: 'Assignments Tab',
+        title: 'Assignments Section',
         description: 'All your work is listed here.',
-        targetSelector: '[data-tour="assignments-tab"], [role="tab"]:has-text("Assignments")',
+        targetSelector: '[data-tour="assignments-section"]',
         tooltipPosition: 'bottom',
       },
       {
         id: 'assignment-list',
         title: 'Assignment List',
         description: 'See all units assigned to you with due dates.',
-        targetSelector: '[data-tour="assignments-list"]',
+        targetSelector: '[data-tour="assignment-card"]',
         tooltipPosition: 'right',
         actions: [
           'Click to open and complete',
@@ -835,6 +890,31 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
           'Fill in vocabulary answers',
           'Submit your answers',
         ],
+      },
+      {
+        id: 'read-content',
+        title: 'Read the Lesson',
+        description: 'Work through lesson text, PDFs, and media before answering.',
+        tooltipPosition: 'bottom',
+      },
+      {
+        id: 'answer-questions',
+        title: 'Answer Questions',
+        description: 'Select answers for quiz questions and fill in any blanks.',
+        targetSelector: '[data-tour="quiz-block"]',
+        tooltipPosition: 'right',
+      },
+      {
+        id: 'record-audio',
+        title: 'Record Pronunciation',
+        description: 'If the assignment includes audio tasks, record your response here.',
+        tooltipPosition: 'left',
+      },
+      {
+        id: 'review-score',
+        title: 'Review Your Score',
+        description: 'After submitting, your accuracy and results appear here.',
+        tooltipPosition: 'top',
       },
       {
         id: 'complete',
@@ -1092,599 +1172,6 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
   },
 
   // ============================================================
-  // DEVELOPER TASKS
-  // ============================================================
-
-  {
-    taskId: 'developer-explore-components',
-    tutorialSteps: [
-      {
-        id: 'intro',
-        title: 'Explore Component Library',
-        description: 'Familiarize yourself with all available components.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'sidebar',
-        title: 'Storybook Sidebar',
-        description: 'All components are organized here.',
-        targetSelector: '[data-tour="storybook-sidebar"], #storybook-explorer-tree',
-        tooltipPosition: 'right',
-        actions: [
-          'Browse categories',
-          'Click to view components',
-          'Each story shows examples',
-        ],
-      },
-      {
-        id: 'tech-overview',
-        title: 'Technical Overview',
-        description: 'Start here to understand the architecture.',
-        targetSelector: '[data-tour="tech-overview"]',
-        tooltipPosition: 'right',
-      },
-      {
-        id: 'docs-tab',
-        title: 'Docs Tab',
-        description: 'Read component documentation.',
-        targetSelector: '[data-tour="docs-tab"], button:has-text("Docs")',
-        tooltipPosition: 'bottom',
-      },
-      {
-        id: 'canvas-tab',
-        title: 'Canvas Tab',
-        description: 'Interact with live components.',
-        targetSelector: '[data-tour="canvas-tab"], button:has-text("Canvas")',
-        tooltipPosition: 'bottom',
-      },
-      {
-        id: 'complete',
-        title: 'Components Explored! 🧩',
-        description: 'You now know where to find component documentation.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-    quizSteps: [
-      {
-        id: 'challenge',
-        title: '🎯 Challenge: Explore Storybook',
-        description: 'Browse at least 5 different component stories.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'verify',
-        title: 'Components Explored?',
-        description: 'Complete if you viewed multiple components.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-  },
-
-  {
-    taskId: 'developer-understand-editor',
-    tutorialSteps: [
-      {
-        id: 'intro',
-        title: 'Understand the Editor',
-        description: 'Learn about the Lexical-based rich text editor.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'editor-section',
-        title: 'Editor Stories',
-        description: 'Find editor examples in "Creating Lessons".',
-        targetSelector: '[data-tour="editor-stories"]',
-        tooltipPosition: 'right',
-      },
-      {
-        id: 'custom-nodes',
-        title: 'Custom Nodes',
-        description: 'Special blocks like Quiz, Answer, etc.',
-        tooltipPosition: 'center',
-        actions: [
-          'QuizNode - Multiple choice questions',
-          'AnswerNode - Fill-in-the-blank',
-          'CustomAnswerNode - Advanced responses',
-          'MeaningAssociationNode - Vocabulary matching',
-        ],
-      },
-      {
-        id: 'plugins',
-        title: 'Editor Plugins',
-        description: 'Check Editor3/plugins directory.',
-        tooltipPosition: 'center',
-        actions: [
-          'ToolbarPlugin - Formatting controls',
-          'AutocompletePlugin - AI suggestions',
-          'MarkdownPlugin - Markdown support',
-          'DataPlugin - Persistence',
-        ],
-      },
-      {
-        id: 'complete',
-        title: 'Editor Understood! 📝',
-        description: 'You now know how the editor system works.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-    quizSteps: [
-      {
-        id: 'challenge',
-        title: '🎯 Challenge: Study Editor',
-        description: 'Read editor documentation and view examples.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'verify',
-        title: 'Editor Concepts Clear?',
-        description: 'Complete if you understand the editor architecture.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-  },
-
-  {
-    taskId: 'developer-explore-datastore',
-    tutorialSteps: [
-      {
-        id: 'intro',
-        title: 'DataStore Patterns',
-        description: 'Learn how we use AWS Amplify DataStore.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'docs',
-        title: 'Read Documentation',
-        description: 'Study these key files:',
-        tooltipPosition: 'center',
-        actions: [
-          'docs/API.md - Data models',
-          'DATASTORE_OPTIMIZATION_CHANGES.md - Subscription patterns',
-          'src/context/ - Context providers with DataStore',
-        ],
-      },
-      {
-        id: 'patterns',
-        title: 'Key Patterns',
-        description: 'Important concepts to understand:',
-        tooltipPosition: 'center',
-        actions: [
-          'Use observeQuery for real-time updates',
-          'One subscription per model (avoid duplicates)',
-          'Always unsubscribe in cleanup',
-          'Lazy load relationships with .toArray()',
-          'Use DataStore.copyOf for updates',
-        ],
-      },
-      {
-        id: 'complete',
-        title: 'DataStore Mastered! 💾',
-        description: 'You can now work with DataStore correctly.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-    quizSteps: [
-      {
-        id: 'challenge',
-        title: '🎯 Challenge: Study DataStore',
-        description: 'Read docs and review context implementations.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'verify',
-        title: 'DataStore Understood?',
-        description: 'Complete if you understand the patterns.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-  },
-
-  {
-    taskId: 'developer-understand-ai-integration',
-    tutorialSteps: [
-      {
-        id: 'intro',
-        title: 'AI Integration',
-        description: 'Learn how OpenAI is integrated.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'docs',
-        title: 'Key Files',
-        description: 'Study these implementations:',
-        tooltipPosition: 'center',
-        actions: [
-          'docs/CHATBOT_TOOLS.md - Tool system',
-          'pages/api/chat.js - Streaming endpoint',
-          'src/components/ChatSidebar.js - UI component',
-          'amplify/backend/function/openai/ - Lambda functions',
-        ],
-      },
-      {
-        id: 'concepts',
-        title: 'Core Concepts',
-        description: 'Understand these patterns:',
-        tooltipPosition: 'center',
-        actions: [
-          'Vercel AI SDK for streaming',
-          'useChat hook for state management',
-          'Tool calling with client-side handlers',
-          'Message parts array structure',
-          'Edge runtime for better performance',
-        ],
-      },
-      {
-        id: 'complete',
-        title: 'AI Integration Clear! 🤖',
-        description: 'You can now work with AI features.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-    quizSteps: [
-      {
-        id: 'challenge',
-        title: '🎯 Challenge: Study AI',
-        description: 'Read AI documentation and review implementations.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'verify',
-        title: 'AI System Understood?',
-        description: 'Complete if you understand the AI integration.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-  },
-
-  {
-    taskId: 'developer-setup-dev-environment',
-    tutorialSteps: [
-      {
-        id: 'intro',
-        title: 'Dev Environment Setup',
-        description: 'Get the project running locally.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'clone',
-        title: 'Clone Repository',
-        description: 'Get the code from GitHub.',
-        tooltipPosition: 'center',
-        actions: [
-          'git clone <repo-url>',
-          'cd amplify-homework-supply',
-        ],
-      },
-      {
-        id: 'install',
-        title: 'Install Dependencies',
-        description: 'Run npm install.',
-        tooltipPosition: 'center',
-        actions: [
-          'npm install',
-          'This installs all packages from package.json',
-        ],
-      },
-      {
-        id: 'amplify',
-        title: 'Configure Amplify',
-        description: 'Set up AWS credentials.',
-        tooltipPosition: 'center',
-        actions: [
-          'amplify pull --appId <app-id>',
-          'Select your environment',
-          'Enter AWS credentials',
-        ],
-      },
-      {
-        id: 'run',
-        title: 'Start Dev Servers',
-        description: 'Run both Next.js and Storybook.',
-        tooltipPosition: 'center',
-        actions: [
-          'Terminal 1: npm run dev (port 3000)',
-          'Terminal 2: npm run storybook (port 6006)',
-        ],
-      },
-      {
-        id: 'complete',
-        title: 'Environment Ready! 🚀',
-        description: 'You can now develop locally.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-    quizSteps: [
-      {
-        id: 'challenge',
-        title: '🎯 Challenge: Set Up Environment',
-        description: 'Get the project running on your machine.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'verify',
-        title: 'Servers Running?',
-        description: 'Complete if both dev and Storybook are working.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-  },
-
-  {
-    taskId: 'developer-explore-file-structure',
-    tutorialSteps: [
-      {
-        id: 'intro',
-        title: 'Explore File Structure',
-        description: 'Understand how the codebase is organized.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'structure',
-        title: 'Key Directories',
-        description: 'Main folders to know:',
-        tooltipPosition: 'center',
-        actions: [
-          'pages/ - Next.js routes',
-          'src/components/ - React components',
-          'src/context/ - Context providers',
-          'src/utils/ - Helper functions',
-          'amplify/backend/ - Backend resources',
-          '.storybook/ - Storybook config',
-        ],
-      },
-      {
-        id: 'naming',
-        title: 'Naming Conventions',
-        description: 'File naming patterns:',
-        tooltipPosition: 'center',
-        actions: [
-          'Components: PascalCase (ChatSidebar.js)',
-          'Contexts: camelCase + Context (unitContext.js)',
-          'Utils: camelCase (getCachedUrl.js)',
-          '2 suffix = v2 (DictionaryEditor2.js)',
-        ],
-      },
-      {
-        id: 'complete',
-        title: 'Structure Understood! 📁',
-        description: 'You know where to find things.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-    quizSteps: [
-      {
-        id: 'challenge',
-        title: '🎯 Challenge: Navigate Codebase',
-        description: 'Find at least one file in each major directory.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'verify',
-        title: 'Structure Clear?',
-        description: 'Complete if you can navigate the codebase.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-  },
-
-  {
-    taskId: 'developer-run-tests',
-    tutorialSteps: [
-      {
-        id: 'intro',
-        title: 'Run Tests and Linting',
-        description: 'Ensure code quality.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'lint',
-        title: 'Run Linter',
-        description: 'Check code style.',
-        tooltipPosition: 'center',
-        actions: [
-          'npm run lint',
-          'Fix issues with npm run lint:fix',
-        ],
-      },
-      {
-        id: 'unit-tests',
-        title: 'Unit Tests',
-        description: 'Run Vitest tests.',
-        tooltipPosition: 'center',
-        actions: [
-          'npm run vitest',
-          'Tests are in __tests__ directories',
-        ],
-      },
-      {
-        id: 'e2e-tests',
-        title: 'E2E Tests',
-        description: 'Run Cypress tests.',
-        tooltipPosition: 'center',
-        actions: [
-          'npm run cypress:open',
-          'Run tests interactively',
-          'Tests are in cypress/e2e/',
-        ],
-      },
-      {
-        id: 'complete',
-        title: 'Tests Running! ✅',
-        description: 'You can now verify code quality.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-    quizSteps: [
-      {
-        id: 'challenge',
-        title: '🎯 Challenge: Run All Tests',
-        description: 'Execute linting, unit tests, and E2E tests.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'verify',
-        title: 'Tests Pass?',
-        description: 'Complete if all tests pass successfully.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-  },
-
-  {
-    taskId: 'developer-customize-storybook',
-    tutorialSteps: [
-      {
-        id: 'intro',
-        title: 'Storybook Configuration',
-        description: 'Learn how Storybook is customized.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'main-config',
-        title: 'main.ts',
-        description: 'Main Storybook configuration.',
-        tooltipPosition: 'center',
-        actions: [
-          'Webpack aliases',
-          'Addon registration',
-          'Story file patterns',
-          'Feature flags',
-        ],
-      },
-      {
-        id: 'preview-config',
-        title: 'preview.jsx',
-        description: 'Global decorators and parameters.',
-        tooltipPosition: 'center',
-        actions: [
-          'Theme provider setup',
-          'Mock context providers',
-          'Global parameters',
-        ],
-      },
-      {
-        id: 'mocks',
-        title: '__mocks__ Directory',
-        description: 'Mock AWS services for Storybook.',
-        tooltipPosition: 'center',
-        actions: [
-          'DataStore mocks',
-          'Auth mocks',
-          'AI SDK mocks',
-          'Mock data in ui-data/',
-        ],
-      },
-      {
-        id: 'complete',
-        title: 'Storybook Mastered! 📖',
-        description: 'You can now customize Storybook.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-    quizSteps: [
-      {
-        id: 'challenge',
-        title: '🎯 Challenge: Study Config',
-        description: 'Read through main.ts and preview.jsx.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'verify',
-        title: 'Config Understood?',
-        description: 'Complete if you understand Storybook setup.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-  },
-
-  {
-    taskId: 'developer-keyboard-shortcuts-demo',
-    tutorialSteps: [
-      {
-        id: 'intro',
-        title: 'Keyboard Shortcuts Demo',
-        description: 'Watch an automated demonstration of all editor shortcuts.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'help-page',
-        title: 'Shortcuts Reference',
-        description: 'Find the comprehensive guide.',
-        targetSelector: '[data-tour="help-shortcuts"]',
-        tooltipPosition: 'bottom',
-        actions: [
-          'Bookmark this page',
-          'Review all available shortcuts',
-          'Organized by category',
-        ],
-      },
-      {
-        id: 'demo-story',
-        title: 'Automated Demo',
-        description: 'Watch shortcuts in action.',
-        targetSelector: '[data-tour="shortcuts-demo"]',
-        tooltipPosition: 'right',
-        actions: [
-          'Play the automated demonstration',
-          'See each shortcut execute',
-          'Pause to try yourself',
-          'Replay as needed',
-        ],
-      },
-      {
-        id: 'categories',
-        title: 'Shortcut Categories',
-        description: 'Organized groups:',
-        tooltipPosition: 'center',
-        actions: [
-          'Text Formatting (Bold, Italic, etc.)',
-          'Block Types (Headings, Lists)',
-          'Alignment (Left, Center, Right)',
-          'Navigation (Undo, Redo)',
-        ],
-      },
-      {
-        id: 'complete',
-        title: 'Demo Complete! ⌨️',
-        description: 'You now know all available shortcuts.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-    quizSteps: [
-      {
-        id: 'challenge',
-        title: '🎯 Challenge: Watch Demo',
-        description: 'View the automated shortcuts demonstration.',
-        tooltipPosition: 'center',
-      },
-      {
-        id: 'verify',
-        title: 'Demo Watched?',
-        description: 'Complete if you viewed the shortcuts demo.',
-        tooltipPosition: 'center',
-        isLast: true,
-      },
-    ],
-  },
-
-  // ============================================================
   // SECRET/EASTER EGG TASKS
   // ============================================================
 
@@ -1897,6 +1384,27 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
   {
     taskId: 'translator-language-switcher',
     tutorialSteps: [
+      {
+        id: 'storybook-welcome',
+        title: 'Welcome to Storybook',
+        description: 'This is the translation workspace. The sidebar organizes all translatable components. Each story shows live previews with real locale data.',
+        targetSelector: '#storybook-explorer-tree',
+        targetFrame: 'manager',
+        tooltipPosition: 'right',
+        actions: [
+          'Browse translation-related stories in the sidebar',
+          'Use Canvas to preview translated UI',
+          'Use Docs for translation guidelines',
+        ],
+      },
+      {
+        id: 'storybook-canvas',
+        title: 'Canvas & Docs',
+        description: 'The Canvas shows live component previews. Switch languages in the toolbar to see translations in action. The Docs tab has locale file conventions.',
+        targetSelector: 'button[id$="-tab-canvas"]',
+        targetFrame: 'manager',
+        tooltipPosition: 'bottom',
+      },
       {
         id: 'intro',
         title: 'Language Switcher',

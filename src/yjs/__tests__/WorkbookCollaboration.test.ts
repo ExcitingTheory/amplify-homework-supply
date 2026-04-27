@@ -251,7 +251,9 @@ describe('WorkbookCollaborationProvider', () => {
 
   describe('Cursor Tracking', () => {
     it('updates cursor position', () => {
+      vi.useFakeTimers()
       provider.updateCursor('block-5', 42)
+      vi.advanceTimersByTime(300)
 
       const awareness = provider.getAwareness()
       const state = awareness.getLocalState()
@@ -260,6 +262,7 @@ describe('WorkbookCollaborationProvider', () => {
         blockId: 'block-5',
         position: 42,
       })
+      vi.useRealTimers()
     })
   })
 })
